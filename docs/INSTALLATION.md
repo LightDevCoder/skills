@@ -1,82 +1,84 @@
 # Installation and Fresh-Install Verification
 
-This repository's installation documentation distinguishes command templates
-from verified release instructions. The collection currently has no admitted
-packages, remote identity, release tag, or verified command. Do not copy a
-template below into user-facing release documentation until it has been tested
-against the actual published repository.
+This repository currently contains a five-Skill local release candidate. It
+has no public remote identity, stable tag, or released version yet. Therefore
+this document deliberately does not publish a final owner/repository command.
+A command becomes a verified release instruction only after it succeeds in a
+fresh environment against the actual released repository and is recorded by
+the T14/T16 evidence gates.
 
 ## Supported installation scopes
 
-The collection supports a host only after that host has passed fresh-install
-and discovery verification for one of these scopes:
-
-| Scope | Location policy | Required release evidence |
+| Scope | Destination policy | Required evidence |
 | --- | --- | --- |
-| Project-local | The Agent host's recognized project-level Skills location for the active repository. | Exact host and path, installer or manual command, restart or reload step, and successful discovery without a source checkout. |
-| User/global | The Agent host's recognized user-level or global Skills location. | Exact host and path, installer or manual command, restart or reload step, and successful discovery without a source checkout. |
-| Per-Skill | A single admitted package directory containing `SKILL.md` and every required resource. | Exact selected package, released revision, installation path, and successful discovery and behavioral smoke evidence. |
+| Project-local | The active repository's recognized project-level Skills location. | Exact host/path, complete package copy or installer result, refresh step, and discovery without the source checkout. |
+| User/global | The Agent host's recognized user-level or global Skills location. | Exact host/path, complete package copy or installer result, refresh step, and discovery without the source checkout. |
+| Per-Skill | One complete admitted directory containing SKILL.md and every referenced resource. | Selected package, immutable released revision, destination, discovery, and behavioral smoke evidence. |
 
-The release documentation must name the actual supported hosts and locations;
-these categories do not imply that every Agent host or arbitrary directory is
-supported.
+These categories do not imply that every Agent host supports every location.
+The host's own documentation and fresh discovery result control.
 
-## General installer templates
+## Release installer form
 
-Where the general Skills installer supports the target host and repository
-layout, the expected forms are:
+The general installer syntax is retained here as a release template only:
 
-```text
-# Template only — verify exact installer behavior before publication.
-npx skills@latest add <owner>/skills
-npx skills@latest add <owner>/skills --skill <skill-name>
-```
+~~~
+npx skills add <owner>/<repository>
+npx skills add <owner>/<repository> --skill <skill-name>
+~~~
 
-The first form is for a whole-repository installation; the second requests one
-Skill. Before publishing them, verify the actual installer version, repository
-identity, argument semantics, resulting location, resource completeness, and
-host discovery. Replace placeholders only with values tested against the
-released remote.
+The syntax is described by the [Skills CLI documentation](https://www.skills.sh/docs/cli),
+but the commands above are not a verified command for this local candidate:
+the owner, repository, release revision, installer version, destination, and
+host discovery result are intentionally unresolved. Do not replace the
+placeholders and publish them as release instructions before T14/T16.
 
 ## Manual fallback
 
-When an installer is unavailable or unsupported:
+When a verified installer is unavailable or unsupported, use the complete
+released package snapshot and follow the host's recognized Skills location:
 
-1. Obtain the exact released repository revision from its authoritative source.
-2. Copy the complete admitted `skills/<skill-name>/` directory, including
-   `SKILL.md` and every referenced resource, into the target host's recognized
-   project-local or user/global Skills location.
-3. Preserve any required attribution or notice supplied with the package.
-4. Reload or restart the host if its discovery model requires it.
-5. Verify discovery and run the documented smoke, boundary, and
-   missing-dependency checks in a fresh environment.
+~~~
+sourceRoot="<released-checkout>"
+skillName="<admitted-skill-name>"
+destinationRoot="<host-recognized-skills-root>"
+Copy-Item -LiteralPath "$sourceRoot/skills/$skillName" -Destination "$destinationRoot/$skillName" -Recurse
+~~~
 
-Manual copying is a fallback installation mechanism, not permission to copy an
-unmodified third-party Skill into this repository.
+This is a procedure template, not a release command. A valid manual
+verification record must identify the released commit or tag, exact host,
+resolved destination, refresh/restart step, discovery result, and success,
+boundary, and missing-dependency smoke results. Copy the complete package;
+never copy only SKILL.md when the package references resources.
 
-## Direct upstream and modified third-party Skills
+## Direct upstream Skills
 
-An unmodified upstream Skill must be installed from its original upstream
-repository. For example, direct-use Matt Pocock Skills are obtained from
-[mattpocock/skills](https://github.com/mattpocock/skills), not duplicated here.
+Unmodified Matt Pocock Skills stay on their original upstream path:
+[mattpocock/skills](https://github.com/mattpocock/skills). They are not copied
+into this repository. Use the upstream repository's current instructions and
+record the exact package, revision, host, and discovery result in the local
+evidence record when documenting a supported composition.
 
-If a locally modified third-party Skill is justified, install it from the
-separate `skills-3rdParty` repository using that repository's provenance,
-version-pinning, and installation instructions. Do not describe it as an
-original first-party Skill.
+## Modified third-party Skills
 
-## Required verification record
+A locally modified third-party Skill belongs in the separate
+skills-3rdParty repository. Its installation must use that repository's
+released source-grouped package and its completed provenance, patch, license,
+and synchronization records. No modified third-party package is included in
+this first-party collection.
 
-For every published whole-repository or per-Skill command, preserve:
+## Verification record
 
-- the exact command and installer version;
-- repository URL, released commit, version, or tag;
+For every future verified release or per-Skill command, preserve:
+
+- exact command and installer version;
+- repository URL and immutable released commit or tag;
 - host, installation scope, and resolved destination;
 - fresh-environment discovery result;
-- success, boundary, and missing-dependency smoke results where applicable;
+- success, boundary, invocation, and missing-dependency smoke results;
 - any manual fallback used; and
 - known limitations.
 
-Structural validation, a copied package tree, and an unexecuted command are
-not installation evidence. See [admission](SKILL_ADMISSION.md) and
-[maintenance](MAINTENANCE.md) for the larger evidence and release gates.
+Structural validation, a source-checkout scan, and an unexecuted command are
+not installation evidence. The collection discovery script is a structural
+cross-reference check; it does not replace fresh host installation.

@@ -1,49 +1,75 @@
-# Skills
+![Personal Skills Collection — composable first-party Agent Skills](skills/docs/assets/skills-header.png)
 
-This repository is the governed home for first-party Agent Skills owned by the
-collection maintainer. It is currently a foundation: no Skill package has yet
-passed admission or been published from this repository.
+# Personal Skills Collection
 
-The collection is intentionally composable. A useful Skill does not need to be
-part of a fixed or canonical workflow to be admitted; it needs an independent,
-bounded capability and trustworthy evidence.
+This repository is the governed home for five first-party Agent Skills:
+bounded capabilities that can be installed independently, inspected before
+use, and composed dynamically for different tasks.
 
-## What belongs here
+> **Release status:** The assembled collection is a local release candidate.
+> No public remote, stable tag, or verified release installation command
+> exists yet. See [installation](docs/INSTALLATION.md) for the exact boundary
+> between candidate procedures and release evidence.
 
-| Category | Treatment |
-| --- | --- |
-| First-party Skill | Authored by the owner, or substantially transformed into an owned capability with clear attribution. It may be admitted here. |
-| Direct upstream Skill | Installed from its upstream source when it works without local modification. It is not copied here. |
-| Modified third-party Skill | Kept in the separate source-organized `skills-3rdParty` repository only when a documented fork necessity exists. |
-| Deprecated or archived source | Retained only with clear migration guidance; it is not a current installation authority. |
+## First-party catalog
 
-In particular, an unmodified third-party Skill is rejected from this repository.
-For example, usable Matt Pocock Skills remain direct upstream dependencies at
-[mattpocock/skills](https://github.com/mattpocock/skills), rather than local
-convenience copies.
+| Skill | Purpose | Invocation | Package |
+| --- | --- | --- | --- |
+| [review-loop](skills/review-loop/SKILL.md) | Run bounded evidence, repair, and final-acceptance loops. | Model-invoked; manual entry point is also supported. | skills/review-loop/ |
+| [project-init](skills/project-init/SKILL.md) | Initialize a confirmed software, manuscript, research, knowledge, data, or Skill-development project preset. | User-invoked only. | skills/project-init/ |
+| [ask-light](skills/ask-light/SKILL.md) | Inspect the active host and recommend one appropriate next Skill without executing it. | User-invoked only. | skills/ask-light/ |
+| [learn-anything](skills/learn-anything/SKILL.md) | Distill sufficiently evidenced source material into reusable Agent Skill methods. | User-invoked only. | skills/learn-anything/ |
+| [manuscript-ops](skills/manuscript-ops/SKILL.md) | Govern reproducible manuscript engineering across formats, batches, reviews, and handoffs. | Model-invoked; manual entry point is also supported. | skills/manuscript-ops/ |
 
-`project-workflow` is not a first-party Hub package and must not be imported.
+The human-readable inventory, including status and evidence links, is
+maintained in [CATALOG.md](CATALOG.md). Package-level SKILL.md files remain
+the source of truth for behavior, triggers, inputs, outputs, and resources.
 
-## Repository governance
+## Installation and discovery
+
+Read [Installation](docs/INSTALLATION.md) before copying or installing a
+package. It distinguishes project-local, user/global, and per-Skill scopes;
+documents the manual fallback; and explains why a release command is not
+published until it has passed fresh-install verification against the actual
+remote release.
+
+The [collection discovery test](tests/collection-discovery-tests.ps1) checks
+that package metadata, catalog entries, README links, and the retired-package
+boundary stay synchronized. It is a structural/discovery check, not a
+substitute for fresh host installation or behavioral evidence.
+
+## Composition without a fixed workflow
+
+The collection is intentionally composable rather than a canonical pipeline.
+The [validated composition examples](docs/workflows/README.md) show useful
+handoffs and stopping boundaries. They are documentation and validation
+assets, not admission requirements and not automatic orchestration rules.
+
+For example, ask-light can recommend project-init, learn-anything,
+manuscript-ops, or review-loop from the current task state, but it never
+invokes the recommendation. The user chooses the next explicit entry point.
+
+## Ownership and upstream boundaries
+
+| Source state | Authority | Treatment here |
+| --- | --- | --- |
+| First-party | This repository and the admitted package contract | Included under skills/. |
+| Direct upstream | The original upstream repository | Install directly; do not copy an unchanged Skill here. |
+| Modified third-party | The separate skills-3rdParty repository | Requires a concrete fork reason, provenance, license, patch, and installation records. |
+| Deprecated or archived | The released migration record | Keep only with explicit replacement and migration guidance. |
+
+Direct-use Matt Pocock Skills remain upstream at
+[mattpocock/skills](https://github.com/mattpocock/skills). This repository does
+not copy them for convenience. project-workflow is retired and excluded; it
+is not a package or compatibility dependency here.
+
+## Governance
 
 - [Maintenance contract for agents](AGENTS.md)
 - [First-party Skill admission](docs/SKILL_ADMISSION.md)
 - [Maintenance and documentation synchronization](docs/MAINTENANCE.md)
-- [Installation policy and verification](docs/INSTALLATION.md)
+- [Installation and fresh-install verification](docs/INSTALLATION.md)
 - [Review policy](docs/REVIEW_POLICY.md)
 - [Catalog](CATALOG.md)
-- [Validated combination-example policy](docs/workflows/README.md)
+- [Validated composition examples](docs/workflows/README.md)
 - [Changelog](CHANGELOG.md)
-
-The documents above define the repository rules. The package-level `SKILL.md`
-is the authoritative behavior contract for an admitted Skill, and a required
-`ATTRIBUTION.md` is the authoritative provenance record for a substantially
-transformed first-party Skill.
-
-## Installation status
-
-No release installation command is published yet. The command forms in
-[Installation](docs/INSTALLATION.md) are explicitly marked as templates until
-they have been verified against a released repository and fresh installation
-environment. Do not present a structural check or a template command as
-runtime installation evidence.
