@@ -84,6 +84,10 @@ foreach ($required in @(
 $documentationFiles = @("README.md", "CATALOG.md", "CHANGELOG.md", "AGENTS.md") + @(rg --files docs)
 foreach ($file in $documentationFiles) {
     $path = Join-Path $Root $file
+    if (-not (Test-Path -LiteralPath $path)) {
+        Assert-Collection $false "Required documentation file is missing: $file"
+        continue
+    }
     $text = Get-Content -LiteralPath $path -Raw
     foreach ($match in [regex]::Matches($text, "\[[^\]]+\]\(([^)]+)\)")) {
         $link = $match.Groups[1].Value.Split("#")[0]
