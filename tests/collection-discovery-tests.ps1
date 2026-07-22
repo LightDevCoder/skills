@@ -64,11 +64,13 @@ foreach ($package in $expected) {
 
     Assert-Collection ($readme -match [regex]::Escape("skills/$package/")) "$package is missing from README."
     Assert-Collection ($catalog -match [regex]::Escape("skills/$package/")) "$package is missing from CATALOG.md."
-    Assert-Collection ($catalog -match [regex]::Escape("### $package")) "$package is missing a catalog section."
-    Assert-Collection ($catalog -match [regex]::Escape("- **Invocation:**")) "$package catalog invocation field is missing."
-    Assert-Collection ($catalog -match [regex]::Escape("- **Status:**")) "$package catalog status field is missing."
-    Assert-Collection ($catalog -match [regex]::Escape("- **Installation path:**")) "$package catalog installation field is missing."
-    Assert-Collection ($catalog -match [regex]::Escape("- **Evidence:**")) "$package catalog evidence field is missing."
+    $sectionMatch = [regex]::Match($catalog, "(?ms)^### " + [regex]::Escape($package) + "\r?\n(?<section>.*?)(?=^### |\z)")
+    $section = $sectionMatch.Groups["section"].Value
+    Assert-Collection $sectionMatch.Success "$package is missing a catalog section."
+    Assert-Collection ($section -match [regex]::Escape("- **Invocation:**")) "$package catalog invocation field is missing."
+    Assert-Collection ($section -match [regex]::Escape("- **Status:**")) "$package catalog status field is missing."
+    Assert-Collection ($section -match [regex]::Escape("- **Installation path:**")) "$package catalog installation field is missing."
+    Assert-Collection ($section -match [regex]::Escape("- **Evidence:**")) "$package catalog evidence field is missing."
 }
 
 $markdownFiles = @(Get-ChildItem -LiteralPath $Root -Recurse -Filter "*.md" -File |
