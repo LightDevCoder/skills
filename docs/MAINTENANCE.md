@@ -45,6 +45,16 @@ For every add, update, rename, deprecation, or removal:
 6. Prepare an unreleased changelog entry. Do not claim a version, tag, or
    verified release command until the actual release gate has passed.
 
+## Synchronization matrix
+
+| Change | Documentation and validation that must be reviewed |
+| --- | --- |
+| Add | Root README, catalog, installation guide, governance references, validated composition examples, ask-light discovery tests, changelog, attribution, and fresh-install evidence. |
+| Update | Package description and behavior evidence; affected catalog, installation, attribution, examples, discovery tests, compatibility evidence, and changelog. |
+| Rename | Old-to-new migration guidance; all links, catalog records, installer examples, discovery tests, examples, attribution references, and changelog. |
+| Deprecate | Catalog status, README guidance, replacement or migration path, installation warning, examples, discovery tests, changelog, and release notes. |
+| Remove | Confirm no supported consumer requires a compatibility shim; remove stale references, preserve migration guidance where applicable, update catalog and installation surfaces, and record the removal. |
+
 ## Catalog and installation maintenance
 
 Catalog entries must name the package's purpose, invocation type, package path,

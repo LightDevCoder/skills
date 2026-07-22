@@ -29,10 +29,25 @@ Assert-Collection (($actual -join ",") -eq ($expected -join ",")) "skills/ must 
 
 $readme = Get-Content -LiteralPath (Join-Path $Root "README.md") -Raw
 $catalog = Get-Content -LiteralPath (Join-Path $Root "CATALOG.md") -Raw
+$installation = Get-Content -LiteralPath (Join-Path $Root "docs/INSTALLATION.md") -Raw
 
 Assert-Collection ($readme -match "skills/docs/assets/skills-header\.png") "README must display the repository-local header image."
-Assert-Collection (Test-Path -LiteralPath (Join-Path $Root "skills/docs/assets/skills-header.svg")) "Editable skills-header.svg is missing."
-Assert-Collection (Test-Path -LiteralPath (Join-Path $Root "skills/docs/assets/skills-header.png")) "Rendered skills-header.png is missing."
+$firstNonEmptyReadmeLine = @($readme -split "\r?\n" | Where-Object { $_.Trim() } | Select-Object -First 1)
+Assert-Collection (($firstNonEmptyReadmeLine.Count -eq 1) -and ($firstNonEmptyReadmeLine[0] -match "^!\[[^\]]+\]\(skills/docs/assets/skills-header\.png\)")) "README header image must be the first non-empty line with alt text."
+$svgPath = Join-Path $Root "skills/docs/assets/skills-header.svg"
+$pngPath = Join-Path $Root "skills/docs/assets/skills-header.png"
+Assert-Collection (Test-Path -LiteralPath $svgPath) "Editable skills-header.svg is missing."
+Assert-Collection (Test-Path -LiteralPath $pngPath) "Rendered skills-header.png is missing."
+if ((Test-Path -LiteralPath $svgPath) -and (Test-Path -LiteralPath $pngPath)) {
+    $svgText = Get-Content -LiteralPath $svgPath -Raw
+    $pngBytes = [IO.File]::ReadAllBytes($pngPath)
+    Assert-Collection (($svgText -match "<svg\b") -and ((Get-Item -LiteralPath $svgPath).Length -gt 100)) "Header SVG is not a non-empty SVG document."
+    Assert-Collection (($pngBytes.Length -gt 100) -and ($pngBytes[0] -eq 137) -and ($pngBytes[1] -eq 80) -and ($pngBytes[2] -eq 78) -and ($pngBytes[3] -eq 71)) "Header PNG does not have a valid PNG signature."
+}
+Assert-Collection ($installation -match "npx skills add <owner>/<repository>") "Installation guide is missing the whole-repository release template."
+Assert-Collection ($installation -match "--skill <skill-name>") "Installation guide is missing the per-Skill release template."
+Assert-Collection ($installation -match "not a verified command") "Installation guide must label pre-release commands accurately."
+Assert-Collection ($installation -match "Manual fallback") "Installation guide must retain a manual fallback."
 
 foreach ($package in $expected) {
     $packageRoot = Join-Path $skillRoot $package
@@ -64,6 +79,20 @@ foreach ($required in @(
     "docs/workflows/README.md"
 )) {
     Assert-Collection (Test-Path -LiteralPath (Join-Path $Root $required)) "Required documentation path is missing: $required"
+}
+
+$documentationFiles = @("README.md", "CATALOG.md", "CHANGELOG.md", "AGENTS.md") + @(rg --files docs)
+foreach ($file in $documentationFiles) {
+    $path = Join-Path $Root $file
+    $text = Get-Content -LiteralPath $path -Raw
+    foreach ($match in [regex]::Matches($text, "\[[^\]]+\]\(([^)]+)\)")) {
+        $link = $match.Groups[1].Value.Split("#")[0]
+        if ($link -match "^https?://" -or [string]::IsNullOrWhiteSpace($link)) {
+            continue
+        }
+        $resolved = Join-Path (Split-Path -Parent $path) $link
+        Assert-Collection (Test-Path -LiteralPath $resolved) "$file contains an unresolved relative link: $link"
+    }
 }
 
 if ($script:failures.Count -gt 0) {
