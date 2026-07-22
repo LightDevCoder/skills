@@ -1,0 +1,7 @@
+interface:
+  display_name: "Review Loop"
+  short_description: "Generic evidence, repair, and final acceptance"
+  default_prompt: "Use $review-loop to run a generic final-acceptance and bounded-repair loop for this approved artifact."
+
+policy:
+  allow_implicit_invocation: true

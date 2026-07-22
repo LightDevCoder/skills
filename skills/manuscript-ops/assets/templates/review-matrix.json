@@ -1,0 +1,74 @@
+{
+  "schema_version": "1",
+  "profile": "manuscript",
+  "milestone": "outline|batch|candidate|source-lock|final",
+  "artifact_snapshot": {
+    "captured_at": "YYYY-MM-DDTHH:MM:SSZ",
+    "files": []
+  },
+  "axes": [
+    {
+      "id": "intent-structure",
+      "label": "Intent, completeness, structure, and logic",
+      "applicable": null,
+      "reason": "Resolve applicability from the approved Brief",
+      "evidence_required": ["artifact-bound content and structure evidence"]
+    },
+    {
+      "id": "factual-sources",
+      "label": "Facts, source authority, citations, numbers, and units",
+      "applicable": null,
+      "reason": "Resolve applicability from the Source Register and claims",
+      "evidence_required": ["source-register and claim evidence"]
+    },
+    {
+      "id": "terminology-localization",
+      "label": "Terminology and cross-language consistency",
+      "applicable": null,
+      "reason": "Resolve applicability from languages and glossary requirements",
+      "evidence_required": ["glossary or terminology evidence"]
+    },
+    {
+      "id": "reader-accessibility",
+      "label": "Reader fit, accessibility, tone, and localization",
+      "applicable": null,
+      "reason": "Resolve applicability from audience and reading context",
+      "evidence_required": ["reader-fit or accessibility evidence"]
+    },
+    {
+      "id": "safety-privacy-legal",
+      "label": "Safety, privacy, legal and regulatory boundaries, and metadata",
+      "applicable": null,
+      "reason": "Resolve applicability from risk and privacy classification",
+      "evidence_required": ["safety, privacy, or legal evidence"]
+    },
+    {
+      "id": "format-layout",
+      "label": "Format structure, layout, navigation, and fields",
+      "applicable": null,
+      "reason": "Resolve applicability from the approved deliverables",
+      "evidence_required": ["structural or rendered format evidence"]
+    },
+    {
+      "id": "images",
+      "label": "Image selection, placement, crop, caption, annotation, and alt text",
+      "applicable": null,
+      "reason": "Resolve applicability from image sources and deliverables",
+      "evidence_required": ["image inventory or visual evidence"]
+    },
+    {
+      "id": "reproducibility-recovery",
+      "label": "Generation reproducibility, hashes, gates, and recovery",
+      "applicable": null,
+      "reason": "Resolve applicability from reproducibility and gate policy",
+      "evidence_required": ["generation, hash, receipt, or resume evidence"]
+    },
+    {
+      "id": "compatibility-round-trip",
+      "label": "Compatibility and round-trip preservation",
+      "applicable": null,
+      "reason": "Resolve applicability from target applications and source formats",
+      "evidence_required": ["compatibility or round-trip evidence"]
+    }
+  ]
+}

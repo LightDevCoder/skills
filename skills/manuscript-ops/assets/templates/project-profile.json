@@ -1,0 +1,102 @@
+{
+  "schema_version": "1",
+  "date_version": {
+    "value": "YYYY.MM.DD",
+    "origin": "规则推导",
+    "evidence": "selected by next_version.py"
+  },
+  "project_root": {
+    "value": ".",
+    "origin": "资料发现",
+    "evidence": "resolved exact project root"
+  },
+  "route": {
+    "value": "Project",
+    "origin": "规则推导",
+    "evidence": "routing-snapshot.json"
+  },
+  "paths": {
+    "brief": {
+      "value": "docs/manuscript-brief.md",
+      "origin": "规则推导",
+      "evidence": "standard logical layout"
+    },
+    "outline": {
+      "value": "docs/outline.md",
+      "origin": "规则推导",
+      "evidence": "standard logical layout"
+    },
+    "source_map": {
+      "value": "docs/source-map.md",
+      "origin": "规则推导",
+      "evidence": "standard logical layout"
+    },
+    "glossary": {
+      "value": "docs/glossary.md",
+      "origin": "规则推导",
+      "evidence": "standard logical layout"
+    },
+    "manuscript": {
+      "value": "manuscript",
+      "origin": "规则推导",
+      "evidence": "standard logical layout"
+    },
+    "deliverables": {
+      "value": "deliverables",
+      "origin": "规则推导",
+      "evidence": "standard logical layout"
+    }
+  },
+  "languages": {
+    "value": [],
+    "origin": "用户决定",
+    "evidence": "approved Manuscript Brief"
+  },
+  "formats": {
+    "value": [],
+    "origin": "用户决定",
+    "evidence": "approved Manuscript Brief"
+  },
+  "dependencies": {
+    "value": [],
+    "origin": "资料发现",
+    "evidence": "capability and dependency discovery"
+  },
+  "capabilities_snapshot": {
+    "value": null,
+    "origin": "资料发现",
+    "evidence": "not captured yet"
+  },
+  "version_control": {
+    "system": {
+      "value": "jj",
+      "origin": "规则推导",
+      "evidence": "new Project route default"
+    },
+    "tested_baseline": {
+      "value": "0.43.0",
+      "origin": "规则推导",
+      "evidence": "manuscript-ops tested baseline"
+    },
+    "colocated": {
+      "value": false,
+      "origin": "规则推导",
+      "evidence": "new Project route default"
+    },
+    "remote_allowed": {
+      "value": false,
+      "origin": "规则推导",
+      "evidence": "manuscript projects remain local by default"
+    }
+  },
+  "snapshot_max_age_hours": {
+    "value": 168,
+    "origin": "规则推导",
+    "evidence": "default seven-day freshness window"
+  },
+  "unknowns": {
+    "value": [],
+    "origin": "资料发现",
+    "evidence": "unresolved configuration items"
+  }
+}

@@ -1,0 +1,355 @@
+{
+  "schema_version": "1",
+  "capability_values": [
+    "supported",
+    "conditional",
+    "unsupported",
+    "not_applicable"
+  ],
+  "status_values": [
+    "READY",
+    "DEGRADED",
+    "BLOCKED"
+  ],
+  "adapters": [
+    {
+      "id": "txt",
+      "format": "TXT",
+      "tier": 1,
+      "extensions": [".txt"],
+      "media_types": ["text/plain"],
+      "operations": {
+        "read": "supported",
+        "edit": "supported",
+        "generate": "supported",
+        "render": "not_applicable",
+        "visual_qa": "not_applicable",
+        "round_trip": "supported"
+      },
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "validation_dependencies": [],
+      "blocking_qa_gaps": false,
+      "validation": ["encoding", "line_endings", "content_invariants"],
+      "degradation": "Block when the required encoding or byte-preservation contract cannot be established."
+    },
+    {
+      "id": "markdown",
+      "format": "Markdown",
+      "tier": 1,
+      "extensions": [".md", ".markdown"],
+      "media_types": ["text/markdown"],
+      "operations": {
+        "read": "supported",
+        "edit": "supported",
+        "generate": "supported",
+        "render": "conditional",
+        "visual_qa": "conditional",
+        "round_trip": "supported"
+      },
+      "required_dependencies": [],
+      "optional_dependencies": ["pandoc", "browser"],
+      "validation_dependencies": [],
+      "blocking_qa_gaps": false,
+      "validation": ["parser_or_linter", "links", "heading_structure", "render_when_layout_matters"],
+      "degradation": "Report layout not tested when no representative Markdown renderer is available."
+    },
+    {
+      "id": "docx",
+      "format": "DOCX",
+      "tier": 1,
+      "extensions": [".docx"],
+      "media_types": ["application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+      "operations": {
+        "read": "conditional",
+        "edit": "conditional",
+        "generate": "conditional",
+        "render": "conditional",
+        "visual_qa": "conditional",
+        "round_trip": "conditional"
+      },
+      "required_dependencies": ["docx_provider"],
+      "optional_dependencies": ["docx_library", "document_provider", "microsoft_word", "libreoffice", "docx_renderer", "image_inspector"],
+      "validation_dependencies": [
+        {
+          "alternatives": ["docx_library", "document_provider", "docx_provider", "docx_validator"],
+          "operation": "structural_qa"
+        }
+      ],
+      "blocking_qa_gaps": true,
+      "validation": ["opc_structure", "styles", "fields_and_links", "metadata_privacy", "real_render", "page_visual_qa", "semantic_compare"],
+      "degradation": "Block layout acceptance without a real Word-compatible renderer and page inspection."
+    },
+    {
+      "id": "pdf",
+      "format": "PDF",
+      "tier": 1,
+      "extensions": [".pdf"],
+      "media_types": ["application/pdf"],
+      "operations": {
+        "read": "conditional",
+        "edit": "conditional",
+        "generate": "conditional",
+        "render": "conditional",
+        "visual_qa": "conditional",
+        "round_trip": "unsupported"
+      },
+      "required_dependencies": ["pdf_provider"],
+      "optional_dependencies": ["pdf_library", "pdf_tool", "poppler", "pdf_renderer", "image_inspector", "pdfa_validator"],
+      "validation_dependencies": [
+        {
+          "alternatives": ["pdf_library", "pdf_tool", "pdf_provider", "pdfa_validator"],
+          "operation": "structural_qa"
+        }
+      ],
+      "blocking_qa_gaps": true,
+      "validation": ["parse", "page_count_and_size", "fonts_and_links", "metadata_privacy", "page_render", "page_visual_qa", "source_semantic_compare"],
+      "degradation": "Prefer regeneration over arbitrary editing; block visual acceptance without page rendering."
+    },
+    {
+      "id": "html",
+      "format": "HTML",
+      "tier": 1,
+      "extensions": [".html", ".htm"],
+      "media_types": ["text/html"],
+      "operations": {
+        "read": "supported",
+        "edit": "supported",
+        "generate": "supported",
+        "render": "conditional",
+        "visual_qa": "conditional",
+        "round_trip": "not_applicable"
+      },
+      "required_dependencies": [],
+      "optional_dependencies": ["browser", "html_validator", "accessibility_checker"],
+      "validation_dependencies": [],
+      "blocking_qa_gaps": false,
+      "validation": ["html_parse", "links_and_assets", "accessibility", "browser_render", "viewport_visual_qa"],
+      "degradation": "Report browser behavior and visual layout not tested when no representative browser is available."
+    },
+    {
+      "id": "epub",
+      "format": "EPUB",
+      "tier": 1,
+      "extensions": [".epub"],
+      "media_types": ["application/epub+zip"],
+      "operations": {
+        "read": "conditional",
+        "edit": "conditional",
+        "generate": "conditional",
+        "render": "conditional",
+        "visual_qa": "conditional",
+        "round_trip": "unsupported"
+      },
+      "required_dependencies": ["epub_provider"],
+      "optional_dependencies": ["epub_library", "epub_tool", "pandoc", "epubcheck", "epub_renderer", "image_inspector"],
+      "validation_dependencies": [
+        {
+          "alternatives": ["epubcheck", "epub_validator"],
+          "operation": "standards_validation"
+        }
+      ],
+      "blocking_qa_gaps": true,
+      "validation": ["container_structure", "epubcheck", "navigation", "metadata", "representative_render", "reflow_visual_qa"],
+      "degradation": "Block final EPUB acceptance without standards validation and representative reading-system rendering."
+    },
+    {
+      "id": "pptx",
+      "format": "PPTX",
+      "tier": 1,
+      "extensions": [".pptx"],
+      "media_types": ["application/vnd.openxmlformats-officedocument.presentationml.presentation"],
+      "operations": {
+        "read": "conditional",
+        "edit": "conditional",
+        "generate": "conditional",
+        "render": "conditional",
+        "visual_qa": "conditional",
+        "round_trip": "conditional"
+      },
+      "required_dependencies": ["presentation_provider"],
+      "optional_dependencies": ["pptx_library", "microsoft_powerpoint", "libreoffice", "presentation_renderer", "image_inspector"],
+      "validation_dependencies": [
+        {
+          "alternatives": ["pptx_library", "presentation_provider", "pptx_validator"],
+          "operation": "structural_qa"
+        }
+      ],
+      "blocking_qa_gaps": true,
+      "validation": ["opc_structure", "theme_and_layout", "links_and_notes", "metadata_privacy", "slide_render", "slide_visual_qa", "semantic_compare"],
+      "degradation": "Block layout acceptance without a real slide renderer and inspection of every required slide."
+    },
+    {
+      "id": "odt",
+      "format": "ODT",
+      "tier": 2,
+      "extensions": [".odt"],
+      "media_types": ["application/vnd.oasis.opendocument.text"],
+      "operations": {"read": "conditional", "edit": "conditional", "generate": "conditional", "render": "conditional", "visual_qa": "conditional", "round_trip": "conditional"},
+      "required_dependencies": ["libreoffice"],
+      "optional_dependencies": ["odf_library", "image_inspector"],
+      "validation_dependencies": [],
+      "blocking_qa_gaps": true,
+      "validation": ["odf_structure", "real_render", "visual_qa", "round_trip_invariants"],
+      "degradation": "Enable only when an ODF-capable target application is present."
+    },
+    {
+      "id": "rtf",
+      "format": "RTF",
+      "tier": 2,
+      "extensions": [".rtf"],
+      "media_types": ["application/rtf", "text/rtf"],
+      "operations": {"read": "conditional", "edit": "conditional", "generate": "conditional", "render": "conditional", "visual_qa": "conditional", "round_trip": "conditional"},
+      "required_dependencies": ["rtf_capable_editor"],
+      "optional_dependencies": ["image_inspector"],
+      "validation_dependencies": [],
+      "blocking_qa_gaps": true,
+      "validation": ["parse", "target_application_render", "visual_qa", "round_trip_invariants"],
+      "degradation": "Treat fidelity as application-dependent and preserve the original."
+    },
+    {
+      "id": "latex",
+      "format": "LaTeX",
+      "tier": 2,
+      "extensions": [".tex"],
+      "media_types": ["application/x-tex", "text/x-tex"],
+      "operations": {"read": "supported", "edit": "supported", "generate": "supported", "render": "conditional", "visual_qa": "conditional", "round_trip": "not_applicable"},
+      "required_dependencies": [],
+      "optional_dependencies": ["latex_engine", "biber", "poppler", "image_inspector"],
+      "validation_dependencies": [],
+      "blocking_qa_gaps": true,
+      "validation": ["compile", "references", "log_warnings", "pdf_render", "page_visual_qa"],
+      "degradation": "Block final layout claims when the required TeX engine or PDF render chain is missing."
+    },
+    {
+      "id": "odp",
+      "format": "ODP",
+      "tier": 2,
+      "extensions": [".odp"],
+      "media_types": ["application/vnd.oasis.opendocument.presentation"],
+      "operations": {"read": "conditional", "edit": "conditional", "generate": "conditional", "render": "conditional", "visual_qa": "conditional", "round_trip": "conditional"},
+      "required_dependencies": ["libreoffice"],
+      "optional_dependencies": ["image_inspector"],
+      "validation_dependencies": [],
+      "blocking_qa_gaps": true,
+      "validation": ["odf_structure", "slide_render", "slide_visual_qa", "round_trip_invariants"],
+      "degradation": "Enable only when an ODP-capable target application is present."
+    },
+    {
+      "id": "xlsx",
+      "format": "XLSX",
+      "tier": 2,
+      "extensions": [".xlsx"],
+      "media_types": ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"],
+      "operations": {"read": "conditional", "edit": "conditional", "generate": "conditional", "render": "conditional", "visual_qa": "conditional", "round_trip": "conditional"},
+      "required_dependencies": ["spreadsheet_provider"],
+      "optional_dependencies": ["xlsx_library", "microsoft_excel", "libreoffice", "spreadsheet_renderer", "image_inspector"],
+      "validation_dependencies": [],
+      "blocking_qa_gaps": true,
+      "validation": ["workbook_structure", "formulas", "links", "print_areas", "sheet_render", "visual_qa"],
+      "degradation": "Do not claim formula recalculation or print layout without a spreadsheet application."
+    },
+    {
+      "id": "ods",
+      "format": "ODS",
+      "tier": 2,
+      "extensions": [".ods"],
+      "media_types": ["application/vnd.oasis.opendocument.spreadsheet"],
+      "operations": {"read": "conditional", "edit": "conditional", "generate": "conditional", "render": "conditional", "visual_qa": "conditional", "round_trip": "conditional"},
+      "required_dependencies": ["libreoffice"],
+      "optional_dependencies": ["odf_library", "image_inspector"],
+      "validation_dependencies": [],
+      "blocking_qa_gaps": true,
+      "validation": ["workbook_structure", "formulas", "print_areas", "sheet_render", "visual_qa"],
+      "degradation": "Enable only when an ODS-capable target application is present."
+    },
+    {
+      "id": "csv",
+      "format": "CSV",
+      "tier": 2,
+      "extensions": [".csv"],
+      "media_types": ["text/csv"],
+      "operations": {"read": "supported", "edit": "supported", "generate": "supported", "render": "not_applicable", "visual_qa": "not_applicable", "round_trip": "conditional"},
+      "required_dependencies": [],
+      "optional_dependencies": ["spreadsheet_application"],
+      "validation_dependencies": [],
+      "blocking_qa_gaps": false,
+      "validation": ["encoding", "dialect", "row_shape", "formula_injection", "round_trip_when_required"],
+      "degradation": "Record delimiter, quoting, encoding, and leading-zero policy."
+    },
+    {
+      "id": "google-workspace",
+      "format": "Google Workspace",
+      "tier": 2,
+      "extensions": [],
+      "media_types": [],
+      "operations": {"read": "conditional", "edit": "conditional", "generate": "conditional", "render": "conditional", "visual_qa": "conditional", "round_trip": "conditional"},
+      "required_dependencies": ["google_workspace_connector"],
+      "optional_dependencies": ["browser", "image_inspector"],
+      "validation_dependencies": [],
+      "blocking_qa_gaps": true,
+      "validation": ["document_identity", "revision_snapshot", "permissions", "native_render", "deterministic_export"],
+      "degradation": "Block when document identity, permissions, or a stable revision/export cannot be captured."
+    },
+    {
+      "id": "microsoft-365",
+      "format": "Microsoft 365",
+      "tier": 2,
+      "extensions": [],
+      "media_types": [],
+      "operations": {"read": "conditional", "edit": "conditional", "generate": "conditional", "render": "conditional", "visual_qa": "conditional", "round_trip": "conditional"},
+      "required_dependencies": ["microsoft_365_connector"],
+      "optional_dependencies": ["browser", "image_inspector"],
+      "validation_dependencies": [],
+      "blocking_qa_gaps": true,
+      "validation": ["document_identity", "revision_snapshot", "permissions", "native_render", "deterministic_export"],
+      "degradation": "Block when document identity, permissions, or a stable revision/export cannot be captured."
+    },
+    {
+      "id": "apple-iwork",
+      "format": "Apple iWork",
+      "tier": 2,
+      "extensions": [".pages", ".key", ".numbers"],
+      "media_types": [],
+      "operations": {"read": "conditional", "edit": "conditional", "generate": "conditional", "render": "conditional", "visual_qa": "conditional", "round_trip": "conditional"},
+      "required_dependencies": ["apple_iwork_application"],
+      "optional_dependencies": ["image_inspector"],
+      "validation_dependencies": [],
+      "blocking_qa_gaps": true,
+      "validation": ["native_open", "native_render", "visual_qa", "export_compare"],
+      "degradation": "Specification compatibility alone is insufficient; require a native iWork environment."
+    }
+  ],
+  "source_adapters": [
+    {
+      "id": "web",
+      "required_metadata": ["url", "retrieved_at", "publisher", "privacy_class", "capture_or_hash"],
+      "derivatives": ["readable_text", "archived_capture"]
+    },
+    {
+      "id": "email",
+      "required_metadata": ["message_or_thread_id", "sender_class", "received_at", "privacy_class", "export_hash"],
+      "derivatives": ["thread_extract", "attachment_register"]
+    },
+    {
+      "id": "image-scan",
+      "required_metadata": ["path", "sha256", "privacy_class", "capture_context"],
+      "derivatives": ["ocr_text", "processed_image"]
+    },
+    {
+      "id": "audio",
+      "required_metadata": ["path", "sha256", "duration", "privacy_class"],
+      "derivatives": ["transcript", "timestamp_map"]
+    },
+    {
+      "id": "video",
+      "required_metadata": ["path", "sha256", "duration", "resolution", "privacy_class"],
+      "derivatives": ["transcript", "timestamp_map", "approved_frames"]
+    },
+    {
+      "id": "transcript",
+      "required_metadata": ["parent_source_id", "engine_or_author", "language", "created_at", "sha256"],
+      "derivatives": ["cleaned_transcript", "source_notes"]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "dimensions": {
+    "scale": {
+      "score": null,
+      "evidence": []
+    },
+    "source_complexity": {
+      "score": null,
+      "evidence": []
+    },
+    "risk": {
+      "score": null,
+      "evidence": []
+    },
+    "output_complexity": {
+      "score": null,
+      "evidence": []
+    },
+    "collaboration": {
+      "score": null,
+      "evidence": []
+    },
+    "reproducibility": {
+      "score": null,
+      "evidence": []
+    }
+  },
+  "hard_triggers": {
+    "explicit_project": false,
+    "cross_session": false,
+    "large_volume": false,
+    "high_risk_facts": false,
+    "locked_derivatives": false,
+    "reproducible_multi_format": false,
+    "independent_multi_thread_acceptance": false
+  },
+  "unknowns": []
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": "1",
+  "platform": "codex|other-host",
+  "captured_at": "YYYY-MM-DDTHH:MM:SSZ",
+  "capabilities": [
+    {
+      "name": "image_inspector",
+      "provider": "host tool or Skill name",
+      "version": "host-managed or exact version",
+      "evidence": "how availability and access were observed",
+      "operations": [
+        "visual_qa"
+      ]
+    }
+  ]
+}

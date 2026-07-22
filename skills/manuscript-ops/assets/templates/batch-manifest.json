@@ -1,0 +1,39 @@
+{
+  "schema_version": "1",
+  "date_version": "YYYY.MM.DD",
+  "batches": [
+    {
+      "id": "batch-01",
+      "label": "Replace with a semantic batch name",
+      "kind": "content",
+      "scope": [
+        "Replace with semantic units"
+      ],
+      "source_dependencies": [],
+      "depends_on": [],
+      "risk": "low",
+      "review_axes": [
+        "intent-structure"
+      ],
+      "reviewable_volume": {
+        "unit": "sections",
+        "target": 1,
+        "rationale": "Replace with the reviewer-context limit"
+      },
+      "review_cadence": "incremental",
+      "cumulative_regression": false,
+      "regression_surface": [],
+      "input_snapshot": null,
+      "outputs": [
+        {
+          "path": "Replace with a project-relative intended output path",
+          "sha256": null
+        }
+      ],
+      "status": "planned",
+      "user_gate": "required",
+      "review_report": null,
+      "user_confirmation": null
+    }
+  ]
+}

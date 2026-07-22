@@ -1,0 +1,106 @@
+{
+  "schema_version": "1",
+  "format": "markdown",
+  "status": "READY|DEGRADED|BLOCKED",
+  "artifact": {
+    "path": "",
+    "sha256": ""
+  },
+  "provider": {
+    "name": "",
+    "version": "",
+    "evidence": ""
+  },
+  "generation": {
+    "mode": "reproducible|manual",
+    "tool": {
+      "name": "",
+      "version": "",
+      "evidence": ""
+    },
+    "command": [],
+    "configuration": {
+      "path": null,
+      "sha256": null,
+      "not_applicable_reason": ""
+    },
+    "inputs": [],
+    "output": {
+      "path": "",
+      "sha256": ""
+    },
+    "manual_disposition": null
+  },
+  "checks": {
+    "structural": {
+      "status": "PASS|FAIL|NOT_APPLICABLE",
+      "evidence": "",
+      "coverage": {
+        "mode": "full|sampled|partial|not_applicable",
+        "unit": "checks",
+        "total": 0,
+        "inspected": 0,
+        "items": [],
+        "sampling_authority": null
+      },
+      "evidence_artifacts": []
+    },
+    "render": {
+      "status": "PASS|FAIL|NOT_APPLICABLE",
+      "evidence": "",
+      "coverage": {
+        "mode": "full|sampled|partial|not_applicable",
+        "unit": "pages|slides|views",
+        "total": 0,
+        "inspected": 0,
+        "items": [],
+        "sampling_authority": null
+      },
+      "evidence_artifacts": []
+    },
+    "visual": {
+      "status": "PASS|FAIL|NOT_APPLICABLE",
+      "evidence": "",
+      "coverage": {
+        "mode": "full|sampled|partial|not_applicable",
+        "unit": "pages|slides|views",
+        "total": 0,
+        "inspected": 0,
+        "items": [],
+        "sampling_authority": null
+      },
+      "evidence_artifacts": []
+    },
+    "semantic": {
+      "status": "PASS|FAIL|NOT_APPLICABLE",
+      "evidence": "",
+      "coverage": {
+        "mode": "full|sampled|partial|not_applicable",
+        "unit": "sections|claims|objects",
+        "total": 0,
+        "inspected": 0,
+        "items": [],
+        "sampling_authority": null
+      },
+      "evidence_artifacts": [],
+      "invariants": [],
+      "reference_artifact": null
+    },
+    "round_trip": {
+      "status": "PASS|FAIL|NOT_APPLICABLE",
+      "evidence": "",
+      "coverage": {
+        "mode": "full|sampled|partial|not_applicable",
+        "unit": "files|objects",
+        "total": 0,
+        "inspected": 0,
+        "items": [],
+        "sampling_authority": null
+      },
+      "evidence_artifacts": [],
+      "output_artifact": null,
+      "invariants": []
+    }
+  },
+  "completed_at": "YYYY-MM-DDTHH:MM:SSZ"
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Learn Anything"
+  short_description: "Assess sources for reusable agent methods"
+  default_prompt: "Use $learn-anything to assess this workflow source and return an internal Method Contract or precise source gaps."

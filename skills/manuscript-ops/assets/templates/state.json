@@ -1,0 +1,20 @@
+{
+  "schema_version": "1",
+  "date_version": "YYYY.MM.DD",
+  "phase": "initialized",
+  "required_gates": [
+    "brief-approved",
+    "baseline"
+  ],
+  "active_receipts": {
+    "brief-approved": "brief-approved-YYYY.MM.DD",
+    "baseline": "baseline-YYYY.MM.DD"
+  },
+  "active_batch": null,
+  "source_register": ".manuscript-ops/sources/source-register.tsv",
+  "review_matrix": null,
+  "latest_review_report": null,
+  "capability_snapshot": null,
+  "format_qa_records": [],
+  "updated_at": "YYYY-MM-DDTHH:MM:SSZ"
+}

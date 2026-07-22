@@ -1,0 +1,55 @@
+{
+  "schema_version": "1",
+  "gate": "brief-approved|baseline|framework-approved|source-locked|final-approved|publish-approved",
+  "date_version": "YYYY.MM.DD",
+  "created_at": "YYYY-MM-DDTHH:MM:SSZ",
+  "bookmark": "",
+  "current_alias": "",
+  "jujutsu": {
+    "version": "",
+    "change_id": "",
+    "commit_id": "",
+    "remote_count": 0
+  },
+  "files": [
+    {
+      "path": "",
+      "sha256": ""
+    }
+  ],
+  "baseline_profile": {
+    "required": false,
+    "path": "",
+    "sha256": ""
+  },
+  "locked_source": {
+    "required": false,
+    "path": "",
+    "sha256": ""
+  },
+  "capability_snapshot": {
+    "required": false,
+    "path": "",
+    "sha256": ""
+  },
+  "format_qa": [],
+  "publication": {
+    "required": false,
+    "target": null,
+    "final_receipt": null
+  },
+  "review": {
+    "required": false,
+    "report_path": "",
+    "report_sha256": "",
+    "verdict": "NOT_REQUIRED|PASS|FAIL|BLOCKED",
+    "upstream_independence": "not_applicable|full|degraded|unavailable",
+    "independence": "not_applicable|native|fresh_session|degraded",
+    "evaluator_fresh": false
+  },
+  "user_confirmation": {
+    "actor": "",
+    "exact_statement": "",
+    "confirmed_at": ""
+  }
+}

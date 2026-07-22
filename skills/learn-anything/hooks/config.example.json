@@ -1,0 +1,35 @@
+{
+  "learn_gate": {
+    "decisions": ["normal_task", "observe_and_summarize", "create_or_update_skill"],
+    "low_confidence_below": 0.4,
+    "observe_threshold": 7
+  },
+  "session_reflector": {
+    "decisions": ["ignore", "summarize_candidate", "create_skill"],
+    "candidate_threshold": 8
+  },
+  "skill_candidate_builder": {
+    "outcomes": [
+      "method_contract",
+      "learning_summary",
+      "blocked"
+    ],
+    "method_contract_required_fields": [
+      "purpose",
+      "triggers",
+      "invocation_type",
+      "inputs",
+      "ordered_method",
+      "decisions",
+      "constraints",
+      "failure_modes",
+      "outputs",
+      "resources",
+      "verification",
+      "unresolved_gaps",
+      "confidence"
+    ],
+    "generic_defaults_are_not_permitted": true,
+    "produces_installable_skill": false
+  }
+}

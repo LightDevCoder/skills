@@ -1,0 +1,93 @@
+{
+  "schema_version": "1",
+  "purpose": "Logical capability names for host evidence; this map never asserts that a host tool is currently available.",
+  "capabilities": {
+    "document_provider": {
+      "operations": ["read", "edit", "generate", "structural_qa"],
+      "codex_examples": ["documents skill or connected document session"]
+    },
+    "docx_provider": {
+      "operations": ["read", "edit", "generate", "structural_qa"],
+      "codex_examples": ["DOCX-capable document provider"]
+    },
+    "docx_renderer": {
+      "operations": ["render"],
+      "codex_examples": ["document render pipeline"]
+    },
+    "docx_validator": {
+      "operations": ["structural_qa"],
+      "codex_examples": ["DOCX package and relationship validator"]
+    },
+    "pdf_tool": {
+      "operations": ["read", "generate", "structural_qa"],
+      "codex_examples": ["pdf skill"]
+    },
+    "pdf_provider": {
+      "operations": ["read", "generate", "structural_qa"],
+      "codex_examples": ["PDF-capable provider"]
+    },
+    "pdf_renderer": {
+      "operations": ["render"],
+      "codex_examples": ["PDF page rendering"]
+    },
+    "epub_provider": {
+      "operations": ["read", "edit", "generate", "structural_qa"],
+      "codex_examples": ["EPUB-capable provider"]
+    },
+    "epub_renderer": {
+      "operations": ["render"],
+      "codex_examples": ["representative EPUB reading-system renderer"]
+    },
+    "epub_validator": {
+      "operations": ["standards_validation"],
+      "codex_examples": ["EPUBCheck-compatible validation"]
+    },
+    "presentation_provider": {
+      "operations": ["read", "edit", "generate", "structural_qa"],
+      "codex_examples": ["presentations skill"]
+    },
+    "presentation_renderer": {
+      "operations": ["render"],
+      "codex_examples": ["slide render pipeline"]
+    },
+    "pptx_validator": {
+      "operations": ["structural_qa"],
+      "codex_examples": ["PPTX package and relationship validator"]
+    },
+    "spreadsheet_provider": {
+      "operations": ["read", "edit", "generate", "structural_qa"],
+      "codex_examples": ["spreadsheets skill"]
+    },
+    "spreadsheet_renderer": {
+      "operations": ["render"],
+      "codex_examples": ["sheet render pipeline"]
+    },
+    "browser": {
+      "operations": ["render", "runtime_qa"],
+      "codex_examples": ["browser or Chrome control skill"]
+    },
+    "image_inspector": {
+      "operations": ["visual_qa"],
+      "codex_examples": ["local image inspection"]
+    },
+    "google_workspace_connector": {
+      "operations": ["read", "edit", "generate", "render", "structural_qa"],
+      "codex_examples": ["connected Google Workspace tools"]
+    },
+    "microsoft_365_connector": {
+      "operations": ["read", "edit", "generate", "render", "structural_qa"],
+      "codex_examples": ["connected Microsoft 365 tools"]
+    },
+    "apple_iwork_application": {
+      "operations": ["read", "edit", "generate", "render", "round_trip"],
+      "codex_examples": ["native Apple iWork application"]
+    }
+  },
+  "required_evidence_fields": [
+    "name",
+    "provider",
+    "version",
+    "evidence",
+    "operations"
+  ]
+}

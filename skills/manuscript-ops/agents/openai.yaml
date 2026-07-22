@@ -1,0 +1,6 @@
+interface:
+  display_name: "Manuscript Ops"
+  short_description: "Route and govern reproducible manuscript projects"
+  default_prompt: "Use $manuscript-ops to assess and run this manuscript project safely."
+policy:
+  allow_implicit_invocation: true

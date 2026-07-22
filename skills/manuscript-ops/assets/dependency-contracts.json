@@ -1,0 +1,102 @@
+{
+  "schema_version": "1",
+  "observed_at": "2026-07-19",
+  "dependencies": [
+    {
+      "name": "grill-me",
+      "repository": "mattpocock/skills",
+      "repository_commit": "9603c1cc8118d08bc1b3bf34cf714f62178dea3b",
+      "path": "skills/productivity/grill-me",
+      "blob_sha": "9470cfcfe231a35e46494cddbacdd395991afb1e",
+      "package_files": ["SKILL.md", "agents/openai.yaml"],
+      "required": true,
+      "layer": "discovery",
+      "required_mentions": ["/grilling"],
+      "strict_agent_skills_compatible": false,
+      "compatibility_note": "Observed frontmatter includes the non-standard disable-model-invocation field."
+    },
+    {
+      "name": "grilling",
+      "repository": "mattpocock/skills",
+      "repository_commit": "9603c1cc8118d08bc1b3bf34cf714f62178dea3b",
+      "path": "skills/productivity/grilling",
+      "blob_sha": "52d8eb3cadd2dca62634d5dccfa73ea6b725b117",
+      "package_files": ["SKILL.md", "agents/openai.yaml"],
+      "required": true,
+      "layer": "discovery",
+      "required_mentions": [],
+      "strict_agent_skills_compatible": true,
+      "compatibility_note": ""
+    },
+    {
+      "name": "wayfinder",
+      "repository": "mattpocock/skills",
+      "repository_commit": "9603c1cc8118d08bc1b3bf34cf714f62178dea3b",
+      "path": "skills/engineering/wayfinder",
+      "blob_sha": "42e3644cc57e41a1b87482754f25b4d9462d4bbc",
+      "package_files": ["SKILL.md", "agents/openai.yaml"],
+      "required": true,
+      "layer": "discovery",
+      "required_mentions": ["/grilling", "/domain-modeling"],
+      "strict_agent_skills_compatible": false,
+      "compatibility_note": "Observed frontmatter includes the non-standard disable-model-invocation field."
+    },
+    {
+      "name": "domain-modeling",
+      "repository": "mattpocock/skills",
+      "repository_commit": "9603c1cc8118d08bc1b3bf34cf714f62178dea3b",
+      "path": "skills/engineering/domain-modeling",
+      "blob_sha": "d0f7e1a5ccb06a7184056ff9af02b67bc77f9dda",
+      "package_files": ["SKILL.md", "ADR-FORMAT.md", "CONTEXT-FORMAT.md", "agents/openai.yaml"],
+      "required": true,
+      "layer": "discovery",
+      "required_mentions": [],
+      "strict_agent_skills_compatible": true,
+      "compatibility_note": ""
+    },
+    {
+      "name": "prototype",
+      "repository": "mattpocock/skills",
+      "repository_commit": "9603c1cc8118d08bc1b3bf34cf714f62178dea3b",
+      "path": "skills/engineering/prototype",
+      "blob_sha": "e75d5331ceffd9b2c5a9554c3db124d848afa054",
+      "package_files": ["SKILL.md", "LOGIC.md", "UI.md", "agents/openai.yaml"],
+      "required": false,
+      "layer": "wayfinder-optional-branch",
+      "required_mentions": [],
+      "strict_agent_skills_compatible": true,
+      "compatibility_note": ""
+    },
+    {
+      "name": "setup-matt-pocock-skills",
+      "repository": "mattpocock/skills",
+      "repository_commit": "9603c1cc8118d08bc1b3bf34cf714f62178dea3b",
+      "path": "skills/engineering/setup-matt-pocock-skills",
+      "blob_sha": "aecf855317d3202f8c812f9b2e0d1b65d98d7d26",
+      "package_files": ["SKILL.md", "domain.md", "issue-tracker-github.md", "issue-tracker-gitlab.md", "issue-tracker-local.md", "triage-labels.md", "agents/openai.yaml"],
+      "required": false,
+      "layer": "wayfinder-optional-branch",
+      "required_mentions": [],
+      "strict_agent_skills_compatible": false,
+      "compatibility_note": "Observed frontmatter includes the non-standard disable-model-invocation field."
+    },
+    {
+      "name": "review-loop",
+      "repository": "LightDevCoder/Agent-Workflow",
+      "repository_commit": "be0c2577347018ad5c9a80f214b8b6cca9bc956e",
+      "path": "review-loop",
+      "blob_sha": "9e6c0f31013af7d289fa9075d21dc2c7a037de24",
+      "package_files": ["SKILL.md", "agents/openai.yaml", "references/acceptance-charter.md", "references/attribution.md", "references/evidence-protocol.md", "references/finding-schema.md", "references/mission-center-compatibility.md", "references/review-rubric.md", "references/stopping-rules.md", "references/subagent-protocol.md"],
+      "required": true,
+      "layer": "independent-acceptance",
+      "required_mentions": [],
+      "strict_agent_skills_compatible": true,
+      "compatibility_note": ""
+    }
+  ],
+  "host_invocation": {
+    "codex": "$<skill-name> <arguments>",
+    "slash-command-clients": "/<skill-name> <arguments>",
+    "generic": "Explicitly activate <skill-name> with <arguments> using the host's documented Skill mechanism."
+  }
+}
