@@ -39,9 +39,9 @@ When a verified installer is unavailable or unsupported, use the complete
 released package snapshot and follow the host's recognized Skills location:
 
 ~~~
-sourceRoot="<released-checkout>"
-skillName="<admitted-skill-name>"
-destinationRoot="<host-recognized-skills-root>"
+$sourceRoot="<released-checkout>"
+$skillName="<admitted-skill-name>"
+$destinationRoot="<host-recognized-skills-root>"
 Copy-Item -LiteralPath "$sourceRoot/skills/$skillName" -Destination "$destinationRoot/$skillName" -Recurse
 ~~~
 

@@ -48,6 +48,7 @@ Assert-Collection ($installation -match "npx skills add <owner>/<repository>") "
 Assert-Collection ($installation -match "--skill <skill-name>") "Installation guide is missing the per-Skill release template."
 Assert-Collection ($installation -match "not a verified command") "Installation guide must label pre-release commands accurately."
 Assert-Collection ($installation -match "Manual fallback") "Installation guide must retain a manual fallback."
+Assert-Collection ($installation -match '\$sourceRoot' -and $installation -match '\$skillName' -and $installation -match '\$destinationRoot') "Manual fallback must use valid PowerShell variables."
 
 foreach ($package in $expected) {
     $packageRoot = Join-Path $skillRoot $package
@@ -63,6 +64,26 @@ foreach ($package in $expected) {
 
     Assert-Collection ($readme -match [regex]::Escape("skills/$package/")) "$package is missing from README."
     Assert-Collection ($catalog -match [regex]::Escape("skills/$package/")) "$package is missing from CATALOG.md."
+    Assert-Collection ($catalog -match [regex]::Escape("### $package")) "$package is missing a catalog section."
+    Assert-Collection ($catalog -match [regex]::Escape("- **Invocation:**")) "$package catalog invocation field is missing."
+    Assert-Collection ($catalog -match [regex]::Escape("- **Status:**")) "$package catalog status field is missing."
+    Assert-Collection ($catalog -match [regex]::Escape("- **Installation path:**")) "$package catalog installation field is missing."
+    Assert-Collection ($catalog -match [regex]::Escape("- **Evidence:**")) "$package catalog evidence field is missing."
+}
+
+$markdownFiles = @(Get-ChildItem -LiteralPath $Root -Recurse -Filter "*.md" -File |
+    ForEach-Object { $_.FullName.Substring($Root.Length + 1).Replace("\", "/") })
+foreach ($file in $markdownFiles) {
+    $path = Join-Path $Root $file
+    $text = Get-Content -LiteralPath $path -Raw
+    foreach ($match in [regex]::Matches($text, "\[[^\]]+\]\(([^)]+)\)")) {
+        $link = $match.Groups[1].Value.Split("#")[0]
+        if ($link -match "^https?://" -or [string]::IsNullOrWhiteSpace($link)) {
+            continue
+        }
+        $resolved = Join-Path (Split-Path -Parent $path) $link
+        Assert-Collection (Test-Path -LiteralPath $resolved) "$file contains an unresolved Markdown link: $link"
+    }
 }
 
 $retired = rg -n "project-workflow|to-manuscript-spec" (Join-Path $Root "skills") 2>$null
@@ -81,7 +102,10 @@ foreach ($required in @(
     Assert-Collection (Test-Path -LiteralPath (Join-Path $Root $required)) "Required documentation path is missing: $required"
 }
 
-$documentationFiles = @("README.md", "CATALOG.md", "CHANGELOG.md", "AGENTS.md") + @(rg --files docs)
+$documentationFiles = @("README.md", "CATALOG.md", "CHANGELOG.md", "AGENTS.md") + @(
+    Get-ChildItem -LiteralPath (Join-Path $Root "docs") -Recurse -Filter "*.md" -File |
+    ForEach-Object { $_.FullName.Substring($Root.Length + 1).Replace("\", "/") }
+)
 foreach ($file in $documentationFiles) {
     $path = Join-Path $Root $file
     if (-not (Test-Path -LiteralPath $path)) {

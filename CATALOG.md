@@ -60,8 +60,9 @@ dependencies and modified third-party variants are documented separately.
 - **Invocation:** User-invoked only.
 - **Package:** [skills/learn-anything/](skills/learn-anything/)
 - **Status:** Admitted first-party.
-- **Evidence:** Package contract, 41-test suite, and method/behavior evidence
-  are preserved in the accepted package record.
+- **Evidence:** [package contract](skills/learn-anything/SKILL.md), 41-test
+  suite, and method/behavior evidence are preserved in the accepted package
+  record.
 - **Installation path:** skills/learn-anything/ in a host-recognized Skills
   root.
 
