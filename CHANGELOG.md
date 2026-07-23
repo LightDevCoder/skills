@@ -4,7 +4,7 @@ All notable changes to this repository are recorded here. A release entry must
 be tied to an actual version or tag and must not be created merely because a
 document was drafted.
 
-## Unreleased
+## 0.1.0 — 2026-07-23
 
 ### Added
 
@@ -15,8 +15,9 @@ document was drafted.
 - Human-readable catalog, repository-local header assets, composition example,
   and collection discovery cross-reference tests.
 
-### Release boundary
+### Release verification
 
-No public remote, released installation command, version, or tag exists in
-this local release candidate. Final command verification remains a release
-gate; the installation guide labels all pre-release command forms accordingly.
+- Published at https://github.com/LightDevCoder/skills.
+- Stable tag: v0.1.0.
+- The v0.1.0 whole-collection and per-Skill installer commands were verified
+  against a fresh destination and the published package content.

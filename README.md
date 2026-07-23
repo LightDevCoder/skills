@@ -6,10 +6,10 @@ This repository is the governed home for five first-party Agent Skills:
 bounded capabilities that can be installed independently, inspected before
 use, and composed dynamically for different tasks.
 
-> **Release status:** The assembled collection is a local release candidate.
-> No public remote, stable tag, or verified release installation command
-> exists yet. See [installation](docs/INSTALLATION.md) for the exact boundary
-> between candidate procedures and release evidence.
+> **Release status:** Stable v0.1.0 is published at
+> [LightDevCoder/skills](https://github.com/LightDevCoder/skills/releases/tag/v0.1.0).
+> See [installation](docs/INSTALLATION.md) for the verified whole-collection
+> and per-Skill commands.
 
 ## First-party catalog
 
@@ -28,10 +28,8 @@ the source of truth for behavior, triggers, inputs, outputs, and resources.
 ## Installation and discovery
 
 Read [Installation](docs/INSTALLATION.md) before copying or installing a
-package. It distinguishes project-local, user/global, and per-Skill scopes;
-documents the manual fallback; and explains why a release command is not
-published until it has passed fresh-install verification against the actual
-remote release.
+package. It distinguishes project-local, user/global, and per-Skill scopes,
+documents the verified v0.1.0 commands, and retains the manual fallback.
 
 The [collection discovery test](tests/collection-discovery-tests.ps1) checks
 that package metadata, catalog entries, README links, and the retired-package

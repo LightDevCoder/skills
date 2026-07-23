@@ -1,11 +1,9 @@
 # Installation and Fresh-Install Verification
 
-This repository currently contains a five-Skill local release candidate. It
-has no public remote identity, stable tag, or released version yet. Therefore
-this document deliberately does not publish a final owner/repository command.
-A command becomes a verified release instruction only after it succeeds in a
-fresh environment against the actual released repository and is recorded by
-the T14/T16 evidence gates.
+This repository contains the stable v0.1.0 five-Skill release at
+[LightDevCoder/skills](https://github.com/LightDevCoder/skills/releases/tag/v0.1.0).
+The commands below were verified against the published repository from a
+fresh destination and are the release installation authority.
 
 ## Supported installation scopes
 
@@ -18,38 +16,41 @@ the T14/T16 evidence gates.
 These categories do not imply that every Agent host supports every location.
 The host's own documentation and fresh discovery result control.
 
-## Release installer form
+## Verified v0.1.0 installer commands
 
-The general installer syntax is retained here as a release template only:
+Install the whole first-party collection:
 
 ~~~
-npx skills add <owner>/<repository>
-npx skills add <owner>/<repository> --skill <skill-name>
+npx skills add LightDevCoder/skills
 ~~~
 
-The syntax is described by the [Skills CLI documentation](https://www.skills.sh/docs/cli),
-but the commands above are not a verified command for this local candidate:
-the owner, repository, release revision, installer version, destination, and
-host discovery result are intentionally unresolved. Do not replace the
-placeholders and publish them as release instructions before T14/T16.
+Install one admitted Skill:
+
+~~~
+npx skills add LightDevCoder/skills --skill review-loop
+~~~
+
+The commands target the immutable v0.1.0 release. The exact installer version,
+host, destination, refresh step, and discovery result are preserved in the
+T16 release receipt.
 
 ## Manual fallback
 
-When a verified installer is unavailable or unsupported, use the complete
-released package snapshot and follow the host's recognized Skills location:
+When the installer is unavailable or unsupported, use the complete v0.1.0
+package snapshot and follow the host's recognized Skills location:
 
 ~~~
-$sourceRoot="<released-checkout>"
+$sourceRoot="<v0.1.0-release-checkout>"
 $skillName="<admitted-skill-name>"
 $destinationRoot="<host-recognized-skills-root>"
 Copy-Item -LiteralPath "$sourceRoot/skills/$skillName" -Destination "$destinationRoot/$skillName" -Recurse
 ~~~
 
-This is a procedure template, not a release command. A valid manual
-verification record must identify the released commit or tag, exact host,
-resolved destination, refresh/restart step, discovery result, and success,
-boundary, and missing-dependency smoke results. Copy the complete package;
-never copy only SKILL.md when the package references resources.
+This is a fallback procedure. A valid manual verification record must identify
+the released commit or tag, exact host, resolved destination, refresh/restart
+step, discovery result, and success, boundary, and missing-dependency smoke
+results. Copy the complete package; never copy only SKILL.md when the package
+references resources.
 
 ## Direct upstream Skills
 

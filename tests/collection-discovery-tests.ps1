@@ -44,9 +44,10 @@ if ((Test-Path -LiteralPath $svgPath) -and (Test-Path -LiteralPath $pngPath)) {
     Assert-Collection (($svgText -match "<svg\b") -and ((Get-Item -LiteralPath $svgPath).Length -gt 100)) "Header SVG is not a non-empty SVG document."
     Assert-Collection (($pngBytes.Length -gt 100) -and ($pngBytes[0] -eq 137) -and ($pngBytes[1] -eq 80) -and ($pngBytes[2] -eq 78) -and ($pngBytes[3] -eq 71)) "Header PNG does not have a valid PNG signature."
 }
-Assert-Collection ($installation -match "npx skills add <owner>/<repository>") "Installation guide is missing the whole-repository release template."
-Assert-Collection ($installation -match "--skill <skill-name>") "Installation guide is missing the per-Skill release template."
-Assert-Collection ($installation -match "not a verified command") "Installation guide must label pre-release commands accurately."
+Assert-Collection ($installation -match "npx skills add LightDevCoder/skills") "Installation guide is missing the verified whole-repository release command."
+Assert-Collection ($installation -match "npx skills add LightDevCoder/skills --skill review-loop") "Installation guide is missing the verified per-Skill release command."
+Assert-Collection ($installation -match "v0\.1\.0") "Installation guide is missing the stable release tag."
+Assert-Collection ($installation -notmatch "not a verified command|<owner>/<repository>") "Installation guide still contains unresolved pre-release command wording."
 Assert-Collection ($installation -match "Manual fallback") "Installation guide must retain a manual fallback."
 Assert-Collection ($installation -match '\$sourceRoot' -and $installation -match '\$skillName' -and $installation -match '\$destinationRoot') "Manual fallback must use valid PowerShell variables."
 

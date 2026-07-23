@@ -10,8 +10,8 @@ not a record of what is currently installed on any particular Agent host.
 | --- | --- |
 | Collection | Personal Skills Collection |
 | Package count | 5 admitted first-party Skills |
-| Current state | Local release candidate |
-| Stable release | Not yet published |
+| Current state | Stable v0.1.0 — public release |
+| Stable release | [v0.1.0](https://github.com/LightDevCoder/skills/releases/tag/v0.1.0) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/collection-discovery-tests.ps1](tests/collection-discovery-tests.ps1) |
 
