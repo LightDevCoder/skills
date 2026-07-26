@@ -47,5 +47,5 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          $hits = rg -n "project-workflow|to-manuscript-spec" skills
-          if ($LASTEXITCODE -eq 0) { throw "Retired package references remain under skills/: $hits" }
+          $hits = @(Get-ChildItem -LiteralPath skills -Recurse -File | Select-String -Pattern "project-workflow|to-manuscript-spec")
+          if ($hits.Count -gt 0) { throw "Retired package references remain under skills/: $($hits -join '; ')" }

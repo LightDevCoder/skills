@@ -104,8 +104,9 @@ foreach ($file in $markdownFiles) {
     }
 }
 
-$retired = rg -n "project-workflow|to-manuscript-spec" (Join-Path $Root "skills") 2>$null
-Assert-Collection ($LASTEXITCODE -eq 1) "Retired orchestration references remain under skills/."
+$retired = @(Get-ChildItem -LiteralPath (Join-Path $Root "skills") -Recurse -File |
+    Select-String -Pattern "project-workflow|to-manuscript-spec")
+Assert-Collection ($retired.Count -eq 0) "Retired orchestration references remain under skills/."
 
 foreach ($required in @(
     "AGENTS.md",
