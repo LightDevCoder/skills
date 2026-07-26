@@ -2,8 +2,9 @@
 
 [English receipt](RELEASE_RECEIPT.md)
 
-状态：`IN PROGRESS`；本地实现和结构证据已更新，但 tag、远程 release、fresh
-installation 与独立 acceptance 仍是未完成 gate。
+状态：`RELEASED WITH ACCEPTANCE LIMITATION`；不可变 tag、远程默认分支、GitHub
+Actions 和 fresh-install 证据已核验；独立 `review-loop agent-skill` acceptance
+仍为 `BLOCKED`。
 
 ## 身份
 
@@ -11,8 +12,8 @@ installation 与独立 acceptance 仍是未完成 gate。
 | --- | --- |
 | 仓库 | `LightDevCoder/skills` |
 | Release | `v0.1.1` |
-| Release commit | `NOT TESTED — 创建 tag 后填写` |
-| Release URL | `NOT TESTED — 创建 GitHub release 后填写` |
+| Release commit | `c50f1ef403a5f0bfe02e75d1aeff2c237556db63` |
+| Release URL | https://github.com/LightDevCoder/skills/releases/tag/v0.1.1 |
 | 日期 | `2026-07-26` |
 | 范围 | 五个第一方包、双语文档、Quick Start、workflow recipes、头图、CI 和 ask-light workflow mode。 |
 
@@ -25,4 +26,10 @@ installation 与独立 acceptance 仍是未完成 gate。
 - [审查策略](../../../REVIEW_POLICY.md)
 - [准入契约](../../../SKILL_ADMISSION.md)
 
-独立 `review-loop agent-skill` acceptance 在有 fresh independent evaluator 记录前保持 `BLOCKED`；同一上下文的自审不是独立证据。结构证据不能写成 runtime proof。
+| Fresh whole-repository install | `VERIFIED` | 见 [INSTALLATION_VERIFICATION.md](INSTALLATION_VERIFICATION.md)。 |
+| Fresh per-Skill install | `VERIFIED` | 见 [INSTALLATION_VERIFICATION.md](INSTALLATION_VERIFICATION.md)。 |
+| Independent `review-loop agent-skill` acceptance | `BLOCKED` | 等待 fresh independent evaluator 记录；同一上下文不是独立证据。 |
+| GitHub Actions | `VERIFIED` | 合并后的 release commit 上的 workflow 已通过。 |
+
+这是一份 release 记录，不是独立 acceptance 记录；在 independent evaluator 行为
+为 `BLOCKED` 期间，不能把结构证据写成模型介导的 runtime proof。

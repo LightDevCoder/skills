@@ -59,7 +59,7 @@ verdict. Stop after the recommendation or the `NEED-INPUT`/`BLOCKED` record.
 
 ## Installation and discovery check
 
-After the v0.1.1 release gate passes, install with `npx skills add LightDevCoder/skills#v0.1.1 --skill ask-light`,
+For the published v0.1.1 release, install with `npx skills add LightDevCoder/skills#v0.1.1 --skill ask-light`,
 refresh, and inspect `SKILL.md`, `agents/openai.yaml`, and the PowerShell
 scanner without the source checkout. Run
 [ask-light contract tests](../../skills/ask-light/tests/ask-light-contract-tests.ps1)

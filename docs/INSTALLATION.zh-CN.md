@@ -2,7 +2,7 @@
 
 [English installation guide](INSTALLATION.md)
 
-公开第一方集合当前稳定版本是 [v0.1.0](https://github.com/LightDevCoder/skills/releases/tag/v0.1.0)。当前工作树同时准备 v0.1.1 release candidate；其 tag 和 fresh-install proof 仍属于 release gate。在证据写入前，下列 v0.1.1 命令只是目标，不是已验证的安装声明。`skills/<name>/` 内的包契约仍是行为权威；本页只规定安装和验证证据。
+公开第一方集合当前稳定版本是 [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1)，commit 为 `c50f1ef403a5f0bfe02e75d1aeff2c237556db63`。已发布 tag 的 fresh-install 证据见[release evidence](evidence/releases/v0.1.1/)。`skills/<name>/` 内的包契约仍是行为权威；本页只规定安装和验证证据。
 
 ## Revision 语义
 
@@ -21,16 +21,16 @@ npx skills add LightDevCoder/skills --skill review-loop
 该历史记录是整理摘要，不是当前重跑；原始 receipt 未记录的
 boundary/missing-dependency smoke 和重复安装行为会明确标为 `NOT RECORDED`。
 
-这份历史验证不改变 CLI 的 revision 语义：无 fragment source 遵循仓库默认 revision，并不是永久固定到 v0.1.0。下面的 v0.1.1 candidate 命令使用显式 tag。
+这份历史验证不改变 CLI 的 revision 语义：无 fragment source 遵循仓库默认 revision，并不是永久固定到 v0.1.0。下面的已发布 v0.1.1 命令使用显式 tag。
 
 目标 v0.1.1 的命令为：
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.1
-npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop
+npx skills add LightDevCoder/skills#v0.1.1 --yes --copy --agent codex
+npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop --yes --copy --agent codex
 ```
 
-release gate 通过后，第一条安装五个包，第二条选择同一 tag 下的完整单包。必须记录 CLI version、host、destination、discovery 和 smoke result；见 [v0.1.1 安装记录](evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md)。
+第一条安装五个包，第二条选择同一 tag 下的完整单包。已验证的 CLI version、destination 类别、discovery 和 smoke result 见 [v0.1.1 安装记录](evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md)。
 
 ## 安装范围
 

@@ -56,7 +56,7 @@ Skill.
 
 ## Installation and discovery check
 
-After the v0.1.1 release gate passes, install with `npx skills add LightDevCoder/skills#v0.1.1 --skill learn-anything`,
+For the published v0.1.1 release, install with `npx skills add LightDevCoder/skills#v0.1.1 --skill learn-anything`,
 refresh the host, and confirm `SKILL.md`, `agents/openai.yaml`, and the `hooks/`
 resources are discovered without the source checkout. The explicit metadata
 policy must read `allow_implicit_invocation: false`.

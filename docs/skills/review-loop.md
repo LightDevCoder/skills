@@ -63,7 +63,7 @@ user-invoked Skill implicitly.
 
 ## Installation and discovery check
 
-After the v0.1.1 release gate passes, install from the target release with
+For the published v0.1.1 release, install with
 `npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop`, refresh the
 host, and inspect the discovered `SKILL.md` plus `agents/openai.yaml` without
 the source checkout. Run the Profile tests under

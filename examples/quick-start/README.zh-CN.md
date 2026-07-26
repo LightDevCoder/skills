@@ -6,10 +6,10 @@
 
 ## 1. 安装
 
-下列命令以 v0.1.1 为目标，只有 release gate 通过后才作为安装说明。
+下列命令安装已发布的 v0.1.1。示例输出仍然只展示选择边界；安装不会授权自动串联。
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.1
+npx skills add LightDevCoder/skills#v0.1.1 --yes --copy --agent codex
 ```
 
 刷新 Agent host，并在脱离 source checkout 的情况下确认 discovery。只安装一个包时，例如：

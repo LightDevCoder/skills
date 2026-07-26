@@ -12,10 +12,12 @@
 | review-loop Profiles | `skills/review-loop/tests/` 全部 contract/behavior | `PASS`；5 个 contract 套件、5 个 behavior 套件，共 105 条 behavior 断言。 |
 | learn-anything hooks | `python -m unittest discover -s tests -p "test*.py"` | `PASS`；4 个测试，collection 54 条断言、learn-anything hook 7 条断言。 |
 | manuscript-ops | 三个 Python CLI 的 `--help` | `PASS`；三个只读 CLI help 检查均成功。 |
-| collection discovery | `powershell -File tests/collection-discovery-tests.ps1` | `PASS`；668 条断言，包含 Skill guide、workflow、release evidence 和双语 semantic-pair parity。 |
+| collection discovery | `powershell -File tests/collection-discovery-tests.ps1` | `PASS`；683 条断言，包含 Skill guide、workflow、release evidence 和双语 semantic-pair parity。 |
 | header asset | `powershell -File tests/header-asset-tests.ps1` | `PASS`；11 条断言，覆盖 SVG/PNG 尺寸、同步资产 manifest 和叠层字标标记。 |
 | Quick Start | `powershell -File tests/quick-start-smoke-tests.ps1` | `PASS`；8 条断言。 |
 | Python 语法 | 只读 `ast.parse` 检查 | `PASS`；12 个 Python 文件解析通过且不写入字节码。 |
-| Python `compileall` | `python -m compileall -q skills tests` | `NOT TESTED` 作为字节码写入证明；沙箱拒绝写入现有受保护的 `__pycache__`，上面的只读 AST 检查已通过。 |
+| Python `compileall` | `python -m compileall -q skills tests` | 本地 `NOT PASSED`；沙箱拒绝写入现有受保护的 `__pycache__`，但合并 release commit `c50f1ef` 上的 GitHub Actions 同命令已通过。 |
+| Tagged fresh install | `npx skills add LightDevCoder/skills#v0.1.1 ...` 加 `npx skills list` | `PASS`；CLI `1.5.20`，整仓 destination 列出 5 个包，单 Skill destination 列出 `review-loop`，且两个 source checkout 都不存在。见[安装证据](INSTALLATION_VERIFICATION.md)。 |
+| Release-commit CI | GitHub Actions `collection-quality` | `PASS`；run `30189210521` 对应 `c50f1ef403a5f0bfe02e75d1aeff2c237556db63`。 |
 
-包测试只证明覆盖到的 contract 场景；collection discovery 只证明 cross-reference 和 metadata 一致，不证明 fresh host install 或 independent acceptance。
+包测试只证明覆盖到的 contract 场景；collection discovery 只证明 cross-reference 和 metadata 一致。tagged installation 证据另有记录；这些证据都不能证明 independent acceptance 或模型介导的 runtime 行为。

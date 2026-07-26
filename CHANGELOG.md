@@ -6,13 +6,13 @@ All notable changes are recorded here. A release entry must be tied to an
 actual version or tag and must not be created merely because a document was
 drafted.
 
-## Unreleased — target v0.1.1 (2026-07-26)
+## 0.1.1 — 2026-07-26
 
 ### Added
 
 - Bilingual user guides for all five first-party Skills, validated workflow
   recipes, and a runnable-sized Quick Start example.
-- A release-candidate evidence tree under
+- A release evidence tree under
   `docs/evidence/releases/v0.1.1/` and CI checks for structure, metadata,
   links, bilingual pairs, package tests, retired references, and header assets.
 - Explicit `$ask-light next` and `$ask-light workflow` modes with bounded
@@ -28,13 +28,18 @@ drafted.
   the CLI's default revision, while `#v0.1.1` will pin the target tag once
   published.
 
-### Release-candidate evidence
+### Release evidence
 
-- Release tag/release: `NOT TESTED` until the release gate passes.
+- Release tag: `v0.1.1`, commit `c50f1ef403a5f0bfe02e75d1aeff2c237556db63`.
+- GitHub Actions `collection-quality`: `PASS` on the merged release commit.
+- Fresh whole-collection and per-Skill installs: `PASS` with CLI `1.5.20`.
+- GitHub release: https://github.com/LightDevCoder/skills/releases/tag/v0.1.1
 - Whole-collection and per-Skill fresh-install target evidence:
   [INSTALLATION_VERIFICATION.md](docs/evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md).
 - Structural and package evidence:
   [TEST_SUMMARY.md](docs/evidence/releases/v0.1.1/TEST_SUMMARY.md).
+- Independent `review-loop agent-skill` acceptance remains `BLOCKED`; see
+  [release receipt](docs/evidence/releases/v0.1.1/RELEASE_RECEIPT.md).
 
 ## 0.1.0 — 2026-07-23
 
@@ -44,7 +49,7 @@ drafted.
 - Stable tag: v0.1.0.
 - The v0.1.0 whole-collection and per-Skill installer commands were verified
   against a fresh destination and the published package content; this
-  historical evidence is retained while v0.1.1 remains a release candidate.
+  historical evidence is retained alongside the v0.1.1 release.
 - Historical commands: `npx skills add LightDevCoder/skills` and
   `npx skills add LightDevCoder/skills --skill review-loop`.
 - Historical installation details:
