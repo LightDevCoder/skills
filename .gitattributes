@@ -1,0 +1,3 @@
+# Keep the editable header pair byte-stable across Windows and Linux runners.
+skills/docs/assets/*.svg text eol=lf
+skills/docs/assets/*.json text eol=lf
