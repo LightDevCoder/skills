@@ -26,7 +26,7 @@ foreach ($category in @('project','global','first-party','upstream','modified-th
 foreach ($field in @('goal','artifacts','blockers','projectType','taskKind','availability','invocationControl')) {
     Assert-True (($reference + $skill) -match [regex]::Escape($field)) "context field supported: $field"
 }
-foreach ($marker in @('metadata first','frontmatter','agents/openai.yaml','shortlist','duplicate','unreadable','Alternative','NEED-INPUT','BLOCKED','installation','never execute','never.*install','body/reference','availability','hosts','readStatus','metadataStatus: unavailable','metadataReadable','materially different next actions','equivalent')) {
+foreach ($marker in @('metadata first','frontmatter','agents/openai.yaml','shortlist','duplicate','unreadable','Alternative','NEED-INPUT','BLOCKED','installation','never execute','never.*install','body/reference','availability','hosts','readStatus','metadataStatus: unavailable','metadataReadable','materially different next actions','equivalent','next','workflow','entryCondition','expectedInput','expectedOutput','stopCondition','missingDependency','finalAuthority','nothing was invoked, installed, or orchestrated')) {
     Assert-True (($skill + $reference) -match $marker) "contract marker: $marker"
 }
 Assert-True ($skill -notmatch 'TODO|\[TODO') 'no template placeholders remain'
@@ -34,6 +34,8 @@ Assert-True ($script -notmatch '(?i)Start-Process|Invoke-Expression|Invoke-RestM
 Assert-True ($script -match 'Get-Content -Raw.*SKILL.md' -and $script -match 'ShortlistLimit') 'scanner reads bodies after shortlist only'
 Assert-True ($script -match 'ConvertTo-Json') 'scanner returns a structured result'
 Assert-True ($script -match 'Test-CandidateAvailability' -and $script -match 'Get-ActionFingerprint' -and $script -match 'readableShortlist') 'scanner filters availability, distinguishes actions, and rejects unreadable reads'
+Assert-True ($script -match "ValidateSet\('next', 'workflow'\)" -and $script -match 'Get-WorkflowRecipes' -and $script -match 'Get-WorkflowRecommendation') 'scanner exposes explicit next and workflow modes with recipe output'
+Assert-True ($script -match 'private skills-3rdParty dependency is not visible') 'workflow reports private third-party availability gaps'
 
 if ($script:failures.Count -gt 0) { throw "ask-light contract failed: $($script:failures -join '; ')" }
 Write-Output 'PASS - ask-light contract'

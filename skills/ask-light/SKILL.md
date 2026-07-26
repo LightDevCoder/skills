@@ -1,6 +1,7 @@
 ---
 name: ask-light
-description: Inspect the Skills available to the active Agent host and recommend the single most appropriate next Skill from the current goal, artifacts, blockers, project type, task kind, availability, and invocation control. Use only when the user explicitly invokes $ask-light; it reports a recommendation and never executes or orchestrates it.
+description: Inspect the Skills available to the active Agent host and recommend either one appropriate next Skill or one bounded workflow recipe from the current goal, artifacts, blockers, project type, task kind, availability, and invocation control. Use only when the user explicitly invokes $ask-light; it reports a recommendation and never executes, installs, or orchestrates it.
+disable-model-invocation: true
 ---
 
 # Ask Light
@@ -18,9 +19,11 @@ workflow state. Do not silently chain another user-invoked Skill. If a next
 step is needed, print the host-appropriate invocation and stop.
 
 The deterministic scanner in [ask-light.ps1](scripts/ask-light.ps1) is an
-optional read-only aid for hosts that can run PowerShell. It scans metadata and
-prints a recommendation; it does not execute the recommendation. On hosts that
-cannot run the script, follow this same contract manually.
+optional read-only aid for hosts that can run PowerShell. Use `$ask-light next`
+for one next Skill, or `$ask-light workflow` for one bounded recipe. It scans
+metadata and availability and prints a recommendation; it does not execute the
+recommendation. On hosts that cannot run the script, follow this same contract
+manually.
 
 ## Required input context
 
@@ -77,13 +80,30 @@ return `BLOCKED` with installation or readability guidance.
    or linked reference cannot be read, mark that candidate ineligible, report
    the exact recovery gap, and continue only with a successfully read
    candidate; if none remains, return `BLOCKED`.
-6. **Return one result.** Recommend one best candidate with source, reason,
+6. **Return one result.** In `next` mode, recommend one best candidate with source, reason,
    confidence, and a host-appropriate invocation. Show one alternative only
    when two distinct candidates remain materially tied after the narrow read
    and represent materially different next actions; equivalent duplicate
    packages do not justify an alternative;
    otherwise omit `Alternative` entirely. Include skipped candidates and
    metadata/readability gaps when they affect confidence.
+
+## Explicit workflow mode
+
+`$ask-light workflow` is a recipe recommendation, not an orchestration engine.
+It selects one documented recipe only when `goal`, `projectType`, `taskKind`,
+artifacts, blockers, availability, and invocation control provide a reliable
+match. It returns each step's Skill, source category/path, actual invocation
+type, expected input/output, handoff artifact, stop condition, optional flag,
+and missing dependency. It never invokes, installs, edits, creates a permanent
+state machine, or silently chains user-invoked Skills.
+
+The validated recipe set covers software feature, bug diagnosis, manuscript
+project, source-to-Skill, new project initialization, final review, and private
+third-party dependency gaps. When no reliable recipe exists, return
+`NEED-INPUT`; when a required Skill is not visible/readable, return `BLOCKED`
+with an accurate availability gap. A private `skills-3rdParty` package must not
+be described as available when its root is absent.
 
 ## Source and host rules
 
@@ -106,6 +126,7 @@ invocation or an automatic merge.
 Return a compact record with these fields:
 
 ```text
+Mode: next | workflow
 Status: RECOMMEND | NEED-INPUT | BLOCKED
 Skill: <one name, or none>
 Source: <category and resolved package path>
@@ -118,6 +139,14 @@ Reads: metadata=<count>; bodies=<count>; references=<count>
 Execution: recommendation only; nothing was invoked or installed
 ```
 
+Workflow mode additionally returns `workflow`, `entryCondition`, `steps`,
+`stoppingBoundary`, and `finalAuthority`. The final verdict for a recipe that
+reaches acceptance remains owned by `review-loop`; `ask-light` only reports the
+recipe and stops. Each returned step declares `expectedInput`,
+`expectedOutput`, `handoffArtifact`, `stopCondition`, and
+`missingDependency` so the handoff remains inspectable. The scanner is a
+recommendation-only aid: nothing was invoked, installed, or orchestrated.
+
 The result must not claim runtime behavior from metadata alone. State when a
 candidate's body/reference was not readable or when host availability could not
 be verified.
@@ -127,6 +156,7 @@ be verified.
 Run the package contract and behavior tests. They exercise fresh disposable
 catalogs, all supported source categories, duplicate names, large catalogs with
 shortlist-bounded body reads, unavailable metadata, context-based ranking,
-genuine ambiguity, installation guidance, and the no-execution boundary. These
-are protocol tests rather than proof that a particular external host exposes a
-given installation path.
+workflow recipes, missing third-party dependencies, explicit-only
+`learn-anything`, genuine ambiguity, installation guidance, and the
+no-execution boundary. These are protocol tests rather than proof that a
+particular external host exposes a given installation path.

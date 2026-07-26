@@ -19,6 +19,10 @@ being inferred from a package name.
 
 `goal` or `taskKind` may be absent only when the result is `NEED-INPUT`.
 
+The caller selects an explicit mode: `next` returns one next Skill, while
+`workflow` returns one bounded recipe recommendation. The mode never changes
+the no-execution boundary.
+
 ## Candidate record and metadata pass
 
 Each source root is declared as `{ category, path }`. Supported categories are
@@ -87,6 +91,24 @@ duplicate packages with the same action fingerprint are not ambiguous. Return on
 candidate and at most one `Alternative`; suppress alternatives for ordinary
 ranking differences.
 
+## Workflow recommendation
+
+Workflow mode uses a small validated recipe catalog rather than a permanent
+state machine. A recipe has an entry condition, participating Skills, source
+category, invocation type, expected input (`expectedInput`), expected output
+(`expectedOutput`), handoff artifact, per-step stop condition
+(`stopCondition`), optional flag, missing dependency, and final authority. The
+supported recipes cover software feature, bug diagnosis, manuscript project,
+source-to-Skill, new project initialization, final review, and private
+third-party dependency availability gaps.
+
+Only candidates visible in the declared roots and passing metadata/availability
+checks are reported as available. Missing upstream or private third-party
+steps stay in the output with `missingDependency`; a required gap makes the
+workflow `BLOCKED`. An uncertain or tied recipe returns `NEED-INPUT`. In
+`explicit-only` mode, a user-invoked `learn-anything` remains eligible and its
+invocation type is reported; explicit-only does not silently exclude it.
+
 ## Output and non-execution
 
 `RECOMMEND` contains exactly one best Skill, a context-specific reason, source,
@@ -96,5 +118,8 @@ installation/readability remedy. Every result includes metadata/body/reference
 read counts and the statement that no recommendation was invoked or installed.
 
 `ask-light` may inspect files and metadata, but it never executes, orchestrates,
-installs, edits, commits, or delegates the recommended Skill. The user must
-invoke the printed command in a later action.
+installs, edits, commits, or delegates the recommended Skill or workflow step:
+nothing was invoked, installed, or orchestrated.
+The user must invoke the printed command or choose each recipe step in a later
+action. `review-loop` owns any final acceptance verdict; recipe output is not a
+verdict.
