@@ -1,5 +1,7 @@
 # First-Party Review Policy
 
+[中文审查策略](REVIEW_POLICY.zh-CN.md)
+
 This policy assigns review responsibilities and evidence requirements for
 first-party Skill work. It does not make a static check, a specialist finding,
 or a producer's self-report into final acceptance evidence.

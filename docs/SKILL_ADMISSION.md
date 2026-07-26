@@ -1,5 +1,7 @@
 # First-Party Skill Admission
 
+[中文准入契约](SKILL_ADMISSION.zh-CN.md)
+
 This document is the admission and evidence contract for a first-party Skill.
 It applies before a package is added to `skills/` and whenever a change alters
 the package's behavior, invocation boundary, dependencies, resources, or

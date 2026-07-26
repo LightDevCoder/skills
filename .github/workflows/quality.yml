@@ -1,0 +1,51 @@
+name: collection-quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  quality:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run collection and package checks
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          ./tests/header-asset-tests.ps1
+          ./tests/quick-start-smoke-tests.ps1
+          ./tests/collection-discovery-tests.ps1
+          ./skills/ask-light/tests/ask-light-contract-tests.ps1
+          ./skills/ask-light/tests/ask-light-behavior-tests.ps1
+          ./skills/project-init/tests/project-init-contract-tests.ps1
+          ./skills/project-init/tests/project-init-behavior-tests.ps1
+          ./skills/review-loop/tests/agent-skill-profile-contract-tests.ps1
+          ./skills/review-loop/tests/agent-skill-profile-behavior-tests.ps1
+          ./skills/review-loop/tests/generic-profile-contract-tests.ps1
+          ./skills/review-loop/tests/generic-profile-behavior-tests.ps1
+          ./skills/review-loop/tests/manuscript-profile-contract-tests.ps1
+          ./skills/review-loop/tests/manuscript-profile-behavior-tests.ps1
+          ./skills/review-loop/tests/software-profile-contract-tests.ps1
+          ./skills/review-loop/tests/software-profile-behavior-tests.ps1
+          ./skills/review-loop/tests/specification-profile-contract-tests.ps1
+          ./skills/review-loop/tests/specification-profile-behavior-tests.ps1
+      - name: Run Python contract tests and compile checks
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          python -m unittest discover -s tests -p "test*.py"
+          python -m compileall -q skills/learn-anything skills/manuscript-ops tests/test_collection_contract.py
+      - name: Retired package boundary
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $hits = rg -n "project-workflow|to-manuscript-spec" skills
+          if ($LASTEXITCODE -eq 0) { throw "Retired package references remain under skills/: $hits" }
