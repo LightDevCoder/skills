@@ -17,4 +17,3 @@ experiment.
 The first decision is whether `ask-light` or `project-init` is the appropriate
 explicit entry point. This brief does not authorize an automatic chain or a
 release.
-
