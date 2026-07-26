@@ -36,4 +36,4 @@ $review-loop resume
 
 ## 安装与发现验证
 
-v0.1.1 release gate 通过后，使用 `npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop` 安装，刷新 host，在不依赖 source checkout 的情况下检查已发现的 `SKILL.md` 和 `agents/openai.yaml`。运行 [Profile tests](../../../skills/review-loop/tests/)；结果记录在 [安装证据](../../evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md)。
+对于已发布的 v0.1.1，使用 `npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop` 安装，刷新 host，在不依赖 source checkout 的情况下检查已发现的 `SKILL.md` 和 `agents/openai.yaml`。运行 [Profile tests](../../../skills/review-loop/tests/)；结果记录在 [安装证据](../../evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md)。

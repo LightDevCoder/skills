@@ -33,4 +33,4 @@ Project route 先按需要选择一个 discovery handoff：单会话决策用 `g
 
 ## 安装与发现验证
 
-v0.1.1 release gate 通过后，使用 `npx skills add LightDevCoder/skills#v0.1.1 --skill manuscript-ops` 安装，刷新 host，在不依赖 source checkout 的情况下验证 `assets/`、`references/`、`scripts/` 等完整资源。先运行 capability/dependency/state 检查，再把 format 结果标为 verified。
+对于已发布的 v0.1.1，使用 `npx skills add LightDevCoder/skills#v0.1.1 --skill manuscript-ops` 安装，刷新 host，在不依赖 source checkout 的情况下验证 `assets/`、`references/`、`scripts/` 等完整资源。先运行 capability/dependency/state 检查，再把 format 结果标为 verified。

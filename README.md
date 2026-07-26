@@ -10,26 +10,25 @@ invocation boundary, and small enough to inspect before use.
 
 > **About:** Personal Skills Collection — Drive your creativity
 
-> **Release candidate:** v0.1.1 is prepared in this worktree. The release
-> record and fresh-install evidence live in
-> [docs/evidence/releases/v0.1.1/](docs/evidence/releases/v0.1.1/); promotion
-> remains subject to the recorded release gates.
+> **Release:** [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1)
+> is published from commit `c50f1ef`. The release record and fresh-install evidence
+> live in [docs/evidence/releases/v0.1.1/](docs/evidence/releases/v0.1.1/).
 >
-> The current published stable release remains [v0.1.0](https://github.com/LightDevCoder/skills/releases/tag/v0.1.0).
+> Independent `review-loop agent-skill` acceptance remains `BLOCKED`; see the
+> receipt for the exact boundary.
 
 ## Quick Start
 
-Install the whole first-party collection at the target revision after the
-release gate passes:
+Install the published first-party collection:
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.1
+npx skills add LightDevCoder/skills#v0.1.1 --yes --copy --agent codex
 ```
 
-Install one Skill at the same target revision after the release gate passes:
+Install one Skill at the same published revision:
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop
+npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop --yes --copy --agent codex
 ```
 
 Refresh the Agent host, then confirm that the package is visible in its Skill

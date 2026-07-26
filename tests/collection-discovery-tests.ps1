@@ -149,7 +149,7 @@ foreach ($pair in @(
 
 $parityMatrix = @(
     [pscustomobject]@{ English = 'README.md'; Chinese = 'README.zh-CN.md'; Markers = @('Quick Start', 'ask-light', 'v0.1.1') },
-    [pscustomobject]@{ English = 'CATALOG.md'; Chinese = 'CATALOG.zh-CN.md'; Markers = @('review-loop', 'v0.1.0', 'skills/') },
+    [pscustomobject]@{ English = 'CATALOG.md'; Chinese = 'CATALOG.zh-CN.md'; Markers = @('review-loop', 'v0.1.1', 'skills/') },
     [pscustomobject]@{ English = 'CHANGELOG.md'; Chinese = 'CHANGELOG.zh-CN.md'; Markers = @('v0.1.1', '0.1.0', 'release') },
     [pscustomobject]@{ English = 'docs/INSTALLATION.md'; Chinese = 'docs/INSTALLATION.zh-CN.md'; Markers = @('npx skills add', 'fresh-install', 'SKILL.md') },
     [pscustomobject]@{ English = 'docs/MAINTENANCE.md'; Chinese = 'docs/MAINTENANCE.zh-CN.md'; Markers = @('README', 'review-loop', 'release') },
@@ -166,8 +166,8 @@ foreach ($pair in $parityMatrix) {
 
 $semanticParityMatrix = @(
     [pscustomobject]@{ English = 'README.md'; Chinese = 'README.zh-CN.md'; Pairs = @(
-        @('Install the whole first-party collection', '安装目标版本的整个第一方集合'),
-        @('Install one Skill at the same target revision', '只安装同一目标版本下的一个 Skill'),
+        @('Install the published first-party collection', '安装已发布的第一方集合'),
+        @('Install one Skill at the same published revision', '安装同一已发布版本下的一个 Skill'),
         @('fresh-install evidence', 'fresh-install 证据')
     ) },
     [pscustomobject]@{ English = 'CATALOG.md'; Chinese = 'CATALOG.zh-CN.md'; Pairs = @(
@@ -176,7 +176,7 @@ $semanticParityMatrix = @(
         @('Installation authority', '安装权威')
     ) },
     [pscustomobject]@{ English = 'CHANGELOG.md'; Chinese = 'CHANGELOG.zh-CN.md'; Pairs = @(
-        @('Release-candidate evidence', 'Release candidate 证据'),
+        @('Release evidence', 'Release 证据'),
         @('Historical installation details', '历史安装明细')
     ) },
     [pscustomobject]@{ English = 'docs/INSTALLATION.md'; Chinese = 'docs/INSTALLATION.zh-CN.md'; Pairs = @(
@@ -260,7 +260,8 @@ foreach ($pair in $secondaryParity) {
 foreach ($name in @('RELEASE_RECEIPT', 'TEST_SUMMARY', 'INSTALLATION_VERIFICATION', 'DISCOVERY_VERIFICATION', 'LIMITATIONS')) {
     $englishText = Get-Content -LiteralPath (Join-Path $Root "docs/evidence/releases/v0.1.1/$name.md") -Raw
     $chineseText = Get-Content -LiteralPath (Join-Path $Root "docs/evidence/releases/v0.1.1/$name.zh-CN.md") -Raw
-    foreach ($marker in @('v0.1.1', 'NOT TESTED', 'fresh')) {
+    $markers = if ($name -eq 'RELEASE_RECEIPT') { @('v0.1.1', 'VERIFIED', 'fresh') } else { @('v0.1.1', 'PASS', 'fresh') }
+    foreach ($marker in $markers) {
         Assert-Collection ($englishText -match [regex]::Escape($marker) -and $chineseText -match [regex]::Escape($marker)) "$name release evidence is missing the synchronized semantic marker: $marker"
     }
 }

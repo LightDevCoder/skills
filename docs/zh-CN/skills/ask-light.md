@@ -38,4 +38,4 @@ Execution: recommendation only; nothing was invoked, installed, or orchestrated
 
 ## 安装与发现验证
 
-v0.1.1 release gate 通过后，使用 `npx skills add LightDevCoder/skills#v0.1.1 --skill ask-light` 安装，刷新 host，在不依赖 source checkout 的情况下检查 `SKILL.md`、`agents/openai.yaml` 和 PowerShell scanner。运行 [contract test](../../../skills/ask-light/tests/ask-light-contract-tests.ps1) 与 [behavior test](../../../skills/ask-light/tests/ask-light-behavior-tests.ps1)，覆盖 learn-anything、私有依赖缺失和歧义 fixtures。
+对于已发布的 v0.1.1，使用 `npx skills add LightDevCoder/skills#v0.1.1 --skill ask-light` 安装，刷新 host，在不依赖 source checkout 的情况下检查 `SKILL.md`、`agents/openai.yaml` 和 PowerShell scanner。运行 [contract test](../../../skills/ask-light/tests/ask-light-contract-tests.ps1) 与 [behavior test](../../../skills/ask-light/tests/ask-light-behavior-tests.ps1)，覆盖 learn-anything、私有依赖缺失和歧义 fixtures。

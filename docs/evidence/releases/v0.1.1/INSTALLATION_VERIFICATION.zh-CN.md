@@ -4,25 +4,31 @@
 
 ## 状态
 
-只有公开 tag 能从 fresh destination 访问后才可更新为 verified。下列命令是 release target，不是 source-checkout scan 已经证明的事实。
+使用 Skills CLI `1.5.20` 从公开 tag 安装后为 `PASS`。host refresh 仍是
+host-specific 行为，因此不宣称已经完成；但每个 fresh destination 都在没有
+source checkout 的条件下执行了 CLI discovery。
 
 | 字段 | 整个集合 | 单 Skill |
 | --- | --- | --- |
-| 命令 | `npx skills add LightDevCoder/skills#v0.1.1` | `npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop` |
-| CLI version | `NOT TESTED` | `NOT TESTED` |
-| Release commit | `NOT TESTED` | `NOT TESTED` |
-| Fresh destination | `NOT TESTED` | `NOT TESTED` |
-| 脱离 source checkout 的 discovery | `NOT TESTED` | `NOT TESTED` |
-| Success/boundary/missing-dependency smoke | `NOT TESTED` | `NOT TESTED` |
-| 重复安装行为 | `NOT TESTED` | `NOT TESTED` |
-| 限制 | 必须在执行后记录 host-specific destination/discovery。 | 同左。 |
+| 命令 | `npx skills add LightDevCoder/skills#v0.1.1 --yes --copy --agent codex` | `npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop --yes --copy --agent codex` |
+| CLI version | `1.5.20` | `1.5.20` |
+| Release commit | `c50f1ef403a5f0bfe02e75d1aeff2c237556db63` | 同左 |
+| Fresh destination | 新建空临时项目；在 `.agents/skills/` 下恰好安装 5 个包 | 新建空临时项目；在 `.agents/skills/` 下恰好安装 1 个包 |
+| 安装结果 | `PASS`，exit code 0 | `PASS`，exit code 0 |
+| 脱离 source checkout 的 discovery | `npx --yes skills list` exit 0；列出 5 个包；不存在 source checkout | `npx --yes skills list` exit 0；列出 1 个包；不存在 source checkout |
+| Success/boundary/missing-dependency smoke | 已安装 `ask-light` behavior suite：52 assertions/PASS；已安装 `manuscript-ops` CLI help/PASS | 已安装 `review-loop` generic profile contract：`PASS`；包资源存在 |
+| 重复安装行为 | 同命令 exit 0；CLI 对 5 个包均报告 `overwrites: Codex` | 未单独重复；整仓重复已覆盖安装器路径 |
+| 限制 | 未测试 host refresh 和模型介导的 runtime invocation。 | 同左。 |
 
-执行时记录 CLI version 和 exact command，使用 disposable empty destination，让 discovery 阶段无法读取 source checkout；分别运行整仓和单包命令，刷新 host，捕获 discovery 和 smoke，再重复安装并记录 no-op/duplicate 行为。公开记录不得包含 token、用户名、绝对私人路径或敏感 host 信息。
+本次记录了 CLI version 和 exact command，使用 disposable empty destination，让
+discovery 阶段无法读取 source checkout；分别运行整仓和单包命令，捕获
+discovery 和 smoke，并重复整仓安装记录覆盖行为。公开记录只写 destination
+类别，不包含 token、用户名、绝对私人路径或敏感 host 信息。
 
 ## 历史 v0.1.0 摘要
 
 本摘要根据 controller 的 T16 acceptance receipt 保留真实的 v0.1.0 安装证据；
-不是当前重跑，也不提升当前 v0.1.1 candidate。
+不是当前 v0.1.1 release 的重跑。
 
 | 字段 | 整个集合 | 单 Skill |
 | --- | --- | --- |

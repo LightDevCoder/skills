@@ -3,10 +3,9 @@
 [中文安装说明](INSTALLATION.zh-CN.md)
 
 The public first-party collection's current stable release is
-[v0.1.0](https://github.com/LightDevCoder/skills/releases/tag/v0.1.0). The
-working tree also prepares v0.1.1 as a release candidate; its tag and
-fresh-install proof are still release-gate evidence. Until those are recorded,
-the v0.1.1 commands below are targets rather than verified installation claims.
+[v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1), commit
+`c50f1ef403a5f0bfe02e75d1aeff2c237556db63`. Fresh-install evidence for the
+published tag is recorded in the [release evidence](evidence/releases/v0.1.1/).
 Package contracts remain inside `skills/<name>/`; this document is the
 installation authority and does not replace host-specific discovery rules.
 
@@ -21,7 +20,7 @@ and [Git helper](https://raw.githubusercontent.com/vercel-labs/skills/main/src/g
 
 ## Historical v0.1.0 verification
 
-The current stable release is the published v0.1.0 snapshot at commit
+The historical stable release was the published v0.1.0 snapshot at commit
 `fb36fc2dad39ee94ad4aa25a5fee3c87c54f05f2`. The following unqualified
 commands are retained as historical commands from that published release. The
 summarized CLI, host, destination, validator, and known evidence limits are
@@ -38,18 +37,18 @@ receipt did not record them.
 
 That historical verification does not change the CLI revision semantics: an
 unqualified source follows the repository's default revision and is not a
-permanent v0.1.0 pin. The v0.1.1 candidate commands below use an explicit tag.
+permanent v0.1.0 pin. The published v0.1.1 commands below use an explicit tag.
 
 The target release commands are:
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.1
-npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop
+npx skills add LightDevCoder/skills#v0.1.1 --yes --copy --agent codex
+npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop --yes --copy --agent codex
 ```
 
-After the release gate passes, the first installs the five-package collection
-and the second selects one complete package at the same tag. Always record the actual CLI version, host,
-destination, discovery result, and smoke result; see the
+The first installs the five-package collection and the second selects one
+complete package at the same tag. The verified CLI version, destination class,
+discovery result, and smoke result are recorded in the
 [v0.1.1 installation record](evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md).
 
 ## Supported installation scopes

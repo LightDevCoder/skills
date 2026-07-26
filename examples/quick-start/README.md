@@ -8,11 +8,11 @@ workflow and not a record of commands already run.
 
 ## 1. Install
 
-The commands below target v0.1.1 and become install instructions only after
-the release gate passes.
+The commands below install the published v0.1.1 release. The output remains a
+recommendation boundary; installation does not authorize automatic chaining.
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.1
+npx skills add LightDevCoder/skills#v0.1.1 --yes --copy --agent codex
 ```
 
 Refresh the Agent host and confirm discovery without this source checkout.

@@ -12,8 +12,8 @@ of what is installed on a particular Agent host.
 | --- | --- |
 | Collection | Personal Skills Collection |
 | Package count | 5 admitted first-party Skills |
-| Current state | Release candidate v0.1.1 — release gate pending; v0.1.0 remains the current stable release |
-| Stable release | [v0.1.0](https://github.com/LightDevCoder/skills/releases/tag/v0.1.0) |
+| Current state | Released v0.1.1; independent `review-loop agent-skill` acceptance remains BLOCKED |
+| Stable release | [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/collection-discovery-tests.ps1](tests/collection-discovery-tests.ps1) |
 | Evidence | [v0.1.1 release evidence](docs/evidence/releases/v0.1.1/) |

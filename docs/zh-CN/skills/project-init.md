@@ -34,4 +34,4 @@ $project-init
 
 ## 安装与发现验证
 
-v0.1.1 release gate 通过后，使用 `npx skills add LightDevCoder/skills#v0.1.1 --skill project-init` 安装，刷新 host，在脱离 source checkout 的环境确认发现结果，并运行 [tests](../../../skills/project-init/tests/)。把 host 限制记录到 release evidence。
+对于已发布的 v0.1.1，使用 `npx skills add LightDevCoder/skills#v0.1.1 --skill project-init` 安装，刷新 host，在脱离 source checkout 的环境确认发现结果，并运行 [tests](../../../skills/project-init/tests/)。把 host 限制记录到 release evidence。

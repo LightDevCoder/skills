@@ -8,22 +8,24 @@
 
 > **About：** Personal Skills Collection — Drive your creativity
 
-> **Release candidate：** 当前工作树准备的是 v0.1.1。发布记录和 fresh-install 证据见 [docs/evidence/releases/v0.1.1/](docs/evidence/releases/v0.1.1/)，promotion 仍受其中 release gate 约束。
+> **Release：** [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1)
+> 已从 commit `c50f1ef` 发布。发布记录和 fresh-install 证据见
+> [docs/evidence/releases/v0.1.1/](docs/evidence/releases/v0.1.1/)。
 >
-> 当前已发布的稳定版本仍是 [v0.1.0](https://github.com/LightDevCoder/skills/releases/tag/v0.1.0)。
+> 独立 `review-loop agent-skill` acceptance 仍为 `BLOCKED`；准确边界见发布收据。
 
 ## Quick Start
 
-release gate 通过后，安装目标版本的整个第一方集合：
+安装已发布的第一方集合：
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.1
+npx skills add LightDevCoder/skills#v0.1.1 --yes --copy --agent codex
 ```
 
-release gate 通过后，只安装同一目标版本下的一个 Skill：
+安装同一已发布版本下的一个 Skill：
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop
+npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop --yes --copy --agent codex
 ```
 
 刷新 Agent host，然后在其 Skill catalog 中确认发现结果。若 host 提供文件系统，检查已安装包的 `SKILL.md` 与 `agents/openai.yaml`；脱离 source checkout 后仍能发现，才是有意义的验证。CLI 版本、destination 和结果见 [INSTALLATION_VERIFICATION.md](docs/evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md)。

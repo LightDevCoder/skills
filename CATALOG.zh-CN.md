@@ -10,8 +10,8 @@
 | --- | --- |
 | 集合 | Personal Skills Collection |
 | 包数量 | 5 个第一方 Skill |
-| 当前状态 | Release candidate v0.1.1 — release gate 待通过；v0.1.0 仍是当前稳定版本 |
-| 稳定版本 | [v0.1.0](https://github.com/LightDevCoder/skills/releases/tag/v0.1.0) |
+| 当前状态 | v0.1.1 已发布；独立 `review-loop agent-skill` acceptance 仍为 BLOCKED |
+| 稳定版本 | [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1) |
 | 安装权威 | [docs/INSTALLATION.zh-CN.md](docs/INSTALLATION.zh-CN.md) |
 | 发现检查 | [collection-discovery-tests.ps1](tests/collection-discovery-tests.ps1) |
 | 证据 | [v0.1.1 release evidence](docs/evidence/releases/v0.1.1/) |
