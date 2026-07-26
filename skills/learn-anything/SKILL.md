@@ -1,6 +1,7 @@
 ---
 name: learn-anything
 description: Turn conversations, transcripts, project notes, folder workflows, documentation, or other sources into reusable agent skills and Skill Creator compatible instructions. Use when a user asks to create, update, distill, or "learn" a workflow as a skill; preserve repeated operating methods for future AI agents; encode corrections/failure modes as durable procedure; or transform source material into portable skill guidance for coding agents, research agents, automation agents, or custom agent frameworks.
+disable-model-invocation: true
 ---
 
 # Learn Anything

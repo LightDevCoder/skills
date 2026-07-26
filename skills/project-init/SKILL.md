@@ -1,6 +1,7 @@
 ---
 name: project-init
-description: Initialize a software or non-software project from a minimal preset, preserving existing instructions and validating resulting paths and capabilities. Use only when the user explicitly invokes $project-init to set up generic, software, manuscript, Skill-development, research, knowledge-base, or data-analysis work.
+description: Initialize a software or non-software project from a minimal preset, preserving existing instructions and validating resulting paths and capabilities. Use only when a user explicitly invokes $project-init to set up generic, software, manuscript, Skill-development, research, knowledge-base, or data-analysis work.
+disable-model-invocation: true
 ---
 
 # Project Init
