@@ -1,5 +1,7 @@
 # Ask Light to explicit next-step selection
 
+[中文示例](../zh-CN/workflows/first-party-composition.md)
+
 ## Use case
 
 An Agent task has a goal, artifacts, blockers, project type, task kind,

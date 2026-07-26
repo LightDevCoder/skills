@@ -1,23 +1,51 @@
 # Changelog
 
-All notable changes to this repository are recorded here. A release entry must
-be tied to an actual version or tag and must not be created merely because a
-document was drafted.
+[中文变更记录](CHANGELOG.zh-CN.md)
 
-## 0.1.0 — 2026-07-23
+All notable changes are recorded here. A release entry must be tied to an
+actual version or tag and must not be created merely because a document was
+drafted.
+
+## Unreleased — target v0.1.1 (2026-07-26)
 
 ### Added
 
-- First-party governance foundation: ownership boundary, admission,
-  maintenance, installation, review, catalog, and composition-example policies.
-- Five admitted first-party Skills: review-loop, project-init, ask-light,
-  learn-anything, and manuscript-ops.
-- Human-readable catalog, repository-local header assets, composition example,
-  and collection discovery cross-reference tests.
+- Bilingual user guides for all five first-party Skills, validated workflow
+  recipes, and a runnable-sized Quick Start example.
+- A release-candidate evidence tree under
+  `docs/evidence/releases/v0.1.1/` and CI checks for structure, metadata,
+  links, bilingual pairs, package tests, retired references, and header assets.
+- Explicit `$ask-light next` and `$ask-light workflow` modes with bounded
+  recipe output, availability gaps, handoff fields, and non-execution tests.
+- A redesigned editable SVG and 1600 × 480 PNG header with a flat layered
+  `LightDevCoder` / `/skills` wordmark and serif slogan.
 
-### Release verification
+### Fixed
 
+- Added `policy.allow_implicit_invocation: false` and matching frontmatter to
+  the user-invoked `learn-anything`, `ask-light`, and `project-init` packages.
+- Corrected installation language: an unqualified repository source follows
+  the CLI's default revision, while `#v0.1.1` will pin the target tag once
+  published.
+
+### Release-candidate evidence
+
+- Release tag/release: `NOT TESTED` until the release gate passes.
+- Whole-collection and per-Skill fresh-install target evidence:
+  [INSTALLATION_VERIFICATION.md](docs/evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md).
+- Structural and package evidence:
+  [TEST_SUMMARY.md](docs/evidence/releases/v0.1.1/TEST_SUMMARY.md).
+
+## 0.1.0 — 2026-07-23
+
+- Established the first-party governance foundation and admitted the five
+  first-party Skills.
 - Published at https://github.com/LightDevCoder/skills.
 - Stable tag: v0.1.0.
 - The v0.1.0 whole-collection and per-Skill installer commands were verified
-  against a fresh destination and the published package content.
+  against a fresh destination and the published package content; this
+  historical evidence is retained while v0.1.1 remains a release candidate.
+- Historical commands: `npx skills add LightDevCoder/skills` and
+  `npx skills add LightDevCoder/skills --skill review-loop`.
+- Historical installation details:
+  [v0.1.0 summary](docs/evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md#historical-v0.1.0-summary).

@@ -1,5 +1,7 @@
 # Validated Combination Examples
 
+[中文示例](../zh-CN/workflows/README.md)
+
 This directory contains evidence-backed examples of Skills used together.
 Examples identify participating packages, invocation boundaries, stopping
 conditions, and the evidence that makes the interaction useful.
@@ -11,6 +13,7 @@ must not automatically invoke another user-invoked Skill.
 ## Current examples
 
 - [Ask Light to explicit next-step selection](first-party-composition.md)
+- [Workflow recipes](recipes.md)
 
 The example is maintained with the package contracts and discovery checks. Its
 fresh cross-host installation and runtime interaction evidence belongs to the

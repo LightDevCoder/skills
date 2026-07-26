@@ -4,7 +4,8 @@ $ErrorActionPreference = 'Stop'
 if ([string]::IsNullOrWhiteSpace($SkillRoot)) { $SkillRoot = Split-Path -Parent $PSScriptRoot }
 $SkillRoot = (Resolve-Path -LiteralPath $SkillRoot).Path
 $script:failures = [System.Collections.Generic.List[string]]::new()
-function Assert-True { param([bool]$Condition, [string]$Name); if (-not $Condition) { $script:failures.Add($Name) } }
+$script:assertions = 0
+function Assert-True { param([bool]$Condition, [string]$Name); $script:assertions++; if (-not $Condition) { $script:failures.Add($Name) } }
 
 $scanner = Join-Path $SkillRoot 'scripts/ask-light.ps1'
 $fixture = Join-Path ([IO.Path]::GetTempPath()) ('ask-light-' + [guid]::NewGuid().ToString('N'))
@@ -146,9 +147,97 @@ try {
     $inputContext = [ordered]@{ goal = ''; artifacts = @(); blockers = ''; projectType = 'generic'; taskKind = ''; availability = 'codex'; invocationControl = 'explicit-only' } | ConvertTo-Json -Compress
     $input = & $scanner -RootsJson $rootsJson -ContextJson $inputContext | ConvertFrom-Json
     Assert-True ($input.status -eq 'NEED-INPUT' -and ($input.gaps -join ' ') -match 'goal and taskKind') 'unknown context asks for input instead of guessing'
+
+    # Workflow mode returns a recipe with real package availability and never executes a step.
+    $workflowRoot = Join-Path $fixture 'workflow'; New-Item -ItemType Directory -Force -Path $workflowRoot | Out-Null
+    $wfFirst = Join-Path $workflowRoot 'first-party'; $wfUpstream = Join-Path $workflowRoot 'upstream'; $wfThird = Join-Path $workflowRoot 'modified-third-party'
+    New-Item -ItemType Directory -Force -Path $wfFirst,$wfUpstream,$wfThird | Out-Null
+    foreach ($name in @('review-loop','ask-light','project-init','learn-anything','manuscript-ops')) { New-Skill $wfFirst $name "First-party $name capability." | Out-Null }
+    foreach ($name in @('to-spec','to-tickets','implement','code-review','handoff','diagnosing-bugs','grill-me','wayfinder','writing-great-skills')) { New-Skill $wfUpstream $name "Upstream $name capability." -AllowImplicit | Out-Null }
+    New-Skill $wfThird 'code-review' 'Modified third-party code review capability.' -AllowImplicit | Out-Null
+    $wfRoots = ConvertTo-Json -InputObject ([array]@(
+        [ordered]@{ category = 'first-party'; path = $wfFirst },
+        [ordered]@{ category = 'upstream'; path = $wfUpstream },
+        [ordered]@{ category = 'modified-third-party'; path = $wfThird }
+    )) -Compress
+    $featureContext = [ordered]@{ goal = 'build a software feature with acceptance criteria'; artifacts = @('brief.md'); blockers = ''; projectType = 'software'; taskKind = 'feature'; availability = 'codex'; invocationControl = 'explicit-only' } | ConvertTo-Json -Compress
+    $featureWorkflow = & $scanner -Mode workflow -RootsJson $wfRoots -ContextJson $featureContext | ConvertFrom-Json
+    Assert-True ($featureWorkflow.status -eq 'RECOMMEND' -and $featureWorkflow.workflow -eq 'software-feature') 'software feature workflow is recommended'
+    Assert-True (@($featureWorkflow.steps).Count -eq 7) 'software feature workflow exposes all handoff steps'
+    Assert-True ((@($featureWorkflow.steps | Where-Object { $_.skill -eq 'review-loop' })).Count -eq 2) 'software feature workflow retains both review-loop boundaries'
+    Assert-True (($featureWorkflow.finalAuthority -eq 'review-loop') -and ($featureWorkflow.stoppingBoundary -match 'PASS|FAIL|BLOCKED')) 'workflow reports final authority and stopping boundary'
+    Assert-True ($featureWorkflow.execution -match 'nothing was invoked|orchestrated') 'workflow recommendation does not execute or orchestrate'
+    Assert-True ((@($featureWorkflow.steps | Where-Object { $_.skill -eq 'to-spec' -and $_.sourceCategory -eq 'upstream' })).Count -eq 1) 'workflow preserves third-party source category'
+    Assert-True ((@($featureWorkflow.steps | Where-Object { $_.skill -eq 'code-review' -and $_.sourceCategory -eq 'upstream' -and $_.availability -eq 'available' })).Count -eq 1) 'workflow selects the declared source category when duplicate Skill names exist'
+    Assert-True ($featureWorkflow.reads.metadata -eq 15 -and $featureWorkflow.reads.bodies -eq 0 -and $featureWorkflow.reads.references -eq 0) 'workflow exposes bounded metadata-only read counts'
+
+    $bugContext = [ordered]@{ goal = 'diagnose a software regression and repair the error'; artifacts = @('failing-test.txt'); blockers = ''; projectType = 'software'; taskKind = 'bug'; availability = 'codex'; invocationControl = 'explicit-only' } | ConvertTo-Json -Compress
+    $bugWorkflow = & $scanner -Mode workflow -RootsJson $wfRoots -ContextJson $bugContext | ConvertFrom-Json
+    Assert-True ($bugWorkflow.workflow -eq 'bug-diagnosis' -and @($bugWorkflow.steps | Where-Object skill -eq 'diagnosing-bugs').Count -eq 1) 'bug diagnosis workflow selects diagnosing-bugs'
+
+    $manuscriptContext = [ordered]@{ goal = 'start a manuscript project with explicit handoffs'; artifacts = @('brief.md'); blockers = ''; projectType = 'manuscript'; taskKind = 'initialization'; availability = 'codex'; invocationControl = 'explicit-only' } | ConvertTo-Json -Compress
+    $manuscriptWorkflow = & $scanner -Mode workflow -RootsJson $wfRoots -ContextJson $manuscriptContext | ConvertFrom-Json
+    Assert-True ($manuscriptWorkflow.status -eq 'RECOMMEND' -and $manuscriptWorkflow.workflow -eq 'manuscript-project') 'manuscript workflow is recommended'
+    Assert-True (($manuscriptWorkflow.stoppingBoundary -match 'handoff') -and (@($manuscriptWorkflow.steps | Where-Object { $_.skill -eq 'project-init' -and $_.invocationType -eq 'user-invoked' })).Count -eq 1) 'manuscript workflow preserves explicit handoff and invocation boundary'
+
+    $mismatchedWorkflowContext = [ordered]@{ goal = 'write a manuscript and plan chapters'; artifacts = @('brief.md'); blockers = ''; projectType = 'generic'; taskKind = 'maintenance'; availability = 'codex'; invocationControl = 'explicit-only' } | ConvertTo-Json -Compress
+    $mismatchedWorkflow = & $scanner -Mode workflow -RootsJson $wfRoots -ContextJson $mismatchedWorkflowContext | ConvertFrom-Json
+    Assert-True ($mismatchedWorkflow.status -eq 'NEED-INPUT' -and $mismatchedWorkflow.workflow -eq '') 'mismatched project type and task kind do not select a manuscript recipe'
+
+    $missingProjectTypeContext = [ordered]@{ goal = 'build a software feature'; artifacts = @('brief.md'); blockers = ''; projectType = ''; taskKind = 'feature'; availability = 'codex'; invocationControl = 'explicit-only' } | ConvertTo-Json -Compress
+    $missingProjectType = & $scanner -Mode workflow -RootsJson $wfRoots -ContextJson $missingProjectTypeContext | ConvertFrom-Json
+    Assert-True ($missingProjectType.status -eq 'NEED-INPUT' -and ($missingProjectType.gaps -join ' ') -match 'projectType') 'workflow requires project type before matching a recipe'
+
+    $incompleteWorkflowContext = [ordered]@{ goal = 'build a software feature'; projectType = 'software'; taskKind = 'feature' } | ConvertTo-Json -Compress
+    $incompleteWorkflow = & $scanner -Mode workflow -RootsJson $wfRoots -ContextJson $incompleteWorkflowContext | ConvertFrom-Json
+    Assert-True ($incompleteWorkflow.status -eq 'NEED-INPUT' -and ($incompleteWorkflow.gaps -join ' ') -match 'artifacts.*blockers.*availability.*invocationControl') 'workflow requires the remaining context fields instead of assuming them'
+
+    $invalidAvailabilityContext = [ordered]@{ goal = 'build a software feature'; artifacts = @('brief.md'); blockers = ''; projectType = 'software'; taskKind = 'feature'; availability = [ordered]@{}; invocationControl = 'explicit-only' } | ConvertTo-Json -Compress
+    $invalidAvailability = & $scanner -Mode workflow -RootsJson $wfRoots -ContextJson $invalidAvailabilityContext | ConvertFrom-Json
+    Assert-True ($invalidAvailability.status -eq 'NEED-INPUT' -and ($invalidAvailability.gaps -join ' ') -match 'availability') 'empty availability context is not treated as reliable'
+
+    $invalidInvocationContext = [ordered]@{ goal = 'build a software feature'; artifacts = @('brief.md'); blockers = ''; projectType = 'software'; taskKind = 'feature'; availability = 'codex'; invocationControl = 'automatic' } | ConvertTo-Json -Compress
+    $invalidInvocation = & $scanner -Mode workflow -RootsJson $wfRoots -ContextJson $invalidInvocationContext | ConvertFrom-Json
+    Assert-True ($invalidInvocation.status -eq 'NEED-INPUT' -and ($invalidInvocation.gaps -join ' ') -match 'invocationControl') 'unknown invocation control is not accepted as reliable context'
+
+    $sourceContext = [ordered]@{ goal = 'learn a reusable Skill method from source material'; artifacts = @('transcript.md'); blockers = ''; projectType = 'skill-development'; taskKind = 'skill-development'; availability = 'codex'; invocationControl = 'explicit-only' } | ConvertTo-Json -Compress
+    $sourceWorkflow = & $scanner -Mode workflow -RootsJson $wfRoots -ContextJson $sourceContext | ConvertFrom-Json
+    $learnStep = @($sourceWorkflow.steps | Where-Object skill -eq 'learn-anything')[0]
+    Assert-True ($sourceWorkflow.workflow -eq 'source-to-skill' -and $learnStep.availability -eq 'available') 'source-to-skill workflow recommends learn-anything'
+    Assert-True ($learnStep.invocationType -eq 'user-invoked' -and $sourceWorkflow.execution -match 'nothing was invoked') 'explicit-only mode does not exclude learn-anything and remains non-executing'
+
+    $newProjectContext = [ordered]@{ goal = 'initialize a new project'; artifacts = @(); blockers = ''; projectType = 'generic'; taskKind = 'initialization'; availability = 'codex'; invocationControl = 'explicit-only' } | ConvertTo-Json -Compress
+    $newProjectWorkflow = & $scanner -Mode workflow -RootsJson $wfRoots -ContextJson $newProjectContext | ConvertFrom-Json
+    Assert-True ($newProjectWorkflow.workflow -eq 'new-project-initialization') 'new project initialization workflow is recommended'
+
+    $finalContext = [ordered]@{ goal = 'perform the final acceptance review and issue a verdict'; artifacts = @('evidence.md'); blockers = ''; projectType = 'generic'; taskKind = 'final-review'; availability = 'codex'; invocationControl = 'explicit-only' } | ConvertTo-Json -Compress
+    $finalWorkflow = & $scanner -Mode workflow -RootsJson $wfRoots -ContextJson $finalContext | ConvertFrom-Json
+    Assert-True ($finalWorkflow.workflow -eq 'final-review' -and @($finalWorkflow.steps).Count -eq 1 -and $finalWorkflow.finalAuthority -eq 'review-loop') 'final review workflow delegates final authority to review-loop'
+
+    # A private third-party package that is not visible is an accurate BLOCKED gap, not a fabricated recommendation.
+    $privateRoot = Join-Path $fixture 'private-third-party'; New-Item -ItemType Directory -Force -Path $privateRoot | Out-Null
+    New-Skill $privateRoot 'review-loop' 'First-party final acceptance.' | Out-Null
+    $privateRoots = ConvertTo-Json -InputObject ([array]@([ordered]@{ category = 'first-party'; path = $privateRoot })) -Compress
+    $privateContext = [ordered]@{ goal = 'resolve a private third-party dependency'; artifacts = @(); blockers = ''; projectType = 'generic'; taskKind = 'dependency'; availability = 'codex'; invocationControl = 'explicit-only' } | ConvertTo-Json -Compress
+    $privateWorkflow = & $scanner -Mode workflow -RootsJson $privateRoots -ContextJson $privateContext | ConvertFrom-Json
+    Assert-True ($privateWorkflow.status -eq 'BLOCKED' -and ($privateWorkflow.gaps -join ' ') -match 'private skills-3rdParty') 'missing private third-party dependency is BLOCKED with an availability gap'
+    Assert-True ((@($privateWorkflow.steps | Where-Object { $_.skill -eq 'code-review' -and $_.availability -eq 'unavailable' })).Count -eq 1) 'missing private dependency step is explicitly unavailable'
+
+    # Missing metadata is not silently treated as availability.
+    $learnMissingRoot = Join-Path $fixture 'learn-missing'; New-Item -ItemType Directory -Force -Path (Join-Path $learnMissingRoot 'learn-anything/agents') | Out-Null
+    Set-Content -LiteralPath (Join-Path $learnMissingRoot 'learn-anything/SKILL.md') -Value @('---','name: learn-anything','description: Learn from source.','---','', 'Body')
+    Set-Content -LiteralPath (Join-Path $learnMissingRoot 'learn-anything/agents/openai.yaml') -Value @('interface:','policy:','  allow_implicit_invocation: false')
+    $learnMissingRoots = ConvertTo-Json -InputObject ([array]@([ordered]@{ category = 'first-party'; path = $learnMissingRoot })) -Compress
+    $learnMissing = & $scanner -RootsJson $learnMissingRoots -ContextJson $sourceContext | ConvertFrom-Json
+    Assert-True ($learnMissing.status -eq 'BLOCKED' -and ($learnMissing.gaps -join ' ') -match 'learn-anything') 'missing learn-anything metadata blocks a workflow recommendation'
+
+    $ambiguousContext = [ordered]@{ goal = 'unclear work with no reliable route'; artifacts = @(); blockers = ''; projectType = 'generic'; taskKind = 'maintenance'; availability = 'codex'; invocationControl = 'explicit-only' } | ConvertTo-Json -Compress
+    $ambiguousWorkflow = & $scanner -Mode workflow -RootsJson $wfRoots -ContextJson $ambiguousContext | ConvertFrom-Json
+    Assert-True ($ambiguousWorkflow.status -eq 'NEED-INPUT' -and ($ambiguousWorkflow.gaps -join ' ') -match 'No reliable workflow recipe') 'ambiguous workflow requests input instead of guessing'
 } finally {
     Remove-Item -LiteralPath $fixture -Recurse -Force -ErrorAction SilentlyContinue
 }
 
 if ($script:failures.Count -gt 0) { throw "ask-light behavior failed: $($script:failures -join '; ')" }
-Write-Output 'PASS - ask-light behavior (sources, duplicates, bounded reads, ranking, ambiguity, guidance, non-execution)'
+Write-Output "ASK_LIGHT_BEHAVIOR_ASSERTIONS=$($script:assertions)"
+Write-Output 'PASS - ask-light behavior (sources, duplicates, bounded reads, ranking, workflow recipes, guidance, non-execution)'
