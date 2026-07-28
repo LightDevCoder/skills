@@ -34,8 +34,7 @@ Skill is a reportable capability gap, not a reason to invent a command.
 
 Use the external user-facing `grill-me` entry point when answers are not
 already explicit. `grill-me` starts the underlying model-invoked `grilling`
-capability; treat this as one clarification capability. Ask one short question
-at a time and capture six answers:
+capability; treat this as one clarification capability. Ask one short question at a time and capture six answers:
 
 1. project type;
 2. user-visible goal;
