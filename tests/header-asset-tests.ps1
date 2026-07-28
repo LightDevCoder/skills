@@ -14,7 +14,7 @@ Assert-Header (Test-Path -LiteralPath $pngPath -PathType Leaf) "PNG header is mi
 Assert-Header (Test-Path -LiteralPath $manifestPath -PathType Leaf) "Header asset manifest is missing."
 if (Test-Path -LiteralPath $manifestPath -PathType Leaf) {
     $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-    Assert-Header ($manifest.source_svg -eq 'skills-header.svg' -and $manifest.rendered_png -eq 'skills-header.png' -and $manifest.width -eq 1600 -and $manifest.height -eq 480) "Header asset manifest does not describe the synchronized 1600x480 pair."
+    Assert-Header ($manifest.source_svg -eq 'skills-header.svg' -and $manifest.rendered_png -eq 'skills-header.png' -and $manifest.width -eq 1536 -and $manifest.height -eq 1024) "Header asset manifest does not describe the current 1536x1024 PNG."
 }
 if (Test-Path -LiteralPath $svgPath -PathType Leaf) {
     $svg = Get-Content -LiteralPath $svgPath -Raw
@@ -26,7 +26,7 @@ if (Test-Path -LiteralPath $pngPath -PathType Leaf) {
     $png = [IO.File]::ReadAllBytes($pngPath)
     Assert-Header ($png.Length -gt 100 -and $png[0] -eq 137 -and $png[1] -eq 80 -and $png[2] -eq 78 -and $png[3] -eq 71) "PNG signature is invalid."
     if ($png.Length -ge 24) {
-        Assert-Header ((Read-UInt32BE $png 16) -eq 1600 -and (Read-UInt32BE $png 20) -eq 480) "PNG IHDR dimensions are not 1600x480."
+        Assert-Header ((Read-UInt32BE $png 16) -eq $manifest.width -and (Read-UInt32BE $png 20) -eq $manifest.height) "PNG IHDR dimensions do not match the header asset manifest."
     }
 }
 if ((Test-Path -LiteralPath $manifestPath -PathType Leaf) -and (Test-Path -LiteralPath $svgPath -PathType Leaf) -and (Test-Path -LiteralPath $pngPath -PathType Leaf)) {
