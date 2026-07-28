@@ -14,8 +14,13 @@ invocation boundary, and small enough to inspect before use.
 > is published from commit `c50f1ef`. The release record and fresh-install evidence
 > live in [docs/evidence/releases/v0.1.1/](docs/evidence/releases/v0.1.1/).
 >
-> Independent `review-loop agent-skill` acceptance remains `BLOCKED`; see the
-> receipt for the exact boundary.
+> **Release status:** The collection is published and usable. Installation and
+> `collection-quality` checks passed for all five first-party Skills. The
+> remaining release-acceptance limitation is the independent evaluator evidence
+> for the `review-loop agent-skill` gate: that evidence is `BLOCKED` because a
+> fresh independent evaluator record is not attached. This does not block
+> installation or ordinary use; see the [release receipt](docs/evidence/releases/v0.1.1/RELEASE_RECEIPT.md)
+> and [limitations](docs/evidence/releases/v0.1.1/LIMITATIONS.md) for the detailed boundary.
 
 ## Quick Start
 
@@ -56,6 +61,31 @@ or a bounded recipe and stops; it never invokes, installs, or orchestrates the
 result. Read [Quick Start](examples/quick-start/README.md), the [Skill user
 guides](docs/skills/), and [workflow recipes](docs/workflows/) for inputs,
 outputs, handoffs, and stopping boundaries.
+
+## External capabilities
+
+The five packages above are the core collection: installing this repository
+provides all five first-party Skills listed in the catalog.
+
+Optional workflow capabilities are external or third-party dependencies and are
+not included by default:
+
+- `grill-me` / `grilling` — `grill-me` is the user-facing entry point for a
+  one-session clarification interview; it starts the underlying model-invoked
+  `grilling` capability. Treat them as one capability, not two workflow steps.
+- `research` — investigate an external fact or practice when a local preset is
+  insufficient.
+- `to-spec` — turn an approved goal and constraints into a traceable
+  specification.
+- `to-tickets` — turn an approved specification into dependency-ordered
+  tickets.
+- `implement` — carry out one bounded, unblocked implementation ticket.
+- `code-review` — provide specialist findings for a fixed change.
+- `handoff` — preserve an accepted result or blocker for closeout or resumption.
+
+These capabilities may come from `mattpocock/skills` or another external
+source. This repository does not copy them or install them automatically;
+check their availability before selecting a workflow that names them.
 
 ## First-party catalog
 

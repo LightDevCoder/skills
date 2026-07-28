@@ -25,8 +25,9 @@ defaults to the current directory. Before writing, it reads root
 `AGENTS.md`/`CLAUDE.md`, README, manifests, project documents, and current
 status. It needs the project type, visible goal, outputs, collaboration mode,
 constraints, and required review level, either from the brief or from its
-short questions. `grilling` may help answer missing questions; it does not
-authorize additional writes.
+short questions. Use the external user-facing `grill-me` entry point when a
+question needs a clarification interview; its underlying model-invoked
+capability is `grilling`. This does not authorize additional writes.
 
 ```text
 $project-init

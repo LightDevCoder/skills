@@ -24,9 +24,11 @@
 - 合并后的 release commit 上 GitHub Actions `collection-quality`：`PASS`。
 - 整仓和单 Skill fresh install：使用 CLI `1.5.20`，均为 `PASS`。
 - GitHub release：https://github.com/LightDevCoder/skills/releases/tag/v0.1.1
-- 整仓与单 Skill fresh-install 目标记录：[INSTALLATION_VERIFICATION.md](docs/evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md)。
-- 结构与包测试证据：[TEST_SUMMARY.md](docs/evidence/releases/v0.1.1/TEST_SUMMARY.md)。
-- 独立 `review-loop agent-skill` acceptance 仍为 `BLOCKED`；见[发布收据](docs/evidence/releases/v0.1.1/RELEASE_RECEIPT.md)。
+- 整仓与单 Skill fresh-install 目标记录：[INSTALLATION_VERIFICATION.zh-CN.md](docs/evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.zh-CN.md)。
+- 结构与包测试证据：[TEST_SUMMARY.zh-CN.md](docs/evidence/releases/v0.1.1/TEST_SUMMARY.zh-CN.md)。
+- 五个包组成的集合仍可安装，`collection-quality` 检查已通过。`review-loop
+  agent-skill` acceptance gate 的独立 evaluator 证据仍为 `BLOCKED`；这不影响
+  一般安装或使用。准确证据边界见[发布收据](docs/evidence/releases/v0.1.1/RELEASE_RECEIPT.zh-CN.md)。
 
 ## 0.1.0 — 2026-07-23
 

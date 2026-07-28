@@ -38,8 +38,10 @@ Record skipped checks and optional documents explicitly.
 
 ## Capability and invocation boundary
 
-`grilling` and `research` are model-invoked capabilities allowed by this
-initializer. The user remains in control of `to-spec`, `to-tickets`,
+`grill-me` is the user-facing entry point for the model-invoked `grilling`
+capability; together they provide the clarification interview allowed by this
+initializer. `research` is another model-invoked capability allowed for the
+confirmed fallback. The user remains in control of `to-spec`, `to-tickets`,
 `implement`, `review-loop`, `ask-light`, `learn-anything`, and every other
 user-invoked Skill. Project-init may recommend those names but never executes
 or orchestrates them.

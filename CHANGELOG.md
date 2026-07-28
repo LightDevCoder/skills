@@ -38,8 +38,11 @@ drafted.
   [INSTALLATION_VERIFICATION.md](docs/evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md).
 - Structural and package evidence:
   [TEST_SUMMARY.md](docs/evidence/releases/v0.1.1/TEST_SUMMARY.md).
-- Independent `review-loop agent-skill` acceptance remains `BLOCKED`; see
-  [release receipt](docs/evidence/releases/v0.1.1/RELEASE_RECEIPT.md).
+- The five-package collection remains installable and its collection-quality
+  checks passed. Independent evaluator evidence for the `review-loop
+  agent-skill` acceptance gate remains `BLOCKED`; this does not block ordinary
+  installation or use. See the [release receipt](docs/evidence/releases/v0.1.1/RELEASE_RECEIPT.md)
+  for the exact evidence boundary.
 
 ## 0.1.0 — 2026-07-23
 

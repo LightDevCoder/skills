@@ -32,8 +32,9 @@ Skill is a reportable capability gap, not a reason to invent a command.
 
 ### 2. Ask lightweight project questions
 
-Use `grilling` as a model-invoked capability when answers are not already
-explicit. Ask one short question at a time and capture six answers:
+Use the external user-facing `grill-me` entry point when answers are not
+already explicit. `grill-me` starts the underlying model-invoked `grilling`
+capability; treat this as one clarification capability. Ask one short question at a time and capture six answers:
 
 1. project type;
 2. user-visible goal;
@@ -109,6 +110,7 @@ confirmation decision if research was used.
 This Skill does not run `to-spec`, `to-tickets`, `implement`, `final review`,
 `review-loop`, `ask-light`, `learn-anything`, or any other user-invoked Skill.
 It does not manage tickets, perform implementation, establish acceptance, or
-become a permanent project workflow manager. `grilling` and `research` above
-are model-invoked capabilities permitted only for the stated questions and
-confirmed fallback; they do not authorize additional writes.
+become a permanent project workflow manager. `grill-me` (through its underlying
+`grilling` capability) and `research` above are external capabilities permitted
+only for the stated questions and confirmed fallback; they do not authorize
+additional writes.

@@ -1,6 +1,6 @@
 # `ask-light` 使用指南
 
-[English guide](../../skills/ask-light.md)
+[英文指南](../../skills/ask-light.md)
 
 行为与 scanner 输出契约见 [skills/ask-light/SKILL.md](../../../skills/ask-light/SKILL.md) 和 [discovery contract](../../../skills/ask-light/references/discovery-contract.md)。
 

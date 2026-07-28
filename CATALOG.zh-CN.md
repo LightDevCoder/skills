@@ -10,11 +10,11 @@
 | --- | --- |
 | 集合 | Personal Skills Collection |
 | 包数量 | 5 个第一方 Skill |
-| 当前状态 | v0.1.1 已发布；独立 `review-loop agent-skill` acceptance 仍为 BLOCKED |
+| 当前状态 | v0.1.1 已发布且可安装；独立 `review-loop agent-skill` 证据仍为 `BLOCKED` |
 | 稳定版本 | [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1) |
 | 安装权威 | [docs/INSTALLATION.zh-CN.md](docs/INSTALLATION.zh-CN.md) |
 | 发现检查 | [collection-discovery-tests.ps1](tests/collection-discovery-tests.ps1) |
-| 证据 | [v0.1.1 release evidence](docs/evidence/releases/v0.1.1/) |
+| 证据 | [v0.1.1 发布证据](docs/evidence/releases/v0.1.1/RELEASE_RECEIPT.zh-CN.md) |
 
 ## 已准入 Skill
 
@@ -30,7 +30,7 @@
 ### project-init
 
 - **作用：** 从最小 preset 初始化项目，保留既有指令并验证结果路径。
-- **调用：** User-invoked only。
+- **调用：** 仅 user-invoked。
 - **包：** [skills/project-init/](skills/project-init/)
 - **状态：** 第一方已准入。
 - **证据：** [package tests](skills/project-init/tests/)；[使用指南](docs/zh-CN/skills/project-init.md)。
@@ -39,7 +39,7 @@
 ### ask-light
 
 - **作用：** 从当前上下文推荐一个下一 Skill 或一个 bounded workflow recipe。
-- **调用：** User-invoked only；永不执行推荐结果。
+- **调用：** 仅 user-invoked；永不执行推荐结果。
 - **包：** [skills/ask-light/](skills/ask-light/)
 - **状态：** 第一方已准入；支持显式 `next` 和 `workflow` 模式。
 - **证据：** [scanner tests](skills/ask-light/tests/)；[使用指南](docs/zh-CN/skills/ask-light.md)。
@@ -48,7 +48,7 @@
 ### learn-anything
 
 - **作用：** 将证据充分的对话、笔记、workflow 或资料转成可复用 Agent Skill 方法。
-- **调用：** User-invoked only。
+- **调用：** 仅 user-invoked。
 - **包：** [skills/learn-anything/](skills/learn-anything/)
 - **状态：** 第一方已准入；保留 source-sufficiency 与 deterministic package-build 边界。
 - **证据：** [package contract](skills/learn-anything/SKILL.md)；[使用指南](docs/zh-CN/skills/learn-anything.md)。

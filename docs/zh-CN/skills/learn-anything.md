@@ -1,6 +1,6 @@
 # `learn-anything` 使用指南
 
-[English guide](../../skills/learn-anything.md)
+[英文指南](../../skills/learn-anything.md)
 
 唯一行为权威是 [skills/learn-anything/SKILL.md](../../../skills/learn-anything/SKILL.md)。
 
