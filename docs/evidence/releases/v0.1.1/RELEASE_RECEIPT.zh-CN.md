@@ -19,15 +19,15 @@ Actions 和 fresh-install 证据已核验；独立 `review-loop agent-skill` acc
 
 ## 证据
 
-- 结构与 discovery：[DISCOVERY_VERIFICATION.md](DISCOVERY_VERIFICATION.md)
-- 包与集合测试：[TEST_SUMMARY.md](TEST_SUMMARY.md)
-- Fresh install 与 host discovery：[INSTALLATION_VERIFICATION.md](INSTALLATION_VERIFICATION.md)
-- 限制和 evidence labels：[LIMITATIONS.md](LIMITATIONS.md)
-- [审查策略](../../../REVIEW_POLICY.md)
-- [准入契约](../../../SKILL_ADMISSION.md)
+- 结构与 discovery：[DISCOVERY_VERIFICATION.zh-CN.md](DISCOVERY_VERIFICATION.zh-CN.md)
+- 包与集合测试：[TEST_SUMMARY.zh-CN.md](TEST_SUMMARY.zh-CN.md)
+- Fresh install 与 host discovery：[INSTALLATION_VERIFICATION.zh-CN.md](INSTALLATION_VERIFICATION.zh-CN.md)
+- 限制和 evidence labels：[LIMITATIONS.zh-CN.md](LIMITATIONS.zh-CN.md)
+- [审查策略](../../../REVIEW_POLICY.zh-CN.md)
+- [准入契约](../../../SKILL_ADMISSION.zh-CN.md)
 
-| Fresh whole-repository install | `VERIFIED` | 见 [INSTALLATION_VERIFICATION.md](INSTALLATION_VERIFICATION.md)。 |
-| Fresh per-Skill install | `VERIFIED` | 见 [INSTALLATION_VERIFICATION.md](INSTALLATION_VERIFICATION.md)。 |
+| Fresh whole-repository install | `VERIFIED` | 见 [INSTALLATION_VERIFICATION.zh-CN.md](INSTALLATION_VERIFICATION.zh-CN.md)。 |
+| Fresh per-Skill install | `VERIFIED` | 见 [INSTALLATION_VERIFICATION.zh-CN.md](INSTALLATION_VERIFICATION.zh-CN.md)。 |
 | Independent `review-loop agent-skill` acceptance | `BLOCKED` | 等待 fresh independent evaluator 记录；同一上下文不是独立证据。 |
 | GitHub Actions | `VERIFIED` | 合并后的 release commit 上的 workflow 已通过。 |
 

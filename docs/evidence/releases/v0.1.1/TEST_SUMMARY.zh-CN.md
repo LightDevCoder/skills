@@ -17,7 +17,7 @@
 | Quick Start | `powershell -File tests/quick-start-smoke-tests.ps1` | `PASS`；8 条断言。 |
 | Python 语法 | 只读 `ast.parse` 检查 | `PASS`；12 个 Python 文件解析通过且不写入字节码。 |
 | Python `compileall` | `python -m compileall -q skills tests` | 本地 `NOT PASSED`；沙箱拒绝写入现有受保护的 `__pycache__`，但合并 release commit `c50f1ef` 上的 GitHub Actions 同命令已通过。 |
-| Tagged fresh install | `npx skills add LightDevCoder/skills#v0.1.1 ...` 加 `npx skills list` | `PASS`；CLI `1.5.20`，整仓 destination 列出 5 个包，单 Skill destination 列出 `review-loop`，且两个 source checkout 都不存在。见[安装证据](INSTALLATION_VERIFICATION.md)。 |
+| Tagged fresh install | `npx skills add LightDevCoder/skills#v0.1.1 ...` 加 `npx skills list` | `PASS`；CLI `1.5.20`，整仓 destination 列出 5 个包，单 Skill destination 列出 `review-loop`，且两个 source checkout 都不存在。见[安装证据](INSTALLATION_VERIFICATION.zh-CN.md)。 |
 | Release-commit CI | GitHub Actions `collection-quality` | `PASS`；run `30189210521` 对应 `c50f1ef403a5f0bfe02e75d1aeff2c237556db63`。 |
 
 包测试只证明覆盖到的 contract 场景；collection discovery 只证明 cross-reference 和 metadata 一致。tagged installation 证据另有记录；这些证据都不能证明 independent acceptance 或模型介导的 runtime 行为。

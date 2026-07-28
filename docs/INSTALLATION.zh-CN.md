@@ -2,7 +2,7 @@
 
 [English installation guide](INSTALLATION.md)
 
-公开第一方集合当前稳定版本是 [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1)，commit 为 `c50f1ef403a5f0bfe02e75d1aeff2c237556db63`。已发布 tag 的 fresh-install 证据见[release evidence](evidence/releases/v0.1.1/)。`skills/<name>/` 内的包契约仍是行为权威；本页只规定安装和验证证据。
+公开第一方集合当前稳定版本是 [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1)，commit 为 `c50f1ef403a5f0bfe02e75d1aeff2c237556db63`。已发布 tag 的 fresh-install 证据见[发布证据](evidence/releases/v0.1.1/RELEASE_RECEIPT.zh-CN.md)。`skills/<name>/` 内的包契约仍是行为权威；本页只规定安装和验证证据。
 
 ## Revision 语义
 
@@ -30,7 +30,7 @@ npx skills add LightDevCoder/skills#v0.1.1 --yes --copy --agent codex
 npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop --yes --copy --agent codex
 ```
 
-第一条安装五个包，第二条选择同一 tag 下的完整单包。已验证的 CLI version、destination 类别、discovery 和 smoke result 见 [v0.1.1 安装记录](evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md)。
+第一条安装五个包，第二条选择同一 tag 下的完整单包。已验证的 CLI version、destination 类别、discovery 和 smoke result 见 [v0.1.1 安装记录](evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.zh-CN.md)。
 
 ## 安装范围
 

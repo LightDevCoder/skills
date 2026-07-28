@@ -6,13 +6,18 @@
 
 `LightDevCoder/skills` 是公开的第一方 Agent Skills 集合，包含五个可以独立安装、独立发现、明确声明调用边界的 Skill。包内 `SKILL.md` 仍是行为权威；本 README 与用户指南负责说明使用方式。
 
-> **About：** Personal Skills Collection — Drive your creativity
+> **简介：** Personal Skills Collection — Drive your creativity
 
-> **Release：** [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1)
+> **发布：** [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1)
 > 已从 commit `c50f1ef` 发布。发布记录和 fresh-install 证据见
 > [docs/evidence/releases/v0.1.1/](docs/evidence/releases/v0.1.1/)。
 >
-> 独立 `review-loop agent-skill` acceptance 仍为 `BLOCKED`；准确边界见发布收据。
+> **发布状态：** 集合已发布且可使用。五个第一方 Skill 的安装与
+> `collection-quality` 检查均已通过。当前剩余的发布验收限制是
+> `review-loop agent-skill` 的独立 evaluator 证据：由于尚未附上 fresh
+> independent evaluator record，该项仍为 `BLOCKED`。这不影响安装或一般使用；
+> 详细边界见[发布收据](docs/evidence/releases/v0.1.1/RELEASE_RECEIPT.zh-CN.md)
+> 和[限制说明](docs/evidence/releases/v0.1.1/LIMITATIONS.zh-CN.md)。
 
 ## Quick Start
 
@@ -28,7 +33,7 @@ npx skills add LightDevCoder/skills#v0.1.1 --yes --copy --agent codex
 npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop --yes --copy --agent codex
 ```
 
-刷新 Agent host，然后在其 Skill catalog 中确认发现结果。若 host 提供文件系统，检查已安装包的 `SKILL.md` 与 `agents/openai.yaml`；脱离 source checkout 后仍能发现，才是有意义的验证。CLI 版本、destination 和结果见 [INSTALLATION_VERIFICATION.md](docs/evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md)。
+刷新 Agent host，然后在其 Skill catalog 中确认发现结果。若 host 提供文件系统，检查已安装包的 `SKILL.md` 与 `agents/openai.yaml`；脱离 source checkout 后仍能发现，才是有意义的验证。CLI 版本、destination 和结果见 [INSTALLATION_VERIFICATION.zh-CN.md](docs/evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.zh-CN.md)。
 
 第一次不知道下一步时，推荐显式调用 `$ask-light`：
 
@@ -39,21 +44,38 @@ $ask-light next
 三个最短示例：
 
 ```text
-$ask-light next       # 推荐下一 Skill，不执行它
+$ask-light next       # 推荐下一 Skill，不执行
 $project-init         # 初始化已确认的最小项目 preset
 $review-loop init     # 冻结已有验收标准的 baseline
 ```
 
-`ask-light` 只返回建议或一个有边界的 recipe，然后停止；不会执行、安装或自动串联。阅读 [Quick Start](examples/quick-start/README.zh-CN.md)、[Skill 使用指南](docs/zh-CN/skills/)、[workflow recipes](docs/zh-CN/workflows/) 了解输入、输出、handoff 和停止点。
+`ask-light` 只返回建议或一个有边界的 recipe，然后停止；不会执行、安装或自动串联。阅读 [Quick Start](examples/quick-start/README.zh-CN.md)、[Skill 使用指南](docs/zh-CN/skills/)、[工作流 recipes](docs/zh-CN/workflows/) 了解输入、输出、handoff 和停止点。
+
+## 外部能力（External Capabilities）
+
+上面的五个包组成 Core collection：安装本仓库后即可使用目录中的五个第一方 Skill。
+
+以下是可选的 workflow 能力，来自外部或第三方来源，不属于默认集合：
+
+- `grill-me` / `grilling`：`grill-me` 是一次会话澄清访谈的用户入口，会启动底层的 model-invoked `grilling` 能力。应把它们视为同一个能力，不要当成两个重复的工作流步骤。
+- `research`：本地 preset 不足时，用于调查外部事实或实践。
+- `to-spec`：把已确认的目标和约束整理成可追踪的 specification。
+- `to-tickets`：把已批准的 specification 整理成按依赖排序的 tickets。
+- `implement`：执行一个有边界且未被阻塞的 implementation ticket。
+- `code-review`：为固定变更提供 specialist findings。
+- `handoff`：为 closeout 或后续 resume 保存已接受结果或 blocker。
+
+这些能力可能来自 `mattpocock/skills` 或其他外部来源。本仓库不复制这些 Skill，
+也不会自动安装；选择包含它们的 workflow 前，请先确认当前 host 能看到对应能力。
 
 ## 第一方目录
 
 | Skill | 作用 | 调用方式 | 包路径 |
 | --- | --- | --- | --- |
 | [review-loop](skills/review-loop/SKILL.md) | 执行有边界的证据、修复和最终验收循环。 | Model-invoked；支持手动入口。 | skills/review-loop/ |
-| [project-init](skills/project-init/SKILL.md) | 从最小 preset 初始化已确认的软件、文稿、研究、知识、数据或 Skill-development 项目。 | User-invoked only。 | skills/project-init/ |
-| [ask-light](skills/ask-light/SKILL.md) | 检查 host 并推荐一个下一 Skill 或 bounded recipe，不执行建议。 | User-invoked only。 | skills/ask-light/ |
-| [learn-anything](skills/learn-anything/SKILL.md) | 从有足够证据的资料中提炼可复用 Agent Skill 方法。 | User-invoked only。 | skills/learn-anything/ |
+| [project-init](skills/project-init/SKILL.md) | 从最小 preset 初始化已确认的软件、文稿、研究、知识、数据或 Skill-development 项目。 | 仅 user-invoked。 | skills/project-init/ |
+| [ask-light](skills/ask-light/SKILL.md) | 检查 host 并推荐一个下一 Skill 或 bounded recipe，不执行建议。 | 仅 user-invoked。 | skills/ask-light/ |
+| [learn-anything](skills/learn-anything/SKILL.md) | 从有足够证据的资料中提炼可复用 Agent Skill 方法。 | 仅 user-invoked。 | skills/learn-anything/ |
 | [manuscript-ops](skills/manuscript-ops/SKILL.md) | 治理跨格式、批次、审查和 handoff 的可复现文稿工程。 | Model-invoked；支持手动入口。 | skills/manuscript-ops/ |
 
 完整目录见 [CATALOG.zh-CN.md](CATALOG.zh-CN.md)。组合示例是文档和验证资产，不是固定 pipeline，也不是自动编排器；退休的 `project-workflow` 不会重新引入。

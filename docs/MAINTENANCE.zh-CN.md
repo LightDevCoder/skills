@@ -14,10 +14,10 @@
 
 新增、更新、改名、弃用或移除时：
 
-1. 先执行 [Skill 准入](SKILL_ADMISSION.md) 的 reuse-before-invention 与 ownership gate。
+1. 先执行 [Skill 准入](SKILL_ADMISSION.zh-CN.md) 的 reuse-before-invention 与 ownership gate。
 2. 保留包边界、invocation direction、attribution 和必要资源。
 3. 收集 structural、fresh-install、behavioral、invocation、script 和 review evidence，并准确标注 evidence class。
-4. 执行 [review policy](REVIEW_POLICY.md) 的 review trigger。
+4. 执行[审查策略](REVIEW_POLICY.zh-CN.md)的 review trigger。
 5. 同步 README、目录、安装说明、治理链接、affected recipes、discovery tests、attribution 和 changelog。
 6. 未通过真实 release gate 前，不把版本、tag 或安装命令写成已验证。
 

@@ -38,8 +38,10 @@ records, review evidence, and production QA records.
 ## Handoffs, success, and `BLOCKED`
 
 On a Project route, choose one discovery handoff: `grill-me` for one-session
-decisions or `wayfinder` for multi-session uncertainty, then stop. Continue
-only after the user explicitly resumes `manuscript-ops`. Before initialization,
+decisions or `wayfinder` for multi-session uncertainty, then stop. `grill-me`
+is the user-facing entry point; its underlying model-invoked capability is
+`grilling`, so it is one clarification capability rather than two user steps.
+Continue only after the user explicitly resumes `manuscript-ops`. Before initialization,
 the user must explicitly choose `project-init`; before review, an approved
 `review-loop` Charter is required. `BLOCKED` is correct for a missing root,
 missing dependency, unapproved brief, absent capability, missing evidence, or

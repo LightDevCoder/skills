@@ -1,6 +1,6 @@
 # `project-init` 使用指南
 
-[English guide](../../skills/project-init.md)
+[英文指南](../../skills/project-init.md)
 
 行为权威是 [skills/project-init/SKILL.md](../../../skills/project-init/SKILL.md)。
 
@@ -20,7 +20,7 @@ $project-init
 
 ## 前置条件、输入和输出
 
-默认目标是当前目录。写入前读取根部 `AGENTS.md`/`CLAUDE.md`、README、manifest、项目文档和当前状态。输入包括项目类型、用户目标、输出物、协作方式、约束和 review level；已有 brief 能回答时不重复询问。`grilling` 只能帮助澄清问题，不能授权额外写入。
+默认目标是当前目录。写入前读取根部 `AGENTS.md`/`CLAUDE.md`、README、manifest、项目文档和当前状态。输入包括项目类型、用户目标、输出物、协作方式、约束和 review level；已有 brief 能回答时不重复询问。需要澄清问题时使用外部的用户入口 `grill-me`；它启动底层 model-invoked 能力 `grilling`。这不能授权额外写入。
 
 输出包括 preset 或已确认的 fallback、唯一 instruction target、变更路径、能力可用性、验证结果和后续 Skill 建议；不得创建 tickets、implementation plan、final-review record 或竞争性的 specification。
 

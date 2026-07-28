@@ -1,6 +1,6 @@
 # Ask Light 显式选择下一步
 
-[English example](../../workflows/first-party-composition.md)
+[英文版示例](../../workflows/first-party-composition.md)
 
 ## 场景
 
@@ -28,6 +28,6 @@ Agent 已有 goal、artifacts、blockers、project type、task kind、availabili
 - 五个包的 `SKILL.md`。
 - [ask-light discovery contract](../../../skills/ask-light/references/discovery-contract.md)。
 - [collection discovery test](../../../tests/collection-discovery-tests.ps1)。
-- [v0.1.1 release evidence](../../evidence/releases/v0.1.1/)。
+- [v0.1.1 发布证据](../../evidence/releases/v0.1.1/RELEASE_RECEIPT.zh-CN.md)。
 
-这是验证资产，不是 canonical workflow 或 admission requirement。
+这是验证资产，不是 canonical workflow 或准入要求。

@@ -18,6 +18,10 @@ authority for every package.
 - **Private modified third-party:** a package in `skills-3rdParty`; an absent
   private root is an availability gap, not an invitation to invent a fallback.
 
+`grill-me` is the user-facing entry point for one-session clarification. It
+starts the underlying model-invoked `grilling` capability; treat them as one
+external capability, not two separate user-facing workflow steps.
+
 Each row declares the handoff artifact and stop condition. `user-invoked` means
 the user must explicitly select the Skill; `model-invoked` means the host may
 call it under its package policy. Findings from a specialist never become the

@@ -1,6 +1,6 @@
 # `manuscript-ops` 使用指南
 
-[English guide](../../skills/manuscript-ops.md)
+[英文指南](../../skills/manuscript-ops.md)
 
 完整行为契约见 [skills/manuscript-ops/SKILL.md](../../../skills/manuscript-ops/SKILL.md)。
 
@@ -25,7 +25,7 @@ $manuscript-ops resume
 
 ## Handoff、成功和 `BLOCKED`
 
-Project route 先按需要选择一个 discovery handoff：单会话决策用 `grill-me`，多会话不确定性用 `wayfinder`，随后停止；只有用户显式 resume 才能继续。初始化前需用户显式选择 `project-init`，review 前需批准的 `review-loop` Charter。root、dependency、brief、capability、证据或真实渲染/round-trip proof 缺失时返回 `BLOCKED`，不能把语法有效当成视觉验收。
+Project route 先按需要选择一个 discovery handoff：单会话决策用 `grill-me`，多会话不确定性用 `wayfinder`，随后停止。`grill-me` 是用户入口，底层的 model-invoked 能力是 `grilling`；二者是同一个澄清能力，不是两个用户步骤。只有用户显式 resume 才能继续。初始化前需用户显式选择 `project-init`，review 前需批准的 `review-loop` Charter。root、dependency、brief、capability、证据或真实渲染/round-trip proof 缺失时返回 `BLOCKED`，不能把语法有效当成视觉验收。
 
 ## 组合和最终权威
 

@@ -18,7 +18,8 @@ contract as well. Do not use `--audit-all` in an ordinary manuscript handoff;
 it changes audit scope, not the selected workflow branch.
 
 Use `--strict-agent-skills` on a client that rejects non-standard frontmatter.
-The pinned `grill-me` and `wayfinder` contracts currently use
+The pinned `grill-me` user entry starts the underlying `grilling` capability;
+the `grill-me` and `wayfinder` contracts currently use
 `disable-model-invocation`; a strict client must return `BLOCKED` unless it has
 compatible releases or an explicit host extension.
 
@@ -109,8 +110,9 @@ $manuscript-ops resume from <exact-project-root>/.review-loop/state.md
 
 Install and refresh the agent between layers when necessary:
 
-1. Required discovery closure from `mattpocock/skills`: `grill-me`, `grilling`,
-   `wayfinder`, and `domain-modeling`.
+1. Required discovery closure from `mattpocock/skills`: `grill-me` (the user
+   entry), its underlying `grilling` capability, `wayfinder`, and
+   `domain-modeling`.
 2. Optional Wayfinder branches, before they are selected: `prototype` and
    `setup-matt-pocock-skills`.
 3. Independent acceptance from `LightDevCoder/Agent-Workflow`:

@@ -1,22 +1,24 @@
-# Workflow Recipes
+# 工作流 Recipes
 
-[English recipes](../../workflows/recipes.md)
+[英文版 recipes](../../workflows/recipes.md)
 
 这些 recipe 是有边界的文档和验证资产，只描述显式 handoff；不会创建 canonical pipeline、永久 state machine 或自动多 Skill orchestrator。每个包的 `SKILL.md` 仍是行为权威。
 
 ## 来源与共同规则
 
-- **First-party：** 本仓库的 `review-loop`、`project-init`、`ask-light`、`learn-anything`、`manuscript-ops`。
-- **Matt upstream：** `mattpocock/skills` 中的 `to-spec`、`to-tickets`、`implement`、`code-review`、`handoff`、`diagnosing-bugs`、`grill-me`、`wayfinder`、`writing-great-skills`，或可见的 pinned third-party package。
-- **Private modified third-party：** `skills-3rdParty` 内的包；私有 root 不可见时必须报告 availability gap，不能编造 fallback。
+- **第一方（First-party）：** 本仓库的 `review-loop`、`project-init`、`ask-light`、`learn-anything`、`manuscript-ops`。
+- **Matt 上游（Matt upstream）：** `mattpocock/skills` 中的 `to-spec`、`to-tickets`、`implement`、`code-review`、`handoff`、`diagnosing-bugs`、`grill-me`、`wayfinder`、`writing-great-skills`，或可见的 pinned third-party package。
+- **私有第三方修改版（Private modified third-party）：** `skills-3rdParty` 内的包；私有 root 不可见时必须报告 availability gap，不能编造 fallback。
 
 每行都写明 handoff artifact 和 stop condition。`user-invoked` 必须由用户显式选择；`model-invoked` 仍受包自身 policy 约束。specialist findings 不能成为最终 verdict；需要验收时由 `review-loop` 拥有 `PASS`、`FAIL`、`BLOCKED`。
 
+`grill-me` 是一次会话澄清的用户入口，会启动底层的 model-invoked `grilling` 能力。二者属于同一个外部能力，不是两个需要用户分别选择的工作流步骤。
+
 ## 1. 软件项目
 
-**Entry condition：** 软件 feature/implementation 的目标、约束和验收方向已经明确。
+**入口条件：** 软件 feature/implementation 的目标、约束和验收方向已经明确。
 
-顺序为 `to-spec`（Matt upstream，user-invoked）→ `review-loop` specification（first-party，model-invoked）→ `to-tickets`（Matt upstream，user-invoked）→ `implement`（Matt upstream，user-invoked）→ `code-review`（Matt upstream，model-invoked，只提供 specialist findings）→ `review-loop` software（first-party，拥有最终 verdict）→ `handoff`（Matt upstream，user-invoked）。每一步的输入、输出、handoff 和 stop condition 见 [English recipe](../../workflows/recipes.md#1-software-feature)。
+顺序为 `to-spec`（Matt upstream，user-invoked）→ `review-loop` specification（first-party，model-invoked）→ `to-tickets`（Matt upstream，user-invoked）→ `implement`（Matt upstream，user-invoked）→ `code-review`（Matt upstream，model-invoked，只提供 specialist findings）→ `review-loop` software（first-party，拥有最终 verdict）→ `handoff`（Matt upstream，user-invoked）。每一步的输入、输出、handoff 和 stop condition 见[英文 recipe](../../workflows/recipes.md#1-software-feature)。
 
 缺少 acceptance authority、上游 Skill、批准 ticket、实现依赖或 independent evaluator 时 `BLOCKED`。证据包括 spec、ticket graph、commit、focused tests、specialist findings、review-loop state/verdict 和 handoff；到 `PASS`/`FAIL`/`BLOCKED` 停止。
 
@@ -26,7 +28,7 @@
 
 ## 3. 文稿项目
 
-顺序为 `manuscript-ops` → 按需选择 `grill-me`/`wayfinder` → `project-init` → `review-loop init` → manuscript production → `review-loop` manuscript Profile。Project route 选择 discovery handoff 后必须停；只有用户显式 `resume` 才能继续。root、dependency、brief、Charter、render/round-trip evidence 缺失时 `BLOCKED`，最终 verdict 归 `review-loop`。
+顺序为 `manuscript-ops` → 按需选择 `grill-me`/`wayfinder` → `project-init` → `review-loop init` → manuscript production → `review-loop` manuscript Profile。这里的 `grill-me` 是用户入口，底层 `grilling` 不作为第二个用户步骤单独选择。Project route 选择 discovery handoff 后必须停；只有用户显式 `resume` 才能继续。root、dependency、brief、Charter、render/round-trip evidence 缺失时 `BLOCKED`，最终 verdict 归 `review-loop`。
 
 ## 4. 从资料提炼 Skill
 

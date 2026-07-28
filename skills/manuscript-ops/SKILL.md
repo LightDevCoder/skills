@@ -5,6 +5,10 @@ description: Route and govern manuscript engineering from small notes and struct
 
 # Manuscript Ops
 
+For one-session clarification, `grill-me` is the external user-facing entry
+point and `grilling` is its underlying model-invoked capability. Treat them as
+one discovery handoff, not two separate user-facing steps.
+
 Treat the manuscript as a governed state machine, not a single editable file.
 Keep source authority, user decisions, reproducible generation, review evidence,
 and human gates visible throughout the work.
