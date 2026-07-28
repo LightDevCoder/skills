@@ -1,9 +1,9 @@
 {
   "source_svg": "skills-header.svg",
   "rendered_png": "skills-header.png",
-  "design_version": "flat-layered-wordmark-v2",
-  "width": 1600,
-  "height": 480,
+  "design_version": "user-provided-raster-v1",
+  "width": 1536,
+  "height": 1024,
   "svg_sha256": "aed2d2aac35635db858931f9100fae871184f48e863cb33304d886a6056a604c",
-  "png_sha256": "37b8903c595eb73d069655a3b63551d1b7820b274a9259eaf1fd30cdde1d19f4"
+  "png_sha256": "ec6f1082f5791192886970e471d6a5bc3e98d5ae38aed1ccdf6b6fba0decc368"
 }
