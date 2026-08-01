@@ -148,11 +148,21 @@ try {
     $input = & $scanner -RootsJson $rootsJson -ContextJson $inputContext | ConvertFrom-Json
     Assert-True ($input.status -eq 'NEED-INPUT' -and ($input.gaps -join ' ') -match 'goal and taskKind') 'unknown context asks for input instead of guessing'
 
+    # The explicit-only recap package is discoverable for a direct one-line session-summary request.
+    $recapRoot = Join-Path $fixture 'recap-discovery'; New-Item -ItemType Directory -Force -Path $recapRoot | Out-Null
+    New-Skill $recapRoot 'recap' 'Generate exactly one line summarizing the current Agent session.' | Out-Null
+    New-Skill $recapRoot 'generic-helper' 'Perform generic project maintenance.' | Out-Null
+    $recapRoots = ConvertTo-Json -InputObject ([array]@([ordered]@{ category = 'first-party'; path = $recapRoot })) -Compress
+    $recapContext = [ordered]@{ goal = 'summarize the current session in one line'; artifacts = @(); blockers = ''; projectType = 'generic'; taskKind = 'recap'; availability = 'codex'; invocationControl = 'explicit-only' } | ConvertTo-Json -Compress
+    $recapResult = & $scanner -RootsJson $recapRoots -ContextJson $recapContext | ConvertFrom-Json
+    Assert-True ($recapResult.status -eq 'RECOMMEND' -and $recapResult.skill -eq 'recap') 'direct session-summary request discovers recap'
+    Assert-True ($recapResult.invocation -eq '$recap' -and $recapResult.execution -match 'nothing was invoked') 'recap recommendation preserves explicit-only non-execution boundary'
+
     # Workflow mode returns a recipe with real package availability and never executes a step.
     $workflowRoot = Join-Path $fixture 'workflow'; New-Item -ItemType Directory -Force -Path $workflowRoot | Out-Null
     $wfFirst = Join-Path $workflowRoot 'first-party'; $wfUpstream = Join-Path $workflowRoot 'upstream'; $wfThird = Join-Path $workflowRoot 'modified-third-party'
     New-Item -ItemType Directory -Force -Path $wfFirst,$wfUpstream,$wfThird | Out-Null
-    foreach ($name in @('review-loop','ask-light','project-init','learn-anything','manuscript-ops')) { New-Skill $wfFirst $name "First-party $name capability." | Out-Null }
+    foreach ($name in @('review-loop','ask-light','project-init','learn-anything','manuscript-ops','recap')) { New-Skill $wfFirst $name "First-party $name capability." | Out-Null }
     foreach ($name in @('to-spec','to-tickets','implement','code-review','handoff','diagnosing-bugs','grill-me','wayfinder','writing-great-skills')) { New-Skill $wfUpstream $name "Upstream $name capability." -AllowImplicit | Out-Null }
     New-Skill $wfThird 'code-review' 'Modified third-party code review capability.' -AllowImplicit | Out-Null
     $wfRoots = ConvertTo-Json -InputObject ([array]@(
@@ -169,7 +179,7 @@ try {
     Assert-True ($featureWorkflow.execution -match 'nothing was invoked|orchestrated') 'workflow recommendation does not execute or orchestrate'
     Assert-True ((@($featureWorkflow.steps | Where-Object { $_.skill -eq 'to-spec' -and $_.sourceCategory -eq 'upstream' })).Count -eq 1) 'workflow preserves third-party source category'
     Assert-True ((@($featureWorkflow.steps | Where-Object { $_.skill -eq 'code-review' -and $_.sourceCategory -eq 'upstream' -and $_.availability -eq 'available' })).Count -eq 1) 'workflow selects the declared source category when duplicate Skill names exist'
-    Assert-True ($featureWorkflow.reads.metadata -eq 15 -and $featureWorkflow.reads.bodies -eq 0 -and $featureWorkflow.reads.references -eq 0) 'workflow exposes bounded metadata-only read counts'
+    Assert-True ($featureWorkflow.reads.metadata -eq 16 -and $featureWorkflow.reads.bodies -eq 0 -and $featureWorkflow.reads.references -eq 0) 'workflow exposes bounded metadata-only read counts'
 
     $bugContext = [ordered]@{ goal = 'diagnose a software regression and repair the error'; artifacts = @('failing-test.txt'); blockers = ''; projectType = 'software'; taskKind = 'bug'; availability = 'codex'; invocationControl = 'explicit-only' } | ConvertTo-Json -Compress
     $bugWorkflow = & $scanner -Mode workflow -RootsJson $wfRoots -ContextJson $bugContext | ConvertFrom-Json

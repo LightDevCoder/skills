@@ -9,7 +9,7 @@ authority for every package.
 
 ## Source legend and common rule
 
-- **First-party:** `review-loop`, `project-init`, `ask-light`,
+- **First-party:** `review-loop`, `project-init`, `ask-light`, `recap`,
   `learn-anything`, and `manuscript-ops` in this repository.
 - **Matt upstream:** `to-spec`, `to-tickets`, `implement`, `code-review`,
   `handoff`, `diagnosing-bugs`, `grill-me`, `wayfinder`, and
@@ -128,3 +128,11 @@ final acceptance review. The bug route is `diagnosing-bugs` → `implement` →
 `code-review` → `review-loop`; the final-review route is a single
 `review-loop` step. Both stop at missing reproduction/acceptance authority or
 the final `PASS`/`FAIL`/`BLOCKED` verdict and never auto-invoke a user Skill.
+
+## 7. Standalone session recap
+
+`recap` is a one-step, user-invoked stopping boundary rather than a multi-Skill
+workflow. The user explicitly selects `$recap`; it consumes only current
+session context, emits exactly one line, invokes nothing else, and stops. It
+does not create a handoff, compact history, continue execution, or issue a
+`review-loop` verdict.

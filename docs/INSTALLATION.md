@@ -51,6 +51,15 @@ complete package at the same tag. The verified CLI version, destination class,
 discovery result, and smoke result are recorded in the
 [v0.1.1 installation record](evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md).
 
+## Unreleased `recap` package
+
+`recap` is admitted on this branch through the prompt-only fast track but is
+not present in v0.1.1. Its fresh-copy installation and discovery check is recorded
+in [its admission evidence](evidence/admissions/recap/README.md). Do not present
+an unqualified default-branch command as a stable release pin, and do not
+publish a pinned `recap` command until a new tag exists and the command has
+succeeded against that released repository in a fresh environment.
+
 ## Supported installation scopes
 
 | Scope | Destination policy | Required evidence |

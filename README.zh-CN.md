@@ -4,7 +4,7 @@
 
 # Personal Skills Collection
 
-`LightDevCoder/skills` 是公开的第一方 Agent Skills 集合，包含五个可以独立安装、独立发现、明确声明调用边界的 Skill。包内 `SKILL.md` 仍是行为权威；本 README 与用户指南负责说明使用方式。
+`LightDevCoder/skills` 是公开的第一方 Agent Skills 集合；当前分支包含六个可以独立安装、独立发现、明确声明调用边界的 Skill。包内 `SKILL.md` 仍是行为权威；本 README 与用户指南负责说明使用方式。
 
 > **简介：** Personal Skills Collection — Drive your creativity
 
@@ -18,6 +18,9 @@
 > independent evaluator record，该项仍为 `BLOCKED`。这不影响安装或一般使用；
 > 详细边界见[发布收据](docs/evidence/releases/v0.1.1/RELEASE_RECEIPT.zh-CN.md)
 > 和[限制说明](docs/evidence/releases/v0.1.1/LIMITATIONS.zh-CN.md)。
+>
+> **当前分支准入：** `recap` 已通过本变更的低风险纯提示型快速通道，但尚未发布；
+> 稳定 v0.1.1 仍是原来的五个包。
 
 ## Quick Start
 
@@ -41,11 +44,12 @@ npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop --yes --copy --ag
 $ask-light next
 ```
 
-三个最短示例：
+四个最短示例：
 
 ```text
 $ask-light next       # 推荐下一 Skill，不执行
 $project-init         # 初始化已确认的最小项目 preset
+$recap                # 用一行总结当前 session
 $review-loop init     # 冻结已有验收标准的 baseline
 ```
 
@@ -53,7 +57,7 @@ $review-loop init     # 冻结已有验收标准的 baseline
 
 ## 外部能力（External Capabilities）
 
-上面的五个包组成 Core collection：安装本仓库后即可使用目录中的五个第一方 Skill。
+当前分支包含六个已准入第一方包：v0.1.1 的五个包，以及新准入但尚未发布的 `recap`。
 
 以下是可选的 workflow 能力，来自外部或第三方来源，不属于默认集合：
 
@@ -75,6 +79,7 @@ $review-loop init     # 冻结已有验收标准的 baseline
 | [review-loop](skills/review-loop/SKILL.md) | 执行有边界的证据、修复和最终验收循环。 | Model-invoked；支持手动入口。 | skills/review-loop/ |
 | [project-init](skills/project-init/SKILL.md) | 从最小 preset 初始化已确认的软件、文稿、研究、知识、数据或 Skill-development 项目。 | 仅 user-invoked。 | skills/project-init/ |
 | [ask-light](skills/ask-light/SKILL.md) | 检查 host 并推荐一个下一 Skill 或 bounded recipe，不执行建议。 | 仅 user-invoked。 | skills/ask-light/ |
+| [recap](skills/recap/SKILL.md) | 用严格一行总结当前 Agent session，不改变历史也不继续任务。 | 仅 user-invoked。 | skills/recap/ |
 | [learn-anything](skills/learn-anything/SKILL.md) | 从有足够证据的资料中提炼可复用 Agent Skill 方法。 | 仅 user-invoked。 | skills/learn-anything/ |
 | [manuscript-ops](skills/manuscript-ops/SKILL.md) | 治理跨格式、批次、审查和 handoff 的可复现文稿工程。 | Model-invoked；支持手动入口。 | skills/manuscript-ops/ |
 
@@ -102,3 +107,4 @@ $review-loop init     # 冻结已有验收标准的 baseline
 - [目录](CATALOG.zh-CN.md)
 - [变更记录](CHANGELOG.zh-CN.md)
 - [发布收据](docs/evidence/releases/v0.1.1/RELEASE_RECEIPT.zh-CN.md)
+- [recap 准入证据](docs/evidence/admissions/recap/README.zh-CN.md)

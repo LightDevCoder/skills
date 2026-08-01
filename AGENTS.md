@@ -79,17 +79,21 @@ changelog and release notes.
 
 ## Validation and review
 
-All Skill admission and significant Skill changes require the structural,
-installation, behavioral, invocation, and independent review evidence defined
-in [Skill admission](docs/SKILL_ADMISSION.md). New or changed executable
-scripts additionally require focused automated and negative tests, adversarial
-or mutation fixtures where appropriate, and `code-review` evidence. A
-zero-assertion or no-op test run is not a passing result.
+Classify each Skill admission under [Skill admission](docs/SKILL_ADMISSION.md).
+An eligible low-risk prompt-only Skill uses the documented fast track: bounded
+structural/install/contract/invocation evidence and one fresh independent
+Evaluator, without a separate Critic or Standards/Spec `code-review`. All
+other new or significant Skill changes use the full evidence path. New or
+changed runtime executable scripts additionally require focused automated and
+negative tests, adversarial or mutation fixtures where appropriate, and
+`code-review` evidence. A zero-assertion or no-op test run is not a passing
+result.
 
-Use `review-loop` with the `agent-skill` Profile when the policy requires final
-Skill acceptance. `review-loop` owns the final `PASS`, `FAIL`, or `BLOCKED`
-verdict; specialist reviewers provide evidence and findings, not a competing
-acceptance decision.
+Use one fresh Evaluator for an eligible fast-track Skill. Use `review-loop`
+with the `agent-skill` Profile when the full policy requires it;
+`review-loop` then owns the final `PASS`, `FAIL`, or `BLOCKED` verdict.
+Specialist reviewers provide evidence and findings, not a competing acceptance
+decision.
 
 ## Installation, release, and closeout
 

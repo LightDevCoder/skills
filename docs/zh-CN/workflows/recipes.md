@@ -6,7 +6,7 @@
 
 ## 来源与共同规则
 
-- **第一方（First-party）：** 本仓库的 `review-loop`、`project-init`、`ask-light`、`learn-anything`、`manuscript-ops`。
+- **第一方（First-party）：** 本仓库的 `review-loop`、`project-init`、`ask-light`、`recap`、`learn-anything`、`manuscript-ops`。
 - **Matt 上游（Matt upstream）：** `mattpocock/skills` 中的 `to-spec`、`to-tickets`、`implement`、`code-review`、`handoff`、`diagnosing-bugs`、`grill-me`、`wayfinder`、`writing-great-skills`，或可见的 pinned third-party package。
 - **私有第三方修改版（Private modified third-party）：** `skills-3rdParty` 内的包；私有 root 不可见时必须报告 availability gap，不能编造 fallback。
 
@@ -41,3 +41,7 @@
 ## 6. Bug 与 final review
 
 Bug recipe 为 `diagnosing-bugs` → `implement` → `code-review` → `review-loop`；final-review recipe 只有一个 `review-loop` step。两者都在 reproduction/authority 缺失或最终 verdict 时停止，不自动调用 user Skill。
+
+## 7. 独立 session recap
+
+`recap` 是单步、user-invoked 的停止边界，不是多 Skill workflow。用户显式选择 `$recap`；它只消费当前 session context，输出严格一行，不调用任何其他能力，然后停止。它不会创建 handoff、压缩历史、继续执行或签发 `review-loop` verdict。

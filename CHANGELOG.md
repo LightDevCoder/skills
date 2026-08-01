@@ -6,6 +6,26 @@ All notable changes are recorded here. A release entry must be tied to an
 actual version or tag and must not be created merely because a document was
 drafted.
 
+## Unreleased
+
+### Added
+
+- Proposed the first-party, user-invoked `recap` Skill. Explicit `$recap`
+  invocation returns exactly one line about the current session, never runs
+  tools, continues work, changes files, compacts history, or invokes another
+  Skill.
+- Added bilingual `recap` guides, package contract/output-contract tests, collection
+  discovery coverage, fresh-copy installation evidence, and independent
+  `review-loop agent-skill` admission evidence.
+- Added a low-risk prompt-only admission fast track for owner-authored,
+  manual-only, text-output Skills with no tools, side effects, runtime
+  executables, or external dependencies. It uses one fresh Evaluator and does
+  not require separate Critic or Standards/Spec review.
+
+`recap` received a final low-risk prompt-only fast-track `PASS`. This entry
+does not claim a release tag or a verified published install command; stable
+v0.1.1 still contains five packages.
+
 ## 0.1.1 — 2026-07-26
 
 ### Added
