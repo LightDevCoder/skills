@@ -310,6 +310,11 @@ foreach ($file in $documentationFiles) {
     }
 }
 
+# Keep prompt-only package gates inside this existing CI entry point so adding
+# a low-risk Skill does not require editing the workflow solely to name tests.
+& (Join-Path $Root 'skills/recap/tests/recap-contract-tests.ps1')
+& (Join-Path $Root 'skills/recap/tests/recap-output-contract-tests.ps1')
+
 if ($script:failures.Count -gt 0) {
     $script:failures | ForEach-Object { "FAIL: $_" }
     throw "COLLECTION_DISCOVERY=FAIL ($($script:failures.Count) failures, $($script:assertions) assertions)"
