@@ -18,14 +18,14 @@ function Assert-Collection {
     }
 }
 
-$expected = @("ask-light", "learn-anything", "manuscript-ops", "project-init", "review-loop")
+$expected = @("ask-light", "learn-anything", "manuscript-ops", "project-init", "recap", "review-loop")
 $skillRoot = Join-Path $Root "skills"
 $actual = @(Get-ChildItem -LiteralPath $skillRoot -Directory |
     Where-Object { $_.Name -ne "docs" } |
     Select-Object -ExpandProperty Name |
     Sort-Object)
 
-Assert-Collection (($actual -join ",") -eq ($expected -join ",")) "skills/ must contain exactly the five admitted package directories."
+Assert-Collection (($actual -join ",") -eq ($expected -join ",")) "skills/ must contain exactly the six admitted package directories."
 
 $readme = Get-Content -LiteralPath (Join-Path $Root "README.md") -Raw
 $catalog = Get-Content -LiteralPath (Join-Path $Root "CATALOG.md") -Raw
@@ -53,6 +53,8 @@ Assert-Collection ($installation -notmatch "commands target the immutable v0\.1\
 Assert-Collection ($installation -notmatch "not a verified command|<owner>/<repository>") "Installation guide still contains unresolved pre-release command wording."
 Assert-Collection ($installation -match "Manual fallback") "Installation guide must retain a manual fallback."
 Assert-Collection ($installation -match '\$sourceRoot' -and $installation -match '\$skillName' -and $installation -match '\$destinationRoot') "Manual fallback must use valid PowerShell variables."
+Assert-Collection ($readme -match '(?is)stable[^\r\n]{0,40}v0\.1\.1[^\r\n]{0,120}five') "README must preserve the stable v0.1.1 five-package boundary."
+Assert-Collection ($catalog -match '5 admitted first-party Skills in stable v0\.1\.1') "Catalog must preserve the stable v0.1.1 five-package boundary."
 
 foreach ($package in $expected) {
     $packageRoot = Join-Path $skillRoot $package
@@ -164,6 +166,17 @@ foreach ($pair in $parityMatrix) {
     }
 }
 
+$admissionPolicy = Get-Content -LiteralPath (Join-Path $Root 'docs/SKILL_ADMISSION.md') -Raw
+$admissionPolicyZh = Get-Content -LiteralPath (Join-Path $Root 'docs/SKILL_ADMISSION.zh-CN.md') -Raw
+$reviewPolicy = Get-Content -LiteralPath (Join-Path $Root 'docs/REVIEW_POLICY.md') -Raw
+$reviewPolicyZh = Get-Content -LiteralPath (Join-Path $Root 'docs/REVIEW_POLICY.zh-CN.md') -Raw
+foreach ($text in @($admissionPolicy, $admissionPolicyZh, $reviewPolicy, $reviewPolicyZh)) {
+    Assert-Collection ($text -match 'prompt-only|纯提示型') 'Admission/review policy must describe the prompt-only fast track.'
+    Assert-Collection ($text -match 'fresh independent Evaluator') 'Fast-track policy must preserve one fresh independent Evaluator.'
+    Assert-Collection ($text -match 'Critic') 'Fast-track policy must state the separate Critic boundary.'
+    Assert-Collection ($text -match 'code-review') 'Fast-track policy must state the code-review boundary.'
+}
+
 $semanticParityMatrix = @(
     [pscustomobject]@{ English = 'README.md'; Chinese = 'README.zh-CN.md'; Pairs = @(
         @('Install the published first-party collection', '安装已发布的第一方集合'),
@@ -208,7 +221,7 @@ foreach ($pair in $semanticParityMatrix) {
     }
 }
 
-foreach ($name in @('review-loop', 'project-init', 'ask-light', 'learn-anything', 'manuscript-ops')) {
+foreach ($name in @('review-loop', 'project-init', 'ask-light', 'learn-anything', 'manuscript-ops', 'recap')) {
     $englishPath = Join-Path $Root "docs/skills/$name.md"
     $chinesePath = Join-Path $Root "docs/zh-CN/skills/$name.md"
     Assert-Collection (Test-Path -LiteralPath $englishPath -PathType Leaf) "Skill guide is missing: docs/skills/$name.md"
@@ -233,7 +246,7 @@ foreach ($pair in @(
 }
 
 $guideParityMarkers = @('SKILL.md', 'BLOCKED', 'review-loop', 'user-invoked')
-foreach ($name in @('review-loop', 'project-init', 'ask-light', 'learn-anything', 'manuscript-ops')) {
+foreach ($name in @('review-loop', 'project-init', 'ask-light', 'learn-anything', 'manuscript-ops', 'recap')) {
     $englishPath = Join-Path $Root "docs/skills/$name.md"
     $chinesePath = Join-Path $Root "docs/zh-CN/skills/$name.md"
     if ((Test-Path -LiteralPath $englishPath -PathType Leaf) -and (Test-Path -LiteralPath $chinesePath -PathType Leaf)) {
@@ -274,6 +287,7 @@ Assert-Collection ($workflowText -match '\$ask-light next' -and $workflowText -m
 Assert-Collection ($workflowText -match 'entryCondition' -and $workflowText -match 'missing dependency' -and $workflowText -match 'finalAuthority') 'ask-light workflow output contract is incomplete.'
 Assert-Collection ($workflowScript -match "ValidateSet\('next', 'workflow'\)" -and $workflowScript -match 'Get-WorkflowRecipes') 'ask-light scanner lacks explicit workflow mode implementation.'
 Assert-Collection ((Get-Content -LiteralPath (Join-Path $Root 'skills/learn-anything/agents/openai.yaml') -Raw) -match 'allow_implicit_invocation:\s*false') 'learn-anything must declare explicit-only metadata policy.'
+Assert-Collection ((Get-Content -LiteralPath (Join-Path $Root 'skills/recap/agents/openai.yaml') -Raw) -match 'allow_implicit_invocation:\s*false') 'recap must declare explicit-only metadata policy.'
 
 $documentationFiles = @("README.md", "CATALOG.md", "CHANGELOG.md", "AGENTS.md") + @(
     Get-ChildItem -LiteralPath (Join-Path $Root "docs") -Recurse -Filter "*.md" -File |

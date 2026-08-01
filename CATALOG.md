@@ -2,17 +2,18 @@
 
 [中文目录](CATALOG.zh-CN.md)
 
-This catalog is synchronized from the five admitted package directories under
-`skills/`. It is an inventory, not a static workflow router and not a record
-of what is installed on a particular Agent host.
+This catalog is synchronized from the six admitted package directories under
+`skills/`. It is an inventory, not a
+static workflow router and not a record of what is installed on a particular
+Agent host.
 
 ## Collection status
 
 | Field | Value |
 | --- | --- |
 | Collection | Personal Skills Collection |
-| Package count | 5 admitted first-party Skills |
-| Current state | Released v0.1.1; independent `review-loop agent-skill` acceptance remains BLOCKED |
+| Package count | 6 admitted first-party Skills on this branch; 5 admitted first-party Skills in stable v0.1.1 |
+| Current state | `recap` passed the low-risk prompt-only fast track but remains unreleased; v0.1.1 remains installable |
 | Stable release | [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/collection-discovery-tests.ps1](tests/collection-discovery-tests.ps1) |
@@ -49,6 +50,19 @@ dependencies and modified third-party variants are documented separately.
 - **Status:** Admitted first-party; supports explicit `next` and `workflow` modes.
 - **Evidence:** Contract, scanner, and behavior tests under [skills/ask-light/tests/](skills/ask-light/tests/); user guide at [docs/skills/ask-light.md](docs/skills/ask-light.md).
 - **Installation path:** `skills/ask-light/` in a host-recognized Skills root.
+
+## Newly admitted Skill
+
+### recap
+
+- **Purpose:** Generate exactly one line summarizing the current Agent session without continuing work or changing conversation history.
+- **Invocation:** User-invoked only; `$recap` is the sole entry point.
+- **Package:** [skills/recap/](skills/recap/)
+- **Status:** First-party admitted by prompt-only fast-track PASS; unreleased and not present in v0.1.1.
+- **Evidence:** Contract and output-contract tests under [skills/recap/tests/](skills/recap/tests/), [user guide](docs/skills/recap.md), and [admission evidence](docs/evidence/admissions/recap/README.md).
+- **Installation path:** `skills/recap/` in a host-recognized Skills root.
+
+## Remaining admitted Skills
 
 ### learn-anything
 

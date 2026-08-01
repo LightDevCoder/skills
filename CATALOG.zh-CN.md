@@ -2,15 +2,15 @@
 
 [English catalog](CATALOG.md)
 
-本目录从 `skills/` 下的五个准入包同步生成，是可读 inventory，不是静态 workflow router，也不代表某个 Agent host 当前已经安装了哪些 Skill。
+本目录从 `skills/` 下六个已准入包同步生成，是可读 inventory，不是静态 workflow router，也不代表某个 Agent host 当前已经安装了哪些 Skill。
 
 ## 集合状态
 
 | 字段 | 值 |
 | --- | --- |
 | 集合 | Personal Skills Collection |
-| 包数量 | 5 个第一方 Skill |
-| 当前状态 | v0.1.1 已发布且可安装；独立 `review-loop agent-skill` 证据仍为 `BLOCKED` |
+| 包数量 | 本分支 6 个已准入第一方 Skill；稳定 v0.1.1 包含 5 个 |
+| 当前状态 | `recap` 已通过低风险纯提示型快速通道但尚未发布；v0.1.1 继续可安装 |
 | 稳定版本 | [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1) |
 | 安装权威 | [docs/INSTALLATION.zh-CN.md](docs/INSTALLATION.zh-CN.md) |
 | 发现检查 | [collection-discovery-tests.ps1](tests/collection-discovery-tests.ps1) |
@@ -44,6 +44,19 @@
 - **状态：** 第一方已准入；支持显式 `next` 和 `workflow` 模式。
 - **证据：** [scanner tests](skills/ask-light/tests/)；[使用指南](docs/zh-CN/skills/ask-light.md)。
 - **安装路径：** host 认可的 Skills root 下的 `skills/ask-light/`。
+
+## 新准入 Skill
+
+### recap
+
+- **作用：** 用严格一行总结当前 Agent session，不继续工作，也不改变会话历史。
+- **调用：** 仅 user-invoked；唯一入口是 `$recap`。
+- **包：** [skills/recap/](skills/recap/)
+- **状态：** 已通过纯提示型快速通道 `PASS` 准入；尚未发布，v0.1.1 不包含它。
+- **证据：** [package tests](skills/recap/tests/)、[使用指南](docs/zh-CN/skills/recap.md)与[准入证据](docs/evidence/admissions/recap/README.zh-CN.md)。
+- **安装路径：** host 认可的 Skills root 下的 `skills/recap/`。
+
+## 其余已准入 Skill
 
 ### learn-anything
 

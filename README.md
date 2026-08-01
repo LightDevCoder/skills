@@ -4,9 +4,9 @@
 
 # Personal Skills Collection
 
-`LightDevCoder/skills` is the public, first-party home for five installable
-Agent Skills. Each package is independently discoverable, explicit about its
-invocation boundary, and small enough to inspect before use.
+`LightDevCoder/skills` is the public, first-party home for six installable
+Agent Skills on the current branch. Each package is independently discoverable,
+explicit about its invocation boundary, and small enough to inspect before use.
 
 > **About:** Personal Skills Collection — Drive your creativity
 
@@ -21,6 +21,9 @@ invocation boundary, and small enough to inspect before use.
 > fresh independent evaluator record is not attached. This does not block
 > installation or ordinary use; see the [release receipt](docs/evidence/releases/v0.1.1/RELEASE_RECEIPT.md)
 > and [limitations](docs/evidence/releases/v0.1.1/LIMITATIONS.md) for the detailed boundary.
+>
+> **Current branch admission:** `recap` passed the low-risk prompt-only fast
+> track for this change. It is still unreleased; stable `v0.1.1` contains the original five packages.
 
 ## Quick Start
 
@@ -48,11 +51,12 @@ The first useful entry point when the next move is unclear is `$ask-light`:
 $ask-light next
 ```
 
-Three short examples:
+Four short examples:
 
 ```text
 $ask-light next       # recommend one next Skill; do not invoke it
 $project-init         # initialize a confirmed minimal project preset
+$recap                # summarize the current session in one line
 $review-loop init     # freeze an already-approved acceptance baseline
 ```
 
@@ -64,8 +68,8 @@ outputs, handoffs, and stopping boundaries.
 
 ## External capabilities
 
-The five packages above are the core collection: installing this repository
-provides all five first-party Skills listed in the catalog.
+The current branch contains six admitted first-party packages: the five in
+v0.1.1 plus the newly admitted, unreleased `recap` package.
 
 Optional workflow capabilities are external or third-party dependencies and are
 not included by default:
@@ -94,6 +98,7 @@ check their availability before selecting a workflow that names them.
 | [review-loop](skills/review-loop/SKILL.md) | Run bounded evidence, repair, and final-acceptance loops. | Model-invoked; manual entry point is supported. | skills/review-loop/ |
 | [project-init](skills/project-init/SKILL.md) | Initialize a confirmed software, manuscript, research, knowledge, data, or Skill-development project preset. | User-invoked only. | skills/project-init/ |
 | [ask-light](skills/ask-light/SKILL.md) | Inspect the active host and recommend one appropriate next Skill or bounded recipe without executing it. | User-invoked only. | skills/ask-light/ |
+| [recap](skills/recap/SKILL.md) | Summarize the current Agent session in exactly one line without changing history or continuing the task. | User-invoked only. | skills/recap/ |
 | [learn-anything](skills/learn-anything/SKILL.md) | Distill sufficiently evidenced source material into reusable Agent Skill methods. | User-invoked only. | skills/learn-anything/ |
 | [manuscript-ops](skills/manuscript-ops/SKILL.md) | Govern reproducible manuscript engineering across formats, batches, reviews, and handoffs. | Model-invoked; manual entry point is supported. | skills/manuscript-ops/ |
 
@@ -135,4 +140,5 @@ and is never copied into this public collection.
 - [Catalog](CATALOG.md)
 - [Changelog](CHANGELOG.md)
 - [Release receipt](docs/evidence/releases/v0.1.1/RELEASE_RECEIPT.md)
+- [recap admission evidence](docs/evidence/admissions/recap/README.md)
 - [Collection discovery test](tests/collection-discovery-tests.ps1)

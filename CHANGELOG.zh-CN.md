@@ -4,6 +4,20 @@
 
 所有变更都必须记录在实际版本/tag 对应的条目中，不能因为文档已起草就提前宣称 release。
 
+## Unreleased
+
+### 新增
+
+- 提议新增第一方、仅 user-invoked 的 `recap` Skill。用户显式调用 `$recap`
+  后只返回一行当前 session 总结；不会运行工具、继续任务、修改文件、压缩历史或调用其他 Skill。
+- 新增 `recap` 双语指南、package contract/output-contract tests、collection discovery
+  覆盖、fresh-copy 安装证据和独立 `review-loop agent-skill` 准入证据。
+- 新增低风险纯提示型准入快速通道：仅适用于 owner-authored、manual-only、
+  只输出文本、无工具/副作用/runtime executable/外部依赖的 Skill；只需一个
+  fresh Evaluator，不再要求额外 Critic 或 Standards/Spec review。
+
+`recap` 已获得低风险纯提示型快速通道 final `PASS`。本条目不宣称 release tag 或已验证的已发布安装命令；稳定 v0.1.1 仍包含五个包。
+
 ## 0.1.1 — 2026-07-26
 
 ### 新增

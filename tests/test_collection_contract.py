@@ -4,7 +4,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED = {"ask-light", "learn-anything", "manuscript-ops", "project-init", "review-loop"}
+EXPECTED = {"ask-light", "learn-anything", "manuscript-ops", "project-init", "recap", "review-loop"}
 
 
 class CollectionContractTests(unittest.TestCase):
@@ -42,11 +42,23 @@ class CollectionContractTests(unittest.TestCase):
         for relative in paths:
             self.check((ROOT / relative).is_file(), f"missing required file {relative}")
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        catalog = (ROOT / "CATALOG.md").read_text(encoding="utf-8")
         installation = (ROOT / "docs/INSTALLATION.md").read_text(encoding="utf-8")
+        admission = (ROOT / "docs/SKILL_ADMISSION.md").read_text(encoding="utf-8")
+        admission_zh = (ROOT / "docs/SKILL_ADMISSION.zh-CN.md").read_text(encoding="utf-8")
+        review_policy = (ROOT / "docs/REVIEW_POLICY.md").read_text(encoding="utf-8")
+        review_policy_zh = (ROOT / "docs/REVIEW_POLICY.zh-CN.md").read_text(encoding="utf-8")
         self.check("npx skills add LightDevCoder/skills#v0.1.1" in readme, "README pinned whole install")
         self.check("npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop" in installation, "installation pinned per-Skill install")
         self.check("default revision" in installation and "#ref" in installation, "installation revision semantics")
         self.check("LightDevCoder/skills" in readme and "Drive your creativity" in readme, "homepage about copy")
+        self.check(re.search(r"stable[^\n]{0,40}v0\.1\.1[^\n]{0,120}five", readme, re.I) is not None, "README stable v0.1.1 five-package boundary")
+        self.check("5 admitted first-party Skills in stable v0.1.1" in catalog, "catalog stable v0.1.1 five-package boundary")
+        for label, text in (("admission", admission), ("admission zh-CN", admission_zh),
+                            ("review policy", review_policy), ("review policy zh-CN", review_policy_zh)):
+            self.check(re.search(r"prompt-only|纯提示型", text) is not None, f"{label} prompt-only fast track")
+            self.check("fresh independent Evaluator" in text, f"{label} independent evaluator boundary")
+            self.check("Critic" in text and "code-review" in text, f"{label} omitted specialist boundaries")
 
     @classmethod
     def tearDownClass(cls) -> None:

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Session Recap"
+  short_description: "Summarize the current session in exactly one line"
+  default_prompt: "Use $recap to summarize the current session in exactly one line."
+
+policy:
+  allow_implicit_invocation: false

@@ -8,7 +8,7 @@
 
 每个事实只保留一个 authority，其他位置链接过去：包行为/触发/调用/输入/输出/资源以 `skills/<skill-name>/SKILL.md` 为准；变换包的 provenance 在 `ATTRIBUTION.md`；可读目录是 `CATALOG.md`；安装与证据是 `docs/INSTALLATION.md`；审查和 verdict 规则是 `docs/REVIEW_POLICY.md`；历史和 release notes 是 `CHANGELOG.md` 与真实 release；组合验证资产在 `docs/workflows/`。
 
-当前集合必须恰好包含 `review-loop`、`project-init`、`ask-light`、`learn-anything`、`manuscript-ops`。`collection-discovery-tests.ps1` 负责检查包名、metadata、目录、README 链接、头图、治理路径、双语配对和退休 orchestration 边界，但不证明 runtime 或 fresh installation。
+本分支的准入集合必须恰好包含 `review-loop`、`project-init`、`ask-light`、`learn-anything`、`manuscript-ops` 和 `recap`。`recap` 已通过纯提示型快速通道，但尚未发布；稳定 v0.1.1 仍包含原来的五个已准入包。`collection-discovery-tests.ps1` 负责检查包名、metadata、目录、README 链接、头图、治理路径、双语配对和退休 orchestration 边界，但不证明 runtime 或 fresh installation。
 
 ## 变更流程与同步矩阵
 
@@ -16,14 +16,14 @@
 
 1. 先执行 [Skill 准入](SKILL_ADMISSION.zh-CN.md) 的 reuse-before-invention 与 ownership gate。
 2. 保留包边界、invocation direction、attribution 和必要资源。
-3. 收集 structural、fresh-install、behavioral、invocation、script 和 review evidence，并准确标注 evidence class。
+3. 先判断是否符合低风险纯提示型快速通道，否则走完整路径；只收集对应路线要求的 evidence，并准确标注 evidence class。
 4. 执行[审查策略](REVIEW_POLICY.zh-CN.md)的 review trigger。
 5. 同步 README、目录、安装说明、治理链接、affected recipes、discovery tests、attribution 和 changelog。
 6. 未通过真实 release gate 前，不把版本、tag 或安装命令写成已验证。
 
 | 变更 | 必须检查 |
 | --- | --- |
-| Add | README、catalog、installation、governance、recipes、ask-light discovery、changelog、attribution、fresh-install evidence。 |
+| Add | README、catalog、installation、governance、受影响 recipes、discovery tests、changelog、适用 attribution、fresh-install evidence，以及所选快速或完整路径的 verdict。 |
 | Update | 包 contract/behavior evidence、受影响目录/安装/attribution/recipes/discovery、兼容性和 changelog。 |
 | Rename | old-to-new migration、链接、目录、installer、测试、attribution 和 changelog。 |
 | Deprecate | catalog 状态、replacement/migration、安装警告、示例、测试、changelog 和 release notes。 |

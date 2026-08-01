@@ -21,8 +21,10 @@ Keep each fact in one authoritative location and link to it elsewhere:
 
 ## Current synchronization baseline
 
-The admitted collection currently contains exactly review-loop, project-init,
-ask-light, learn-anything, and manuscript-ops. The cross-reference check at
+The admitted collection on this branch contains exactly review-loop,
+project-init, ask-light, learn-anything, manuscript-ops, and recap. The recap
+package passed the prompt-only fast track but remains unreleased. Stable v0.1.1
+contains the original five admitted packages. The check at
 [tests/collection-discovery-tests.ps1](../tests/collection-discovery-tests.ps1)
 guards package names, metadata, catalog entries, README links, header assets,
 required governance paths, and the retired orchestration boundary.
@@ -38,8 +40,8 @@ For every add, update, rename, deprecation, or removal:
    [Skill admission](SKILL_ADMISSION.md).
 2. Preserve the package boundary, invocation direction, and required
    attribution.
-3. Collect structural, fresh-install, behavioral, invocation, and review
-   evidence appropriate to the change.
+3. Classify the change as an eligible low-risk prompt-only fast track or the
+   full path, then collect only the evidence required by that route.
 4. Apply the review trigger in [review policy](REVIEW_POLICY.md).
 5. Synchronize the README, catalog, installation guide, governance links,
    affected composition examples, discovery tests, attribution records, and
@@ -51,7 +53,7 @@ For every add, update, rename, deprecation, or removal:
 
 | Change | Documentation and validation that must be reviewed |
 | --- | --- |
-| Add | Root README, catalog, installation guide, governance references, validated composition examples, ask-light discovery tests, changelog, attribution, and fresh-install evidence. |
+| Add | Root README, catalog, installation guide, governance references, affected validated composition examples, discovery tests, changelog, applicable attribution, fresh-install evidence, and the selected fast-track or full-path verdict. |
 | Update | Package description and behavior evidence; affected catalog, installation, attribution, examples, discovery tests, compatibility evidence, and changelog. |
 | Rename | Old-to-new migration guidance; all links, catalog records, installer examples, discovery tests, examples, attribution references, and changelog. |
 | Deprecate | Catalog status, README guidance, replacement or migration path, installation warning, examples, discovery tests, changelog, and release notes. |

@@ -13,7 +13,8 @@ Use this policy for:
 - a new Skill admission;
 - a change to a Skill's behavior, trigger, invocation type, boundary,
   dependency, resource, or attribution;
-- any executable script, test, or installer behavior change;
+- any runtime executable script, shared test infrastructure, or installer
+  behavior change;
 - a rename, deprecation, or removal that changes discovery, installation, or
   migration behavior; and
 - a release candidate containing any of the above.
@@ -26,6 +27,7 @@ cross-reference inspection. They do not substitute for the future package-level
 
 | Change | Required final review | Additional specialist evidence |
 | --- | --- | --- |
+| Eligible low-risk prompt-only Skill | One fresh independent Evaluator using the fast track in [admission](SKILL_ADMISSION.md) | Structure/metadata, isolated copy/discovery, deterministic positive/negative contract tests, explicit-use/non-trigger observations, and synchronized docs. No separate Critic or `code-review`. |
 | New or materially changed first-party Skill | `review-loop` using the `agent-skill` Profile | Structural, fresh-install, behavioral, invocation, and attribution evidence. |
 | Skill with executable scripts | `review-loop` using the `agent-skill` Profile | Focused automated and negative tests, adversarial or mutation fixtures where appropriate, and `code-review`. |
 | Software artifact inside a Skill | `review-loop` owns the final verdict; use the applicable profile | `code-review` supplies software standards and Spec findings. |
@@ -35,6 +37,11 @@ cross-reference inspection. They do not substitute for the future package-level
 `code-review` remains a specialist reviewer. It does not own the Program or
 package final acceptance verdict.
 
+Self-contained validation tests for an eligible prompt-only Skill do not by
+themselves trigger the executable-script row. If a test exercises product
+code, shared helpers, installers, hooks, subprocesses, network access, or other
+runtime behavior, the fast track is unavailable and specialist review applies.
+
 ## Evidence and independence
 
 Producer evidence must identify exact commands, environment, inputs, outputs,
@@ -42,9 +49,10 @@ revisions, scope, and limitations. The reviewer checks that each evidence item
 is correctly labeled as structural, installation, behavioral, invocation,
 script, or review evidence.
 
-The Producer performs repairs. Critics and Evaluators remain read-only. The
-final evaluation must use a fresh, independent Evaluator with the frozen
-acceptance source and admissible evidence, rather than an intended conclusion.
+The Producer performs repairs. Critics, when required, and Evaluators remain
+read-only. Every final evaluation uses a fresh, independent Evaluator with the
+frozen acceptance source and admissible evidence, rather than an intended
+conclusion. The fast track omits the separate Critic stage.
 
 ## Bounded repair and verdicts
 

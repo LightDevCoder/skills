@@ -32,6 +32,10 @@ npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop --yes --copy --ag
 
 第一条安装五个包，第二条选择同一 tag 下的完整单包。已验证的 CLI version、destination 类别、discovery 和 smoke result 见 [v0.1.1 安装记录](evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.zh-CN.md)。
 
+## 未发布的 `recap` 包
+
+`recap` 已通过纯提示型快速通道在本分支准入，但 v0.1.1 不包含它。它的 fresh-copy 安装与 discovery 检查见[准入记录](evidence/admissions/recap/README.zh-CN.md)。不要把无 fragment 的默认分支命令写成稳定 release pin；只有新 tag 已创建、并在 fresh 环境中针对已发布仓库成功运行后，才能发布 pinned `recap` 安装命令。
+
 ## 安装范围
 
 | 范围 | destination 规则 | 必需证据 |

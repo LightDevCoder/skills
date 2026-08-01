@@ -9,4 +9,4 @@
 - [Ask Light 显式选择下一步](first-party-composition.md)
 - [工作流 recipes](recipes.md)
 
-完整的第一方组合示例见[英文版示例](../../workflows/first-party-composition.md)；当前五个包的 behavior authority 仍在各自 `SKILL.md`。外部 workflow 能力不属于本仓库默认安装内容，且不会由这些示例自动安装。
+完整的第一方组合示例见[英文版示例](../../workflows/first-party-composition.md)；当前六个包的 behavior authority 仍在各自 `SKILL.md`。外部 workflow 能力不属于本仓库默认安装内容，且不会由这些示例自动安装。
