@@ -382,6 +382,7 @@ class ManuscriptProfileBehaviorTest(unittest.TestCase):
             assert_manuscript_evaluator_record(c, limit_evaluator, overall_outcome="BLOCKED", format_outcome="BLOCKED", image_label="structural", name="maximum-round manuscript Evaluator records all axes and valid labels")
             c.check(scenario.state().status == "BLOCKED" and bool(re.search(r"(?m)^Blocker: maximum rounds", scenario.state().raw)), "maximum repair round returns generic BLOCKED")
 
+        self.assertGreater(c.assertions, 0)
         self.assertFalse(c.failures, f"manuscript-profile behavior failed: {c.failures}")
 
 

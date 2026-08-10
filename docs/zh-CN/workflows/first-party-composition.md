@@ -27,7 +27,7 @@ Agent 已有 goal、artifacts、blockers、project type、task kind、availabili
 
 - 六个包的 `SKILL.md`。
 - [ask-light discovery contract](../../../skills/ask-light/references/discovery-contract.md)。
-- [collection discovery test](../../../tests/collection-discovery-tests.ps1)。
+- [collection discovery 测试](../../../tests/test_collection_discovery.py)。
 - [v0.1.1 发布证据](../../evidence/releases/v0.1.1/RELEASE_RECEIPT.zh-CN.md)。
 - [recap 准入证据](../../evidence/admissions/recap/README.zh-CN.md)。
 

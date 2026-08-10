@@ -80,6 +80,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 class ProjectInitBehaviorTest(unittest.TestCase):
     def test_project_init_behavior(self) -> None:
         assertions, failures = run_checks()
+        self.assertGreater(assertions, 0)
         self.assertFalse(failures, f"project-init behavior failed: {failures}")
 
 

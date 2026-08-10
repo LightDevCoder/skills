@@ -81,6 +81,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 class HeaderAssetsTest(unittest.TestCase):
     def test_header_assets(self) -> None:
         assertions, failures = run_checks()
+        self.assertGreater(assertions, 0)
         self.assertFalse(failures, f"HEADER_ASSETS=FAIL: {failures}")
 
 

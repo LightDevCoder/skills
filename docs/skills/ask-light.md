@@ -62,7 +62,7 @@ verdict. Stop after the recommendation or the `NEED-INPUT`/`BLOCKED` record.
 For the published v0.1.2 release, install with `npx skills add LightDevCoder/skills --skill ask-light --yes --copy --agent '*'`,
 refresh, and inspect `SKILL.md`, `agents/openai.yaml`, and the PowerShell
 scanner without the source checkout. Run
-[ask-light contract tests](../../skills/ask-light/tests/ask-light-contract-tests.ps1)
-and [behavior tests](../../skills/ask-light/tests/ask-light-behavior-tests.ps1),
+[ask-light contract tests](../../skills/ask-light/tests/test_ask_light_contract.py)
+and [behavior tests](../../skills/ask-light/tests/test_ask_light_behavior.py),
 including the learn-anything, missing-private-dependency, and ambiguity
 fixtures.

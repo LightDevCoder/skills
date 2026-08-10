@@ -9,6 +9,7 @@ from __future__ import annotations
 import os
 import re
 import sys
+import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -17,6 +18,9 @@ sys.path.insert(0, str(ROOT / "skills" / "recap" / "tests"))
 sys.path.insert(0, str(ROOT / "skills" / "language-learning" / "tests"))
 
 from check_helpers import Checks, read  # noqa: E402
+from test_recap_contract import run_checks as recap_checks  # noqa: E402
+from test_recap_output_contract import run_checks as recap_output_checks  # noqa: E402
+from test_language_learning_contract import run_checks as ll_checks  # noqa: E402
 
 EXPECTED = [
     "ask-light",
@@ -67,8 +71,8 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.check(not re.search(r"not a verified command|<owner>/<repository>", installation), "Installation guide still contains unresolved pre-release command wording.")
     c.check("Manual fallback" in installation, "Installation guide must retain a manual fallback.")
     c.check(
-        all(token in installation for token in ("$sourceRoot", "$skillName", "$destinationRoot")),
-        "Manual fallback must use valid PowerShell variables.",
+        all(token in installation for token in ("source_root", "skill_name", "destination_root")),
+        "Manual fallback must use valid shell variables.",
     )
     c.check(bool(re.search(r"(?is)v0\.1\.2.{0,120}is published from commit", readme)), "README must present v0.1.2 as the published release.")
     c.check("7 admitted first-party Skills" in catalog, "Catalog must present the published v0.1.2 seven-package collection.")
@@ -124,7 +128,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
             if re.match(r"^https?://", link) or not link:
                 continue
             resolved = path.parent / link
-            c.check(resolved.is_file(), f"{file} contains an unresolved Markdown link: {link}")
+            c.check(resolved.exists(), f"{file} contains an unresolved Markdown link: {link}")
 
     retired = 0
     for p in (root / "skills").rglob("*"):
@@ -283,33 +287,36 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
             if re.match(r"^https?://", link) or not link:
                 continue
             resolved = path.parent / link
-            c.check(resolved.is_file(), f"{file} contains an unresolved relative link: {link}")
+            c.check(resolved.exists(), f"{file} contains an unresolved relative link: {link}")
 
     return c.assertions, c.failures
 
 
+class CollectionDiscoveryTest(unittest.TestCase):
+    def test_collection_discovery(self) -> None:
+        assertions, failures = run_checks()
+        self.assertGreater(assertions, 0)
+        self.assertFalse(failures, f"COLLECTION_DISCOVERY=FAIL: {failures}")
+
+
+class RecapContractCompositionTest(unittest.TestCase):
+    def test_recap_contract_composition(self) -> None:
+        assertions, failures = recap_checks()
+        self.assertGreater(assertions, 0)
+        self.assertFalse(failures, f"RECAP_CONTRACT=FAIL: {failures}")
+
+    def test_recap_output_contract_composition(self) -> None:
+        assertions, failures = recap_output_checks()
+        self.assertGreater(assertions, 0)
+        self.assertFalse(failures, f"RECAP_OUTPUT_CONTRACT=FAIL: {failures}")
+
+
+class LanguageLearningContractCompositionTest(unittest.TestCase):
+    def test_language_learning_contract_composition(self) -> None:
+        assertions, failures = ll_checks()
+        self.assertGreater(assertions, 0)
+        self.assertFalse(failures, f"LANGUAGE_LEARNING_CONTRACT=FAIL: {failures}")
+
+
 if __name__ == "__main__":
-    import unittest
-
-    from test_recap_contract import run_checks as recap_checks
-    from test_recap_output_contract import run_checks as recap_output_checks
-    from test_language_learning_contract import run_checks as ll_checks
-
-    class CollectionDiscoveryTest(unittest.TestCase):
-        def test_collection_discovery(self) -> None:
-            assertions, failures = run_checks()
-            self.assertFalse(failures, f"COLLECTION_DISCOVERY=FAIL: {failures}")
-
-        def test_recap_contract_composition(self) -> None:
-            assertions, failures = recap_checks()
-            self.assertFalse(failures, f"RECAP_CONTRACT=FAIL: {failures}")
-
-        def test_recap_output_contract_composition(self) -> None:
-            assertions, failures = recap_output_checks()
-            self.assertFalse(failures, f"RECAP_OUTPUT_CONTRACT=FAIL: {failures}")
-
-        def test_language_learning_contract_composition(self) -> None:
-            assertions, failures = ll_checks()
-            self.assertFalse(failures, f"LANGUAGE_LEARNING_CONTRACT=FAIL: {failures}")
-
     unittest.main(verbosity=2)

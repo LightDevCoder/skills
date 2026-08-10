@@ -431,6 +431,7 @@ class SoftwareProfileBehaviorTest(unittest.TestCase):
             c.check(scenario.state().status == "BLOCKED", "maximum-round stop returns BLOCKED")
             assert_evaluator_record(c, limit_evaluator, overall_outcome="BLOCKED", standards_outcome="BLOCKED", spec_outcome="BLOCKED", behavior_outcome="BLOCKED", safety_outcome="BLOCKED", name="maximum-round BLOCKED Evaluator record includes every criterion with linked evidence, labels, and BLOCKED outcome")
 
+        self.assertGreater(c.assertions, 0)
         self.assertFalse(c.failures, f"software-profile behavior failed: {c.failures}")
 
 

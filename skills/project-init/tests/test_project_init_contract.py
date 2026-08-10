@@ -46,6 +46,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 class ProjectInitContractTest(unittest.TestCase):
     def test_project_init_contract(self) -> None:
         assertions, failures = run_checks()
+        self.assertGreater(assertions, 0)
         self.assertFalse(failures, f"project-init contract failed: {failures}")
 
 

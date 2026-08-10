@@ -43,6 +43,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 class QuickStartSmokeTest(unittest.TestCase):
     def test_quick_start_smoke(self) -> None:
         assertions, failures = run_checks()
+        self.assertGreater(assertions, 0)
         self.assertFalse(failures, f"QUICK_START=FAIL: {failures}")
 
 

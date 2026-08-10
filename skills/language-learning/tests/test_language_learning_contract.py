@@ -92,6 +92,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 class LanguageLearningContractTest(unittest.TestCase):
     def test_language_learning_contract(self) -> None:
         assertions, failures = run_checks()
+        self.assertGreater(assertions, 0)
         self.assertFalse(failures, f"LANGUAGE_LEARNING_CONTRACT=FAIL: {failures}")
 
 

@@ -387,6 +387,7 @@ class SpecificationProfileBehaviorTest(unittest.TestCase):
             assert_specification_evaluator_record(c, limit_evaluator, overall_outcome="BLOCKED", name="maximum-round stop records Core BLOCKED evidence")
             c.check(scenario.state().status == "BLOCKED" and "maximum rounds" in scenario.state().raw, "maximum repair round returns generic BLOCKED")
 
+        self.assertGreater(c.assertions, 0)
         self.assertFalse(c.failures, f"specification-profile behavior failed: {c.failures}")
 
 

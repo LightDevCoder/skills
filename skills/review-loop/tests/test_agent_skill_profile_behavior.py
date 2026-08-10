@@ -407,6 +407,7 @@ class AgentSkillProfileBehaviorTest(unittest.TestCase):
             assert_agent_skill_evaluator_record(c, limit_evaluator, overall_outcome="BLOCKED", executable_outcome="BLOCKED", name="maximum-round Agent-Skill Evaluator records all axes and valid labels")
             c.check(scenario.state().status == "BLOCKED" and "maximum rounds" in scenario.state().raw, "maximum repair round returns generic Core BLOCKED")
 
+        self.assertGreater(c.assertions, 0)
         self.assertFalse(c.failures, f"agent-skill-profile behavior failed: {c.failures}")
 
 

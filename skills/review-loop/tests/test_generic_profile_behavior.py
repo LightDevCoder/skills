@@ -232,6 +232,7 @@ class GenericProfileBehaviorTest(unittest.TestCase):
             scenario.evaluate(c, passed=False, independent_context=True, repair_available=True, maximum_round=1)
             c.check(scenario.state().status == "BLOCKED" and "repair limit" in scenario.state().next, "maximum-round stop returns BLOCKED")
 
+        self.assertGreater(c.assertions, 0)
         self.assertFalse(c.failures, f"generic-profile behavior failed: {c.failures}")
 
 

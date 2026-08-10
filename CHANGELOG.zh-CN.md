@@ -4,6 +4,26 @@
 
 所有变更都必须记录在实际版本/tag 对应的条目中，不能因为文档已起草就提前宣称 release。
 
+## 0.1.3 — 2026-08-10
+
+### 变更
+
+- 测试工具链从 Windows PowerShell 迁移为跨平台 Python：21 个 PowerShell
+  测试文件替换为 18 个 Python 套件（collection discovery、header assets、
+  quick start、ask-light contract、project-init contract 与 behavior、
+  recap 两个 contract、language-learning contract、review-loop 五个
+  profile 的 contract 与 behavior 套件及协议 helpers），保留断言集。
+- ask-light scanner behavior 套件仍通过 `pwsh` 执行真实的
+  `scripts/ask-light.ps1`，pwsh 缺失时优雅跳过；CI（ubuntu-latest）自带
+  pwsh 并运行。
+- CI 迁至 `ubuntu-latest`（bash + python）；新增 retired-boundary 与
+  无 PowerShell 测试检查。
+- 文档更新为新测试文件名与跨平台手动 fallback 片段；治理措辞不变。
+
+### 证据
+
+- [docs/evidence/releases/v0.1.3/](docs/evidence/releases/v0.1.3/)
+
 ## 0.1.2 — 2026-08-10
 
 ### 新增

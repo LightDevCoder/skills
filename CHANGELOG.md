@@ -6,6 +6,28 @@ All notable changes are recorded here. A release entry must be tied to an
 actual version or tag and must not be created merely because a document was
 drafted.
 
+## 0.1.3 — 2026-08-10
+
+### Changed
+
+- Test toolchain migrated from Windows PowerShell to cross-platform Python:
+  21 PowerShell test files replaced by 18 Python suites (collection
+  discovery, header assets, quick start, ask-light contract, project-init
+  contract and behavior, recap contracts, language-learning contract, and
+  review-loop five-profile contract and behavior suites plus protocol
+  helpers), preserving the assertion sets.
+- The ask-light scanner behavior suite still executes the real
+  `scripts/ask-light.ps1` through `pwsh` and skips gracefully when pwsh is
+  absent; CI (ubuntu-latest) ships pwsh and runs it.
+- CI moved to `ubuntu-latest` (bash + python); retired-boundary and
+  no-PowerShell-test checks added.
+- Documentation updated for the new test file names and the cross-platform
+  manual-fallback snippet; governance wording unchanged.
+
+### Evidence
+
+- [docs/evidence/releases/v0.1.3/](docs/evidence/releases/v0.1.3/)
+
 ## 0.1.2 — 2026-08-10
 
 ### Added

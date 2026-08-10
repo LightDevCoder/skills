@@ -328,6 +328,7 @@ class AskLightBehaviorTest(unittest.TestCase):
             ambiguous_workflow = run_scanner(scanner, mode="workflow", roots_json=wf_roots, context_json=ambiguous_context)
             c.check(ambiguous_workflow.get("status") == "NEED-INPUT" and bool(re_match(r"No reliable workflow recipe", " ".join(ambiguous_workflow.get("gaps", [])))), "ambiguous workflow requests input instead of guessing")
 
+        self.assertGreater(c.assertions, 0)
         self.assertFalse(c.failures, f"ask-light behavior failed: {c.failures}")
 
 

@@ -51,6 +51,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 class RecapOutputContractTest(unittest.TestCase):
     def test_recap_output_contract(self) -> None:
         assertions, failures = run_checks()
+        self.assertGreater(assertions, 0)
         self.assertFalse(failures, f"RECAP_OUTPUT_CONTRACT=FAIL: {failures}")
 
 

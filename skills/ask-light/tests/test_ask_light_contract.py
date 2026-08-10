@@ -57,6 +57,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 class AskLightContractTest(unittest.TestCase):
     def test_ask_light_contract(self) -> None:
         assertions, failures = run_checks()
+        self.assertGreater(assertions, 0)
         self.assertFalse(failures, f"ask-light contract failed: {failures}")
 
 

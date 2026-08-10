@@ -13,7 +13,7 @@
 | 当前状态 | 已发布 v0.1.2；原有五个包的独立 `review-loop agent-skill` acceptance 仍为 BLOCKED |
 | 稳定版本 | [v0.1.2](https://github.com/LightDevCoder/skills/releases/tag/v0.1.2) |
 | 安装权威 | [docs/INSTALLATION.zh-CN.md](docs/INSTALLATION.zh-CN.md) |
-| 发现检查 | [collection-discovery-tests.ps1](tests/collection-discovery-tests.ps1) |
+| 发现检查 | [test_collection_discovery.py](tests/test_collection_discovery.py) |
 | 证据 | [v0.1.2 发布证据](docs/evidence/releases/v0.1.2/RELEASE_RECEIPT.zh-CN.md) |
 
 稳定 `v0.1.1` 包含原来的五个包；v0.1.2 加入 `recap` 与 `language-learning`，

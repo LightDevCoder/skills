@@ -25,10 +25,12 @@ class Checks:
         self.check((root / path).is_file(), f"{label}: missing file {path}")
 
     def require_match(self, label: str, text: str, pattern: str) -> None:
+        self.assertions += 1
         if not re.search(pattern, text, flags=re.MULTILINE | re.IGNORECASE):
             self.failures.append(f"{label}: expected /{pattern}/")
 
     def require_no_match(self, label: str, text: str, pattern: str) -> None:
+        self.assertions += 1
         if re.search(pattern, text, flags=re.MULTILINE | re.IGNORECASE):
             self.failures.append(f"{label}: must not contain /{pattern}/")
 

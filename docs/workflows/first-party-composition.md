@@ -43,7 +43,7 @@ The selected Skill keeps its own contract and evidence boundary.
 - Package contracts: the six skills/*/SKILL.md files.
 - Discovery contract: [ask-light discovery contract](../../skills/ask-light/references/discovery-contract.md).
 - Executable discovery check:
-  [collection-discovery-tests.ps1](../../tests/collection-discovery-tests.ps1).
+  [collection discovery tests](../../tests/test_collection_discovery.py).
 - Package admission evidence: the existing release records plus the
   [recap admission record](../evidence/admissions/recap/README.md).
 

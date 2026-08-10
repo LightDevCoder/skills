@@ -91,6 +91,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 class AgentSkillProfileContractTest(unittest.TestCase):
     def test_agent_skill_profile_contract(self) -> None:
         assertions, failures = run_checks()
+        self.assertGreater(assertions, 0)
         self.assertFalse(failures, f"agent-skill-profile contract failed: {failures}")
 
 

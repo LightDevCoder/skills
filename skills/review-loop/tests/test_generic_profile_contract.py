@@ -97,6 +97,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 class GenericProfileContractTest(unittest.TestCase):
     def test_generic_profile_contract(self) -> None:
         assertions, failures = run_checks()
+        self.assertGreater(assertions, 0)
         self.assertFalse(failures, f"generic-profile contract failed: {failures}")
 
 

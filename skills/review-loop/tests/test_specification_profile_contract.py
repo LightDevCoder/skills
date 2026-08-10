@@ -89,6 +89,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 class SpecificationProfileContractTest(unittest.TestCase):
     def test_specification_profile_contract(self) -> None:
         assertions, failures = run_checks()
+        self.assertGreater(assertions, 0)
         self.assertFalse(failures, f"specification-profile contract failed: {failures}")
 
 

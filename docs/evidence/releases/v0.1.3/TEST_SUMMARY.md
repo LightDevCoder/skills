@@ -20,10 +20,12 @@ Actions `ubuntu-latest` (CI, Python 3.11). No PowerShell test files remain.
 | Retired package boundary | `grep -rn -E "project-workflow|to-manuscript-spec" skills/` | PASS (no hits) | PASS |
 | No PowerShell test files | `find . -path "*/tests/*.ps1"` | PASS (0) | PASS |
 
-Assertion counts preserved from the PowerShell suites: recap contract (14),
-recap output contract (5), language-learning contract (33), collection
-discovery (1064+), review-loop per-profile contract/behavior scenarios
-unchanged.
+Assertion counts preserved from the PowerShell suites: recap contract (12),
+recap output contract (8), language-learning contract (33), collection
+discovery (1068+ including the composed recap/language-learning suites),
+review-loop per-profile contract/behavior scenarios unchanged. The
+collection-discovery suite runs under `unittest discover` (10 suites total)
+and the per-suite loop in CI.
 
 Structural checks do not replace fresh installation, discovery, or manual
 review evidence.
