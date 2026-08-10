@@ -56,7 +56,7 @@ discovery, specification, implementation, or final review.
 
 ## Installation and discovery check
 
-For the published v0.1.1 release, install with `npx skills add LightDevCoder/skills#v0.1.1 --skill project-init`,
+For the published v0.1.2 release, install with `npx skills add LightDevCoder/skills --skill project-init --yes --copy --agent '*'`,
 refresh the host, and confirm the package is discovered without the source
 checkout. Run the contract and behavior tests in
 [skills/project-init/tests/](../../skills/project-init/tests/) and record any

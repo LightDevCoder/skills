@@ -3,20 +3,17 @@
 [中文安装说明](INSTALLATION.zh-CN.md)
 
 The public first-party collection's current stable release is
-[v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1). The
-working tree also prepares v0.1.2 as a release candidate; its tag and
-fresh-install proof are still release-gate evidence. Until those are recorded,
-the v0.1.2 commands below are targets rather than verified installation claims.
-Package contracts remain inside `skills/<name>/`; this document is the
-installation authority and does not replace host-specific discovery rules.
+[v0.1.2](https://github.com/LightDevCoder/skills/releases/tag/v0.1.2),
+published from commit `8de5ec1a453b0e93f71dcda160e17ea7b42c3997`. Package
+contracts remain inside `skills/<name>/`; this document is the installation
+authority and does not replace host-specific discovery rules.
 
 The standard install command is the generic `latest` form: it follows the
 repository's default revision, so every `npx skills add
 LightDevCoder/skills` install gets the current collection on the default
-branch. A pinned `#v0.1.2` form exists for reproducibility once the release
-gate passes. The
-[installation verification](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.md)
-will record both forms against a fresh destination.
+branch. A pinned `#v0.1.2` form exists for reproducible installs. Both forms
+were verified against fresh destinations; see the
+[installation verification](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.md).
 
 ## Revision semantics
 
@@ -28,15 +25,15 @@ and [Git helper](https://raw.githubusercontent.com/vercel-labs/skills/main/src/g
 
 The generic `latest` command below uses no fragment and therefore follows the
 repository's default revision: it installs the current collection and is the
-standard way to install. The pinned `#v0.1.2` form selects that specific
-candidate tag once published and is retained for reproducible installs and
-release verification. Neither form is a claim about a future default revision;
-re-run discovery against the fresh destination for the resolved content.
+standard way to install. The pinned `#v0.1.2` form selects the published tag
+and is retained for reproducible installs and release verification. Neither
+form is a claim about a future default revision; re-run discovery against the
+fresh destination for the resolved content.
 
-## Target v0.1.2 release commands
+## v0.1.2 release commands
 
-The target install commands follow the repository's default revision and
-install the current seven-package collection once the release gate passes:
+The current release install commands follow the repository's default revision
+and install the seven-package collection:
 
 ```text
 npx skills add LightDevCoder/skills --yes --copy --agent '*'
@@ -44,12 +41,11 @@ npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'
 ```
 
 The first installs the seven-package collection and the second selects one
-complete package from the same revision. Both forms are targets until the
-release gate passes and are then verified against fresh destinations in the
+complete package from the same revision. Both forms are verified against fresh
+destinations in the
 [v0.1.2 installation record](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.md).
 
-For a reproducible pinned install once the tag exists, use the same command
-with the explicit tag:
+For a reproducible pinned install, use the same command with the explicit tag:
 
 ```text
 npx skills add LightDevCoder/skills#v0.1.2 --yes --copy --agent '*'
@@ -95,10 +91,10 @@ unqualified source follows the repository's default revision and is not a
 permanent pin. The current release commands above use the generic `latest` form
 or the explicit `#v0.1.2` tag.
 
-## Prepared `recap` and `language-learning` packages
+## `recap` and `language-learning` packages
 
-`recap` and `language-learning` are admitted first-party packages and are
-prepared as the v0.1.2 release candidate. Their admission evidence is recorded
+`recap` and `language-learning` are admitted first-party packages released in
+v0.1.2 through the prompt-only fast track. Their admission evidence is recorded
 in
 [evidence/admissions/recap/README.md](evidence/admissions/recap/README.md) and
 [evidence/admissions/language-learning/README.md](evidence/admissions/language-learning/README.md).

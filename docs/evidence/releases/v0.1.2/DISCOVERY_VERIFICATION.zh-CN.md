@@ -4,10 +4,10 @@
 
 ## 状态
 
-`NOT TESTED — 将 tagged artifact 安装到 fresh destinations 并在无 source
-checkout 的条件下列出后填写。`
+`PASS — 从已发布的 v0.1.2 tag 与通用 latest 命令将 fresh destinations 安装完成，
+并在无 source checkout 的条件下列出。`
 
-本分支当前的本地集合测试返回 951 assertions 与 `COLLECTION_DISCOVERY=PASS`，
+本分支当前的本地集合测试返回 1064 assertions 与 `COLLECTION_DISCOVERY=PASS`，
 这是已准入树的 structural/discovery 证据，不是 fresh host installation proof。
 
 ## 必需观察
@@ -32,7 +32,10 @@ npx --yes skills add LightDevCoder/skills#v0.1.2 --skill review-loop --yes --cop
 npx --yes skills list
 ```
 
-观察结果：`NOT TESTED — 创建 release tag 后填写`。
+观察结果：CLI `1.5.22` 下四个命令均为 `PASS`。pinned `#v0.1.2` 整仓安装列出
+恰好七个包；pinned per-Skill 安装恰好列出 `review-loop`；通用 `latest` 整仓
+安装列出恰好七个包；通用 `latest` per-Skill 安装恰好列出 `review-loop`。
+任何 fresh destination 中均无 source checkout。
 
 ## 结构命令
 
@@ -40,5 +43,5 @@ npx --yes skills list
 powershell -File tests/collection-discovery-tests.ps1
 ```
 
-本地观察结果：`COLLECTION_DISCOVERY_ASSERTIONS=951`、`COLLECTION_DISCOVERY=PASS`。
+本地观察结果：`COLLECTION_DISCOVERY_ASSERTIONS=1064`、`COLLECTION_DISCOVERY=PASS`。
 这只是 structural/discovery 证据。

@@ -8,18 +8,18 @@ workflow and not a record of commands already run.
 
 ## 1. Install
 
-The commands below install the published v0.1.1 release. The output remains a
+The commands below install the published v0.1.2 release. The output remains a
 recommendation boundary; installation does not authorize automatic chaining.
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.1 --yes --copy --agent codex
+npx skills add LightDevCoder/skills --yes --copy --agent '*'
 ```
 
 Refresh the Agent host and confirm discovery without this source checkout.
 For a single package, use for example:
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.1 --skill ask-light
+npx skills add LightDevCoder/skills --skill ask-light --yes --copy --agent '*'
 ```
 
 ## 2. Inspect the example
@@ -52,5 +52,5 @@ After `$ask-light`, stop and let the user select the next Skill. After
 `$project-init`, stop before discovery/specification/implementation/final
 review. After `$review-loop`, stop at its durable `PASS`, `FAIL`, or `BLOCKED`
 verdict. See [workflow recipes](../../docs/workflows/recipes.md) for longer
-handoff examples and [fresh-install evidence](../../docs/evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md)
+handoff examples and [fresh-install evidence](../../docs/evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.md)
 for real release verification.

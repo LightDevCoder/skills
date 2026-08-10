@@ -12,39 +12,20 @@ Agent host.
 | Field | Value |
 | --- | --- |
 | Collection | Personal Skills Collection |
-| Package count | 7 admitted first-party Skills on this branch; 5 admitted first-party Skills in stable v0.1.1 |
-| Current state | Release candidate v0.1.2 — release gate pending; v0.1.1 remains the current stable release |
-| Stable release | [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1) |
+| Package count | 7 admitted first-party Skills |
+| Current state | Released v0.1.2; independent `review-loop agent-skill` acceptance remains BLOCKED for the original five |
+| Stable release | [v0.1.2](https://github.com/LightDevCoder/skills/releases/tag/v0.1.2) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/collection-discovery-tests.ps1](tests/collection-discovery-tests.ps1) |
 | Evidence | [v0.1.2 release evidence](docs/evidence/releases/v0.1.2/) |
 
-Stable `v0.1.1` contained the original five packages; the v0.1.2 release
-candidate adds `recap` and `language-learning`, targeting seven admitted
-first-party Skills.
+Stable `v0.1.1` contained the original five packages; v0.1.2 adds `recap` and
+`language-learning`, for seven admitted first-party Skills.
 
 No package in this table is an unmodified upstream copy. Direct upstream
 dependencies and modified third-party variants are documented separately.
 
 ## Admitted Skills
-
-### review-loop
-
-- **Purpose:** Run a generic final-acceptance and bounded-repair loop after the target and acceptance source are defined.
-- **Invocation:** Model-invoked, with a supported manual entry point.
-- **Package:** [skills/review-loop/](skills/review-loop/)
-- **Status:** Admitted first-party; generic, software, specification, manuscript, and agent-skill Profiles are included.
-- **Evidence:** Package and Profile tests under [skills/review-loop/tests/](skills/review-loop/tests/); user guide at [docs/skills/review-loop.md](docs/skills/review-loop.md).
-- **Installation path:** `skills/review-loop/` in a host-recognized Skills root.
-
-### project-init
-
-- **Purpose:** Initialize a confirmed project from a minimal preset while preserving existing instructions and validating resulting paths.
-- **Invocation:** User-invoked only.
-- **Package:** [skills/project-init/](skills/project-init/)
-- **Status:** Admitted first-party.
-- **Evidence:** Contract and behavior tests under [skills/project-init/tests/](skills/project-init/tests/); user guide at [docs/skills/project-init.md](docs/skills/project-init.md).
-- **Installation path:** `skills/project-init/` in a host-recognized Skills root.
 
 ### ask-light
 
@@ -55,27 +36,14 @@ dependencies and modified third-party variants are documented separately.
 - **Evidence:** Contract, scanner, and behavior tests under [skills/ask-light/tests/](skills/ask-light/tests/); user guide at [docs/skills/ask-light.md](docs/skills/ask-light.md).
 - **Installation path:** `skills/ask-light/` in a host-recognized Skills root.
 
-## Prepared as the v0.1.2 release candidate
-
-### recap
-
-- **Purpose:** Generate exactly one line summarizing the current Agent session without continuing work or changing conversation history.
-- **Invocation:** User-invoked only; `$recap` is the sole entry point.
-- **Package:** [skills/recap/](skills/recap/)
-- **Status:** First-party admitted by prompt-only fast-track PASS; prepared as the v0.1.2 release candidate.
-- **Evidence:** Contract and output-contract tests under [skills/recap/tests/](skills/recap/tests/), [user guide](docs/skills/recap.md), and [admission evidence](docs/evidence/admissions/recap/README.md).
-- **Installation path:** `skills/recap/` in a host-recognized Skills root.
-
 ### language-learning
 
 - **Purpose:** Tutor for any target language through six study modes — daily lessons, flashcards, conversation practice, grammar decoding, progress quizzes, and immersion translation.
 - **Invocation:** User-invoked only.
 - **Package:** [skills/language-learning/](skills/language-learning/)
-- **Status:** First-party admitted by prompt-only fast-track `PASS`; prepared as the v0.1.2 release candidate.
+- **Status:** First-party admitted by prompt-only fast-track `PASS`; released in v0.1.2.
 - **Evidence:** Contract tests under [skills/language-learning/tests/](skills/language-learning/tests/), [user guide](docs/skills/language-learning.md), and [admission evidence](docs/evidence/admissions/language-learning/README.md).
 - **Installation path:** `skills/language-learning/` in a host-recognized Skills root.
-
-## Remaining admitted Skills
 
 ### learn-anything
 
@@ -94,6 +62,33 @@ dependencies and modified third-party variants are documented separately.
 - **Status:** Admitted first-party; generic review mechanics delegate to `review-loop`.
 - **Evidence:** Package contract, referenced templates/scripts, and user guide at [docs/skills/manuscript-ops.md](docs/skills/manuscript-ops.md).
 - **Installation path:** `skills/manuscript-ops/` in a host-recognized Skills root.
+
+### project-init
+
+- **Purpose:** Initialize a confirmed project from a minimal preset while preserving existing instructions and validating resulting paths.
+- **Invocation:** User-invoked only.
+- **Package:** [skills/project-init/](skills/project-init/)
+- **Status:** Admitted first-party.
+- **Evidence:** Contract and behavior tests under [skills/project-init/tests/](skills/project-init/tests/); user guide at [docs/skills/project-init.md](docs/skills/project-init.md).
+- **Installation path:** `skills/project-init/` in a host-recognized Skills root.
+
+### recap
+
+- **Purpose:** Generate exactly one line summarizing the current Agent session without continuing work or changing conversation history.
+- **Invocation:** User-invoked only; `$recap` is the sole entry point.
+- **Package:** [skills/recap/](skills/recap/)
+- **Status:** First-party admitted by prompt-only fast-track PASS; released in v0.1.2.
+- **Evidence:** Contract and output-contract tests under [skills/recap/tests/](skills/recap/tests/), [user guide](docs/skills/recap.md), and [admission evidence](docs/evidence/admissions/recap/README.md).
+- **Installation path:** `skills/recap/` in a host-recognized Skills root.
+
+### review-loop
+
+- **Purpose:** Run a generic final-acceptance and bounded-repair loop after the target and acceptance source are defined.
+- **Invocation:** Model-invoked, with a supported manual entry point.
+- **Package:** [skills/review-loop/](skills/review-loop/)
+- **Status:** Admitted first-party; generic, software, specification, manuscript, and agent-skill Profiles are included.
+- **Evidence:** Package and Profile tests under [skills/review-loop/tests/](skills/review-loop/tests/); user guide at [docs/skills/review-loop.md](docs/skills/review-loop.md).
+- **Installation path:** `skills/review-loop/` in a host-recognized Skills root.
 
 ## Source-state boundaries
 

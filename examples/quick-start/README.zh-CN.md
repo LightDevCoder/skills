@@ -8,16 +8,16 @@
 
 ## 1. 安装
 
-下列命令安装已发布的 v0.1.1。示例输出仍然只展示选择边界；安装不会授权自动串联。
+下列命令安装已发布的 v0.1.2。示例输出仍然只展示选择边界；安装不会授权自动串联。
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.1 --yes --copy --agent codex
+npx skills add LightDevCoder/skills --yes --copy --agent '*'
 ```
 
 刷新 Agent host，并在脱离 source checkout 的情况下确认 discovery。只安装一个包时，例如：
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.1 --skill ask-light
+npx skills add LightDevCoder/skills --skill ask-light --yes --copy --agent '*'
 ```
 
 ## 2. 查看示例
@@ -41,4 +41,4 @@ Execution: recommendation only; nothing was invoked, installed, or orchestrated
 
 ## 4. 停止并 handoff
 
-`$ask-light` 后停止并等待用户选择；`$project-init` 后在 discovery/specification/implementation/final review 前停止；`$review-loop` 后在持久化的 `PASS`、`FAIL` 或 `BLOCKED` verdict 停止。每个 handoff 后都要停止并保留状态。更长的组合见[工作流 recipes](../../docs/zh-CN/workflows/recipes.md)，真实 release 验证见[安装证据](../../docs/evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.zh-CN.md)。
+`$ask-light` 后停止并等待用户选择；`$project-init` 后在 discovery/specification/implementation/final review 前停止；`$review-loop` 后在持久化的 `PASS`、`FAIL` 或 `BLOCKED` verdict 停止。每个 handoff 后都要停止并保留状态。更长的组合见[工作流 recipes](../../docs/zh-CN/workflows/recipes.md)，真实 release 验证见[安装证据](../../docs/evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.zh-CN.md)。

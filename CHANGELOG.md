@@ -6,7 +6,7 @@ All notable changes are recorded here. A release entry must be tied to an
 actual version or tag and must not be created merely because a document was
 drafted.
 
-## Unreleased — target v0.1.2 (2026-08-10)
+## 0.1.2 — 2026-08-10
 
 ### Added
 
@@ -30,13 +30,20 @@ drafted.
   a fresh independent prompt-only fast-track Evaluator `PASS`; see their
   [admission evidence](docs/evidence/admissions/).
 
-### Release-candidate evidence
+### Release evidence
 
-- Release tag/release: `NOT TESTED` until the release gate passes.
-- Whole-collection and per-Skill fresh-install target evidence:
+- Release tag: `v0.1.2`, commit `8de5ec1a453b0e93f71dcda160e17ea7b42c3997`.
+- GitHub Actions `collection-quality`: `PASS` on the merged release commit.
+- Fresh whole-collection and per-Skill installs: `PASS` with CLI `1.5.22` for
+  both the generic `latest` and pinned `#v0.1.2` forms.
+- GitHub release: https://github.com/LightDevCoder/skills/releases/tag/v0.1.2
+- Whole-collection and per-Skill fresh-install evidence:
   [INSTALLATION_VERIFICATION.md](docs/evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.md).
 - Structural and package evidence:
   [TEST_SUMMARY.md](docs/evidence/releases/v0.1.2/TEST_SUMMARY.md).
+- Independent `review-loop agent-skill` acceptance for the original five
+  packages remains `BLOCKED`; see the
+  [release receipt](docs/evidence/releases/v0.1.2/RELEASE_RECEIPT.md).
 
 ## 0.1.1 — 2026-07-26
 

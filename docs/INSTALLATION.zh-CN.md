@@ -2,36 +2,35 @@
 
 [English installation guide](INSTALLATION.md)
 
-公开第一方集合当前稳定版本是 [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1)。本 worktree 同时准备 v0.1.2 release candidate；其 tag 与 fresh-install 证明仍是 release-gate 证据。在这些记录完成前，下面的 v0.1.2 命令是 target，不是已验证的安装声明。`skills/<name>/` 内的包契约仍是行为权威；本页只规定安装和验证证据。
+公开第一方集合当前稳定版本是 [v0.1.2](https://github.com/LightDevCoder/skills/releases/tag/v0.1.2)，发布自 commit `8de5ec1a453b0e93f71dcda160e17ea7b42c3997`。`skills/<name>/` 内的包契约仍是行为权威；本页只规定安装和验证证据。
 
 标准安装命令是通用 `latest` 形式：它跟随仓库默认 revision，因此每次
 `npx skills add LightDevCoder/skills` 都安装默认分支上的当前集合。pinned
-`#v0.1.2` 形式在 release gate 通过后用于可复现安装。
-[安装验证](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.zh-CN.md)将在 fresh
-destination 上记录这两种形式。
+`#v0.1.2` 形式用于可复现安装。两种形式都已针对 fresh destination 验证；
+见[安装验证](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.zh-CN.md)。
 
 ## Revision 语义
 
 官方 Skills CLI 支持 GitHub source 的 `#ref` fragment，并将其作为 Git revision；没有 fragment 的仓库简写使用仓库默认 revision。可查看 [官方 source parser](https://raw.githubusercontent.com/vercel-labs/skills/main/src/source-parser.ts) 和 [Git helper](https://raw.githubusercontent.com/vercel-labs/skills/main/src/git.ts)。
 
 下面的通用 `latest` 命令不带 fragment，因此跟随仓库默认 revision：它安装当前
-集合，是标准安装方式。pinned `#v0.1.2` 形式在发布后选择该候选 tag，用于可复现
+集合，是标准安装方式。pinned `#v0.1.2` 形式选择已发布的 tag，用于可复现
 安装与 release 验证。两者都不是对未来默认 revision 的声明；对 fresh
 destination 重新运行 discovery，以获取解析后的实际内容。
 
-## Target v0.1.2 release 命令
+## v0.1.2 release 命令
 
-release gate 通过后，目标安装命令跟随仓库默认 revision，安装当前七包集合：
+当前 release 安装命令跟随仓库默认 revision，安装七包集合：
 
 ```text
 npx skills add LightDevCoder/skills --yes --copy --agent '*'
 npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'
 ```
 
-第一条安装七包集合，第二条从同一 revision 选择完整单包。两种形式在 release gate
-通过前都是 target，之后在 fresh destinations 上验证，见 [v0.1.2 安装记录](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.zh-CN.md)。
+第一条安装七包集合，第二条从同一 revision 选择完整单包。两种形式均已针对 fresh
+destinations 验证，见 [v0.1.2 安装记录](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.zh-CN.md)。
 
-tag 存在后如需可复现的 pinned 安装，用显式 tag 运行同一命令：
+如需可复现的 pinned 安装，用显式 tag 运行同一命令：
 
 ```text
 npx skills add LightDevCoder/skills#v0.1.2 --yes --copy --agent '*'
@@ -74,8 +73,8 @@ revision，并不是永久 pin。上面的当前 release 命令使用通用 `lat
 
 ## 准备的 `recap` 与 `language-learning` 包
 
-`recap` 与 `language-learning` 是已准入的第一方包，作为 v0.1.2 release
-candidate 准备。其准入记录见 [evidence/admissions/recap/README.zh-CN.md](evidence/admissions/recap/README.zh-CN.md) 与
+`recap` 与 `language-learning` 是经纯提示型快速通道在 v0.1.2 中发布的第一方包。
+其准入记录见 [evidence/admissions/recap/README.zh-CN.md](evidence/admissions/recap/README.zh-CN.md) 与
 [evidence/admissions/language-learning/README.zh-CN.md](evidence/admissions/language-learning/README.zh-CN.md)。
 它们的 fresh install 作为
 [collection discovery 测试](../tests/collection-discovery-tests.ps1)与

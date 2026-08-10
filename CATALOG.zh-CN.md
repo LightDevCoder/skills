@@ -9,35 +9,17 @@
 | 字段 | 值 |
 | --- | --- |
 | 集合 | Personal Skills Collection |
-| 包数量 | 本分支 7 个已准入第一方 Skill；稳定 v0.1.1 包含 5 个 |
-| 当前状态 | Release candidate v0.1.2 — release gate 待定；v0.1.1 仍是当前稳定版本 |
-| 稳定版本 | [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1) |
+| 包数量 | 7 个已准入第一方 Skill |
+| 当前状态 | 已发布 v0.1.2；原有五个包的独立 `review-loop agent-skill` acceptance 仍为 BLOCKED |
+| 稳定版本 | [v0.1.2](https://github.com/LightDevCoder/skills/releases/tag/v0.1.2) |
 | 安装权威 | [docs/INSTALLATION.zh-CN.md](docs/INSTALLATION.zh-CN.md) |
 | 发现检查 | [collection-discovery-tests.ps1](tests/collection-discovery-tests.ps1) |
 | 证据 | [v0.1.2 发布证据](docs/evidence/releases/v0.1.2/RELEASE_RECEIPT.zh-CN.md) |
 
-稳定 `v0.1.1` 包含原来的五个包；v0.1.2 release candidate 加入 `recap` 与
-`language-learning`，目标是七个已准入第一方 Skill。
+稳定 `v0.1.1` 包含原来的五个包；v0.1.2 加入 `recap` 与 `language-learning`，
+共七个已准入第一方 Skill。
 
 ## 已准入 Skill
-
-### review-loop
-
-- **作用：** 在 target 和 acceptance source 已定义后，执行通用的 final-acceptance 和 bounded-repair loop。
-- **调用：** Model-invoked，支持手动入口。
-- **包：** [skills/review-loop/](skills/review-loop/)
-- **状态：** 第一方已准入；包含 generic、software、specification、manuscript、agent-skill Profiles。
-- **证据：** [Profile tests](skills/review-loop/tests/)；[使用指南](docs/zh-CN/skills/review-loop.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/review-loop/`。
-
-### project-init
-
-- **作用：** 从最小 preset 初始化项目，保留既有指令并验证结果路径。
-- **调用：** 仅 user-invoked。
-- **包：** [skills/project-init/](skills/project-init/)
-- **状态：** 第一方已准入。
-- **证据：** [package tests](skills/project-init/tests/)；[使用指南](docs/zh-CN/skills/project-init.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/project-init/`。
 
 ### ask-light
 
@@ -48,27 +30,14 @@
 - **证据：** [scanner tests](skills/ask-light/tests/)；[使用指南](docs/zh-CN/skills/ask-light.md)。
 - **安装路径：** host 认可的 Skills root 下的 `skills/ask-light/`。
 
-## 作为 v0.1.2 release candidate 准备
-
-### recap
-
-- **作用：** 用严格一行总结当前 Agent session，不继续工作，也不改变会话历史。
-- **调用：** 仅 user-invoked；唯一入口是 `$recap`。
-- **包：** [skills/recap/](skills/recap/)
-- **状态：** 已通过纯提示型快速通道 `PASS` 准入；作为 v0.1.2 release candidate 准备。
-- **证据：** [package tests](skills/recap/tests/)、[使用指南](docs/zh-CN/skills/recap.md)与[准入证据](docs/evidence/admissions/recap/README.zh-CN.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/recap/`。
-
 ### language-learning
 
 - **作用：** 通过六种学习模式辅导任意目标语言——每日课程、即时卡片、对话练习、语法解码、进度测验与沉浸翻译。
 - **调用：** 仅 user-invoked。
 - **包：** [skills/language-learning/](skills/language-learning/)
-- **状态：** 已通过纯提示型快速通道 `PASS` 准入；作为 v0.1.2 release candidate 准备。
+- **状态：** 已通过纯提示型快速通道 `PASS` 准入；v0.1.2 中发布。
 - **证据：** [package tests](skills/language-learning/tests/)、[使用指南](docs/zh-CN/skills/language-learning.md)与[准入证据](docs/evidence/admissions/language-learning/README.zh-CN.md)。
 - **安装路径：** host 认可的 Skills root 下的 `skills/language-learning/`。
-
-## 其余已准入 Skill
 
 ### learn-anything
 
@@ -87,6 +56,33 @@
 - **状态：** 第一方已准入；generic review mechanics 委托给 `review-loop`。
 - **证据：** [package contract](skills/manuscript-ops/SKILL.md)；[使用指南](docs/zh-CN/skills/manuscript-ops.md)。
 - **安装路径：** host 认可的 Skills root 下的 `skills/manuscript-ops/`。
+
+### project-init
+
+- **作用：** 从最小 preset 初始化项目，保留既有指令并验证结果路径。
+- **调用：** 仅 user-invoked。
+- **包：** [skills/project-init/](skills/project-init/)
+- **状态：** 第一方已准入。
+- **证据：** [package tests](skills/project-init/tests/)；[使用指南](docs/zh-CN/skills/project-init.md)。
+- **安装路径：** host 认可的 Skills root 下的 `skills/project-init/`。
+
+### recap
+
+- **作用：** 用严格一行总结当前 Agent session，不继续工作，也不改变会话历史。
+- **调用：** 仅 user-invoked；唯一入口是 `$recap`。
+- **包：** [skills/recap/](skills/recap/)
+- **状态：** 已通过纯提示型快速通道 `PASS` 准入；v0.1.2 中发布。
+- **证据：** [package tests](skills/recap/tests/)、[使用指南](docs/zh-CN/skills/recap.md)与[准入证据](docs/evidence/admissions/recap/README.zh-CN.md)。
+- **安装路径：** host 认可的 Skills root 下的 `skills/recap/`。
+
+### review-loop
+
+- **作用：** 在 target 和 acceptance source 已定义后，执行通用的 final-acceptance 和 bounded-repair loop。
+- **调用：** Model-invoked，支持手动入口。
+- **包：** [skills/review-loop/](skills/review-loop/)
+- **状态：** 第一方已准入；包含 generic、software、specification、manuscript、agent-skill Profiles。
+- **证据：** [Profile tests](skills/review-loop/tests/)；[使用指南](docs/zh-CN/skills/review-loop.md)。
+- **安装路径：** host 认可的 Skills root 下的 `skills/review-loop/`。
 
 ## 来源边界
 

@@ -4,7 +4,7 @@
 
 所有变更都必须记录在实际版本/tag 对应的条目中，不能因为文档已起草就提前宣称 release。
 
-## Unreleased — target v0.1.2 (2026-08-10)
+## 0.1.2 — 2026-08-10
 
 ### 新增
 
@@ -22,11 +22,17 @@
   安装。`recap` 与 `language-learning` 均由 fresh independent prompt-only
   fast-track Evaluator `PASS` 准入，见各自[准入证据](docs/evidence/admissions/)。
 
-### Release candidate 证据
+### Release 证据
 
-- Release tag/release：release gate 通过前为 `NOT TESTED`。
-- 整仓与单 Skill fresh-install 目标记录：[INSTALLATION_VERIFICATION.zh-CN.md](docs/evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.zh-CN.md)。
+- Release tag：`v0.1.2`，commit `8de5ec1a453b0e93f71dcda160e17ea7b42c3997`。
+- 合并后的 release commit 上 GitHub Actions `collection-quality`：`PASS`。
+- 整仓和单 Skill fresh install：使用 CLI `1.5.22`，通用 `latest` 与 pinned
+  `#v0.1.2` 两种形式均为 `PASS`。
+- GitHub release：https://github.com/LightDevCoder/skills/releases/tag/v0.1.2
+- 整仓与单 Skill fresh-install 证据：[INSTALLATION_VERIFICATION.zh-CN.md](docs/evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.zh-CN.md)。
 - 结构与包测试证据：[TEST_SUMMARY.zh-CN.md](docs/evidence/releases/v0.1.2/TEST_SUMMARY.zh-CN.md)。
+- 原有五个包的独立 `review-loop agent-skill` acceptance 仍为 `BLOCKED`；见
+  [发布收据](docs/evidence/releases/v0.1.2/RELEASE_RECEIPT.zh-CN.md)。
 
 ## 0.1.1 — 2026-07-26
 

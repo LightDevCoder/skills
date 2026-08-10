@@ -59,7 +59,7 @@ consumes that verdict. Stop at every stated handoff or final verdict.
 
 ## Installation and discovery check
 
-For the published v0.1.1 release, install with `npx skills add LightDevCoder/skills#v0.1.1 --skill manuscript-ops`,
+For the published v0.1.2 release, install with `npx skills add LightDevCoder/skills --skill manuscript-ops --yes --copy --agent '*'`,
 refresh, and verify the complete package including `assets/`, `references/`,
 and `scripts/` without the source checkout. Probe local capabilities and run
 the package's state/dependency checks before treating a format result as

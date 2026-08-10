@@ -45,8 +45,9 @@ Run [the package tests](../../skills/recap/tests/) and inspect
 independent review evidence is recorded in the
 [admission record](../evidence/admissions/recap/README.md).
 
-`recap` is not present in stable v0.1.1. Do not publish a pinned install command
-for it until the next tag is released and verified under
+`recap` is released in v0.1.2. Install it with
+`npx skills add LightDevCoder/skills --skill recap --yes --copy --agent '*'`,
+refresh, and confirm discovery without the source checkout under
 [the installation policy](../INSTALLATION.md).
 
 ## Behavior references

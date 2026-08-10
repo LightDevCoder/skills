@@ -10,26 +10,22 @@ explicit about its invocation boundary, and small enough to inspect before use.
 
 > **About:** Personal Skills Collection — Drive your creativity
 
-> **Release candidate:** v0.1.2 is prepared in this worktree. The release
-> record and fresh-install evidence live in
-> [docs/evidence/releases/v0.1.2/](docs/evidence/releases/v0.1.2/); promotion
-> remains subject to the recorded release gates.
+> **Release:** [v0.1.2](https://github.com/LightDevCoder/skills/releases/tag/v0.1.2)
+> is published from commit `8de5ec1`. The release record and fresh-install evidence
+> live in [docs/evidence/releases/v0.1.2/](docs/evidence/releases/v0.1.2/).
 >
-> The current published stable release remains [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1).
->
-> **Current branch admission:** seven packages are admitted on this branch.
-> Stable `v0.1.1` contained the original five packages; `recap` and
-> `language-learning` are prepared as the v0.1.2 release candidate.
+> Independent `review-loop agent-skill` acceptance remains `BLOCKED` for the
+> original five packages; see the receipt for the exact boundary.
 
 ## Quick Start
 
-Install the whole first-party collection after the release gate passes:
+Install the published first-party collection:
 
 ```text
 npx skills add LightDevCoder/skills --yes --copy --agent '*'
 ```
 
-Install one Skill at the same revision after the release gate passes:
+Install one Skill at the same published revision:
 
 ```text
 npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'
@@ -64,9 +60,8 @@ outputs, handoffs, and stopping boundaries.
 
 ## External capabilities
 
-The current branch contains seven first-party packages: the five in v0.1.1
-plus `recap` and `language-learning`, which are prepared as the v0.1.2 release
-candidate.
+The published v0.1.2 collection contains seven first-party packages: v0.1.1's five
+plus `recap` and `language-learning`.
 
 Optional workflow capabilities are external or third-party dependencies and are
 not included by default:

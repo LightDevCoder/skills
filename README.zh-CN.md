@@ -8,24 +8,21 @@
 
 > **简介：** Personal Skills Collection — Drive your creativity
 
-> **发布候选：** v0.1.2 正在本 worktree 中准备。发布记录和 fresh-install 证据见
-> [docs/evidence/releases/v0.1.2/](docs/evidence/releases/v0.1.2/)；晋升仍受已记录的
-> release gate 约束。
+> **发布：** [v0.1.2](https://github.com/LightDevCoder/skills/releases/tag/v0.1.2)
+> 已从 commit `8de5ec1` 发布。发布记录和 fresh-install 证据见
+> [docs/evidence/releases/v0.1.2/](docs/evidence/releases/v0.1.2/)。
 >
-> 当前已发布的稳定版本仍是 [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1)。
->
-> **当前分支准入：** 本分支已准入七个包。稳定 v0.1.1 包含原来的五个包；`recap`
-> 与 `language-learning` 作为 v0.1.2 release candidate 准备。
+> 原有五个包的独立 `review-loop agent-skill` acceptance 仍为 `BLOCKED`；准确边界见发布收据。
 
 ## Quick Start
 
-安装整个第一方集合：
+安装已发布的第一方集合：
 
 ```text
 npx skills add LightDevCoder/skills --yes --copy --agent '*'
 ```
 
-安装同一版本下的一个 Skill：
+安装同一已发布版本下的一个 Skill：
 
 ```text
 npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'
@@ -52,7 +49,7 @@ $review-loop init     # 冻结已有验收标准的 baseline
 
 ## 外部能力（External Capabilities）
 
-当前分支包含七个第一方包：v0.1.1 的五个包，以及作为 v0.1.2 release candidate 准备的 `recap` 与 `language-learning`。
+已发布的 v0.1.2 集合包含七个第一方包：v0.1.1 的五个包，以及新增的 `recap` 与 `language-learning`。
 
 以下是可选的 workflow 能力，来自外部或第三方来源，不属于默认集合：
 

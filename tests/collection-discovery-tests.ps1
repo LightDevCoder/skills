@@ -54,10 +54,10 @@ Assert-Collection ($installation -notmatch "commands target the immutable v0\.1\
 Assert-Collection ($installation -notmatch "not a verified command|<owner>/<repository>") "Installation guide still contains unresolved pre-release command wording."
 Assert-Collection ($installation -match "Manual fallback") "Installation guide must retain a manual fallback."
 Assert-Collection ($installation -match '\$sourceRoot' -and $installation -match '\$skillName' -and $installation -match '\$destinationRoot') "Manual fallback must use valid PowerShell variables."
-Assert-Collection ($readme -match '(?is)stable[^\r\n]{0,40}v0\.1\.1[^\r\n]{0,120}five') "README must preserve the stable v0.1.1 five-package boundary."
-Assert-Collection ($catalog -match '5 admitted first-party Skills in stable v0\.1\.1') "Catalog must preserve the stable v0.1.1 five-package boundary."
-Assert-Collection ($readme -match '(?is)Release candidate[^\r\n]{0,80}v0\.1\.2') "README must present v0.1.2 as a release candidate."
-Assert-Collection ($catalog -match 'Release candidate v0\.1\.2[^\r\n]{0,80}v0\.1\.1') "Catalog must present v0.1.2 as a release candidate over stable v0.1.1."
+Assert-Collection ($readme -match '(?is)v0\.1\.2.{0,120}is published from commit') "README must present v0.1.2 as the published release."
+Assert-Collection ($catalog -match '7 admitted first-party Skills') "Catalog must present the published v0.1.2 seven-package collection."
+Assert-Collection ($catalog -match 'Released v0\.1\.2') "Catalog must present v0.1.2 as released."
+Assert-Collection ($readme -match '(?is)v0\.1\.1[^\r\n]{0,80}five') "README must retain the v0.1.1 five-package history."
 
 foreach ($package in $expected) {
     $packageRoot = Join-Path $skillRoot $package
@@ -183,8 +183,8 @@ foreach ($text in @($admissionPolicy, $admissionPolicyZh, $reviewPolicy, $review
 
 $semanticParityMatrix = @(
     [pscustomobject]@{ English = 'README.md'; Chinese = 'README.zh-CN.md'; Pairs = @(
-        @('Install the whole first-party collection', '安装整个第一方集合'),
-        @('Install one Skill at the same revision', '安装同一版本下的一个 Skill'),
+        @('Install the published first-party collection', '安装已发布的第一方集合'),
+        @('Install one Skill at the same published revision', '安装同一已发布版本下的一个 Skill'),
         @('fresh-install evidence', 'fresh-install 证据')
     ) },
     [pscustomobject]@{ English = 'CATALOG.md'; Chinese = 'CATALOG.zh-CN.md'; Pairs = @(
@@ -193,7 +193,7 @@ $semanticParityMatrix = @(
         @('Installation authority', '安装权威')
     ) },
     [pscustomobject]@{ English = 'CHANGELOG.md'; Chinese = 'CHANGELOG.zh-CN.md'; Pairs = @(
-        @('Release-candidate evidence', 'Release candidate 证据'),
+        @('Release evidence', 'Release 证据'),
         @('Historical installation details', '历史安装明细')
     ) },
     [pscustomobject]@{ English = 'docs/INSTALLATION.md'; Chinese = 'docs/INSTALLATION.zh-CN.md'; Pairs = @(
@@ -278,10 +278,10 @@ foreach ($revision in @('v0.1.1', 'v0.1.2')) {
     foreach ($name in @('RELEASE_RECEIPT', 'TEST_SUMMARY', 'INSTALLATION_VERIFICATION', 'DISCOVERY_VERIFICATION', 'LIMITATIONS')) {
         $englishText = Get-Content -LiteralPath (Join-Path $Root "docs/evidence/releases/$revision/$name.md") -Raw
         $chineseText = Get-Content -LiteralPath (Join-Path $Root "docs/evidence/releases/$revision/$name.zh-CN.md") -Raw
-        $markers = if ($revision -eq 'v0.1.1') {
-            if ($name -eq 'RELEASE_RECEIPT') { @('v0.1.1', 'VERIFIED', 'fresh') } else { @('v0.1.1', 'PASS', 'fresh') }
+        $markers = if ($name -eq 'RELEASE_RECEIPT') {
+            @($revision, 'VERIFIED', 'fresh')
         } else {
-            @('v0.1.2', 'NOT TESTED', 'fresh')
+            @($revision, 'PASS', 'fresh')
         }
         foreach ($marker in $markers) {
             Assert-Collection ($englishText -match [regex]::Escape($marker) -and $chineseText -match [regex]::Escape($marker)) "$name $revision release evidence is missing the synchronized semantic marker: $marker"

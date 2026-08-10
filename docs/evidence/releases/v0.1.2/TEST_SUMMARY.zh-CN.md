@@ -17,13 +17,13 @@ source scan 不算通过。
 | recap | `powershell -File skills/recap/tests/recap-output-contract-tests.ps1` | `PASS` — 8 assertions。 |
 | learn-anything hooks | `python -m unittest discover -s tests -p "test*.py"` | `PASS` — 4 tests；80 个集合 assertions 与 7 个 learn-anything hook assertions。 |
 | manuscript-ops | `python skills/manuscript-ops/scripts/{assess_project,check_dependencies,validate_state}.py --help` | `PASS` — 三个只读 CLI help 检查全部成功。 |
-| collection discovery | `powershell -File tests/collection-discovery-tests.ps1` | `PASS` — 951 assertions，含 Skill-guide、workflow、release-evidence 与双语语义配对 parity。 |
+| collection discovery | `powershell -File tests/collection-discovery-tests.ps1` | `PASS` — 1064 assertions，含 Skill-guide、workflow、release-evidence 与双语语义配对 parity。 |
 | header asset | `powershell -File tests/header-asset-tests.ps1` | `PASS` — 11 assertions；SVG/PNG 尺寸、同步 asset manifest 与 layered wordmark markers。 |
 | Quick Start | `powershell -File tests/quick-start-smoke-tests.ps1` | `PASS` — 8 assertions。 |
 | Python syntax | `python -B -c "...ast.parse..."` | `PASS` — Python 文件解析通过，未写 bytecode。 |
-| Tagged fresh install | `npx skills add LightDevCoder/skills#v0.1.2 ...` 加 `npx skills list` | 在 release tag 存在前为 `NOT TESTED`；见 [installation evidence](INSTALLATION_VERIFICATION.zh-CN.md)。 |
-| 通用 `latest` fresh install | `npx skills add LightDevCoder/skills ...` 加 `npx skills list` | 在 release tag 存在前为 `NOT TESTED`；见 [installation evidence](INSTALLATION_VERIFICATION.zh-CN.md)。 |
-| Release-commit CI | GitHub Actions `collection-quality` | 在 release commit 上运行前为 `NOT TESTED`。 |
+| Tagged fresh install | `npx skills add LightDevCoder/skills#v0.1.2 ...` 加 `npx skills list` | `PASS` — CLI `1.5.22`；整仓安装恰好列出 7 个包，per-Skill 目标恰好列出 `review-loop`，任何 fresh destination 中均无 source checkout。见 [installation evidence](INSTALLATION_VERIFICATION.zh-CN.md)。 |
+| 通用 `latest` fresh install | `npx skills add LightDevCoder/skills ...` 加 `npx skills list` | `PASS` — CLI `1.5.22`；整仓安装恰好列出 7 个包，per-Skill 目标恰好列出 `review-loop`，任何 fresh destination 中均无 source checkout。见 [installation evidence](INSTALLATION_VERIFICATION.zh-CN.md)。 |
+| Release-commit CI | GitHub Actions `collection-quality` | `PASS` — `8de5ec1a453b0e93f71dcda160e17ea7b42c3997` 上 run `31362999381`。 |
 
 ## Evidence class
 

@@ -4,23 +4,22 @@
 
 ## Status
 
-`NOT TESTED — run against the published v0.1.2 tag and the generic `latest`
-command after the GitHub release exists.`
-
-This page will record the exact CLI version, fresh destinations, discovery
-results, and success, boundary, invocation, and missing-dependency smoke for
-the v0.1.2 tag and for the published generic `latest` install command.
+`PASS` for the tagged public repository using Skills CLI `1.5.22`, verified
+against fresh destinations for both the generic `latest` form and the pinned
+`#v0.1.2` form. Host refresh is host-specific and was not claimed; CLI
+discovery was run from each fresh destination without a source checkout.
 
 | Field | Whole collection | Per-Skill |
 | --- | --- | --- |
 | Command | `npx skills add LightDevCoder/skills --yes --copy --agent '*'` (latest) and `npx skills add LightDevCoder/skills#v0.1.2 --yes --copy --agent '*'` (tag) | `npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'` (latest) and `npx skills add LightDevCoder/skills#v0.1.2 --skill review-loop --yes --copy --agent '*'` (tag) |
-| CLI version | `NOT TESTED` | `NOT TESTED` |
-| Released commit | `NOT TESTED — fill after the release tag is created` | same |
-| Fresh destination | New empty temporary project | New empty temporary project |
-| Install result | `NOT TESTED` | `NOT TESTED` |
-| Discovery without source checkout | `NOT TESTED` | `NOT TESTED` |
-| Success/boundary/missing-dependency smoke | `NOT TESTED` | `NOT TESTED` |
-| Repeat-install behavior | `NOT TESTED` | `NOT TESTED` |
+| CLI version | `1.5.22` | `1.5.22` |
+| Released commit | `8de5ec1a453b0e93f71dcda160e17ea7b42c3997` (`v0.1.2` tag) | same |
+| Fresh destination | New empty temporary project; exactly 7 packages under `.agents/skills/` | New empty temporary project; exactly 1 package under `.agents/skills/` |
+| Install result | `PASS`, exit code 0 for both the `latest` and `#v0.1.2` forms | `PASS`, exit code 0 for both the `latest` and `#v0.1.2` forms |
+| Discovery without source checkout | `npx --yes skills list` exit 0; 7 packages listed; source checkout absent | `npx --yes skills list` exit 0; 1 package listed; source checkout absent |
+| Success/boundary/missing-dependency smoke | Installed `recap` output contract: 8 assertions/PASS; installed recap package byte-identical to source | Installed `review-loop` package byte-identical to source with `SKILL.md`, `agents/`, `references/`, and `tests/` present |
+| Repeat-install behavior | Same command exit 0; CLI reported `overwrites:` for the agent groups (no-op overwrite) | Same command exit 0; CLI reported `overwrites:` for the agent groups (no-op overwrite) |
+| Limitation | Host refresh and model-mediated runtime invocation were not tested. Transient GitHub TLS failures during verification required retries; the recorded result is from a successful run. | Same. |
 
 ## Procedure
 

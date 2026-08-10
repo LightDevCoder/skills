@@ -4,10 +4,10 @@
 
 ## Status
 
-`NOT TESTED — fill after the tagged artifact is installed into fresh
-destinations and listed without a source checkout.`
+`PASS — fresh destinations installed from the published v0.1.2 tag and the
+generic latest command, then listed without a source checkout.`
 
-The local collection test on this branch currently returns 951 assertions and
+The local collection test on this branch returns 1064 assertions and
 `COLLECTION_DISCOVERY=PASS`, which is structural/discovery evidence for the
 admitted tree, not fresh host installation proof.
 
@@ -34,7 +34,11 @@ npx --yes skills add LightDevCoder/skills#v0.1.2 --skill review-loop --yes --cop
 npx --yes skills list
 ```
 
-Observed result: `NOT TESTED — fill after the release tag is created`.
+Observed result: `PASS` for all four commands with CLI `1.5.22`. The pinned
+`#v0.1.2` whole install listed exactly seven packages; the pinned per-Skill
+install listed exactly `review-loop`; the generic `latest` whole install listed
+exactly seven packages; the generic `latest` per-Skill install listed exactly
+`review-loop`. No source checkout was present in any fresh destination.
 
 ## Structural command
 
@@ -42,5 +46,5 @@ Observed result: `NOT TESTED — fill after the release tag is created`.
 powershell -File tests/collection-discovery-tests.ps1
 ```
 
-Observed local result: `COLLECTION_DISCOVERY_ASSERTIONS=951`,
+Observed local result: `COLLECTION_DISCOVERY_ASSERTIONS=1064`,
 `COLLECTION_DISCOVERY=PASS`. This is structural/discovery evidence only.
