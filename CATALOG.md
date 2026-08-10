@@ -16,7 +16,7 @@ Agent host.
 | Current state | Released v0.1.2; independent `review-loop agent-skill` acceptance remains BLOCKED for the original five |
 | Stable release | [v0.1.2](https://github.com/LightDevCoder/skills/releases/tag/v0.1.2) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
-| Discovery check | [tests/collection-discovery-tests.ps1](tests/collection-discovery-tests.ps1) |
+| Discovery check | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) |
 | Evidence | [v0.1.2 release evidence](docs/evidence/releases/v0.1.2/) |
 
 Stable `v0.1.1` contained the original five packages; v0.1.2 adds `recap` and

@@ -135,4 +135,4 @@ and is never copied into this public collection.
 - [Release receipt](docs/evidence/releases/v0.1.2/RELEASE_RECEIPT.md)
 - [recap admission evidence](docs/evidence/admissions/recap/README.md)
 - [language-learning admission evidence](docs/evidence/admissions/language-learning/README.md)
-- [Collection discovery test](tests/collection-discovery-tests.ps1)
+- [Collection discovery test](tests/test_collection_discovery.py)

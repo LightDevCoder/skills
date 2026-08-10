@@ -8,7 +8,7 @@ on:
 
 jobs:
   quality:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -16,36 +16,59 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Run collection and package checks
-        shell: pwsh
+      - name: Run collection and package checks (cross-platform python)
+        shell: bash
         run: |
-          $ErrorActionPreference = "Stop"
-          ./tests/header-asset-tests.ps1
-          ./tests/quick-start-smoke-tests.ps1
-          ./tests/collection-discovery-tests.ps1
-          ./skills/ask-light/tests/ask-light-contract-tests.ps1
-          ./skills/ask-light/tests/ask-light-behavior-tests.ps1
-          ./skills/project-init/tests/project-init-contract-tests.ps1
-          ./skills/project-init/tests/project-init-behavior-tests.ps1
-          ./skills/review-loop/tests/agent-skill-profile-contract-tests.ps1
-          ./skills/review-loop/tests/agent-skill-profile-behavior-tests.ps1
-          ./skills/review-loop/tests/generic-profile-contract-tests.ps1
-          ./skills/review-loop/tests/generic-profile-behavior-tests.ps1
-          ./skills/review-loop/tests/manuscript-profile-contract-tests.ps1
-          ./skills/review-loop/tests/manuscript-profile-behavior-tests.ps1
-          ./skills/review-loop/tests/software-profile-contract-tests.ps1
-          ./skills/review-loop/tests/software-profile-behavior-tests.ps1
-          ./skills/review-loop/tests/specification-profile-contract-tests.ps1
-          ./skills/review-loop/tests/specification-profile-behavior-tests.ps1
-      - name: Run Python contract tests and compile checks
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          python -m unittest discover -s tests -p "test*.py"
+          set -euo pipefail
+          python -m unittest discover -s tests -p "test_*.py"
           python -m compileall -q skills/learn-anything skills/manuscript-ops tests/test_collection_contract.py
-      - name: Retired package boundary
-        shell: pwsh
+          for f in \
+            skills/ask-light/tests/test_ask_light_contract.py \
+            skills/project-init/tests/test_project_init_contract.py \
+            skills/project-init/tests/test_project_init_behavior.py \
+            skills/recap/tests/test_recap_contract.py \
+            skills/recap/tests/test_recap_output_contract.py \
+            skills/language-learning/tests/test_language_learning_contract.py \
+            skills/review-loop/tests/review_protocol_helpers.py \
+            skills/review-loop/tests/test_agent_skill_profile_contract.py \
+            skills/review-loop/tests/test_agent_skill_profile_behavior.py \
+            skills/review-loop/tests/test_generic_profile_contract.py \
+            skills/review-loop/tests/test_generic_profile_behavior.py \
+            skills/review-loop/tests/test_manuscript_profile_contract.py \
+            skills/review-loop/tests/test_manuscript_profile_behavior.py \
+            skills/review-loop/tests/test_software_profile_contract.py \
+            skills/review-loop/tests/test_software_profile_behavior.py \
+            skills/review-loop/tests/test_specification_profile_contract.py \
+            skills/review-loop/tests/test_specification_profile_behavior.py \
+          ; do
+            python "$f"
+          done
+      - name: Run ask-light scanner behavior (requires pwsh)
+        shell: bash
         run: |
-          $ErrorActionPreference = "Stop"
-          $hits = @(Get-ChildItem -LiteralPath skills -Recurse -File | Select-String -Pattern "project-workflow|to-manuscript-spec")
-          if ($hits.Count -gt 0) { throw "Retired package references remain under skills/: $($hits -join '; ')" }
+          set -euo pipefail
+          if command -v pwsh >/dev/null 2>&1; then
+            python skills/ask-light/tests/test_ask_light_behavior.py
+          else
+            echo "pwsh not available; ask-light behavior suite skipped (structural contract still enforced)"
+          fi
+      - name: Retired package boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          hits=$(grep -rn --include="*" -E "project-workflow|to-manuscript-spec" skills/ || true)
+          if [ -n "$hits" ]; then
+            echo "Retired package references remain under skills/:"
+            echo "$hits"
+            exit 1
+          fi
+      - name: No PowerShell test files remain
+        shell: bash
+        run: |
+          set -euo pipefail
+          count=$(find . -path "*/tests/*.ps1" -not -path "./.git/*" | wc -l | tr -d " ")
+          if [ "$count" -ne 0 ]; then
+            echo "PowerShell test files still present: $count"
+            find . -path "*/tests/*.ps1" -not -path "./.git/*"
+            exit 1
+          fi

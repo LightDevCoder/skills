@@ -99,7 +99,7 @@ in
 [evidence/admissions/recap/README.md](evidence/admissions/recap/README.md) and
 [evidence/admissions/language-learning/README.md](evidence/admissions/language-learning/README.md).
 Their fresh installs are exercised as part of the
-[collection discovery test](../tests/collection-discovery-tests.ps1) and the
+[collection discovery test](../tests/test_collection_discovery.py) and the
 [v0.1.2 installation record](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.md).
 
 ## Supported installation scopes
@@ -119,11 +119,11 @@ When the installer is unavailable or unsupported, check out the target tag
 after it is published and copy the complete package into the host-recognized
 root:
 
-```powershell
-$sourceRoot = "<v0.1.2-release-checkout>"
-$skillName = "<admitted-skill-name>"
-$destinationRoot = "<host-recognized-skills-root>"
-Copy-Item -LiteralPath "$sourceRoot/skills/$skillName" -Destination "$destinationRoot/$skillName" -Recurse
+```bash
+source_root="<v0.1.2-release-checkout>"
+skill_name="<admitted-skill-name>"
+destination_root="<host-recognized-skills-root>"
+cp -R "$source_root/skills/$skill_name" "$destination_root/$skill_name"
 ```
 
 This is a fallback procedure, not fresh-install proof by itself. The record

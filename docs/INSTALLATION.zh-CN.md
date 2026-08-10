@@ -77,7 +77,7 @@ revision，并不是永久 pin。上面的当前 release 命令使用通用 `lat
 其准入记录见 [evidence/admissions/recap/README.zh-CN.md](evidence/admissions/recap/README.zh-CN.md) 与
 [evidence/admissions/language-learning/README.zh-CN.md](evidence/admissions/language-learning/README.zh-CN.md)。
 它们的 fresh install 作为
-[collection discovery 测试](../tests/collection-discovery-tests.ps1)与
+[collection discovery 测试](../tests/test_collection_discovery.py)与
 [v0.1.2 安装记录](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.zh-CN.md)的一部分被演练。
 
 ## 安装范围
@@ -94,11 +94,11 @@ revision，并不是永久 pin。上面的当前 release 命令使用通用 `lat
 
 installer 不可用时，在 target tag 发布后 checkout，并将完整包复制到 host 认可的 root：
 
-```powershell
-$sourceRoot = "<v0.1.2-release-checkout>"
-$skillName = "<admitted-skill-name>"
-$destinationRoot = "<host-recognized-skills-root>"
-Copy-Item -LiteralPath "$sourceRoot/skills/$skillName" -Destination "$destinationRoot/$skillName" -Recurse
+```bash
+source_root="<v0.1.2-release-checkout>"
+skill_name="<admitted-skill-name>"
+destination_root="<host-recognized-skills-root>"
+cp -R "$source_root/skills/$skill_name" "$destination_root/$skill_name"
 ```
 
 手动复制本身不是 fresh-install proof。记录必须包含 release commit/tag、host、destination、refresh/restart、discovery、success/boundary/invocation/missing-dependency smoke。包引用资源时不能只复制 `SKILL.md`。

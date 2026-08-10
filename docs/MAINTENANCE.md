@@ -26,7 +26,7 @@ project-init, ask-light, learn-anything, manuscript-ops, recap, and
 language-learning. recap and language-learning were admitted through the
 prompt-only fast track and released in v0.1.2. Stable v0.1.1 contained the
 original five admitted packages. The check at
-[tests/collection-discovery-tests.ps1](../tests/collection-discovery-tests.ps1)
+[tests/test_collection_discovery.py](../tests/test_collection_discovery.py)
 guards package names, metadata, catalog entries, README links, header assets,
 required governance paths, and the retired orchestration boundary.
 
