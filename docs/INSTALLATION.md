@@ -60,6 +60,16 @@ an unqualified default-branch command as a stable release pin, and do not
 publish a pinned `recap` command until a new tag exists and the command has
 succeeded against that released repository in a fresh environment.
 
+## Unreleased `language-learning` package
+
+`language-learning` has its prompt-only fast-track evidence staged on this
+branch but is not yet admitted and not present in v0.1.1. Its admission record
+is under [evidence/admissions/language-learning/](evidence/admissions/language-learning/README.md).
+Do not present an unqualified default-branch command as a stable release pin,
+and do not publish a pinned `language-learning` command until a new tag exists
+and the command has succeeded against that released repository in a fresh
+environment.
+
 ## Supported installation scopes
 
 | Scope | Destination policy | Required evidence |

@@ -2,7 +2,7 @@
 
 [中文目录](CATALOG.zh-CN.md)
 
-This catalog is synchronized from the six admitted package directories under
+This catalog is synchronized from the seven admitted package directories under
 `skills/`. It is an inventory, not a
 static workflow router and not a record of what is installed on a particular
 Agent host.
@@ -12,8 +12,8 @@ Agent host.
 | Field | Value |
 | --- | --- |
 | Collection | Personal Skills Collection |
-| Package count | 6 admitted first-party Skills on this branch; 5 admitted first-party Skills in stable v0.1.1 |
-| Current state | `recap` passed the low-risk prompt-only fast track but remains unreleased; v0.1.1 remains installable |
+| Package count | 7 admitted first-party Skills on this branch; 5 admitted first-party Skills in stable v0.1.1 |
+| Current state | `recap` passed the low-risk prompt-only fast track but remains unreleased; `language-learning` has its fast-track evidence staged and is not yet admitted; v0.1.1 remains installable |
 | Stable release | [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/collection-discovery-tests.ps1](tests/collection-discovery-tests.ps1) |
@@ -61,6 +61,17 @@ dependencies and modified third-party variants are documented separately.
 - **Status:** First-party admitted by prompt-only fast-track PASS; unreleased and not present in v0.1.1.
 - **Evidence:** Contract and output-contract tests under [skills/recap/tests/](skills/recap/tests/), [user guide](docs/skills/recap.md), and [admission evidence](docs/evidence/admissions/recap/README.md).
 - **Installation path:** `skills/recap/` in a host-recognized Skills root.
+
+## Proposed first-party admission
+
+### language-learning
+
+- **Purpose:** Tutor for any target language through six study modes — daily lessons, flashcards, conversation practice, grammar decoding, progress quizzes, and immersion translation.
+- **Invocation:** User-invoked only.
+- **Package:** [skills/language-learning/](skills/language-learning/)
+- **Status:** Proposed first-party; prompt-only fast-track evidence staged for this branch; not yet admitted and not in any release.
+- **Evidence:** Contract tests under [skills/language-learning/tests/](skills/language-learning/tests/), [user guide](docs/skills/language-learning.md), and [admission evidence](docs/evidence/admissions/language-learning/README.md).
+- **Installation path:** `skills/language-learning/` in a host-recognized Skills root.
 
 ## Remaining admitted Skills
 

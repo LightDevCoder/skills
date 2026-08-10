@@ -15,6 +15,13 @@
 - 新增低风险纯提示型准入快速通道：仅适用于 owner-authored、manual-only、
   只输出文本、无工具/副作用/runtime executable/外部依赖的 Skill；只需一个
   fresh Evaluator，不再要求额外 Critic 或 Standards/Spec review。
+- 提议新增第一方、仅 user-invoked 的 `language-learning` Skill。它通过六种
+  学习模式辅导任意目标语言——每日课程、即时卡片、对话练习、语法解码、
+  进度测验与沉浸翻译——并在多次调用之间复用会话上下文与已学词汇，而不是
+  每次都重新询问。
+- 新增 `language-learning` 双语指南、package contract tests、collection
+  discovery 覆盖和已准备的纯提示型快速通道准入证据。它尚未准入，也不在任何
+  release 中。
 
 `recap` 已获得低风险纯提示型快速通道 final `PASS`。本条目不宣称 release tag 或已验证的已发布安装命令；稳定 v0.1.1 仍包含五个包。
 

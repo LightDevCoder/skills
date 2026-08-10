@@ -1,0 +1,7 @@
+interface:
+  display_name: "Language Learning"
+  short_description: "Tutor for any language with six study modes"
+  default_prompt: "Use $language-learning to get a lesson, flashcards, conversation practice, grammar help, a quiz, or translation practice in your target language."
+
+policy:
+  allow_implicit_invocation: false

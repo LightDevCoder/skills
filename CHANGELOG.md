@@ -21,6 +21,14 @@ drafted.
   manual-only, text-output Skills with no tools, side effects, runtime
   executables, or external dependencies. It uses one fresh Evaluator and does
   not require separate Critic or Standards/Spec review.
+- Proposed the first-party, user-invoked `language-learning` Skill. It tutors
+  any target language through six study modes — daily lessons, flashcards,
+  conversation practice, grammar decoding, progress quizzes, and immersion
+  translation — reusing session context and previously learned vocabulary
+  across invocations instead of re-asking.
+- Added bilingual `language-learning` guides, package contract tests,
+  collection discovery coverage, and staged prompt-only fast-track admission
+  evidence. It is not yet admitted and is not in any release.
 
 `recap` received a final low-risk prompt-only fast-track `PASS`. This entry
 does not claim a release tag or a verified published install command; stable

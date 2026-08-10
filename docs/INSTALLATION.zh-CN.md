@@ -36,6 +36,10 @@ npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop --yes --copy --ag
 
 `recap` 已通过纯提示型快速通道在本分支准入，但 v0.1.1 不包含它。它的 fresh-copy 安装与 discovery 检查见[准入记录](evidence/admissions/recap/README.zh-CN.md)。不要把无 fragment 的默认分支命令写成稳定 release pin；只有新 tag 已创建、并在 fresh 环境中针对已发布仓库成功运行后，才能发布 pinned `recap` 安装命令。
 
+## 未发布的 `language-learning` 包
+
+`language-learning` 的纯提示型快速通道证据已在本分支准备好，但尚未准入，v0.1.1 不包含它。准入记录见[准入证据](evidence/admissions/language-learning/README.zh-CN.md)。不要把无 fragment 的默认分支命令写成稳定 release pin；只有新 tag 已创建、并在 fresh 环境中针对已发布仓库成功运行后，才能发布 pinned `language-learning` 安装命令。
+
 ## 安装范围
 
 | 范围 | destination 规则 | 必需证据 |

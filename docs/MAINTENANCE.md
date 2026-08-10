@@ -22,8 +22,10 @@ Keep each fact in one authoritative location and link to it elsewhere:
 ## Current synchronization baseline
 
 The admitted collection on this branch contains exactly review-loop,
-project-init, ask-light, learn-anything, manuscript-ops, and recap. The recap
-package passed the prompt-only fast track but remains unreleased. Stable v0.1.1
+project-init, ask-light, learn-anything, manuscript-ops, recap, and the
+proposed, unreleased language-learning package. The recap package passed the
+prompt-only fast track but remains unreleased; language-learning has its
+prompt-only fast-track evidence staged but is not yet admitted. Stable v0.1.1
 contains the original five admitted packages. The check at
 [tests/collection-discovery-tests.ps1](../tests/collection-discovery-tests.ps1)
 guards package names, metadata, catalog entries, README links, header assets,

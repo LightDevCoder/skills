@@ -18,14 +18,14 @@ function Assert-Collection {
     }
 }
 
-$expected = @("ask-light", "learn-anything", "manuscript-ops", "project-init", "recap", "review-loop")
+$expected = @("ask-light", "language-learning", "learn-anything", "manuscript-ops", "project-init", "recap", "review-loop")
 $skillRoot = Join-Path $Root "skills"
 $actual = @(Get-ChildItem -LiteralPath $skillRoot -Directory |
     Where-Object { $_.Name -ne "docs" } |
     Select-Object -ExpandProperty Name |
     Sort-Object)
 
-Assert-Collection (($actual -join ",") -eq ($expected -join ",")) "skills/ must contain exactly the six admitted package directories."
+Assert-Collection (($actual -join ",") -eq ($expected -join ",")) "skills/ must contain exactly the seven admitted package directories."
 
 $readme = Get-Content -LiteralPath (Join-Path $Root "README.md") -Raw
 $catalog = Get-Content -LiteralPath (Join-Path $Root "CATALOG.md") -Raw
@@ -221,7 +221,7 @@ foreach ($pair in $semanticParityMatrix) {
     }
 }
 
-foreach ($name in @('review-loop', 'project-init', 'ask-light', 'learn-anything', 'manuscript-ops', 'recap')) {
+foreach ($name in @('review-loop', 'project-init', 'ask-light', 'language-learning', 'learn-anything', 'manuscript-ops', 'recap')) {
     $englishPath = Join-Path $Root "docs/skills/$name.md"
     $chinesePath = Join-Path $Root "docs/zh-CN/skills/$name.md"
     Assert-Collection (Test-Path -LiteralPath $englishPath -PathType Leaf) "Skill guide is missing: docs/skills/$name.md"
@@ -246,7 +246,7 @@ foreach ($pair in @(
 }
 
 $guideParityMarkers = @('SKILL.md', 'BLOCKED', 'review-loop', 'user-invoked')
-foreach ($name in @('review-loop', 'project-init', 'ask-light', 'learn-anything', 'manuscript-ops', 'recap')) {
+foreach ($name in @('review-loop', 'project-init', 'ask-light', 'language-learning', 'learn-anything', 'manuscript-ops', 'recap')) {
     $englishPath = Join-Path $Root "docs/skills/$name.md"
     $chinesePath = Join-Path $Root "docs/zh-CN/skills/$name.md"
     if ((Test-Path -LiteralPath $englishPath -PathType Leaf) -and (Test-Path -LiteralPath $chinesePath -PathType Leaf)) {
@@ -314,6 +314,7 @@ foreach ($file in $documentationFiles) {
 # a low-risk Skill does not require editing the workflow solely to name tests.
 & (Join-Path $Root 'skills/recap/tests/recap-contract-tests.ps1')
 & (Join-Path $Root 'skills/recap/tests/recap-output-contract-tests.ps1')
+& (Join-Path $Root 'skills/language-learning/tests/language-learning-contract-tests.ps1')
 
 if ($script:failures.Count -gt 0) {
     $script:failures | ForEach-Object { "FAIL: $_" }
