@@ -10,39 +10,36 @@ explicit about its invocation boundary, and small enough to inspect before use.
 
 > **About:** Personal Skills Collection — Drive your creativity
 
-> **Release:** [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1)
-> is published from commit `c50f1ef`. The release record and fresh-install evidence
-> live in [docs/evidence/releases/v0.1.1/](docs/evidence/releases/v0.1.1/).
+> **Release candidate:** v0.1.2 is prepared in this worktree. The release
+> record and fresh-install evidence live in
+> [docs/evidence/releases/v0.1.2/](docs/evidence/releases/v0.1.2/); promotion
+> remains subject to the recorded release gates.
 >
-> **Release status:** The collection is published and usable. Installation and
-> `collection-quality` checks passed for all five first-party Skills. The
-> remaining release-acceptance limitation is the independent evaluator evidence
-> for the `review-loop agent-skill` gate: that evidence is `BLOCKED` because a
-> fresh independent evaluator record is not attached. This does not block
-> installation or ordinary use; see the [release receipt](docs/evidence/releases/v0.1.1/RELEASE_RECEIPT.md)
-> and [limitations](docs/evidence/releases/v0.1.1/LIMITATIONS.md) for the detailed boundary.
+> The current published stable release remains [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1).
 >
-> **Current branch admission:** `recap` and `language-learning` both passed the low-risk prompt-only fast track. Both remain unreleased; stable `v0.1.1` contains the original five packages.
+> **Current branch admission:** seven packages are admitted on this branch.
+> Stable `v0.1.1` contained the original five packages; `recap` and
+> `language-learning` are prepared as the v0.1.2 release candidate.
 
 ## Quick Start
 
-Install the published first-party collection:
+Install the whole first-party collection after the release gate passes:
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.1 --yes --copy --agent codex
+npx skills add LightDevCoder/skills --yes --copy --agent '*'
 ```
 
-Install one Skill at the same published revision:
+Install one Skill at the same revision after the release gate passes:
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop --yes --copy --agent codex
+npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'
 ```
 
 Refresh the Agent host, then confirm that the package is visible in its Skill
 catalog. If the host exposes a filesystem, inspect the installed package's
 `SKILL.md` and `agents/openai.yaml`; discovery without the source checkout is
 the meaningful check. The exact CLI version, destination, and result are in
-[INSTALLATION_VERIFICATION.md](docs/evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md).
+[INSTALLATION_VERIFICATION.md](docs/evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.md).
 
 The first useful entry point when the next move is unclear is `$ask-light`:
 
@@ -67,9 +64,9 @@ outputs, handoffs, and stopping boundaries.
 
 ## External capabilities
 
-The current branch contains seven first-party packages on this branch: the five
-in v0.1.1 plus the newly admitted, unreleased `recap` and `language-learning`
-packages.
+The current branch contains seven first-party packages: the five in v0.1.1
+plus `recap` and `language-learning`, which are prepared as the v0.1.2 release
+candidate.
 
 Optional workflow capabilities are external or third-party dependencies and are
 not included by default:
@@ -140,7 +137,7 @@ and is never copied into this public collection.
 - [Review policy](docs/REVIEW_POLICY.md)
 - [Catalog](CATALOG.md)
 - [Changelog](CHANGELOG.md)
-- [Release receipt](docs/evidence/releases/v0.1.1/RELEASE_RECEIPT.md)
+- [Release receipt](docs/evidence/releases/v0.1.2/RELEASE_RECEIPT.md)
 - [recap admission evidence](docs/evidence/admissions/recap/README.md)
 - [language-learning admission evidence](docs/evidence/admissions/language-learning/README.md)
 - [Collection discovery test](tests/collection-discovery-tests.ps1)

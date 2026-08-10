@@ -48,12 +48,14 @@ class CollectionContractTests(unittest.TestCase):
         admission_zh = (ROOT / "docs/SKILL_ADMISSION.zh-CN.md").read_text(encoding="utf-8")
         review_policy = (ROOT / "docs/REVIEW_POLICY.md").read_text(encoding="utf-8")
         review_policy_zh = (ROOT / "docs/REVIEW_POLICY.zh-CN.md").read_text(encoding="utf-8")
-        self.check("npx skills add LightDevCoder/skills#v0.1.1" in readme, "README pinned whole install")
-        self.check("npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop" in installation, "installation pinned per-Skill install")
+        self.check("npx skills add LightDevCoder/skills --yes --copy --agent '*'" in readme, "README generic latest whole install")
+        self.check("npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'" in installation, "installation generic latest per-Skill install")
+        self.check("npx skills add LightDevCoder/skills#v0.1.2" in installation, "installation pinned v0.1.2 install")
         self.check("default revision" in installation and "#ref" in installation, "installation revision semantics")
         self.check("LightDevCoder/skills" in readme and "Drive your creativity" in readme, "homepage about copy")
         self.check(re.search(r"stable[^\n]{0,40}v0\.1\.1[^\n]{0,120}five", readme, re.I) is not None, "README stable v0.1.1 five-package boundary")
         self.check("5 admitted first-party Skills in stable v0.1.1" in catalog, "catalog stable v0.1.1 five-package boundary")
+        self.check("Release candidate v0.1.2" in catalog and "v0.1.1 remains the current stable release" in catalog, "catalog v0.1.2 release candidate framing")
         for label, text in (("admission", admission), ("admission zh-CN", admission_zh),
                             ("review policy", review_policy), ("review policy zh-CN", review_policy_zh)):
             self.check(re.search(r"prompt-only|纯提示型", text) is not None, f"{label} prompt-only fast track")

@@ -23,9 +23,9 @@ Keep each fact in one authoritative location and link to it elsewhere:
 
 The admitted collection on this branch contains exactly review-loop,
 project-init, ask-light, learn-anything, manuscript-ops, recap, and
-language-learning. Both recap and language-learning passed the prompt-only fast
-track but remain unreleased. Stable v0.1.1 contains the original five admitted
-packages. The check at
+language-learning. recap and language-learning were admitted through the
+prompt-only fast track and are prepared as the v0.1.2 release candidate.
+Stable v0.1.1 contained the original five admitted packages. The check at
 [tests/collection-discovery-tests.ps1](../tests/collection-discovery-tests.ps1)
 guards package names, metadata, catalog entries, README links, header assets,
 required governance paths, and the retired orchestration boundary.

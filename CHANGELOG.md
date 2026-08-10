@@ -6,34 +6,37 @@ All notable changes are recorded here. A release entry must be tied to an
 actual version or tag and must not be created merely because a document was
 drafted.
 
-## Unreleased
+## Unreleased — target v0.1.2 (2026-08-10)
 
 ### Added
 
-- Proposed the first-party, user-invoked `recap` Skill. Explicit `$recap`
-  invocation returns exactly one line about the current session, never runs
-  tools, continues work, changes files, compacts history, or invokes another
-  Skill.
-- Added bilingual `recap` guides, package contract/output-contract tests, collection
-  discovery coverage, fresh-copy installation evidence, and independent
-  `review-loop agent-skill` admission evidence.
+- Prepared the first-party, user-invoked `recap` Skill for v0.1.2. Explicit
+  `$recap` invocation returns exactly one line about the current session, never
+  runs tools, continues work, changes files, compacts history, or invokes
+  another Skill.
+- Prepared the first-party, user-invoked `language-learning` Skill for v0.1.2.
+  It tutors any target language through six study modes — daily lessons,
+  flashcards, conversation practice, grammar decoding, progress quizzes, and
+  immersion translation — reusing session context and previously learned
+  vocabulary across invocations instead of re-asking.
 - Added a low-risk prompt-only admission fast track for owner-authored,
   manual-only, text-output Skills with no tools, side effects, runtime
   executables, or external dependencies. It uses one fresh Evaluator and does
   not require separate Critic or Standards/Spec review.
-- Proposed the first-party, user-invoked `language-learning` Skill. It tutors
-  any target language through six study modes — daily lessons, flashcards,
-  conversation practice, grammar decoding, progress quizzes, and immersion
-  translation — reusing session context and previously learned vocabulary
-  across invocations instead of re-asking.
-- Added bilingual `language-learning` guides, package contract tests,
-  collection discovery coverage, and prompt-only fast-track admission evidence.
-  The package received a final low-risk prompt-only fast-track `PASS` and is
-  admitted on this branch; it is not in any release.
+- Published the generic `latest` install command
+  (`npx skills add LightDevCoder/skills --yes --copy --agent '*'`) as the
+  standard install path, with the pinned `#v0.1.2` form retained for
+  reproducible installs. `recap` and `language-learning` were both admitted by
+  a fresh independent prompt-only fast-track Evaluator `PASS`; see their
+  [admission evidence](docs/evidence/admissions/).
 
-`recap` received a final low-risk prompt-only fast-track `PASS`. This entry
-does not claim a release tag or a verified published install command; stable
-v0.1.1 still contains five packages.
+### Release-candidate evidence
+
+- Release tag/release: `NOT TESTED` until the release gate passes.
+- Whole-collection and per-Skill fresh-install target evidence:
+  [INSTALLATION_VERIFICATION.md](docs/evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.md).
+- Structural and package evidence:
+  [TEST_SUMMARY.md](docs/evidence/releases/v0.1.2/TEST_SUMMARY.md).
 
 ## 0.1.1 — 2026-07-26
 

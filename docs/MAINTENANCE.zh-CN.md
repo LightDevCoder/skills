@@ -8,7 +8,7 @@
 
 每个事实只保留一个 authority，其他位置链接过去：包行为/触发/调用/输入/输出/资源以 `skills/<skill-name>/SKILL.md` 为准；变换包的 provenance 在 `ATTRIBUTION.md`；可读目录是 `CATALOG.md`；安装与证据是 `docs/INSTALLATION.md`；审查和 verdict 规则是 `docs/REVIEW_POLICY.md`；历史和 release notes 是 `CHANGELOG.md` 与真实 release；组合验证资产在 `docs/workflows/`。
 
-本分支的准入集合必须恰好包含 `review-loop`、`project-init`、`ask-light`、`learn-anything`、`manuscript-ops`、`recap` 和 `language-learning`。`recap` 与 `language-learning` 均已通过纯提示型快速通道，但都尚未发布；稳定 v0.1.1 仍包含原来的五个已准入包。`collection-discovery-tests.ps1` 负责检查包名、metadata、目录、README 链接、头图、治理路径、双语配对和退休 orchestration 边界，但不证明 runtime 或 fresh installation。
+本分支的准入集合必须恰好包含 `review-loop`、`project-init`、`ask-light`、`learn-anything`、`manuscript-ops`、`recap` 和 `language-learning`。`recap` 与 `language-learning` 经纯提示型快速通道准入，并作为 v0.1.2 release candidate 准备；稳定 v0.1.1 包含原来的五个已准入包。`collection-discovery-tests.ps1` 负责检查包名、metadata、目录、README 链接、头图、治理路径、双语配对和退休 orchestration 边界，但不证明 runtime 或 fresh installation。
 
 ## 变更流程与同步矩阵
 

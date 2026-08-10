@@ -3,20 +3,75 @@
 [中文安装说明](INSTALLATION.zh-CN.md)
 
 The public first-party collection's current stable release is
-[v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1), commit
-`c50f1ef403a5f0bfe02e75d1aeff2c237556db63`. Fresh-install evidence for the
-published tag is recorded in the [release evidence](evidence/releases/v0.1.1/).
+[v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1). The
+working tree also prepares v0.1.2 as a release candidate; its tag and
+fresh-install proof are still release-gate evidence. Until those are recorded,
+the v0.1.2 commands below are targets rather than verified installation claims.
 Package contracts remain inside `skills/<name>/`; this document is the
 installation authority and does not replace host-specific discovery rules.
+
+The standard install command is the generic `latest` form: it follows the
+repository's default revision, so every `npx skills add
+LightDevCoder/skills` install gets the current collection on the default
+branch. A pinned `#v0.1.2` form exists for reproducibility once the release
+gate passes. The
+[installation verification](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.md)
+will record both forms against a fresh destination.
 
 ## Revision semantics
 
 The official Skills CLI accepts a `#ref` fragment in a GitHub source. The
 fragment is passed as the Git revision; a source without a fragment uses the
-repository's default revision. Therefore an unqualified shorthand is not a
-permanent release pin. The parser and clone behavior are documented in the
+repository's default revision. The parser and clone behavior are documented in the
 [official Skills CLI source parser](https://raw.githubusercontent.com/vercel-labs/skills/main/src/source-parser.ts)
 and [Git helper](https://raw.githubusercontent.com/vercel-labs/skills/main/src/git.ts).
+
+The generic `latest` command below uses no fragment and therefore follows the
+repository's default revision: it installs the current collection and is the
+standard way to install. The pinned `#v0.1.2` form selects that specific
+candidate tag once published and is retained for reproducible installs and
+release verification. Neither form is a claim about a future default revision;
+re-run discovery against the fresh destination for the resolved content.
+
+## Target v0.1.2 release commands
+
+The target install commands follow the repository's default revision and
+install the current seven-package collection once the release gate passes:
+
+```text
+npx skills add LightDevCoder/skills --yes --copy --agent '*'
+npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'
+```
+
+The first installs the seven-package collection and the second selects one
+complete package from the same revision. Both forms are targets until the
+release gate passes and are then verified against fresh destinations in the
+[v0.1.2 installation record](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.md).
+
+For a reproducible pinned install once the tag exists, use the same command
+with the explicit tag:
+
+```text
+npx skills add LightDevCoder/skills#v0.1.2 --yes --copy --agent '*'
+npx skills add LightDevCoder/skills#v0.1.2 --skill review-loop --yes --copy --agent '*'
+```
+
+The `latest` form and the `#v0.1.2` form resolve to the same content at release
+time; only the pinned form is stable against future default-revision changes.
+
+## Historical v0.1.1 verification
+
+The previous stable release was the published v0.1.1 snapshot at commit
+`c50f1ef403a5f0bfe02e75d1aeff2c237556db63`. Its verified commands used an
+explicit tag and a codex host selection:
+
+```text
+npx skills add LightDevCoder/skills#v0.1.1 --yes --copy --agent codex
+npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop --yes --copy --agent codex
+```
+
+The verified CLI version, destination class, discovery result, and smoke result
+are recorded in the [v0.1.1 installation record](evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md).
 
 ## Historical v0.1.0 verification
 
@@ -37,38 +92,19 @@ receipt did not record them.
 
 That historical verification does not change the CLI revision semantics: an
 unqualified source follows the repository's default revision and is not a
-permanent v0.1.0 pin. The published v0.1.1 commands below use an explicit tag.
+permanent pin. The current release commands above use the generic `latest` form
+or the explicit `#v0.1.2` tag.
 
-The target release commands are:
+## Prepared `recap` and `language-learning` packages
 
-```text
-npx skills add LightDevCoder/skills#v0.1.1 --yes --copy --agent codex
-npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop --yes --copy --agent codex
-```
-
-The first installs the five-package collection and the second selects one
-complete package at the same tag. The verified CLI version, destination class,
-discovery result, and smoke result are recorded in the
-[v0.1.1 installation record](evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md).
-
-## Unreleased `recap` package
-
-`recap` is admitted on this branch through the prompt-only fast track but is
-not present in v0.1.1. Its fresh-copy installation and discovery check is recorded
-in [its admission evidence](evidence/admissions/recap/README.md). Do not present
-an unqualified default-branch command as a stable release pin, and do not
-publish a pinned `recap` command until a new tag exists and the command has
-succeeded against that released repository in a fresh environment.
-
-## Unreleased `language-learning` package
-
-`language-learning` is admitted on this branch through the prompt-only fast
-track but is not present in v0.1.1. Its admission record is under
-[evidence/admissions/language-learning/](evidence/admissions/language-learning/README.md).
-Do not present an unqualified default-branch command as a stable release pin,
-and do not publish a pinned `language-learning` command until a new tag exists
-and the command has succeeded against that released repository in a fresh
-environment.
+`recap` and `language-learning` are admitted first-party packages and are
+prepared as the v0.1.2 release candidate. Their admission evidence is recorded
+in
+[evidence/admissions/recap/README.md](evidence/admissions/recap/README.md) and
+[evidence/admissions/language-learning/README.md](evidence/admissions/language-learning/README.md).
+Their fresh installs are exercised as part of the
+[collection discovery test](../tests/collection-discovery-tests.ps1) and the
+[v0.1.2 installation record](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.md).
 
 ## Supported installation scopes
 
@@ -88,7 +124,7 @@ after it is published and copy the complete package into the host-recognized
 root:
 
 ```powershell
-$sourceRoot = "<v0.1.1-release-checkout>"
+$sourceRoot = "<v0.1.2-release-checkout>"
 $skillName = "<admitted-skill-name>"
 $destinationRoot = "<host-recognized-skills-root>"
 Copy-Item -LiteralPath "$sourceRoot/skills/$skillName" -Destination "$destinationRoot/$skillName" -Recurse

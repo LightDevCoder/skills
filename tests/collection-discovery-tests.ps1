@@ -46,8 +46,9 @@ if ((Test-Path -LiteralPath $svgPath) -and (Test-Path -LiteralPath $pngPath)) {
     Assert-Collection (($svgText -match "<svg\b") -and ((Get-Item -LiteralPath $svgPath).Length -gt 100)) "Header SVG is not a non-empty SVG document."
     Assert-Collection (($pngBytes.Length -gt 100) -and ($pngBytes[0] -eq 137) -and ($pngBytes[1] -eq 80) -and ($pngBytes[2] -eq 78) -and ($pngBytes[3] -eq 71)) "Header PNG does not have a valid PNG signature."
 }
-Assert-Collection ($installation -match "npx skills add LightDevCoder/skills#v0\.1\.1") "Installation guide is missing the pinned whole-repository release command."
-Assert-Collection ($installation -match "npx skills add LightDevCoder/skills#v0\.1\.1 --skill review-loop") "Installation guide is missing the pinned per-Skill release command."
+Assert-Collection ($installation -match "npx skills add LightDevCoder/skills --yes --copy --agent '\*'") "Installation guide is missing the generic whole-repository latest install command."
+Assert-Collection ($installation -match "npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '\*'") "Installation guide is missing the generic per-Skill latest install command."
+Assert-Collection ($installation -match "npx skills add LightDevCoder/skills#v0\.1\.2") "Installation guide is missing the pinned v0.1.2 release command."
 Assert-Collection ($installation -match "#ref|fragment|default revision") "Installation guide must explain revision semantics rather than overclaim shorthand immutability."
 Assert-Collection ($installation -notmatch "commands target the immutable v0\.1\.0 release") "Installation guide must not claim the old shorthand is permanently immutable."
 Assert-Collection ($installation -notmatch "not a verified command|<owner>/<repository>") "Installation guide still contains unresolved pre-release command wording."
@@ -55,6 +56,8 @@ Assert-Collection ($installation -match "Manual fallback") "Installation guide m
 Assert-Collection ($installation -match '\$sourceRoot' -and $installation -match '\$skillName' -and $installation -match '\$destinationRoot') "Manual fallback must use valid PowerShell variables."
 Assert-Collection ($readme -match '(?is)stable[^\r\n]{0,40}v0\.1\.1[^\r\n]{0,120}five') "README must preserve the stable v0.1.1 five-package boundary."
 Assert-Collection ($catalog -match '5 admitted first-party Skills in stable v0\.1\.1') "Catalog must preserve the stable v0.1.1 five-package boundary."
+Assert-Collection ($readme -match '(?is)Release candidate[^\r\n]{0,80}v0\.1\.2') "README must present v0.1.2 as a release candidate."
+Assert-Collection ($catalog -match 'Release candidate v0\.1\.2[^\r\n]{0,80}v0\.1\.1') "Catalog must present v0.1.2 as a release candidate over stable v0.1.1."
 
 foreach ($package in $expected) {
     $packageRoot = Join-Path $skillRoot $package
@@ -124,6 +127,7 @@ foreach ($required in @(
     "CATALOG.zh-CN.md",
     "CHANGELOG.zh-CN.md",
     "docs/evidence/releases/v0.1.1/RELEASE_RECEIPT.md",
+    "docs/evidence/releases/v0.1.2/RELEASE_RECEIPT.md",
     ".github/workflows/quality.yml"
 )) {
     Assert-Collection (Test-Path -LiteralPath (Join-Path $Root $required)) "Required documentation path is missing: $required"
@@ -179,8 +183,8 @@ foreach ($text in @($admissionPolicy, $admissionPolicyZh, $reviewPolicy, $review
 
 $semanticParityMatrix = @(
     [pscustomobject]@{ English = 'README.md'; Chinese = 'README.zh-CN.md'; Pairs = @(
-        @('Install the published first-party collection', '安装已发布的第一方集合'),
-        @('Install one Skill at the same published revision', '安装同一已发布版本下的一个 Skill'),
+        @('Install the whole first-party collection', '安装整个第一方集合'),
+        @('Install one Skill at the same revision', '安装同一版本下的一个 Skill'),
         @('fresh-install evidence', 'fresh-install 证据')
     ) },
     [pscustomobject]@{ English = 'CATALOG.md'; Chinese = 'CATALOG.zh-CN.md'; Pairs = @(
@@ -189,7 +193,7 @@ $semanticParityMatrix = @(
         @('Installation authority', '安装权威')
     ) },
     [pscustomobject]@{ English = 'CHANGELOG.md'; Chinese = 'CHANGELOG.zh-CN.md'; Pairs = @(
-        @('Release evidence', 'Release 证据'),
+        @('Release-candidate evidence', 'Release candidate 证据'),
         @('Historical installation details', '历史安装明细')
     ) },
     [pscustomobject]@{ English = 'docs/INSTALLATION.md'; Chinese = 'docs/INSTALLATION.zh-CN.md'; Pairs = @(
@@ -270,12 +274,18 @@ foreach ($pair in $secondaryParity) {
     }
 }
 
-foreach ($name in @('RELEASE_RECEIPT', 'TEST_SUMMARY', 'INSTALLATION_VERIFICATION', 'DISCOVERY_VERIFICATION', 'LIMITATIONS')) {
-    $englishText = Get-Content -LiteralPath (Join-Path $Root "docs/evidence/releases/v0.1.1/$name.md") -Raw
-    $chineseText = Get-Content -LiteralPath (Join-Path $Root "docs/evidence/releases/v0.1.1/$name.zh-CN.md") -Raw
-    $markers = if ($name -eq 'RELEASE_RECEIPT') { @('v0.1.1', 'VERIFIED', 'fresh') } else { @('v0.1.1', 'PASS', 'fresh') }
-    foreach ($marker in $markers) {
-        Assert-Collection ($englishText -match [regex]::Escape($marker) -and $chineseText -match [regex]::Escape($marker)) "$name release evidence is missing the synchronized semantic marker: $marker"
+foreach ($revision in @('v0.1.1', 'v0.1.2')) {
+    foreach ($name in @('RELEASE_RECEIPT', 'TEST_SUMMARY', 'INSTALLATION_VERIFICATION', 'DISCOVERY_VERIFICATION', 'LIMITATIONS')) {
+        $englishText = Get-Content -LiteralPath (Join-Path $Root "docs/evidence/releases/$revision/$name.md") -Raw
+        $chineseText = Get-Content -LiteralPath (Join-Path $Root "docs/evidence/releases/$revision/$name.zh-CN.md") -Raw
+        $markers = if ($revision -eq 'v0.1.1') {
+            if ($name -eq 'RELEASE_RECEIPT') { @('v0.1.1', 'VERIFIED', 'fresh') } else { @('v0.1.1', 'PASS', 'fresh') }
+        } else {
+            @('v0.1.2', 'NOT TESTED', 'fresh')
+        }
+        foreach ($marker in $markers) {
+            Assert-Collection ($englishText -match [regex]::Escape($marker) -and $chineseText -match [regex]::Escape($marker)) "$name $revision release evidence is missing the synchronized semantic marker: $marker"
+        }
     }
 }
 

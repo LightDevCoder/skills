@@ -2,15 +2,62 @@
 
 [English installation guide](INSTALLATION.md)
 
-公开第一方集合当前稳定版本是 [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1)，commit 为 `c50f1ef403a5f0bfe02e75d1aeff2c237556db63`。已发布 tag 的 fresh-install 证据见[发布证据](evidence/releases/v0.1.1/RELEASE_RECEIPT.zh-CN.md)。`skills/<name>/` 内的包契约仍是行为权威；本页只规定安装和验证证据。
+公开第一方集合当前稳定版本是 [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1)。本 worktree 同时准备 v0.1.2 release candidate；其 tag 与 fresh-install 证明仍是 release-gate 证据。在这些记录完成前，下面的 v0.1.2 命令是 target，不是已验证的安装声明。`skills/<name>/` 内的包契约仍是行为权威；本页只规定安装和验证证据。
+
+标准安装命令是通用 `latest` 形式：它跟随仓库默认 revision，因此每次
+`npx skills add LightDevCoder/skills` 都安装默认分支上的当前集合。pinned
+`#v0.1.2` 形式在 release gate 通过后用于可复现安装。
+[安装验证](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.zh-CN.md)将在 fresh
+destination 上记录这两种形式。
 
 ## Revision 语义
 
-官方 Skills CLI 支持 GitHub source 的 `#ref` fragment，并将其作为 Git revision；没有 fragment 的仓库简写使用仓库默认 revision。因此未加 fragment 的 shorthand 不是永久 release pin。可查看 [官方 source parser](https://raw.githubusercontent.com/vercel-labs/skills/main/src/source-parser.ts) 和 [Git helper](https://raw.githubusercontent.com/vercel-labs/skills/main/src/git.ts)。
+官方 Skills CLI 支持 GitHub source 的 `#ref` fragment，并将其作为 Git revision；没有 fragment 的仓库简写使用仓库默认 revision。可查看 [官方 source parser](https://raw.githubusercontent.com/vercel-labs/skills/main/src/source-parser.ts) 和 [Git helper](https://raw.githubusercontent.com/vercel-labs/skills/main/src/git.ts)。
+
+下面的通用 `latest` 命令不带 fragment，因此跟随仓库默认 revision：它安装当前
+集合，是标准安装方式。pinned `#v0.1.2` 形式在发布后选择该候选 tag，用于可复现
+安装与 release 验证。两者都不是对未来默认 revision 的声明；对 fresh
+destination 重新运行 discovery，以获取解析后的实际内容。
+
+## Target v0.1.2 release 命令
+
+release gate 通过后，目标安装命令跟随仓库默认 revision，安装当前七包集合：
+
+```text
+npx skills add LightDevCoder/skills --yes --copy --agent '*'
+npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'
+```
+
+第一条安装七包集合，第二条从同一 revision 选择完整单包。两种形式在 release gate
+通过前都是 target，之后在 fresh destinations 上验证，见 [v0.1.2 安装记录](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.zh-CN.md)。
+
+tag 存在后如需可复现的 pinned 安装，用显式 tag 运行同一命令：
+
+```text
+npx skills add LightDevCoder/skills#v0.1.2 --yes --copy --agent '*'
+npx skills add LightDevCoder/skills#v0.1.2 --skill review-loop --yes --copy --agent '*'
+```
+
+`latest` 形式与 `#v0.1.2` 形式在 release 时刻解析为相同内容；只有 pinned 形式
+对未来默认 revision 的变化保持稳定。
+
+## 历史 v0.1.1 验证
+
+上一稳定版本是已发布的 v0.1.1 snapshot，commit 为
+`c50f1ef403a5f0bfe02e75d1aeff2c237556db63`。其已验证命令使用显式 tag 和 codex
+host 选择：
+
+```text
+npx skills add LightDevCoder/skills#v0.1.1 --yes --copy --agent codex
+npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop --yes --copy --agent codex
+```
+
+已验证的 CLI version、destination 类别、discovery 和 smoke result 见
+[v0.1.1 安装记录](evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.zh-CN.md)。
 
 ## 历史 v0.1.0 验证
 
-当前稳定版本是已发布的 v0.1.0 snapshot，commit 为
+历史稳定版本是已发布的 v0.1.0 snapshot，commit 为
 `fb36fc2dad39ee94ad4aa25a5fee3c87c54f05f2`。以下无 fragment 命令作为历史命令保留；其 CLI、host、destination、validator 和证据限制见[历史安装记录](evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.zh-CN.md#历史-v0.1.0-摘要)：
 
 ```text
@@ -21,24 +68,18 @@ npx skills add LightDevCoder/skills --skill review-loop
 该历史记录是整理摘要，不是当前重跑；原始 receipt 未记录的
 boundary/missing-dependency smoke 和重复安装行为会明确标为 `NOT RECORDED`。
 
-这份历史验证不改变 CLI 的 revision 语义：无 fragment source 遵循仓库默认 revision，并不是永久固定到 v0.1.0。下面的已发布 v0.1.1 命令使用显式 tag。
+这份历史验证不改变 CLI 的 revision 语义：无 fragment source 遵循仓库默认
+revision，并不是永久 pin。上面的当前 release 命令使用通用 `latest` 形式或显式
+`#v0.1.2` tag。
 
-目标 v0.1.1 的命令为：
+## 准备的 `recap` 与 `language-learning` 包
 
-```text
-npx skills add LightDevCoder/skills#v0.1.1 --yes --copy --agent codex
-npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop --yes --copy --agent codex
-```
-
-第一条安装五个包，第二条选择同一 tag 下的完整单包。已验证的 CLI version、destination 类别、discovery 和 smoke result 见 [v0.1.1 安装记录](evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.zh-CN.md)。
-
-## 未发布的 `recap` 包
-
-`recap` 已通过纯提示型快速通道在本分支准入，但 v0.1.1 不包含它。它的 fresh-copy 安装与 discovery 检查见[准入记录](evidence/admissions/recap/README.zh-CN.md)。不要把无 fragment 的默认分支命令写成稳定 release pin；只有新 tag 已创建、并在 fresh 环境中针对已发布仓库成功运行后，才能发布 pinned `recap` 安装命令。
-
-## 未发布的 `language-learning` 包
-
-`language-learning` 已通过纯提示型快速通道在本分支准入，但 v0.1.1 不包含它。准入记录见[准入证据](evidence/admissions/language-learning/README.zh-CN.md)。不要把无 fragment 的默认分支命令写成稳定 release pin；只有新 tag 已创建、并在 fresh 环境中针对已发布仓库成功运行后，才能发布 pinned `language-learning` 安装命令。
+`recap` 与 `language-learning` 是已准入的第一方包，作为 v0.1.2 release
+candidate 准备。其准入记录见 [evidence/admissions/recap/README.zh-CN.md](evidence/admissions/recap/README.zh-CN.md) 与
+[evidence/admissions/language-learning/README.zh-CN.md](evidence/admissions/language-learning/README.zh-CN.md)。
+它们的 fresh install 作为
+[collection discovery 测试](../tests/collection-discovery-tests.ps1)与
+[v0.1.2 安装记录](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.zh-CN.md)的一部分被演练。
 
 ## 安装范围
 
@@ -55,7 +96,7 @@ npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop --yes --copy --ag
 installer 不可用时，在 target tag 发布后 checkout，并将完整包复制到 host 认可的 root：
 
 ```powershell
-$sourceRoot = "<v0.1.1-release-checkout>"
+$sourceRoot = "<v0.1.2-release-checkout>"
 $skillName = "<admitted-skill-name>"
 $destinationRoot = "<host-recognized-skills-root>"
 Copy-Item -LiteralPath "$sourceRoot/skills/$skillName" -Destination "$destinationRoot/$skillName" -Recurse

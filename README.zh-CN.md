@@ -8,34 +8,30 @@
 
 > **简介：** Personal Skills Collection — Drive your creativity
 
-> **发布：** [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1)
-> 已从 commit `c50f1ef` 发布。发布记录和 fresh-install 证据见
-> [docs/evidence/releases/v0.1.1/](docs/evidence/releases/v0.1.1/)。
+> **发布候选：** v0.1.2 正在本 worktree 中准备。发布记录和 fresh-install 证据见
+> [docs/evidence/releases/v0.1.2/](docs/evidence/releases/v0.1.2/)；晋升仍受已记录的
+> release gate 约束。
 >
-> **发布状态：** 集合已发布且可使用。五个第一方 Skill 的安装与
-> `collection-quality` 检查均已通过。当前剩余的发布验收限制是
-> `review-loop agent-skill` 的独立 evaluator 证据：由于尚未附上 fresh
-> independent evaluator record，该项仍为 `BLOCKED`。这不影响安装或一般使用；
-> 详细边界见[发布收据](docs/evidence/releases/v0.1.1/RELEASE_RECEIPT.zh-CN.md)
-> 和[限制说明](docs/evidence/releases/v0.1.1/LIMITATIONS.zh-CN.md)。
+> 当前已发布的稳定版本仍是 [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1)。
 >
-> **当前分支准入：** `recap` 与 `language-learning` 均已通过低风险纯提示型快速通道。两者均未发布；稳定 v0.1.1 仍是原来的五个包。
+> **当前分支准入：** 本分支已准入七个包。稳定 v0.1.1 包含原来的五个包；`recap`
+> 与 `language-learning` 作为 v0.1.2 release candidate 准备。
 
 ## Quick Start
 
-安装已发布的第一方集合：
+安装整个第一方集合：
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.1 --yes --copy --agent codex
+npx skills add LightDevCoder/skills --yes --copy --agent '*'
 ```
 
-安装同一已发布版本下的一个 Skill：
+安装同一版本下的一个 Skill：
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop --yes --copy --agent codex
+npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'
 ```
 
-刷新 Agent host，然后在其 Skill catalog 中确认发现结果。若 host 提供文件系统，检查已安装包的 `SKILL.md` 与 `agents/openai.yaml`；脱离 source checkout 后仍能发现，才是有意义的验证。CLI 版本、destination 和结果见 [INSTALLATION_VERIFICATION.zh-CN.md](docs/evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.zh-CN.md)。
+刷新 Agent host，然后在其 Skill catalog 中确认发现结果。若 host 提供文件系统，检查已安装包的 `SKILL.md` 与 `agents/openai.yaml`；脱离 source checkout 后仍能发现，才是有意义的验证。CLI 版本、destination 和结果见 [INSTALLATION_VERIFICATION.zh-CN.md](docs/evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.zh-CN.md)。
 
 第一次不知道下一步时，推荐显式调用 `$ask-light`：
 
@@ -56,7 +52,7 @@ $review-loop init     # 冻结已有验收标准的 baseline
 
 ## 外部能力（External Capabilities）
 
-当前分支包含七个第一方包：v0.1.1 的五个包，以及新准入但尚未发布的 `recap` 与 `language-learning`。
+当前分支包含七个第一方包：v0.1.1 的五个包，以及作为 v0.1.2 release candidate 准备的 `recap` 与 `language-learning`。
 
 以下是可选的 workflow 能力，来自外部或第三方来源，不属于默认集合：
 
@@ -106,6 +102,6 @@ $review-loop init     # 冻结已有验收标准的 baseline
 - [审查策略](docs/REVIEW_POLICY.zh-CN.md)
 - [目录](CATALOG.zh-CN.md)
 - [变更记录](CHANGELOG.zh-CN.md)
-- [发布收据](docs/evidence/releases/v0.1.1/RELEASE_RECEIPT.zh-CN.md)
+- [发布收据](docs/evidence/releases/v0.1.2/RELEASE_RECEIPT.zh-CN.md)
 - [recap 准入证据](docs/evidence/admissions/recap/README.zh-CN.md)
 - [language-learning 准入证据](docs/evidence/admissions/language-learning/README.zh-CN.md)

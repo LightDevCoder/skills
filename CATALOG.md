@@ -13,11 +13,15 @@ Agent host.
 | --- | --- |
 | Collection | Personal Skills Collection |
 | Package count | 7 admitted first-party Skills on this branch; 5 admitted first-party Skills in stable v0.1.1 |
-| Current state | `recap` and `language-learning` both passed the low-risk prompt-only fast track but remain unreleased; v0.1.1 remains installable |
+| Current state | Release candidate v0.1.2 — release gate pending; v0.1.1 remains the current stable release |
 | Stable release | [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/collection-discovery-tests.ps1](tests/collection-discovery-tests.ps1) |
-| Evidence | [v0.1.1 release evidence](docs/evidence/releases/v0.1.1/) |
+| Evidence | [v0.1.2 release evidence](docs/evidence/releases/v0.1.2/) |
+
+Stable `v0.1.1` contained the original five packages; the v0.1.2 release
+candidate adds `recap` and `language-learning`, targeting seven admitted
+first-party Skills.
 
 No package in this table is an unmodified upstream copy. Direct upstream
 dependencies and modified third-party variants are documented separately.
@@ -51,25 +55,23 @@ dependencies and modified third-party variants are documented separately.
 - **Evidence:** Contract, scanner, and behavior tests under [skills/ask-light/tests/](skills/ask-light/tests/); user guide at [docs/skills/ask-light.md](docs/skills/ask-light.md).
 - **Installation path:** `skills/ask-light/` in a host-recognized Skills root.
 
-## Newly admitted Skill
+## Prepared as the v0.1.2 release candidate
 
 ### recap
 
 - **Purpose:** Generate exactly one line summarizing the current Agent session without continuing work or changing conversation history.
 - **Invocation:** User-invoked only; `$recap` is the sole entry point.
 - **Package:** [skills/recap/](skills/recap/)
-- **Status:** First-party admitted by prompt-only fast-track PASS; unreleased and not present in v0.1.1.
+- **Status:** First-party admitted by prompt-only fast-track PASS; prepared as the v0.1.2 release candidate.
 - **Evidence:** Contract and output-contract tests under [skills/recap/tests/](skills/recap/tests/), [user guide](docs/skills/recap.md), and [admission evidence](docs/evidence/admissions/recap/README.md).
 - **Installation path:** `skills/recap/` in a host-recognized Skills root.
-
-## Newly admitted Skill
 
 ### language-learning
 
 - **Purpose:** Tutor for any target language through six study modes — daily lessons, flashcards, conversation practice, grammar decoding, progress quizzes, and immersion translation.
 - **Invocation:** User-invoked only.
 - **Package:** [skills/language-learning/](skills/language-learning/)
-- **Status:** First-party admitted by prompt-only fast-track `PASS`; unreleased and not present in v0.1.1.
+- **Status:** First-party admitted by prompt-only fast-track `PASS`; prepared as the v0.1.2 release candidate.
 - **Evidence:** Contract tests under [skills/language-learning/tests/](skills/language-learning/tests/), [user guide](docs/skills/language-learning.md), and [admission evidence](docs/evidence/admissions/language-learning/README.md).
 - **Installation path:** `skills/language-learning/` in a host-recognized Skills root.
 
