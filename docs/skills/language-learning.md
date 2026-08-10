@@ -50,13 +50,13 @@ admission does not change the package contract.
 ## Verification and release state
 
 Run [the package tests](../../skills/language-learning/tests/) and inspect
-`agents/openai.yaml` for `allow_implicit_invocation: false`. The staged
-prompt-only fast-track admission evidence is recorded in the
+`agents/openai.yaml` for `allow_implicit_invocation: false`. The prompt-only
+fast-track `PASS` admission evidence is recorded in the
 [admission record](../evidence/admissions/language-learning/README.md).
 
-`language-learning` is not yet admitted and is not present in stable v0.1.1.
-Do not publish a pinned install command for it until a future tag is released
-and verified under [the installation policy](../INSTALLATION.md).
+`language-learning` is admitted on this branch but is not present in stable
+v0.1.1. Do not publish a pinned install command for it until a future tag is
+released and verified under [the installation policy](../INSTALLATION.md).
 
 ## Behavior sources
 

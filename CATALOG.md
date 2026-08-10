@@ -13,7 +13,7 @@ Agent host.
 | --- | --- |
 | Collection | Personal Skills Collection |
 | Package count | 7 admitted first-party Skills on this branch; 5 admitted first-party Skills in stable v0.1.1 |
-| Current state | `recap` passed the low-risk prompt-only fast track but remains unreleased; `language-learning` has its fast-track evidence staged and is not yet admitted; v0.1.1 remains installable |
+| Current state | `recap` and `language-learning` both passed the low-risk prompt-only fast track but remain unreleased; v0.1.1 remains installable |
 | Stable release | [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/collection-discovery-tests.ps1](tests/collection-discovery-tests.ps1) |
@@ -62,14 +62,14 @@ dependencies and modified third-party variants are documented separately.
 - **Evidence:** Contract and output-contract tests under [skills/recap/tests/](skills/recap/tests/), [user guide](docs/skills/recap.md), and [admission evidence](docs/evidence/admissions/recap/README.md).
 - **Installation path:** `skills/recap/` in a host-recognized Skills root.
 
-## Proposed first-party admission
+## Newly admitted Skill
 
 ### language-learning
 
 - **Purpose:** Tutor for any target language through six study modes — daily lessons, flashcards, conversation practice, grammar decoding, progress quizzes, and immersion translation.
 - **Invocation:** User-invoked only.
 - **Package:** [skills/language-learning/](skills/language-learning/)
-- **Status:** Proposed first-party; prompt-only fast-track evidence staged for this branch; not yet admitted and not in any release.
+- **Status:** First-party admitted by prompt-only fast-track `PASS`; unreleased and not present in v0.1.1.
 - **Evidence:** Contract tests under [skills/language-learning/tests/](skills/language-learning/tests/), [user guide](docs/skills/language-learning.md), and [admission evidence](docs/evidence/admissions/language-learning/README.md).
 - **Installation path:** `skills/language-learning/` in a host-recognized Skills root.
 

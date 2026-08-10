@@ -6,30 +6,25 @@
 
 - 包：`skills/language-learning/`
 - 调用类型：仅 user-invoked
-- 准入状态：已为低风险纯提示型快速通道准备好证据；尚无最终 verdict
+- Profile：`review-loop` `agent-skill`
+- 准入状态：低风险纯提示型快速通道 `PASS`
 - 稳定版本边界：v0.1.1 包含五个包，不含 `language-learning`
 
-## 已准备的证据
+## 证据摘要
 
 | 领域 | 结果 | 证据边界 |
 | --- | --- | --- |
 | 来源 | PASS | 原创第一方设计；无复制的第三方代码、脚本或资源。 |
-| 结构 | PENDING | 包树、`SKILL.md` metadata 与内部链接将在 collection discovery 检查中验证。 |
-| 契约 | PENDING | 33 条本地通过的契约断言覆盖上下文复用、教学行为、选择性纠错、时间比例指导值、常用义优先卡片、易混结构对照、评估与沉浸分级，包含正反 fixtures。 |
-| 调用 | PASS | Claude `disable-model-invocation: true` 与 Codex `allow_implicit_invocation: false`；包声明仅 user-invoked。 |
-| Fresh-copy 安装 | PENDING | 需要 fresh host；pinned 命令还需要未来发布的 release tag，目前尚无。 |
-| 行为 | PENDING | 需要 fresh Agent 对成功、边界与失败场景的观察。 |
-| 独立评审 | PENDING | 最终 `PASS`、`FAIL` 或 `BLOCKED` 之前需要一个 fresh 独立快速通道 Evaluator。 |
-| 集合质量 | PENDING | 准入编辑定稿后记录完整本地套件结果。 |
+| 结构 | PASS | 33 条契约断言；七个包合计 931 条 collection-discovery 断言；frontmatter 有效、链接可解析。 |
+| 调用 | PASS | Claude `disable-model-invocation: true` 与 Codex `allow_implicit_invocation: false`；仅 user-invoked；非触发场景返回 `NOT_INVOKED`。 |
+| Fresh-copy 安装 | PASS | 隔离副本只含 `language-learning`、无 source checkout、文件集一致、零 SHA-256 差异、安装副本契约测试 33 断言 PASS；host 安装逐字节一致并在 host skills root 被发现。 |
+| 行为 | PASS | Fresh Agent 产出路由后的卡片组与默认 beginner 的每日课程，且不重问语言/水平/模式。 |
+| 文档同步 | PASS | collection discovery、目录、双语指南、维护基线、changelog 一致：`main` 七个包，稳定 v0.1.1 五个包。 |
+| 独立评审 | PASS | Fresh 最终快速通道 Evaluator 确认资格、复现证据、逐条验证全部九项验收标准并返回 `PASS`。Evaluator 提出一条 Low 级证据准确性观察，已在 Producer 记录中解决。 |
 
-## 最终 verdict 之前的待办
+完整记录见 [review-loop/](review-loop/)。
 
-1. 本地运行 collection discovery、header-asset 与 quick-start 套件并记录结果。
-2. 为纯提示型快速通道取得一个 fresh 独立 Evaluator verdict。
-3. 在 fresh host 上完成 fresh-copy 安装与 discovery 检查。
-4. 记录 fresh Agent 的成功、边界与非触发行为观察。
-
-在这些完成之前，该包只是提议，尚未准入，也不得发布任何 pinned 安装命令。
+本地源与 host 安装证据是准入证据，不是已发布安装命令的证明。pinned `language-learning` 安装命令必须等下一个已发布 tag 与 fresh released-repository 验证。
 
 ## 行为来源
 

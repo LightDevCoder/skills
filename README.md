@@ -22,7 +22,7 @@ explicit about its invocation boundary, and small enough to inspect before use.
 > installation or ordinary use; see the [release receipt](docs/evidence/releases/v0.1.1/RELEASE_RECEIPT.md)
 > and [limitations](docs/evidence/releases/v0.1.1/LIMITATIONS.md) for the detailed boundary.
 >
-> **Current branch admission:** `recap` passed the low-risk prompt-only fast track; `language-learning` has its prompt-only fast-track evidence staged for this branch. Both remain unreleased; stable `v0.1.1` contains the original five packages.
+> **Current branch admission:** `recap` and `language-learning` both passed the low-risk prompt-only fast track. Both remain unreleased; stable `v0.1.1` contains the original five packages.
 
 ## Quick Start
 
@@ -68,8 +68,8 @@ outputs, handoffs, and stopping boundaries.
 ## External capabilities
 
 The current branch contains seven first-party packages on this branch: the five
-in v0.1.1 plus the newly admitted, unreleased `recap` package and the proposed,
-unreleased `language-learning` package.
+in v0.1.1 plus the newly admitted, unreleased `recap` and `language-learning`
+packages.
 
 Optional workflow capabilities are external or third-party dependencies and are
 not included by default:

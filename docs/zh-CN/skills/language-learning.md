@@ -34,9 +34,9 @@ $language-learning Spanish, flashcards for: perro, gato, casa
 
 ## 验证与发布状态
 
-运行 [package tests](../../../skills/language-learning/tests/)，并检查 `agents/openai.yaml` 中的 `allow_implicit_invocation: false`。已准备的纯提示型快速通道准入证据见[准入记录](../../evidence/admissions/language-learning/README.zh-CN.md)。
+运行 [package tests](../../../skills/language-learning/tests/)，并检查 `agents/openai.yaml` 中的 `allow_implicit_invocation: false`。纯提示型快速通道 `PASS` 准入证据见[准入记录](../../evidence/admissions/language-learning/README.zh-CN.md)。
 
-`language-learning` 尚未准入，稳定 v0.1.1 不包含它。下一 tag 正式发布并按[安装策略](../../INSTALLATION.zh-CN.md)验证前，不得发布它的 pinned 安装命令。
+`language-learning` 已在本分支准入，但稳定 v0.1.1 不包含它。下一 tag 正式发布并按[安装策略](../../INSTALLATION.zh-CN.md)验证前，不得发布它的 pinned 安装命令。
 
 ## 行为来源
 

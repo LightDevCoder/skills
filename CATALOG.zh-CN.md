@@ -10,7 +10,7 @@
 | --- | --- |
 | 集合 | Personal Skills Collection |
 | 包数量 | 本分支 7 个已准入第一方 Skill；稳定 v0.1.1 包含 5 个 |
-| 当前状态 | `recap` 已通过低风险纯提示型快速通道但尚未发布；`language-learning` 的快速通道证据已准备好但尚未准入；v0.1.1 继续可安装 |
+| 当前状态 | `recap` 与 `language-learning` 均已通过低风险纯提示型快速通道，但都尚未发布；v0.1.1 继续可安装 |
 | 稳定版本 | [v0.1.1](https://github.com/LightDevCoder/skills/releases/tag/v0.1.1) |
 | 安装权威 | [docs/INSTALLATION.zh-CN.md](docs/INSTALLATION.zh-CN.md) |
 | 发现检查 | [collection-discovery-tests.ps1](tests/collection-discovery-tests.ps1) |
@@ -56,14 +56,14 @@
 - **证据：** [package tests](skills/recap/tests/)、[使用指南](docs/zh-CN/skills/recap.md)与[准入证据](docs/evidence/admissions/recap/README.zh-CN.md)。
 - **安装路径：** host 认可的 Skills root 下的 `skills/recap/`。
 
-## 提议准入的第一方 Skill
+## 新准入 Skill
 
 ### language-learning
 
 - **作用：** 通过六种学习模式辅导任意目标语言——每日课程、即时卡片、对话练习、语法解码、进度测验与沉浸翻译。
 - **调用：** 仅 user-invoked。
 - **包：** [skills/language-learning/](skills/language-learning/)
-- **状态：** 提议第一方；纯提示型快速通道证据已为本分支准备好；尚未准入，也不在任何 release 中。
+- **状态：** 已通过纯提示型快速通道 `PASS` 准入；尚未发布，v0.1.1 不包含它。
 - **证据：** [package tests](skills/language-learning/tests/)、[使用指南](docs/zh-CN/skills/language-learning.md)与[准入证据](docs/evidence/admissions/language-learning/README.zh-CN.md)。
 - **安装路径：** host 认可的 Skills root 下的 `skills/language-learning/`。
 

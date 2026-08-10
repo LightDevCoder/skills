@@ -27,8 +27,9 @@ drafted.
   translation — reusing session context and previously learned vocabulary
   across invocations instead of re-asking.
 - Added bilingual `language-learning` guides, package contract tests,
-  collection discovery coverage, and staged prompt-only fast-track admission
-  evidence. It is not yet admitted and is not in any release.
+  collection discovery coverage, and prompt-only fast-track admission evidence.
+  The package received a final low-risk prompt-only fast-track `PASS` and is
+  admitted on this branch; it is not in any release.
 
 `recap` received a final low-risk prompt-only fast-track `PASS`. This entry
 does not claim a release tag or a verified published install command; stable

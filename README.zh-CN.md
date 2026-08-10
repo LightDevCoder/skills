@@ -19,9 +19,7 @@
 > 详细边界见[发布收据](docs/evidence/releases/v0.1.1/RELEASE_RECEIPT.zh-CN.md)
 > 和[限制说明](docs/evidence/releases/v0.1.1/LIMITATIONS.zh-CN.md)。
 >
-> **当前分支准入：** `recap` 已通过本变更的低风险纯提示型快速通道，但尚未发布；
-> `language-learning` 的纯提示型快速通道证据已为本分支准备好。两者均未发布；
-> 稳定 v0.1.1 仍是原来的五个包。
+> **当前分支准入：** `recap` 与 `language-learning` 均已通过低风险纯提示型快速通道。两者均未发布；稳定 v0.1.1 仍是原来的五个包。
 
 ## Quick Start
 
@@ -58,7 +56,7 @@ $review-loop init     # 冻结已有验收标准的 baseline
 
 ## 外部能力（External Capabilities）
 
-当前分支包含七个第一方包：v0.1.1 的五个包，新准入但尚未发布的 `recap`，以及已提议、尚未发布的 `language-learning`。
+当前分支包含七个第一方包：v0.1.1 的五个包，以及新准入但尚未发布的 `recap` 与 `language-learning`。
 
 以下是可选的 workflow 能力，来自外部或第三方来源，不属于默认集合：
 
