@@ -55,11 +55,11 @@ def frontmatter_is_yaml_safe(skill: str) -> bool:
             return False
     try:
         import yaml  # optional strict gate when the dependency exists
-
-        data = yaml.safe_load(frontmatter)
-        return isinstance(data, dict) and data.get("name") == "light-kanban-worker"
     except Exception:
-        return False
+        # CI has no PyYAML: the conservative scan above is the fallback gate
+        return True
+    data = yaml.safe_load(frontmatter)
+    return isinstance(data, dict) and data.get("name") == "light-kanban-worker"
 
 
 def is_model_invoked(skill: str) -> bool:

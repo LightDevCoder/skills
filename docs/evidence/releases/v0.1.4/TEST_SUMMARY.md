@@ -15,7 +15,7 @@
 | `python3 -m compileall -q skills/learn-anything skills/manuscript-ops skills/light-kanban-worker/tests tests/test_collection_contract.py` | OK |
 | Retired package boundary (project-workflow / to-manuscript-spec) | clean |
 | No PowerShell test files remain | clean |
-| ask-light scanner behavior (pwsh) | skipped locally (pwsh absent; CI runs it) |
+| ask-light scanner behavior (pwsh) | PASS locally with PowerShell 7.4.6 — includes the cross-platform `Test-PathUnder` separator fix and the new outside-readable-path negative scenario (see [CODE_REVIEW.md](CODE_REVIEW.md)) |
 
 ## Package evidence
 

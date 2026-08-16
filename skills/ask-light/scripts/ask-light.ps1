@@ -156,9 +156,10 @@ function Test-WorkflowInvocationControlValue {
 function Test-PathUnder {
     param([string]$Path, [string]$Root)
     try {
-        $resolvedPath = [IO.Path]::GetFullPath($Path).TrimEnd('\')
-        $resolvedRoot = [IO.Path]::GetFullPath($Root).TrimEnd('\')
-        return $resolvedPath.Equals($resolvedRoot, [StringComparison]::OrdinalIgnoreCase) -or $resolvedPath.StartsWith($resolvedRoot + '\', [StringComparison]::OrdinalIgnoreCase)
+        $sep = [IO.Path]::DirectorySeparatorChar
+        $resolvedPath = [IO.Path]::GetFullPath($Path).TrimEnd($sep)
+        $resolvedRoot = [IO.Path]::GetFullPath($Root).TrimEnd($sep)
+        return $resolvedPath.Equals($resolvedRoot, [StringComparison]::OrdinalIgnoreCase) -or $resolvedPath.StartsWith($resolvedRoot + $sep, [StringComparison]::OrdinalIgnoreCase)
     } catch { return $false }
 }
 

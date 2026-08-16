@@ -15,7 +15,7 @@
 | `python3 -m compileall -q skills/learn-anything skills/manuscript-ops skills/light-kanban-worker/tests tests/test_collection_contract.py` | OK |
 | 退休包边界（project-workflow / to-manuscript-spec） | 干净 |
 | 无 PowerShell 测试文件残留 | 干净 |
-| ask-light scanner behavior（pwsh） | 本地跳过（无 pwsh；CI 运行） |
+| ask-light scanner behavior（pwsh） | 本地以 PowerShell 7.4.6 PASS — 包含跨平台 `Test-PathUnder` 分隔符修复与新增 outside-readable-path negative 场景（见 [CODE_REVIEW.zh-CN.md](CODE_REVIEW.zh-CN.md)） |
 
 ## 包级证据
 

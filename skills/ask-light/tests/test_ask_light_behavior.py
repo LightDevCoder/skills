@@ -153,6 +153,29 @@ class AskLightBehaviorTest(unittest.TestCase):
             c.check(len([x for x in host_result.get("candidates", []) if x.get("name") == "claude-block" and x.get("availabilityStatus") == "unavailable"]) == 1, "block-list host incompatibility is not eligible")
             c.check("host 'codex' is not declared" in " ".join(host_result.get("gaps", [])), "host incompatibility has actionable gap")
 
+            # Negative cross-platform path boundary: a package OUTSIDE the host's
+            # readable paths must be unavailable (pins the platform-native
+            # separator handling in the scanner's Test-PathUnder).
+            path_root = fixture / "path-filter"
+            outside_dir = fixture / "outside-readable"
+            path_root.mkdir()
+            outside_dir.mkdir()
+            new_skill(path_root, "inside-skill", "Review software changes.")
+            new_skill(outside_dir, "outside-skill", "Review software changes.")
+            path_roots = json.dumps([
+                {"category": "project", "path": str(path_root)},
+                {"category": "project", "path": str(outside_dir)},
+            ])
+            path_availability = {"host": "codex", "readablePaths": [str(path_root)], "unavailableSkills": []}
+            path_context = json.dumps({
+                "goal": "review software changes", "artifacts": ["src/parser.ts"], "blockers": "",
+                "projectType": "software", "taskKind": "review", "availability": path_availability, "invocationControl": "explicit-only",
+            })
+            path_result = run_scanner(scanner, host_name="codex", roots_json=path_roots, context_json=path_context)
+            c.check(path_result.get("status") == "RECOMMEND" and path_result.get("skill") == "inside-skill", "readable-path filter keeps the compatible Skill eligible")
+            c.check(len([x for x in path_result.get("candidates", []) if x.get("name") == "outside-skill" and x.get("availabilityStatus") == "unavailable"]) == 1, "package outside host readable paths is not eligible")
+            c.check("package path is outside host readable paths" in " ".join(path_result.get("gaps", [])), "outside-readable-path candidate has actionable gap")
+
             read_fail_root = fixture / "read-failure"
             read_fail_root.mkdir()
             new_skill(read_fail_root, "broken-body", "Review software changes.", body="[missing](references/missing.md)")
