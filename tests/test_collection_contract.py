@@ -51,13 +51,14 @@ class CollectionContractTests(unittest.TestCase):
         self.check("npx skills add LightDevCoder/skills --yes --copy --agent '*'" in readme, "README generic latest whole install")
         self.check("npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'" in installation, "installation generic latest per-Skill install")
         self.check("npx skills add LightDevCoder/skills#v0.1.2" in installation, "installation historical pinned v0.1.2 install")
-        self.check("npx skills add LightDevCoder/skills#v0.1.3" in installation, "installation pinned v0.1.3 install")
+        self.check("npx skills add LightDevCoder/skills#v0.1.3" in installation, "installation historical pinned v0.1.3 install")
+        self.check("npx skills add LightDevCoder/skills#v0.1.4" in installation, "installation pinned v0.1.4 install")
         self.check("default revision" in installation and "#ref" in installation, "installation revision semantics")
         self.check("LightDevCoder/skills" in readme and "Drive your creativity" in readme, "homepage about copy")
-        self.check(re.search(r"v0\.1\.3.{0,120}is published from commit", readme, re.I | re.S) is not None, "README published v0.1.3 release")
+        self.check(re.search(r"v0\.1\.4.{0,120}is published from", readme, re.I | re.S) is not None, "README published v0.1.4 release")
         self.check(re.search(r"v0\.1\.2.{0,200}seven", readme, re.I | re.S) is not None, "README v0.1.2 seven-package history")
         self.check("8 admitted first-party Skills" in catalog, "catalog eight-package boundary")
-        self.check("Released v0.1.3" in catalog, "catalog released v0.1.3 framing")
+        self.check("Released v0.1.4" in catalog, "catalog released v0.1.4 framing")
         for label, text in (("admission", admission), ("admission zh-CN", admission_zh),
                             ("review policy", review_policy), ("review policy zh-CN", review_policy_zh)):
             self.check(re.search(r"prompt-only|纯提示型", text) is not None, f"{label} prompt-only fast track")

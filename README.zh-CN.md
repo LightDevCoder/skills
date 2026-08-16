@@ -8,11 +8,13 @@
 
 > **简介：** Personal Skills Collection — Drive your creativity
 
-> **发布：** [v0.1.3](https://github.com/LightDevCoder/skills/releases/tag/v0.1.3)
-> 已从 commit `f8b573a` 发布。发布记录和 fresh-install 证据见
-> [docs/evidence/releases/v0.1.3/](docs/evidence/releases/v0.1.3/)。
+> **发布：** [v0.1.4](https://github.com/LightDevCoder/skills/releases/tag/v0.1.4)
+> 已从 `v0.1.4` release tag 发布。发布记录和 fresh-install 证据见
+> [docs/evidence/releases/v0.1.4/](docs/evidence/releases/v0.1.4/)。
 >
-> 原有五个包的独立 `review-loop agent-skill` acceptance 仍为 `BLOCKED`；准确边界见发布收据。
+> `light-kanban-worker` 经完整路径准入，独立 `review-loop agent-skill`
+> 验收为 `PASS`；见[准入证据](docs/evidence/admissions/light-kanban-worker/README.zh-CN.md)。
+> 原有五个包的独立 acceptance 仍为 `BLOCKED`；准确边界见发布收据。
 
 ## Quick Start
 
@@ -57,10 +59,9 @@ Use light-kanban-worker to process at most one Light-Kanban task.
 
 ## 外部能力（External Capabilities）
 
-已发布的 v0.1.2 集合包含七个第一方包
-（v0.1.1 的五个包，以及新增的 `recap` 与 `language-learning`）；已发布的
-v0.1.3 保持同样的七个包并迁移了测试工具链。当前分支新增
-`light-kanban-worker`，成为第八个包。
+已发布的 v0.1.4 集合包含八个第一方包：v0.1.2 的七个包
+（v0.1.1 的五个包加 `recap` 与 `language-learning`；v0.1.3 保持同样的七个包
+并迁移了测试工具链），再加 `light-kanban-worker`。
 
 以下是可选的 workflow 能力，来自外部或第三方来源，不属于默认集合：
 
@@ -111,7 +112,7 @@ v0.1.3 保持同样的七个包并迁移了测试工具链。当前分支新增
 - [审查策略](docs/REVIEW_POLICY.zh-CN.md)
 - [目录](CATALOG.zh-CN.md)
 - [变更记录](CHANGELOG.zh-CN.md)
-- [发布收据](docs/evidence/releases/v0.1.3/RELEASE_RECEIPT.zh-CN.md)
+- [发布收据](docs/evidence/releases/v0.1.4/RELEASE_RECEIPT.zh-CN.md)
 - [recap 准入证据](docs/evidence/admissions/recap/README.zh-CN.md)
 - [language-learning 准入证据](docs/evidence/admissions/language-learning/README.zh-CN.md)
 - [light-kanban-worker 准入证据](docs/evidence/admissions/light-kanban-worker/README.zh-CN.md)

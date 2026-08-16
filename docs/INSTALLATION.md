@@ -3,20 +3,18 @@
 [中文安装说明](INSTALLATION.zh-CN.md)
 
 The public first-party collection's current stable release is
-[v0.1.3](https://github.com/LightDevCoder/skills/releases/tag/v0.1.3),
-published from commit `f8b573a48f7d53da74cfb8d94eb2ee7ca467d5c4`. Package
+[v0.1.4](https://github.com/LightDevCoder/skills/releases/tag/v0.1.4),
+published from the `v0.1.4` release tag. Package
 contracts remain inside `skills/<name>/`; this document is the installation
 authority and does not replace host-specific discovery rules.
 
 The standard install command is the generic `latest` form: it follows the
 repository's default revision, so every `npx skills add
 LightDevCoder/skills` install gets the current collection on the default
-branch. A pinned `#v0.1.3` form exists for reproducible installs. v0.1.3 is a
-toolchain-migration release with the same seven packages as v0.1.2; its
-package-level installs were verified against fresh destinations in the
-[v0.1.2 installation verification](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.md).
-Fresh-install verification for the next package-changing release (v0.1.4) is
-a release gate.
+branch. A pinned `#v0.1.4` form exists for reproducible installs. v0.1.4
+releases `light-kanban-worker` (eight packages total); both forms are
+verified against fresh destinations in the
+[v0.1.4 installation verification](evidence/releases/v0.1.4/INSTALLATION_VERIFICATION.md).
 
 ## Revision semantics
 
@@ -28,47 +26,50 @@ and [Git helper](https://raw.githubusercontent.com/vercel-labs/skills/main/src/g
 
 The generic `latest` command below uses no fragment and therefore follows the
 repository's default revision: it installs the current collection and is the
-standard way to install. The pinned `#v0.1.3` form selects the published tag
+standard way to install. The pinned `#v0.1.4` form selects the published tag
 and is retained for reproducible installs and release verification. Neither
 form is a claim about a future default revision; re-run discovery against the
 fresh destination for the resolved content.
 
-## v0.1.3 release commands
+## v0.1.4 release commands
 
 The current release install commands follow the repository's default revision
-and install the seven-package collection:
+and install the eight-package collection:
 
 ```text
 npx skills add LightDevCoder/skills --yes --copy --agent '*'
+npx skills add LightDevCoder/skills --skill light-kanban-worker --yes --copy --agent '*'
 npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'
 ```
 
-The first installs the seven-package collection and the second selects one
-complete package from the same revision. v0.1.3 kept the v0.1.2 package set
-unchanged (test toolchain migration only), so the whole-collection and
-per-Skill installs verified against fresh destinations in the
-[v0.1.2 installation record](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.md)
-cover this release's package content.
+The first installs the eight-package collection and the others select one
+complete package from the same revision. Both forms are verified
+against fresh destinations in the
+[v0.1.4 installation record](evidence/releases/v0.1.4/INSTALLATION_VERIFICATION.md).
 
 For a reproducible pinned install, use the same command with the explicit tag:
+
+```text
+npx skills add LightDevCoder/skills#v0.1.4 --yes --copy --agent '*'
+npx skills add LightDevCoder/skills#v0.1.4 --skill light-kanban-worker --yes --copy --agent '*'
+```
+
+The `latest` form and the `#v0.1.4` form resolve to the same content at release
+time; only the pinned form is stable against future default-revision changes.
+
+## Historical v0.1.3 verification
+
+The previous stable release was the published v0.1.3 snapshot at commit
+`f8b573a48f7d53da74cfb8d94eb2ee7ca467d5c4`. It is a toolchain-migration
+release with the same seven packages as v0.1.2, so its package-level installs
+are covered by the
+[v0.1.2 installation verification](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.md);
+its pinned form was:
 
 ```text
 npx skills add LightDevCoder/skills#v0.1.3 --yes --copy --agent '*'
 npx skills add LightDevCoder/skills#v0.1.3 --skill review-loop --yes --copy --agent '*'
 ```
-
-The `latest` form and the `#v0.1.3` form resolve to the same content at release
-time; only the pinned form is stable against future default-revision changes.
-
-The new `light-kanban-worker` package lives on the current branch and is
-released with v0.1.4. Its per-Skill install form is:
-
-```text
-npx skills add LightDevCoder/skills --skill light-kanban-worker --yes --copy --agent '*'
-```
-
-This command becomes a verified release command after the v0.1.4 fresh-install
-verification is recorded; until then treat it as the current-branch form.
 
 ## Historical v0.1.2 verification
 
@@ -117,7 +118,7 @@ receipt did not record them.
 That historical verification does not change the CLI revision semantics: an
 unqualified source follows the repository's default revision and is not a
 permanent pin. The current release commands above use the generic `latest` form
-or the explicit `#v0.1.3` tag.
+or the explicit `#v0.1.4` tag.
 
 ## `recap` and `language-learning` packages
 

@@ -10,12 +10,15 @@ explicit about its invocation boundary, and small enough to inspect before use.
 
 > **About:** Personal Skills Collection — Drive your creativity
 
-> **Release:** [v0.1.3](https://github.com/LightDevCoder/skills/releases/tag/v0.1.3)
-> is published from commit `f8b573a`. The release record and fresh-install evidence
-> live in [docs/evidence/releases/v0.1.3/](docs/evidence/releases/v0.1.3/).
+> **Release:** [v0.1.4](https://github.com/LightDevCoder/skills/releases/tag/v0.1.4)
+> is published from the `v0.1.4` release tag. The release record and fresh-install evidence
+> live in [docs/evidence/releases/v0.1.4/](docs/evidence/releases/v0.1.4/).
 >
-> Independent `review-loop agent-skill` acceptance remains `BLOCKED` for the
-> original five packages; see the receipt for the exact boundary.
+> `light-kanban-worker` was admitted through the full path with an independent
+> `review-loop agent-skill` `PASS`; see its
+> [admission evidence](docs/evidence/admissions/light-kanban-worker/README.md).
+> Independent acceptance for the original five packages remains `BLOCKED`;
+> see the release receipts for the exact boundary.
 
 ## Quick Start
 
@@ -71,10 +74,10 @@ returns the result for human confirmation. See the
 
 ## External capabilities
 
-The published v0.1.2 release contained seven first-party packages
-(v0.1.1's five plus `recap` and `language-learning`); the published v0.1.3
-release kept the same seven and migrated the test toolchain. The current
-branch adds `light-kanban-worker` as the eighth package.
+The published v0.1.4 collection contains eight first-party packages: the
+v0.1.2 release's seven (v0.1.1's five plus `recap` and `language-learning`;
+v0.1.3 kept the same seven and migrated the test toolchain), plus
+`light-kanban-worker`.
 
 Optional workflow capabilities are external or third-party dependencies and are
 not included by default:
@@ -146,7 +149,7 @@ and is never copied into this public collection.
 - [Review policy](docs/REVIEW_POLICY.md)
 - [Catalog](CATALOG.md)
 - [Changelog](CHANGELOG.md)
-- [Release receipt](docs/evidence/releases/v0.1.3/RELEASE_RECEIPT.md)
+- [Release receipt](docs/evidence/releases/v0.1.4/RELEASE_RECEIPT.md)
 - [recap admission evidence](docs/evidence/admissions/recap/README.md)
 - [language-learning admission evidence](docs/evidence/admissions/language-learning/README.md)
 - [light-kanban-worker admission evidence](docs/evidence/admissions/light-kanban-worker/README.md)
