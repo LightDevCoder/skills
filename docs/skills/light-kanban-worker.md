@@ -79,12 +79,13 @@ outside the catalog. See the [admission evidence](../evidence/admissions/light-k
 
 ## Installation and discovery
 
-Install the published package with:
+Install the package with:
 
 ```text
 npx skills add LightDevCoder/skills --skill light-kanban-worker --yes --copy --agent '*'
 ```
 
-Refresh the agent host and confirm the Skill is discovered without relying on
-the source checkout. It is compatible with Light-Kanban v1.0.4+; v1.0.5 is the
-recommended integration version.
+(The pinned `#v0.1.4` form becomes the verified release command once the
+v0.1.4 release gates pass.) Refresh the agent host and confirm the Skill is
+discovered without relying on the source checkout. It is compatible with
+Light-Kanban v1.0.4+; v1.0.5 is the recommended integration version.

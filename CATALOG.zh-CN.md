@@ -54,7 +54,7 @@
 - **作用：** 每次定时运行领取并执行一张 Light-Kanban 任务，交回人工验收；先继续自己持有的任务和 review feedback，再领取新任务。
 - **调用：** Model-invoked，支持手动入口。
 - **包：** [skills/light-kanban-worker/](skills/light-kanban-worker/)
-- **状态：** 通过完整准入路径（`review-loop agent-skill`）准入；v0.1.4 中发布。
+- **状态：** 通过完整准入路径（`review-loop agent-skill` `PASS`）准入；计划随 v0.1.4 发布。
 - **证据：** [contract 与 behavior 测试](skills/light-kanban-worker/tests/)、[使用指南](docs/zh-CN/skills/light-kanban-worker.md)与[准入证据](docs/evidence/admissions/light-kanban-worker/README.zh-CN.md)。
 - **安装路径：** host 认可的 Skills root 下的 `skills/light-kanban-worker/`。
 

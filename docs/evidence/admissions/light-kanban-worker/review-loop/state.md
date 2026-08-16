@@ -4,10 +4,10 @@
 - Goal: admit `light-kanban-worker` into the first-party collection (full path)
 - Charter revision: 1 (approved — direct user SPEC)
 - Profile: agent-skill
-- Status: READY
-- Current round: round-01 (in progress)
-- Independence requirement: separate fresh read-only Critic and Evaluator contexts (subagents)
+- Status: CLOSED — PASS (round-01)
+- Current round: round-01 (closed)
+- Independence: full (separate fresh read-only Critic and Evaluator subagent contexts)
 - Blockers: none
-- Recent decisions: charter frozen; clean-copy installation evidence collected; behavioral scenarios A–F recorded PASS; invocation trigger/non-trigger probes completed
+- Recent decisions: verdict PASS; F-001/F-002/F-003 resolved, F-004 rejected; repairs verified by the fresh Evaluator
 - Open questions: none
-- Next action: launch read-only Critic with the frozen charter, bounded target view, admissible evidence, and the finding schema; then validate candidates; then a fresh Evaluator; then apply the verdict
+- Next action: v0.1.4 release gates (tag, fresh-install verification, release receipt) — out of admission scope

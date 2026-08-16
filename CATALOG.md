@@ -61,7 +61,7 @@ dependencies and modified third-party variants are documented separately.
 - **Purpose:** Pick up and execute one Light-Kanban task per scheduled agent run, then return it for human confirmation; resumes owned in-progress work and review feedback before claiming new tasks.
 - **Invocation:** Model-invoked; manual entry point is supported.
 - **Package:** [skills/light-kanban-worker/](skills/light-kanban-worker/)
-- **Status:** Admitted first-party through the full admission path (`review-loop agent-skill`); released in v0.1.4.
+- **Status:** Admitted first-party through the full admission path (`review-loop agent-skill` `PASS`); scheduled for the v0.1.4 release.
 - **Evidence:** Contract and behavior tests under [skills/light-kanban-worker/tests/](skills/light-kanban-worker/tests/), [user guide](docs/skills/light-kanban-worker.md), and [admission evidence](docs/evidence/admissions/light-kanban-worker/README.md).
 - **Installation path:** `skills/light-kanban-worker/` in a host-recognized Skills root.
 

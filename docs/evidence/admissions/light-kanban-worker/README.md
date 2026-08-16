@@ -8,30 +8,23 @@
 - Invocation type: model-invoked, with a supported manual entry point
 - Profile: `review-loop` `agent-skill`
 - Stable-release boundary: v0.1.3 contains seven packages and does not contain `light-kanban-worker`
-- Admission status: `IN PROGRESS` — full admission path; the prompt-only fast track does not apply because the Skill accesses the network, reads workspace files, and mutates Light-Kanban task state
+- Admission status: `PASS` — full admission path (2026-08-16); the prompt-only fast track does not apply because the Skill accesses the network, reads workspace files, and mutates Light-Kanban task state
 
-## Evidence plan (full path)
+## Evidence summary
 
-| Area | Required demonstration |
-| --- | --- |
-| Structure | Package tree, `SKILL.md` metadata, internal links and resources validate with the package contract and behavior suites. |
-| Installation and discovery | A fresh environment installs the package form, then discovers the installed Skill without relying on the source checkout. |
-| Behavioral | Scenarios A–F against a real Light-Kanban server: fresh task, Request Changes rework, two-worker atomic claim, workspace missing → block, empty queue → no mutation, offline → no mutation with clear failure. |
-| Invocation | A scheduled-style prompt and a one-shot manual prompt both resolve to the worker; model-invoked metadata agrees with `SKILL.md`. |
-| Review | `review-loop` with the `agent-skill` Profile evaluates the candidate using Producer evidence and a fresh Evaluator. |
-| Attribution | Owner-authored first-party; no third-party content, so no `ATTRIBUTION.md` is required. |
+| Area | Result | Evidence boundary |
+| --- | --- | --- |
+| Structure | PASS | Package contract and behavior suites (metadata, required workflow sections, golden-flow order, rule checkers) plus collection discovery/contract composition; 90 collection assertions + all 19 package suites green. |
+| Installation and discovery | PASS | Clean-copy install to `/tmp/lk-worker-fresh/codex/skills/light-kanban-worker`: 10/10 files SHA-256 identical, tree contains only the declared package, both suites green against the installed copy (shared collection test harness on PYTHONPATH). Published-tag `npx skills add` verification is the v0.1.4 release gate. |
+| Behavioral | PASS | Scenarios A–F against a real Light-Kanban server (binary built from `LightDevCoder/light-kanban` main, commit `f49ace5`): fresh task, Request Changes rework, two-worker atomic claim (exactly one 200 / one 409), workspace missing → block, empty queue no-mutation, offline no-mutation. Full transcript recorded. |
+| Invocation | PASS | Fresh read-only probes: the scheduled-task prompt loads the skill with the correct first protocol actions; an unrelated instruction does not trigger it; the skill invokes no other user-invoked skill. |
+| Review | PASS | `review-loop` `agent-skill` Profile, Charter revision 1: Critic candidates F-001/F-002/F-003 resolved with verified repairs, F-004 rejected; fresh independent Evaluator returned `PASS` criterion-by-criterion. |
+| Attribution | PASS | Owner-authored first-party; no third-party content or code, so no `ATTRIBUTION.md` is required. |
 
-## Results
+Behavioral evidence: [behavioral-evidence.md](behavioral-evidence.md).
+Final acceptance record: [review-loop/](review-loop/) (charter, findings,
+round-01 records, verdict).
 
-The rows above are filled in with exact commands, environment facts, inputs,
-outputs, and limitations as each gate completes. The final verdict is owned
-by `review-loop agent-skill`; only a `PASS` admits the package into the
-first-party collection.
-
-- Contract and behavior suites:
-  `skills/light-kanban-worker/tests/` (positive and negative fixtures,
-  non-zero assertions).
-- Behavioral evidence against a real Light-Kanban server: recorded in
-  [behavioral-evidence.md](behavioral-evidence.md).
-- Final acceptance: recorded under [review-loop/](review-loop/) once the
-  `review-loop agent-skill` run completes.
+Admission does not waive release, installation-command verification, or
+Program-level acceptance gates; those are recorded under
+[docs/evidence/releases/v0.1.4/](../../releases/v0.1.4/).
