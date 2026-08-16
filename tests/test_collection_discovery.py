@@ -16,16 +16,20 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(ROOT / "skills" / "recap" / "tests"))
 sys.path.insert(0, str(ROOT / "skills" / "language-learning" / "tests"))
+sys.path.insert(0, str(ROOT / "skills" / "light-kanban-worker" / "tests"))
 
 from check_helpers import Checks, read  # noqa: E402
 from test_recap_contract import run_checks as recap_checks  # noqa: E402
 from test_recap_output_contract import run_checks as recap_output_checks  # noqa: E402
 from test_language_learning_contract import run_checks as ll_checks  # noqa: E402
+from test_light_kanban_worker_contract import run_checks as worker_contract_checks  # noqa: E402
+from test_light_kanban_worker_behavior import run_checks as worker_behavior_checks  # noqa: E402
 
 EXPECTED = [
     "ask-light",
     "language-learning",
     "learn-anything",
+    "light-kanban-worker",
     "manuscript-ops",
     "project-init",
     "recap",
@@ -37,7 +41,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c = Checks()
     skill_root = root / "skills"
     actual = sorted(d.name for d in skill_root.iterdir() if d.is_dir() and d.name != "docs")
-    c.check(actual == EXPECTED, "skills/ must contain exactly the seven admitted package directories.")
+    c.check(actual == EXPECTED, "skills/ must contain exactly the eight admitted package directories.")
 
     readme = read(root, "README.md")
     catalog = read(root, "CATALOG.md")
@@ -65,7 +69,8 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         )
     c.check("npx skills add LightDevCoder/skills --yes --copy --agent '*'" in installation, "Installation guide is missing the generic whole-repository latest install command.")
     c.check("npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'" in installation, "Installation guide is missing the generic per-Skill latest install command.")
-    c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.1\.2", installation)), "Installation guide is missing the pinned v0.1.2 release command.")
+    c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.1\.2", installation)), "Installation guide is missing the historical pinned v0.1.2 release command.")
+    c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.1\.3", installation)), "Installation guide is missing the pinned v0.1.3 release command.")
     c.check(bool(re.search(r"#ref|fragment|default revision", installation)), "Installation guide must explain revision semantics rather than overclaim shorthand immutability.")
     c.check("commands target the immutable v0.1.0 release" not in installation, "Installation guide must not claim the old shorthand is permanently immutable.")
     c.check(not re.search(r"not a verified command|<owner>/<repository>", installation), "Installation guide still contains unresolved pre-release command wording.")
@@ -74,10 +79,12 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         all(token in installation for token in ("source_root", "skill_name", "destination_root")),
         "Manual fallback must use valid shell variables.",
     )
-    c.check(bool(re.search(r"(?is)v0\.1\.2.{0,120}is published from commit", readme)), "README must present v0.1.2 as the published release.")
-    c.check("7 admitted first-party Skills" in catalog, "Catalog must present the published v0.1.2 seven-package collection.")
-    c.check("Released v0.1.2" in catalog, "Catalog must present v0.1.2 as released.")
+    c.check(bool(re.search(r"(?is)v0\.1\.3.{0,120}is published from commit", readme)), "README must present v0.1.3 as the published release.")
+    c.check(bool(re.search(r"(?is)v0\.1\.2.{0,200}seven", readme)), "README must retain the v0.1.2 seven-package history.")
+    c.check("8 admitted first-party Skills" in catalog, "Catalog must present the eight-package collection.")
+    c.check("Released v0.1.3" in catalog, "Catalog must present v0.1.3 as released.")
     c.check(bool(re.search(r"(?is)v0\.1\.1[^\r\n]{0,80}five", readme)), "README must retain the v0.1.1 five-package history.")
+    c.check(bool(re.search(r"light-kanban-worker.{0,200}scheduled", readme, re.IGNORECASE | re.DOTALL)), "README must present light-kanban-worker as the scheduled Light-Kanban worker Skill.")
 
     for package in EXPECTED:
         package_root = skill_root / package
@@ -153,6 +160,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         "CHANGELOG.zh-CN.md",
         "docs/evidence/releases/v0.1.1/RELEASE_RECEIPT.md",
         "docs/evidence/releases/v0.1.2/RELEASE_RECEIPT.md",
+        "docs/evidence/releases/v0.1.3/RELEASE_RECEIPT.md",
         ".github/workflows/quality.yml",
     ]:
         c.check((root / required).is_file(), f"Required documentation path is missing: {required}")
@@ -316,6 +324,20 @@ class LanguageLearningContractCompositionTest(unittest.TestCase):
         assertions, failures = ll_checks()
         self.assertGreater(assertions, 0)
         self.assertFalse(failures, f"LANGUAGE_LEARNING_CONTRACT=FAIL: {failures}")
+
+
+class LightKanbanWorkerContractCompositionTest(unittest.TestCase):
+    def test_worker_contract_composition(self) -> None:
+        assertions, failures = worker_contract_checks()
+        self.assertGreater(assertions, 0)
+        self.assertFalse(failures, f"LIGHT_KANBAN_WORKER_CONTRACT=FAIL: {failures}")
+
+
+class LightKanbanWorkerBehaviorCompositionTest(unittest.TestCase):
+    def test_worker_behavior_composition(self) -> None:
+        assertions, failures = worker_behavior_checks()
+        self.assertGreater(assertions, 0)
+        self.assertFalse(failures, f"LIGHT_KANBAN_WORKER_BEHAVIOR=FAIL: {failures}")
 
 
 if __name__ == "__main__":

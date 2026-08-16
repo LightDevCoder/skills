@@ -6,6 +6,37 @@ All notable changes are recorded here. A release entry must be tied to an
 actual version or tag and must not be created merely because a document was
 drafted.
 
+## Unreleased — v0.1.4 candidate
+
+### Added
+
+- New first-party, model-invoked `light-kanban-worker` Skill: each scheduled
+  agent run processes at most one Light-Kanban task — stable agent identity,
+  owned in-progress work and `reviewFeedback` checked before new claims,
+  atomic claim with bounded conflict retry, workspace validation (an
+  inaccessible workspace becomes `block` with a meaningful reason), and
+  `complete` back to human confirmation. The worker never archives, accepts,
+  deletes, recycles, or unblocks tasks, and never loops or starts a resident
+  process. Network/filesystem/state side effects place it on the full
+  admission path (`review-loop agent-skill`), not the prompt-only fast track.
+- Contract and behavior test suites for the worker package with positive and
+  negative fixtures (mutation and adversarial fixture files).
+
+### Changed
+
+- Version documentation synchronized: v0.1.3 is the current stable release,
+  v0.1.2 and earlier remain historical records, and the v0.1.4 candidate is
+  marked unreleased until the release gates pass. README, catalog,
+  installation guide, maintenance baseline, discovery tests, and CI updated
+  for the eight-package collection.
+
+### Evidence
+
+- Admission: [docs/evidence/admissions/light-kanban-worker/](docs/evidence/admissions/light-kanban-worker/)
+- Release evidence is recorded in
+  [docs/evidence/releases/v0.1.4/](docs/evidence/releases/v0.1.4/) once the
+  release gates pass.
+
 ## 0.1.3 — 2026-08-10
 
 ### Changed

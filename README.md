@@ -4,15 +4,15 @@
 
 # Personal Skills Collection
 
-`LightDevCoder/skills` is the public, first-party home for seven installable
+`LightDevCoder/skills` is the public, first-party home for eight installable
 Agent Skills on the current branch. Each package is independently discoverable,
 explicit about its invocation boundary, and small enough to inspect before use.
 
 > **About:** Personal Skills Collection — Drive your creativity
 
-> **Release:** [v0.1.2](https://github.com/LightDevCoder/skills/releases/tag/v0.1.2)
-> is published from commit `8de5ec1`. The release record and fresh-install evidence
-> live in [docs/evidence/releases/v0.1.2/](docs/evidence/releases/v0.1.2/).
+> **Release:** [v0.1.3](https://github.com/LightDevCoder/skills/releases/tag/v0.1.3)
+> is published from commit `f8b573a`. The release record and fresh-install evidence
+> live in [docs/evidence/releases/v0.1.3/](docs/evidence/releases/v0.1.3/).
 >
 > Independent `review-loop agent-skill` acceptance remains `BLOCKED` for the
 > original five packages; see the receipt for the exact boundary.
@@ -58,10 +58,23 @@ result. Read [Quick Start](examples/quick-start/README.md), the [Skill user
 guides](docs/skills/), and [workflow recipes](docs/workflows/) for inputs,
 outputs, handoffs, and stopping boundaries.
 
+For scheduled Light-Kanban work, `light-kanban-worker` turns each agent
+wake-up into one handled board task:
+
+```text
+Use light-kanban-worker to process at most one Light-Kanban task.
+```
+
+It resumes owned work and review feedback before claiming new tasks, then
+returns the result for human confirmation. See the
+[`light-kanban-worker` guide](docs/skills/light-kanban-worker.md).
+
 ## External capabilities
 
-The published v0.1.2 collection contains seven first-party packages: v0.1.1's five
-plus `recap` and `language-learning`.
+The published v0.1.2 release contained seven first-party packages
+(v0.1.1's five plus `recap` and `language-learning`); the published v0.1.3
+release kept the same seven and migrated the test toolchain. The current
+branch adds `light-kanban-worker` as the eighth package.
 
 Optional workflow capabilities are external or third-party dependencies and are
 not included by default:
@@ -94,6 +107,7 @@ check their availability before selecting a workflow that names them.
 | [recap](skills/recap/SKILL.md) | Summarize the current Agent session in exactly one line without changing history or continuing the task. | User-invoked only. | skills/recap/ |
 | [learn-anything](skills/learn-anything/SKILL.md) | Distill sufficiently evidenced source material into reusable Agent Skill methods. | User-invoked only. | skills/learn-anything/ |
 | [manuscript-ops](skills/manuscript-ops/SKILL.md) | Govern reproducible manuscript engineering across formats, batches, reviews, and handoffs. | Model-invoked; manual entry point is supported. | skills/manuscript-ops/ |
+| [light-kanban-worker](skills/light-kanban-worker/SKILL.md) | Pick up and execute one Light-Kanban task per scheduled run, then return it for human confirmation. | Model-invoked; manual entry point is supported. | skills/light-kanban-worker/ |
 
 [CATALOG.md](CATALOG.md) is the human-readable inventory. Package-level
 `SKILL.md` files remain the behavior authority; the guides explain usage
@@ -132,7 +146,8 @@ and is never copied into this public collection.
 - [Review policy](docs/REVIEW_POLICY.md)
 - [Catalog](CATALOG.md)
 - [Changelog](CHANGELOG.md)
-- [Release receipt](docs/evidence/releases/v0.1.2/RELEASE_RECEIPT.md)
+- [Release receipt](docs/evidence/releases/v0.1.3/RELEASE_RECEIPT.md)
 - [recap admission evidence](docs/evidence/admissions/recap/README.md)
 - [language-learning admission evidence](docs/evidence/admissions/language-learning/README.md)
+- [light-kanban-worker admission evidence](docs/evidence/admissions/light-kanban-worker/README.md)
 - [Collection discovery test](tests/test_collection_discovery.py)

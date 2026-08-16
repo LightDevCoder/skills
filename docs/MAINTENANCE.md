@@ -22,10 +22,14 @@ Keep each fact in one authoritative location and link to it elsewhere:
 ## Current synchronization baseline
 
 The admitted collection on this branch contains exactly review-loop,
-project-init, ask-light, learn-anything, manuscript-ops, recap, and
-language-learning. recap and language-learning were admitted through the
-prompt-only fast track and released in v0.1.2. Stable v0.1.1 contained the
-original five admitted packages. The check at
+project-init, ask-light, learn-anything, manuscript-ops, recap,
+language-learning, and light-kanban-worker. recap and language-learning were
+admitted through the prompt-only fast track and released in v0.1.2.
+light-kanban-worker is a model-invoked package with network, filesystem, and
+board-state side effects, so it follows the full admission path
+(`review-loop agent-skill`) and is released in v0.1.4. Stable v0.1.1
+contained the original five admitted packages; v0.1.3 kept the v0.1.2
+package set and migrated the test toolchain. The check at
 [tests/test_collection_discovery.py](../tests/test_collection_discovery.py)
 guards package names, metadata, catalog entries, README links, header assets,
 required governance paths, and the retired orchestration boundary.

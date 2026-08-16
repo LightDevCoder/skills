@@ -2,22 +2,23 @@
 
 [English catalog](CATALOG.md)
 
-本目录从 `skills/` 下七个已准入包同步生成，是可读 inventory，不是静态 workflow router，也不代表某个 Agent host 当前已经安装了哪些 Skill。
+本目录从 `skills/` 下八个已准入包同步生成，是可读 inventory，不是静态 workflow router，也不代表某个 Agent host 当前已经安装了哪些 Skill。
 
 ## 集合状态
 
 | 字段 | 值 |
 | --- | --- |
 | 集合 | Personal Skills Collection |
-| 包数量 | 7 个已准入第一方 Skill |
-| 当前状态 | 已发布 v0.1.2；原有五个包的独立 `review-loop agent-skill` acceptance 仍为 BLOCKED |
-| 稳定版本 | [v0.1.2](https://github.com/LightDevCoder/skills/releases/tag/v0.1.2) |
+| 包数量 | 8 个已准入第一方 Skill |
+| 当前状态 | 已发布 v0.1.3；`light-kanban-worker` 已在当前分支准入，v0.1.4 发布待 gates |
+| 稳定版本 | [v0.1.3](https://github.com/LightDevCoder/skills/releases/tag/v0.1.3) |
 | 安装权威 | [docs/INSTALLATION.zh-CN.md](docs/INSTALLATION.zh-CN.md) |
 | 发现检查 | [test_collection_discovery.py](tests/test_collection_discovery.py) |
-| 证据 | [v0.1.2 发布证据](docs/evidence/releases/v0.1.2/RELEASE_RECEIPT.zh-CN.md) |
+| 证据 | [v0.1.3 发布证据](docs/evidence/releases/v0.1.3/RELEASE_RECEIPT.zh-CN.md) |
 
 稳定 `v0.1.1` 包含原来的五个包；v0.1.2 加入 `recap` 与 `language-learning`，
-共七个已准入第一方 Skill。
+共七个已准入第一方 Skill；v0.1.3 保持同样的七个包并迁移了测试工具链。
+当前分支新增 `light-kanban-worker`，成为第八个已准入包。
 
 ## 已准入 Skill
 
@@ -47,6 +48,15 @@
 - **状态：** 第一方已准入；保留 source-sufficiency 与 deterministic package-build 边界。
 - **证据：** [package contract](skills/learn-anything/SKILL.md)；[使用指南](docs/zh-CN/skills/learn-anything.md)。
 - **安装路径：** host 认可的 Skills root 下的 `skills/learn-anything/`。
+
+### light-kanban-worker
+
+- **作用：** 每次定时运行领取并执行一张 Light-Kanban 任务，交回人工验收；先继续自己持有的任务和 review feedback，再领取新任务。
+- **调用：** Model-invoked，支持手动入口。
+- **包：** [skills/light-kanban-worker/](skills/light-kanban-worker/)
+- **状态：** 通过完整准入路径（`review-loop agent-skill`）准入；v0.1.4 中发布。
+- **证据：** [contract 与 behavior 测试](skills/light-kanban-worker/tests/)、[使用指南](docs/zh-CN/skills/light-kanban-worker.md)与[准入证据](docs/evidence/admissions/light-kanban-worker/README.zh-CN.md)。
+- **安装路径：** host 认可的 Skills root 下的 `skills/light-kanban-worker/`。
 
 ### manuscript-ops
 

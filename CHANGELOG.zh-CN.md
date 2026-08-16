@@ -4,6 +4,32 @@
 
 所有变更都必须记录在实际版本/tag 对应的条目中，不能因为文档已起草就提前宣称 release。
 
+## Unreleased — v0.1.4 candidate
+
+### 新增
+
+- 新的第一方 model-invoked Skill `light-kanban-worker`：每次 scheduled
+  agent 运行最多处理一张 Light-Kanban 任务——稳定 agent identity、先检查
+  自己持有的 in-progress 任务与 `reviewFeedback` 再领取新任务、原子 claim
+  带有限次冲突重试、workspace 校验（不可访问的 workspace 变成 `block` 并带
+  具体原因）、`complete` 交回人工验收。worker 绝不 archive、accept、delete、
+  recycle、unblock，也绝不循环或常驻进程。因其涉及网络/文件系统/看板状态
+  副作用，走完整准入路径（`review-loop agent-skill`），不走纯提示型快速通道。
+- worker 包的 contract 与 behavior 测试套件，包含 positive fixtures 与
+  negative fixtures（变异文本与对抗性 fixture 文件）。
+
+### 变更
+
+- 版本文档同步：v0.1.3 为当前稳定 release，v0.1.2 及更早版本保持历史
+  记录，v0.1.4 candidate 在 release gates 通过前标记为 Unreleased。README、
+  目录、安装指南、维护基线、discovery 测试与 CI 更新为八包集合。
+
+### 证据
+
+- 准入：[docs/evidence/admissions/light-kanban-worker/](docs/evidence/admissions/light-kanban-worker/)
+- release gates 通过后，发布证据记录于
+  [docs/evidence/releases/v0.1.4/](docs/evidence/releases/v0.1.4/)。
+
 ## 0.1.3 — 2026-08-10
 
 ### 变更

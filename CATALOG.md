@@ -2,7 +2,7 @@
 
 [中文目录](CATALOG.zh-CN.md)
 
-This catalog is synchronized from the seven admitted package directories under
+This catalog is synchronized from the eight admitted package directories under
 `skills/`. It is an inventory, not a
 static workflow router and not a record of what is installed on a particular
 Agent host.
@@ -12,15 +12,17 @@ Agent host.
 | Field | Value |
 | --- | --- |
 | Collection | Personal Skills Collection |
-| Package count | 7 admitted first-party Skills |
-| Current state | Released v0.1.2; independent `review-loop agent-skill` acceptance remains BLOCKED for the original five |
-| Stable release | [v0.1.2](https://github.com/LightDevCoder/skills/releases/tag/v0.1.2) |
+| Package count | 8 admitted first-party Skills |
+| Current state | Released v0.1.3; `light-kanban-worker` admitted on the current branch, v0.1.4 release pending gates |
+| Stable release | [v0.1.3](https://github.com/LightDevCoder/skills/releases/tag/v0.1.3) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) |
-| Evidence | [v0.1.2 release evidence](docs/evidence/releases/v0.1.2/) |
+| Evidence | [v0.1.3 release evidence](docs/evidence/releases/v0.1.3/) |
 
-Stable `v0.1.1` contained the original five packages; v0.1.2 adds `recap` and
-`language-learning`, for seven admitted first-party Skills.
+Stable `v0.1.1` contained the original five packages; v0.1.2 added `recap` and
+`language-learning` for seven admitted first-party Skills; v0.1.3 kept the
+same seven and migrated the test toolchain. The current branch adds
+`light-kanban-worker` as the eighth admitted package.
 
 No package in this table is an unmodified upstream copy. Direct upstream
 dependencies and modified third-party variants are documented separately.
@@ -53,6 +55,15 @@ dependencies and modified third-party variants are documented separately.
 - **Status:** Admitted first-party; source sufficiency and deterministic package-build boundaries are preserved.
 - **Evidence:** [package contract](skills/learn-anything/SKILL.md), hook evidence, and user guide at [docs/skills/learn-anything.md](docs/skills/learn-anything.md).
 - **Installation path:** `skills/learn-anything/` in a host-recognized Skills root.
+
+### light-kanban-worker
+
+- **Purpose:** Pick up and execute one Light-Kanban task per scheduled agent run, then return it for human confirmation; resumes owned in-progress work and review feedback before claiming new tasks.
+- **Invocation:** Model-invoked; manual entry point is supported.
+- **Package:** [skills/light-kanban-worker/](skills/light-kanban-worker/)
+- **Status:** Admitted first-party through the full admission path (`review-loop agent-skill`); released in v0.1.4.
+- **Evidence:** Contract and behavior tests under [skills/light-kanban-worker/tests/](skills/light-kanban-worker/tests/), [user guide](docs/skills/light-kanban-worker.md), and [admission evidence](docs/evidence/admissions/light-kanban-worker/README.md).
+- **Installation path:** `skills/light-kanban-worker/` in a host-recognized Skills root.
 
 ### manuscript-ops
 

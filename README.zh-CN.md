@@ -4,13 +4,13 @@
 
 # Personal Skills Collection
 
-`LightDevCoder/skills` 是公开的第一方 Agent Skills 集合；当前分支包含七个可以独立安装、独立发现、明确声明调用边界的 Skill。包内 `SKILL.md` 仍是行为权威；本 README 与用户指南负责说明使用方式。
+`LightDevCoder/skills` 是公开的第一方 Agent Skills 集合；当前分支包含八个可以独立安装、独立发现、明确声明调用边界的 Skill。包内 `SKILL.md` 仍是行为权威；本 README 与用户指南负责说明使用方式。
 
 > **简介：** Personal Skills Collection — Drive your creativity
 
-> **发布：** [v0.1.2](https://github.com/LightDevCoder/skills/releases/tag/v0.1.2)
-> 已从 commit `8de5ec1` 发布。发布记录和 fresh-install 证据见
-> [docs/evidence/releases/v0.1.2/](docs/evidence/releases/v0.1.2/)。
+> **发布：** [v0.1.3](https://github.com/LightDevCoder/skills/releases/tag/v0.1.3)
+> 已从 commit `f8b573a` 发布。发布记录和 fresh-install 证据见
+> [docs/evidence/releases/v0.1.3/](docs/evidence/releases/v0.1.3/)。
 >
 > 原有五个包的独立 `review-loop agent-skill` acceptance 仍为 `BLOCKED`；准确边界见发布收据。
 
@@ -47,9 +47,20 @@ $review-loop init     # 冻结已有验收标准的 baseline
 
 `ask-light` 只返回建议或一个有边界的 recipe，然后停止；不会执行、安装或自动串联。阅读 [Quick Start](examples/quick-start/README.zh-CN.md)、[Skill 使用指南](docs/zh-CN/skills/)、[工作流 recipes](docs/zh-CN/workflows/) 了解输入、输出、handoff 和停止点。
 
+对于定时处理的 Light-Kanban 工作，`light-kanban-worker` 把每次 agent 唤醒变成恰好处理一张看板任务：
+
+```text
+Use light-kanban-worker to process at most one Light-Kanban task.
+```
+
+它先继续自己持有的任务和 review feedback，再领取新任务，并把结果交回人工验收。详见 [`light-kanban-worker` 指南](docs/zh-CN/skills/light-kanban-worker.md)。
+
 ## 外部能力（External Capabilities）
 
-已发布的 v0.1.2 集合包含七个第一方包：v0.1.1 的五个包，以及新增的 `recap` 与 `language-learning`。
+已发布的 v0.1.2 集合包含七个第一方包
+（v0.1.1 的五个包，以及新增的 `recap` 与 `language-learning`）；已发布的
+v0.1.3 保持同样的七个包并迁移了测试工具链。当前分支新增
+`light-kanban-worker`，成为第八个包。
 
 以下是可选的 workflow 能力，来自外部或第三方来源，不属于默认集合：
 
@@ -75,6 +86,7 @@ $review-loop init     # 冻结已有验收标准的 baseline
 | [recap](skills/recap/SKILL.md) | 用严格一行总结当前 Agent session，不改变历史也不继续任务。 | 仅 user-invoked。 | skills/recap/ |
 | [learn-anything](skills/learn-anything/SKILL.md) | 从有足够证据的资料中提炼可复用 Agent Skill 方法。 | 仅 user-invoked。 | skills/learn-anything/ |
 | [manuscript-ops](skills/manuscript-ops/SKILL.md) | 治理跨格式、批次、审查和 handoff 的可复现文稿工程。 | Model-invoked；支持手动入口。 | skills/manuscript-ops/ |
+| [light-kanban-worker](skills/light-kanban-worker/SKILL.md) | 每次定时运行领取并执行一张 Light-Kanban 任务，交回人工验收。 | Model-invoked；支持手动入口。 | skills/light-kanban-worker/ |
 
 完整目录见 [CATALOG.zh-CN.md](CATALOG.zh-CN.md)。组合示例是文档和验证资产，不是固定 pipeline，也不是自动编排器；退休的 `project-workflow` 不会重新引入。
 
@@ -99,6 +111,7 @@ $review-loop init     # 冻结已有验收标准的 baseline
 - [审查策略](docs/REVIEW_POLICY.zh-CN.md)
 - [目录](CATALOG.zh-CN.md)
 - [变更记录](CHANGELOG.zh-CN.md)
-- [发布收据](docs/evidence/releases/v0.1.2/RELEASE_RECEIPT.zh-CN.md)
+- [发布收据](docs/evidence/releases/v0.1.3/RELEASE_RECEIPT.zh-CN.md)
 - [recap 准入证据](docs/evidence/admissions/recap/README.zh-CN.md)
 - [language-learning 准入证据](docs/evidence/admissions/language-learning/README.zh-CN.md)
+- [light-kanban-worker 准入证据](docs/evidence/admissions/light-kanban-worker/README.zh-CN.md)

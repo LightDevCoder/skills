@@ -4,7 +4,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED = {"ask-light", "language-learning", "learn-anything", "manuscript-ops", "project-init", "recap", "review-loop"}
+EXPECTED = {"ask-light", "language-learning", "learn-anything", "light-kanban-worker", "manuscript-ops", "project-init", "recap", "review-loop"}
 
 
 class CollectionContractTests(unittest.TestCase):
@@ -50,12 +50,14 @@ class CollectionContractTests(unittest.TestCase):
         review_policy_zh = (ROOT / "docs/REVIEW_POLICY.zh-CN.md").read_text(encoding="utf-8")
         self.check("npx skills add LightDevCoder/skills --yes --copy --agent '*'" in readme, "README generic latest whole install")
         self.check("npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'" in installation, "installation generic latest per-Skill install")
-        self.check("npx skills add LightDevCoder/skills#v0.1.2" in installation, "installation pinned v0.1.2 install")
+        self.check("npx skills add LightDevCoder/skills#v0.1.2" in installation, "installation historical pinned v0.1.2 install")
+        self.check("npx skills add LightDevCoder/skills#v0.1.3" in installation, "installation pinned v0.1.3 install")
         self.check("default revision" in installation and "#ref" in installation, "installation revision semantics")
         self.check("LightDevCoder/skills" in readme and "Drive your creativity" in readme, "homepage about copy")
-        self.check(re.search(r"v0\.1\.2.{0,120}is published from commit", readme, re.I | re.S) is not None, "README published v0.1.2 release")
-        self.check("7 admitted first-party Skills" in catalog, "catalog published v0.1.2 seven-package boundary")
-        self.check("Released v0.1.2" in catalog, "catalog released v0.1.2 framing")
+        self.check(re.search(r"v0\.1\.3.{0,120}is published from commit", readme, re.I | re.S) is not None, "README published v0.1.3 release")
+        self.check(re.search(r"v0\.1\.2.{0,200}seven", readme, re.I | re.S) is not None, "README v0.1.2 seven-package history")
+        self.check("8 admitted first-party Skills" in catalog, "catalog eight-package boundary")
+        self.check("Released v0.1.3" in catalog, "catalog released v0.1.3 framing")
         for label, text in (("admission", admission), ("admission zh-CN", admission_zh),
                             ("review policy", review_policy), ("review policy zh-CN", review_policy_zh)):
             self.check(re.search(r"prompt-only|纯提示型", text) is not None, f"{label} prompt-only fast track")
