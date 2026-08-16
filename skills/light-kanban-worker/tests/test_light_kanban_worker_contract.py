@@ -23,6 +23,7 @@ from worker_checks import (  # noqa: E402
     api_fields_documented,
     api_reference_linked,
     existing_work_before_new_work,
+    frontmatter_is_yaml_safe,
     has_frontmatter_name,
     human_only_review,
     is_model_invoked,
@@ -69,6 +70,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     # --- metadata and invocation type ---
     c.check(has_frontmatter_name(skill), "SKILL.md frontmatter name must be light-kanban-worker")
     c.check("description:" in skill, "SKILL.md frontmatter must declare a description")
+    c.check(frontmatter_is_yaml_safe(skill), "SKILL.md frontmatter must parse as YAML (Skills CLI install gate)")
     c.check(is_model_invoked(skill), "SKILL.md must not disable model invocation")
     c.check(bool(re.search(r'display_name:\s*"Light Kanban Worker"', metadata)), "openai.yaml display_name is incorrect")
     c.check(bool(re.search(r'short_description:\s*"Pick up and execute work from Light-Kanban"', metadata)), "openai.yaml short_description is incorrect")
@@ -111,6 +113,13 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.check(
         not api_reference_linked(skill, mutated_api),
         "removing a claim endpoint from the API reference must be rejected",
+    )
+    mutated_frontmatter = skill.replace('description: "', "description: ").replace(
+        "work — resume", "work: resume"
+    )
+    c.check(
+        not frontmatter_is_yaml_safe(mutated_frontmatter),
+        "unquoted colon-space frontmatter mutation must be rejected",
     )
 
     # --- negative fixture files: adversarial protocols that violate exactly

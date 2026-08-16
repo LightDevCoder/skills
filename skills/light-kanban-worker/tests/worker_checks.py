@@ -27,6 +27,41 @@ def has_frontmatter_name(text: str, name: str = "light-kanban-worker") -> bool:
     return bool(re.search(rf"(?m)^name:\s*{re.escape(name)}\s*$", text))
 
 
+def frontmatter_is_yaml_safe(skill: str) -> bool:
+    """The Skills CLI parses the SKILL.md frontmatter as YAML. A plain
+    (unquoted) scalar that contains a colon followed by a space — e.g.
+    "work: resume" inside a description — is read as a nested mapping and
+    the whole package is skipped at install time. Gate both with PyYAML
+    when available and with a conservative unquoted-colon-space scan."""
+    match = re.search(r"(?ms)^---\r?\n(?P<fm>.*?)\r?\n---\s*$", skill)
+    if not match:
+        return False
+    frontmatter = match.group("fm")
+    for line in frontmatter.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if ":" not in stripped:
+            continue
+        key, _, value = stripped.partition(":")
+        value = value.strip()
+        if not value:
+            continue
+        if value.startswith(('"', "'")):
+            continue
+        # unquoted plain scalar: any word-colon-space inside it is a nested
+        # mapping for the YAML parser
+        if re.search(r"\w:\s", value):
+            return False
+    try:
+        import yaml  # optional strict gate when the dependency exists
+
+        data = yaml.safe_load(frontmatter)
+        return isinstance(data, dict) and data.get("name") == "light-kanban-worker"
+    except Exception:
+        return False
+
+
 def is_model_invoked(skill: str) -> bool:
     """The skill must never disable model invocation."""
     return not bool(re.search(r"(?m)^disable-model-invocation:\s*true\s*$", skill))

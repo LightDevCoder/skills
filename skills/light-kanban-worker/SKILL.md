@@ -1,6 +1,6 @@
 ---
 name: light-kanban-worker
-description: Pick up and execute one task from a Light-Kanban board, then return it for human confirmation. Use when a scheduled agent wakes and must process queued Light-Kanban work: resume owned in-progress tasks and Request Changes feedback first, claim new To Do work with a stable agent identity, validate the workspace, execute, then complete or block with a meaningful reason.
+description: "Pick up and execute one task from a Light-Kanban board, then return it for human confirmation. Use when a scheduled agent wakes and must process queued Light-Kanban work — resume owned in-progress tasks and Request Changes feedback first, claim new To Do work with a stable agent identity, validate the workspace, execute, then complete or block with a meaningful reason."
 ---
 
 # Light Kanban Worker
