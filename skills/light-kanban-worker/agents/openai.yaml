@@ -1,0 +1,7 @@
+interface:
+  display_name: "Light Kanban Worker"
+  short_description: "Pick up and execute work from Light-Kanban"
+  default_prompt: "Use light-kanban-worker to process one Light-Kanban task."
+
+policy:
+  allow_implicit_invocation: true

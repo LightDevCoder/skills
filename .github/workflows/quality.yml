@@ -21,7 +21,7 @@ jobs:
         run: |
           set -euo pipefail
           python -m unittest discover -s tests -p "test_*.py"
-          python -m compileall -q skills/learn-anything skills/manuscript-ops tests/test_collection_contract.py
+          python -m compileall -q skills/learn-anything skills/manuscript-ops skills/light-kanban-worker/tests tests/test_collection_contract.py
           for f in \
             skills/ask-light/tests/test_ask_light_contract.py \
             skills/project-init/tests/test_project_init_contract.py \
@@ -29,6 +29,8 @@ jobs:
             skills/recap/tests/test_recap_contract.py \
             skills/recap/tests/test_recap_output_contract.py \
             skills/language-learning/tests/test_language_learning_contract.py \
+            skills/light-kanban-worker/tests/test_light_kanban_worker_contract.py \
+            skills/light-kanban-worker/tests/test_light_kanban_worker_behavior.py \
             skills/review-loop/tests/review_protocol_helpers.py \
             skills/review-loop/tests/test_agent_skill_profile_contract.py \
             skills/review-loop/tests/test_agent_skill_profile_behavior.py \
