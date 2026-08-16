@@ -47,6 +47,9 @@ Resolution order:
 2. environment variables,
 3. the URL default above.
 
+The agent id comes only from those sources — the current invocation (or its
+scheduled task instruction) or the `LIGHT_KANBAN_AGENT_ID` environment
+variable. An id invented per run is a guessed identity and is not allowed.
 Agent identity values are never guessed. If the agent id is unavailable, end
 the run with a clear report and **do not change any task**.
 

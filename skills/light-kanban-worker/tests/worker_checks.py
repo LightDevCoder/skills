@@ -62,8 +62,22 @@ def one_task_per_run(skill: str) -> bool:
     ) and not bool(re.search(r"process (all|multiple|several) tasks", skill, re.IGNORECASE))
 
 
+CANONICAL_REVIEW_BOUNDARY = (
+    r"never\s+archives?\b.*?never\s+accepts?\b.*?never\s+deletes?\b"
+    r".*?never\s+recycles?\b.*?never\s+unblocks?\b"
+)
+
+
 def human_only_review(skill: str) -> bool:
-    """The worker must never archive/accept/delete/recycle or unblock."""
+    """The worker must never archive/accept/delete/recycle or unblock.
+
+    Two gates: the canonical boundary sentence must appear (whitespace- and
+    rewrap-tolerant), and each forbidden verb must have a "never" within a
+    bounded distance (catches a truncated or reworded prompt that keeps only
+    part of the sentence).
+    """
+    if not re.search(CANONICAL_REVIEW_BOUNDARY, skill, re.IGNORECASE | re.DOTALL):
+        return False
     for verb in ("archive", "accept", "delete", "recycle", "unblock"):
         if not re.search(rf"never.{{0,150}}{verb}", skill, re.IGNORECASE | re.DOTALL):
             return False

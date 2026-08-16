@@ -113,7 +113,15 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         "removing a claim endpoint from the API reference must be rejected",
     )
 
-    # --- negative fixture files must fail at least the checker they target ---
+    # --- negative fixture files: adversarial protocols that violate exactly
+    # one rule each; the target checker must fail while the other three rule
+    # checkers must still pass ---
+    all_checkers = [
+        existing_work_before_new_work,
+        no_daemon_or_polling,
+        human_only_review,
+        one_task_per_run,
+    ]
     fixture_targets = [
         ("tests/fixtures/todo-first-variant.md", existing_work_before_new_work),
         ("tests/fixtures/daemon-variant.md", no_daemon_or_polling),
@@ -124,6 +132,12 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         fixture = read(root, path)
         c.check(bool(fixture.strip()), f"negative fixture is empty: {path}")
         c.check(not checker(fixture), f"negative fixture must be rejected: {path}")
+        for other in all_checkers:
+            if other is not checker:
+                c.check(
+                    other(fixture),
+                    f"negative fixture violates a second rule ({other.__name__}): {path}",
+                )
 
     return c.assertions, c.failures
 
