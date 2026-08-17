@@ -82,10 +82,12 @@ outside the catalog. See the [admission evidence](../evidence/admissions/light-k
 Install the package with:
 
 ```text
-npx skills add LightDevCoder/skills --skill light-kanban-worker --yes --copy --agent '*'
+npx skills add LightDevCoder/skills#v0.1.4 --skill light-kanban-worker --yes --copy --agent '*'
 ```
 
-(The pinned `#v0.1.4` form becomes the verified release command once the
-v0.1.4 release gates pass.) Refresh the agent host and confirm the Skill is
-discovered without relying on the source checkout. It is compatible with
-Light-Kanban v1.0.4+; v1.0.5 is the recommended integration version.
+Both the pinned `#v0.1.4` and generic `latest` forms are verified against
+fresh destinations (Skills CLI `1.5.22`); see the
+[v0.1.4 installation record](../../evidence/releases/v0.1.4/INSTALLATION_VERIFICATION.md).
+Refresh the agent host and confirm the Skill is discovered without relying
+on the source checkout. It is compatible with Light-Kanban v1.0.4+; v1.0.5
+is the recommended integration version.

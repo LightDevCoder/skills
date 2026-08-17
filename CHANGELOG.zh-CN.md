@@ -4,7 +4,7 @@
 
 所有变更都必须记录在实际版本/tag 对应的条目中，不能因为文档已起草就提前宣称 release。
 
-## Unreleased — v0.1.4 candidate
+## 0.1.4 — 2026-08-16
 
 ### 新增
 
@@ -16,19 +16,32 @@
   recycle、unblock，也绝不循环或常驻进程。因其涉及网络/文件系统/看板状态
   副作用，走完整准入路径（`review-loop agent-skill`），不走纯提示型快速通道。
 - worker 包的 contract 与 behavior 测试套件，包含 positive fixtures 与
-  negative fixtures（变异文本与对抗性 fixture 文件）。
+  negative fixtures（对抗性单规则 fixture 文件）及 frontmatter YAML 安全门。
+- ask-light behavior 套件新增 outside-readable-path negative 场景。
 
 ### 变更
 
-- 版本文档同步：v0.1.3 为当前稳定 release，v0.1.2 及更早版本保持历史
-  记录，v0.1.4 candidate 在 release gates 通过前标记为 Unreleased。README、
-  目录、安装指南、维护基线、discovery 测试与 CI 更新为八包集合。
+- 版本文档同步：v0.1.4 为当前稳定 release，v0.1.3 及更早版本保持历史
+  记录。README、目录、安装指南、维护基线、discovery 测试与 CI 更新为八包集合。
+- 修复 ask-light scanner 的 `Test-PathUnder` 路径比较（硬编码 Windows
+  分隔符），该问题使 collection-quality workflow 自 v0.1.3 Python 移植起在
+  ubuntu-latest 上失败。
 
-### 证据
+### Release 证据
 
-- 准入：[docs/evidence/admissions/light-kanban-worker/](docs/evidence/admissions/light-kanban-worker/)
-- release gates 通过后，发布证据记录于
-  [docs/evidence/releases/v0.1.4/](docs/evidence/releases/v0.1.4/)。
+- Release tag：`v0.1.4`，commit `a9cc8aa029c926fc80f6ddc0022793f79dfd85bd`。
+- GitHub Actions `collection-quality`：release commit 上 `PASS`（run
+  `31962459531`）。
+- 整集合与单 Skill fresh installs：`PASS`（CLI `1.5.22`，通用 `latest` 与
+  pinned `#v0.1.4` 形式）。
+- GitHub release：https://github.com/LightDevCoder/skills/releases/tag/v0.1.4
+- 整集合与单 Skill fresh-install 证据：
+  [INSTALLATION_VERIFICATION.zh-CN.md](docs/evidence/releases/v0.1.4/INSTALLATION_VERIFICATION.zh-CN.md)。
+- 结构与包级证据：[TEST_SUMMARY.zh-CN.md](docs/evidence/releases/v0.1.4/TEST_SUMMARY.zh-CN.md)。
+- 准入：[light-kanban-worker 证据](docs/evidence/admissions/light-kanban-worker/README.zh-CN.md)。
+- scanner code-review：[CODE_REVIEW.zh-CN.md](docs/evidence/releases/v0.1.4/CODE_REVIEW.zh-CN.md)。
+- 原有五个包的独立 `review-loop agent-skill` acceptance 仍为 `BLOCKED`；见
+  [发布收据](docs/evidence/releases/)。
 
 ## 0.1.3 — 2026-08-10
 

@@ -50,9 +50,11 @@ http://127.0.0.1:8641 as agent codex-main.
 安装该包：
 
 ```text
-npx skills add LightDevCoder/skills --skill light-kanban-worker --yes --copy --agent '*'
+npx skills add LightDevCoder/skills#v0.1.4 --skill light-kanban-worker --yes --copy --agent '*'
 ```
 
-（v0.1.4 release gates 通过后，pinned `#v0.1.4` 形式成为 verified release
-命令。）刷新 agent host，确认脱离 source checkout 仍能发现该 Skill。兼容
+pinned `#v0.1.4` 与通用 `latest` 形式均已针对 fresh destination 验证（Skills
+CLI `1.5.22`）；见
+[v0.1.4 安装记录](../../evidence/releases/v0.1.4/INSTALLATION_VERIFICATION.zh-CN.md)。
+刷新 agent host，确认脱离 source checkout 仍能发现该 Skill。兼容
 Light-Kanban v1.0.4+；推荐集成版本 v1.0.5。

@@ -11,7 +11,7 @@ explicit about its invocation boundary, and small enough to inspect before use.
 > **About:** Personal Skills Collection — Drive your creativity
 
 > **Release:** [v0.1.4](https://github.com/LightDevCoder/skills/releases/tag/v0.1.4)
-> is published from the `v0.1.4` release tag. The release record and fresh-install evidence
+> is published from commit `a9cc8aa` (tag `v0.1.4`). The release record and fresh-install evidence
 > live in [docs/evidence/releases/v0.1.4/](docs/evidence/releases/v0.1.4/).
 >
 > `light-kanban-worker` was admitted through the full path with an independent

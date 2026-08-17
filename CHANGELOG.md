@@ -6,7 +6,7 @@ All notable changes are recorded here. A release entry must be tied to an
 actual version or tag and must not be created merely because a document was
 drafted.
 
-## Unreleased — v0.1.4 candidate
+## 0.1.4 — 2026-08-16
 
 ### Added
 
@@ -20,22 +20,37 @@ drafted.
   process. Network/filesystem/state side effects place it on the full
   admission path (`review-loop agent-skill`), not the prompt-only fast track.
 - Contract and behavior test suites for the worker package with positive and
-  negative fixtures (mutation and adversarial fixture files).
+  negative fixtures (adversarial single-rule fixture files) and a frontmatter
+  YAML-safety gate.
+- A negative outside-readable-path scenario in the ask-light behavior suite.
 
 ### Changed
 
-- Version documentation synchronized: v0.1.3 is the current stable release,
-  v0.1.2 and earlier remain historical records, and the v0.1.4 candidate is
-  marked unreleased until the release gates pass. README, catalog,
-  installation guide, maintenance baseline, discovery tests, and CI updated
-  for the eight-package collection.
+- Version documentation synchronized: v0.1.4 is the current stable release,
+  v0.1.3 and earlier remain historical records. README, catalog, installation
+  guide, maintenance baseline, discovery tests, and CI updated for the
+  eight-package collection.
+- Fixed the ask-light scanner's `Test-PathUnder` path comparison, which
+  hardcoded Windows separators and made the collection-quality workflow fail
+  on ubuntu-latest since the v0.1.3 Python port.
 
-### Evidence
+### Release evidence
 
-- Admission: [docs/evidence/admissions/light-kanban-worker/](docs/evidence/admissions/light-kanban-worker/)
-- Release evidence is recorded in
-  [docs/evidence/releases/v0.1.4/](docs/evidence/releases/v0.1.4/) once the
-  release gates pass.
+- Release tag: `v0.1.4`, commit `a9cc8aa029c926fc80f6ddc0022793f79dfd85bd`.
+- GitHub Actions `collection-quality`: `PASS` on the release commit
+  (run `31962459531`).
+- Fresh whole-collection and per-Skill installs: `PASS` with CLI `1.5.22`
+  for both the generic `latest` and pinned `#v0.1.4` forms.
+- GitHub release: https://github.com/LightDevCoder/skills/releases/tag/v0.1.4
+- Whole-collection and per-Skill fresh-install evidence:
+  [INSTALLATION_VERIFICATION.md](docs/evidence/releases/v0.1.4/INSTALLATION_VERIFICATION.md).
+- Structural and package evidence:
+  [TEST_SUMMARY.md](docs/evidence/releases/v0.1.4/TEST_SUMMARY.md).
+- Admission: [light-kanban-worker evidence](docs/evidence/admissions/light-kanban-worker/README.md).
+- Scanner code-review: [CODE_REVIEW.md](docs/evidence/releases/v0.1.4/CODE_REVIEW.md).
+- Independent `review-loop agent-skill` acceptance for the original five
+  packages remains `BLOCKED`; see the
+  [release receipts](docs/evidence/releases/).
 
 ## 0.1.3 — 2026-08-10
 

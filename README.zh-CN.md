@@ -9,7 +9,7 @@
 > **简介：** Personal Skills Collection — Drive your creativity
 
 > **发布：** [v0.1.4](https://github.com/LightDevCoder/skills/releases/tag/v0.1.4)
-> 已从 `v0.1.4` release tag 发布。发布记录和 fresh-install 证据见
+> 已从 commit `a9cc8aa`（tag `v0.1.4`）发布。发布记录和 fresh-install 证据见
 > [docs/evidence/releases/v0.1.4/](docs/evidence/releases/v0.1.4/)。
 >
 > `light-kanban-worker` 经完整路径准入，独立 `review-loop agent-skill`
