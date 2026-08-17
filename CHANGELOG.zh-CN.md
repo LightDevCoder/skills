@@ -4,7 +4,7 @@
 
 所有变更都必须记录在实际版本/tag 对应的条目中，不能因为文档已起草就提前宣称 release。
 
-## Unreleased — v0.1.5 candidate
+## 0.1.5 — 2026-08-17
 
 ### 变更
 
@@ -44,10 +44,20 @@
 
 ### 证据
 
-- 契约变更的 `review-loop agent-skill` 验收：
-  [docs/evidence/releases/v0.1.5/AGENT_SKILL_REVIEW.zh-CN.md](docs/evidence/releases/v0.1.5/AGENT_SKILL_REVIEW.zh-CN.md)。
-- Release 证据在 release gate 通过后记录于
-  [docs/evidence/releases/v0.1.5/](docs/evidence/releases/v0.1.5/)。
+- Release tag：`v0.1.5`，commit `a56aa9d98de0b941ee2282144bc7e756ef5e48bd`。
+- GitHub Actions `collection-quality`：release commit 上 `PASS`（run
+  `31985455493`）。
+- 契约变更的 `review-loop agent-skill` 验收：完全独立的 PASS（findings
+  F-001/F-002/F-003/G-001 已修复）——
+  [AGENT_SKILL_REVIEW.zh-CN.md](docs/evidence/releases/v0.1.5/AGENT_SKILL_REVIEW.zh-CN.md)。
+- Fresh installs：整集合与单 Skill、通用 `latest` 与 pinned `#v0.1.5`
+  形式，CLI `1.5.22` —— PASS；安装包与 tag 逐字节一致且套件可独立运行。见
+  [INSTALLATION_VERIFICATION.zh-CN.md](docs/evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.zh-CN.md)。
+- Host discovery：
+  [DISCOVERY_VERIFICATION.zh-CN.md](docs/evidence/releases/v0.1.5/DISCOVERY_VERIFICATION.zh-CN.md)。
+- GitHub release：https://github.com/LightDevCoder/skills/releases/tag/v0.1.5
+- 最终收据（pre-release gate + post-release verification）：
+  [RELEASE_RECEIPT.zh-CN.md](docs/evidence/releases/v0.1.5/RELEASE_RECEIPT.zh-CN.md)。
 
 ## 0.1.4 — 2026-08-16
 

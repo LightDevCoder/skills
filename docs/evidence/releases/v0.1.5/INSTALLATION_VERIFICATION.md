@@ -4,11 +4,22 @@
 
 ## Status
 
-`PENDING` at the time of this commit. The verification runs after the
-published `v0.1.5` tag exists, against fresh destinations and without a
-source checkout, exactly as required by the release gate. The verified
-results, CLI version, and discovery output are filled into the table below
-once the run completes (post-release verification recorded on main).
+`PASS` for the tagged public repository using Skills CLI `1.5.22`, verified
+against fresh destinations for both the generic `latest` form and the pinned
+`#v0.1.5` form. Host refresh is host-specific and was not claimed; CLI
+discovery was run from each fresh destination without a source checkout.
+
+| Field | Whole collection | Per-Skill (`light-kanban-worker`) |
+| --- | --- | --- |
+| Command | `npx skills add LightDevCoder/skills --yes --copy --agent '*'` (latest) and `npx skills add LightDevCoder/skills#v0.1.5 --yes --copy --agent '*'` (tag) | `npx skills add LightDevCoder/skills --skill light-kanban-worker --yes --copy --agent '*'` (latest) and `npx skills add LightDevCoder/skills#v0.1.5 --skill light-kanban-worker --yes --copy --agent '*'` (tag) |
+| CLI version | `1.5.22` | `1.5.22` |
+| Released commit | `a56aa9d98de0b941ee2282144bc7e756ef5e48bd` (`v0.1.5` tag) | same |
+| Fresh destination | New empty temporary directory; `Found 8 skills`, `Installing all 8 skills`; exactly 8 packages under `.agents/skills/` | New empty temporary directory; exactly 1 package (`light-kanban-worker`) under `.agents/skills/` |
+| Install result | `PASS`, exit code 0 | `PASS`, exit code 0 |
+| Discovery without source checkout | `npx --yes skills list` exit 0; `light-kanban-worker ./.agents/skills/light-kanban-worker` listed; source checkout absent | `npx --yes skills list` exit 0; exactly one package listed: `light-kanban-worker`; source checkout absent |
+| Installed-package smoke | — | All 14 package files byte-identical to the tagged source (`diff -r` clean against a checkout of tag `v0.1.5`); contract suite (100 assertions) and behavior suite (23 assertions) OK against the installed copy, run standalone |
+| Repeat-install behavior | Same command exit 0; CLI reported `overwrites:` for the agent groups (no-op overwrite) | Same command exit 0; no-op overwrite |
+| Limitation | The CLI's own per-host copies under `agent/skills/` strip the `name` frontmatter field, so `skills list` prints a uniform "missing required frontmatter field(s): name" warning for every package (including the long-released ones). This is CLI copy behavior, not a package defect; the `.agents/skills/` installs are byte-identical to the tag. Host refresh and model-mediated runtime invocation were not claimed. | Same. |
 
 ## Procedure
 
@@ -17,21 +28,11 @@ once the run completes (post-release verification recorded on main).
    unavailable to the host discovery step.
 3. Run the whole-collection and per-Skill commands separately for both the
    generic `latest` form and the pinned `#v0.1.5` form.
-4. Capture discovery (`npx --yes skills list`) and confirm
-   `light-kanban-worker` is listed without relying on the source checkout.
-5. Run one success and one boundary smoke against the installed
-   `light-kanban-worker` package (package contract + behavior suites against
-   the installed copy).
-6. Repeat the same command and record whether it is a no-op or reports a
+4. Capture discovery, then run the installed-package smoke for
+   `light-kanban-worker` (byte comparison against the tag checkout, plus
+   the package's own contract and behavior suites from the installed copy).
+5. Repeat the same command and record whether it is a no-op or reports a
    duplicate.
 
-| Field | Whole collection | Per-Skill (`light-kanban-worker`) |
-| --- | --- | --- |
-| Command | `npx skills add LightDevCoder/skills --yes --copy --agent '*'` and `npx skills add LightDevCoder/skills#v0.1.5 --yes --copy --agent '*'` | `npx skills add LightDevCoder/skills --skill light-kanban-worker --yes --copy --agent '*'` and `npx skills add LightDevCoder/skills#v0.1.5 --skill light-kanban-worker --yes --copy --agent '*'` |
-| Installer version | pending | pending |
-| Host / destination | pending | pending |
-| Result | pending | pending |
-| Discovery without source checkout | pending | pending |
-| Success smoke (contract + behavior suites on the installed copy) | pending | pending |
-| Boundary smoke | pending | pending |
-| Repeat install | pending | pending |
+The evidence records destination classes rather than absolute private paths.
+It does not include tokens, usernames, or sensitive host details.

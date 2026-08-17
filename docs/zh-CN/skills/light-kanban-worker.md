@@ -87,7 +87,8 @@ Agent Avatar: /path/to/codex-icon.png
 npx skills add LightDevCoder/skills#v0.1.5 --skill light-kanban-worker --yes --copy --agent '*'
 ```
 
-pinned `#v0.1.5` 命令在 v0.1.5 tag 发布后针对 fresh destination 验证；见
+pinned `#v0.1.5` 命令已针对 fresh destination 验证（Skills CLI `1.5.22`，
+安装副本与 tag 逐字节一致，包套件可独立运行）；见
 [v0.1.5 安装记录](../../evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.zh-CN.md)。
 刷新 agent host，确认脱离 source checkout 仍能发现该 Skill。兼容
 Light-Kanban v1.0.4+；推荐集成版本是 Light-Kanban v1.0.6（其内置的正是本

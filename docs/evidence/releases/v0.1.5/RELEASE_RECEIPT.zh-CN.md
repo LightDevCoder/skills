@@ -2,9 +2,9 @@
 
 [English receipt](RELEASE_RECEIPT.md)
 
-状态：`READY FOR RELEASE` — pre-release gate 已通过。本记录包含的是
-pre-release gate；post-release verification 记录在 main 上，并从 GitHub
-Release 链接。
+状态：`RELEASED` — tag 已发布，post-release verification 记录在 main。tag
+快照携带 pre-release gate；本定稿记录（含 post-release verification）位于
+main，并从 GitHub Release 链接。
 
 ## 身份
 
@@ -12,7 +12,7 @@ Release 链接。
 | --- | --- |
 | 仓库 | `LightDevCoder/skills`（公开） |
 | Release | `v0.1.5` |
-| Release commit | main 上的 `v0.1.5` tag（记录于 post-release verification） |
+| Release commit | `a56aa9d98de0b941ee2282144bc7e756ef5e48bd` |
 | Release tag | `v0.1.5` |
 | Release URL | https://github.com/LightDevCoder/skills/releases/tag/v0.1.5 |
 | 范围 | `light-kanban-worker` 行为契约：same-agent run 不得重叠、atomic claim 边界澄清、首次注册身份（ID + name + avatar）、release evidence 工作流清理 |
@@ -54,14 +54,14 @@ Release 链接。
 
 ## Post-release verification
 
-以下内容只能在 `v0.1.5` tag 真正存在后确认。它们记录在 main 的 final
-verification commit 中，并从 GitHub Release 链接：
+以下内容已在 `v0.1.5` tag 存在后确认，并记录在本定稿收据中（tag 本身包含
+pre-release gate 快照；见上文）：
 
 | 检查项 | 记录 |
 | --- | --- |
-| 已发布 tag 身份与 release commit | 记录在 main |
-| 从 `LightDevCoder/skills#v0.1.5` fresh install | [INSTALLATION_VERIFICATION.zh-CN.md](INSTALLATION_VERIFICATION.zh-CN.md) |
-| Host discovery | [DISCOVERY_VERIFICATION.zh-CN.md](DISCOVERY_VERIFICATION.zh-CN.md) |
-| 重复安装 | [INSTALLATION_VERIFICATION.zh-CN.md](INSTALLATION_VERIFICATION.zh-CN.md) |
-| Release CI（`collection-quality`） | 记录在 main |
-| GitHub Release body 链接本记录与 post-release receipt | 记录在 main |
+| 已发布 tag 身份与 release commit | `v0.1.5` → `a56aa9d98de0b941ee2282144bc7e756ef5e48bd` |
+| 从 `LightDevCoder/skills#v0.1.5` fresh install | PASS — [INSTALLATION_VERIFICATION.zh-CN.md](INSTALLATION_VERIFICATION.zh-CN.md) |
+| Host discovery | PASS — [DISCOVERY_VERIFICATION.zh-CN.md](DISCOVERY_VERIFICATION.zh-CN.md) |
+| 重复安装 | PASS（no-op overwrite）— [INSTALLATION_VERIFICATION.zh-CN.md](INSTALLATION_VERIFICATION.zh-CN.md) |
+| Release CI（`collection-quality`） | PASS — commit `a56aa9d` 上的 run `31985455493` |
+| GitHub Release body 链接本记录与 post-release receipt | 已完成 — 见 [GitHub Release](https://github.com/LightDevCoder/skills/releases/tag/v0.1.5) |

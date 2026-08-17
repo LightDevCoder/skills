@@ -56,10 +56,10 @@ class CollectionContractTests(unittest.TestCase):
         self.check("npx skills add LightDevCoder/skills#v0.1.5" in installation, "installation pinned v0.1.5 install")
         self.check("default revision" in installation and "#ref" in installation, "installation revision semantics")
         self.check("LightDevCoder/skills" in readme and "Drive your creativity" in readme, "homepage about copy")
-        self.check(re.search(r"v0\.1\.5.{0,160}release candidate", readme, re.I | re.S) is not None, "README v0.1.5 candidate framing")
+        self.check(re.search(r"v0\.1\.5.{0,160}is published from", readme, re.I | re.S) is not None, "README published v0.1.5 release")
         self.check(re.search(r"v0\.1\.2.{0,200}seven", readme, re.I | re.S) is not None, "README v0.1.2 seven-package history")
         self.check("8 admitted first-party Skills" in catalog, "catalog eight-package boundary")
-        self.check("v0.1.5 release candidate" in catalog, "catalog v0.1.5 candidate framing")
+        self.check("Released v0.1.5" in catalog, "catalog released v0.1.5 framing")
         for label, text in (("admission", admission), ("admission zh-CN", admission_zh),
                             ("review policy", review_policy), ("review policy zh-CN", review_policy_zh)):
             self.check(re.search(r"prompt-only|纯提示型", text) is not None, f"{label} prompt-only fast track")

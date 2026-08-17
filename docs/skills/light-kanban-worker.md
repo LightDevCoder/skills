@@ -134,8 +134,9 @@ Install the package with:
 npx skills add LightDevCoder/skills#v0.1.5 --skill light-kanban-worker --yes --copy --agent '*'
 ```
 
-The pinned `#v0.1.5` command is verified against a fresh destination after
-the v0.1.5 tag is published; see the
+The pinned `#v0.1.5` command is verified against fresh destinations (Skills
+CLI `1.5.22`, installed copy byte-identical to the tag, package suites run
+standalone); see the
 [v0.1.5 installation record](../evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.md).
 Refresh the agent host and confirm the Skill is discovered without relying
 on the source checkout. It is compatible with Light-Kanban v1.0.4+; the

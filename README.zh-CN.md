@@ -9,8 +9,7 @@
 > **简介：** Personal Skills Collection — Drive your creativity
 
 > **发布：** [v0.1.5](https://github.com/LightDevCoder/skills/releases/tag/v0.1.5)
-> 是已准备好的 release candidate——pre-release gate 为 `READY FOR RELEASE`，
-> `v0.1.5` tag 在 gate 通过后才发布。发布记录和 fresh-install 证据见
+> 已从 commit `a56aa9d`（tag `v0.1.5`）发布。发布记录和 fresh-install 证据见
 > [docs/evidence/releases/v0.1.5/](docs/evidence/releases/v0.1.5/)；
 > post-release verification 记录在 main，并从 GitHub Release 链接。
 >
@@ -63,7 +62,7 @@ Use light-kanban-worker to process at most one Light-Kanban task.
 
 ## 外部能力（External Capabilities）
 
-v0.1.5 release candidate 集合包含八个第一方包：v0.1.2 的七个包
+已发布的 v0.1.5 集合包含八个第一方包：v0.1.2 的七个包
 （v0.1.1 的五个包加 `recap` 与 `language-learning`；v0.1.3 保持同样的七个包
 并迁移了测试工具链），再加 `light-kanban-worker`。
 

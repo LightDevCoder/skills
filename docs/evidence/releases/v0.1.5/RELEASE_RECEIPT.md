@@ -2,9 +2,10 @@
 
 [中文收据](RELEASE_RECEIPT.zh-CN.md)
 
-Status: `READY FOR RELEASE` — pre-release gate passed. This record contains
-the pre-release gate. Post-release verification is recorded on main and
-linked from the GitHub Release.
+Status: `RELEASED` — tag published, post-release verification recorded on
+main. The tag snapshot carries the pre-release gate; this finalized record
+(with post-release verification) lives on main and is linked from the GitHub
+Release.
 
 ## Identity
 
@@ -12,7 +13,7 @@ linked from the GitHub Release.
 | --- | --- |
 | Repository | `LightDevCoder/skills` (public) |
 | Release | `v0.1.5` |
-| Release commit | the `v0.1.5` tag on main (recorded in post-release verification) |
+| Release commit | `a56aa9d98de0b941ee2282144bc7e756ef5e48bd` |
 | Release tag | `v0.1.5` |
 | Release URL | https://github.com/LightDevCoder/skills/releases/tag/v0.1.5 |
 | Scope | `light-kanban-worker` behavior contract: same-agent non-overlapping runs, atomic-claim boundary clarification, first-registration identity (ID + name + avatar), release-evidence workflow cleanup |
@@ -60,15 +61,15 @@ linked from the GitHub Release.
 
 ## Post-release verification
 
-The following can only be confirmed after the `v0.1.5` tag exists. They are
-recorded on main in the final verification commit and linked from the GitHub
-Release:
+The following were confirmed after the `v0.1.5` tag existed and are recorded
+in this finalized receipt on main (the tag itself contains the pre-release
+gate snapshot; see the section above):
 
 | Check | Record |
 | --- | --- |
-| Published tag identity and release commit | Recorded on main |
-| Fresh install from `LightDevCoder/skills#v0.1.5` | [INSTALLATION_VERIFICATION.md](INSTALLATION_VERIFICATION.md) |
-| Host discovery | [DISCOVERY_VERIFICATION.md](DISCOVERY_VERIFICATION.md) |
-| Repeat installation | [INSTALLATION_VERIFICATION.md](INSTALLATION_VERIFICATION.md) |
-| Release CI (`collection-quality`) | Recorded on main |
-| GitHub Release body links to this record and the post-release receipt | Recorded on main |
+| Published tag identity and release commit | `v0.1.5` → `a56aa9d98de0b941ee2282144bc7e756ef5e48bd` |
+| Fresh install from `LightDevCoder/skills#v0.1.5` | PASS — [INSTALLATION_VERIFICATION.md](INSTALLATION_VERIFICATION.md) |
+| Host discovery | PASS — [DISCOVERY_VERIFICATION.md](DISCOVERY_VERIFICATION.md) |
+| Repeat installation | PASS (no-op overwrite) — [INSTALLATION_VERIFICATION.md](INSTALLATION_VERIFICATION.md) |
+| Release CI (`collection-quality`) | PASS — run `31985455493` on commit `a56aa9d` |
+| GitHub Release body links to this record and the post-release receipt | Done — see the [GitHub Release](https://github.com/LightDevCoder/skills/releases/tag/v0.1.5) |

@@ -13,8 +13,8 @@ Agent host.
 | --- | --- |
 | Collection | Personal Skills Collection |
 | Package count | 8 admitted first-party Skills |
-| Current state | v0.1.5 release candidate (`READY FOR RELEASE`, tag pending); `light-kanban-worker` admitted with independent `review-loop agent-skill` `PASS` |
-| Stable release | [v0.1.4](https://github.com/LightDevCoder/skills/releases/tag/v0.1.4) (v0.1.5 is the prepared candidate) |
+| Current state | Released v0.1.5; `light-kanban-worker` admitted with independent `review-loop agent-skill` `PASS` |
+| Stable release | [v0.1.5](https://github.com/LightDevCoder/skills/releases/tag/v0.1.5) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) |
 | Evidence | [v0.1.5 release evidence](docs/evidence/releases/v0.1.5/) |

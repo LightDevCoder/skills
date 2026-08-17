@@ -11,9 +11,7 @@ explicit about its invocation boundary, and small enough to inspect before use.
 > **About:** Personal Skills Collection — Drive your creativity
 
 > **Release:** [v0.1.5](https://github.com/LightDevCoder/skills/releases/tag/v0.1.5)
-> is the prepared release candidate — the pre-release gate is
-> `READY FOR RELEASE` and the `v0.1.5` tag is published only after the gate
-> passes. The release record and fresh-install evidence
+> is published from commit `a56aa9d` (tag `v0.1.5`). The release record and fresh-install evidence
 > live in [docs/evidence/releases/v0.1.5/](docs/evidence/releases/v0.1.5/);
 > post-release verification is recorded on main and linked from the GitHub
 > Release.
@@ -84,7 +82,7 @@ the scheduler so only one run of the same agent id can be active at a time
 
 ## External capabilities
 
-The v0.1.5 release candidate collection contains eight first-party packages: the
+The published v0.1.5 collection contains eight first-party packages: the
 v0.1.2 release's seven (v0.1.1's five plus `recap` and `language-learning`;
 v0.1.3 kept the same seven and migrated the test toolchain), plus
 `light-kanban-worker`.

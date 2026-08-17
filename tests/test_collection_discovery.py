@@ -81,18 +81,10 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         all(token in installation for token in ("source_root", "skill_name", "destination_root")),
         "Manual fallback must use valid shell variables.",
     )
-    c.check(bool(re.search(r"(?is)v0\.1\.5.{0,160}release candidate", readme)), "README must present v0.1.5 as the prepared release candidate.")
-    c.check(
-        not re.search(r"(?is)published\s+v0\.1\.5", readme),
-        "README must not claim v0.1.5 is published before the tag exists.",
-    )
-    c.check(
-        not re.search(r"已发布的\s+v0\.1\.5", readme_zh),
-        "README.zh-CN.md must not claim v0.1.5 is published before the tag exists.",
-    )
+    c.check(bool(re.search(r"(?is)v0\.1\.5.{0,160}is published from", readme)), "README must present v0.1.5 as the published release.")
     c.check(bool(re.search(r"(?is)v0\.1\.2.{0,200}seven", readme)), "README must retain the v0.1.2 seven-package history.")
     c.check("8 admitted first-party Skills" in catalog, "Catalog must present the eight-package collection.")
-    c.check("v0.1.5 release candidate" in catalog, "Catalog must present the v0.1.5 candidate state.")
+    c.check("Released v0.1.5" in catalog, "Catalog must present v0.1.5 as released.")
     c.check(bool(re.search(r"(?is)v0\.1\.1[^\r\n]{0,80}five", readme)), "README must retain the v0.1.1 five-package history.")
     c.check(bool(re.search(r"light-kanban-worker.{0,200}scheduled", readme, re.IGNORECASE | re.DOTALL)), "README must present light-kanban-worker as the scheduled Light-Kanban worker Skill.")
 

@@ -2,12 +2,12 @@
 
 [English installation guide](INSTALLATION.md)
 
-公开第一方集合当前稳定版本是 [v0.1.4](https://github.com/LightDevCoder/skills/releases/tag/v0.1.4)，发布自 commit `a9cc8aa029c926fc80f6ddc0022793f79dfd85bd`。v0.1.5 是已准备好的 release candidate（`READY FOR RELEASE`，tag 待发布）；其 pinned 命令在 tag 发布后针对 fresh destination 验证。`skills/<name>/` 内的包契约仍是行为权威；本页只规定安装和验证证据。
+公开第一方集合当前稳定版本是 [v0.1.5](https://github.com/LightDevCoder/skills/releases/tag/v0.1.5)，发布自 commit `a56aa9d98de0b941ee2282144bc7e756ef5e48bd`。`skills/<name>/` 内的包契约仍是行为权威；本页只规定安装和验证证据。
 
 标准安装命令是通用 `latest` 形式：它跟随仓库默认 revision，因此每次
 `npx skills add LightDevCoder/skills` 都安装默认分支上的当前集合。v0.1.5
-candidate 更新 `light-kanban-worker`（same-agent run 不得重叠与首次注册身份
-规则）；其命令在 tag 发布后于
+更新 `light-kanban-worker`（same-agent run 不得重叠与首次注册身份规则）；
+其命令已在
 [v0.1.5 安装验证](evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.zh-CN.md)
 中针对 fresh destination 验证。
 
@@ -16,13 +16,13 @@ candidate 更新 `light-kanban-worker`（same-agent run 不得重叠与首次注
 官方 Skills CLI 支持 GitHub source 的 `#ref` fragment，并将其作为 Git revision；没有 fragment 的仓库简写使用仓库默认 revision。可查看 [官方 source parser](https://raw.githubusercontent.com/vercel-labs/skills/main/src/source-parser.ts) 和 [Git helper](https://raw.githubusercontent.com/vercel-labs/skills/main/src/git.ts)。
 
 下面的通用 `latest` 命令不带 fragment，因此跟随仓库默认 revision：它安装当前
-集合，是标准安装方式。pinned `#v0.1.5` 形式在发布后选择该 tag，用于可复现
+集合，是标准安装方式。pinned `#v0.1.5` 形式选择已发布的 tag，用于可复现
 安装与 release 验证。两者都不是对未来默认 revision 的声明；对 fresh
 destination 重新运行 discovery，以获取解析后的实际内容。
 
-## v0.1.5 candidate 命令
+## v0.1.5 release 命令
 
-v0.1.5 candidate 安装命令跟随仓库默认 revision，安装八包集合：
+当前 release 安装命令跟随仓库默认 revision，安装八包集合：
 
 ```text
 npx skills add LightDevCoder/skills --yes --copy --agent '*'
@@ -31,17 +31,17 @@ npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'
 ```
 
 第一条安装八包集合，其余从同一 revision 选择完整单包。
-pinned `#v0.1.5` 形式在 tag 发布后针对 fresh destinations 验证，见
+各形式均已针对 fresh destinations 验证，见
 [v0.1.5 安装记录](evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.zh-CN.md)。
 
-如需可复现的 pinned 安装，在 tag 存在后用显式 tag 运行同一命令：
+如需可复现的 pinned 安装，用显式 tag 运行同一命令：
 
 ```text
 npx skills add LightDevCoder/skills#v0.1.5 --yes --copy --agent '*'
 npx skills add LightDevCoder/skills#v0.1.5 --skill light-kanban-worker --yes --copy --agent '*'
 ```
 
-`latest` 形式与 `#v0.1.5` 形式在 candidate 时刻解析为相同内容；只有 pinned
+`latest` 形式与 `#v0.1.5` 形式在 release 时刻解析为相同内容；只有 pinned
 形式对未来默认 revision 的变化保持稳定。
 
 ## 历史 v0.1.4 验证

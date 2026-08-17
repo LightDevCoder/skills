@@ -3,22 +3,18 @@
 [中文安装说明](INSTALLATION.zh-CN.md)
 
 The public first-party collection's current stable release is
-[v0.1.4](https://github.com/LightDevCoder/skills/releases/tag/v0.1.4),
-published from commit `a9cc8aa029c926fc80f6ddc0022793f79dfd85bd`. v0.1.5 is
-the prepared release candidate (`READY FOR RELEASE`, tag pending); its
-pinned command is verified against fresh destinations once the tag is
-published. Package
+[v0.1.5](https://github.com/LightDevCoder/skills/releases/tag/v0.1.5),
+published from commit `a56aa9d98de0b941ee2282144bc7e756ef5e48bd`. Package
 contracts remain inside `skills/<name>/`; this document is the installation
 authority and does not replace host-specific discovery rules.
 
 The standard install command is the generic `latest` form: it follows the
 repository's default revision, so every `npx skills add
 LightDevCoder/skills` install gets the current collection on the default
-branch. The v0.1.5 candidate updates `light-kanban-worker` (non-overlapping
+branch. v0.1.5 updates `light-kanban-worker` (non-overlapping
 same-agent runs and the first-registration identity rule); its commands are
 verified against fresh destinations in the
-[v0.1.5 installation verification](evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.md)
-after the tag is published.
+[v0.1.5 installation verification](evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.md).
 
 ## Revision semantics
 
@@ -30,16 +26,15 @@ and [Git helper](https://raw.githubusercontent.com/vercel-labs/skills/main/src/g
 
 The generic `latest` command below uses no fragment and therefore follows the
 repository's default revision: it installs the current collection and is the
-standard way to install. The pinned `#v0.1.5` form selects the prepared
-candidate tag once published, and is retained for reproducible installs and
-release verification. Neither
+standard way to install. The pinned `#v0.1.5` form selects the published tag
+and is retained for reproducible installs and release verification. Neither
 form is a claim about a future default revision; re-run discovery against the
 fresh destination for the resolved content.
 
-## v0.1.5 candidate commands
+## v0.1.5 release commands
 
-The v0.1.5 candidate install commands follow the repository's default
-revision and install the eight-package collection:
+The current release install commands follow the repository's default revision
+and install the eight-package collection:
 
 ```text
 npx skills add LightDevCoder/skills --yes --copy --agent '*'
@@ -48,12 +43,11 @@ npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'
 ```
 
 The first installs the eight-package collection and the others select one
-complete package from the same revision. The pinned `#v0.1.5` form is
-verified against fresh destinations after the tag is published, in the
+complete package from the same revision. The forms are
+verified against fresh destinations in the
 [v0.1.5 installation record](evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.md).
 
-For a reproducible pinned install, use the same command with the explicit tag
-once it exists:
+For a reproducible pinned install, use the same command with the explicit tag:
 
 ```text
 npx skills add LightDevCoder/skills#v0.1.5 --yes --copy --agent '*'
@@ -61,7 +55,7 @@ npx skills add LightDevCoder/skills#v0.1.5 --skill light-kanban-worker --yes --c
 ```
 
 The `latest` form and the `#v0.1.5` form resolve to the same content at
-candidate time; only the pinned form is stable against future
+release time; only the pinned form is stable against future
 default-revision changes.
 
 ## Historical v0.1.4 verification
@@ -138,7 +132,7 @@ receipt did not record them.
 
 That historical verification does not change the CLI revision semantics: an
 unqualified source follows the repository's default revision and is not a
-permanent pin. The candidate commands above use the generic `latest` form
+permanent pin. The current release commands above use the generic `latest` form
 or the explicit `#v0.1.5` tag.
 
 ## `recap` and `language-learning` packages

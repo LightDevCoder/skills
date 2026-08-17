@@ -6,7 +6,7 @@ All notable changes are recorded here. A release entry must be tied to an
 actual version or tag and must not be created merely because a document was
 drafted.
 
-## Unreleased — v0.1.5 candidate
+## 0.1.5 — 2026-08-17
 
 ### Changed
 
@@ -54,11 +54,20 @@ drafted.
 
 ### Evidence
 
-- `review-loop agent-skill` acceptance for the contract change:
-  [docs/evidence/releases/v0.1.5/AGENT_SKILL_REVIEW.md](docs/evidence/releases/v0.1.5/AGENT_SKILL_REVIEW.md).
-- Release evidence is recorded in
-  [docs/evidence/releases/v0.1.5/](docs/evidence/releases/v0.1.5/) once the
-  release gates pass.
+- Release tag: `v0.1.5`, commit `a56aa9d98de0b941ee2282144bc7e756ef5e48bd`.
+- GitHub Actions `collection-quality`: `PASS` on the release commit
+  (run `31985455493`).
+- `review-loop agent-skill` acceptance for the contract change: PASS with
+  full independence (findings F-001/F-002/F-003/G-001 repaired) —
+  [AGENT_SKILL_REVIEW.md](docs/evidence/releases/v0.1.5/AGENT_SKILL_REVIEW.md).
+- Fresh installs: whole-collection and per-Skill, generic `latest` and
+  pinned `#v0.1.5` forms, CLI `1.5.22` — PASS; installed package
+  byte-identical to the tag and its suites run standalone. See
+  [INSTALLATION_VERIFICATION.md](docs/evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.md).
+- Host discovery: [DISCOVERY_VERIFICATION.md](docs/evidence/releases/v0.1.5/DISCOVERY_VERIFICATION.md).
+- GitHub release: https://github.com/LightDevCoder/skills/releases/tag/v0.1.5
+- Final receipt (pre-release gate + post-release verification):
+  [RELEASE_RECEIPT.md](docs/evidence/releases/v0.1.5/RELEASE_RECEIPT.md).
 
 ## 0.1.4 — 2026-08-16
 

@@ -10,8 +10,8 @@
 | --- | --- |
 | 集合 | Personal Skills Collection |
 | 包数量 | 8 个已准入第一方 Skill |
-| 当前状态 | v0.1.5 release candidate（`READY FOR RELEASE`，tag 待发布）；`light-kanban-worker` 经独立 `review-loop agent-skill` `PASS` 准入 |
-| 稳定版本 | [v0.1.4](https://github.com/LightDevCoder/skills/releases/tag/v0.1.4)（v0.1.5 为已准备的 candidate） |
+| 当前状态 | 已发布 v0.1.5；`light-kanban-worker` 经独立 `review-loop agent-skill` `PASS` 准入 |
+| 稳定版本 | [v0.1.5](https://github.com/LightDevCoder/skills/releases/tag/v0.1.5) |
 | 安装权威 | [docs/INSTALLATION.zh-CN.md](docs/INSTALLATION.zh-CN.md) |
 | 发现检查 | [test_collection_discovery.py](tests/test_collection_discovery.py) |
 | 证据 | [v0.1.5 发布证据](docs/evidence/releases/v0.1.5/RELEASE_RECEIPT.zh-CN.md) |
