@@ -32,6 +32,60 @@ Every invocation handles **at most one task**, then stops. Never take more
 than one task in a run, never work on more than one project at once, and
 never keep working after the outcome (complete or block) is reported.
 
+## Non-overlapping runs
+
+At most one worker invocation may be active for one
+`LIGHT_KANBAN_AGENT_ID` at any time. Two scheduled wakes that use the same
+agent id must not overlap: if a wake fires while the previous run of that
+agent id is still active, the new invocation must skip and end without
+processing work. It must not open a second invocation that continues the
+same owned in_progress task while the first one is still working.
+
+```text
+run #1 codex-main ──────────────────┐
+                                    │ active
+08:15 scheduled wake codex-main ────┘
+             ↓
+        must skip
+```
+
+Never let this become two parallel runs of one identity working on the same
+in_progress task.
+
+## Why this is required
+
+Light-Kanban's atomic claim protects two **different** workers that try to
+claim the same To Do task at the same moment — exactly one claim succeeds.
+It does not protect two runs that share the same agent id: owned work does
+not need a new claim, so both runs would keep working on the same owned
+in_progress task in parallel. Atomic claim is not a concurrency lock for
+multiple invocations using the same agent identity.
+
+## Scheduler responsibility
+
+Concurrency control belongs to the scheduler / agent runtime, not to this
+Skill. Configure the scheduler so a given agent id has at most one active
+run (`max concurrent runs = 1`) or so it skips a new run while the previous
+run for the same agent id is still active. Field names vary between
+scheduler products — use the equivalent setting of the one you run. The
+worker adds no lock process, no heartbeat, no lease service, and no resident
+background process of its own.
+
+## Unsupported schedulers
+
+If the scheduler cannot guarantee non-overlap: **do not schedule overlapping
+runs with the same agentId.** Lower the run frequency, use an external
+scheduler lock, or switch to a scheduler that supports single concurrency.
+Never build a replacement scheduler into light-kanban-worker.
+
+## Different agents may run concurrently
+
+Different agent ids (`codex-main`, `claude-code`, `deepseek-main`) may run
+concurrently: they hold different identities and compete for new tasks
+through atomic claim. What is forbidden is overlap between two runs of the
+**same** agent id — `codex-main` run #1 and `codex-main` run #2 — never
+parallel execution of different agents.
+
 ## Configuration
 
 | Variable | Meaning | Default |
@@ -53,6 +107,10 @@ variable. An id invented per run is a guessed identity and is not allowed.
 Agent identity values are never guessed. If the agent id is unavailable, end
 the run with a clear report and **do not change any task**.
 
+Name and avatar are first-registration values: once the board knows the
+agent id, later runs reuse the stored identity and must not repeat them on
+every wake.
+
 ## Agent identity
 
 Every run uses one **stable agent id** (e.g. `codex-main`). Never generate a
@@ -66,8 +124,9 @@ GET /api/agents
 
 - If the agent id already exists, reuse the server's stored `name` and
   `avatar` for this run; do not require the scheduled task to repeat them.
-- If the agent id does not exist, this is first registration: a legal `name`
-  and `avatar` are required. The avatar may be an http(s) image URL, or a
+  Avatar is required for first registration, not every worker wake.
+- If the agent id does not exist, this is first registration and requires a
+  legal `name` and `avatar`. The avatar may be an http(s) image URL, or a
   local icon image — upload a local image first:
 
   ```http
@@ -75,8 +134,12 @@ GET /api/agents
   Content-Type: multipart/form-data; field "file"
   ```
 
-  and use the returned `/api/avatars/...` path. End the run without touching
-  tasks when neither avatar form is available.
+  and use the returned `/api/avatars/...` path when claiming.
+
+If the agent id is new and `name` or `avatar` is missing, report identity
+configuration missing, do not claim a task, do not mutate any task, and end
+the run. Never generate a placeholder avatar, invent an image path, or guess
+another agent identity.
 
 ## Golden flow
 
@@ -276,4 +339,5 @@ stop (see Failures before and after claim).
 
 The exact endpoints, fields, and error semantics this worker uses are in
 [references/api.md](references/api.md). Compatible with Light-Kanban v1.0.4+;
-v1.0.5 is the recommended integration version.
+this version adds no REST API requirement. The recommended integration
+version is Light-Kanban v1.0.6, which vendors this v0.1.5 snapshot.

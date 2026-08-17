@@ -13,16 +13,17 @@ Agent host.
 | --- | --- |
 | Collection | Personal Skills Collection |
 | Package count | 8 admitted first-party Skills |
-| Current state | Released v0.1.4; `light-kanban-worker` admitted with independent `review-loop agent-skill` `PASS` |
-| Stable release | [v0.1.4](https://github.com/LightDevCoder/skills/releases/tag/v0.1.4) |
+| Current state | v0.1.5 release candidate (`READY FOR RELEASE`, tag pending); `light-kanban-worker` admitted with independent `review-loop agent-skill` `PASS` |
+| Stable release | [v0.1.4](https://github.com/LightDevCoder/skills/releases/tag/v0.1.4) (v0.1.5 is the prepared candidate) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) |
-| Evidence | [v0.1.4 release evidence](docs/evidence/releases/v0.1.4/) |
+| Evidence | [v0.1.5 release evidence](docs/evidence/releases/v0.1.5/) |
 
 Stable `v0.1.1` contained the original five packages; v0.1.2 added `recap` and
 `language-learning` for seven admitted first-party Skills; v0.1.3 kept the
 same seven and migrated the test toolchain; v0.1.4 adds `light-kanban-worker`
-for eight admitted packages.
+for eight admitted packages; v0.1.5 adds the worker's non-overlapping-run and
+first-registration identity contract.
 
 No package in this table is an unmodified upstream copy. Direct upstream
 dependencies and modified third-party variants are documented separately.
@@ -61,8 +62,8 @@ dependencies and modified third-party variants are documented separately.
 - **Purpose:** Pick up and execute one Light-Kanban task per scheduled agent run, then return it for human confirmation; resumes owned in-progress work and review feedback before claiming new tasks.
 - **Invocation:** Model-invoked; manual entry point is supported.
 - **Package:** [skills/light-kanban-worker/](skills/light-kanban-worker/)
-- **Status:** Admitted first-party through the full admission path (`review-loop agent-skill` `PASS`); released in v0.1.4.
-- **Evidence:** Contract and behavior tests under [skills/light-kanban-worker/tests/](skills/light-kanban-worker/tests/), [user guide](docs/skills/light-kanban-worker.md), and [admission evidence](docs/evidence/admissions/light-kanban-worker/README.md).
+- **Status:** Admitted first-party through the full admission path (`review-loop agent-skill` `PASS`); released in v0.1.4; v0.1.5 adds the same-agent non-overlap rule and the first-registration identity requirement (second `review-loop agent-skill` `PASS`).
+- **Evidence:** Contract and behavior tests under [skills/light-kanban-worker/tests/](skills/light-kanban-worker/tests/), [user guide](docs/skills/light-kanban-worker.md), [admission evidence](docs/evidence/admissions/light-kanban-worker/README.md), and [v0.1.5 release evidence](docs/evidence/releases/v0.1.5/README.md).
 - **Installation path:** `skills/light-kanban-worker/` in a host-recognized Skills root.
 
 ### manuscript-ops

@@ -8,12 +8,16 @@
 
 > **简介：** Personal Skills Collection — Drive your creativity
 
-> **发布：** [v0.1.4](https://github.com/LightDevCoder/skills/releases/tag/v0.1.4)
-> 已从 commit `a9cc8aa`（tag `v0.1.4`）发布。发布记录和 fresh-install 证据见
-> [docs/evidence/releases/v0.1.4/](docs/evidence/releases/v0.1.4/)。
+> **发布：** [v0.1.5](https://github.com/LightDevCoder/skills/releases/tag/v0.1.5)
+> 是已准备好的 release candidate——pre-release gate 为 `READY FOR RELEASE`，
+> `v0.1.5` tag 在 gate 通过后才发布。发布记录和 fresh-install 证据见
+> [docs/evidence/releases/v0.1.5/](docs/evidence/releases/v0.1.5/)；
+> post-release verification 记录在 main，并从 GitHub Release 链接。
 >
 > `light-kanban-worker` 经完整路径准入，独立 `review-loop agent-skill`
 > 验收为 `PASS`；见[准入证据](docs/evidence/admissions/light-kanban-worker/README.zh-CN.md)。
+> 其 v0.1.5 调度边界与身份变更带有第二次 `review-loop agent-skill`
+> `PASS`；见 [v0.1.5 release 证据](docs/evidence/releases/v0.1.5/README.zh-CN.md)。
 > 原有五个包的独立 acceptance 仍为 `BLOCKED`；准确边界见发布收据。
 
 ## Quick Start
@@ -30,7 +34,7 @@ npx skills add LightDevCoder/skills --yes --copy --agent '*'
 npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'
 ```
 
-刷新 Agent host，然后在其 Skill catalog 中确认发现结果。若 host 提供文件系统，检查已安装包的 `SKILL.md` 与 `agents/openai.yaml`；脱离 source checkout 后仍能发现，才是有意义的验证。CLI 版本、destination 和结果见 [INSTALLATION_VERIFICATION.zh-CN.md](docs/evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.zh-CN.md)。
+刷新 Agent host，然后在其 Skill catalog 中确认发现结果。若 host 提供文件系统，检查已安装包的 `SKILL.md` 与 `agents/openai.yaml`；脱离 source checkout 后仍能发现，才是有意义的验证。CLI 版本、destination 和结果见 [INSTALLATION_VERIFICATION.zh-CN.md](docs/evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.zh-CN.md)。
 
 第一次不知道下一步时，推荐显式调用 `$ask-light`：
 
@@ -55,11 +59,11 @@ $review-loop init     # 冻结已有验收标准的 baseline
 Use light-kanban-worker to process at most one Light-Kanban task.
 ```
 
-它先继续自己持有的任务和 review feedback，再领取新任务，并把结果交回人工验收。详见 [`light-kanban-worker` 指南](docs/zh-CN/skills/light-kanban-worker.md)。
+它先继续自己持有的任务和 review feedback，再领取新任务，并把结果交回人工验收。首次注册需要 Agent ID、Name 和 Avatar；之后的运行复用已保存的身份。请把 scheduler 配置为同一 agent id 同时最多只有一个 run 活跃（不同 agent id 可以并发）。详见 [`light-kanban-worker` 指南](docs/zh-CN/skills/light-kanban-worker.md)。
 
 ## 外部能力（External Capabilities）
 
-已发布的 v0.1.4 集合包含八个第一方包：v0.1.2 的七个包
+v0.1.5 release candidate 集合包含八个第一方包：v0.1.2 的七个包
 （v0.1.1 的五个包加 `recap` 与 `language-learning`；v0.1.3 保持同样的七个包
 并迁移了测试工具链），再加 `light-kanban-worker`。
 
@@ -112,7 +116,7 @@ Use light-kanban-worker to process at most one Light-Kanban task.
 - [审查策略](docs/REVIEW_POLICY.zh-CN.md)
 - [目录](CATALOG.zh-CN.md)
 - [变更记录](CHANGELOG.zh-CN.md)
-- [发布收据](docs/evidence/releases/v0.1.4/RELEASE_RECEIPT.zh-CN.md)
+- [发布收据](docs/evidence/releases/v0.1.5/RELEASE_RECEIPT.zh-CN.md)
 - [recap 准入证据](docs/evidence/admissions/recap/README.zh-CN.md)
 - [language-learning 准入证据](docs/evidence/admissions/language-learning/README.zh-CN.md)
 - [light-kanban-worker 准入证据](docs/evidence/admissions/light-kanban-worker/README.zh-CN.md)

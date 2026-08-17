@@ -1,7 +1,9 @@
 # Light-Kanban API Reference for light-kanban-worker
 
 The minimal API surface the worker actually uses. Compatible with
-Light-Kanban v1.0.4+; v1.0.5 is the recommended integration version. The
+Light-Kanban v1.0.4+; v0.1.5 adds no REST API requirement. The recommended
+integration version is Light-Kanban v1.0.6, which vendors the v0.1.5
+snapshot. The
 authoritative product contract is the Light-Kanban repository spec
 (`.scratch/task-board/spec.md` in `LightDevCoder/light-kanban`); this file
 records only the worker-facing subset.

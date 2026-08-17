@@ -2,13 +2,13 @@
 
 [English installation guide](INSTALLATION.md)
 
-公开第一方集合当前稳定版本是 [v0.1.4](https://github.com/LightDevCoder/skills/releases/tag/v0.1.4)，发布自 commit `a9cc8aa029c926fc80f6ddc0022793f79dfd85bd`。`skills/<name>/` 内的包契约仍是行为权威；本页只规定安装和验证证据。
+公开第一方集合当前稳定版本是 [v0.1.4](https://github.com/LightDevCoder/skills/releases/tag/v0.1.4)，发布自 commit `a9cc8aa029c926fc80f6ddc0022793f79dfd85bd`。v0.1.5 是已准备好的 release candidate（`READY FOR RELEASE`，tag 待发布）；其 pinned 命令在 tag 发布后针对 fresh destination 验证。`skills/<name>/` 内的包契约仍是行为权威；本页只规定安装和验证证据。
 
 标准安装命令是通用 `latest` 形式：它跟随仓库默认 revision，因此每次
-`npx skills add LightDevCoder/skills` 都安装默认分支上的当前集合。pinned
-`#v0.1.4` 形式用于可复现安装。v0.1.4 发布 `light-kanban-worker`（共八个包）；
-两种形式均已在
-[v0.1.4 安装验证](evidence/releases/v0.1.4/INSTALLATION_VERIFICATION.zh-CN.md)
+`npx skills add LightDevCoder/skills` 都安装默认分支上的当前集合。v0.1.5
+candidate 更新 `light-kanban-worker`（same-agent run 不得重叠与首次注册身份
+规则）；其命令在 tag 发布后于
+[v0.1.5 安装验证](evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.zh-CN.md)
 中针对 fresh destination 验证。
 
 ## Revision 语义
@@ -16,13 +16,13 @@
 官方 Skills CLI 支持 GitHub source 的 `#ref` fragment，并将其作为 Git revision；没有 fragment 的仓库简写使用仓库默认 revision。可查看 [官方 source parser](https://raw.githubusercontent.com/vercel-labs/skills/main/src/source-parser.ts) 和 [Git helper](https://raw.githubusercontent.com/vercel-labs/skills/main/src/git.ts)。
 
 下面的通用 `latest` 命令不带 fragment，因此跟随仓库默认 revision：它安装当前
-集合，是标准安装方式。pinned `#v0.1.4` 形式选择已发布的 tag，用于可复现
+集合，是标准安装方式。pinned `#v0.1.5` 形式在发布后选择该 tag，用于可复现
 安装与 release 验证。两者都不是对未来默认 revision 的声明；对 fresh
 destination 重新运行 discovery，以获取解析后的实际内容。
 
-## v0.1.4 release 命令
+## v0.1.5 candidate 命令
 
-当前 release 安装命令跟随仓库默认 revision，安装八包集合：
+v0.1.5 candidate 安装命令跟随仓库默认 revision，安装八包集合：
 
 ```text
 npx skills add LightDevCoder/skills --yes --copy --agent '*'
@@ -31,18 +31,32 @@ npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'
 ```
 
 第一条安装八包集合，其余从同一 revision 选择完整单包。
-各形式均已针对 fresh destinations 验证，见
-[v0.1.4 安装记录](evidence/releases/v0.1.4/INSTALLATION_VERIFICATION.zh-CN.md)。
+pinned `#v0.1.5` 形式在 tag 发布后针对 fresh destinations 验证，见
+[v0.1.5 安装记录](evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.zh-CN.md)。
 
-如需可复现的 pinned 安装，用显式 tag 运行同一命令：
+如需可复现的 pinned 安装，在 tag 存在后用显式 tag 运行同一命令：
+
+```text
+npx skills add LightDevCoder/skills#v0.1.5 --yes --copy --agent '*'
+npx skills add LightDevCoder/skills#v0.1.5 --skill light-kanban-worker --yes --copy --agent '*'
+```
+
+`latest` 形式与 `#v0.1.5` 形式在 candidate 时刻解析为相同内容；只有 pinned
+形式对未来默认 revision 的变化保持稳定。
+
+## 历史 v0.1.4 验证
+
+上一稳定版本是已发布的 v0.1.4 snapshot，commit 为
+`a9cc8aa029c926fc80f6ddc0022793f79dfd85bd`。它引入 `light-kanban-worker`，
+形成八包集合。其 pinned 形式为：
 
 ```text
 npx skills add LightDevCoder/skills#v0.1.4 --yes --copy --agent '*'
 npx skills add LightDevCoder/skills#v0.1.4 --skill light-kanban-worker --yes --copy --agent '*'
 ```
 
-`latest` 形式与 `#v0.1.4` 形式在 release 时刻解析为相同内容；只有 pinned 形式
-对未来默认 revision 的变化保持稳定。
+两种形式均以 CLI `1.5.22` 针对 fresh destinations 验证；见
+[v0.1.4 安装记录](evidence/releases/v0.1.4/INSTALLATION_VERIFICATION.zh-CN.md)。
 
 ## 历史 v0.1.3 验证
 
@@ -98,8 +112,8 @@ npx skills add LightDevCoder/skills --skill review-loop
 boundary/missing-dependency smoke 和重复安装行为会明确标为 `NOT RECORDED`。
 
 这份历史验证不改变 CLI 的 revision 语义：无 fragment source 遵循仓库默认
-revision，并不是永久 pin。上面的当前 release 命令使用通用 `latest` 形式或显式
-`#v0.1.3` tag。
+revision，并不是永久 pin。上面的 candidate 命令使用通用 `latest` 形式或显式
+`#v0.1.5` tag。
 
 ## 准备的 `recap` 与 `language-learning` 包
 

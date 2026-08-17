@@ -10,13 +10,20 @@ explicit about its invocation boundary, and small enough to inspect before use.
 
 > **About:** Personal Skills Collection — Drive your creativity
 
-> **Release:** [v0.1.4](https://github.com/LightDevCoder/skills/releases/tag/v0.1.4)
-> is published from commit `a9cc8aa` (tag `v0.1.4`). The release record and fresh-install evidence
-> live in [docs/evidence/releases/v0.1.4/](docs/evidence/releases/v0.1.4/).
+> **Release:** [v0.1.5](https://github.com/LightDevCoder/skills/releases/tag/v0.1.5)
+> is the prepared release candidate — the pre-release gate is
+> `READY FOR RELEASE` and the `v0.1.5` tag is published only after the gate
+> passes. The release record and fresh-install evidence
+> live in [docs/evidence/releases/v0.1.5/](docs/evidence/releases/v0.1.5/);
+> post-release verification is recorded on main and linked from the GitHub
+> Release.
 >
 > `light-kanban-worker` was admitted through the full path with an independent
 > `review-loop agent-skill` `PASS`; see its
 > [admission evidence](docs/evidence/admissions/light-kanban-worker/README.md).
+> Its v0.1.5 scheduling-boundary and identity change carries a second
+> `review-loop agent-skill` `PASS`; see the
+> [v0.1.5 release evidence](docs/evidence/releases/v0.1.5/README.md).
 > Independent acceptance for the original five packages remains `BLOCKED`;
 > see the release receipts for the exact boundary.
 
@@ -38,7 +45,7 @@ Refresh the Agent host, then confirm that the package is visible in its Skill
 catalog. If the host exposes a filesystem, inspect the installed package's
 `SKILL.md` and `agents/openai.yaml`; discovery without the source checkout is
 the meaningful check. The exact CLI version, destination, and result are in
-[INSTALLATION_VERIFICATION.md](docs/evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.md).
+[INSTALLATION_VERIFICATION.md](docs/evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.md).
 
 The first useful entry point when the next move is unclear is `$ask-light`:
 
@@ -69,12 +76,15 @@ Use light-kanban-worker to process at most one Light-Kanban task.
 ```
 
 It resumes owned work and review feedback before claiming new tasks, then
-returns the result for human confirmation. See the
+returns the result for human confirmation. First registration needs the
+Agent ID, Name, and Avatar; later runs reuse the saved identity. Configure
+the scheduler so only one run of the same agent id can be active at a time
+(different agent ids may run concurrently). See the
 [`light-kanban-worker` guide](docs/skills/light-kanban-worker.md).
 
 ## External capabilities
 
-The published v0.1.4 collection contains eight first-party packages: the
+The v0.1.5 release candidate collection contains eight first-party packages: the
 v0.1.2 release's seven (v0.1.1's five plus `recap` and `language-learning`;
 v0.1.3 kept the same seven and migrated the test toolchain), plus
 `light-kanban-worker`.
@@ -149,7 +159,7 @@ and is never copied into this public collection.
 - [Review policy](docs/REVIEW_POLICY.md)
 - [Catalog](CATALOG.md)
 - [Changelog](CHANGELOG.md)
-- [Release receipt](docs/evidence/releases/v0.1.4/RELEASE_RECEIPT.md)
+- [Release receipt](docs/evidence/releases/v0.1.5/RELEASE_RECEIPT.md)
 - [recap admission evidence](docs/evidence/admissions/recap/README.md)
 - [language-learning admission evidence](docs/evidence/admissions/language-learning/README.md)
 - [light-kanban-worker admission evidence](docs/evidence/admissions/light-kanban-worker/README.md)

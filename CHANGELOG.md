@@ -6,6 +6,60 @@ All notable changes are recorded here. A release entry must be tied to an
 actual version or tag and must not be created merely because a document was
 drafted.
 
+## Unreleased — v0.1.5 candidate
+
+### Changed
+
+- `light-kanban-worker` now explicitly forbids overlapping scheduled runs
+  with the same `LIGHT_KANBAN_AGENT_ID`: at most one invocation per agent id
+  may be active, a wake that fires while the previous run is still active
+  must skip, and different agent ids may still run concurrently. The atomic
+  claim boundary is documented accurately — atomic claim protects two
+  different workers claiming the same To Do task and is not a concurrency
+  lock for multiple invocations using the same agent identity; concurrency
+  control stays with the scheduler / agent runtime (`max concurrent runs =
+  1` or an equivalent skip-while-active setting), and the worker adds no
+  lock process, heartbeat, or lease service.
+- First registration now clearly requires ID + name + avatar. A local image
+  is uploaded through `POST /api/avatars` and the returned
+  `/api/avatars/...` path is used for the claim; an existing agent id reuses
+  the server's stored name/avatar, so later wakes do not repeat the avatar.
+  A new agent id without a name or avatar reports identity configuration
+  missing, claims nothing, and mutates nothing.
+- `agents/openai.yaml` default prompt updated to the first-run-capable
+  one-shot form (Agent ID / Name / Avatar) so a fresh board can register a
+  new agent identity.
+
+### Tests
+
+- Worker contract suite extended with the scheduling-boundary rules:
+  same-agent non-overlap, different-agent concurrency, atomic-claim
+  boundary, scheduler ownership of concurrency, no resident lock service,
+  first-registration identity, identity reuse, missing-identity
+  no-mutation, and the local avatar upload path.
+- New adversarial negative fixtures `overlap-allowed-variant.md` and
+  `avatar-optional-first-registration.md`; each violates exactly one rule
+  and must be rejected.
+- Behavior suite adds Scenario G (same-agent concurrent wake: the second run
+  must not start while run #1 is active, verified through a scheduler-guard
+  fixture — Light-Kanban itself provides no run lease) and Scenario H (fresh
+  identity without avatar: no claim, no mutation, clear configuration
+  failure; a legal avatar then makes registration and claim succeed).
+  Scenarios A–F remain unchanged and passing.
+- Release evidence workflow clarified: the receipt now separates the
+  pre-release gate (candidate tests, admission, catalog sync — `READY FOR
+  RELEASE`) from post-release verification (published tag identity, fresh
+  install, host discovery, release CI), so a published tag no longer shows
+  unexplained `PENDING` markers.
+
+### Evidence
+
+- `review-loop agent-skill` acceptance for the contract change:
+  [docs/evidence/releases/v0.1.5/AGENT_SKILL_REVIEW.md](docs/evidence/releases/v0.1.5/AGENT_SKILL_REVIEW.md).
+- Release evidence is recorded in
+  [docs/evidence/releases/v0.1.5/](docs/evidence/releases/v0.1.5/) once the
+  release gates pass.
+
 ## 0.1.4 — 2026-08-16
 
 ### Added

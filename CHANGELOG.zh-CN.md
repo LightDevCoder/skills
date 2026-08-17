@@ -4,6 +4,51 @@
 
 所有变更都必须记录在实际版本/tag 对应的条目中，不能因为文档已起草就提前宣称 release。
 
+## Unreleased — v0.1.5 candidate
+
+### 变更
+
+- `light-kanban-worker` 现在明确禁止同一 `LIGHT_KANBAN_AGENT_ID` 的
+  scheduled run 重叠执行：同一 agent id 任意时刻至多一个 invocation 活跃，
+  上一 run 仍活跃时触发的唤醒必须 skip；不同 agent id 仍可并发。atomic
+  claim 边界被准确记录——它保护的是两个不同 worker 同时 claim 同一张 To Do，
+  并不是同一 agent identity 多个 invocation 的并发锁；并发控制属于
+  scheduler / agent runtime（`max concurrent runs = 1` 或等价的
+  skip-while-active 设置），worker 不新增 lock process、heartbeat 或 lease
+  service。
+- 首次注册现在明确要求 ID + name + avatar：本地图片通过
+  `POST /api/avatars` 上传并使用返回的 `/api/avatars/...` 路径 claim；已存在
+  的 agent id 复用服务器保存的 name/avatar，后续唤醒无需重复 avatar。全新
+  agent id 缺 name 或 avatar 时报 identity configuration missing，不 claim、
+  不改动任何任务。
+- `agents/openai.yaml` default prompt 更新为可完成首次注册的 one-shot
+  形式（Agent ID / Name / Avatar），全新看板也能注册新身份。
+
+### 测试
+
+- worker contract 套件新增调度边界规则：same-agent 不得重叠、不同 agent
+  并发允许、atomic claim 边界、scheduler 拥有并发控制、无常驻 lock
+  service、首次注册身份、身份复用、缺身份不得改动任务、本地 avatar
+  上传路径。
+- 新增对抗性 negative fixtures `overlap-allowed-variant.md` 与
+  `avatar-optional-first-registration.md`，各自只违反一条规则且必须被拒绝。
+- behavior 套件新增 Scenario G（同 agent 并发唤醒：run #1 活跃时第二个 run
+  不得开始处理，经 scheduler-guard fixture 验证——Light-Kanban 自身不提供
+  run lease）与 Scenario H（无 avatar 的新身份：不 claim、不改动、明确配置
+  失败；提供合法 avatar 后注册与 claim 成功）。Scenarios A–F 保持不变并继续
+  通过。
+- release evidence 工作流澄清：receipt 现在区分 pre-release gate（candidate
+  测试、准入、catalog 同步——`READY FOR RELEASE`）与 post-release
+  verification（已发布 tag 身份、fresh install、host discovery、release
+  CI），已发布 tag 中不再出现令人困惑的 `PENDING` 标记。
+
+### 证据
+
+- 契约变更的 `review-loop agent-skill` 验收：
+  [docs/evidence/releases/v0.1.5/AGENT_SKILL_REVIEW.zh-CN.md](docs/evidence/releases/v0.1.5/AGENT_SKILL_REVIEW.zh-CN.md)。
+- Release 证据在 release gate 通过后记录于
+  [docs/evidence/releases/v0.1.5/](docs/evidence/releases/v0.1.5/)。
+
 ## 0.1.4 — 2026-08-16
 
 ### 新增
