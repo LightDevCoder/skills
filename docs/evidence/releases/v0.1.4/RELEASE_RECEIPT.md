@@ -28,7 +28,7 @@ complete.
 - Admission: `review-loop agent-skill` Profile, Charter revision 1, full
   independence; three confirmed findings repaired, one rejected; fresh
   Evaluator `PASS` criterion-by-criterion. Evidence under
-  [docs/evidence/admissions/light-kanban-worker/](../admissions/light-kanban-worker/README.md).
+  [docs/evidence/admissions/light-kanban-worker/](../../admissions/light-kanban-worker/README.md).
 - Behavioral evidence: scenarios A–F against a real Light-Kanban server
   (fresh task, request changes rework, two-worker atomic claim, workspace
   missing block, empty queue no-mutation, offline no-mutation).

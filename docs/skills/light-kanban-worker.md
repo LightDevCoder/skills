@@ -87,7 +87,7 @@ npx skills add LightDevCoder/skills#v0.1.4 --skill light-kanban-worker --yes --c
 
 Both the pinned `#v0.1.4` and generic `latest` forms are verified against
 fresh destinations (Skills CLI `1.5.22`); see the
-[v0.1.4 installation record](../../evidence/releases/v0.1.4/INSTALLATION_VERIFICATION.md).
+[v0.1.4 installation record](../evidence/releases/v0.1.4/INSTALLATION_VERIFICATION.md).
 Refresh the agent host and confirm the Skill is discovered without relying
 on the source checkout. It is compatible with Light-Kanban v1.0.4+; v1.0.5
 is the recommended integration version.

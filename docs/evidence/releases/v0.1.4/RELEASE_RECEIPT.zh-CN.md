@@ -24,7 +24,7 @@
   collection CI。
 - 准入：`review-loop agent-skill` Profile，Charter revision 1，完整独立性；
   三项确认 findings 已修复，一项驳回；全新 Evaluator 逐条 `PASS`。证据见
-  [docs/evidence/admissions/light-kanban-worker/](../admissions/light-kanban-worker/README.zh-CN.md)。
+  [docs/evidence/admissions/light-kanban-worker/](../../admissions/light-kanban-worker/README.zh-CN.md)。
 - 行为证据：针对真实 Light-Kanban 服务器的场景 A–F（新任务、退回返工、
   双 worker 原子 claim、workspace 缺失 block、空队列无变更、离线无变更）。
 - 修复 ask-light scanner 的 `Test-PathUnder` 路径比较（硬编码 Windows
