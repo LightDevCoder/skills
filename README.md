@@ -4,8 +4,8 @@
 
 # Personal Skills Collection
 
-`LightDevCoder/skills` is the public, first-party home for eight installable
-Agent Skills on the current branch. Each package is independently discoverable,
+`LightDevCoder/skills` is the public, first-party home for nine installable
+Agent Skills on the current branch (the published v0.1.5 release remains eight). Each package is independently discoverable,
 explicit about its invocation boundary, and small enough to inspect before use.
 
 > **About:** Personal Skills Collection — Drive your creativity
@@ -85,7 +85,9 @@ the scheduler so only one run of the same agent id can be active at a time
 The published v0.1.5 collection contains eight first-party packages: the
 v0.1.2 release's seven (v0.1.1's five plus `recap` and `language-learning`;
 v0.1.3 kept the same seven and migrated the test toolchain), plus
-`light-kanban-worker`.
+`light-kanban-worker`. The current default branch additionally admits
+unreleased `kb-init` as a ninth first-party Skill; no new release has been
+cut for it yet.
 
 Optional workflow capabilities are external or third-party dependencies and are
 not included by default:
@@ -114,6 +116,7 @@ check their availability before selecting a workflow that names them.
 | [review-loop](skills/review-loop/SKILL.md) | Run bounded evidence, repair, and final-acceptance loops. | Model-invoked; manual entry point is supported. | skills/review-loop/ |
 | [project-init](skills/project-init/SKILL.md) | Initialize a confirmed software, manuscript, research, knowledge, data, or Skill-development project preset. | User-invoked only. | skills/project-init/ |
 | [ask-light](skills/ask-light/SKILL.md) | Inspect the active host and recommend one appropriate next Skill or bounded recipe without executing it. | User-invoked only. | skills/ask-light/ |
+| [kb-init](skills/kb-init/SKILL.md) | Design and initialize a maintainable knowledge base through a knowledge-base-specific interview and an approval-gated implementation SPEC. | User-invoked only. | skills/kb-init/ |
 | [language-learning](skills/language-learning/SKILL.md) | Tutor for any target language through six study modes: lessons, flashcards, conversation, grammar, quizzes, and immersion. | User-invoked only. | skills/language-learning/ |
 | [recap](skills/recap/SKILL.md) | Summarize the current Agent session in exactly one line without changing history or continuing the task. | User-invoked only. | skills/recap/ |
 | [learn-anything](skills/learn-anything/SKILL.md) | Distill sufficiently evidenced source material into reusable Agent Skill methods. | User-invoked only. | skills/learn-anything/ |
@@ -161,4 +164,5 @@ and is never copied into this public collection.
 - [recap admission evidence](docs/evidence/admissions/recap/README.md)
 - [language-learning admission evidence](docs/evidence/admissions/language-learning/README.md)
 - [light-kanban-worker admission evidence](docs/evidence/admissions/light-kanban-worker/README.md)
+- [kb-init admission evidence](docs/evidence/admissions/kb-init/README.md)
 - [Collection discovery test](tests/test_collection_discovery.py)

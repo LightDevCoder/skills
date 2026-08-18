@@ -4,6 +4,16 @@
 
 所有变更都必须记录在实际版本/tag 对应的条目中，不能因为文档已起草就提前宣称 release。
 
+## Unreleased
+
+### 新增
+
+- 第一方 `kb-init` Skill：通过知识库专属访谈设计可维护知识库，并且只有在用户明确结束访谈、批准实施方案 SPEC 并请求继续后才实施。它仅 user-invoked，可调用 model-invoked `research` 能力调查外部事实，绝不自行调用另一个 user-invoked Skill。由于访谈和实施可能使用工具、读写文件并创建知识库状态，因此走完整准入路径（`review-loop agent-skill` `PASS`），不走纯提示型快速通道。
+- `kb-init` contract 测试与双语使用指南。
+- 当前九包分支的文档与 discovery 同步：README、目录、安装指南、维护基线和 discovery 测试现在把默认分支视为包含九个已准入第一方 Skill，而已发布的 v0.1.5 tag 仍是八包稳定版本。
+
+`kb-init` 尚未创建版本、tag、release 收据或已验证的 release 安装命令；它有意保持未发布，将在未来积累更多 Skill 后随下一个 tag 发布。
+
 ## 0.1.5 — 2026-08-17
 
 ### 变更

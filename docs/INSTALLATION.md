@@ -11,9 +11,11 @@ authority and does not replace host-specific discovery rules.
 The standard install command is the generic `latest` form: it follows the
 repository's default revision, so every `npx skills add
 LightDevCoder/skills` install gets the current collection on the default
-branch. v0.1.5 updates `light-kanban-worker` (non-overlapping
-same-agent runs and the first-registration identity rule); its commands are
-verified against fresh destinations in the
+branch. As of this branch the default revision contains nine admitted Skills;
+`kb-init` is unreleased and will be included by the generic `latest` form only
+after it exists on the default revision. The published v0.1.5 tag remains the
+current stable release and contains eight Skills. The v0.1.5 commands below
+were verified against fresh destinations at that tag in the
 [v0.1.5 installation verification](evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.md).
 
 ## Revision semantics
@@ -31,28 +33,30 @@ and is retained for reproducible installs and release verification. Neither
 form is a claim about a future default revision; re-run discovery against the
 fresh destination for the resolved content.
 
-## v0.1.5 release commands
-
-The current release install commands follow the repository's default revision
-and install the eight-package collection:
+For the generic `latest` forms, which follow the current default revision,
+use:
 
 ```text
 npx skills add LightDevCoder/skills --yes --copy --agent '*'
-npx skills add LightDevCoder/skills --skill light-kanban-worker --yes --copy --agent '*'
 npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'
 ```
 
-The first installs the eight-package collection and the others select one
-complete package from the same revision. The forms are
-verified against fresh destinations in the
-[v0.1.5 installation record](evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.md).
 
-For a reproducible pinned install, use the same command with the explicit tag:
+## v0.1.5 release commands
+
+The v0.1.5 release commands were verified against the published v0.1.5 tag and
+installed the eight-package collection at that revision:
 
 ```text
 npx skills add LightDevCoder/skills#v0.1.5 --yes --copy --agent '*'
 npx skills add LightDevCoder/skills#v0.1.5 --skill light-kanban-worker --yes --copy --agent '*'
+npx skills add LightDevCoder/skills#v0.1.5 --skill review-loop --yes --copy --agent '*'
 ```
+
+The first installs the eight-package collection and the others select one
+complete package from the same verified revision. The forms are
+verified against fresh destinations in the
+[v0.1.5 installation record](evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.md).
 
 The `latest` form and the `#v0.1.5` form resolve to the same content at
 release time; only the pinned form is stable against future

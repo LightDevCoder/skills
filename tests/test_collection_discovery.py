@@ -27,6 +27,7 @@ from test_light_kanban_worker_behavior import run_checks as worker_behavior_chec
 
 EXPECTED = [
     "ask-light",
+    "kb-init",
     "language-learning",
     "learn-anything",
     "light-kanban-worker",
@@ -41,7 +42,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c = Checks()
     skill_root = root / "skills"
     actual = sorted(d.name for d in skill_root.iterdir() if d.is_dir() and d.name != "docs")
-    c.check(actual == EXPECTED, "skills/ must contain exactly the eight admitted package directories.")
+    c.check(actual == EXPECTED, "skills/ must contain exactly the nine admitted package directories.")
 
     readme = read(root, "README.md")
     catalog = read(root, "CATALOG.md")
@@ -83,7 +84,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     )
     c.check(bool(re.search(r"(?is)v0\.1\.5.{0,160}is published from", readme)), "README must present v0.1.5 as the published release.")
     c.check(bool(re.search(r"(?is)v0\.1\.2.{0,200}seven", readme)), "README must retain the v0.1.2 seven-package history.")
-    c.check("8 admitted first-party Skills" in catalog, "Catalog must present the eight-package collection.")
+    c.check("9 admitted first-party Skills" in catalog, "Catalog must present the nine-package collection.")
     c.check("Released v0.1.5" in catalog, "Catalog must present v0.1.5 as released.")
     c.check(bool(re.search(r"(?is)v0\.1\.1[^\r\n]{0,80}five", readme)), "README must retain the v0.1.1 five-package history.")
     c.check(bool(re.search(r"light-kanban-worker.{0,200}scheduled", readme, re.IGNORECASE | re.DOTALL)), "README must present light-kanban-worker as the scheduled Light-Kanban worker Skill.")

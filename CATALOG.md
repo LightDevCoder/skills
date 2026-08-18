@@ -2,7 +2,7 @@
 
 [中文目录](CATALOG.zh-CN.md)
 
-This catalog is synchronized from the eight admitted package directories under
+This catalog is synchronized from the nine admitted package directories under
 `skills/`. It is an inventory, not a
 static workflow router and not a record of what is installed on a particular
 Agent host.
@@ -12,8 +12,8 @@ Agent host.
 | Field | Value |
 | --- | --- |
 | Collection | Personal Skills Collection |
-| Package count | 8 admitted first-party Skills |
-| Current state | Released v0.1.5; `light-kanban-worker` admitted with independent `review-loop agent-skill` `PASS` |
+| Package count | 9 admitted first-party Skills |
+| Current state | Released v0.1.5; current branch adds unreleased `kb-init` as the ninth admitted first-party Skill |
 | Stable release | [v0.1.5](https://github.com/LightDevCoder/skills/releases/tag/v0.1.5) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) |
@@ -23,7 +23,9 @@ Stable `v0.1.1` contained the original five packages; v0.1.2 added `recap` and
 `language-learning` for seven admitted first-party Skills; v0.1.3 kept the
 same seven and migrated the test toolchain; v0.1.4 adds `light-kanban-worker`
 for eight admitted packages; v0.1.5 adds the worker's non-overlapping-run and
-first-registration identity contract.
+first-registration identity contract. The current default branch additionally
+admits unreleased `kb-init` as a ninth first-party Skill; no new stable tag
+has been cut for it yet.
 
 No package in this table is an unmodified upstream copy. Direct upstream
 dependencies and modified third-party variants are documented separately.
@@ -38,6 +40,15 @@ dependencies and modified third-party variants are documented separately.
 - **Status:** Admitted first-party; supports explicit `next` and `workflow` modes.
 - **Evidence:** Contract, scanner, and behavior tests under [skills/ask-light/tests/](skills/ask-light/tests/); user guide at [docs/skills/ask-light.md](docs/skills/ask-light.md).
 - **Installation path:** `skills/ask-light/` in a host-recognized Skills root.
+
+### kb-init
+
+- **Purpose:** Design and initialize a maintainable knowledge base through a knowledge-base-specific interview, then implement it only after the user ends the interview and approves the implementation SPEC.
+- **Invocation:** User-invoked only; never triggers on its own from a generic mention of knowledge bases.
+- **Package:** [skills/kb-init/](skills/kb-init/)
+- **Status:** Admitted first-party via the full admission path (`review-loop agent-skill` `PASS`); unreleased on the current branch.
+- **Evidence:** Contract tests under [skills/kb-init/tests/](skills/kb-init/tests/), [user guide](docs/skills/kb-init.md), and [admission evidence](docs/evidence/admissions/kb-init/README.md).
+- **Installation path:** `skills/kb-init/` in a host-recognized Skills root.
 
 ### language-learning
 

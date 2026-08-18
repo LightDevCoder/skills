@@ -6,6 +6,29 @@ All notable changes are recorded here. A release entry must be tied to an
 actual version or tag and must not be created merely because a document was
 drafted.
 
+## Unreleased
+
+### Added
+
+- First-party `kb-init` Skill: a knowledge-base-specific interview that designs
+  a maintainable knowledge base and initializes it only after the user
+  explicitly ends the interview, approves the implementation SPEC, and asks to
+  proceed. It is user-invoked only, may call the model-invoked `research`
+  capability for external facts, and never invokes another user-invoked Skill.
+  Because the interview and implementation can use tools, read or write files,
+  and create knowledge-base state, it follows the full admission path
+  (`review-loop agent-skill` `PASS`) rather than the prompt-only fast track.
+- `kb-init` contract tests and bilingual user guides.
+- Documentation and discovery synchronization for the nine-package current
+  branch: README, catalog, installation guide, maintenance baseline, and
+  discovery tests now treat the default branch as containing nine admitted
+  first-party Skills while the published v0.1.5 tag remains the eight-package
+  stable release.
+
+No version, tag, release receipt, or verified release installation command has
+been created for `kb-init`; it is intentionally unreleased and will ship with a
+future tag once more Skills accumulate.
+
 ## 0.1.5 — 2026-08-17
 
 ### Changed

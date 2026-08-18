@@ -24,6 +24,7 @@ jobs:
           python -m compileall -q skills/learn-anything skills/manuscript-ops skills/light-kanban-worker/tests tests/test_collection_contract.py
           for f in \
             skills/ask-light/tests/test_ask_light_contract.py \
+            skills/kb-init/tests/test_kb_init_contract.py \
             skills/project-init/tests/test_project_init_contract.py \
             skills/project-init/tests/test_project_init_behavior.py \
             skills/recap/tests/test_recap_contract.py \

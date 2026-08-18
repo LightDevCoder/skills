@@ -22,14 +22,18 @@ Keep each fact in one authoritative location and link to it elsewhere:
 ## Current synchronization baseline
 
 The admitted collection on this branch contains exactly review-loop,
-project-init, ask-light, learn-anything, manuscript-ops, recap,
+project-init, ask-light, kb-init, learn-anything, manuscript-ops, recap,
 language-learning, and light-kanban-worker. recap and language-learning were
 admitted through the prompt-only fast track and released in v0.1.2.
 light-kanban-worker is a model-invoked package with network, filesystem, and
 board-state side effects, so it follows the full admission path
 (`review-loop agent-skill`) and is released in v0.1.4; its v0.1.5
 scheduling-boundary and first-registration identity change carries a second
-`review-loop agent-skill` `PASS`. Stable v0.1.1
+`review-loop agent-skill` `PASS`. kb-init is a user-invoked package whose
+interview can use tools and the model-invoked `research` capability and whose
+implementation can create files and state, so it follows the full admission
+path (`review-loop agent-skill`) and is admitted on this branch as an
+unreleased ninth Skill. Stable v0.1.1
 contained the original five admitted packages; v0.1.3 kept the v0.1.2
 package set and migrated the test toolchain. The check at
 [tests/test_collection_discovery.py](../tests/test_collection_discovery.py)

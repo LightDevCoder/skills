@@ -5,11 +5,12 @@
 公开第一方集合当前稳定版本是 [v0.1.5](https://github.com/LightDevCoder/skills/releases/tag/v0.1.5)，发布自 commit `a56aa9d98de0b941ee2282144bc7e756ef5e48bd`。`skills/<name>/` 内的包契约仍是行为权威；本页只规定安装和验证证据。
 
 标准安装命令是通用 `latest` 形式：它跟随仓库默认 revision，因此每次
-`npx skills add LightDevCoder/skills` 都安装默认分支上的当前集合。v0.1.5
-更新 `light-kanban-worker`（same-agent run 不得重叠与首次注册身份规则）；
-其命令已在
-[v0.1.5 安装验证](evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.zh-CN.md)
-中针对 fresh destination 验证。
+`npx skills add LightDevCoder/skills` 都安装默认分支上的当前集合。当前分支的
+默认 revision 包含九个已准入 Skill；`kb-init` 尚未发布，但只要进入默认
+revision，就会包含在通用 `latest` 安装中。已发布的 v0.1.5 tag 仍是当前稳定
+版本，包含八个 Skill；下面的 v0.1.5 命令是针对该 tag 的 fresh destination
+验证结果，见
+[v0.1.5 安装验证](evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.zh-CN.md)。
 
 ## Revision 语义
 
@@ -20,26 +21,27 @@
 安装与 release 验证。两者都不是对未来默认 revision 的声明；对 fresh
 destination 重新运行 discovery，以获取解析后的实际内容。
 
-## v0.1.5 release 命令
-
-当前 release 安装命令跟随仓库默认 revision，安装八包集合：
+通用 `latest` 形式（跟随当前默认 revision）为：
 
 ```text
 npx skills add LightDevCoder/skills --yes --copy --agent '*'
-npx skills add LightDevCoder/skills --skill light-kanban-worker --yes --copy --agent '*'
 npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'
 ```
 
-第一条安装八包集合，其余从同一 revision 选择完整单包。
-各形式均已针对 fresh destinations 验证，见
-[v0.1.5 安装记录](evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.zh-CN.md)。
 
-如需可复现的 pinned 安装，用显式 tag 运行同一命令：
+## v0.1.5 release 命令
+
+v0.1.5 release 命令针对已发布的 v0.1.5 tag 验证，在该 revision 安装八包集合：
 
 ```text
 npx skills add LightDevCoder/skills#v0.1.5 --yes --copy --agent '*'
 npx skills add LightDevCoder/skills#v0.1.5 --skill light-kanban-worker --yes --copy --agent '*'
+npx skills add LightDevCoder/skills#v0.1.5 --skill review-loop --yes --copy --agent '*'
 ```
+
+第一条安装八包集合，其余从同一已验证 revision 选择完整单包。
+各形式均已针对 fresh destinations 验证，见
+[v0.1.5 安装记录](evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.zh-CN.md)。
 
 `latest` 形式与 `#v0.1.5` 形式在 release 时刻解析为相同内容；只有 pinned
 形式对未来默认 revision 的变化保持稳定。
@@ -112,7 +114,7 @@ npx skills add LightDevCoder/skills --skill review-loop
 boundary/missing-dependency smoke 和重复安装行为会明确标为 `NOT RECORDED`。
 
 这份历史验证不改变 CLI 的 revision 语义：无 fragment source 遵循仓库默认
-revision，并不是永久 pin。上面的 candidate 命令使用通用 `latest` 形式或显式
+revision，并不是永久 pin。上面的历史命令使用通用 `latest` 形式或显式
 `#v0.1.5` tag。
 
 ## 准备的 `recap` 与 `language-learning` 包

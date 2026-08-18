@@ -1,0 +1,105 @@
+{
+  "skill": "kb-init",
+  "purpose": "Regression tests for interview depth, user-controlled phase transitions, research detours, base abstraction, and non-GUI implementation.",
+  "cases": [
+    {
+      "id": "empty-invocation",
+      "prompt": "/kb-init",
+      "expect": [
+        "Starts a knowledge-base interview automatically",
+        "Does not ask for a formal brief or technology stack",
+        "Does not generate a SPEC"
+      ]
+    },
+    {
+      "id": "user-question-does-not-settle-decision",
+      "prompt": "During the base discussion the user asks: 为什么你推荐这种方式？它和普通 Markdown 到底差在哪？",
+      "expect": [
+        "Answers the user's question first",
+        "Explains unfamiliar terminology in plain language",
+        "Keeps the base decision open",
+        "Returns to the same decision after answering",
+        "Does not generate a SPEC"
+      ]
+    },
+    {
+      "id": "all-covered-but-user-did-not-end",
+      "prompt": "Assume all eight interview areas are settled, but the user has not said the interview is finished.",
+      "expect": [
+        "Does not generate a SPEC automatically",
+        "Tells the user the necessary areas are covered",
+        "Offers to continue discussion, research another direction, or produce a SPEC if the user chooses"
+      ]
+    },
+    {
+      "id": "research-detour",
+      "prompt": "The user says they are unsure whether the proposed base supports the attachment and search behavior they need and asks to research it first.",
+      "expect": [
+        "Marks the base decision as unresolved/researching",
+        "Invokes research if available",
+        "States the narrow research question",
+        "Returns to the paused base decision after research",
+        "Lets the user decide",
+        "Does not jump to SPEC"
+      ]
+    },
+    {
+      "id": "unknown-base",
+      "prompt": "The user prefers a software base the Agent has never used before.",
+      "expect": [
+        "Does not rely on a built-in platform recipe",
+        "Uses Base Discovery",
+        "Researches current official programmatic access if needed",
+        "Builds an operating profile for storage, read/write, auth, attachments, search, export, and current environment access"
+      ]
+    },
+    {
+      "id": "gui-only-environment",
+      "prompt": "Base Discovery shows that the current Agent lacks the required connector and there is no usable programmatic access in the environment.",
+      "expect": [
+        "Does not make computer use a mandatory hidden dependency",
+        "Completes base-independent work",
+        "Prepares import/configuration/setup material",
+        "Identifies exactly what remains manual",
+        "Provides a resumable handoff rather than calling the whole task a failure"
+      ]
+    },
+    {
+      "id": "multimedia-changes-base",
+      "prompt": "Mid-interview the user clarifies that every knowledge item may include large images, animated media, and video attachments.",
+      "expect": [
+        "Reopens any storage/base decision affected by the new requirement",
+        "Discusses attachment handling as a first-class requirement",
+        "Does not force the prior base choice"
+      ]
+    },
+    {
+      "id": "retrieval-invalidates-structure",
+      "prompt": "The user later says they need reliable cross-month aggregation and field-level comparisons, but the current design was optimized only for browsing documents.",
+      "expect": [
+        "Reopens structure and possibly base decisions",
+        "Does not silently assume an analysis mechanism",
+        "Explores or researches a structure that supports the real query"
+      ]
+    },
+    {
+      "id": "explicit-end-triggers-spec-only",
+      "prompt": "The user says: 好，问答结束，按现在的内容出 SPEC。",
+      "expect": [
+        "Stops interviewing",
+        "Runs Base Discovery if the base operating path is not yet verified",
+        "Produces a knowledge-base-specific SPEC",
+        "Does not start implementation"
+      ]
+    },
+    {
+      "id": "question-after-spec-is-not-approval",
+      "prompt": "After the SPEC, the user asks: 这里为什么需要这个维护规则？",
+      "expect": [
+        "Answers the question",
+        "Remains in SPEC phase",
+        "Does not implement until explicit approval"
+      ]
+    }
+  ]
+}

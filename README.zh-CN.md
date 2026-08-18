@@ -4,7 +4,7 @@
 
 # Personal Skills Collection
 
-`LightDevCoder/skills` 是公开的第一方 Agent Skills 集合；当前分支包含八个可以独立安装、独立发现、明确声明调用边界的 Skill。包内 `SKILL.md` 仍是行为权威；本 README 与用户指南负责说明使用方式。
+`LightDevCoder/skills` 是公开的第一方 Agent Skills 集合；当前分支包含九个可以独立安装、独立发现、明确声明调用边界的 Skill（已发布的 v0.1.5 仍为八个）。包内 `SKILL.md` 仍是行为权威；本 README 与用户指南负责说明使用方式。
 
 > **简介：** Personal Skills Collection — Drive your creativity
 
@@ -64,7 +64,8 @@ Use light-kanban-worker to process at most one Light-Kanban task.
 
 已发布的 v0.1.5 集合包含八个第一方包：v0.1.2 的七个包
 （v0.1.1 的五个包加 `recap` 与 `language-learning`；v0.1.3 保持同样的七个包
-并迁移了测试工具链），再加 `light-kanban-worker`。
+并迁移了测试工具链），再加 `light-kanban-worker`。当前默认分支额外准入
+未发布的 `kb-init`，成为第九个第一方 Skill；尚未为其创建新 release。
 
 以下是可选的 workflow 能力，来自外部或第三方来源，不属于默认集合：
 
@@ -86,6 +87,7 @@ Use light-kanban-worker to process at most one Light-Kanban task.
 | [review-loop](skills/review-loop/SKILL.md) | 执行有边界的证据、修复和最终验收循环。 | Model-invoked；支持手动入口。 | skills/review-loop/ |
 | [project-init](skills/project-init/SKILL.md) | 从最小 preset 初始化已确认的软件、文稿、研究、知识、数据或 Skill-development 项目。 | 仅 user-invoked。 | skills/project-init/ |
 | [ask-light](skills/ask-light/SKILL.md) | 检查 host 并推荐一个下一 Skill 或 bounded recipe，不执行建议。 | 仅 user-invoked。 | skills/ask-light/ |
+| [kb-init](skills/kb-init/SKILL.md) | 通过知识库专属访谈和审批门控的实施方案 SPEC，设计并初始化可维护知识库。 | 仅 user-invoked。 | skills/kb-init/ |
 | [language-learning](skills/language-learning/SKILL.md) | 通过六种学习模式辅导任意目标语言：课程、卡片、对话、语法、测验与沉浸。 | 仅 user-invoked。 | skills/language-learning/ |
 | [recap](skills/recap/SKILL.md) | 用严格一行总结当前 Agent session，不改变历史也不继续任务。 | 仅 user-invoked。 | skills/recap/ |
 | [learn-anything](skills/learn-anything/SKILL.md) | 从有足够证据的资料中提炼可复用 Agent Skill 方法。 | 仅 user-invoked。 | skills/learn-anything/ |
@@ -119,3 +121,4 @@ Use light-kanban-worker to process at most one Light-Kanban task.
 - [recap 准入证据](docs/evidence/admissions/recap/README.zh-CN.md)
 - [language-learning 准入证据](docs/evidence/admissions/language-learning/README.zh-CN.md)
 - [light-kanban-worker 准入证据](docs/evidence/admissions/light-kanban-worker/README.zh-CN.md)
+- [kb-init 准入证据](docs/evidence/admissions/kb-init/README.zh-CN.md)

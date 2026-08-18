@@ -4,7 +4,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED = {"ask-light", "language-learning", "learn-anything", "light-kanban-worker", "manuscript-ops", "project-init", "recap", "review-loop"}
+EXPECTED = {"ask-light", "kb-init", "language-learning", "learn-anything", "light-kanban-worker", "manuscript-ops", "project-init", "recap", "review-loop"}
 
 
 class CollectionContractTests(unittest.TestCase):
@@ -58,7 +58,7 @@ class CollectionContractTests(unittest.TestCase):
         self.check("LightDevCoder/skills" in readme and "Drive your creativity" in readme, "homepage about copy")
         self.check(re.search(r"v0\.1\.5.{0,160}is published from", readme, re.I | re.S) is not None, "README published v0.1.5 release")
         self.check(re.search(r"v0\.1\.2.{0,200}seven", readme, re.I | re.S) is not None, "README v0.1.2 seven-package history")
-        self.check("8 admitted first-party Skills" in catalog, "catalog eight-package boundary")
+        self.check("9 admitted first-party Skills" in catalog, "catalog nine-package boundary")
         self.check("Released v0.1.5" in catalog, "catalog released v0.1.5 framing")
         for label, text in (("admission", admission), ("admission zh-CN", admission_zh),
                             ("review policy", review_policy), ("review policy zh-CN", review_policy_zh)):
