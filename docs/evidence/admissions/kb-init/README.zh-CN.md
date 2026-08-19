@@ -7,8 +7,8 @@
 - 包：`skills/kb-init/`
 - 调用类型：仅 user-invoked
 - Profile：`review-loop` `agent-skill`
-- 稳定版本边界：v0.1.6 包含 `kb-init` v1.0.0，作为第九个包
-- 准入状态：完整准入路径 `PASS`；以 v1.0.0 包随 v0.1.6 发布
+- 稳定版本边界：v0.1.6 包含 `kb-init`，作为第九个包
+- 准入状态：完整准入路径 `PASS`；随 v0.1.6 发布
 
 ## 证据摘要
 

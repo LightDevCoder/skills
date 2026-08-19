@@ -1,9 +1,9 @@
 ---
-name: light-kanban-worker
+name: kanban-worker
 description: "Pick up and execute one task from a Light-Kanban board, then return it for human confirmation. Use when a scheduled agent wakes and must process queued Light-Kanban work — resume owned in-progress tasks and Request Changes feedback first, claim new To Do work with a stable agent identity, validate the workspace, execute, then complete or block with a meaningful reason."
 ---
 
-# Light Kanban Worker
+# Kanban Worker
 
 Process **at most one task** from a Light-Kanban board and end the run. This
 Skill is the protocol an agent follows after an external scheduler (cron,
@@ -76,7 +76,7 @@ background process of its own.
 If the scheduler cannot guarantee non-overlap: **do not schedule overlapping
 runs with the same agentId.** Lower the run frequency, use an external
 scheduler lock, or switch to a scheduler that supports single concurrency.
-Never build a replacement scheduler into light-kanban-worker.
+Never build a replacement scheduler into kanban-worker.
 
 ## Different agents may run concurrently
 

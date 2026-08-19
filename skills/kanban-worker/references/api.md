@@ -1,4 +1,4 @@
-# Light-Kanban API Reference for light-kanban-worker
+# Light-Kanban API Reference for kanban-worker
 
 The minimal API surface the worker actually uses. Compatible with
 Light-Kanban v1.0.4+; v0.1.5 adds no REST API requirement. The recommended

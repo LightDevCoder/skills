@@ -1,9 +1,9 @@
 ---
-name: light-kanban-worker
+name: kanban-worker
 description: Pick up and execute work from a Light-Kanban board.
 ---
 
-# Light Kanban Worker (negative fixture: auto-archive)
+# Kanban Worker (negative fixture: auto-archive)
 
 A complete worker protocol that violates exactly one rule: the worker takes
 over the human review boundary and archives / accepts / deletes / recycles /

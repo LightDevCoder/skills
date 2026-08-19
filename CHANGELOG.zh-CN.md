@@ -8,17 +8,19 @@
 
 ### 新增
 
-- 第一方 `kb-init` Skill v1.0.0：正式版知识库初始化包替换之前未发布的草稿。
+- 第一方 `kb-init` Skill：正式版知识库初始化包替换之前未发布的草稿。
   新增扩展核心原则（决策 provenance、开放决策 surfacing、depth before
   settlement）、readiness 检查、人类导航设计、research contract、
   connection setup/validation、backup/recovery 语义，以及 38 个回归 eval
   用例。按 owner 决定，它仍是仅 user-invoked。
-- 针对 v1.0.0 更新 contract 测试与双语使用指南。
+- 针对 `kb-init` 更新 contract 测试与双语使用指南。
 - v0.1.6 发布九包集合：v0.1.1 的五个包、`recap` 与 `language-learning`
-  （v0.1.2）、`light-kanban-worker`（v0.1.4），以及 `kb-init` v1.0.0。
+  （v0.1.2）、`kanban-worker`（v0.1.6 中由 `light-kanban-worker` 改名；
+  首次发布于 v0.1.4），以及 `kb-init`。
 
 ### 变更
 
+- `light-kanban-worker` 改名为 `kanban-worker`。包目录、`SKILL.md` name/frontmatter、`agents/openai.yaml`、测试、指南、目录、README 与安装面统一使用 `kanban-worker`。v0.1.4/v0.1.5 历史记录保留旧名并附迁移说明。
 - `kb-init` 保持 explicit-only：`SKILL.md` 中 `disable-model-invocation: true`，
   `agents/openai.yaml` 中 `allow_implicit_invocation: false`。
 - README、目录、安装指南、维护基线、discovery 测试与双语指南从 v0.1.5

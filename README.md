@@ -16,7 +16,7 @@ explicit about its invocation boundary, and small enough to inspect before use.
 > post-release verification is recorded on main and linked from the GitHub
 > Release.
 >
-> `kb-init` v1.0.0 was admitted through the full admission path with an
+> `kb-init` was admitted through the full admission path with an
 > independent `review-loop agent-skill` `PASS`; see its
 > [admission evidence](docs/evidence/admissions/kb-init/README.md).
 > v0.1.6 publishes the nine-package collection. Independent acceptance for the
@@ -64,11 +64,12 @@ result. Read [Quick Start](examples/quick-start/README.md), the [Skill user
 guides](docs/skills/), and [workflow recipes](docs/workflows/) for inputs,
 outputs, handoffs, and stopping boundaries.
 
-For scheduled Light-Kanban work, `light-kanban-worker` turns each agent
-wake-up into one handled board task:
+For scheduled Light-Kanban work, `kanban-worker` turns each agent
+wake-up into one handled board task (renamed from `light-kanban-worker` in
+v0.1.6):
 
 ```text
-Use light-kanban-worker to process at most one Light-Kanban task.
+Use kanban-worker to process at most one Light-Kanban task.
 ```
 
 It resumes owned work and review feedback before claiming new tasks, then
@@ -76,14 +77,14 @@ returns the result for human confirmation. First registration needs the
 Agent ID, Name, and Avatar; later runs reuse the saved identity. Configure
 the scheduler so only one run of the same agent id can be active at a time
 (different agent ids may run concurrently). See the
-[`light-kanban-worker` guide](docs/skills/light-kanban-worker.md).
+[`kanban-worker` guide](docs/skills/kanban-worker.md).
 
 ## External capabilities
 
 The published v0.1.6 collection contains nine first-party packages: the
 v0.1.2 release's seven (v0.1.1's five plus `recap` and `language-learning`;
 v0.1.3 kept the same seven and migrated the test toolchain), plus
-`light-kanban-worker`, plus `kb-init` v1.0.0.
+`kanban-worker` (renamed from `light-kanban-worker`), plus `kb-init`.
 
 Optional workflow capabilities are external or third-party dependencies and are
 not included by default:
@@ -117,7 +118,7 @@ check their availability before selecting a workflow that names them.
 | [recap](skills/recap/SKILL.md) | Summarize the current Agent session in exactly one line without changing history or continuing the task. | User-invoked only. | skills/recap/ |
 | [learn-anything](skills/learn-anything/SKILL.md) | Distill sufficiently evidenced source material into reusable Agent Skill methods. | User-invoked only. | skills/learn-anything/ |
 | [manuscript-ops](skills/manuscript-ops/SKILL.md) | Govern reproducible manuscript engineering across formats, batches, reviews, and handoffs. | Model-invoked; manual entry point is supported. | skills/manuscript-ops/ |
-| [light-kanban-worker](skills/light-kanban-worker/SKILL.md) | Pick up and execute one Light-Kanban task per scheduled run, then return it for human confirmation. | Model-invoked; manual entry point is supported. | skills/light-kanban-worker/ |
+| [kanban-worker](skills/kanban-worker/SKILL.md) | Pick up and execute one Light-Kanban task per scheduled run, then return it for human confirmation. | Model-invoked; manual entry point is supported. | skills/kanban-worker/ |
 
 [CATALOG.md](CATALOG.md) is the human-readable inventory. Package-level
 `SKILL.md` files remain the behavior authority; the guides explain usage
@@ -159,6 +160,7 @@ and is never copied into this public collection.
 - [Release receipt](docs/evidence/releases/v0.1.6/RELEASE_RECEIPT.md)
 - [recap admission evidence](docs/evidence/admissions/recap/README.md)
 - [language-learning admission evidence](docs/evidence/admissions/language-learning/README.md)
-- [light-kanban-worker admission evidence](docs/evidence/admissions/light-kanban-worker/README.md)
+- [kanban-worker admission evidence](docs/evidence/admissions/light-kanban-worker/README.md)  
+  (admission record predates the v0.1.6 rename from `light-kanban-worker`)
 - [kb-init admission evidence](docs/evidence/admissions/kb-init/README.md)
 - [Collection discovery test](tests/test_collection_discovery.py)

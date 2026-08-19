@@ -1,4 +1,4 @@
-"""Behavior tests for the first-party light-kanban-worker Skill.
+"""Behavior tests for the first-party kanban-worker Skill.
 
 Pins the workflow ordering and the failure-mode rules of the worker contract:
 golden-flow order, review-feedback priority, one-task-per-run, human-only
@@ -13,7 +13,7 @@ import sys
 import unittest
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent  # skills/light-kanban-worker/
+ROOT = Path(__file__).resolve().parent.parent  # skills/kanban-worker/
 REPO_ROOT = ROOT.parents[1]  # repository root
 sys.path.insert(0, str(REPO_ROOT / "tests"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))

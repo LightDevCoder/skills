@@ -16,7 +16,7 @@
 - Selection reason: the target is an installable Agent Skill package whose installation, discovery, invocation, behavior, and interaction boundaries must be accepted (Skills-repo admission contract full path; the prompt-only fast track does not apply because kb-init can use tools, call the model-invoked `research` capability, and create files/state)
 
 ## Original goal
-Admit the first-party, user-invoked `kb-init` Skill v1.0.0 into the LightDevCoder/skills collection as the ninth package and release it in v0.1.6.
+Admit the first-party, user-invoked `kb-init` Skill into the LightDevCoder/skills collection as the ninth package and release it in v0.1.6.
 
 ## User-visible outcome
 Explicit `kb-init` runs a knowledge-base-specific interview, performs Base Discovery when a base is selected, produces an implementation SPEC, and only after explicit user approval implements, validates, and hands off the knowledge base.

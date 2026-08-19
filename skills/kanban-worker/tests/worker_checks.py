@@ -1,4 +1,4 @@
-"""Shared rule checkers for the light-kanban-worker package tests.
+"""Shared rule checkers for the kanban-worker package tests.
 
 Each checker reads SKILL.md / agents/openai.yaml / references/api.md text and
 returns a single boolean for one rule of the worker contract. The positive
@@ -46,7 +46,7 @@ API_ENDPOINTS = [
 API_FIELDS = ["reviewFeedback", "claimedBy", "workspacePath", "blockReason"]
 
 
-def has_frontmatter_name(text: str, name: str = "light-kanban-worker") -> bool:
+def has_frontmatter_name(text: str, name: str = "kanban-worker") -> bool:
     return bool(re.search(rf"(?m)^name:\s*{re.escape(name)}\s*$", text))
 
 
@@ -82,7 +82,7 @@ def frontmatter_is_yaml_safe(skill: str) -> bool:
         # CI has no PyYAML: the conservative scan above is the fallback gate
         return True
     data = yaml.safe_load(frontmatter)
-    return isinstance(data, dict) and data.get("name") == "light-kanban-worker"
+    return isinstance(data, dict) and data.get("name") == "kanban-worker"
 
 
 def is_model_invoked(skill: str) -> bool:

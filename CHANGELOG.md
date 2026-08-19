@@ -10,19 +10,23 @@ drafted.
 
 ### Added
 
-- First-party `kb-init` Skill v1.0.0: the formal knowledge-base initialization
+- First-party `kb-init` Skill: the formal knowledge-base initialization
   package replaces the earlier unreleased draft. It adds expanded core
   principles (decision provenance, open-decision surfacing, depth before
   settlement), readiness checks, human-navigation design, a research contract,
   connection setup/validation, backup/recovery semantics, and 38 regression
   eval cases. It remains user-invoked only per owner decision.
-- Contract tests and bilingual user guides updated for the v1.0.0 package.
+- Contract tests and bilingual user guides updated for the formal kb-init package.
 - v0.1.6 publishes the nine-package collection: v0.1.1's five, `recap` and
-  `language-learning` (v0.1.2), `light-kanban-worker` (v0.1.4), and `kb-init`
-  v1.0.0.
+  `language-learning` (v0.1.2), `kanban-worker` (renamed from
+  `light-kanban-worker` in v0.1.6; first released in v0.1.4), and `kb-init`.
 
 ### Changed
 
+- `light-kanban-worker` was renamed to `kanban-worker`. The package directory,
+  `SKILL.md` name/frontmatter, `agents/openai.yaml`, tests, guides, catalog,
+  README, and installation surfaces now use `kanban-worker`. Historical v0.1.4
+  and v0.1.5 records retain the old name with a migration note.
 - `kb-init` stays explicit-only: `disable-model-invocation: true` in
   `SKILL.md` and `allow_implicit_invocation: false` in `agents/openai.yaml`.
 - README, catalog, installation guide, maintenance baseline, discovery tests,

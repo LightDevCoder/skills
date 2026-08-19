@@ -47,6 +47,7 @@ installed the nine-package collection at that revision:
 
 ```text
 npx skills add LightDevCoder/skills#v0.1.6 --yes --copy --agent '*'
+npx skills add LightDevCoder/skills#v0.1.6 --skill kanban-worker --yes --copy --agent '*'
 npx skills add LightDevCoder/skills#v0.1.6 --skill kb-init --yes --copy --agent '*'
 npx skills add LightDevCoder/skills#v0.1.6 --skill review-loop --yes --copy --agent '*'
 ```
@@ -59,6 +60,12 @@ verified against fresh destinations in the
 The `latest` form and the `#v0.1.6` form resolve to the same content at
 release time; only the pinned form is stable against future
 default-revision changes.
+
+## Rename note
+
+`light-kanban-worker` was renamed to `kanban-worker` in v0.1.6. Historical
+v0.1.4 and v0.1.5 records and commands below still use the old
+`light-kanban-worker` name; current installs use `kanban-worker`.
 
 ## Historical v0.1.5 verification
 

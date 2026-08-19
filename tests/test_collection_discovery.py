@@ -16,21 +16,21 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(ROOT / "skills" / "recap" / "tests"))
 sys.path.insert(0, str(ROOT / "skills" / "language-learning" / "tests"))
-sys.path.insert(0, str(ROOT / "skills" / "light-kanban-worker" / "tests"))
+sys.path.insert(0, str(ROOT / "skills" / "kanban-worker" / "tests"))
 
 from check_helpers import Checks, read  # noqa: E402
 from test_recap_contract import run_checks as recap_checks  # noqa: E402
 from test_recap_output_contract import run_checks as recap_output_checks  # noqa: E402
 from test_language_learning_contract import run_checks as ll_checks  # noqa: E402
-from test_light_kanban_worker_contract import run_checks as worker_contract_checks  # noqa: E402
-from test_light_kanban_worker_behavior import run_checks as worker_behavior_checks  # noqa: E402
+from test_kanban_worker_contract import run_checks as worker_contract_checks  # noqa: E402
+from test_kanban_worker_behavior import run_checks as worker_behavior_checks  # noqa: E402
 
 EXPECTED = [
     "ask-light",
+    "kanban-worker",
     "kb-init",
     "language-learning",
     "learn-anything",
-    "light-kanban-worker",
     "manuscript-ops",
     "project-init",
     "recap",
@@ -88,7 +88,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.check("9 admitted first-party Skills" in catalog, "Catalog must present the nine-package collection.")
     c.check("Released v0.1.6" in catalog, "Catalog must present v0.1.6 as released.")
     c.check(bool(re.search(r"(?is)v0\.1\.1[^\r\n]{0,80}five", readme)), "README must retain the v0.1.1 five-package history.")
-    c.check(bool(re.search(r"light-kanban-worker.{0,200}scheduled", readme, re.IGNORECASE | re.DOTALL)), "README must present light-kanban-worker as the scheduled Light-Kanban worker Skill.")
+    c.check(bool(re.search(r"kanban-worker.{0,200}scheduled", readme, re.IGNORECASE | re.DOTALL)), "README must present kanban-worker as the scheduled Light-Kanban worker Skill.")
 
     for package in EXPECTED:
         package_root = skill_root / package

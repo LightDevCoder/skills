@@ -4,7 +4,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED = {"ask-light", "kb-init", "language-learning", "learn-anything", "light-kanban-worker", "manuscript-ops", "project-init", "recap", "review-loop"}
+EXPECTED = {"ask-light", "kb-init", "language-learning", "learn-anything", "kanban-worker", "manuscript-ops", "project-init", "recap", "review-loop"}
 
 
 class CollectionContractTests(unittest.TestCase):

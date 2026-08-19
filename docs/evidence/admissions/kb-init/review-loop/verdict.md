@@ -10,7 +10,7 @@
 ## Conclusion
 
 `skills/kb-init/` is admitted into the first-party collection as the ninth
-package (v1.0.0), released in v0.1.6. All frozen acceptance criteria (AC-1…AC-8) are satisfied with
+package , released in v0.1.6. All frozen acceptance criteria (AC-1…AC-8) are satisfied with
 appropriately labeled evidence: structural/contract (package files and
 `test_kb_init_contract.py`), invocation (explicit-only frontmatter and
 `agents/openai.yaml`), documentation synchronization (nine-package current

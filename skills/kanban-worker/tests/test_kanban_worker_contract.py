@@ -1,4 +1,4 @@
-"""Contract tests for the first-party light-kanban-worker Skill.
+"""Contract tests for the first-party kanban-worker Skill.
 
 Verifies SKILL.md metadata, invocation type, required workflow sections,
 metadata consistency, and API reference links. Positive fixtures are the real
@@ -13,7 +13,7 @@ import sys
 import unittest
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent  # skills/light-kanban-worker/
+ROOT = Path(__file__).resolve().parent.parent  # skills/kanban-worker/
 REPO_ROOT = ROOT.parents[1]  # repository root
 sys.path.insert(0, str(REPO_ROOT / "tests"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -89,14 +89,14 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     api_doc = read(root, "references/api.md")
 
     # --- metadata and invocation type ---
-    c.check(has_frontmatter_name(skill), "SKILL.md frontmatter name must be light-kanban-worker")
+    c.check(has_frontmatter_name(skill), "SKILL.md frontmatter name must be kanban-worker")
     c.check("description:" in skill, "SKILL.md frontmatter must declare a description")
     c.check(frontmatter_is_yaml_safe(skill), "SKILL.md frontmatter must parse as YAML (Skills CLI install gate)")
     c.check(is_model_invoked(skill), "SKILL.md must not disable model invocation")
-    c.check(bool(re.search(r'display_name:\s*"Light Kanban Worker"', metadata)), "openai.yaml display_name is incorrect")
+    c.check(bool(re.search(r'display_name:\s*"Kanban Worker"', metadata)), "openai.yaml display_name is incorrect")
     c.check(bool(re.search(r'short_description:\s*"Pick up and execute work from Light-Kanban"', metadata)), "openai.yaml short_description is incorrect")
     c.check(
-        bool(re.search(r'default_prompt:.*Use light-kanban-worker to process one task from http://127\.0\.0\.1:8641\.', metadata, re.DOTALL)),
+        bool(re.search(r'default_prompt:.*Use kanban-worker to process one task from http://127\.0\.0\.1:8641\.', metadata, re.DOTALL)),
         "openai.yaml default_prompt must be the first-run-capable one-shot form",
     )
     c.check("Agent ID: codex-main" in metadata, "openai.yaml default_prompt must name the Agent ID")

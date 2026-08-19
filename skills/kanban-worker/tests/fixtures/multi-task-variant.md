@@ -1,12 +1,12 @@
 ---
-name: light-kanban-worker
+name: kanban-worker
 description: Pick up and execute work from a Light-Kanban board.
 ---
 
-# Light Kanban Worker (negative fixture: todo first)
+# Kanban Worker (negative fixture: multi-task)
 
-A complete worker protocol that violates exactly one rule: it checks To Do
-before owned In Progress work, which can orphan a Request Changes rework loop.
+A complete worker protocol that violates exactly one rule: it claims several
+tasks in one run instead of at most one.
 
 ## Agent identity
 
@@ -16,23 +16,9 @@ Use a stable agent id from the invocation or the environment:
 GET /api/agents
 ```
 
-## Claiming new work (WRONG ORDER)
-
-Start by listing new work:
-
-```http
-GET /api/tasks?status=todo
-```
-
-Then claim the first FIFO item:
-
-```http
-POST /api/tasks/:id/claim
-```
-
 ## Existing work before new work
 
-Only afterwards check whether you already hold work:
+Check owned in-progress work before new work:
 
 ```http
 GET /api/tasks?status=in_progress
@@ -43,9 +29,21 @@ GET /api/tasks?status=in_progress
 reviewFeedback has top priority: a task returned with Request Changes
 outranks other work.
 
-## One task per run
+## Claiming new work (WRONG RULE)
 
-Every invocation handles at most one task, then stops.
+Fetch the queue and claim the first two items, then process multiple tasks
+in parallel to maximize throughput:
+
+```http
+GET /api/tasks?status=todo
+POST /api/tasks/:id/claim
+POST /api/tasks/:id/claim
+```
+
+## One task per run (WRONG RULE)
+
+One invocation may work on several tasks at once and keeps going until every
+claimed task is done.
 
 ## Human review boundary
 

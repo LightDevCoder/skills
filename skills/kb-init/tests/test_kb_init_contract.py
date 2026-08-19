@@ -1,4 +1,4 @@
-"""Deterministic contract tests for the kb-init first-party Skill (v1.0.0)."""
+"""Deterministic contract tests for the kb-init first-party Skill ."""
 
 from __future__ import annotations
 

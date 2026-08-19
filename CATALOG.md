@@ -13,7 +13,7 @@ Agent host.
 | --- | --- |
 | Collection | Personal Skills Collection |
 | Package count | 9 admitted first-party Skills |
-| Current state | Released v0.1.6; collection contains nine admitted first-party Skills, including `kb-init` v1.0.0 |
+| Current state | Released v0.1.6; collection contains nine admitted first-party Skills, including `kb-init` |
 | Stable release | [v0.1.6](https://github.com/LightDevCoder/skills/releases/tag/v0.1.6) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) |
@@ -22,8 +22,8 @@ Agent host.
 Stable `v0.1.1` contained the original five packages; v0.1.2 added `recap` and
 `language-learning` for seven admitted first-party Skills; v0.1.3 kept the
 same seven and migrated the test toolchain; v0.1.4 adds `light-kanban-worker`
-for eight admitted packages; v0.1.5 adds the worker's non-overlapping-run and
-first-registration identity contract. v0.1.6 adds `kb-init` v1.0.0 as the
+(renamed `kanban-worker` in v0.1.6) for eight admitted packages; v0.1.5 adds
+the worker's non-overlapping-run and first-registration identity contract. v0.1.6 adds `kb-init` as the
 ninth admitted first-party Skill and publishes the collection as a nine-package
 stable release.
 
@@ -46,7 +46,7 @@ dependencies and modified third-party variants are documented separately.
 - **Purpose:** Design and initialize a maintainable knowledge base through a knowledge-base-specific interview, then implement it only after the user ends the interview and approves the implementation SPEC.
 - **Invocation:** User-invoked only; never triggers on its own from a generic mention of knowledge bases.
 - **Package:** [skills/kb-init/](skills/kb-init/)
-- **Status:** Admitted first-party via the full admission path (`review-loop agent-skill` `PASS`); released in v0.1.6 as the v1.0.0 package.
+- **Status:** Admitted first-party via the full admission path (`review-loop agent-skill` `PASS`); released in v0.1.6 as the formal kb-init package.
 - **Evidence:** Contract tests under [skills/kb-init/tests/](skills/kb-init/tests/), [user guide](docs/skills/kb-init.md), and [admission evidence](docs/evidence/admissions/kb-init/README.md).
 - **Installation path:** `skills/kb-init/` in a host-recognized Skills root.
 
@@ -68,14 +68,14 @@ dependencies and modified third-party variants are documented separately.
 - **Evidence:** [package contract](skills/learn-anything/SKILL.md), hook evidence, and user guide at [docs/skills/learn-anything.md](docs/skills/learn-anything.md).
 - **Installation path:** `skills/learn-anything/` in a host-recognized Skills root.
 
-### light-kanban-worker
+### kanban-worker
 
 - **Purpose:** Pick up and execute one Light-Kanban task per scheduled agent run, then return it for human confirmation; resumes owned in-progress work and review feedback before claiming new tasks.
 - **Invocation:** Model-invoked; manual entry point is supported.
-- **Package:** [skills/light-kanban-worker/](skills/light-kanban-worker/)
-- **Status:** Admitted first-party through the full admission path (`review-loop agent-skill` `PASS`); released in v0.1.4; v0.1.5 adds the same-agent non-overlap rule and the first-registration identity requirement (second `review-loop agent-skill` `PASS`).
-- **Evidence:** Contract and behavior tests under [skills/light-kanban-worker/tests/](skills/light-kanban-worker/tests/), [user guide](docs/skills/light-kanban-worker.md), [admission evidence](docs/evidence/admissions/light-kanban-worker/README.md), and [v0.1.5 release evidence](docs/evidence/releases/v0.1.5/README.md).
-- **Installation path:** `skills/light-kanban-worker/` in a host-recognized Skills root.
+- **Package:** [skills/kanban-worker/](skills/kanban-worker/)
+- **Status:** Admitted first-party through the full admission path (`review-loop agent-skill` `PASS`); renamed from `light-kanban-worker` in v0.1.6; released in v0.1.4 as `light-kanban-worker`; v0.1.5 adds the same-agent non-overlap rule and the first-registration identity requirement (second `review-loop agent-skill` `PASS`).
+- **Evidence:** Contract and behavior tests under [skills/kanban-worker/tests/](skills/kanban-worker/tests/), [user guide](docs/skills/kanban-worker.md), [admission evidence](docs/evidence/admissions/light-kanban-worker/README.md), and [v0.1.5 release evidence](docs/evidence/releases/v0.1.5/README.md).
+- **Installation path:** `skills/kanban-worker/` in a host-recognized Skills root.
 
 ### manuscript-ops
 

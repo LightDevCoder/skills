@@ -7,8 +7,8 @@
 - Package: `skills/kb-init/`
 - Invocation type: user-invoked only
 - Profile: `review-loop` `agent-skill`
-- Stable-release boundary: v0.1.6 contains `kb-init` v1.0.0 as the ninth package
-- Admission status: `PASS` under the full admission path; released in v0.1.6 as the v1.0.0 package
+- Stable-release boundary: v0.1.6 contains `kb-init` as the ninth package
+- Admission status: `PASS` under the full admission path; released in v0.1.6 as the formal kb-init package
 
 ## Evidence summary
 
