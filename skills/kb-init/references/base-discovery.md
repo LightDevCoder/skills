@@ -1,18 +1,18 @@
 # Base Discovery
 
-Base Discovery happens only after the interview has produced a selected or strongly preferred base.
+Base Discovery turns "we may use this base" into an operational understanding of whether it can actually support the knowledge base.
 
-The purpose is to turn "we want to use X" into an operational understanding of how an Agent can actually build and maintain the knowledge base on X.
+It is platform-agnostic.
 
-Do not maintain a catalog of platform recipes in this skill.
+Do not maintain a catalog of named software recipes.
 
-Research the selected base as needed.
+Base Discovery may happen during the interview because its result can change the base choice.
 
-## What to discover
+For a third-party software/service base, this reference must be read before that base's operating model or connection route is considered settled.
 
-Build an internal operating profile covering the following.
+It does not perform configuration.
 
-### Storage model
+## Discover the storage model
 
 Determine what the base actually stores:
 
@@ -28,165 +28,121 @@ Determine what the base actually stores:
 
 Understand which parts are user-visible and which are implementation details.
 
-### Programmatic access
+## Discover programmatic access
 
-Determine the supported non-GUI ways an Agent can interact with it.
+Determine the currently supported non-GUI ways an Agent can interact with the base.
 
 Possible categories may include:
 
 - direct filesystem access;
 - command-line interfaces;
-- application programming interfaces;
+- connector or MCP interfaces;
+- APIs;
 - SDKs;
-- MCP or connector-style interfaces;
 - import/export formats;
 - other documented automation surfaces.
 
+These are categories, not assumptions.
+
 Do not assume any category exists.
 
-Do not prefer one merely because this skill has seen it before.
+Do not ask the user to supply public links that can be researched.
 
-### Authentication and permissions
+If the access method is current, unfamiliar, or unverified, use `research` under `research-contract.md`.
+
+For a third-party software or service base, do not lock a connection route from model memory alone when the official integration surface could have changed. Unless already verified from first-party sources in the current session, research the current supported programmatic access before finalizing whether the implementation should use a connector/MCP-style interface, CLI, API, SDK, import/export route, or another supported mechanism.
+
+## Discover authentication and permissions
 
 Determine:
 
-- what credentials or authorization are required;
-- whether the user must create an application, token, workspace permission, or similar grant;
+- what authorization is required;
+- whether user approval is needed;
 - which permissions are necessary;
 - whether least-privilege access is possible;
-- what a future Agent session needs in order to reconnect.
+- whether setup is project-scoped or global;
+- what a future Agent session needs to reconnect;
+- what safe credential mechanism is supported (for example OAuth, connector-managed auth, environment/config secret store, or another non-echoing route).
 
-Never ask the user to paste secrets into maintenance documentation.
+Never design a connection flow that requires the user to paste secrets into chat, prompts, maintenance documentation, example files, or shell command arguments when a safer route is available.
 
-### Read/write capability
+## Discover read/write capability
 
 Determine whether an Agent can:
 
-- list or browse;
+- list/browse;
 - search;
 - read;
 - create;
 - update;
-- move or reorganize;
+- move/reorganize;
 - delete;
 - upload or link attachments;
 - create relationships;
-- create fields or schemas;
-- manage views or navigation;
-- export or back up.
+- create fields/schemas;
+- manage navigation or views;
+- export/back up.
 
-Identify important missing operations.
+Identify missing operations that matter to the user's workflow.
 
-### Attachments and non-text content
+## Discover attachment and non-text handling
 
-Determine how the chosen base handles the content types found during the interview.
+Check how the base handles the actual content types from the interview.
 
-Pay special attention to:
+If it cannot adequately store, link, retrieve, automate, export, or migrate required media, consider a hybrid design or reopen the base decision.
 
-- large files;
-- images;
-- audio/video;
-- linked external media;
-- binary attachments;
-- generated artifacts.
-
-If the base cannot adequately store or automate these, consider a hybrid design or reopen the base decision.
-
-### Retrieval and analysis
+## Discover retrieval and analysis support
 
 Verify that the base can support the user's real retrieval scenarios.
 
-If analysis will happen outside the base, define how data is extracted reliably.
+If analysis will happen outside the base, define how the knowledge can be extracted reliably without designing the downstream analysis system itself.
 
-If the base's native search is weak, do not pretend it satisfies the user's query needs.
-
-### Export, backup, and portability
+## Discover export, backup, and portability
 
 Determine:
 
 - whether content can be exported;
-- what export format is available;
+- the export shape;
 - whether attachments are included;
-- whether the structure survives export;
-- how backups can be made;
+- whether important relationships survive export;
+- how backup works;
 - what an exit path looks like.
 
-### Current Agent environment
+When the user asks for backup, distinguish the actual guarantee offered by each route:
 
-Separate the base's theoretical capabilities from the current Agent environment.
+- offline snapshot;
+- portable export/migration material;
+- recoverable reconstruction/disaster recovery.
 
-Record:
+Do not equate "downloaded successfully" with "restorable". If recovery fidelity matters, determine what must be rebuilt and whether a restore/reconstruction test is possible.
 
-- what the base supports;
-- what the current environment can actually access now;
-- which connectors, CLIs, credentials, or network permissions are present;
-- what is missing.
+## Separate product capability from current Agent capability
 
-Do not equate "the product supports an API" with "this Agent is currently connected to it".
+Record separately:
 
-## Research rule
+- what the base officially supports;
+- what the current Agent environment can actually access now;
+- what connection capability is missing;
+- what user action or authorization may be needed later.
 
-Use `research` when any material part of the operating profile is unfamiliar, current, or unverified.
-
-Research should prioritize first-party documentation and official interfaces.
-
-A useful research brief is narrow and operational:
-
-> Research the currently supported programmatic ways an Agent can read, create, update, search, attach files to, export from, and authenticate with <selected base>. Prefer official documentation. Report which operations require user setup or authorization and which can be automated without GUI interaction.
-
-Do not research every feature of the product.
-
-Research only what affects the knowledge-base implementation.
-
-## No computer-use dependency
-
-The preferred route is a stable non-GUI route.
-
-Computer use may supplement the implementation, but do not make it the sole planned route unless:
-
-1. no programmatic or import/export route can satisfy the requirement; and
-2. the user explicitly accepts that dependency.
-
-If the current Agent lacks the required connector or programmatic access:
-
-- complete all base-independent work;
-- prepare the knowledge structure;
-- prepare schemas or field definitions;
-- prepare importable content;
-- prepare scripts or configuration where useful;
-- prepare exact setup and authorization instructions;
-- document the remaining manual step;
-- make future continuation straightforward.
-
-The goal is graceful partial completion, not an all-or-nothing outcome.
+Do not equate "an interface exists" with "this Agent is already connected".
 
 ## Base fitness check
 
-After Base Discovery, compare the operating profile against the user's requirements.
+Compare the discovered operating model against the user's requirements.
 
-Ask:
+If it fails a material requirement, reopen the base decision.
 
-- Does it store the required content types?
-- Does it support the required retrieval and analysis?
-- Can the Agent maintain it at the desired autonomy level?
-- Are the required permissions acceptable?
-- Is the manual remainder acceptable?
-- Is backup/export acceptable?
-- Does it meet the user's collaboration, privacy, cost, and scale constraints?
+Do not force a poor base choice just because it was discussed earlier.
 
-If not, reopen the base decision.
+## Output of Base Discovery
 
-Do not force a poor base choice merely because the interview selected it earlier.
+Base Discovery should leave the design with:
 
-## Output to the SPEC
+- a verified operating model;
+- a proposed connection route;
+- known permissions/authorization requirements;
+- known automation limits;
+- a clear distinction between what can be done now and what may require later setup.
 
-The final SPEC should summarize Base Discovery as practical operating decisions, not as a research dump.
-
-It should make clear:
-
-- why the base is suitable;
-- how the Agent connects;
-- what the Agent can automate;
-- what the user must do;
-- what limitations remain;
-- how another Agent session reconnects and continues maintenance.
+Actual connection/configuration waits until SPEC approval.

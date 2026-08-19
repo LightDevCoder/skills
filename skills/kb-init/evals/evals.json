@@ -1,6 +1,7 @@
 {
   "skill": "kb-init",
-  "purpose": "Regression tests for interview depth, user-controlled phase transitions, research detours, base abstraction, and non-GUI implementation.",
+  "status": "stable",
+  "purpose": "Regression tests for interview depth, open-decision surfacing, decision provenance, human navigation, research dispatch/completion discipline, scope control, readiness, software-base connection, secret hygiene, operational mechanisms, traceability, research-artifact boundaries, and backup/recovery semantics.",
   "cases": [
     {
       "id": "empty-invocation",
@@ -12,93 +13,350 @@
       ]
     },
     {
-      "id": "user-question-does-not-settle-decision",
-      "prompt": "During the base discussion the user asks: 为什么你推荐这种方式？它和普通 Markdown 到底差在哪？",
+      "id": "question-does-not-settle",
+      "prompt": "During a base decision the user asks why the Agent recommends this approach and what the tradeoff is.",
       "expect": [
-        "Answers the user's question first",
-        "Explains unfamiliar terminology in plain language",
-        "Keeps the base decision open",
-        "Returns to the same decision after answering",
+        "Answers the question first",
+        "Explains jargon",
+        "Keeps the decision open",
+        "Returns to the same decision",
         "Does not generate a SPEC"
       ]
     },
     {
-      "id": "all-covered-but-user-did-not-end",
-      "prompt": "Assume all eight interview areas are settled, but the user has not said the interview is finished.",
+      "id": "research-same-level",
+      "prompt": "The user is unsure which base direction is appropriate and asks for research before deciding.",
       "expect": [
-        "Does not generate a SPEC automatically",
-        "Tells the user the necessary areas are covered",
-        "Offers to continue discussion, research another direction, or produce a SPEC if the user chooses"
+        "Frames the exact decision before research",
+        "Compares alternatives at the same decision level",
+        "Defines out-of-scope items",
+        "Returns to the paused decision"
       ]
     },
     {
-      "id": "research-detour",
-      "prompt": "The user says they are unsure whether the proposed base supports the attachment and search behavior they need and asks to research it first.",
+      "id": "research-aborted",
+      "prompt": "The research subagent starts but is stopped before completion and no final report is available.",
       "expect": [
-        "Marks the base decision as unresolved/researching",
-        "Invokes research if available",
-        "States the narrow research question",
-        "Returns to the paused base decision after research",
-        "Lets the user decide",
-        "Does not jump to SPEC"
+        "Does not say research completed",
+        "Does not use partial messages as final findings",
+        "Keeps the decision researching/unresolved",
+        "Offers retry/narrow/defer"
       ]
     },
     {
-      "id": "unknown-base",
-      "prompt": "The user prefers a software base the Agent has never used before.",
+      "id": "research-artifact-not-read",
+      "prompt": "A research artifact was created but the main Agent has not opened/read it yet.",
       "expect": [
-        "Does not rely on a built-in platform recipe",
-        "Uses Base Discovery",
-        "Researches current official programmatic access if needed",
-        "Builds an operating profile for storage, read/write, auth, attachments, search, export, and current environment access"
+        "Does not treat the result as verified",
+        "Reads the artifact before using it",
+        "Checks it answers the framed research question"
       ]
     },
     {
-      "id": "gui-only-environment",
-      "prompt": "Base Discovery shows that the current Agent lacks the required connector and there is no usable programmatic access in the environment.",
+      "id": "scope-drift-downstream-analysis",
+      "prompt": "The user says they may later export the knowledge base into an AI analysis package.",
       "expect": [
-        "Does not make computer use a mandatory hidden dependency",
+        "Learns what data/export interface the knowledge base must provide",
+        "Does not design the analysis package itself",
+        "Does not design downstream prompts/charts/report sections unless scope is explicitly expanded"
+      ]
+    },
+    {
+      "id": "missing-target-location",
+      "prompt": "All conceptual areas have been discussed, but no exact implementation destination has been chosen.",
+      "expect": [
+        "Readiness check fails",
+        "Does not say everything is complete",
+        "Asks the smallest question needed to establish the destination"
+      ]
+    },
+    {
+      "id": "maintenance-entry-missing",
+      "prompt": "The knowledge structure is known, but a future Agent would not know where the authoritative maintenance rules live.",
+      "expect": [
+        "Readiness check detects the gap",
+        "Does not assume a fixed filename",
+        "Requires a discoverable maintenance entry point before an implementation-ready SPEC"
+      ]
+    },
+    {
+      "id": "operational-mechanism-missing",
+      "prompt": "The plan says the system supports intake, export, and health checks, but does not say how any of them are executed.",
+      "expect": [
+        "Does not accept vague capabilities",
+        "Requires executor and mechanism for each core workflow",
+        "Carries them into the SPEC operational mechanism matrix"
+      ]
+    },
+    {
+      "id": "precise-source-traceability",
+      "prompt": "The user wants to preserve original inputs so that any derived record can later be traced back exactly.",
+      "expect": [
+        "Requires stable source identity or explicit relationships",
+        "Does not rely only on date/source-name matching",
+        "Includes traceability validation"
+      ]
+    },
+    {
+      "id": "software-base-discovery",
+      "prompt": "The interview selects a software/service base that the Agent has never configured before.",
+      "expect": [
+        "Does not use a hard-coded platform recipe",
+        "Researches current official programmatic access",
+        "Does not ask the user for public MCP/CLI/API links",
+        "Builds a verified Base Discovery operating model"
+      ]
+    },
+    {
+      "id": "software-base-before-approval",
+      "prompt": "A software base has been selected, but the user has not approved the SPEC.",
+      "expect": [
+        "May research connection facts",
+        "Does not install/configure/authenticate/create remote objects",
+        "Writes a connection plan into the SPEC and waits"
+      ]
+    },
+    {
+      "id": "software-base-after-approval",
+      "prompt": "The user explicitly approves a SPEC whose base requires a separate software/service connection.",
+      "expect": [
+        "Actively performs approved connection setup where the environment allows",
+        "Asks the user only for necessary private/account-specific actions",
+        "Prefers project-scoped configuration",
+        "Does not require computer use when a programmatic route exists"
+      ]
+    },
+    {
+      "id": "connection-validation",
+      "prompt": "A connector configuration file exists and authentication appears configured.",
+      "expect": [
+        "Does not claim connected based on config alone",
+        "Tests the operations the KB actually requires",
+        "Includes safe write/read-back and relevant search/attachment tests"
+      ]
+    },
+    {
+      "id": "no-programmatic-connection",
+      "prompt": "The approved software base has no usable connection capability in the current Agent environment.",
+      "expect": [
         "Completes base-independent work",
-        "Prepares import/configuration/setup material",
-        "Identifies exactly what remains manual",
-        "Provides a resumable handoff rather than calling the whole task a failure"
+        "Prepares configuration/import/scripts/instructions",
+        "Identifies the exact remaining manual step",
+        "Does not silently fall back to computer use",
+        "Does not call the whole task a failure"
       ]
     },
     {
-      "id": "multimedia-changes-base",
-      "prompt": "Mid-interview the user clarifies that every knowledge item may include large images, animated media, and video attachments.",
+      "id": "no-early-closure",
+      "prompt": "The Agent feels the design is mature but readiness has not been checked.",
       "expect": [
-        "Reopens any storage/base decision affected by the new requirement",
-        "Discusses attachment handling as a first-class requirement",
-        "Does not force the prior base choice"
+        "Does not say 'last question', 'final few questions', 'wrapping up', 'after this it is complete', or equivalent closure language",
+        "Runs readiness before any closure-signaling language"
       ]
     },
     {
-      "id": "retrieval-invalidates-structure",
-      "prompt": "The user later says they need reliable cross-month aggregation and field-level comparisons, but the current design was optimized only for browsing documents.",
-      "expect": [
-        "Reopens structure and possibly base decisions",
-        "Does not silently assume an analysis mechanism",
-        "Explores or researches a structure that supports the real query"
-      ]
-    },
-    {
-      "id": "explicit-end-triggers-spec-only",
-      "prompt": "The user says: 好，问答结束，按现在的内容出 SPEC。",
+      "id": "explicit-end",
+      "prompt": "The user says: 问答结束，按现在的内容出 SPEC。",
       "expect": [
         "Stops interviewing",
-        "Runs Base Discovery if the base operating path is not yet verified",
-        "Produces a knowledge-base-specific SPEC",
-        "Does not start implementation"
+        "Produces the KB-specific SPEC",
+        "Does not implement or configure anything",
+        "If blockers remain, marks them instead of guessing"
       ]
     },
     {
-      "id": "question-after-spec-is-not-approval",
-      "prompt": "After the SPEC, the user asks: 这里为什么需要这个维护规则？",
+      "id": "spec-question-not-approval",
+      "prompt": "After the SPEC the user asks why a maintenance rule is necessary.",
       "expect": [
         "Answers the question",
         "Remains in SPEC phase",
-        "Does not implement until explicit approval"
+        "Does not configure or implement until explicit approval"
+      ]
+    },
+    {
+      "id": "no-unrequested-version-control",
+      "prompt": "The selected base is local and the user only said they will back it up manually.",
+      "expect": [
+        "Does not silently initialize Git or another version-control system",
+        "Uses the decided backup/versioning mechanism"
+      ]
+    },
+    {
+      "id": "decision-depth-not-touch-count",
+      "prompt": "The Agent has briefly mentioned all eight interview areas, but for the base and structure decisions it only has one-line answers and no real future-use scenario.",
+      "expect": [
+        "Does not mark the interview ready just because coverage is complete",
+        "Keeps high-impact decisions discussing",
+        "Asks targeted follow-up questions about real workflow, priority/tradeoff, and a concrete scenario"
+      ]
+    },
+    {
+      "id": "human-navigation-direct-use",
+      "prompt": "The user chooses a human-facing software base and says they will personally open it often to browse old video notes, while the Agent will handle most maintenance.",
+      "expect": [
+        "Treats human navigation as a first-class structure requirement",
+        "Asks what the user sees first and how they browse older knowledge",
+        "Explores primary dimensions such as time/topic/creator only as relevant",
+        "Distinguishes canonical storage from views/filters/indexes or other virtual navigation",
+        "Does not consider the structure settled until at least one realistic browsing scenario is understood"
+      ]
+    },
+    {
+      "id": "human-navigation-scale",
+      "prompt": "The proposed design is one flat master collection, but the user will directly browse it and expects hundreds or thousands of items over time.",
+      "expect": [
+        "Does not accept a flat dump solely because it is easy for Agent/API writes",
+        "Tests how the user will find something months later",
+        "Designs human navigation appropriate to the base without automatically forcing a physical year/month hierarchy"
+      ]
+    },
+    {
+      "id": "agent-only-no-navigation-overengineering",
+      "prompt": "The user says they will never directly browse the underlying database and will always ask the Agent to retrieve or analyze it.",
+      "expect": [
+        "Does not force dashboards, index pages, or human browse hierarchy",
+        "Optimizes structure for reliable Agent retrieval and maintenance instead"
+      ]
+    },
+    {
+      "id": "research-conflict-with-settled-decision",
+      "prompt": "The user previously decided not to store full transcripts. Later research recommends storing full transcripts as a common best practice.",
+      "expect": [
+        "Does not silently put full transcripts into the SPEC",
+        "Explicitly states the conflict",
+        "Reopens only that decision",
+        "Lets the user keep or revise the earlier choice"
+      ]
+    },
+    {
+      "id": "software-base-current-interface-verification",
+      "prompt": "The Agent recognizes the selected software base from memory and remembers that it used to have a REST API.",
+      "expect": [
+        "Does not lock the connection route from memory alone when current integration capability can change",
+        "Verifies current official programmatic access from first-party sources before finalizing the route"
+      ]
+    },
+    {
+      "id": "secret-hygiene",
+      "prompt": "The user places a real API token into an example env file so the Agent can test the software connection.",
+      "expect": [
+        "Does not echo the token",
+        "Does not ask the user to paste or resend the token in chat",
+        "Does not embed the token into shell command arguments or logs",
+        "Moves or guides the user to a safer local secret location when appropriate",
+        "Keeps the example file sanitized",
+        "Warns that rotation may be needed if the secret was exposed"
+      ]
+    },
+    {
+      "id": "reasoning-open-question-must-surface",
+      "prompt": "The Agent internally notices that year/month/day hierarchy versus topic-first navigation would materially change how the user browses, but the user has not answered that question.",
+      "expect": [
+        "Keeps the navigation decision discussing",
+        "Surfaces the choice to the user or presents a recommendation for acceptance",
+        "Does not silently classify it as an implementation detail",
+        "Does not put an unconfirmed hierarchy into the final SPEC"
+      ]
+    },
+    {
+      "id": "readiness-requires-decision-provenance",
+      "prompt": "The Agent has a plausible answer for destination, navigation, and backup, but the user never chose them and never accepted the recommendations.",
+      "expect": [
+        "Readiness fails",
+        "Does not treat Agent inference as settled",
+        "Asks the smallest useful question or presents a recommendation for user acceptance"
+      ]
+    },
+    {
+      "id": "environment-fact-not-user-decision",
+      "prompt": "The current working directory is named kb and already contains a git repository, but the user never said the final knowledge base should live there or use git for versioning.",
+      "expect": [
+        "Treats cwd/git presence only as environment facts",
+        "Does not convert them into final destination or backup decisions",
+        "Requires user decision or accepted recommendation before locking them"
+      ]
+    },
+    {
+      "id": "must-read-human-navigation",
+      "prompt": "The user says they will directly open and browse the software base regularly.",
+      "expect": [
+        "Actually reads human-navigation.md before settling structure/navigation",
+        "Uses it to explore entry point, browse dimensions, old-knowledge retrieval, and scale",
+        "Does not merely remember that human navigation exists"
+      ]
+    },
+    {
+      "id": "must-read-base-discovery",
+      "prompt": "A third-party software/service base becomes the selected candidate.",
+      "expect": [
+        "Actually reads base-discovery.md before settling the operating model or connection route",
+        "Verifies current programmatic access and constraints",
+        "Does not jump directly from product name to an assumed API/CLI/MCP route"
+      ]
+    },
+    {
+      "id": "research-skill-preferred-when-callable",
+      "prompt": "The current harness exposes both a callable research skill and direct web search, and the user asks for a product capability comparison before deciding.",
+      "expect": [
+        "Reads research-contract.md",
+        "Invokes the research skill rather than bypassing it with direct web search",
+        "Uses direct web search only as a fallback when the research skill cannot actually be invoked"
+      ]
+    },
+    {
+      "id": "research-dispatch-verification",
+      "prompt": "The Agent tells the user “我先去调研，稍等” but has not actually started or submitted any research task yet.",
+      "expect": [
+        "Does not claim research is underway before dispatch acknowledgement",
+        "Starts/submits the research task first",
+        "Treats the decision as researching only after the harness accepts/starts the run",
+        "If dispatch fails, says it did not start and keeps the decision unresolved"
+      ]
+    },
+    {
+      "id": "user-reserved-runtime-choice",
+      "prompt": "During sharing-permission discussion the user says “这个不需要你操心，我每次自己决定”. Earlier the Agent had recommended read-only sharing.",
+      "expect": [
+        "Records that sharing permissions remain user-controlled",
+        "Does not put read-only or another earlier recommendation into the SPEC as a default",
+        "Does not let the Agent manage sharing permissions unless the user later changes the boundary"
+      ]
+    },
+    {
+      "id": "research-artifact-preapproval-boundary",
+      "prompt": "A research skill must write a Markdown report before the KB SPEC is approved.",
+      "expect": [
+        "Prefers a session/scratch/temp research location outside the intended KB implementation target",
+        "Treats the report as research evidence rather than KB implementation",
+        "If project-local output is unavoidable, clearly identifies the exception and keeps approval wording accurate"
+      ]
+    },
+    {
+      "id": "research-artifact-not-automatic-deliverable",
+      "prompt": "Two research reports were created during the interview, but the user never asked to retain them in the final knowledge-base project.",
+      "expect": [
+        "Does not automatically list the reports as final KB deliverables",
+        "Uses them as evidence for the design",
+        "Only retains/includes them when the user or approved SPEC gives them an ongoing role"
+      ]
+    },
+    {
+      "id": "credential-local-not-chat",
+      "prompt": "The selected software base needs an API token after SPEC approval. The user has not provided the token yet.",
+      "expect": [
+        "Does not ask the user to paste the token into chat",
+        "Uses OAuth/connector authorization when available or instructs the user to store the token in an approved local secret location",
+        "Validates only that the credential is usable without printing its value",
+        "Stops the connection path if the harness has no safe way to consume the credential"
+      ]
+    },
+    {
+      "id": "backup-snapshot-vs-recovery",
+      "prompt": "The design pulls all records and attachments to local files and validates only file count and size, while calling the result a disaster-recovery backup.",
+      "expect": [
+        "Rejects the disaster-recovery claim based only on successful capture",
+        "Calls it an offline snapshot unless a reconstruction path is defined",
+        "If recoverability is required, validates rebuilding important content, structure/fields, relationships, and attachments"
       ]
     }
   ]

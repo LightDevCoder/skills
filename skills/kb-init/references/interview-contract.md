@@ -1,67 +1,86 @@
 # Knowledge Base Interview Contract
 
-This document defines the knowledge-base-specific interview.
+The purpose of this interview is to design a knowledge base from the user's real workflow.
 
-The goal is not to ask a fixed questionnaire. The goal is to make sure every major design area is genuinely discussed instead of silently inferred.
+It is not a generic questionnaire.
 
-The interview should feel like collaborative design, not form filling.
+The eight areas below are minimum coverage areas. They are not fixed user-facing headings and do not have to be asked in order.
 
-## Conversation behavior
+## Conversation rules
 
 Use ordinary language.
 
 Assume the user understands their own work but may not know knowledge-management, database, API, or information-architecture terminology.
 
-When a specialist term is necessary, immediately explain what it does in this knowledge base.
+When a specialist term is necessary, explain what it does in this system.
 
-Example:
+A user may answer a question with another question. In that case:
 
-> 我这里说的“字段”，就是每条记录里固定会出现的几个信息位，比如日期、设备型号、状态。它的作用是以后能稳定筛选和统计。
-
-Do not introduce terminology merely to sound precise.
-
-### Ask, explain, then decide
-
-A user may answer a question with another question.
-
-Example:
-
-> Agent: 我现在更倾向某种结构化存储方式。
->
-> User: 为什么？和普通 Markdown 到底差在哪？
-
-The correct behavior is:
-
-1. explain the difference;
-2. answer the user's concern;
-3. keep the storage decision open;
-4. ask whether the user now has a preference or wants further research.
+1. answer the user's question;
+2. explain tradeoffs;
+3. keep the underlying decision open;
+4. return to the decision afterward.
 
 Do not interpret curiosity as approval.
 
-### Do not optimize for few turns
+If the user explicitly keeps a choice under their own runtime control (for example, "这个我每次自己决定"), treat that control boundary as settled. Do not turn an earlier suggestion into a hidden default for the reserved choice.
 
-Do not compress several major design areas into one giant message just to reduce turns.
+Do not optimize for few turns.
 
-Prefer one major decision area, or one tightly related cluster, per turn.
+There is no fixed minimum or maximum number of interview rounds.
 
-A normal interview should take as many rounds as the design needs.
+## Decision depth
 
-There is no fixed minimum or maximum number of rounds.
+Coverage and depth are different.
 
-Completion is controlled by coverage and the user's explicit decision to end the interview, not by speed.
+- **Coverage** means the topic has been surfaced.
+- **Depth** means the decision is understood well enough to design from without guesswork.
 
-## Required design areas
+For an important decision, do not mark it settled after one shallow answer.
 
-The following eight areas form the minimum knowledge-base design coverage.
+Before settling a high-impact decision, understand enough of these three layers:
 
-They are internal coverage areas, not headings that must be shown to the user.
+1. **Real workflow** — what the user will actually do.
+2. **Priority or tradeoff** — what matters most and what compromise is acceptable.
+3. **Concrete scenario** — how this choice should behave in a realistic future case.
 
-The order is adaptive.
+Example:
 
-A later answer may reopen an earlier area.
+> “I want this organized by topic” is useful, but may not be deep enough.
 
----
+A follow-up might be:
+
+> “When you come back six months later, will you usually remember the topic first, the approximate date, the source, or something else?”
+
+Do not mechanically ask three questions for every detail. Apply this depth standard mainly to decisions that materially affect architecture, retrieval, maintenance, navigation, automation, or migration.
+
+## Open-decision surfacing
+
+The Agent's internal reasoning may reveal design questions the user has not answered yet.
+
+If such a question could materially change:
+
+- knowledge structure;
+- human navigation;
+- base selection;
+- storage layout;
+- automation mechanism;
+- permissions;
+- migration;
+- backup/versioning;
+- connection method;
+- long-term operating workflow;
+
+the Agent must not silently answer it for the user.
+
+Either:
+
+1. ask the user directly; or
+2. present a concrete recommendation with the tradeoff and ask whether the user accepts it.
+
+Do not downgrade an architecture-shaping question into an "implementation detail" merely because one answer seems sensible.
+
+Low-risk implementation details may still be chosen by the Agent when they do not materially alter the user's knowledge-base behavior or future options.
 
 ## 1. Purpose, users, and outcomes
 
@@ -71,21 +90,22 @@ Understand:
 - why the user wants it;
 - who will use it;
 - who will maintain it;
+- whether people directly browse/operate the base or mainly interact through an Agent;
 - what useful outcomes should come from it.
-
-Possible outcomes include learning, lookup, operational reuse, analysis, reporting, collaboration, archival, troubleshooting, or decision support.
 
 Ask concretely.
 
 Examples:
 
-> 这个库以后最常拿来做什么？自己翻资料、直接问 Agent、给团队查、做分析，还是还会拿它生成报告之类的东西？
+> 这个库以后最常拿来做什么？自己翻资料、直接问 Agent、给团队查、做分析，还是会拿里面的数据继续做别的事情？
 
 > 主要是谁用？你自己、你和 Agent、一个小团队，还是很多人一起维护？
 
-If purpose and users are already clear from context, confirm only what still affects the design.
+> 你自己会经常直接打开这个知识库浏览和找东西，还是基本都让 Agent 帮你查和维护？
 
----
+This distinction matters. A base that people directly browse needs a deliberate human-navigation model. A base used mainly through an Agent may not.
+
+Downstream use is relevant only insofar as it changes what the knowledge base must store or expose.
 
 ## 2. Content and record types
 
@@ -93,7 +113,7 @@ Understand what the knowledge base actually contains.
 
 Do not reduce this to "documents or data".
 
-Explore the real material types when relevant:
+Explore relevant material types such as:
 
 - narrative text;
 - structured records;
@@ -103,32 +123,27 @@ Explore the real material types when relevant:
 - code or configuration;
 - images or screenshots;
 - diagrams;
-- vector graphics;
-- animated media;
+- vector or animated media;
 - audio;
 - video;
 - online media links;
 - attachments;
-- generated reports;
-- other domain-specific artifacts.
+- generated artifacts;
+- other domain-specific material.
 
 Also understand what one meaningful knowledge unit looks like.
 
 Examples:
 
-> 你以后最常往里放的“一条东西”大概长什么样？是一篇完整笔记、一条带固定字段的记录、一份 PDF，还是经常会带图片和其他附件？
+> 你以后最常往里放的一条东西大概长什么样？是一篇完整笔记、一条固定字段的记录、一份文档，还是经常会带图片和其他附件？
 
-> 图片、视频、链接这些只是附件，还是它们本身也是需要被检索和长期管理的知识？
-
-This area strongly affects the base, structure, storage model, attachment handling, and retrieval method.
-
----
+> 图片、视频、链接这些只是附件，还是它们本身也需要被检索和长期管理？
 
 ## 3. Base and storage environment
 
 Only discuss the base after enough is known about usage and content, unless the user already chose one.
 
-Understand the practical constraints:
+Understand practical constraints such as:
 
 - local or remote;
 - personal or collaborative;
@@ -147,15 +162,15 @@ Do not make the user choose technology they do not understand.
 
 If the user is unsure, explain a small number of relevant approaches in plain language and recommend one.
 
-The base remains `unresolved` until the user accepts a direction.
+The base stays unresolved until the user accepts a direction.
 
-Once a base is selected, it will later go through Base Discovery. Do not embed platform-specific integration recipes here.
+When a serious candidate emerges, Base Discovery may run before this decision is fully settled.
 
----
+## 4. Knowledge structure and human navigation
 
-## 4. Knowledge structure and organization
+Understand both the canonical knowledge structure and, when relevant, how people directly navigate it.
 
-Understand how the knowledge should be organized once it exists.
+### Canonical knowledge structure
 
 This may include:
 
@@ -166,59 +181,67 @@ This may include:
 - fields;
 - tags;
 - links and relationships;
-- index or navigation pages;
 - attachment placement;
-- structured versus free-form sections;
-- how cross-topic knowledge is represented.
+- structured and free-form portions;
+- cross-topic relationships.
 
 Do not ask the user to invent a folder tree unless they want to.
 
 The Agent may propose a structure, but a proposal is not a settled decision.
 
-Example:
+Explain what problem each major structural part solves.
 
-> 这类知识本身有没有比较自然的几大块？如果现在说不准，我可以先按你的实际使用方式提出一个结构，再一起改。
+### Human navigation
 
-When proposing a structure, explain what problem each major part solves.
+If people will directly browse or operate the base, read `human-navigation.md`.
 
-Do not create complexity only to look organized.
+Do not assume the canonical storage structure is automatically a good browsing structure.
 
----
+Clarify how the person should:
 
-## 5. How new knowledge enters
+- enter the knowledge base;
+- browse recent and older knowledge;
+- move by the dimensions they naturally remember;
+- distinguish active/recent material from archived/older material;
+- find knowledge when the collection becomes much larger.
+
+Possible navigation can be physical or virtual. A person may browse by time, topic, author, project, status, or another domain-specific dimension without requiring a literal nested hierarchy.
+
+At least one realistic human-browsing scenario should be understood before this area is settled.
+
+If people will not directly use the base, do not over-engineer a human-facing navigation layer.
+
+## 5. How new knowledge enters and how sources are traced
 
 Understand the real intake workflow.
-
-Possible questions:
-
-> 平时拿到一份新资料以后，你希望直接整理进库，还是先随手丢进去，等 Agent 之后统一处理？
-
-> 如果是你自己的一条经验，是直接保存最终结论，还是还要保留当时的原始记录？
 
 Clarify when relevant:
 
 - where new material comes from;
-- whether there is a temporary holding area;
+- whether there is a temporary holding step;
 - whether original material is retained;
-- whether derived knowledge must link back to sources;
+- whether derived knowledge must link back to original material;
 - whether duplicate detection matters;
 - whether review is needed;
 - whether records have statuses;
-- whether an Agent or person performs each step.
+- whether a person or Agent performs each step.
 
-Do not expose internal terms such as ingestion pipeline, Raw layer, Source layer, or provenance unless useful, and explain them if used.
+If original material is retained, ask whether the user needs precise traceability.
 
----
+Example:
+
+> 以后如果发现 Agent 整理错了，你需要能精确追到“这条知识是从哪一份原始输入来的”，还是只要知道大概来源就够？
+
+If precise traceability is required, the design should use stable identifiers or explicit relationships. Do not rely only on weak labels such as date or source name.
+
+Do not expose internal terms such as Raw layer, Source layer, provenance, or ingestion pipeline unless useful, and explain them if used.
 
 ## 6. Retrieval, analysis, and outputs
 
 Understand how the knowledge will be used after it grows.
 
-This is a separate design problem from storage.
+Explore real needs such as:
 
-Explore real tasks such as:
-
-- browsing;
 - full-text search;
 - filtering by fields;
 - following links;
@@ -227,23 +250,35 @@ Explore real tasks such as:
 - aggregation;
 - Agent Q&A;
 - semantic retrieval;
-- report generation;
 - export;
 - statistics;
-- dashboards;
-- other domain-specific analysis.
+- generating downstream inputs.
 
-Ask for concrete future examples.
+Ask for realistic future examples.
 
 Example:
 
-> 假设这个库已经用了半年，你最可能对 Agent 说什么？“帮我找某个案例”，还是“比较最近三个月的数据”，或者“把这些内容整理成报告”？
+> 假设这个库已经用了半年，你最可能对 Agent 说什么？是找某条知识、比较一段时间的数据，还是把库里的内容导出去给别的系统继续处理？
 
-At least one realistic retrieval or analysis scenario should be understood before finalizing the base.
+### Consumer boundary
 
-If the desired retrieval behavior conflicts with the current base choice, reopen the base decision.
+Use downstream needs to define what the knowledge base must expose.
 
----
+Do not design the downstream consumer itself.
+
+If the user says they will later create a report, analysis package, dashboard, app, model input, or other consumer, determine only:
+
+- what data/content must be available;
+- what structure or export format the consumer needs;
+- what traceability or completeness the knowledge base must guarantee.
+
+Do not continue into the downstream product's own internal structure, prompts, charts, UI, report sections, or analysis workflow unless the user explicitly expands the scope.
+
+A useful test is:
+
+> Will this decision change the knowledge base itself or only the thing that consumes it?
+
+If only the consumer changes, stop at the interface requirement.
 
 ## 7. Maintenance and Agent autonomy
 
@@ -251,12 +286,12 @@ Understand how the knowledge base stays usable.
 
 Discuss:
 
-- who creates new knowledge;
-- who updates existing knowledge;
+- who creates knowledge;
+- who updates it;
 - how duplicates are handled;
 - how conflicts are handled;
 - how outdated knowledge is treated;
-- whether relationships or navigation are maintained;
+- whether navigation/relationships must be maintained;
 - whether categories may change;
 - whether validation or health checks are needed;
 - what the Agent may do automatically;
@@ -270,13 +305,9 @@ Example:
 
 Do not invent confirmation gates the user does not need.
 
-Do not grant broad write/delete authority by assumption.
-
----
-
 ## 8. Boundaries, history, migration, and growth
 
-Understand the constraints that could invalidate the design later.
+Understand constraints that could invalidate the design later.
 
 Discuss when relevant:
 
@@ -284,12 +315,12 @@ Discuss when relevant:
 - material that must remain untouched;
 - sensitive or private content;
 - Agent access boundaries;
-- backup expectations;
+- backup expectations and, when it matters, whether "backup" means an offline snapshot, portable export, or recoverable reconstruction;
 - version history;
-- audit or change logs;
+- audit/change logs;
 - expected growth;
 - long-term versus project-lifetime use;
-- export or exit strategy;
+- export/exit strategy;
 - future integration with other systems.
 
 Examples:
@@ -298,34 +329,23 @@ Examples:
 
 > 这里面会不会有不希望 Agent 读取的私人或公司敏感内容？
 
-> 你觉得这个库以后大概是几百条、几千条，还是可能长期一直长？这个会影响我们要不要一开始就为规模留余地。
-
-Do not over-engineer for hypothetical future scale, but do not ignore growth the user explicitly expects.
+> 你觉得这个库以后大概会增长到什么规模？这个会影响我们要不要一开始就给结构留余地。
 
 ## Research detours
 
-Research is used for facts, not user preferences.
+Use research for facts, not user preferences.
 
 Typical triggers include:
 
-- the user asks why one approach is better than another and the answer depends on current capabilities;
-- a platform's integration method is unclear;
-- current API/CLI/MCP/SDK support matters;
-- attachment, search, size, permission, export, or collaboration limits affect the decision;
-- the Agent is unfamiliar with the proposed base;
-- the user explicitly asks to research a direction before deciding.
+- the user asks for current capability facts before deciding;
+- a candidate base's official integration method is unclear;
+- attachment/search/permission/export limits matter;
+- the Agent is unfamiliar with the candidate base;
+- the user explicitly asks to research a direction.
 
-When research starts, mark the current decision `researching`.
+Whenever research is used, follow `research-contract.md`.
 
-Say what is being investigated.
-
-Example:
-
-> 这个会直接影响“基座”这一步，我先查清楚它现在有哪些正式的读写方式、附件能力和导出方式。这个问题先保持未决定，查完我们再回来选。
-
-After research, do not jump forward.
-
-Return to the same decision.
+After research, return to the paused decision.
 
 ## Decision dependency
 
@@ -333,25 +353,46 @@ Treat the interview like a design tree.
 
 Do not ask a decision whose prerequisite is still unresolved unless exploring both together is genuinely useful.
 
+A later answer may reopen earlier decisions.
+
 Examples:
 
-- attachment layout may depend on content types;
-- query design may force a different storage base;
-- Agent maintenance rules may depend on how the base exposes write operations;
-- migration may depend on the target structure.
+- attachment behavior can reopen the base;
+- retrieval needs can reopen structure or storage;
+- Base Discovery can reopen the base choice;
+- migration can reopen the target structure.
 
-When a new answer changes a prerequisite, reopen downstream decisions.
+## Settlement standard
 
-## Interview completion
+Before marking a high-impact area settled, check:
 
-The Agent does not decide when the interview ends.
+- Is the real workflow understood?
+- Is the important user priority or accepted tradeoff understood?
+- Is there at least one concrete scenario showing how the choice should behave?
+- If people directly use the base, is the human-facing experience clear enough for the relevant structure/navigation decision?
+- Is the decision source valid?
 
-Even if all eight areas are `settled`, remain in interview mode until the user explicitly ends it.
+A valid high-impact decision source is one of:
 
-If all areas are covered, say:
+- explicit user decision;
+- user-accepted recommendation;
+- verified environment fact;
+- explicit user deferral;
+- genuinely not-applicable.
 
-> 我这边需要弄清楚的部分已经都覆盖到了。你还可以继续问、改任何一块，也可以让我再 research 一个方向。等你觉得够了，再告诉我“出 SPEC”。
+The following is **not** valid:
 
-Do not generate the SPEC in the same message unless the user already explicitly asked for it.
+- "the Agent has a reasonable default";
+- "this is probably what the user wants";
+- "the current directory suggests this destination";
+- "the Agent already designed something plausible in reasoning".
 
-If the user explicitly ends the interview while a blocking decision is unresolved, explain the blocker instead of silently filling it.
+If not, the area is still `discussing`, even if it has already been mentioned.
+
+## Do not close early
+
+Do not say the interview is complete merely because all eight headings have been touched once.
+
+Before using any closure-signaling language — including "last question", "final few questions", "wrapping up", "after this it is complete", or equivalent wording — run `readiness-check.md`.
+
+Even after readiness passes, the user still owns the end of the interview.

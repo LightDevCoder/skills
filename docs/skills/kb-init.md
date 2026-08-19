@@ -49,6 +49,7 @@ admission path used `review-loop agent-skill`; the final verdict is `PASS`
 with no unresolved `BLOCKED` condition. Evidence is recorded in the
 [admission record](../evidence/admissions/kb-init/README.md).
 
-`kb-init` is currently unreleased on the default branch. Do not claim a
-verified release install command until a future tag includes it and fresh
-release-install verification exists under the [installation policy](../INSTALLATION.md).
+`kb-init` v1.0.0 is released in v0.1.6. Install it with
+`npx skills add LightDevCoder/skills --skill kb-init --yes --copy --agent '*'`,
+refresh, and confirm discovery without the source checkout under
+the [installation policy](../INSTALLATION.md).

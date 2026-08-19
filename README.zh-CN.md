@@ -4,20 +4,19 @@
 
 # Personal Skills Collection
 
-`LightDevCoder/skills` 是公开的第一方 Agent Skills 集合；当前分支包含九个可以独立安装、独立发现、明确声明调用边界的 Skill（已发布的 v0.1.5 仍为八个）。包内 `SKILL.md` 仍是行为权威；本 README 与用户指南负责说明使用方式。
+`LightDevCoder/skills` 是公开的第一方 Agent Skills 集合；当前分支包含九个可以独立安装、独立发现、明确声明调用边界的 Skill（已随 v0.1.6 发布）。包内 `SKILL.md` 仍是行为权威；本 README 与用户指南负责说明使用方式。
 
 > **简介：** Personal Skills Collection — Drive your creativity
 
-> **发布：** [v0.1.5](https://github.com/LightDevCoder/skills/releases/tag/v0.1.5)
-> 已从 commit `a56aa9d`（tag `v0.1.5`）发布。发布记录和 fresh-install 证据见
-> [docs/evidence/releases/v0.1.5/](docs/evidence/releases/v0.1.5/)；
+> **发布：** [v0.1.6](https://github.com/LightDevCoder/skills/releases/tag/v0.1.6)
+> 已从 commit `<release-commit>`（tag `v0.1.6`）发布。发布记录和 fresh-install 证据见
+> [docs/evidence/releases/v0.1.6/](docs/evidence/releases/v0.1.6/)；
 > post-release verification 记录在 main，并从 GitHub Release 链接。
 >
-> `light-kanban-worker` 经完整路径准入，独立 `review-loop agent-skill`
-> 验收为 `PASS`；见[准入证据](docs/evidence/admissions/light-kanban-worker/README.zh-CN.md)。
-> 其 v0.1.5 调度边界与身份变更带有第二次 `review-loop agent-skill`
-> `PASS`；见 [v0.1.5 release 证据](docs/evidence/releases/v0.1.5/README.zh-CN.md)。
-> 原有五个包的独立 acceptance 仍为 `BLOCKED`；准确边界见发布收据。
+> `kb-init` v1.0.0 经完整准入路径准入，独立 `review-loop agent-skill`
+> 验收为 `PASS`；见[准入证据](docs/evidence/admissions/kb-init/README.zh-CN.md)。
+> v0.1.6 发布九包集合。原有五个包的独立 acceptance 仍为 `BLOCKED`；
+> 准确边界见发布收据。
 
 ## Quick Start
 
@@ -33,7 +32,7 @@ npx skills add LightDevCoder/skills --yes --copy --agent '*'
 npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'
 ```
 
-刷新 Agent host，然后在其 Skill catalog 中确认发现结果。若 host 提供文件系统，检查已安装包的 `SKILL.md` 与 `agents/openai.yaml`；脱离 source checkout 后仍能发现，才是有意义的验证。CLI 版本、destination 和结果见 [INSTALLATION_VERIFICATION.zh-CN.md](docs/evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.zh-CN.md)。
+刷新 Agent host，然后在其 Skill catalog 中确认发现结果。若 host 提供文件系统，检查已安装包的 `SKILL.md` 与 `agents/openai.yaml`；脱离 source checkout 后仍能发现，才是有意义的验证。CLI 版本、destination 和结果见 [INSTALLATION_VERIFICATION.zh-CN.md](docs/evidence/releases/v0.1.6/INSTALLATION_VERIFICATION.zh-CN.md)。
 
 第一次不知道下一步时，推荐显式调用 `$ask-light`：
 
@@ -62,10 +61,9 @@ Use light-kanban-worker to process at most one Light-Kanban task.
 
 ## 外部能力（External Capabilities）
 
-已发布的 v0.1.5 集合包含八个第一方包：v0.1.2 的七个包
+已发布的 v0.1.6 集合包含九个第一方包：v0.1.2 的七个包
 （v0.1.1 的五个包加 `recap` 与 `language-learning`；v0.1.3 保持同样的七个包
-并迁移了测试工具链），再加 `light-kanban-worker`。当前默认分支额外准入
-未发布的 `kb-init`，成为第九个第一方 Skill；尚未为其创建新 release。
+并迁移了测试工具链），再加 `light-kanban-worker` 与 `kb-init` v1.0.0。
 
 以下是可选的 workflow 能力，来自外部或第三方来源，不属于默认集合：
 
@@ -117,7 +115,7 @@ Use light-kanban-worker to process at most one Light-Kanban task.
 - [审查策略](docs/REVIEW_POLICY.zh-CN.md)
 - [目录](CATALOG.zh-CN.md)
 - [变更记录](CHANGELOG.zh-CN.md)
-- [发布收据](docs/evidence/releases/v0.1.5/RELEASE_RECEIPT.zh-CN.md)
+- [发布收据](docs/evidence/releases/v0.1.6/RELEASE_RECEIPT.zh-CN.md)
 - [recap 准入证据](docs/evidence/admissions/recap/README.zh-CN.md)
 - [language-learning 准入证据](docs/evidence/admissions/language-learning/README.zh-CN.md)
 - [light-kanban-worker 准入证据](docs/evidence/admissions/light-kanban-worker/README.zh-CN.md)

@@ -1,4 +1,4 @@
-"""Deterministic contract tests for the kb-init first-party Skill."""
+"""Deterministic contract tests for the kb-init first-party Skill (v1.0.0)."""
 
 from __future__ import annotations
 
@@ -14,22 +14,39 @@ sys.path.insert(0, str(REPO_ROOT / "tests"))
 
 from check_helpers import Checks  # noqa: E402
 
-REQUIRED_MARKERS = [
+REQUIRED_REFS = [
+    "base-discovery.md",
+    "connection-setup.md",
+    "design-guide.md",
+    "human-navigation.md",
+    "interview-contract.md",
+    "readiness-check.md",
+    "research-contract.md",
+    "spec-guide.md",
+]
+
+SKILL_MARKERS = [
     "Interview before architecture",
     "The user owns decisions",
     "The user owns the end of the interview",
-    "Questions from the user interrupt the interview",
+    "User questions interrupt the interview",
     "No silent gap-filling",
-    "No platform recipes in the core skill",
-    "Computer use is never a prerequisite",
-    "Maintenance is part of the product",
-    "Allowed external skill",
+    "Depth before settlement",
+    "Surface architecture-shaping open decisions",
+    "Decision provenance matters",
+    "No platform recipes in the skill",
+    "Computer use is optional, never foundational",
+    "Maintenance is part of the knowledge base",
+    "Design for both human and Agent use when both exist",
+    "Stay inside the knowledge-base boundary",
+    "External skill policy",
     "research",
-    "user explicitly ends the interview",
-    "Base Discovery",
+    "readiness-check",
+    "Connection Setup",
+    "Connection Validation",
     "Approval gate",
-    "Implementation begins only after the user explicitly approves the SPEC",
-    "Validation should test the user's actual workflow",
+    "Implementation begins only after explicit approval of the SPEC",
+    "At minimum, verify representative end-to-end scenarios",
 ]
 
 
@@ -37,13 +54,9 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c = Checks()
     skill_path = root / "SKILL.md"
     metadata_path = root / "agents" / "openai.yaml"
-    refs = [
-        "base-discovery.md",
-        "design-guide.md",
-        "interview-contract.md",
-        "spec-guide.md",
-    ]
-    for path in [skill_path, metadata_path, root / "evals" / "evals.json"] + [root / "references" / r for r in refs]:
+    evals_path = root / "evals" / "evals.json"
+
+    for path in [skill_path, metadata_path, evals_path] + [root / "references" / r for r in REQUIRED_REFS]:
         c.check(path.is_file(), f"required path exists: {path}")
 
     skill = skill_path.read_text(encoding="utf-8", errors="replace")
@@ -60,45 +73,64 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.check("display_name:" in metadata and "short_description:" in metadata and "default_prompt:" in metadata, "metadata has required interface fields")
     c.check(bool(re.search(r'default_prompt:\s*"Use \$kb-init', metadata)), "metadata default prompt invokes kb-init explicitly")
 
-    for marker in REQUIRED_MARKERS:
+    for marker in SKILL_MARKERS:
         c.check(marker in skill, f"SKILL.md marker: {marker}")
 
-    for ref in refs:
-        text = (root / "references" / ref).read_text(encoding="utf-8", errors="replace")
-        c.check(len(text.strip()) > 0, f"references/{ref} is non-empty")
-
     interview = (root / "references" / "interview-contract.md").read_text(encoding="utf-8", errors="replace")
-    c.check("## 1. Purpose, users, and outcomes" in interview, "interview contract covers purpose/users/outcomes")
-    c.check("## 2. Content and record types" in interview, "interview contract covers content/record types")
-    c.check("## 3. Base and storage environment" in interview, "interview contract covers base/storage")
-    c.check("## 4. Knowledge structure and organization" in interview, "interview contract covers structure/organization")
-    c.check("## 5. How new knowledge enters" in interview, "interview contract covers intake")
-    c.check("## 6. Retrieval, analysis, and outputs" in interview, "interview contract covers retrieval/analysis")
-    c.check("## 7." in interview and "## 8." in interview, "interview contract has all eight required design areas")
-
-    spec = (root / "references" / "spec-guide.md").read_text(encoding="utf-8", errors="replace")
-    for marker in ["Problem and objective", "Base decision", "Approval gate", "Remaining limitations"]:
-        c.check(marker in spec, f"spec guide marker: {marker}")
+    for marker in [
+        "## 1. Purpose, users, and outcomes",
+        "## 2. Content and record types",
+        "## 3. Base and storage environment",
+        "## 4. Knowledge structure and human navigation",
+        "## 5. How new knowledge enters and how sources are traced",
+        "## 6. Retrieval, analysis, and outputs",
+        "## 7. Maintenance and Agent autonomy",
+        "## 8. Boundaries, history, migration, and growth",
+    ]:
+        c.check(marker in interview, f"interview contract section: {marker}")
 
     base = (root / "references" / "base-discovery.md").read_text(encoding="utf-8", errors="replace")
-    for marker in ["Storage model", "Programmatic access", "Authentication and permissions", "Export, backup, and portability", "No computer-use dependency"]:
+    for marker in ["Discover the storage model", "Discover programmatic access", "Discover authentication and permissions", "Discover export, backup, and portability", "Base fitness check", "Separate product capability from current Agent capability"]:
         c.check(marker in base, f"base discovery marker: {marker}")
 
-    evals_path = root / "evals" / "evals.json"
+    design = (root / "references" / "design-guide.md").read_text(encoding="utf-8", errors="replace")
+    for marker in ["Keep the models separate", "Human navigation model", "Make operational mechanisms explicit", "Backup claims match recovery reality"]:
+        c.check(marker in design, f"design guide marker: {marker}")
+
+    spec = (root / "references" / "spec-guide.md").read_text(encoding="utf-8", errors="replace")
+    for marker in ["Problem and objective", "Exact destination", "Connection plan", "Operational mechanism matrix", "Backup/versioning and recovery semantics", "Approval gate"]:
+        c.check(marker in spec, f"spec guide marker: {marker}")
+
+    readiness = (root / "references" / "readiness-check.md").read_text(encoding="utf-8", errors="replace")
+    for marker in ["Open decision surfacing", "Decision provenance", "Decision depth", "Human navigation when people directly use the base", "Exact destination", "Pre-approval side effects"]:
+        c.check(marker in readiness, f"readiness check marker: {marker}")
+
+    research = (root / "references" / "research-contract.md").read_text(encoding="utf-8", errors="replace")
+    for marker in ["Before dispatch", "Dispatch verification", "Research artifact isolation", "Completion verification", "After research"]:
+        c.check(marker in research, f"research contract marker: {marker}")
+
+    connection = (root / "references" / "connection-setup.md").read_text(encoding="utf-8", errors="replace")
+    for marker in ["Validate the connection", "Handle failure gracefully", "Record reconnection guidance", "Never ask the user to paste secrets"]:
+        c.check(marker in connection, f"connection setup marker: {marker}")
+
+    navigation = (root / "references" / "human-navigation.md").read_text(encoding="utf-8", errors="replace")
+    for marker in ["First establish the human role", "Design the entry point", "Design browse dimensions", "Test old-knowledge retrieval"]:
+        c.check(marker in navigation, f"human navigation marker: {marker}")
+
     evals = json.loads(evals_path.read_text(encoding="utf-8"))
     c.check(evals.get("skill") == "kb-init", "evals metadata names kb-init")
-    c.check(isinstance(evals.get("cases"), list) and len(evals["cases"]) >= 8, "evals has at least eight regression cases")
+    c.check(isinstance(evals.get("cases"), list) and len(evals["cases"]) >= 30, "evals has at least thirty regression cases")
     for case in evals["cases"]:
         c.check("id" in case and "prompt" in case and "expect" in case, f"eval case fields: {case.get('id')}")
 
     c.check(not re.search(r"TODO|\[TODO", skill), "no template placeholders remain")
 
-    # Opposite-polarity mutations: each change must be detected.
     mutated = skill.replace("The user owns the end of the interview", "The Agent may end the interview whenever enough information exists")
     c.check("The Agent may end the interview whenever enough information exists" in mutated, "mutation applied for user-owns-end")
     c.check("The user owns the end of the interview" not in mutated, "mutation removed the required marker")
-    mutated2 = skill.replace("Do not choose a base, folder structure, schema, or maintenance model before the user's workflow supports that choice.", "Choose a generic folder structure immediately.")
-    c.check("Choose a generic folder structure immediately." in mutated2 and "Interview before architecture." not in mutated2.split("## Core principles")[0], "interview-first mutation is detectable")
+    mutated2 = skill.replace("Do not choose a base, structure, schema, or maintenance model before the user's workflow supports that choice.", "Choose a generic structure immediately.")
+    c.check("Choose a generic structure immediately." in mutated2, "interview-first mutation applied")
+    c.check("Interview before architecture" not in mutated2.split("## Core principles")[0], "interview-first mutation is detectable")
 
     return c.assertions, c.failures
 

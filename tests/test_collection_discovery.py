@@ -74,6 +74,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.1\.3", installation)), "Installation guide is missing the historical pinned v0.1.3 release command.")
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.1\.4", installation)), "Installation guide is missing the historical pinned v0.1.4 release command.")
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.1\.5", installation)), "Installation guide is missing the pinned v0.1.5 release command.")
+    c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.1\.6", installation)), "Installation guide is missing the pinned v0.1.6 release command.")
     c.check(bool(re.search(r"#ref|fragment|default revision", installation)), "Installation guide must explain revision semantics rather than overclaim shorthand immutability.")
     c.check("commands target the immutable v0.1.0 release" not in installation, "Installation guide must not claim the old shorthand is permanently immutable.")
     c.check(not re.search(r"not a verified command|<owner>/<repository>", installation), "Installation guide still contains unresolved pre-release command wording.")
@@ -82,10 +83,10 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         all(token in installation for token in ("source_root", "skill_name", "destination_root")),
         "Manual fallback must use valid shell variables.",
     )
-    c.check(bool(re.search(r"(?is)v0\.1\.5.{0,160}is published from", readme)), "README must present v0.1.5 as the published release.")
+    c.check(bool(re.search(r"(?is)v0\.1\.6.{0,160}is published from", readme)), "README must present v0.1.6 as the published release.")
     c.check(bool(re.search(r"(?is)v0\.1\.2.{0,200}seven", readme)), "README must retain the v0.1.2 seven-package history.")
     c.check("9 admitted first-party Skills" in catalog, "Catalog must present the nine-package collection.")
-    c.check("Released v0.1.5" in catalog, "Catalog must present v0.1.5 as released.")
+    c.check("Released v0.1.6" in catalog, "Catalog must present v0.1.6 as released.")
     c.check(bool(re.search(r"(?is)v0\.1\.1[^\r\n]{0,80}five", readme)), "README must retain the v0.1.1 five-package history.")
     c.check(bool(re.search(r"light-kanban-worker.{0,200}scheduled", readme, re.IGNORECASE | re.DOTALL)), "README must present light-kanban-worker as the scheduled Light-Kanban worker Skill.")
 
@@ -168,6 +169,8 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         "docs/evidence/releases/v0.1.4/INSTALLATION_VERIFICATION.md",
         "docs/evidence/releases/v0.1.5/RELEASE_RECEIPT.md",
         "docs/evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.md",
+        "docs/evidence/releases/v0.1.6/RELEASE_RECEIPT.md",
+        "docs/evidence/releases/v0.1.6/INSTALLATION_VERIFICATION.md",
         ".github/workflows/quality.yml",
     ]:
         c.check((root / required).is_file(), f"Required documentation path is missing: {required}")

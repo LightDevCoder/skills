@@ -32,8 +32,8 @@ scheduling-boundary and first-registration identity change carries a second
 `review-loop agent-skill` `PASS`. kb-init is a user-invoked package whose
 interview can use tools and the model-invoked `research` capability and whose
 implementation can create files and state, so it follows the full admission
-path (`review-loop agent-skill`) and is admitted on this branch as an
-unreleased ninth Skill. Stable v0.1.1
+path (`review-loop agent-skill`) and is released in v0.1.6 as the v1.0.0
+package. Stable v0.1.1
 contained the original five admitted packages; v0.1.3 kept the v0.1.2
 package set and migrated the test toolchain. The check at
 [tests/test_collection_discovery.py](../tests/test_collection_discovery.py)

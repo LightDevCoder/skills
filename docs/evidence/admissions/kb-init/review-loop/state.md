@@ -1,7 +1,7 @@
 # Review Loop State
 
 - Captured at: 2026-08-18
-- Goal: admit `kb-init` into the first-party collection as an unreleased ninth Skill (full path)
+- Goal: admit `kb-init` v1.0.0 into the first-party collection as the ninth Skill (full path)
 - Charter revision: 1 (approved — direct user request)
 - Profile: agent-skill
 - Status: CLOSED — PASS (round-01)
@@ -10,4 +10,4 @@
 - Blockers: none
 - Recent decisions: verdict PASS; no unresolved findings
 - Open questions: none
-- Next action: future release gates (tag, fresh-install verification, release receipt) — out of admission scope
+- Next action: completed with v0.1.6 release gates (tag, fresh-install verification, release receipt)

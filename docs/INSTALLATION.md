@@ -3,20 +3,18 @@
 [中文安装说明](INSTALLATION.zh-CN.md)
 
 The public first-party collection's current stable release is
-[v0.1.5](https://github.com/LightDevCoder/skills/releases/tag/v0.1.5),
-published from commit `a56aa9d98de0b941ee2282144bc7e756ef5e48bd`. Package
+[v0.1.6](https://github.com/LightDevCoder/skills/releases/tag/v0.1.6),
+published from commit `<release-commit>`. Package
 contracts remain inside `skills/<name>/`; this document is the installation
 authority and does not replace host-specific discovery rules.
 
 The standard install command is the generic `latest` form: it follows the
 repository's default revision, so every `npx skills add
 LightDevCoder/skills` install gets the current collection on the default
-branch. As of this branch the default revision contains nine admitted Skills;
-`kb-init` is unreleased and will be included by the generic `latest` form only
-after it exists on the default revision. The published v0.1.5 tag remains the
-current stable release and contains eight Skills. The v0.1.5 commands below
+branch. As of this branch the default revision contains nine admitted Skills
+and is published as v0.1.6. The v0.1.6 commands below
 were verified against fresh destinations at that tag in the
-[v0.1.5 installation verification](evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.md).
+[v0.1.6 installation verification](evidence/releases/v0.1.6/INSTALLATION_VERIFICATION.md).
 
 ## Revision semantics
 
@@ -28,7 +26,7 @@ and [Git helper](https://raw.githubusercontent.com/vercel-labs/skills/main/src/g
 
 The generic `latest` command below uses no fragment and therefore follows the
 repository's default revision: it installs the current collection and is the
-standard way to install. The pinned `#v0.1.5` form selects the published tag
+standard way to install. The pinned `#v0.1.6` form selects the published tag
 and is retained for reproducible installs and release verification. Neither
 form is a claim about a future default revision; re-run discovery against the
 fresh destination for the resolved content.
@@ -42,10 +40,31 @@ npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'
 ```
 
 
-## v0.1.5 release commands
+## v0.1.6 release commands
 
-The v0.1.5 release commands were verified against the published v0.1.5 tag and
-installed the eight-package collection at that revision:
+The v0.1.6 release commands were verified against the published v0.1.6 tag and
+installed the nine-package collection at that revision:
+
+```text
+npx skills add LightDevCoder/skills#v0.1.6 --yes --copy --agent '*'
+npx skills add LightDevCoder/skills#v0.1.6 --skill kb-init --yes --copy --agent '*'
+npx skills add LightDevCoder/skills#v0.1.6 --skill review-loop --yes --copy --agent '*'
+```
+
+The first installs the nine-package collection and the others select one
+complete package from the same verified revision. The forms are
+verified against fresh destinations in the
+[v0.1.6 installation record](evidence/releases/v0.1.6/INSTALLATION_VERIFICATION.md).
+
+The `latest` form and the `#v0.1.6` form resolve to the same content at
+release time; only the pinned form is stable against future
+default-revision changes.
+
+## Historical v0.1.5 verification
+
+The previous stable release was the published v0.1.5 snapshot at commit
+`a56aa9d98de0b941ee2282144bc7e756ef5e48bd`. It installed the eight-package
+collection at that revision. Its verified pinned forms were:
 
 ```text
 npx skills add LightDevCoder/skills#v0.1.5 --yes --copy --agent '*'
@@ -53,14 +72,8 @@ npx skills add LightDevCoder/skills#v0.1.5 --skill light-kanban-worker --yes --c
 npx skills add LightDevCoder/skills#v0.1.5 --skill review-loop --yes --copy --agent '*'
 ```
 
-The first installs the eight-package collection and the others select one
-complete package from the same verified revision. The forms are
-verified against fresh destinations in the
+Verified against fresh destinations in the
 [v0.1.5 installation record](evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.md).
-
-The `latest` form and the `#v0.1.5` form resolve to the same content at
-release time; only the pinned form is stable against future
-default-revision changes.
 
 ## Historical v0.1.4 verification
 

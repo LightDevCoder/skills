@@ -13,19 +13,19 @@ Agent host.
 | --- | --- |
 | Collection | Personal Skills Collection |
 | Package count | 9 admitted first-party Skills |
-| Current state | Released v0.1.5; current branch adds unreleased `kb-init` as the ninth admitted first-party Skill |
-| Stable release | [v0.1.5](https://github.com/LightDevCoder/skills/releases/tag/v0.1.5) |
+| Current state | Released v0.1.6; collection contains nine admitted first-party Skills, including `kb-init` v1.0.0 |
+| Stable release | [v0.1.6](https://github.com/LightDevCoder/skills/releases/tag/v0.1.6) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) |
-| Evidence | [v0.1.5 release evidence](docs/evidence/releases/v0.1.5/) |
+| Evidence | [v0.1.6 release evidence](docs/evidence/releases/v0.1.6/) |
 
 Stable `v0.1.1` contained the original five packages; v0.1.2 added `recap` and
 `language-learning` for seven admitted first-party Skills; v0.1.3 kept the
 same seven and migrated the test toolchain; v0.1.4 adds `light-kanban-worker`
 for eight admitted packages; v0.1.5 adds the worker's non-overlapping-run and
-first-registration identity contract. The current default branch additionally
-admits unreleased `kb-init` as a ninth first-party Skill; no new stable tag
-has been cut for it yet.
+first-registration identity contract. v0.1.6 adds `kb-init` v1.0.0 as the
+ninth admitted first-party Skill and publishes the collection as a nine-package
+stable release.
 
 No package in this table is an unmodified upstream copy. Direct upstream
 dependencies and modified third-party variants are documented separately.
@@ -46,7 +46,7 @@ dependencies and modified third-party variants are documented separately.
 - **Purpose:** Design and initialize a maintainable knowledge base through a knowledge-base-specific interview, then implement it only after the user ends the interview and approves the implementation SPEC.
 - **Invocation:** User-invoked only; never triggers on its own from a generic mention of knowledge bases.
 - **Package:** [skills/kb-init/](skills/kb-init/)
-- **Status:** Admitted first-party via the full admission path (`review-loop agent-skill` `PASS`); unreleased on the current branch.
+- **Status:** Admitted first-party via the full admission path (`review-loop agent-skill` `PASS`); released in v0.1.6 as the v1.0.0 package.
 - **Evidence:** Contract tests under [skills/kb-init/tests/](skills/kb-init/tests/), [user guide](docs/skills/kb-init.md), and [admission evidence](docs/evidence/admissions/kb-init/README.md).
 - **Installation path:** `skills/kb-init/` in a host-recognized Skills root.
 

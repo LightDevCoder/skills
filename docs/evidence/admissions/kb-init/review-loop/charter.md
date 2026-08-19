@@ -16,7 +16,7 @@
 - Selection reason: the target is an installable Agent Skill package whose installation, discovery, invocation, behavior, and interaction boundaries must be accepted (Skills-repo admission contract full path; the prompt-only fast track does not apply because kb-init can use tools, call the model-invoked `research` capability, and create files/state)
 
 ## Original goal
-Admit the first-party, user-invoked `kb-init` Skill into the LightDevCoder/skills collection as an unreleased ninth package so it can ship in a future tag when more Skills accumulate.
+Admit the first-party, user-invoked `kb-init` Skill v1.0.0 into the LightDevCoder/skills collection as the ninth package and release it in v0.1.6.
 
 ## User-visible outcome
 Explicit `kb-init` runs a knowledge-base-specific interview, performs Base Discovery when a base is selected, produces an implementation SPEC, and only after explicit user approval implements, validates, and hands off the knowledge base.
@@ -38,7 +38,7 @@ Explicit `kb-init` runs a knowledge-base-specific interview, performs Base Disco
 - AC-4: references cover interview contract, design guide, base discovery, and SPEC guide with the required design areas
 - AC-5: contract test passes with non-zero assertions, including positive and negative mutation checks
 - AC-6: documentation synchronization is complete for the nine-package current branch while v0.1.5 stays the eight-package stable release
-- AC-7: no verified release install command is claimed for `kb-init` before a future tag and fresh verification
+- AC-7: the admission record does not claim release verification; v0.1.6 released-tag fresh-install verification is recorded separately under docs/evidence/releases/v0.1.6/
 - AC-8: fresh independent Evaluator returns `PASS`
 
 ## Required evidence
@@ -54,7 +54,7 @@ Explicit `kb-init` runs a knowledge-base-specific interview, performs Base Disco
 - VS-4: evals/evals.json cases cover automatic interview start, user-question handling, no auto-SPEC, research detour, explicit end, and approval gate
 
 ## Constraints, assumptions, and risks
-- The candidate is unreleased; local-source/structural evidence is admission evidence, not released-install proof.
+- The candidate is released in v0.1.6; local-source/structural evidence is admission evidence, and released-tag fresh-install verification is a separate release gate.
 - `evals.json` is a semantic regression fixture, not an executed model-evaluation harness; it is reviewed as spec coverage.
 - Maximum review rounds: 3.
 

@@ -10,17 +10,17 @@
 | --- | --- |
 | 集合 | Personal Skills Collection |
 | 包数量 | 9 个已准入第一方 Skill |
-| 当前状态 | 已发布 v0.1.5；当前分支增加未发布 `kb-init`，作为第九个已准入第一方 Skill |
-| 稳定版本 | [v0.1.5](https://github.com/LightDevCoder/skills/releases/tag/v0.1.5) |
+| 当前状态 | 已发布 v0.1.6；集合包含九个已准入第一方 Skill，含 `kb-init` v1.0.0 |
+| 稳定版本 | [v0.1.6](https://github.com/LightDevCoder/skills/releases/tag/v0.1.6) |
 | 安装权威 | [docs/INSTALLATION.zh-CN.md](docs/INSTALLATION.zh-CN.md) |
 | 发现检查 | [test_collection_discovery.py](tests/test_collection_discovery.py) |
-| 证据 | [v0.1.5 发布证据](docs/evidence/releases/v0.1.5/RELEASE_RECEIPT.zh-CN.md) |
+| 证据 | [v0.1.6 发布证据](docs/evidence/releases/v0.1.6/RELEASE_RECEIPT.zh-CN.md) |
 
 稳定 `v0.1.1` 包含原来的五个包；v0.1.2 加入 `recap` 与 `language-learning`，
 共七个已准入第一方 Skill；v0.1.3 保持同样的七个包并迁移了测试工具链；
 v0.1.4 加入 `light-kanban-worker`，共八个已准入包；v0.1.5 增加 worker 的
-same-agent run 不得重叠与首次注册身份契约。当前默认分支额外准入未发布的
-`kb-init`，成为第九个第一方 Skill；尚未为其创建新的稳定 tag。
+same-agent run 不得重叠与首次注册身份契约。v0.1.6 将 `kb-init` v1.0.0
+作为第九个已准入第一方 Skill 加入，并发布为九包稳定版本。
 
 ## 已准入 Skill
 
@@ -38,7 +38,7 @@ same-agent run 不得重叠与首次注册身份契约。当前默认分支额�
 - **作用：** 通过知识库专属访谈设计并初始化一个可维护的知识库；只有在用户结束访谈并批准实施方案 SPEC 后才实施。
 - **调用：** 仅 user-invoked；不会因为泛泛提到知识库而自动触发。
 - **包：** [skills/kb-init/](skills/kb-init/)
-- **状态：** 经完整准入路径（`review-loop agent-skill` `PASS`）准入；当前分支上未发布。
+- **状态：** 经完整准入路径（`review-loop agent-skill` `PASS`）准入；以 v1.0.0 包发布在 v0.1.6。
 - **证据：** [contract tests](skills/kb-init/tests/)、[使用指南](docs/zh-CN/skills/kb-init.md)与[准入证据](docs/evidence/admissions/kb-init/README.zh-CN.md)。
 - **安装路径：** host 认可的 Skills root 下的 `skills/kb-init/`。
 

@@ -9,8 +9,8 @@
 
 ## Conclusion
 
-`skills/kb-init/` is admitted into the first-party collection as an unreleased
-ninth package. All frozen acceptance criteria (AC-1…AC-8) are satisfied with
+`skills/kb-init/` is admitted into the first-party collection as the ninth
+package (v1.0.0), released in v0.1.6. All frozen acceptance criteria (AC-1…AC-8) are satisfied with
 appropriately labeled evidence: structural/contract (package files and
 `test_kb_init_contract.py`), invocation (explicit-only frontmatter and
 `agents/openai.yaml`), documentation synchronization (nine-package current
@@ -23,12 +23,12 @@ Evaluator `PASS`).
 - Admission evidence: README, README.zh-CN, charter, verdict, and state.
 
 ## Unfinished work (out of admission scope)
-- New release/tag for `kb-init`.
-- Published-tag fresh-install verification (`npx skills add LightDevCoder/skills#<next-tag> --skill kb-init …`).
+- None for admission; the v0.1.6 release and fresh-install verification are
+  recorded under docs/evidence/releases/v0.1.6/.
 
 ## Risks
 - `evals.json` is a semantic regression fixture, not an executed model-evaluation harness; treat as spec coverage, not runtime proof.
-- No fresh host installation was run; none is claimed because the package is unreleased.
+- No fresh host installation was run during admission review; the released-tag fresh-install verification is a release gate under docs/evidence/releases/v0.1.6/.
 
 ## Reopen note
 Reopen with a recorded Change Proposal if the package capability, invocation

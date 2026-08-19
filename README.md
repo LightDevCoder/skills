@@ -5,25 +5,23 @@
 # Personal Skills Collection
 
 `LightDevCoder/skills` is the public, first-party home for nine installable
-Agent Skills on the current branch (the published v0.1.5 release remains eight). Each package is independently discoverable,
+Agent Skills on the current branch (published in v0.1.6). Each package is independently discoverable,
 explicit about its invocation boundary, and small enough to inspect before use.
 
 > **About:** Personal Skills Collection — Drive your creativity
 
-> **Release:** [v0.1.5](https://github.com/LightDevCoder/skills/releases/tag/v0.1.5)
-> is published from commit `a56aa9d` (tag `v0.1.5`). The release record and fresh-install evidence
-> live in [docs/evidence/releases/v0.1.5/](docs/evidence/releases/v0.1.5/);
+> **Release:** [v0.1.6](https://github.com/LightDevCoder/skills/releases/tag/v0.1.6)
+> is published from commit `<release-commit>` (tag `v0.1.6`). The release record and fresh-install evidence
+> live in [docs/evidence/releases/v0.1.6/](docs/evidence/releases/v0.1.6/);
 > post-release verification is recorded on main and linked from the GitHub
 > Release.
 >
-> `light-kanban-worker` was admitted through the full path with an independent
-> `review-loop agent-skill` `PASS`; see its
-> [admission evidence](docs/evidence/admissions/light-kanban-worker/README.md).
-> Its v0.1.5 scheduling-boundary and identity change carries a second
-> `review-loop agent-skill` `PASS`; see the
-> [v0.1.5 release evidence](docs/evidence/releases/v0.1.5/README.md).
-> Independent acceptance for the original five packages remains `BLOCKED`;
-> see the release receipts for the exact boundary.
+> `kb-init` v1.0.0 was admitted through the full admission path with an
+> independent `review-loop agent-skill` `PASS`; see its
+> [admission evidence](docs/evidence/admissions/kb-init/README.md).
+> v0.1.6 publishes the nine-package collection. Independent acceptance for the
+> original five packages remains `BLOCKED`; see the release receipts for the
+> exact boundary.
 
 ## Quick Start
 
@@ -43,7 +41,7 @@ Refresh the Agent host, then confirm that the package is visible in its Skill
 catalog. If the host exposes a filesystem, inspect the installed package's
 `SKILL.md` and `agents/openai.yaml`; discovery without the source checkout is
 the meaningful check. The exact CLI version, destination, and result are in
-[INSTALLATION_VERIFICATION.md](docs/evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.md).
+[INSTALLATION_VERIFICATION.md](docs/evidence/releases/v0.1.6/INSTALLATION_VERIFICATION.md).
 
 The first useful entry point when the next move is unclear is `$ask-light`:
 
@@ -82,12 +80,10 @@ the scheduler so only one run of the same agent id can be active at a time
 
 ## External capabilities
 
-The published v0.1.5 collection contains eight first-party packages: the
+The published v0.1.6 collection contains nine first-party packages: the
 v0.1.2 release's seven (v0.1.1's five plus `recap` and `language-learning`;
 v0.1.3 kept the same seven and migrated the test toolchain), plus
-`light-kanban-worker`. The current default branch additionally admits
-unreleased `kb-init` as a ninth first-party Skill; no new release has been
-cut for it yet.
+`light-kanban-worker`, plus `kb-init` v1.0.0.
 
 Optional workflow capabilities are external or third-party dependencies and are
 not included by default:
@@ -160,7 +156,7 @@ and is never copied into this public collection.
 - [Review policy](docs/REVIEW_POLICY.md)
 - [Catalog](CATALOG.md)
 - [Changelog](CHANGELOG.md)
-- [Release receipt](docs/evidence/releases/v0.1.5/RELEASE_RECEIPT.md)
+- [Release receipt](docs/evidence/releases/v0.1.6/RELEASE_RECEIPT.md)
 - [recap admission evidence](docs/evidence/admissions/recap/README.md)
 - [language-learning admission evidence](docs/evidence/admissions/language-learning/README.md)
 - [light-kanban-worker admission evidence](docs/evidence/admissions/light-kanban-worker/README.md)

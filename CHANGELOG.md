@@ -6,28 +6,41 @@ All notable changes are recorded here. A release entry must be tied to an
 actual version or tag and must not be created merely because a document was
 drafted.
 
-## Unreleased
+## 0.1.6 — 2026-08-19
 
 ### Added
 
-- First-party `kb-init` Skill: a knowledge-base-specific interview that designs
-  a maintainable knowledge base and initializes it only after the user
-  explicitly ends the interview, approves the implementation SPEC, and asks to
-  proceed. It is user-invoked only, may call the model-invoked `research`
-  capability for external facts, and never invokes another user-invoked Skill.
-  Because the interview and implementation can use tools, read or write files,
-  and create knowledge-base state, it follows the full admission path
-  (`review-loop agent-skill` `PASS`) rather than the prompt-only fast track.
-- `kb-init` contract tests and bilingual user guides.
-- Documentation and discovery synchronization for the nine-package current
-  branch: README, catalog, installation guide, maintenance baseline, and
-  discovery tests now treat the default branch as containing nine admitted
-  first-party Skills while the published v0.1.5 tag remains the eight-package
-  stable release.
+- First-party `kb-init` Skill v1.0.0: the formal knowledge-base initialization
+  package replaces the earlier unreleased draft. It adds expanded core
+  principles (decision provenance, open-decision surfacing, depth before
+  settlement), readiness checks, human-navigation design, a research contract,
+  connection setup/validation, backup/recovery semantics, and 38 regression
+  eval cases. It remains user-invoked only per owner decision.
+- Contract tests and bilingual user guides updated for the v1.0.0 package.
+- v0.1.6 publishes the nine-package collection: v0.1.1's five, `recap` and
+  `language-learning` (v0.1.2), `light-kanban-worker` (v0.1.4), and `kb-init`
+  v1.0.0.
 
-No version, tag, release receipt, or verified release installation command has
-been created for `kb-init`; it is intentionally unreleased and will ship with a
-future tag once more Skills accumulate.
+### Changed
+
+- `kb-init` stays explicit-only: `disable-model-invocation: true` in
+  `SKILL.md` and `allow_implicit_invocation: false` in `agents/openai.yaml`.
+- README, catalog, installation guide, maintenance baseline, discovery tests,
+  and bilingual guides updated from the v0.1.5 eight-package release boundary
+  to the v0.1.6 nine-package release.
+
+### Release evidence
+
+- Release tag: `v0.1.6`, commit `<release-commit>`.
+- GitHub Actions `collection-quality`: PASS on the release commit.
+- Fresh whole-collection and per-Skill installs: PASS with the documented CLI
+  for both generic `latest` and pinned `#v0.1.6` forms; see
+  [INSTALLATION_VERIFICATION.md](docs/evidence/releases/v0.1.6/INSTALLATION_VERIFICATION.md).
+- Host discovery:
+  [DISCOVERY_VERIFICATION.md](docs/evidence/releases/v0.1.6/DISCOVERY_VERIFICATION.md).
+- GitHub release: https://github.com/LightDevCoder/skills/releases/tag/v0.1.6
+- Final receipt:
+  [RELEASE_RECEIPT.md](docs/evidence/releases/v0.1.6/RELEASE_RECEIPT.md).
 
 ## 0.1.5 — 2026-08-17
 
