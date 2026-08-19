@@ -31,8 +31,8 @@ drafted.
 
 ### Release evidence
 
-- Release tag: `v0.1.6`, commit `<release-commit>`.
-- GitHub Actions `collection-quality`: PASS on the release commit.
+- Release tag: `v0.1.6`, commit `41b6e7169a1c68bb017f9ff6c464b220185b02ff`.
+- GitHub Actions `collection-quality`: PASS on the release commit (run `32230990952`).
 - Fresh whole-collection and per-Skill installs: PASS with the documented CLI
   for both generic `latest` and pinned `#v0.1.6` forms; see
   [INSTALLATION_VERIFICATION.md](docs/evidence/releases/v0.1.6/INSTALLATION_VERIFICATION.md).

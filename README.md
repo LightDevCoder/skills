@@ -11,7 +11,7 @@ explicit about its invocation boundary, and small enough to inspect before use.
 > **About:** Personal Skills Collection — Drive your creativity
 
 > **Release:** [v0.1.6](https://github.com/LightDevCoder/skills/releases/tag/v0.1.6)
-> is published from commit `<release-commit>` (tag `v0.1.6`). The release record and fresh-install evidence
+> is published from commit `41b6e71` (tag `v0.1.6`). The release record and fresh-install evidence
 > live in [docs/evidence/releases/v0.1.6/](docs/evidence/releases/v0.1.6/);
 > post-release verification is recorded on main and linked from the GitHub
 > Release.

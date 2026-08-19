@@ -2,7 +2,7 @@
 
 [English installation guide](INSTALLATION.md)
 
-公开第一方集合当前稳定版本是 [v0.1.6](https://github.com/LightDevCoder/skills/releases/tag/v0.1.6)，发布自 commit `<release-commit>`。`skills/<name>/` 内的包契约仍是行为权威；本页只规定安装和验证证据。
+公开第一方集合当前稳定版本是 [v0.1.6](https://github.com/LightDevCoder/skills/releases/tag/v0.1.6)，发布自 commit `41b6e7169a1c68bb017f9ff6c464b220185b02ff`。`skills/<name>/` 内的包契约仍是行为权威；本页只规定安装和验证证据。
 
 标准安装命令是通用 `latest` 形式：它跟随仓库默认 revision，因此每次
 `npx skills add LightDevCoder/skills` 都安装默认分支上的当前集合。当前

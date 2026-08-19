@@ -10,7 +10,7 @@
 | --- | --- |
 | 仓库 | `LightDevCoder/skills`（公开） |
 | 发布 | `v0.1.6` |
-| 发布 commit | `<release-commit>` |
+| 发布 commit | `41b6e7169a1c68bb017f9ff6c464b220185b02ff` |
 | 发布 tag | `v0.1.6` |
 | 发布 URL | https://github.com/LightDevCoder/skills/releases/tag/v0.1.6 |
 | 范围 | 发布 `kb-init` v1.0.0 作为第九个已准入第一方 Skill；仅 user-invoked；文档/测试/证据同步到九包集合 |
@@ -36,8 +36,8 @@
 
 | 检查 | 记录 |
 | --- | --- |
-| 已发布 tag 与 commit | `v0.1.6` → `<release-commit>` |
+| 已发布 tag 与 commit | `v0.1.6` → `41b6e7169a1c68bb017f9ff6c464b220185b02ff` |
 | `LightDevCoder/skills#v0.1.6` fresh install | PASS — [INSTALLATION_VERIFICATION.zh-CN.md](INSTALLATION_VERIFICATION.zh-CN.md) |
 | Host discovery | PASS — [DISCOVERY_VERIFICATION.zh-CN.md](DISCOVERY_VERIFICATION.zh-CN.md) |
-| Release CI（`collection-quality`） | PASS |
+| Release CI（`collection-quality`） | PASS — run `32230990952`，commit `41b6e71` |
 | GitHub Release | https://github.com/LightDevCoder/skills/releases/tag/v0.1.6 |
