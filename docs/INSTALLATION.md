@@ -4,7 +4,7 @@
 
 The public first-party collection's current stable release is
 [v0.1.6](https://github.com/LightDevCoder/skills/releases/tag/v0.1.6),
-published from commit `41b6e7169a1c68bb017f9ff6c464b220185b02ff`. Package
+published from commit `e8c3589031bbc1cb76d7f928761ce3f60ebea3e1`. Package
 contracts remain inside `skills/<name>/`; this document is the installation
 authority and does not replace host-specific discovery rules.
 

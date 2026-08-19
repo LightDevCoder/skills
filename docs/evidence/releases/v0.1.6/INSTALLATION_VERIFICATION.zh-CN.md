@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | 命令 | `npx skills add LightDevCoder/skills --yes --copy --agent '*'`（latest）与 `npx skills add LightDevCoder/skills#v0.1.6 --yes --copy --agent '*'`（tag） | `npx skills add LightDevCoder/skills --skill kanban-worker --yes --copy --agent '*'`（latest）与 `npx skills add LightDevCoder/skills#v0.1.6 --skill kanban-worker --yes --copy --agent '*'`（tag） | `npx skills add LightDevCoder/skills --skill kb-init --yes --copy --agent '*'`（latest）与 `npx skills add LightDevCoder/skills#v0.1.6 --skill kb-init --yes --copy --agent '*'`（tag） |
 | CLI 版本 | `1.5.23` | `1.5.23` |
-| 发布 commit | `41b6e7169a1c68bb017f9ff6c464b220185b02ff`（`v0.1.6` tag） | 相同 |
+| 发布 commit | `e8c3589031bbc1cb76d7f928761ce3f60ebea3e1`（`v0.1.6` tag） | 相同 |
 | Fresh destination | 新空临时目录；发现/安装 9 个 skills | 新空临时目录；恰好 1 个包（`kanban-worker`） | 新空临时目录；恰好 1 个包（`kb-init`） |
 | 安装结果 | PASS | PASS | PASS |
 | 脱离 source checkout 的 discovery | `npx --yes skills list` exit 0；包含 `kb-init`；无 source checkout | `npx --yes skills list` exit 0；恰好 `kb-init`；无 source checkout |

@@ -28,8 +28,8 @@
 
 ### Release 证据
 
-- Release tag：`v0.1.6`，commit `41b6e7169a1c68bb017f9ff6c464b220185b02ff`。
-- GitHub Actions `collection-quality`：release commit 上 PASS（run `32230990952`）。
+- Release tag：`v0.1.6`，commit `e8c3589031bbc1cb76d7f928761ce3f60ebea3e1`。
+- GitHub Actions `collection-quality`：release commit 上 PASS（run `32232850422`）。
 - 整集合与单 Skill fresh installs：通用 `latest` 与 pinned `#v0.1.6` 形式
   PASS；见
   [INSTALLATION_VERIFICATION.zh-CN.md](docs/evidence/releases/v0.1.6/INSTALLATION_VERIFICATION.zh-CN.md)。

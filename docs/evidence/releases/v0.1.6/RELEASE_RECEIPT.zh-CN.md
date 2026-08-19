@@ -10,7 +10,7 @@
 | --- | --- |
 | 仓库 | `LightDevCoder/skills`（公开） |
 | 发布 | `v0.1.6` |
-| 发布 commit | `41b6e7169a1c68bb017f9ff6c464b220185b02ff` |
+| 发布 commit | `e8c3589031bbc1cb76d7f928761ce3f60ebea3e1` |
 | 发布 tag | `v0.1.6` |
 | 发布 URL | https://github.com/LightDevCoder/skills/releases/tag/v0.1.6 |
 | 范围 | 新增 `kb-init` 作为第九个已准入第一方 Skill，并把 `light-kanban-worker` 改名为 `kanban-worker`；文档/测试/证据同步到九包集合 |
@@ -37,8 +37,8 @@
 
 | 检查 | 记录 |
 | --- | --- |
-| 已发布 tag 与 commit | `v0.1.6` → `41b6e7169a1c68bb017f9ff6c464b220185b02ff` |
+| 已发布 tag 与 commit | `v0.1.6` → `e8c3589031bbc1cb76d7f928761ce3f60ebea3e1` |
 | `LightDevCoder/skills#v0.1.6` fresh install | PASS — [INSTALLATION_VERIFICATION.zh-CN.md](INSTALLATION_VERIFICATION.zh-CN.md) |
 | Host discovery | PASS — [DISCOVERY_VERIFICATION.zh-CN.md](DISCOVERY_VERIFICATION.zh-CN.md) |
-| Release CI（`collection-quality`） | PASS — run `32230990952`，commit `41b6e71` |
+| Release CI（`collection-quality`） | PASS — run `32232850422`，commit `e8c3589` |
 | GitHub Release | https://github.com/LightDevCoder/skills/releases/tag/v0.1.6 |

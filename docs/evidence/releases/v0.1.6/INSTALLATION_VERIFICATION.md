@@ -13,7 +13,7 @@ discovery was run from each fresh destination without a source checkout.
 | --- | --- | --- |
 | Command | `npx skills add LightDevCoder/skills --yes --copy --agent '*'` (latest) and `npx skills add LightDevCoder/skills#v0.1.6 --yes --copy --agent '*'` (tag) | `npx skills add LightDevCoder/skills --skill kb-init --yes --copy --agent '*'` (latest) and `npx skills add LightDevCoder/skills#v0.1.6 --skill kb-init --yes --copy --agent '*'` (tag) |
 | CLI version | `1.5.23` | `1.5.23` |
-| Released commit | `41b6e7169a1c68bb017f9ff6c464b220185b02ff` (`v0.1.6` tag) | same |
+| Released commit | `e8c3589031bbc1cb76d7f928761ce3f60ebea3e1` (`v0.1.6` tag) | same |
 | Fresh destination | New empty temporary directory; found/installed 9 skills | New empty temporary directory; exactly 1 package (`kb-init`) |
 | Install result | PASS | PASS |
 | Discovery without source checkout | `npx --yes skills list` exit 0; `kb-init` listed; source checkout absent | `npx --yes skills list` exit 0; exactly `kb-init` listed; source checkout absent |

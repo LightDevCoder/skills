@@ -10,7 +10,7 @@ Status: `RELEASED` — tag published, post-release verification recorded on main
 | --- | --- |
 | Repository | `LightDevCoder/skills` (public) |
 | Release | `v0.1.6` |
-| Release commit | `41b6e7169a1c68bb017f9ff6c464b220185b02ff` |
+| Release commit | `e8c3589031bbc1cb76d7f928761ce3f60ebea3e1` |
 | Release tag | `v0.1.6` |
 | Release URL | https://github.com/LightDevCoder/skills/releases/tag/v0.1.6 |
 | Scope | Add `kb-init` as the ninth admitted first-party Skill and rename `light-kanban-worker` → `kanban-worker`; docs/tests/evidence synchronized for the nine-package collection |
@@ -44,8 +44,8 @@ Status: `RELEASED` — tag published, post-release verification recorded on main
 
 | Check | Record |
 | --- | --- |
-| Published tag identity and release commit | `v0.1.6` → `41b6e7169a1c68bb017f9ff6c464b220185b02ff` |
+| Published tag identity and release commit | `v0.1.6` → `e8c3589031bbc1cb76d7f928761ce3f60ebea3e1` |
 | Fresh install from `LightDevCoder/skills#v0.1.6` | PASS — [INSTALLATION_VERIFICATION.md](INSTALLATION_VERIFICATION.md) |
 | Host discovery | PASS — [DISCOVERY_VERIFICATION.md](DISCOVERY_VERIFICATION.md) |
-| Release CI (`collection-quality`) | PASS — run `32230990952` on commit `41b6e71` |
+| Release CI (`collection-quality`) | PASS — run `32232850422` on commit `e8c3589` |
 | GitHub Release | https://github.com/LightDevCoder/skills/releases/tag/v0.1.6 |
