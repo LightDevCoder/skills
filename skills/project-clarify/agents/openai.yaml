@@ -1,0 +1,7 @@
+interface:
+  display_name: "Project Clarify"
+  short_description: "Clarify project decisions from inspected facts"
+  default_prompt: "Use $project-clarify to inspect this project's real materials, identify only unresolved user-owned decisions, and return a bounded clarification handoff."
+
+policy:
+  allow_implicit_invocation: false

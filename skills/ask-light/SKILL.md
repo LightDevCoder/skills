@@ -6,10 +6,13 @@ disable-model-invocation: true
 
 # Ask Light
 
-`ask-light` is a user-invoked, read-only router. It answers "which installed
-Skill is the best next fit?" from the active host and project state. It does not
-replace project discovery, specification, implementation, or final acceptance.
-The recommendation is an output for the user to invoke separately.
+`ask-light` is the **Light Workflow Router** — a user-invoked, read-only router
+built last, after the full Skill map exists ("先把路修好，再画地图"). It answers
+"which installed Skill is the best next fit?" from the active host and project
+state across the 33 first-party Skills. It does not replace project discovery,
+specification, implementation, or final acceptance. The recommendation is an
+output for the user to invoke separately. It never reimplements the capabilities
+it routes to.
 
 ## Invocation and safety boundary
 
@@ -27,7 +30,10 @@ manually.
 
 ## Required input context
 
-Collect what is known; do not invent missing facts. Use the fields in
+`ask-light` must understand current intent, project context, existing
+artifacts, available first-party Skills, current project stage, specialized
+workflow, and host capabilities before routing. Collect what is known; do not
+invent missing facts. Use the fields in
 [discovery-contract.md](references/discovery-contract.md):
 
 - **Goal** - the user-visible outcome or question;
@@ -87,6 +93,33 @@ return `BLOCKED` with installation or readability guidance.
    packages do not justify an alternative;
    otherwise omit `Alternative` entirely. Include skipped candidates and
    metadata/readability gaps when they affect confidence.
+
+## Typical routing (Light workflow)
+
+`ask-light` routes; it does not reimplement. After the metadata-first discovery
+and availability checks, apply this typical map and the project's actual stage:
+
+```text
+vague idea                                    → clarify
+existing project + unclear requirements       → project-clarify
+large / foggy / multi-session project         → decision-map
+missing external fact                         → research
+need experiment to decide                     → prototype
+information held by another person            → to-questionnaire
+SPEC exists (needs slicing)                   → project-tickets
+ticket is ready (and unblocked)               → implement
+hard bug / regression / performance issue     → diagnosing-bugs
+implementation complete (needs acceptance)    → project-review (via review-loop)
+ready to publish / release                    → release-workflow
+previous explanation did not land             → wait-what
+```
+
+Specialized workflows (`manuscript-ops`, `kb-init`, `learn-anything`,
+`kanban-worker`) and reusable capabilities (`socratic`, `agent-config`,
+`generic-review`, `code-review`, `tdd`, `handoff`, `wizard`, `teach`,
+`writing-for-agents`, `resolving-merge-conflicts`) remain independent. Route to
+them when their entry condition is the best fit; do not force them through
+`project-init → project-clarify → ...`.
 
 ## Explicit workflow mode
 

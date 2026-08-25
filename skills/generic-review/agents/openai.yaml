@@ -1,0 +1,7 @@
+interface:
+  display_name: "Generic Review"
+  short_description: "Return normalized read-only findings for ordinary artifacts"
+  default_prompt: "Use generic-review on a bounded target with requirements, relevant context, and previous findings; return only read-only normalized findings."
+
+policy:
+  allow_implicit_invocation: true

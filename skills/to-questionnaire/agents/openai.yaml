@@ -1,0 +1,7 @@
+interface:
+  display_name: "To Questionnaire"
+  short_description: "Front-load questions into a doc for someone to answer"
+  default_prompt: "Use $to-questionnaire to turn a decision you can't answer alone into an async questionnaire for the person who holds the knowledge."
+
+policy:
+  allow_implicit_invocation: false

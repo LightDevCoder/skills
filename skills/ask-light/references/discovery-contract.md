@@ -1,6 +1,10 @@
 # Ask-light discovery contract
 
-This reference defines the observable read-only protocol used by `ask-light`.
+This reference defines the observable read-only protocol used by `ask-light`
+(Light Workflow Router). Light's first-party collection now contains 33 Skills
+across Project Workflow, Clarification & Research, Execution, Review, Reusable
+Capabilities, Specialized Workflows, and Router. This contract covers how the
+router discovers and ranks those Skills without reimplementing them.
 
 ## Context record
 

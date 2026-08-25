@@ -6,12 +6,16 @@ disable-model-invocation: true
 
 # Project Init
 
-`project-init` is a user-invoked initialization aid, not a project manager. It
-inspects the target directory, asks a small set of questions, chooses one of the
-presets in [presets.md](references/presets.md), writes the minimum useful
-project guidance, validates what it wrote, and reports the result. Keep the
-actual goal and acceptance source in the user's existing records; this Skill
-does not create a competing specification or ticket system.
+`project-init` is a user-invoked **minimum initialization** aid, not a project
+manager and not a clarification interview. It inspects the target directory,
+asks a small set of questions via the `grill-me`/`grilling` capability, chooses
+one of the presets in [presets.md](references/presets.md), writes the minimum
+useful project guidance, validates what it wrote, and reports the result. Since
+`project-clarify` now exists, this Skill no longer owns full requirement
+clarification — for deep discovery use `$clarify`, `$project-clarify`, or
+`$decision-map` instead. Keep the actual goal and acceptance source in the
+user's existing records; this Skill does not create a competing specification
+or ticket system.
 
 ## Invocation and scope
 
@@ -43,8 +47,10 @@ capability; treat this as one clarification capability. Ask one short question a
 5. important constraints;
 6. required review level.
 
-Do not turn this into a full discovery interview. If a supplied brief already
-answers a question, record it and move on.
+Do not turn this into a full discovery interview — that full clarification
+duty now belongs to `project-clarify` (project-aware), `clarify` (standalone),
+and `decision-map` (foggy/multi-session) via the `socratic` engine. If a
+supplied brief already answers a question, record it and move on.
 
 ### 3. Select a preset or prepare a fallback
 
@@ -107,10 +113,12 @@ confirmation decision if research was used.
 
 ## Explicit boundaries
 
-This Skill does not run `to-spec`, `to-tickets`, `implement`, `final review`,
-`review-loop`, `ask-light`, `learn-anything`, or any other user-invoked Skill.
-It does not manage tickets, perform implementation, establish acceptance, or
-become a permanent project workflow manager. `grill-me` (through its underlying
-`grilling` capability) and `research` above are external capabilities permitted
-only for the stated questions and confirmed fallback; they do not authorize
-additional writes.
+This Skill does not run `clarify`, `project-clarify`, `decision-map`, `socratic`,
+`to-spec`, `to-tickets`, `implement`, `final review`, `review-loop`,
+`ask-light`, `learn-anything`, or any other user-invoked Skill. It does not
+manage tickets, perform implementation, establish acceptance, or become a
+permanent project workflow manager. It also does not create a full decision
+map, SPEC, or ticket graph. `grill-me` (through its underlying `grilling`
+capability) and `research` above are the only model-invoked capabilities
+permitted — and only for the stated six questions and confirmed fallback; they
+do not authorize additional writes or a second clarification interview.

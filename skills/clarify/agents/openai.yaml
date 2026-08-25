@@ -1,0 +1,7 @@
+interface:
+  display_name: "Clarify"
+  short_description: "Clarify an ambiguous idea without entering a project workflow"
+  default_prompt: "Use $clarify to identify the current understanding, resolved choices, unresolved decisions, and the next user-owned question."
+
+policy:
+  allow_implicit_invocation: false

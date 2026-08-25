@@ -1,0 +1,7 @@
+interface:
+  display_name: "Writing for Agents"
+  short_description: "Write documents agents consume"
+  default_prompt: "Use $writing-for-agents when creating or editing skills or AGENTS.md/CLAUDE.md with predictable agent-process levers."
+
+policy:
+  allow_implicit_invocation: true

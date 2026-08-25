@@ -6,42 +6,41 @@
 
 ## 来源与共同规则
 
-- **第一方（First-party）：** 本仓库的 `review-loop`、`project-init`、`ask-light`、`recap`、`learn-anything`、`manuscript-ops`。
-- **Matt 上游（Matt upstream）：** `mattpocock/skills` 中的 `to-spec`、`to-tickets`、`implement`、`code-review`、`handoff`、`diagnosing-bugs`、`grill-me`、`wayfinder`、`writing-great-skills`，或可见的 pinned third-party package。
-- **私有第三方修改版（Private modified third-party）：** `skills-3rdParty` 内的包；私有 root 不可见时必须报告 availability gap，不能编造 fallback。
+- **第一方（33 个）：** 本仓库全部 Skill——`project-init`、`project-clarify`、`project-spec`、`project-tickets`、`implement`、`project-review`、`release-workflow`、`socratic`、`clarify`、`decision-map`、`research`、`prototype`、`to-questionnaire`、`agent-config`、`tdd`、`diagnosing-bugs`、`resolving-merge-conflicts`、`review-loop`、`generic-review`、`code-review`、`handoff`、`wizard`、`wait-what`、`writing-for-agents`、`teach`、`eli5`、`language-learning`、`recap`、`learn-anything`、`manuscript-ops`、`kb-init`、`kanban-worker`、`ask-light`（见 [CATALOG.zh-CN.md](../../../CATALOG.zh-CN.md)）。
+- **已批准 PORT：** `research`、`prototype`、`tdd`、`handoff`、`diagnosing-bugs`、`wizard`、`teach`、`wait-what`、`to-questionnaire`、`writing-for-agents`、`resolving-merge-conflicts` 为带 `ATTRIBUTION.md` 的自包含第一方包，运行时不要求上游。
+- **历史 Matt 名称：** `grill-me` → `clarify`、`grilling` → `socratic`、`grill-with-docs` → `project-clarify`、`wayfinder` → `decision-map`、`to-spec` → `project-spec`、`to-tickets` → `project-tickets` —— 仅用于归属说明，工作流以 Light 名称为准。
+- **私有第三方修改版：** `skills-3rdParty` 内的包；不可见时属 availability gap，不编造 fallback。
 
-每行都写明 handoff artifact 和 stop condition。`user-invoked` 必须由用户显式选择；`model-invoked` 仍受包自身 policy 约束。specialist findings 不能成为最终 verdict；需要验收时由 `review-loop` 拥有 `PASS`、`FAIL`、`BLOCKED`。
+`socratic` 为 model-invoked 引擎；`clarify` 为轻量用户入口，`project-clarify` 为项目感知入口，`decision-map` 为大型决策地图。把 `clarify → socratic` 等视为组合，非独立步骤。
 
-`grill-me` 是一次会话澄清的用户入口，会启动底层的 model-invoked `grilling` 能力。二者属于同一个外部能力，不是两个需要用户分别选择的工作流步骤。
+每行均写明 handoff (stop condition) 与停止点。`user-invoked` 须用户显式选择；`model-invoked` 受包 policy 约束。specialist findings 不能成为最终 verdict；需验收时由 `project-review` 经 `review-loop` 拥有 `PASS`/`FAIL`/`BLOCKED`。 Each row declares the handoff artifact and stop condition — handoff/stop.
 
 ## 1. 软件项目
 
-**入口条件：** 软件 feature/implementation 的目标、约束和验收方向已经明确。
+入口已明确时，顺序为 `project-spec`（user-invoked）→ `project-review`（经 `review-loop` + `generic-review`）→ `project-tickets`（user-invoked）→ `implement`（user-invoked）→ `code-review`（model-invoked）→ `project-review`（经 `review-loop` 拥有最终 verdict）→ `handoff`（user-invoked）。每步的输入/输出/handoff/停止见[英文版](../../workflows/recipes.md#1-software-feature)。
 
-顺序为 `to-spec`（Matt upstream，user-invoked）→ `review-loop` specification（first-party，model-invoked）→ `to-tickets`（Matt upstream，user-invoked）→ `implement`（Matt upstream，user-invoked）→ `code-review`（Matt upstream，model-invoked，只提供 specialist findings）→ `review-loop` software（first-party，拥有最终 verdict）→ `handoff`（Matt upstream，user-invoked）。每一步的输入、输出、handoff 和 stop condition 见[英文 recipe](../../workflows/recipes.md#1-software-feature)。
-
-缺少 acceptance authority、上游 Skill、批准 ticket、实现依赖或 independent evaluator 时 `BLOCKED`。证据包括 spec、ticket graph、commit、focused tests、specialist findings、review-loop state/verdict 和 handoff；到 `PASS`/`FAIL`/`BLOCKED` 停止。
+缺 acceptance authority、未批准 ticket、实现依赖或 independent evaluator 时 `BLOCKED`。证据含 SPEC、ticket 图、commit、focused tests、specialist findings、`project-review`/`review-loop` verdict 与 handoff；到 `PASS`/`FAIL`/`BLOCKED` 停止。
 
 ## 2. 新项目初始化
 
-`ask-light`（first-party，user-invoked）接收 goal、project type、task kind、artifacts、blockers、availability、invocation control，返回下一 Skill/recipe；停止等待用户选择。随后 `project-init`（first-party，user-invoked）接收确认 preset 和 root，写入最小指令并验证；初始化后停止，不等于 discovery/specification/implementation/final review。下一能力由用户选择，最终验收若需要则归 `review-loop`。
+`ask-light`（user-invoked）收 goal/project type/task kind/artifacts/blockers/availability/invocation control，返回下一 Skill/recipe 后停止。随后 `project-init`（user-invoked）收确认 preset 与 root，写入最小指令并验证后停止。下一能力由用户选，最终验收归 `project-review`。
 
 ## 3. 文稿项目
 
-顺序为 `manuscript-ops` → 按需选择 `grill-me`/`wayfinder` → `project-init` → `review-loop init` → manuscript production → `review-loop` manuscript Profile。这里的 `grill-me` 是用户入口，底层 `grilling` 不作为第二个用户步骤单独选择。Project route 选择 discovery handoff 后必须停；只有用户显式 `resume` 才能继续。root、dependency、brief、Charter、render/round-trip evidence 缺失时 `BLOCKED`，最终 verdict 归 `review-loop`。
+顺序为 `manuscript-ops` → 按需 `socratic`（经 `clarify`/`decision-map`）→ `project-init` → `project-review init` → manuscript production → `project-review` manuscript Profile。这里 `socratic` 为引擎，不作为第二个用户步骤单独选择。Project route 选 discovery handoff 后必须停；仅用户显式 `resume` 才继续。缺 root/dependency/brief/Charter/渲染证据时 `BLOCKED`，最终 verdict 归 `project-review`。
 
 ## 4. 从资料提炼 Skill
 
-`learn-anything`（first-party，user-invoked）输出内部 Method Contract、`not_promoted` 或精确 `BLOCKED`；随后 deterministic package builder 输出 `created`/`updated`/`no-op`/`duplicate`/`blocked`。`writing-great-skills` 只能作为可选 authoring knowledge，不是 runtime dependency。完整包交给 `review-loop agent-skill`，到 verdict 后再进入 admission 和 collection sync。
+`learn-anything`（user-invoked）输出内部 Method Contract/`not_promoted`/精确 `BLOCKED`；随后 deterministic builder 输出 `created`/`updated`/`no-op`/`duplicate`/`blocked`。`writing-for-agents` 仅作 authoring knowledge，非 runtime 依赖。完整包交 `project-review`/`review-loop agent-skill` 至 verdict 后再进入 admission 与 collection sync。
 
 ## 5. Skill 维护与发布
 
-顺序为 ownership/reuse gate → bounded implementation → package tests 与 negative/mutation fixtures → script 变更时的 `code-review` → `review-loop agent-skill` → collection sync、双语 docs、fresh whole/per-Skill install、discovery、release/tag/closeout。ownership ambiguity、测试失败、独立审查缺失、安装未验证、私有依赖不可见或 release 凭据失败都应 `BLOCKED`。结构检查不是 runtime proof，source checkout scan 不是 fresh-install proof。
+顺序为 ownership/reuse gate → 有界实现 → 包测试与负向/mutation fixtures → 脚本变更时的 `code-review` → `project-review`/`review-loop` verdict → collection sync、双语、fresh 安装、discovery、release/tag/closeout。ownership 模糊、测试失败、独立审查缺失、安装未验证或双语未同步均 `BLOCKED`。结构检查非 runtime proof。
 
 ## 6. Bug 与 final review
 
-Bug recipe 为 `diagnosing-bugs` → `implement` → `code-review` → `review-loop`；final-review recipe 只有一个 `review-loop` step。两者都在 reproduction/authority 缺失或最终 verdict 时停止，不自动调用 user Skill。
+Bug 路径为 `diagnosing-bugs` → `implement` → `code-review` → `project-review`（经 `review-loop`）；final-review 为单步 `project-review`。两者在复现/authority 缺失或最终 verdict 时停止，不自动调用 user Skill。
 
 ## 7. 独立 session recap
 
-`recap` 是单步、user-invoked 的停止边界，不是多 Skill workflow。用户显式选择 `$recap`；它只消费当前 session context，输出严格一行，不调用任何其他能力，然后停止。它不会创建 handoff、压缩历史、继续执行或签发 `review-loop` verdict。
+`recap` 为单步、user-invoked 停止边界。用户显式 `$recap`，只消费当前 session，输出严格一行，不调其他能力。

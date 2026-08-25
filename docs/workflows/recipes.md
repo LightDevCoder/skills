@@ -1,138 +1,85 @@
 # Workflow recipes
 
-[中文 recipes](../zh-CN/workflows/recipes.md)
+[中文 recipes](../../docs/zh-CN/workflows/recipes.md)
 
-These recipes are bounded documentation and validation assets. They describe
-explicit handoffs; they do not create a canonical pipeline, permanent state
-machine, or automatic multi-Skill orchestrator. `SKILL.md` remains the behavior
-authority for every package.
+These recipes are bounded documentation and validation assets. They describe explicit handoffs; they do not create a canonical pipeline, permanent state machine, or automatic multi-Skill orchestrator. `SKILL.md` remains the behavior authority for every package.
 
 ## Source legend and common rule
 
-- **First-party:** `review-loop`, `project-init`, `ask-light`, `recap`,
-  `learn-anything`, and `manuscript-ops` in this repository.
-- **Matt upstream:** `to-spec`, `to-tickets`, `implement`, `code-review`,
-  `handoff`, `diagnosing-bugs`, `grill-me`, `wayfinder`, and
-  `writing-great-skills` from `mattpocock/skills` or a separately visible
-  pinned third-party package.
-- **Private modified third-party:** a package in `skills-3rdParty`; an absent
-  private root is an availability gap, not an invitation to invent a fallback.
+- **First-party (33):** all Skills in this repository — `project-init`, `project-clarify`, `project-spec`, `project-tickets`, `implement`, `project-review`, `release-workflow`, `socratic`, `clarify`, `decision-map`, `research`, `prototype`, `to-questionnaire`, `agent-config`, `tdd`, `diagnosing-bugs`, `resolving-merge-conflicts`, `review-loop`, `generic-review`, `code-review`, `handoff`, `wizard`, `wait-what`, `writing-for-agents`, `teach`, `eli5`, `language-learning`, `recap`, `learn-anything`, `manuscript-ops`, `kb-init`, `kanban-worker`, `ask-light` — installed via `LightDevCoder/skills` (see [CATALOG.md](../../CATALOG.md)).
+- **Approved PORTs:** `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts` are self-contained first-party packages with `ATTRIBUTION.md` and no upstream runtime dependency (Port preserves Matt behavior; Light changes are handoff/decoupling only).
+- **Historical Matt names:** `grill-me` → `clarify`, `grilling` → `socratic`, `grill-with-docs` → `project-clarify`, `wayfinder` → `decision-map`, `to-spec` → `project-spec`, `to-tickets` → `project-tickets` — used only for attribution; the Light names above are the canonical workflow steps.
+- **Private modified third-party:** a package in `skills-3rdParty`; an absent private root is an availability gap, not an invitation to invent a fallback.
 
-`grill-me` is the user-facing entry point for one-session clarification. It
-starts the underlying model-invoked `grilling` capability; treat them as one
-external capability, not two separate user-facing workflow steps.
+`socratic` is the model-invoked engine; `clarify` is the user-facing lightweight entry, `project-clarify` the project-aware entry, and `decision-map` the large-effort map. Treat `clarify → socratic`, `project-clarify → socratic`, `decision-map → socratic` as composition, not separate steps.
 
-Each row declares the handoff artifact and stop condition. `user-invoked` means
-the user must explicitly select the Skill; `model-invoked` means the host may
-call it under its package policy. Findings from a specialist never become the
-final verdict; `review-loop` owns final `PASS`, `FAIL`, or `BLOCKED` whenever a
-recipe reaches acceptance.
+Each row declares the handoff artifact and stop condition. `user-invoked` means the user must explicitly select the Skill; `model-invoked` means the host may call it under its package policy. Findings from a specialist never become the final verdict; `project-review` (via `review-loop`) owns final `PASS`, `FAIL`, or `BLOCKED` whenever a recipe reaches acceptance.
 
 ## 1. Software feature
 
-**Entry condition:** a software feature or implementation goal has a defined
-outcome, constraints, and acceptance direction.
+**Entry condition:** a software feature or implementation goal has a defined outcome, constraints, and acceptance direction.
 
-| Order | Skill / source | Invocation | Input → output | Handoff / stop |
+| Order | Skill | Invocation | Input → output | Handoff / stop |
 | --- | --- | --- | --- | --- |
-| 1 | `to-spec` / Matt upstream | user-invoked | goal and constraints → traceable specification | Specification artifact; stop for user approval. |
-| 2 | `review-loop` / first-party | model-invoked | frozen specification + acceptance source → specification findings/verdict | Review evidence; stop at the review result. |
-| 3 | `to-tickets` / Matt upstream | user-invoked | approved specification → dependency-ordered tracer tickets | Ticket graph; do not auto-start implementation. |
-| 4 | `implement` / Matt upstream | user-invoked | one unblocked ticket → bounded diff and tests | Commit/implementation evidence; stop at ticket scope. |
-| 5 | `code-review` / Matt upstream | model-invoked | fixed diff → Standards/Spec findings | Specialist review; it does not accept the change. |
-| 6 | `review-loop` / first-party | model-invoked | implementation, tests, findings → final verdict | Durable verdict; stop at `PASS`, `FAIL`, or `BLOCKED`. |
-| 7 | `handoff` / Matt upstream | user-invoked | accepted result or blocker → closeout/resume record | Closeout artifact; user decides whether to resume. |
+| 1 | `project-spec` | user-invoked | goal, constraints + clarified decisions → traceable SPEC | SPEC artifact; stop for user approval. |
+| 2 | `project-review` (spec) | model-invoked via `review-loop` + `generic-review` | frozen SPEC + acceptance source → findings / verdict | Review evidence; stop at result. |
+| 3 | `project-tickets` | user-invoked | approved SPEC → dependency-ordered tracer tickets | Ticket graph; do not auto-start `implement`. |
+| 4 | `implement` | user-invoked | one unblocked ticket → bounded diff + tests | Commit evidence; stop at ticket scope. |
+| 5 | `code-review` | model-invoked | fixed diff → Standards/Spec findings | Specialist review; it does not accept the change. |
+| 6 | `project-review` | model-invoked via `review-loop` + `code-review`/`generic-review` | implementation + tests + findings → final verdict | Durable `PASS`/`FAIL`/`BLOCKED`; stop. |
+| 7 | `handoff` | user-invoked | accepted result or blocker → closeout/resume record | Closeout artifact; user decides whether to resume. |
 
-**Blocked conditions:** missing acceptance authority, unavailable upstream
-package, unapproved tickets, unresolved implementation dependencies, or absent
-independent evaluator. **Evidence:** specification, ticket graph, commit,
-focused tests, specialist findings, review-loop state/verdict, and handoff.
+**Blocked conditions:** missing acceptance authority, unapproved tickets, unresolved dependencies, or absent independent evaluator. **Evidence:** SPEC, ticket graph, commit, focused tests, specialist findings, `project-review`/`review-loop` state/verdict, and `handoff`.
 
 ## 2. New project initialization
 
-**Entry condition:** a project needs a minimal confirmed starting point and has
-not yet selected a full delivery route.
+**Entry condition:** a project needs a minimal confirmed starting point and has not yet selected a full delivery route.
 
-| Order | Skill / source | Invocation | Input → output | Handoff / stop |
+| Order | Skill | Invocation | Input → output | Handoff / stop |
 | --- | --- | --- | --- | --- |
-| 1 | `ask-light` / first-party | user-invoked | goal, project type, task kind, artifacts, blockers, availability, invocation control → one next Skill or recipe | Recommendation record; stop and wait for user selection. |
-| 2 | `project-init` / first-party | user-invoked | confirmed preset + target root → minimal instruction update and validation | Initialization report; stop before discovery/specification/implementation/review. |
-| 3 | User-selected next capability | per package policy | confirmed initialized root → next explicit artifact | The user chooses `to-spec`, `manuscript-ops`, `learn-anything`, or `review-loop`; no implicit chain. |
+| 1 | `ask-light` | user-invoked | goal, project type, task kind, artifacts, blockers, availability, invocation control → one next Skill or recipe | Recommendation; stop and wait for user selection. |
+| 2 | `project-init` | user-invoked | confirmed preset + target root → minimal instruction update and validation | Initialization report; stop before clarification/spec/implementation/review. |
+| 3 | User-selected next capability | per package policy | confirmed initialized root → next explicit artifact | The user chooses `project-clarify`, `project-spec`, `manuscript-ops`, `learn-anything`, or `project-review`; no implicit chain. |
 
-**Blocked conditions:** missing root, ambiguous preset, unconfirmed fallback,
-instruction conflict, or unavailable declared capability. **Final authority:**
-the user chooses the next Skill; any later acceptance belongs to
-`review-loop`.
+**Blocked conditions:** missing root, ambiguous preset, unconfirmed fallback, instruction conflict, or unavailable capability. **Final authority:** the user chooses the next Skill; later acceptance belongs to `project-review`.
 
 ## 3. Manuscript project
 
-**Entry condition:** a manuscript/manual/book/multilingual project has source,
-format, batch, review, or production risk.
+**Entry condition:** a manuscript/manual/book/multilingual project has source, format, batch, review, or production risk.
 
-| Order | Skill / source | Invocation | Input → output | Handoff / stop |
+| Order | Skill | Invocation | Input → output | Handoff / stop |
 | --- | --- | --- | --- | --- |
-| 1 | `manuscript-ops` / first-party | model-invoked or manual entry | root, six routing dimensions, sources → route and RoutingSnapshot | On Project route, choose one discovery handoff and stop. |
-| 2 | `grill-me` or `wayfinder` / Matt upstream | user-invoked | unresolved decisions or multi-session uncertainty → confirmed decisions/map | Return to `manuscript-ops` only after explicit resume. |
-| 3 | `project-init` / first-party | user-invoked | approved manuscript brief → mapped minimal project state | Initialization evidence; stop and wait for the next explicit handoff. |
-| 4 | `review-loop init` / first-party | model-invoked or manual entry | approved brief + acceptance source → frozen manuscript Charter | Charter/state; no production before approval. |
-| 5 | `manuscript-ops resume` / first-party | model-invoked or manual entry | approved Charter + project state → batches, locked source, formats, QA | User-controlled lock/resume boundary. |
-| 6 | `review-loop` manuscript Profile / first-party | model-invoked | frozen candidate/final + format QA → final verdict | Stop at `PASS`, `FAIL`, or `BLOCKED`. |
+| 1 | `manuscript-ops` | model-invoked or manual entry | root, six routing dimensions, sources → route and RoutingSnapshot | On Project route, choose one discovery handoff and stop. |
+| 2 | `socratic` engine via `clarify` or `decision-map` | user-invoked entries | unresolved decisions or multi-session uncertainty → confirmed decisions/map | Return to `manuscript-ops` only after explicit resume. |
+| 3 | `project-init` | user-invoked | approved manuscript brief → mapped minimal project state | Initialization evidence; stop and wait. |
+| 4 | `project-review init` | model-invoked or manual entry | approved brief + acceptance source → frozen Charter | Charter/state; no production before approval. |
+| 5 | `manuscript-ops resume` | model-invoked or manual entry | approved Charter + project state → batches, locked source, formats, QA | User-controlled lock/resume boundary. |
+| 6 | `project-review` (manuscript Profile) | model-invoked via `review-loop` | frozen candidate/final + format QA → final verdict | Stop at `PASS`/`FAIL`/`BLOCKED`. |
 
-**Blocked conditions:** root/dependency/capability/brief/Charter/rendering or
-round-trip evidence missing. **Evidence:** RoutingSnapshot, brief, profile,
-source/batch/format records, QA, lock receipt, review-loop state and verdict.
+**Blocked conditions:** root/dependency/capability/brief/Charter/rendering or round-trip evidence missing. **Evidence:** RoutingSnapshot, brief, profile, source/batch/format records, QA, lock receipt, `project-review`/`review-loop` state and verdict.
 
 ## 4. Source to reusable Skill
 
-**Entry condition:** source material may contain a repeated, evidence-backed
-method rather than a one-off event.
+**Entry condition:** source material may contain a repeated, evidence-backed method rather than a one-off event.
 
-| Order | Skill / source | Invocation | Input → output | Handoff / stop |
+| Order | Skill | Invocation | Input → output | Handoff / stop |
 | --- | --- | --- | --- | --- |
-| 1 | `learn-anything` / first-party | user-invoked | source + provenance → internal Method Contract or precise gaps | Stop at `method_contract`, `not_promoted`, or `BLOCKED`. |
-| 2 | deterministic package builder / first-party resource | explicit build step after contract | Method Contract → created/updated/no-op/duplicate/blocked package result | Stop on the exact builder state; do not hide duplicate ownership. |
-| 3 | `writing-great-skills` / Matt upstream | optional model-invoked knowledge | approved contract → authoring notes | Knowledge only; never a runtime dependency of `learn-anything`. |
-| 4 | `review-loop` `agent-skill` Profile / first-party | model-invoked | complete package + admission source → acceptance verdict | Stop at the verdict before admission. |
-| 5 | Admission and collection sync / repository governance | explicit maintainer action | accepted package → catalog, tests, release evidence | Stop after fresh install and release gate. |
+| 1 | `learn-anything` | user-invoked | source + provenance → internal Method Contract or precise gaps | Stop at `method_contract`, `not_promoted`, or `BLOCKED`. |
+| 2 | deterministic package builder | explicit build step after contract | Method Contract → created/updated/no-op/duplicate/blocked | Stop on exact builder state; do not hide duplicate ownership. |
+| 3 | `writing-for-agents` | optional model-invoked knowledge | approved contract → authoring notes | Knowledge only; never a runtime dependency. |
+| 4 | `project-review` or `review-loop` `agent-skill` Profile | model-invoked | complete package + admission source → acceptance verdict | Stop at verdict before admission. |
+| 5 | Admission and collection sync | explicit maintainer action | accepted package → catalog, tests, release evidence | Stop after fresh install and release gate. |
 
-**Blocked conditions:** missing method fields, unresolved placeholders,
-contradictory invocation evidence, unowned duplicate package, missing resource,
-or unavailable reviewer. **Final authority:** `review-loop` for package
-acceptance; admission governance for collection entry.
+**Blocked conditions:** missing method fields, unresolved placeholders, contradictory invocation evidence, unowned duplicate package, missing resource, or unavailable reviewer. **Final authority:** `project-review`/`review-loop` for package acceptance; admission governance for collection entry.
 
 ## 5. Skill maintenance and release
 
-**Entry condition:** a change request affects a package, script, metadata,
-documentation, ownership boundary, or release surface.
-
-| Order | Capability / source | Invocation | Input → output | Handoff / stop |
-| --- | --- | --- | --- | --- |
-| 1 | Ownership/reuse gate / first-party governance | maintainer decision | request + current package/source → ownership decision | Stop if direct upstream use or `skills-3rdParty` is the correct home. |
-| 2 | Bounded implementation / appropriate Skill | explicit by package policy | approved scope → patch, tests, and change record | Stop at the requested scope. |
-| 3 | package tests and mutation/negative fixtures | explicit maintainer action | patch → structural/behavioral/invocation evidence | Stop if a required assertion or failure path is absent. |
-| 4 | `code-review` / Matt upstream when scripts changed | model-invoked | fixed diff → specialist findings | Findings only; hand to acceptance. |
-| 5 | `review-loop` `agent-skill` Profile / first-party | model-invoked | package + acceptance source → verdict | Stop at final verdict. |
-| 6 | Collection sync and bilingual documentation | maintainer action | accepted change → catalog/docs/changelog/evidence | Stop when all synchronization records agree. |
-| 7 | Fresh whole/per-Skill install and discovery | explicit validation | released tag → install/discovery/smoke evidence | Stop on evidence or `NOT TESTED`; do not overclaim. |
-| 8 | Release/tag/closeout | explicit release action | verified evidence → release record and migration state | Final authority is the applicable acceptance gate. |
-
-**Blocked conditions:** ownership ambiguity, failing tests, missing independent
-review, unverified install, private dependency not visible, release credential
-failure, or stale bilingual/catalog records. Structural tests are not runtime
-proof; a source-checkout scan is not fresh-install proof.
+See [docs/MAINTENANCE.md](../../docs/MAINTENANCE.md) and [docs/REVIEW_POLICY.md](../../docs/REVIEW_POLICY.md): ownership/reuse gate → bounded implementation → tests + adversarial fixtures → `code-review` when scripts changed → `project-review`/`review-loop` verdict → collection sync → fresh install/discovery → release/tag/closeout.
 
 ## 6. Bug diagnosis and final review
 
-`ask-light workflow` also has bounded recipes for a reproducible bug and a
-final acceptance review. The bug route is `diagnosing-bugs` → `implement` →
-`code-review` → `review-loop`; the final-review route is a single
-`review-loop` step. Both stop at missing reproduction/acceptance authority or
-the final `PASS`/`FAIL`/`BLOCKED` verdict and never auto-invoke a user Skill.
+`ask-light workflow` also has bounded recipes for a reproducible bug and a final acceptance review. The bug route is `diagnosing-bugs` → `implement` → `code-review` → `project-review` (via `review-loop`); the final-review route is a single `project-review` step. Both stop at missing reproduction/acceptance authority or the final `PASS`/`FAIL`/`BLOCKED` and never auto-invoke a user Skill.
 
 ## 7. Standalone session recap
 
-`recap` is a one-step, user-invoked stopping boundary rather than a multi-Skill
-workflow. The user explicitly selects `$recap`; it consumes only current
-session context, emits exactly one line, invokes nothing else, and stops. It
-does not create a handoff, compact history, continue execution, or issue a
-`review-loop` verdict.
+`recap` is a one-step, user-invoked stopping boundary. The user explicitly selects `$recap`; it consumes only current session context, emits exactly one line, invokes nothing else, and stops. It does not create a handoff, compact history, continue execution, or issue a review verdict.

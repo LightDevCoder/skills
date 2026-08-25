@@ -1,0 +1,7 @@
+interface:
+  display_name: "Project Review"
+  short_description: "Project final acceptance with frozen baseline and PASS/FAIL/BLOCKED verdict via composed reviewers"
+  default_prompt: "Use $project-review to determine whether the completed project satisfies its approved target by freezing a baseline, composing reviewers through review-loop, and issuing a final PASS/FAIL/BLOCKED."
+
+policy:
+  allow_implicit_invocation: true

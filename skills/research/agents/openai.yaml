@@ -1,0 +1,7 @@
+interface:
+  display_name: "Research"
+  short_description: "Research from high-trust sources"
+  default_prompt: "Use $research to investigate a question against high-trust primary sources and capture the findings as a Markdown file."
+
+policy:
+  allow_implicit_invocation: true

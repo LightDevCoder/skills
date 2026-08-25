@@ -1,0 +1,7 @@
+interface:
+  display_name: "Diagnosing Bugs"
+  short_description: "Diagnose hard bugs and regressions"
+  default_prompt: "Use $diagnosing-bugs to build a tight feedback loop for a hard bug or performance regression and drive it through reproduce, hypothesise, instrument, fix, and cleanup."
+
+policy:
+  allow_implicit_invocation: true

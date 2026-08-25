@@ -1,0 +1,6 @@
+interface:
+  display_name: "Project Tickets"
+  short_description: "Split a formal SPEC into blocked, ready, and parallelizable tickets"
+  default_prompt: "Use $project-tickets to turn the SPEC at .scratch/<feature>/spec.md into numbered tracer-bullet tickets under .scratch/<feature>/issues/ with verified Blocked by edges."
+policy:
+  allow_implicit_invocation: false

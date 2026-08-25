@@ -1,7 +1,7 @@
 interface:
   display_name: "Review Loop"
-  short_description: "Generic evidence, repair, and final acceptance"
-  default_prompt: "Use $review-loop to run a generic final-acceptance and bounded-repair loop for this approved artifact."
+  short_description: "Lightweight review→findings→repair→re-review convergence engine"
+  default_prompt: "Use $review-loop to run a lightweight review→findings→repair→re-review loop by resolving a reviewer and converging until clean or bounded limit."
 
 policy:
   allow_implicit_invocation: true

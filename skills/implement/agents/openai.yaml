@@ -1,0 +1,7 @@
+interface:
+  display_name: "Implement"
+  short_description: "Execute one bounded work item: code, doc, config, Skill, or generic task"
+  default_prompt: "Use $implement to execute one bounded ticket or Spec slice inside a single context window with inspected source, optional agent-config routing, focused verification, and a review-loop handoff."
+
+policy:
+  allow_implicit_invocation: false

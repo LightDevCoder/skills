@@ -1,0 +1,7 @@
+interface:
+  display_name: "Wait What"
+  short_description: "Re-pitch that — simpler, with the context I'm missing"
+  default_prompt: "Use $wait-what when the last message did not land and you need a simpler re-pitch in ASD-STE100 with context."
+
+policy:
+  allow_implicit_invocation: false

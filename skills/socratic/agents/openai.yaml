@@ -1,0 +1,7 @@
+interface:
+  display_name: "Socratic"
+  short_description: "Maintain a dynamic frontier of user-owned decisions"
+  default_prompt: "Use socratic to update the clarification state, identify the current decision frontier, and ask only unblocked user choices."
+
+policy:
+  allow_implicit_invocation: true

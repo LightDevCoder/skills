@@ -2,35 +2,63 @@
 
 [English maintenance contract](MAINTENANCE.md)
 
-本页规定第一方 Skill 的生命周期和使集合可维护、可安装的文档同步要求。
+本页规定第一方 Skill 的生命周期和使集合可维护、可安装的文档同步要求。不复制 [AGENTS.md](../AGENTS.md) 或架构文档。
 
 ## 权威记录
 
-每个事实只保留一个 authority，其他位置链接过去：包行为/触发/调用/输入/输出/资源以 `skills/<skill-name>/SKILL.md` 为准；变换包的 provenance 在 `ATTRIBUTION.md`；可读目录是 `CATALOG.md`；安装与证据是 `docs/INSTALLATION.md`；审查和 verdict 规则是 `docs/REVIEW_POLICY.md`；历史和 release notes 是 `CHANGELOG.md` 与真实 release；组合验证资产在 `docs/workflows/`。
+每个事实只保留一个权威位置，其他位置链接过去：包行为/触发/调用/输入/输出/资源以 `skills/<skill-name>/SKILL.md`（及 supporting files）为准；Port/变换包的来源在 `ATTRIBUTION.md`；可读目录是 [CATALOG.md](../CATALOG.md)；安装与验证是 [docs/INSTALLATION.md](INSTALLATION.md)；审查与 verdict 是 [docs/REVIEW_POLICY.md](REVIEW_POLICY.md) 与 [REVIEWER_CONTRACT.md](REVIEWER_CONTRACT.md)；历史是 [CHANGELOG.md](../CHANGELOG.md) 与真实 release；组合验证资产在 [docs/workflows/](workflows/)。
 
-本分支的准入集合必须恰好包含 `review-loop`、`project-init`、`ask-light`、`kb-init`、`learn-anything`、`manuscript-ops`、`recap`、`language-learning` 和 `kanban-worker`（v0.1.6 中由 `light-kanban-worker` 改名）。`recap` 与 `language-learning` 经纯提示型快速通道准入，并在 v0.1.2 中发布；`kanban-worker`（v0.1.6 中由 `light-kanban-worker` 改名） 是 model-invoked 包，涉及网络、文件系统和看板状态副作用，因此走完整准入路径（`review-loop agent-skill`），以 `light-kanban-worker` 之名随 v0.1.4 首次发布；其 v0.1.5 调度边界与首次注册身份变更带有第二次 `review-loop agent-skill` `PASS`。`kb-init` 是 user-invoked 包，其访谈可使用工具和 model-invoked `research` 能力，实施阶段可能创建文件和状态，因此走完整准入路径（`review-loop agent-skill`），随 v0.1.6 发布。稳定 v0.1.1 包含原来的五个已准入包，v0.1.3 保持 v0.1.2 的包集合并迁移了测试工具链。`tests/test_collection_discovery.py` 负责检查包名、metadata、目录、README 链接、头图、治理路径、双语配对和退休 orchestration 边界，但不证明 runtime 或 fresh installation。
+## 当前同步基线
 
-## 变更流程与同步矩阵
+本分支准入集合为 `skills/` 下 **33 个第一方 Skill**（见 [CATALOG.md](../CATALOG.md)）。最后稳定 tag 为 `v0.1.6`（9 个包）；当前分支新增其余 24 个，形成 33 包架构（见 [CHANGELOG.md](../CHANGELOG.md) 未发布）。
 
-新增、更新、改名、弃用或移除时：
+历史：`v0.1.1` 五个、`v0.1.2` 七个、`v0.1.3` 工具链迁移、`v0.1.4`（`light-kanban-worker`）、`v0.1.5` 调度与身份加固、`v0.1.6`（`kb-init`）。结构发现检查在 [tests/test_collection_discovery.py](../tests/test_collection_discovery.py) 与 [tests/test_composition.py](../tests/test_composition.py)，仅为结构证据，不是 fresh-install 证明。
 
-1. 先执行 [Skill 准入](SKILL_ADMISSION.zh-CN.md) 的 reuse-before-invention 与 ownership gate。
-2. 保留包边界、invocation direction、attribution 和必要资源。
-3. 先判断是否符合低风险纯提示型快速通道，否则走完整路径；只收集对应路线要求的 evidence，并准确标注 evidence class。
-4. 执行[审查策略](REVIEW_POLICY.zh-CN.md)的 review trigger。
-5. 同步 README、目录、安装说明、治理链接、affected recipes、discovery tests、attribution 和 changelog。
-6. 未通过真实 release gate 前，不把版本、tag 或安装命令写成已验证。
+## 变更流程
+
+每次 **新增 / 更新 / 改名 / 弃用 / 移除 / Port / Adapt**：
+
+1. 先执行 [Skill 准入](SKILL_ADMISSION.md) 的 reuse-before-invention 与 ownership gate——已批准的 Matt PORT（SPEC §14）只要带 `ATTRIBUTION.md` 且无运行时依赖即获架构授权。
+2. 保留包边界、invocation direction、attribution 与必要资源。
+3. 判断是否符合低风险纯提示型快速通道，否则走完整路径；只收集对应路线要求的 evidence。
+4. 执行[审查策略](REVIEW_POLICY.md) 的 review trigger——`review-loop` 为引擎，`project-review` 拥有最终验收。
+5. 同步 README、目录、安装说明、治理链接、受影响组合示例、discovery/composition 测试、attribution 与 changelog。
+6. 先写未发布变更记录；未通过真实 release gate 前不宣称版本/tag/已验证命令。
+
+## 同步矩阵
 
 | 变更 | 必须检查 |
 | --- | --- |
-| Add | README、catalog、installation、governance、受影响 recipes、discovery tests、changelog、适用 attribution、fresh-install evidence，以及所选快速或完整路径的 verdict。 |
-| Update | 包 contract/behavior evidence、受影响目录/安装/attribution/recipes/discovery、兼容性和 changelog。 |
-| Rename | old-to-new migration、链接、目录、installer、测试、attribution 和 changelog。 |
-| Deprecate | catalog 状态、replacement/migration、安装警告、示例、测试、changelog 和 release notes。 |
-| Remove | 消费者检查、旧引用清理、迁移说明、catalog/installation 更新和 removal 记录。 |
+| **新增** | README、目录、安装指南、治理链接、受影响组合示例、discovery + composition 测试、changelog、适用 `ATTRIBUTION.md`、fresh-install 证据及所选快速/完整路径 verdict。 |
+| **更新** | 包契约与行为证据；受影响目录/安装/attribution/示例/测试、兼容性与 changelog。 |
+| **改名** | old-to-new 迁移指引；全部链接、目录记录、installer 示例、测试、示例、attribution 与 changelog。 |
+| **弃用** | 目录状态、README 指引、替代/迁移路径、安装警告、示例、测试、changelog 与 release notes。 |
+| **移除** | 确认无兼容 shim 需求；清理旧引用、保留迁移说明、更新目录/安装面并记录移除。 |
+| **Port** | 已读上游源码、`ATTRIBUTION.md`（来源/路径/revision/license/Light 变更）、Light handoff 适配、无上游运行时依赖，外加新增矩阵的文档/测试。 |
+| **Adapt** | 说明参照的上游模式与 Light 集成必要性，保留适用 `ATTRIBUTION.md`，外加更新矩阵的文档/测试。 |
 
-## 上游、recipes、rollback 和 closeout
+## 目录与安装维护
 
-上游可以直接推荐而不复制；实质变换的第一方能力必须保留 attribution，仍主要是第三方能力的修改版进入 `skills-3rdParty`。`docs/workflows/` 只是验证资产，不能变成隐藏准入门槛或自动 workflow。
+目录条目须写明作用、when to use（适用时）、调用方式、包路径、状态、安装范围与证据。以包 metadata 为准，不另建静态路由表。
 
-发布前检查 attribution/license、依赖、host location、安装行为、双语文档和已知差异。release candidate 验证失败时停止 promotion，不改写已发布历史或删除证据。closeout 必须记录最终位置、版本/tag、命令、catalog、direct upstream、modified third-party、证据、限制和迁移/归档状态，并区分 `implemented`、`verified`、`independently accepted`、`BLOCKED`、`NOT TESTED`、`out of scope`。
+发布示例必须指向真实已发布来源并与当前目录一致。针对 fresh 环境验证全仓与单包安装，保留精确命令、已发布 revision、host 与离线 discovery 结果；未验证前保持模板标记。
+
+## 上游归属与兼容性
+
+已批准的 Matt PORT 为自包含第一方包，带 `ATTRIBUTION.md`，运行时**不需要**安装 `mattpocock/skills`。其他上游可直接推荐而不复制；仍以第三方为主的修改版进入 `skills-3rdParty`。
+
+发布前检查 attribution/license、依赖、host 位置、安装行为与已知行为差异。Light 主流程运行时不得要求 `mattpocock/skills` 或 `sol-advisor`。
+
+## 组合示例
+
+`docs/workflows/` 仅为验证资产，说明 Skill 组合与 handoff（`entry → handoff → stop → optional`），不复制 Skill 内部详细流程。不得成为隐藏准入门槛或自动 workflow。
+
+## 弃用、回滚与发布
+
+弃用需显式标记目录与安装指引、写明替代或声明无替代、在发布支持期内保留迁移信息并记入 changelog。
+
+候选发布验证失败时停止 promotion，按适用 review 流程修复；不重写已发布历史或删除证据。稳定发布仅需已准入包、同步文档、已验证安装命令、必需 review 证据与真实版本/tag。
+
+## Closeout 记录
+
+收尾时记录最终仓库位置、已发版本/tag、已验证命令、第一方目录（33）、已批准 Port / direct upstream / modified third-party 区分、证据、限制与迁移/归档指引。不得把结构或模拟证据写成 runtime proof。Historical closeout must be recorded with exact identifiers and limitations — closeout is not structural proof. 历史证据（`docs/evidence/`）保持不变。

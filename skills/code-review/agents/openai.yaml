@@ -1,0 +1,7 @@
+interface:
+  display_name: "Code Review"
+  short_description: "Review a bounded diff on Standards and Spec axes, read-only"
+  default_prompt: "Use $code-review to review git diff <fixed-point>...HEAD along Standards and Spec axes in parallel read-only sub-agents and report findings as review evidence."
+
+policy:
+  allow_implicit_invocation: true

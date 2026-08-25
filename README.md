@@ -1,152 +1,139 @@
-![LightDevCoder/skills — composable agent workflows](skills/docs/assets/skills-header.png)
+![Light Skills — composable agent workflows](Assets/header.png)
 
 [中文说明](README.zh-CN.md)
 
-# Personal Skills Collection
+# Light Skills — Composable Agent Workflows
 
-`LightDevCoder/skills` is the public, first-party home for nine installable
-Agent Skills on the current branch (published in v0.1.6). Each package is independently discoverable,
-explicit about its invocation boundary, and small enough to inspect before use.
+`LightDevCoder/skills` is a **first-party, general-purpose, composable Agent workflow system** — 33 small, explicit, independently discoverable Skills that combine into a complete project flow or run standalone. Each package owns its `SKILL.md` contract; this README explains the repository.
 
-> **About:** Personal Skills Collection — Drive your creativity
+> **About:** Light Skills — Drive your creativity. Small, composable, inspectable.
 
-> **Release:** [v0.1.6](https://github.com/LightDevCoder/skills/releases/tag/v0.1.6)
-> is published from commit `e8c3589` (tag `v0.1.6`). The release record and fresh-install evidence
-> live in [docs/evidence/releases/v0.1.6/](docs/evidence/releases/v0.1.6/);
-> post-release verification is recorded on main and linked from the GitHub
-> Release.
->
-> `kb-init` was admitted through the full admission path with an
-> independent `review-loop agent-skill` `PASS`; see its
-> [admission evidence](docs/evidence/admissions/kb-init/README.md).
-> v0.1.6 publishes the nine-package collection. Independent acceptance for the
-> original five packages remains `BLOCKED`; see the release receipts for the
-> exact boundary.
+> **Release:** [v0.1.6](https://github.com/LightDevCoder/skills/releases/tag/v0.1.6) is published from commit `e8c3589` (tag `v0.1.6`) and is the last published stable (9 packages). The current branch contains **33 first-party Skills** (unreleased refactor — see [CHANGELOG.md](CHANGELOG.md)). Skills are still installed with `npx skills add LightDevCoder/skills`.
 
-## Quick Start
+## What is Light Skills
 
-Install the published first-party collection:
+A workflow system, not a monolithic orchestrator. The repository provides composable capabilities across:
+
+- **Project Workflow** — from initialization to release
+- **Clarification & Research** — decide before you build
+- **Execution** — do bounded work with host-aware routing
+- **Review** — from read-only findings to project acceptance
+- **Specialized Workflows** — manuscript, knowledge base, learning, kanban
+- **Router** — `ask-light` recommends the next step without executing it
+
+Architecture decides *which capabilities exist and how they compose*; Skill-writing quality follows [Matt Pocock Skills](https://github.com/mattpocock/skills), and host-aware routing follows [Sol Advisor](https://github.com/DannyMac180/sol-advisor) — both as design references, not runtime dependencies.
+
+## Installation
 
 ```text
 npx skills add LightDevCoder/skills --yes --copy --agent '*'
 ```
 
-Install one Skill at the same published revision:
+One Skill at the same revision:
 
 ```text
-npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'
+npx skills add LightDevCoder/skills --skill project-review --yes --copy --agent '*'
+npx skills add LightDevCoder/skills --skill research --yes --copy --agent '*'
 ```
 
-Refresh the Agent host, then confirm that the package is visible in its Skill
-catalog. If the host exposes a filesystem, inspect the installed package's
-`SKILL.md` and `agents/openai.yaml`; discovery without the source checkout is
-the meaningful check. The exact CLI version, destination, and result are in
-[INSTALLATION_VERIFICATION.md](docs/evidence/releases/v0.1.6/INSTALLATION_VERIFICATION.md).
+For the last published tag:
 
-The first useful entry point when the next move is unclear is `$ask-light`:
+```text
+npx skills add LightDevCoder/skills#v0.1.6 --yes --copy --agent '*'
+```
+
+Refresh the host, then confirm discovery without the source checkout. See [Installation](docs/INSTALLATION.md) for revision semantics, manual fallback, and fresh-install evidence.
+
+## Quick Start
+
+```text
+$ask-light next        # you don't know what's next — get one recommendation and stop
+$project-init          # start a new project from a minimal preset
+$clarify               # vague idea → lightweight decisions, no SPEC yet
+$project-clarify       # real project → inspect repo, then decide
+$implement             # one clear ticket in, one verified artifact out
+$project-review        # final acceptance: PASS / FAIL / BLOCKED
+```
+
+## Main workflow
+
+The recommended project flow (not a required pipeline — enter mid-stream when appropriate):
+
+```text
+project-init
+      ↓
+project-clarify
+      ↓
+project-spec
+      ↓
+project-tickets
+      ↓
+implement
+      ↓
+project-review
+      ↓
+release-workflow
+```
+
+- `project-init` — minimum initialization from a preset; no full clarification.
+- `project-clarify → project-spec → project-tickets` — clarify decisions, freeze a SPEC, slice into tracer-bullet tickets.
+- `implement` — general-purpose bounded executor (code, doc, config, Skill).
+- `project-review` — project-level final acceptance; `review-loop` is its convergence engine.
+- Any stage may enter directly when the task is already in that state.
+
+Small-task paths:
+
+```text
+clarify                          # standalone idea triage → stop, no SPEC
+implement                        # one ready ticket → verify → review-loop when useful
+diagnosing-bugs → implement      # hard bug → tight loop → fix → review
+release-workflow                 # publish only
+$ask-light                       # unknown entry → one recommendation
+```
+
+Full composition is in [docs/workflows/](docs/workflows/). Each `SKILL.md` stays the authority.
+
+## When you don't know what's next
 
 ```text
 $ask-light next
+$ask-light workflow
 ```
 
-Four short examples:
+`ask-light` is the **Light Workflow Router** — user-invoked, read-only, built last after the full map exists. It inspects goal, artifacts, blockers, project type, task kind, availability, and invocation control across the 33 first-party Skills and returns *one* recommendation (or one bounded recipe) with source, reason, and host-appropriate invocation — then stops. It never installs, executes, or chains another user-invoked Skill.
 
-```text
-$ask-light next       # recommend one next Skill; do not invoke it
-$project-init         # initialize a confirmed minimal project preset
-$recap                # summarize the current session in one line
-$review-loop init     # freeze an already-approved acceptance baseline
-```
+See [ask-light](skills/ask-light/SKILL.md) and [docs/workflows/](docs/workflows/).
 
-`ask-light` is the only router in these examples. It reports a recommendation
-or a bounded recipe and stops; it never invokes, installs, or orchestrates the
-result. Read [Quick Start](examples/quick-start/README.md), the [Skill user
-guides](docs/skills/), and [workflow recipes](docs/workflows/) for inputs,
-outputs, handoffs, and stopping boundaries.
+## Representative capabilities
 
-For scheduled Light-Kanban work, `kanban-worker` turns each agent
-wake-up into one handled board task (renamed from `light-kanban-worker` in
-v0.1.6):
+| Group | Skills | Entry |
+| --- | --- | --- |
+| **Project** | `project-init`, `project-clarify`, `project-spec`, `project-tickets`, `implement`, `project-review`, `release-workflow` | [CATALOG.md](CATALOG.md) |
+| **Clarification & Research** | `socratic` (engine), `clarify`, `project-clarify`, `decision-map`, `research`, `prototype`, `to-questionnaire` | [clarification-system](docs/workflows/clarification-system.md) |
+| **Execution** | `implement`, `agent-config`, `tdd`, `diagnosing-bugs`, `resolving-merge-conflicts` | [execution](docs/workflows/execution.md) |
+| **Review** | `review-loop` (engine), `generic-review`, `code-review`, `project-review` (acceptance) | [review-system](docs/workflows/review-system.md) |
+| **Specialized** | `manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `eli5`, `recap` | [specialized-workflows](docs/workflows/specialized-workflows.md) |
+| **Productivity** | `handoff`, `wizard`, `wait-what`, `writing-for-agents` | [CATALOG.md](CATALOG.md) |
 
-```text
-Use kanban-worker to process at most one Light-Kanban task.
-```
+Full inventory — purpose, when to use, invocation, and package path for all 33 — is in [CATALOG.md](CATALOG.md). Do not duplicate full Skill contracts here.
 
-It resumes owned work and review feedback before claiming new tasks, then
-returns the result for human confirmation. First registration needs the
-Agent ID, Name, and Avatar; later runs reuse the saved identity. Configure
-the scheduler so only one run of the same agent id can be active at a time
-(different agent ids may run concurrently). See the
-[`kanban-worker` guide](docs/skills/kanban-worker.md).
+## First-party catalog (summary)
 
-## External capabilities
+33 admitted first-party Skills under `skills/`. Package contracts are the behavior authority.
 
-The published v0.1.6 collection contains nine first-party packages: the
-v0.1.2 release's seven (v0.1.1's five plus `recap` and `language-learning`;
-v0.1.3 kept the same seven and migrated the test toolchain), plus
-`kanban-worker` (renamed from `light-kanban-worker`), plus `kb-init`.
-
-Optional workflow capabilities are external or third-party dependencies and are
-not included by default:
-
-- `grill-me` / `grilling` — `grill-me` is the user-facing entry point for a
-  one-session clarification interview; it starts the underlying model-invoked
-  `grilling` capability. Treat them as one capability, not two workflow steps.
-- `research` — investigate an external fact or practice when a local preset is
-  insufficient.
-- `to-spec` — turn an approved goal and constraints into a traceable
-  specification.
-- `to-tickets` — turn an approved specification into dependency-ordered
-  tickets.
-- `implement` — carry out one bounded, unblocked implementation ticket.
-- `code-review` — provide specialist findings for a fixed change.
-- `handoff` — preserve an accepted result or blocker for closeout or resumption.
-
-These capabilities may come from `mattpocock/skills` or another external
-source. This repository does not copy them or install them automatically;
-check their availability before selecting a workflow that names them.
-
-## First-party catalog
-
-| Skill | Purpose | Invocation | Package |
-| --- | --- | --- | --- |
-| [review-loop](skills/review-loop/SKILL.md) | Run bounded evidence, repair, and final-acceptance loops. | Model-invoked; manual entry point is supported. | skills/review-loop/ |
-| [project-init](skills/project-init/SKILL.md) | Initialize a confirmed software, manuscript, research, knowledge, data, or Skill-development project preset. | User-invoked only. | skills/project-init/ |
-| [ask-light](skills/ask-light/SKILL.md) | Inspect the active host and recommend one appropriate next Skill or bounded recipe without executing it. | User-invoked only. | skills/ask-light/ |
-| [kb-init](skills/kb-init/SKILL.md) | Design and initialize a maintainable knowledge base through a knowledge-base-specific interview and an approval-gated implementation SPEC. | User-invoked only. | skills/kb-init/ |
-| [language-learning](skills/language-learning/SKILL.md) | Tutor for any target language through six study modes: lessons, flashcards, conversation, grammar, quizzes, and immersion. | User-invoked only. | skills/language-learning/ |
-| [recap](skills/recap/SKILL.md) | Summarize the current Agent session in exactly one line without changing history or continuing the task. | User-invoked only. | skills/recap/ |
-| [learn-anything](skills/learn-anything/SKILL.md) | Distill sufficiently evidenced source material into reusable Agent Skill methods. | User-invoked only. | skills/learn-anything/ |
-| [manuscript-ops](skills/manuscript-ops/SKILL.md) | Govern reproducible manuscript engineering across formats, batches, reviews, and handoffs. | Model-invoked; manual entry point is supported. | skills/manuscript-ops/ |
-| [kanban-worker](skills/kanban-worker/SKILL.md) | Pick up and execute one Light-Kanban task per scheduled run, then return it for human confirmation. | Model-invoked; manual entry point is supported. | skills/kanban-worker/ |
-
-[CATALOG.md](CATALOG.md) is the human-readable inventory. Package-level
-`SKILL.md` files remain the behavior authority; the guides explain usage
-without creating a second contract.
-
-## Composition without a fixed workflow
-
-The collection is composable rather than a required pipeline. Recipes in
-[docs/workflows/](docs/workflows/) document explicit handoffs such as
-specification → tickets → implementation → specialist review → final
-`review-loop` verdict. They are documentation and validation assets, not an
-automatic orchestration engine and not a replacement for the retired
-`project-workflow` package.
+See [CATALOG.md](CATALOG.md) for the complete table.
 
 ## Ownership and upstream boundaries
 
 | Source state | Authority | Treatment here |
 | --- | --- | --- |
 | First-party | This repository and its admitted package contracts | Included under `skills/`. |
-| Direct upstream | The original upstream repository | Install directly; do not copy an unchanged Skill here. |
-| Modified third-party | The private `LightDevCoder/skills-3rdParty` repository | Keep provenance, patches, licenses, sync locks, and install evidence. |
-| Deprecated or archived | The released migration record | Keep history and point users to the current authority. |
+| Approved Port (Matt) | Original upstream + `ATTRIBUTION.md` + Light integration | Self-contained here; no runtime install of Matt Skills required. |
+| Direct upstream (other) | Original upstream repository | Install directly; do not copy unchanged Skill here. |
+| Modified third-party | Private `LightDevCoder/skills-3rdParty` | Keep provenance, patches, licenses, sync locks, evidence. |
+| Deprecated / archived | Released migration record | Keep history, point to current authority. |
 
-Matt Pocock Skills that are not first-party remain at
-[mattpocock/skills](https://github.com/mattpocock/skills). The selected private
-third-party snapshot is maintained separately at
-[LightDevCoder/skills-3rdParty](https://github.com/LightDevCoder/skills-3rdParty)
-and is never copied into this public collection.
+Approved Matt PORTs in this repo (SPEC §14): `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts`. Each has `ATTRIBUTION.md` and no upstream runtime dependency. Light main workflow does not require `mattpocock/skills` or `sol-advisor` at runtime.
 
 ## Governance and evidence
 
@@ -154,13 +141,12 @@ and is never copied into this public collection.
 - [Skill admission](docs/SKILL_ADMISSION.md)
 - [Maintenance and synchronization](docs/MAINTENANCE.md)
 - [Installation and fresh-install verification](docs/INSTALLATION.md)
-- [Review policy](docs/REVIEW_POLICY.md)
-- [Catalog](CATALOG.md)
-- [Changelog](CHANGELOG.md)
+- [Review policy](docs/REVIEW_POLICY.md) · [Reviewer contract](docs/REVIEWER_CONTRACT.md)
+- [Catalog](CATALOG.md) · [Changelog](CHANGELOG.md)
+- [Workflows](docs/workflows/) — project, clarification, execution, review, specialized
 - [Release receipt](docs/evidence/releases/v0.1.6/RELEASE_RECEIPT.md)
-- [recap admission evidence](docs/evidence/admissions/recap/README.md)
-- [language-learning admission evidence](docs/evidence/admissions/language-learning/README.md)
-- [kanban-worker admission evidence](docs/evidence/admissions/light-kanban-worker/README.md)  
-  (admission record predates the v0.1.6 rename from `light-kanban-worker`)
-- [kb-init admission evidence](docs/evidence/admissions/kb-init/README.md)
-- [Collection discovery test](tests/test_collection_discovery.py)
+- [Collection discovery](tests/test_collection_discovery.py) · [Composition checks](tests/test_composition.py)
+
+## Hero asset
+
+Header image: [Assets/header.png](Assets/header.png) (first line of this README). The editable legacy header remains at `skills/docs/assets/skills-header.svg` / `.png` with manifest `skills/docs/assets/skills-header.json` for package tests.

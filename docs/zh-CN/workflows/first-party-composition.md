@@ -21,14 +21,13 @@ Agent 已有 goal、artifacts、blockers、project type、task kind、availabili
 用户显式选择下一 Skill
 ```
 
-可能选择 `project-init`、`learn-anything`、`recap`、`manuscript-ops` 或 `review-loop`。其中 `recap` 只有在用户显式需要当前 session 的一行摘要时才适用。`ask-light` 在建议后停止，不执行、安装、delegate、创建 workflow state 或静默串联 user-invoked Skill；选中的 Skill 保留自己的 contract 和 evidence boundary。
+可能选择 `project-init`、`project-clarify`、`clarify`、`decision-map`、`research`、`prototype`、`project-spec`、`project-tickets`、`implement`、`diagnosing-bugs`、`project-review`、`review-loop`、`learn-anything`、`recap`、`manuscript-ops` 或 `release-workflow`。其中 `recap` 仅在用户显式需要当前 session 一行摘要时适用。`ask-light` 在建议后停止，不执行、安装、delegate、创建 workflow state 或静默串联 user-invoked Skill；选中 Skill 保留自己的契约与证据边界。
 
 ## Evidence 与状态
 
-- 六个包的 `SKILL.md`。
+- 33 个包的 `SKILL.md`（见 [CATALOG.zh-CN.md](../../../CATALOG.zh-CN.md)）。
 - [ask-light discovery contract](../../../skills/ask-light/references/discovery-contract.md)。
-- [collection discovery 测试](../../../tests/test_collection_discovery.py)。
-- [v0.1.1 发布证据](../../evidence/releases/v0.1.1/RELEASE_RECEIPT.zh-CN.md)。
-- [recap 准入证据](../../evidence/admissions/recap/README.zh-CN.md)。
+- [collection discovery 测试](../../../tests/test_collection_discovery.py) 与 [composition](../../../tests/test_composition.py)。
+- `docs/evidence/` 下的 release 与 admission 证据。
 
 这是验证资产，不是 canonical workflow 或准入要求。

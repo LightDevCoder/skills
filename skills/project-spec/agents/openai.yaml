@@ -1,0 +1,6 @@
+interface:
+  display_name: "Project Spec"
+  short_description: "Turn clarified outputs into a formal project SPEC"
+  default_prompt: "Use $project-spec to turn the project-clarify handoff or decision-map outputs into a formal SPEC at .scratch/<feature>/spec.md without reopening the interview."
+policy:
+  allow_implicit_invocation: false

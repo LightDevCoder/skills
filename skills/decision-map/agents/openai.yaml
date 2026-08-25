@@ -1,0 +1,7 @@
+interface:
+  display_name: "Decision Map"
+  short_description: "Map a large effort as decision tickets"
+  default_prompt: "Use $decision-map to chart or work through a .scratch decision map until fog clears for project-spec."
+
+policy:
+  allow_implicit_invocation: false

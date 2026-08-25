@@ -1,0 +1,7 @@
+interface:
+  display_name: "TDD"
+  short_description: "Test-driven red-green-refactor"
+  default_prompt: "Use $tdd to build features or fix bugs test-first with the red-green-refactor loop."
+
+policy:
+  allow_implicit_invocation: true
