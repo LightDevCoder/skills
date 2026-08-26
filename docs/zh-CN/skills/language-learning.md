@@ -30,7 +30,7 @@ $language-learning Spanish, flashcards for: perro, gato, casa
 - **边界：** 混合或模糊请求只路由到一个主模式，并顺带给出第二个选项，而不是发明新能力。
 - **失败：** 每次调用都重新询问语言、水平与模式，或逐条列出学习者的全部错误，都违反教学契约。
 
-`language-learning` 不会调用另一个 user-invoked Skill。持久化续接记录需要用户另行选择 `handoff`；最终验收仍由 `review-loop` 拥有。`BLOCKED` 或不完整的准入状态不会改变包契约。
+`language-learning` 不会调用另一个 user-invoked Skill。持久化续接记录需要用户另行选择 `handoff`；最终验收仍由 `project-review` 拥有。`BLOCKED` 或不完整的准入状态不会改变包契约。
 
 ## 验证与发布状态
 

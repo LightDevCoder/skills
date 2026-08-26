@@ -47,12 +47,12 @@ with generic Purpose, Workflow, or Quality Checks.
 
 ## Composition and stopping
 
-`writing-great-skills` may provide optional authoring knowledge after the Method
+`writing-for-agents` may provide optional authoring knowledge after the Method
 Contract. It is not an implicit runtime dependency. A deterministic package
-build hands to `review-loop` with the `agent-skill` Profile; admission owns the
-next gate. Stop at the Method Contract, package-build result, or exact
-`BLOCKED` gap. `learn-anything` never silently invokes another user-invoked
-Skill.
+build hands to `project-review` (via `review-loop`) with the `agent-skill`
+Profile; admission owns the next gate. Stop at the Method Contract,
+package-build result, or exact `BLOCKED` gap. `learn-anything` never silently
+invokes another user-invoked Skill.
 
 ## Installation and discovery check
 

@@ -35,8 +35,10 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         c.check(marker in skill, f"lightweight question captured: {marker}")
     for marker in ("existing `AGENTS.md`", "existing `CLAUDE.md`", "research", "confirm", "reject", "created path", "declared capability", "Project Initialization"):
         c.check(marker in (skill + contract), f"initialization contract marker: {marker}")
-    for forbidden in ("to-spec", "to-tickets", "implement", "final review", "another user-invoked Skill"):
+    for forbidden in ("project-spec", "project-tickets", "implement", "project-review", "another user-invoked Skill"):
         c.check(forbidden in skill, f"boundary names forbidden operation: {forbidden}")
+    for old in ("to-spec", "to-tickets", "final review"):
+        c.check(old not in skill, f"old name removed: {old}")
     c.check("does not run" in skill and ("never invoke" in skill or "must not invoke" in skill), "boundaries prohibit execution")
     c.check(not re.search(r"TODO|\[TODO", skill), "no template placeholders remain")
 

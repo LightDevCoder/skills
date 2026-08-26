@@ -125,11 +125,11 @@ fixes it — rework does not create a new task.
 `kanban-worker` accesses the network, reads workspace files, and
 mutates board state, so it follows the full admission path: contract and
 behavior tests under [skills/kanban-worker/tests/](../../skills/kanban-worker/tests/)
-plus `review-loop agent-skill` acceptance; a `BLOCKED` verdict would keep it
-outside the catalog. See the [admission evidence](../evidence/admissions/light-kanban-worker/README.md)
+plus `project-review` (via `review-loop`) acceptance; a `BLOCKED` verdict would
+keep it outside the catalog. See the [admission evidence](../evidence/admissions/light-kanban-worker/README.md)
 (recorded under the original `light-kanban-worker` name). The v0.1.5 contract
 change (non-overlapping same-agent runs and the first-registration avatar
-requirement) carries its own `review-loop agent-skill` `PASS`; see the
+requirement) carries its own `project-review` `PASS`; see the
 [v0.1.5 release evidence](../evidence/releases/v0.1.5/README.md).
 
 ## Installation and discovery

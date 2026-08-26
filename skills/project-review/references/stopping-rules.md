@@ -2,7 +2,7 @@
 
 ## State values
 
-Use one current status in `.review-loop/state.md`:
+Use one current status in `.project-review/state.md`:
 
 `INIT`, `READY`, `CRITIC`, `REPAIR`, `EVALUATE`, `PASS`, `FAIL`, or `BLOCKED`.
 

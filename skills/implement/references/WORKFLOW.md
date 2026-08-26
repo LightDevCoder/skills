@@ -17,10 +17,9 @@ this file holds the full step description.
 
 ## Inputs and ticket consumption
 
-`project-tickets` produces one file per ticket per
-[docs/agents/issue-tracker.md](../../../docs/agents/issue-tracker.md) and
-[../project-tickets/references/TICKET-CONTRACT.md](../../project-tickets/references/TICKET-CONTRACT.md)
-Wayfinding operations:
+`project-tickets` produces one file per ticket under the tracker convention
+used by the active repository (`.scratch/<feature>/issues/`). Wayfinding
+operations:
 
 ```text
 .scratch/<feature>/issues/NN-<slug>.md    # from 01 in dependency order
@@ -52,7 +51,7 @@ When `$implement` is passed a ticket path:
    (or one non-code artifact) attributable to that ticket only. Traceable issue
    state (`Status: claimed / resolved`, appending `## Answer`) is not this
    Skill's side-effect; the caller or tracker workflow updates the file after
-   `review-loop` reaches a verdict. Early `Claim` before work is a recommended
+   `project-review` reaches a verdict. Early `Claim` before work is a recommended
    external step for concurrent sessions but not a required side-effect of this
    Skill.
 
@@ -93,9 +92,8 @@ explicit routing:
 - ownership, concurrency cap, or worktree isolation must be declared.
 
 Inputs to `agent-config` are exactly the bounded item, its acceptance source,
-declared change units with exact file ownership, current Host evidence per
-[host-evidence-schema.md](../../agent-config/references/host-evidence-schema.md),
-and any non-negotiable review/worktree constraints.
+declared change units with exact file ownership, current Host evidence as
+`agent-config` defines, and any non-negotiable review/worktree constraints.
 
 - If Host evidence shows a single-model single-agent Host, `agent-config`
   returns a serial plan with a self-check gate rather than a purported
@@ -121,8 +119,8 @@ software Profile):
 2. Drive `tdd` (model-invoked) at those seams. One red→green cycle at a time:
    a named seam, a failing test in the correct harness location, then the
    minimal implementation that makes that test pass. Do not write tests bulk
-   ahead of implementation. Follow [tdd](../../tdd/SKILL.md) seams, anti-
-   patterns, and loop rules — do not duplicate them here.
+   ahead of implementation. Follow `tdd`'s seams, anti-patterns, and loop
+   rules — do not duplicate them here.
 3. The run's editorial position is **tracer-bullet vertical**: each cycle is a
    narrow but complete path through the relevant layers, demoable on its own.
 
@@ -164,19 +162,16 @@ Package the evidence for `review-loop`:
 - limitations (unavailable dependencies, environments, generated outputs, or
   untestable paths).
 
-Select the `review-loop` Profile and reviewer implied by the artifact:
+Select the reviewer implied by the artifact and call it through `review-loop`:
 
-- **Code** → `software` Profile → `review-loop` invokes `code-review`
-  (Standards + Spec) as the specialist reviewer and collects behavioral /
-  operational findings; the Core validates findings and directs only bounded
-  in-scope repairs.
-- **Non-code** → `generic` Profile with `generic-review` (or an available
-  domain reviewer). Do not call `code-review` on a non-code diff.
+- **Code** → `code-review` (Standards + Spec) as the specialist reviewer. It
+  returns candidate findings; `review-loop` drives convergence and
+  `project-review` owns any final verdict.
+- **Non-code** → `generic-review` (or an available domain reviewer). Do not
+  call `code-review` on a non-code diff.
 
-Do not copy the reviewer's rubric or the `review-loop` charter/evidence/state
-machine into this file; call those Skills/capabilities via their public
-protocols (see [software.md](../../review-loop/references/profiles/software.md)
-for the software handoff shape).
+Do not copy the reviewer's rubric or the acceptance/state machine into this
+file; call those Skills via their public protocols.
 
 ## Boundaries
 

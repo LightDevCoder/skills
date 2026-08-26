@@ -4,7 +4,7 @@
 `MissionCenter/` directory, keep the two systems complementary:
 
 - Mission Center owns its task lifecycle and task-management artifacts.
-- `.review-loop/charter.md`, `state.md`, round evidence, and `verdict.md` own
+- `.project-review/charter.md`, `state.md`, round evidence, and `verdict.md` own
   acceptance state for this review loop.
 - A task ID, smoke-test ID, snapshot path, or final verdict path may be linked
   from the other system when the pointer is stable and useful.

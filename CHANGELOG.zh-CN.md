@@ -33,6 +33,14 @@
 - **头图：** `README.zh-CN.md` 首行改为 `Assets/header.png`；可编辑遗留头图仍在 `skills/docs/assets/skills-header.svg` / `.png`。
 - **测试：** 保留有效行为测试；将锁旧架构的测试更新为 33 包、组合 handoff 与头图/双语检查。
 
+### 变更 — Lean 架构重构
+
+- **SKILL.md 作为最小可执行接口：** 全量重构 Skill（`agent-config`、`ask-light`、`clarify`、`code-review`、`decision-map`、`generic-review`、`implement`、`project-clarify`、`project-init`、`project-review`、`project-spec`、`project-tickets`、`review-loop`、`socratic`）现在直接暴露核心执行行为，条件性格式/示例/专项指导保留在 Skill 自有的 supporting files。
+- **组合优于复制：** `review-loop` 是轻量评审引擎；`project-review` 拥有最终 `PASS`/`FAIL`/`BLOCKED`；调用方只命名 Skill，不再复述其内部 runbook。
+- **测试：** 非契约的字面措辞断言已放宽；根 discovery/composition 测试已更新为 `project-review` 作为最终验收命令。
+- **规划状态：** 旧 `.scratch/light-skills-refactor/` 已归档/废弃；`.scratch/light-skills-lean-refactor/` 成为唯一活动规划集，含逻辑重构分析与实施 tickets。
+- **Frozen 完整性：** 六个 Frozen Skills（`eli5`、`recap`、`language-learning`、`kb-init`、`kanban-worker`、`learn-anything`）保持逐字节不变并通过 hash 验证。
+
 ### No-Redesign 验证
 
 对 19 个 `NO REWRITE/PORT` 按 `git diff` 逐个检查（SPEC §26）：`manuscript-ops`、`kb-init`、`learn-anything`、`language-learning`、`kanban-worker`、`recap`、`eli5`、`release-workflow`、`research`、`prototype`、`tdd`、`handoff`、`diagnosing-bugs`、`wizard`、`teach`、`wait-what`、`to-questionnaire`、`writing-for-agents`、`resolving-merge-conflicts`——仅在真实集成需求处加最小 handoff/attribution。

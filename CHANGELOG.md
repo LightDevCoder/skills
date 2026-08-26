@@ -33,6 +33,14 @@ Approved Matt PORTs (10) each carry `ATTRIBUTION.md` and have no upstream runtim
 - **Hero:** `README.md` / `README.zh-CN.md` now use `Assets/header.png` (first line) as the repository hero; legacy editable header remains at `skills/docs/assets/skills-header.svg` / `.png` with manifest.
 - **Tests:** Preserved effective behavior tests; updated architecture-locked tests to 33 packages, composition handoffs, and hero/bilingual checks.
 
+### Changed — Lean architecture refactor
+
+- **SKILL.md as minimal executable interface:** Full-refactor Skills (`agent-config`, `ask-light`, `clarify`, `code-review`, `decision-map`, `generic-review`, `implement`, `project-clarify`, `project-init`, `project-review`, `project-spec`, `project-tickets`, `review-loop`, `socratic`) now expose their core execution behavior directly and keep conditional formats/examples/specialized guidance in Skill-owned supporting files.
+- **Composition over duplication:** `review-loop` is the lightweight review engine; `project-review` owns final `PASS`/`FAIL`/`BLOCKED`; callers name Skills instead of re-documenting their runbooks.
+- **Tests:** prose-only assertions were loosened where literal wording is not a contract; root discovery/composition tests updated for the `project-review` final-acceptance command.
+- **Planning state:** the previous `.scratch/light-skills-refactor/` is archived/superseded; `.scratch/light-skills-lean-refactor/` is now the active planning set with reconstruction analysis and implementation tickets.
+- **Frozen integrity:** the six Frozen Skills (`eli5`, `recap`, `language-learning`, `kb-init`, `kanban-worker`, `learn-anything`) remain byte-for-byte unchanged and hash-verified.
+
 ### No redesign verification
 
 19 `NO REWRITE/PORT` Skills were `git diff` checked (SPEC §26): `manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `recap`, `eli5`, `release-workflow`, `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts` — only minimal handoff/attribution wiring where a real integration need existed.

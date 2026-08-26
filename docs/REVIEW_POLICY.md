@@ -24,7 +24,7 @@ Use this policy for:
 - a rename, deprecation, or removal that changes discovery, installation, or migration behavior; and
 - a release candidate containing any of the above.
 
-Documentation-only governance changes still require link, scope, and cross-reference inspection. They do not substitute for the future package-level `project-review` or `review-loop agent-skill` acceptance that an admitted Skill requires.
+Documentation-only governance changes still require link, scope, and cross-reference inspection. They do not substitute for the future package-level `project-review` (via `review-loop`) acceptance that an admitted Skill requires.
 
 ## Profile selection and specialist review
 
@@ -49,9 +49,9 @@ The Producer performs repairs. Critics, when required, and Evaluators remain rea
 
 ## Bounded repair and verdicts
 
-`review-loop` may direct the current Producer to repair only a confirmed, in-scope finding with a bounded correction that can converge within the configured limit. It must stop with `FAIL` or `BLOCKED` when repair would require changed requirements, a new architecture decision, multiple new tickets, missing authority, missing environment access, or unavailable independent review.
+`project-review` may direct the current Producer to repair only a confirmed, in-scope finding with a bounded correction that can converge within the configured limit. It must stop with `FAIL` or `BLOCKED` when repair would require changed requirements, a new architecture decision, multiple new tickets, missing authority, missing environment access, or unavailable independent review.
 
-The final verdict is owned by **`project-review`** (for projects/releases) or by the designated package acceptance owner (`review-loop` with `agent-skill` Profile for package admission where no separate project acceptance exists) — never by a reviewer:
+The final verdict is owned by **`project-review`** — never by a reviewer and never by `review-loop`:
 
 - **PASS:** All frozen acceptance conditions and evidence requirements are met.
 - **FAIL:** A confirmed in-scope condition is unmet and not resolved within the allowed repair path.

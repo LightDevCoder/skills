@@ -1,10 +1,11 @@
 # Ask-light discovery contract
 
 This reference defines the observable read-only protocol used by `ask-light`
-(Light Workflow Router). Light's first-party collection now contains 33 Skills
+(Light Workflow Router). Light's first-party collection contains 33 Skills
 across Project Workflow, Clarification & Research, Execution, Review, Reusable
 Capabilities, Specialized Workflows, and Router. This contract covers how the
-router discovers and ranks those Skills without reimplementing them.
+router discovers and ranks those first-party Skills without reimplementing
+them.
 
 ## Context record
 
@@ -29,12 +30,12 @@ the no-execution boundary.
 
 ## Candidate record and metadata pass
 
-Each source root is declared as `{ category, path }`. Supported categories are
-`project`, `global`, `first-party`, `upstream`, `modified-third-party`, and
-`other`. The scanner may accept host-specific aliases but preserves the
-canonical category in output.
+Each source root is declared as `{ category: first-party, path }`. Project/global
+roots are installation locations, not competing capability categories. If a host
+passes a project/global root, the scanner normalizes its category to
+`first-party` and keeps the resolved path for provenance.
 
-For every package directory, the metadata pass reads only:
+For every package directory, the **metadata-first** pass reads only:
 
 1. the YAML frontmatter in `SKILL.md` up to its closing `---`;
 2. `agents/openai.yaml` when it exists;
@@ -45,35 +46,31 @@ The pass records `name`, `description`, `displayName`, `shortDescription`,
 unreadable field, including any missing display/default-prompt metadata, sets
 `metadataStatus: unavailable` and records a gap. Such a candidate remains
 visible with `metadataReadable: false`, its source, package path, and
-readability details for remediation
-but is not eligible for a normal recommendation. Bodies and references are not
-read in this pass.
+readability details for remediation, but is not eligible for a normal
+recommendation. Bodies and references are not read in this pass.
 
 The stable identity is:
 
 ```text
-normalized-name + source-category + resolved-package-path
+normalized-name + first-party + resolved-package-path
 ```
 
-Same-name records are grouped, never overwritten. A source-specific package
-may therefore win a tie without hiding another installation of that name.
+Same-name records are grouped, never overwritten. A duplicate installed copy
+remains visible but does not create a second capability or an automatic merge.
 
 ## Ranking and narrow reads
 
 Compute a fit score from independent evidence: goal, artifact, blocker,
 project-type, and task-kind matches. Add compatibility for host availability and
 the requested invocation control. A candidate with incomplete metadata,
-unreadable files, or an unavailable host is ineligible. Source precedence is a
-final tie-break only:
+unreadable files, or an unavailable host is ineligible. There is no source
+precedence ladder; all candidates are first-party, so the tie-break is the
+normalized path after score and availability.
 
-```text
-project -> global -> first-party -> modified-third-party -> upstream -> other
-```
-
-The scanner sorts by score, compatibility, source precedence, then normalized
-path. It reads bodies and relative references only for the top `N` candidates
-(`N=3` by default) or for a tied pair. It must expose body/reference read counts
-so a large catalog cannot masquerade as a full-body scan.
+The scanner sorts by score, compatibility, then normalized path. It reads
+bodies and relative references only for the top `N` candidates (`N=3` by
+default) or for a tied pair. It must expose body/reference read counts so a
+large catalog cannot masquerade as a full-body scan.
 
 Availability is an eligibility gate, not a display hint. If the active context
 declares a host, available/unavailable Skill names, readable paths, or a
@@ -91,24 +88,23 @@ remedy rather than accepting metadata-only evidence.
 Two candidates are **genuinely ambiguous** only when both are eligible, their
 scores remain within one point after body/reference checks, and their matched
 task evidence represents materially different next actions. Equivalent
-duplicate packages with the same action fingerprint are not ambiguous. Return one best
-candidate and at most one `Alternative`; suppress alternatives for ordinary
-ranking differences.
+duplicate packages with the same action fingerprint are not ambiguous. Return
+one best candidate and at most one `Alternative`; suppress alternatives for
+ordinary ranking differences.
 
 ## Workflow recommendation
 
 Workflow mode uses a small validated recipe catalog rather than a permanent
-state machine. A recipe has an entry condition, participating Skills, source
-category, invocation type, expected input (`expectedInput`), expected output
+state machine. A recipe has an entry condition, participating first-party
+Skills, invocation type, expected input (`expectedInput`), expected output
 (`expectedOutput`), handoff artifact, per-step stop condition
 (`stopCondition`), optional flag, missing dependency, and final authority. The
 supported recipes cover software feature, bug diagnosis, manuscript project,
-source-to-Skill, new project initialization, final review, and private
-third-party dependency availability gaps.
+source-to-Skill, new project initialization, and final review.
 
-Only candidates visible in the declared roots and passing metadata/availability
-checks are reported as available. Missing upstream or private third-party
-steps stay in the output with `missingDependency`; a required gap makes the
+Only candidates visible in the declared first-party roots and passing
+metadata/availability checks are reported as available. A missing first-party
+step stays in the output with `missingDependency`; a required gap makes the
 workflow `BLOCKED`. An uncertain or tied recipe returns `NEED-INPUT`. In
 `explicit-only` mode, a user-invoked `learn-anything` remains eligible and its
 invocation type is reported; explicit-only does not silently exclude it.
@@ -123,7 +119,7 @@ read counts and the statement that no recommendation was invoked or installed.
 
 `ask-light` may inspect files and metadata, but it never executes, orchestrates,
 installs, edits, commits, or delegates the recommended Skill or workflow step:
-nothing was invoked, installed, or orchestrated.
-The user must invoke the printed command or choose each recipe step in a later
-action. `review-loop` owns any final acceptance verdict; recipe output is not a
-verdict.
+nothing was invoked, installed, or orchestrated. The user must invoke the
+printed command or choose each recipe step in a later action. For a recipe that
+reaches acceptance, `project-review` owns the final verdict; recipe output is
+not a verdict.

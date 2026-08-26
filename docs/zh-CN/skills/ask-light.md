@@ -34,8 +34,8 @@ Execution: recommendation only; nothing was invoked, installed, or orchestrated
 
 ## 误用、组合和停止点
 
-不要把它当成 discovery/specification 引擎、installer、scheduler 或自动串联器。它可以指向 `project-init`、`learn-anything`、`manuscript-ops`、`to-spec`、`implement`、`code-review` 或 `review-loop`，但下一步必须由用户显式选择。最终 verdict 归 `review-loop`；建议、`NEED-INPUT` 或 `BLOCKED` 记录后就停止。
+不要把它当成 discovery/specification 引擎、installer、scheduler 或自动串联器。它只路由真实第一方 Skills，可以指向 `project-init`、`learn-anything`、`manuscript-ops`、`project-spec`、`implement`、`code-review` 或 `project-review`，但下一步必须由用户显式选择。需要验收的 recipe 最终 verdict 归 `project-review`；建议、`NEED-INPUT` 或 `BLOCKED` 记录后就停止。
 
 ## 安装与发现验证
 
-对于已发布的 v0.1.2，使用 `npx skills add LightDevCoder/skills --skill ask-light --yes --copy --agent '*'` 安装，刷新 host，在不依赖 source checkout 的情况下检查 `SKILL.md`、`agents/openai.yaml` 和 PowerShell scanner。运行 [contract test](../../../skills/ask-light/tests/test_ask_light_contract.py) 与 [behavior test](../../../skills/ask-light/tests/test_ask_light_behavior.py)，覆盖 learn-anything、私有依赖缺失和歧义 fixtures。
+对于已发布的 v0.1.2，使用 `npx skills add LightDevCoder/skills --skill ask-light --yes --copy --agent '*'` 安装，刷新 host，在不依赖 source checkout 的情况下检查 `SKILL.md`、`agents/openai.yaml` 和 PowerShell scanner。运行 [contract test](../../../skills/ask-light/tests/test_ask_light_contract.py) 与 [behavior test](../../../skills/ask-light/tests/test_ask_light_behavior.py)，覆盖 learn-anything、非第一方依赖不路由和歧义 fixtures。

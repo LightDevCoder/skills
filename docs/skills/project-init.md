@@ -25,9 +25,8 @@ defaults to the current directory. Before writing, it reads root
 `AGENTS.md`/`CLAUDE.md`, README, manifests, project documents, and current
 status. It needs the project type, visible goal, outputs, collaboration mode,
 constraints, and required review level, either from the brief or from its
-short questions. Use the external user-facing `grill-me` entry point when a
-question needs a clarification interview; its underlying model-invoked
-capability is `grilling`. This does not authorize additional writes.
+short questions. It does not use a separate clarification Skill; deep
+discovery belongs to `$clarify` / `$project-clarify` / `$decision-map`.
 
 ```text
 $project-init
@@ -50,8 +49,8 @@ its evidence. On rejection or an unconfirmed fallback, write nothing.
 ## Composition and stopping
 
 `ask-light` may recommend this Skill. After initialization, the user may
-explicitly choose `to-spec`, `manuscript-ops`, or `review-loop`; this Skill
-does not call them. Initialization is the stopping boundary: it is not
+explicitly choose `project-spec`, `manuscript-ops`, or `project-review`; this
+Skill does not call them. Initialization is the stopping boundary: it is not
 discovery, specification, implementation, or final review.
 
 ## Installation and discovery check

@@ -45,8 +45,8 @@ external facts are needed. It never invokes another user-invoked Skill.
 
 Run [the package contract test](../../skills/kb-init/tests/) and inspect
 `agents/openai.yaml` for `allow_implicit_invocation: false`. The full
-admission path used `review-loop agent-skill`; the final verdict is `PASS`
-with no unresolved `BLOCKED` condition. Evidence is recorded in the
+admission path used `project-review` (via `review-loop`); the final verdict
+is `PASS` with no unresolved `BLOCKED` condition. Evidence is recorded in the
 [admission record](../evidence/admissions/kb-init/README.md).
 
 `kb-init` is released in v0.1.6. Install it with

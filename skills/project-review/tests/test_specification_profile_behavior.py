@@ -41,13 +41,13 @@ class SpecificationScenario:
         current = self.state()
         if not charter_revision:
             charter_revision = current.charter_revision
-        set_review_state(self.case_root, status, round_no, next_action, "specification", charter_revision, "review-loop Core", last_completed_action, blocker)
+        set_review_state(self.case_root, status, round_no, next_action, "specification", charter_revision, "project-review Core", last_completed_action, blocker)
 
     def initialize(self, acceptance_source: Path, authority: str = "spec-source-2026-07-22-r4") -> None:
         if not acceptance_source.is_file():
             self.set_state("BLOCKED", 0, "record missing authoritative source", charter_revision="specification-fixture-1", last_completed_action="specification source check", blocker="missing approved authoritative Spec/brief/ticket")
             return
-        charter = self.case_root / ".review-loop" / "charter.md"
+        charter = self.case_root / ".project-review" / "charter.md"
         charter.parent.mkdir(parents=True, exist_ok=True)
         charter.write_text("\n".join([
             "# Acceptance Charter",
@@ -60,7 +60,7 @@ class SpecificationScenario:
             "- Scope: in-scope criteria AC-1..AC-7; exclusions: implementation and release",
             "- Acceptance source: acceptance.md",
         ]) + "\n", encoding="utf-8")
-        set_review_state(self.case_root, "READY", 0, "collect Producer evidence", "specification", "approved-specification-r4", "review-loop Core", "specification Charter freeze")
+        set_review_state(self.case_root, "READY", 0, "collect Producer evidence", "specification", "approved-specification-r4", "project-review Core", "specification Charter freeze")
 
     def start_round(self, *, ambiguous: bool = False, contradictory: bool = False, traceability_complete: bool = True) -> Path:
         evidence = [
@@ -100,7 +100,7 @@ class SpecificationScenario:
         state = self.state()
         if state.status != "CRITIC":
             raise ValueError("specification specialist report requires CRITIC state")
-        round_path = self.case_root / f".review-loop/rounds/round-{state.round:02d}"
+        round_path = self.case_root / f".project-review/rounds/round-{state.round:02d}"
         round_path.mkdir(parents=True, exist_ok=True)
         (round_path / "specification-specialist.md").write_text("\n".join([
             "# Specification Specialist Report",
@@ -120,7 +120,7 @@ class SpecificationScenario:
         state = self.state()
         if state.status != "CRITIC":
             raise ValueError("specification finding ingestion requires CRITIC state")
-        round_path = self.case_root / f".review-loop/rounds/round-{state.round:02d}"
+        round_path = self.case_root / f".project-review/rounds/round-{state.round:02d}"
         report = (round_path / "specification-specialist.md").read_text(encoding="utf-8")
         if f"Stable candidate ID: {finding_id}" not in report or "Evidence label: review" not in report:
             raise ValueError("specialist report lost stable ID or evidence class")
@@ -157,7 +157,7 @@ class SpecificationScenario:
         if not contradiction_outcome:
             contradiction_outcome = outcome
         state = self.state()
-        round_path = self.case_root / f".review-loop/rounds/round-{state.round:02d}"
+        round_path = self.case_root / f".project-review/rounds/round-{state.round:02d}"
         round_path.mkdir(parents=True, exist_ok=True)
         records = [
             f"# Evaluator Verdict - Round {state.round:02d}",
@@ -182,7 +182,7 @@ class SpecificationScenario:
         state = self.state()
         if state.status != "EVALUATE":
             raise ValueError("Specification evaluation requires EVALUATE state")
-        round_path = self.case_root / f".review-loop/rounds/round-{state.round:02d}"
+        round_path = self.case_root / f".project-review/rounds/round-{state.round:02d}"
         producer = (round_path / "producer-evidence.md").read_text(encoding="utf-8")
         if not independent_context:
             self.write_evaluator("BLOCKED", "unavailable independent read-only Evaluator", "BLOCKED", "BLOCKED", "BLOCKED")
@@ -199,7 +199,7 @@ class SpecificationScenario:
             self.set_state("BLOCKED", state.round, "record authority decision or clarify ambiguous requirement", last_completed_action="authority and ambiguity boundary check", blocker="unresolved specification authority boundary")
             return
         if passed:
-            registry = self.case_root / ".review-loop" / "findings.md"
+            registry = self.case_root / ".project-review" / "findings.md"
             for finding_id in get_confirmed_review_finding_ids(self.case_root):
                 repair = round_path / f"repair-evidence-{finding_id}.md"
                 if not repair.is_file():
@@ -211,11 +211,11 @@ class SpecificationScenario:
                         f"Repair evidence: rounds/round-{state.round:02d}/repair-evidence-{finding_id}.md",
                     ]) + "\n")
             self.write_evaluator("PASS", "fresh independent read-only Evaluator")
-            verdict = self.case_root / ".review-loop" / "verdict.md"
+            verdict = self.case_root / ".project-review" / "verdict.md"
             verdict.write_text("\n".join([
                 "# Review Loop Verdict",
                 "Verdict: PASS",
-                "Issued by: review-loop Core",
+                "Issued by: project-review Core",
                 "Evaluator: fresh independent read-only context",
                 "Specialist input: specification authority, traceability, ambiguity, and contradiction evidence",
             ]) + "\n", encoding="utf-8")
@@ -273,9 +273,9 @@ class SpecificationProfileBehaviorTest(unittest.TestCase):
             acceptance = case_root / "acceptance.md"
             acceptance.write_text("Approved Spec revision 4; source register entry 001 is authoritative", encoding="utf-8")
             scenario.initialize(acceptance)
-            c.check(scenario.state().profile == "specification" and scenario.state().charter_revision == "approved-specification-r4" and "Verdict owner: review-loop Core" in scenario.state().raw, "init freezes authoritative source, Profile, revision, and Core ownership")
+            c.check(scenario.state().profile == "specification" and scenario.state().charter_revision == "approved-specification-r4" and "Verdict owner: project-review Core" in scenario.state().raw, "init freezes authoritative source, Profile, revision, and Core ownership")
             scenario.start_round()
-            producer = (case_root / ".review-loop/rounds/round-01/producer-evidence.md").read_text(encoding="utf-8")
+            producer = (case_root / ".project-review/rounds/round-01/producer-evidence.md").read_text(encoding="utf-8")
             c.check("Authority:" in producer and "Scope map:" in producer and "Acceptance matrix:" in producer and "Evidence labels: source; structural; behavioral; manual; review" in producer, "Producer evidence records authority and requirement traceability")
             scenario.write_specialist_report(disposition="confirmed", finding_id="F-001", specialist_verdict="PASS")
             c.check(scenario.state().status == "CRITIC", "specialist PASS remains a candidate while Core is in CRITIC")
@@ -283,11 +283,11 @@ class SpecificationProfileBehaviorTest(unittest.TestCase):
             c.check(scenario.state().status == "REPAIR", "confirmed specification finding enters generic REPAIR lifecycle")
             scenario.apply_repair(True)
             scenario.evaluate(c, passed=True, independent_context=True)
-            evaluator = (case_root / ".review-loop/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
-            verdict = (case_root / ".review-loop/verdict.md").read_text(encoding="utf-8")
+            evaluator = (case_root / ".project-review/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
+            verdict = (case_root / ".project-review/verdict.md").read_text(encoding="utf-8")
             assert_specification_evaluator_record(c, evaluator, overall_outcome="PASS", name="fresh Evaluator records all specification criteria with linked evidence")
-            registry = (case_root / ".review-loop/findings.md").read_text(encoding="utf-8")
-            c.check(scenario.state().status == "PASS" and "Issued by: review-loop Core" in verdict and "Finding F-001: Status: resolved" in registry and "Resolution evidence: fresh independent Evaluator" in registry, "Core owns final PASS and preserves stable finding resolution")
+            registry = (case_root / ".project-review/findings.md").read_text(encoding="utf-8")
+            c.check(scenario.state().status == "PASS" and "Issued by: project-review Core" in verdict and "Finding F-001: Status: resolved" in registry and "Resolution evidence: fresh independent Evaluator" in registry, "Core owns final PASS and preserves stable finding resolution")
 
             case_root = new_review_case(root, "missing-source", "specification")
             scenario = SpecificationScenario(case_root)
@@ -302,7 +302,7 @@ class SpecificationProfileBehaviorTest(unittest.TestCase):
             scenario.write_specialist_report(disposition="rejected", finding_id="F-002", specialist_verdict="PASS")
             scenario.ingest_finding(disposition="rejected", finding_id="F-002")
             scenario.evaluate(c, passed=True, independent_context=True)
-            ambiguous_evaluator = (case_root / ".review-loop/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
+            ambiguous_evaluator = (case_root / ".project-review/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
             assert_specification_evaluator_record(c, ambiguous_evaluator, overall_outcome="BLOCKED", traceability_outcome="BLOCKED", ambiguity_outcome="BLOCKED", contradiction_outcome="PASS", name="ambiguous requirement blocks with criterion-linked evidence")
             c.check(scenario.state().status == "BLOCKED" and "unresolved specification authority boundary" in scenario.state().raw, "unresolved ambiguity returns Core BLOCKED")
 
@@ -314,7 +314,7 @@ class SpecificationProfileBehaviorTest(unittest.TestCase):
             scenario.write_specialist_report(disposition="rejected", finding_id="F-003", axis="contradiction and decision coherence", source_reference="SP-CONTRADICTION-001")
             scenario.ingest_finding(disposition="rejected", finding_id="F-003")
             scenario.evaluate(c, passed=True, independent_context=True)
-            contradiction_evaluator = (case_root / ".review-loop/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
+            contradiction_evaluator = (case_root / ".project-review/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
             assert_specification_evaluator_record(c, contradiction_evaluator, overall_outcome="BLOCKED", traceability_outcome="BLOCKED", ambiguity_outcome="PASS", contradiction_outcome="BLOCKED", name="contradictory authority blocks with criterion-linked evidence")
             c.check(scenario.state().status == "BLOCKED" and "unresolved specification authority boundary" in scenario.state().raw, "unresolved contradiction returns Core BLOCKED")
 
@@ -326,7 +326,7 @@ class SpecificationProfileBehaviorTest(unittest.TestCase):
             scenario.write_specialist_report(disposition="rejected", finding_id="F-008", axis="criteria and acceptance traceability", source_reference="SP-TRACEABILITY-001")
             scenario.ingest_finding(disposition="rejected", finding_id="F-008")
             scenario.evaluate(c, passed=True, independent_context=True)
-            traceability_evaluator = (case_root / ".review-loop/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
+            traceability_evaluator = (case_root / ".project-review/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
             assert_specification_evaluator_record(c, traceability_evaluator, overall_outcome="BLOCKED", traceability_outcome="BLOCKED", ambiguity_outcome="BLOCKED", contradiction_outcome="BLOCKED", name="untraceable criterion blocks AC-2 and AC-3 before PASS")
             c.check(scenario.state().status == "BLOCKED" and "untraceable requirement or acceptance criterion" in scenario.state().raw and "authoritative source and owner" in scenario.state().next, "untraceable criterion returns Core BLOCKED with smallest unblock")
 
@@ -339,7 +339,7 @@ class SpecificationProfileBehaviorTest(unittest.TestCase):
             scenario.ingest_finding(disposition="confirmed", finding_id="F-004")
             scenario.apply_repair(True)
             scenario.evaluate(c, passed=False, independent_context=True)
-            failed_evaluator = (case_root / ".review-loop/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
+            failed_evaluator = (case_root / ".project-review/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
             assert_specification_evaluator_record(c, failed_evaluator, overall_outcome="FAIL", name="failed specification evaluation preserves all criterion evidence")
             revision = scenario.state().charter_revision
             c.check(scenario.state().status == "FAIL" and revision == "approved-specification-r4" and "next round" in scenario.state().next, "failed specification round retains frozen revision and bounded next round")
@@ -347,9 +347,9 @@ class SpecificationProfileBehaviorTest(unittest.TestCase):
             scenario.write_specialist_report(disposition="rejected", finding_id="F-004", specialist_verdict="PASS")
             scenario.ingest_finding(disposition="rejected", finding_id="F-004")
             scenario.evaluate(c, passed=True, independent_context=True)
-            recheck_evaluator = (case_root / ".review-loop/rounds/round-02/evaluator-verdict.md").read_text(encoding="utf-8")
+            recheck_evaluator = (case_root / ".project-review/rounds/round-02/evaluator-verdict.md").read_text(encoding="utf-8")
             assert_specification_evaluator_record(c, recheck_evaluator, overall_outcome="PASS", name="rechecked specification finding reaches Core PASS")
-            recheck_registry = (case_root / ".review-loop/findings.md").read_text(encoding="utf-8")
+            recheck_registry = (case_root / ".project-review/findings.md").read_text(encoding="utf-8")
             c.check(scenario.state().status == "PASS" and len(re.findall(r"(?:Finding|Re-observed) F-004", recheck_registry)) == 2 and "Disposition: rejected" in recheck_registry, "stable specification finding ID survives bounded recheck")
 
             case_root = new_review_case(root, "scope-change", "specification")
@@ -360,7 +360,7 @@ class SpecificationProfileBehaviorTest(unittest.TestCase):
             scenario.write_specialist_report(disposition="confirmed", finding_id="F-005", specialist_verdict="FAIL")
             scenario.ingest_finding(disposition="confirmed", finding_id="F-005")
             scenario.apply_repair(False)
-            c.check(scenario.state().status == "FAIL" and "scope-changing" in scenario.state().next and not (case_root / ".review-loop/rounds/round-01/repair-evidence-F-005.md").is_file(), "scope-changing specification repair is rejected without Producer edit")
+            c.check(scenario.state().status == "FAIL" and "scope-changing" in scenario.state().next and not (case_root / ".project-review/rounds/round-01/repair-evidence-F-005.md").is_file(), "scope-changing specification repair is rejected without Producer edit")
 
             case_root = new_review_case(root, "independence-block", "specification")
             scenario = SpecificationScenario(case_root)
@@ -370,7 +370,7 @@ class SpecificationProfileBehaviorTest(unittest.TestCase):
             scenario.write_specialist_report(disposition="rejected", finding_id="F-006")
             scenario.ingest_finding(disposition="rejected", finding_id="F-006")
             scenario.evaluate(c, passed=True, independent_context=False)
-            independence_evaluator = (case_root / ".review-loop/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
+            independence_evaluator = (case_root / ".project-review/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
             assert_specification_evaluator_record(c, independence_evaluator, overall_outcome="BLOCKED", name="missing independent context blocks Core verdict")
             c.check(scenario.state().status == "BLOCKED" and "independent Evaluator" in scenario.state().next, "missing independent Evaluator context returns BLOCKED")
 
@@ -383,7 +383,7 @@ class SpecificationProfileBehaviorTest(unittest.TestCase):
             scenario.ingest_finding(disposition="confirmed", finding_id="F-007")
             scenario.apply_repair(True)
             scenario.evaluate(c, passed=False, independent_context=True, maximum_round=1)
-            limit_evaluator = (case_root / ".review-loop/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
+            limit_evaluator = (case_root / ".project-review/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
             assert_specification_evaluator_record(c, limit_evaluator, overall_outcome="BLOCKED", name="maximum-round stop records Core BLOCKED evidence")
             c.check(scenario.state().status == "BLOCKED" and "maximum rounds" in scenario.state().raw, "maximum repair round returns generic BLOCKED")
 

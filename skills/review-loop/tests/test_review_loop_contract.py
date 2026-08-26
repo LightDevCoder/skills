@@ -10,11 +10,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SKILL = (ROOT / "SKILL.md").read_text(encoding="utf-8")
 METADATA = (ROOT / "agents" / "openai.yaml").read_text(encoding="utf-8")
-REVIEWER_CONTRACT = (ROOT.parent.parent / "docs" / "REVIEWER_CONTRACT.md").read_text(encoding="utf-8") if (ROOT.parent.parent / "docs" / "REVIEWER_CONTRACT.md").exists() else ""
-# fallback: read from skills/review-loop parent
-if not REVIEWER_CONTRACT:
-    alt = Path(__file__).resolve().parents[3] / "docs" / "REVIEWER_CONTRACT.md"
-    REVIEWER_CONTRACT = alt.read_text(encoding="utf-8") if alt.exists() else ""
+REFS = "\n".join(
+    (ROOT / "references" / name).read_text(encoding="utf-8")
+    for name in ("reviewer-contract.md", "finding-schema.md", "migration.md")
+)
+COMBINED = SKILL + "\n" + REFS
 
 
 def frontmatter(text: str) -> str:
@@ -40,19 +40,20 @@ class ReviewLoopContractTest(unittest.TestCase):
         self.assertTrue((ROOT / "agents" / "openai.yaml").is_file())
         self.assertTrue(model_invoked(SKILL, METADATA))
         self.assertIn("model-invoked", SKILL)
-        self.assertIn("manually invoked", SKILL)
+        self.assertIn("manually invoked", normalized(SKILL))
 
     def test_responsibilities_are_the_five_steps(self) -> None:
+        text = normalized(SKILL).lower()
         for marker in ("resolve reviewer", "invoke reviewer", "receive findings", "return repair", "re-run reviewer"):
-            self.assertIn(marker, SKILL)
-        self.assertIn("at limit", normalized(SKILL).lower())
-        self.assertIn("stop", normalized(SKILL).lower())
+            self.assertIn(marker, text)
+        self.assertIn("at the limit", text)
+        self.assertIn("stop", text)
 
     def test_input_packet_is_the_four_fields(self) -> None:
         for marker in ("Target:", "Requirements:", "Relevant context:", "Previous findings:"):
-            self.assertIn(marker, SKILL)
-        self.assertIn("REVIEWER_CONTRACT", SKILL)
-        self.assertIn("REVIEW-ERROR", SKILL)
+            self.assertIn(marker, COMBINED)
+        self.assertIn("reviewer-contract", SKILL.lower())
+        self.assertIn("REVIEW-ERROR", COMBINED)
 
     def test_reviewer_resolution_is_explicit(self) -> None:
         self.assertIn("generic-review", SKILL)
@@ -61,32 +62,31 @@ class ReviewLoopContractTest(unittest.TestCase):
 
     def test_normalized_findings_contract(self) -> None:
         for marker in ("id:", "severity:", "location:", "problem:", "reason:"):
-            self.assertIn(marker, SKILL)
-        self.assertIn("suggestion", SKILL.lower())
-        self.assertIn("Findings: []", SKILL)
+            self.assertIn(marker, COMBINED)
+        self.assertIn("suggestion", COMBINED.lower())
+        self.assertIn("Findings: []", COMBINED)
         for state in ("new", "persists", "fixed", "duplicate"):
-            self.assertIn(state, SKILL)
-        self.assertIn("never recycle", normalized(SKILL).lower() if "never recycle" in SKILL.lower() else "never recycle")
-        # fallback check for duplicate link
-        self.assertTrue("duplicate_of" in SKILL or "duplicate" in SKILL)
+            self.assertIn(state, COMBINED)
+        self.assertIn("never reuse", normalized(COMBINED).lower())
+        self.assertIn("duplicate_of", COMBINED)
 
     def test_bounded_convergence_and_handoff(self) -> None:
         self.assertIn("3 rounds", SKILL)
-        self.assertIn("handoff", normalized(SKILL).lower() if "handoff" in SKILL.lower() else "handoff")
-        self.assertIn("hand the outstanding", normalized(SKILL))
+        self.assertIn("handoff", normalized(SKILL).lower())
+        self.assertIn("hand the outstanding", normalized(SKILL).lower())
 
     def test_legacy_note_points_to_project_review(self) -> None:
         self.assertIn("project-review", SKILL)
-        self.assertIn("migrated", normalized(SKILL).lower())
-        self.assertIn("frozen", normalized(SKILL).lower() if "frozen" in SKILL.lower() else "frozen")
-        self.assertIn("PASS", SKILL)
-        self.assertIn("FAIL", SKILL)
-        self.assertIn("BLOCKED", SKILL)
+        self.assertIn("migrated", normalized(REFS).lower())
+        self.assertIn("frozen", normalized(REFS).lower())
+        self.assertIn("PASS", COMBINED)
+        self.assertIn("FAIL", COMBINED)
+        self.assertIn("BLOCKED", COMBINED)
 
     def test_read_only_and_no_final_verdict_boundary(self) -> None:
         # review-loop engine must not claim final project verdict
-        self.assertIn("does not decide project", normalized(SKILL))
-        self.assertIn("owns the final", normalized(SKILL))
+        self.assertIn("owns no project final acceptance", normalized(SKILL))
+        self.assertIn("belong to `project-review`", SKILL)
         # engine itself is not the verdict owner
         self.assertTrue("project-review" in SKILL and "PASS" in SKILL)
 
@@ -99,7 +99,6 @@ class ReviewLoopContractTest(unittest.TestCase):
 
     def test_references_resolve(self) -> None:
         # All links in SKILL.md must resolve
-        import pathlib
         links = re.findall(r"\[[^\]]+\]\(([^)]+)\)", SKILL)
         for link in links:
             if link.startswith("http") or link.startswith("#") or not link:
@@ -109,10 +108,6 @@ class ReviewLoopContractTest(unittest.TestCase):
             self.assertTrue(resolved.exists(), f"unresolved link {link} -> {resolved}")
 
     def test_no_heavy_acceptance_ownership(self) -> None:
-        # Lightweight engine should not describe itself as owning Charter/evidence labels as final acceptance
-        # It may mention Charter only in legacy note, not as its own ownership
-        # Ensure the phrase "frozen acceptance baseline" appears only in legacy/migration context, not as current ownership
-        # Count occurrences: should be at least in legacy note, but not claim "The Core owns the final verdict: PASS" as review-loop
         self.assertNotIn("The Core owns the final verdict", SKILL)
         self.assertIn("project-review", SKILL)
 

@@ -1,6 +1,6 @@
 # Manuscript review boundary
 
-`manuscript-ops` supplies the manuscript Profile to `review-loop`; it does not
+`manuscript-ops` supplies the manuscript Profile to `project-review`; it does not
 own a second review engine. The frozen Profile records the manuscript-specific
 axes, applicability reasons, required evidence, source authority, deliverable
 paths, batch context, and milestone snapshot.
@@ -29,13 +29,13 @@ recorded in the Profile.
 
 ## Evidence contract
 
-Capture the exact artifact snapshot before handing it to `review-loop`. Each
+Capture the exact artifact snapshot before handing it to `project-review`. Each
 applicable axis must name the evidence needed to inspect it. Evidence is typed
 and project-relative; files, rendered pages, source-register rows, capability
 snapshots, format-QA records, and receipts are hash-bound. A valid file without
 render or visual evidence does not establish layout acceptance.
 
-The review-loop result must retain a `manuscript_evidence` projection with one
+The project-review result must retain a `manuscript_evidence` projection with one
 entry per applicable manuscript axis. Each entry points to the hashed evidence
 artifacts used for that axis. `manuscript-ops` checks that the projection covers
 the frozen Profile and that candidate outputs, locked sources, and final format
@@ -43,19 +43,19 @@ QA are included where the lifecycle gate requires them.
 
 ## Delegated generic review mechanics
 
-`review-loop` owns the generic finding schema and stable identities, finding
+`project-review` owns the generic finding schema and stable identities, finding
 disposition and resolution, repair rounds and stopping rules, reviewer and
 Evaluator independence, durable review state, and the final `PASS`, `FAIL`, or
 `BLOCKED` verdict. `manuscript-ops` must not copy or reimplement those rules.
 
 At each manuscript milestone, pass the Profile, frozen artifact snapshot, source
-authority, active batch, and format evidence to `review-loop`. Consume its
+authority, active batch, and format evidence to `project-review`. Consume its
 hash-bound ReviewReport and preserve its raw verdict and independence metadata in
 the manuscript lifecycle and GateReceipt. The manuscript validator may check the
 integration envelope, milestone, artifact hashes, and manuscript evidence
-coverage, but must leave generic findings and verdict reasoning to `review-loop`.
+coverage, but must leave generic findings and verdict reasoning to `project-review`.
 
-If the review-loop dependency or an independent review context is unavailable,
+If the project-review dependency or an independent review context is unavailable,
 preserve the current manuscript evidence and return `BLOCKED` with the exact
 resume point. Do not simulate a reviewer, repair loop, or final verdict inside
 `manuscript-ops`.

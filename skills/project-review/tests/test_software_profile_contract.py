@@ -16,6 +16,7 @@ from check_helpers import Checks  # noqa: E402
 def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c = Checks()
     skill_path = root / "SKILL.md"
+    workflow_path = root / "references" / "WORKFLOW.md"
     metadata_path = root / "agents" / "openai.yaml"
     profile_path = root / "references" / "profiles" / "software.md"
     generic_path = root / "references" / "profiles" / "generic.md"
@@ -37,6 +38,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         c.require_file(root, path.relative_to(root).as_posix(), label)
 
     skill = skill_path.read_text(encoding="utf-8", errors="replace")
+    workflow = workflow_path.read_text(encoding="utf-8", errors="replace")
     metadata = metadata_path.read_text(encoding="utf-8", errors="replace")
     profile = profile_path.read_text(encoding="utf-8", errors="replace")
     generic = generic_path.read_text(encoding="utf-8", errors="replace")
@@ -68,17 +70,17 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.require_match("TC-SW-003 stable IDs", profile, r"(?i)stable.*F-###|stable.*Finding ID")
     c.require_match("TC-SW-003 dispositions", profile, r"(?is)confirmed.*rejected.*duplicate.*out-of-scope")
     c.require_match("TC-SW-003 evidence class", evidence, r"(?i)`review`")
-    c.require_match("TC-SW-003 core flow", skill, r"(?is)code-review.*Standards.*Spec.*findings.*generic lifecycle")
+    c.require_match("TC-SW-003 core flow", workflow, r"(?is)code-review.*Standards.*Spec.*findings.*generic lifecycle")
 
     c.require_match("TC-SW-004 specialist boundary", profile, r"(?is)code-review.*never.*Program.*acceptance verdict")
-    c.require_match("TC-SW-004 Core ownership", profile, r"(?is)final `PASS`, `FAIL`, or `BLOCKED`.*review-loop\s+Core")
-    c.require_match("TC-SW-004 Core ownership in Skill", skill, r"(?is)code-review.*never issues.*final.*review-loop Core owns")
+    c.require_match("TC-SW-004 Core ownership", profile, r"(?is)final `PASS`, `FAIL`, or `BLOCKED`.*project-review\s+Core")
+    c.require_match("TC-SW-004 Core ownership in Workflow", workflow, r"(?is)code-review.*never issues.*final.*project-review.{0,5}Core owns")
     c.require_match("TC-SW-004 generic verdicts preserved", stopping, r"(?i)`PASS`.*`FAIL`.*`BLOCKED`")
     c.require_match("TC-SW-004 read-only specialist boundary", roles, r"(?i)Critic.*read-only|Evaluator.*read-only")
 
     c.require_match("TC-SW-005 bounded repair", profile, r"(?is)confirmed.*blocking finding.*resolved|bounded repair")
     c.require_match("TC-SW-005 scope stop", profile, r"(?i)scope|architecture.*decision|multiple new implementation tickets")
-    c.require_match("TC-SW-005 generic stop", skill, r"(?i)Stop scope expansion")
+    c.require_match("TC-SW-005 generic stop", workflow, r"(?i)Stop scope expansion")
     c.require_match("TC-SW-005 no lifecycle duplication", profile, r"(?i)does not replace.*state machine|generic lifecycle.*stopping rules")
 
     return c.assertions, c.failures

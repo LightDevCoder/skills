@@ -16,6 +16,7 @@ from check_helpers import Checks  # noqa: E402
 def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c = Checks()
     skill_path = root / "SKILL.md"
+    workflow_path = root / "references" / "WORKFLOW.md"
     metadata_path = root / "agents" / "openai.yaml"
     profile_path = root / "references" / "profiles" / "generic.md"
     charter_path = root / "references" / "acceptance-charter.md"
@@ -36,6 +37,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         c.require_file(root, path.relative_to(root).as_posix(), label)
 
     skill = skill_path.read_text(encoding="utf-8", errors="replace")
+    workflow = workflow_path.read_text(encoding="utf-8", errors="replace")
     metadata = metadata_path.read_text(encoding="utf-8", errors="replace")
     profile = profile_path.read_text(encoding="utf-8", errors="replace")
     charter = charter_path.read_text(encoding="utf-8", errors="replace")
@@ -57,7 +59,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 
     c.require_match("TC-GEN-003 baseline", charter, r"(?im)^## Acceptance baseline$")
     c.require_match("TC-GEN-003 profile", charter, r"(?im)^## Review Profile$")
-    c.require_match("TC-GEN-003 state records", skill, r"(?m)^\|-- findings\.md$")
+    c.require_match("TC-GEN-003 state records", workflow, r"(?m)^\|-- findings\.md$")
 
     c.require_match("TC-GEN-004 stable finding identity", findings, r"(?i)stable.*Finding ID|Finding ID.*stable")
     c.require_match("TC-GEN-004 stable finding identity", findings, r"(?i)must not be reused")
@@ -71,7 +73,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.require_match("TC-GEN-006 read-only reviewers", roles, r"(?i)Critic.*read-only")
     c.require_match("TC-GEN-006 read-only reviewers", roles, r"(?i)Evaluator.*read-only")
 
-    c.require_match("TC-GEN-007 missing acceptance source", skill, r"(?i)missing acceptance source.*BLOCKED|BLOCKED.*missing acceptance source")
+    c.require_match("TC-GEN-007 missing acceptance source", workflow, r"(?i)missing acceptance source.*BLOCKED|BLOCKED.*missing acceptance source")
 
     c.require_match("TC-GEN-008 missing independent context", roles, r"(?i)independence: unavailable")
     c.require_match("TC-GEN-008 missing independent context", roles, r"(?i)return `BLOCKED`")
@@ -82,8 +84,8 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.require_match("TC-GEN-010 verdicts", stopping, r"`FAIL`")
     c.require_match("TC-GEN-010 verdicts", stopping, r"`BLOCKED`")
 
-    c.require_match("TC-GEN-011 resume", skill, r"(?im)^## `resume` workflow$")
-    c.require_match("TC-GEN-011 resume", skill, r"(?i)append rather than rewrite")
+    c.require_match("TC-GEN-011 resume", workflow, r"(?im)^## `resume` workflow$")
+    c.require_match("TC-GEN-011 resume", workflow, r"(?i)append rather than rewrite")
 
     c.require_match("TC-GEN-012 evidence labels", evidence, r"(?im)^- Evidence label:")
     c.require_match("TC-GEN-012 evidence labels", evidence, r"`structural`")

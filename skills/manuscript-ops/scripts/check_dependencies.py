@@ -185,7 +185,7 @@ def package_files(root: Path) -> set[str]:
     return {
         path.relative_to(root).as_posix()
         for path in root.rglob("*")
-        if path.is_file() and "__pycache__" not in path.parts
+        if path.is_file() and "__pycache__" not in path.parts and path.name != ".DS_Store"
     }
 
 

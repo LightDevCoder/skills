@@ -45,7 +45,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 
     for preset in ("generic", "software", "manuscript", "skill-development", "research", "knowledge-base", "data-analysis"):
         c.check(bool(re.search(rf"(?m)^\| {re.escape(preset)} \|.+\|.+\|", presets)), f"preset plan is selectable: {preset}")
-    c.check("one short question at a time" in skill and "six answers" in skill, "grilling stays lightweight")
+    c.check("one short question at a time" in skill and "six answers" in skill, "questions stay lightweight")
 
     with tempfile.TemporaryDirectory(prefix="project-init-") as tmp:
         fixture = Path(tmp)
@@ -70,8 +70,10 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.check("requested modification" in skill and "confirmation again" in skill, "research modification re-enters confirmation")
     for marker in ("inside the requested project root", "exactly one instruction target", "existing instruction text remains present", "declared capability", "forbidden workflow"):
         c.check(marker in skill, f"validation covers {marker}")
-    for forbidden in ("to-spec", "to-tickets", "implement", "final review", "review-loop", "ask-light", "learn-anything"):
+    for forbidden in ("project-spec", "project-tickets", "implement", "project-review", "review-loop", "ask-light", "learn-anything"):
         c.check(forbidden in skill, f"boundary names {forbidden}")
+    for old in ("to-spec", "to-tickets", "final review"):
+        c.check(old not in skill, f"old boundary name removed: {old}")
     c.check("must not invoke another user-invoked Skill" in skill or "never invoke" in skill, "initializer does not invoke user Skills")
 
     return c.assertions, c.failures

@@ -66,7 +66,7 @@ class GenericScenario:
             raise ValueError("Candidates require CRITIC state")
         if not re.match(r"^F-\d{3}$", finding_id):
             raise ValueError(f"Invalid finding ID: {finding_id}")
-        path = self.case_root / ".review-loop" / "findings.md"
+        path = self.case_root / ".project-review" / "findings.md"
         records = [
             f"Finding {finding_id}",
             f"Disposition: {disposition}",
@@ -96,11 +96,11 @@ class GenericScenario:
     def apply_repair(self, in_scope: bool) -> None:
         if self.state().status != "REPAIR":
             raise ValueError("Repairs require REPAIR state")
-        round_path = self.case_root / f".review-loop/rounds/round-{self.state().round:02d}"
+        round_path = self.case_root / f".project-review/rounds/round-{self.state().round:02d}"
         if not in_scope:
             self.set_state("FAIL", self.state().round, "scope-changing repair rejected")
             return
-        finding_id = re.search(r"Finding (F-\d{3})", (self.case_root / ".review-loop/findings.md").read_text(encoding="utf-8")).group(1)
+        finding_id = re.search(r"Finding (F-\d{3})", (self.case_root / ".project-review/findings.md").read_text(encoding="utf-8")).group(1)
         round_path.mkdir(parents=True, exist_ok=True)
         (round_path / "repair-evidence.md").write_text("\n".join([
             f"Finding: {finding_id}",
@@ -117,11 +117,11 @@ class GenericScenario:
             self.set_state("BLOCKED", state.round, "obtain independent Evaluator context")
             return
         if passed:
-            path = self.case_root / ".review-loop" / "findings.md"
+            path = self.case_root / ".project-review" / "findings.md"
             if path.is_file():
                 with path.open("a", encoding="utf-8") as fh:
                     fh.write("Status: resolved; Resolution evidence: fresh Evaluator\n")
-            round_path = self.case_root / f".review-loop/rounds/round-{state.round:02d}"
+            round_path = self.case_root / f".project-review/rounds/round-{state.round:02d}"
             round_path.mkdir(parents=True, exist_ok=True)
             (round_path / "evaluator-verdict.md").write_text("\n".join([
                 f"# Evaluator Verdict - Round {state.round:02d}",
@@ -183,10 +183,10 @@ class GenericProfileBehaviorTest(unittest.TestCase):
             scenario.record_candidate("F-001", "confirmed")
             scenario.apply_repair(True)
             scenario.evaluate(c, passed=True, independent_context=True, repair_available=True, maximum_round=3)
-            finding = (case_root / ".review-loop/findings.md").read_text(encoding="utf-8")
-            repair_evidence = (case_root / ".review-loop/rounds/round-02/repair-evidence.md").read_text(encoding="utf-8")
-            producer_evidence = (case_root / ".review-loop/rounds/round-01/producer-evidence.md").read_text(encoding="utf-8")
-            evaluator_verdict = (case_root / ".review-loop/rounds/round-02/evaluator-verdict.md").read_text(encoding="utf-8")
+            finding = (case_root / ".project-review/findings.md").read_text(encoding="utf-8")
+            repair_evidence = (case_root / ".project-review/rounds/round-02/repair-evidence.md").read_text(encoding="utf-8")
+            producer_evidence = (case_root / ".project-review/rounds/round-01/producer-evidence.md").read_text(encoding="utf-8")
+            evaluator_verdict = (case_root / ".project-review/rounds/round-02/evaluator-verdict.md").read_text(encoding="utf-8")
             c.check(
                 scenario.state().status == "PASS" and "F-001" in finding and "Status: resolved" in finding
                 and "Finding: F-001" in repair_evidence and "Validation:" in repair_evidence
@@ -202,7 +202,7 @@ class GenericProfileBehaviorTest(unittest.TestCase):
             scenario.start_round()
             scenario.record_candidate("F-002", "rejected")
             scenario.evaluate(c, passed=True, independent_context=True, repair_available=False, maximum_round=3)
-            c.check(scenario.state().status == "PASS" and not (case_root / ".review-loop/rounds/round-01/repair-evidence.md").is_file(), "rejected candidate bypasses Producer repair")
+            c.check(scenario.state().status == "PASS" and not (case_root / ".project-review/rounds/round-01/repair-evidence.md").is_file(), "rejected candidate bypasses Producer repair")
 
             case_root = new_review_case(root, "scope-change", "generic")
             scenario = GenericScenario(case_root)

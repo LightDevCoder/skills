@@ -4,7 +4,7 @@
 
 Return `BLOCKED` with the missing dependency, required step, installation
 instructions, preserved evidence, and exact resume invocation. Do not implement
-a reduced private clone of `grill-me`, `wayfinder`, or `review-loop`.
+a reduced private clone of `clarify`, `decision-map`, or `project-review`.
 
 ## Snapshot stale
 

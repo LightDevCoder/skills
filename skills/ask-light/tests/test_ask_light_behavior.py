@@ -70,7 +70,7 @@ class AskLightBehaviorTest(unittest.TestCase):
         scanner = ROOT / "skills/ask-light/scripts/ask-light.ps1"
         with tempfile.TemporaryDirectory(prefix="ask-light-") as tmp:
             fixture = Path(tmp)
-            categories = ("project", "global", "first-party", "upstream", "modified-third-party", "other")
+            categories = ("first-party",)
             roots = []
             for category in categories:
                 category_root = fixture / category
@@ -229,7 +229,7 @@ class AskLightBehaviorTest(unittest.TestCase):
             wf_third = workflow_root / "modified-third-party"
             for d in (wf_first, wf_upstream, wf_third):
                 d.mkdir(parents=True)
-            for name in ("review-loop", "ask-light", "project-init", "learn-anything", "manuscript-ops", "recap"):
+            for name in ("review-loop", "ask-light", "project-init", "learn-anything", "manuscript-ops", "recap", "project-spec", "project-tickets", "project-review", "clarify", "decision-map", "writing-for-agents"):
                 new_skill(wf_first, name, f"First-party {name} capability.")
             for name in ("to-spec", "to-tickets", "implement", "code-review", "handoff", "diagnosing-bugs", "grill-me", "wayfinder", "writing-great-skills"):
                 new_skill(wf_upstream, name, f"Upstream {name} capability.", allow_implicit=True)
@@ -246,13 +246,13 @@ class AskLightBehaviorTest(unittest.TestCase):
             feature_workflow = run_scanner(scanner, mode="workflow", roots_json=wf_roots, context_json=feature_context)
             c.check(feature_workflow.get("status") == "RECOMMEND" and feature_workflow.get("workflow") == "software-feature", "software feature workflow is recommended")
             c.check(len(feature_workflow.get("steps", [])) == 7, "software feature workflow exposes all handoff steps")
-            c.check(len([s for s in feature_workflow.get("steps", []) if s.get("skill") == "review-loop"]) == 2, "software feature workflow retains both review-loop boundaries")
-            c.check(feature_workflow.get("finalAuthority") == "review-loop" and bool(re_match(r"PASS|FAIL|BLOCKED", feature_workflow.get("stoppingBoundary", ""))), "workflow reports final authority and stopping boundary")
+            c.check(len([s for s in feature_workflow.get("steps", []) if s.get("skill") == "review-loop"]) == 1, "software feature workflow retains one review-loop convergence step")
+            c.check(feature_workflow.get("finalAuthority") == "project-review" and bool(re_match(r"PASS|FAIL|BLOCKED", feature_workflow.get("stoppingBoundary", ""))), "workflow reports final authority and stopping boundary")
             c.check(bool(re_match(r"nothing was invoked|orchestrated", feature_workflow.get("execution", ""))), "workflow recommendation does not execute or orchestrate")
-            c.check(len([s for s in feature_workflow.get("steps", []) if s.get("skill") == "to-spec" and s.get("sourceCategory") == "upstream"]) == 1, "workflow preserves third-party source category")
-            c.check(len([s for s in feature_workflow.get("steps", []) if s.get("skill") == "code-review" and s.get("sourceCategory") == "upstream" and s.get("availability") == "available"]) == 1, "workflow selects the declared source category when duplicate Skill names exist")
+            c.check(len([s for s in feature_workflow.get("steps", []) if s.get("skill") == "project-spec" and s.get("sourceCategory") == "first-party"]) == 1, "workflow uses first-party project-spec")
+            c.check(len([s for s in feature_workflow.get("steps", []) if s.get("skill") == "code-review" and s.get("sourceCategory") == "first-party" and s.get("availability") == "available"]) == 1, "workflow selects first-party code-review when duplicate Skill names exist")
             reads = feature_workflow.get("reads", {})
-            c.check(reads.get("metadata") == 16 and reads.get("bodies") == 0 and reads.get("references") == 0, "workflow exposes bounded metadata-only read counts")
+            c.check(reads.get("metadata") == 22 and reads.get("bodies") == 0 and reads.get("references") == 0, "workflow exposes bounded metadata-only read counts")
 
             bug_context = json.dumps({
                 "goal": "diagnose a software regression and repair the error", "artifacts": ["failing-test.txt"], "blockers": "",
@@ -322,19 +322,18 @@ class AskLightBehaviorTest(unittest.TestCase):
                 "projectType": "generic", "taskKind": "final-review", "availability": "codex", "invocationControl": "explicit-only",
             })
             final_workflow = run_scanner(scanner, mode="workflow", roots_json=wf_roots, context_json=final_context)
-            c.check(final_workflow.get("workflow") == "final-review" and len(final_workflow.get("steps", [])) == 1 and final_workflow.get("finalAuthority") == "review-loop", "final review workflow delegates final authority to review-loop")
+            c.check(final_workflow.get("workflow") == "final-review" and len(final_workflow.get("steps", [])) == 1 and final_workflow.get("finalAuthority") == "project-review" and final_workflow.get("steps", [])[0].get("skill") == "project-review", "final review workflow delegates final authority to project-review")
 
             private_root = fixture / "private-third-party"
             private_root.mkdir()
-            new_skill(private_root, "review-loop", "First-party final acceptance.")
+            new_skill(private_root, "project-review", "First-party final acceptance.")
             private_roots = json.dumps([{"category": "first-party", "path": str(private_root)}])
             private_context = json.dumps({
                 "goal": "resolve a private third-party dependency", "artifacts": [], "blockers": "",
                 "projectType": "generic", "taskKind": "dependency", "availability": "codex", "invocationControl": "explicit-only",
             })
             private_workflow = run_scanner(scanner, mode="workflow", roots_json=private_roots, context_json=private_context)
-            c.check(private_workflow.get("status") == "BLOCKED" and bool(re_match(r"private skills-3rdParty", " ".join(private_workflow.get("gaps", [])))), "missing private third-party dependency is BLOCKED with an availability gap")
-            c.check(len([s for s in private_workflow.get("steps", []) if s.get("skill") == "code-review" and s.get("availability") == "unavailable"]) == 1, "missing private dependency step is explicitly unavailable")
+            c.check(private_workflow.get("status") == "NEED-INPUT", "private third-party dependency is outside first-party workflow routing and requests input")
 
             learn_missing_root = fixture / "learn-missing"
             (learn_missing_root / "learn-anything" / "agents").mkdir(parents=True)

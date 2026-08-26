@@ -8,65 +8,52 @@ contract.
 
 ## What it solves
 
-`review-loop` turns an approved target and acceptance source into a bounded
-evidence, critique, repair, evaluation, and final-verdict loop. Its Core role
-freezes the baseline, preserves durable state, enforces stopping rules, and
-owns `PASS`, `FAIL`, or `BLOCKED`.
+`review-loop` is the lightweight review engine. It drives one loop —
+`review → findings → repair → re-review` — by resolving a reviewer, invoking
+it, collecting normalized findings, returning confirmed in-scope findings to
+the Producer, and re-running until clean or a bounded limit.
+
+It owns no project final `PASS`/`FAIL`/`BLOCKED`. That acceptance role belongs
+to `project-review`.
 
 ## When to use it
 
-Use it when the target, scope, acceptance authority, evidence boundary, and
-applicable Profile are already clear. Use `agent-skill` for an installable
-Skill package, `software` for executable software, `manuscript` for document
-deliverables, or `specification` for a brief/spec/ticket acceptance contract.
+Use it when a bounded review needs repair convergence: an implementation
+handoff, a package review, or a routine review where the caller has a bounded
+packet and a concrete repair path.
 
-Do not use it to invent a product goal, settle unresolved architecture, write
-the artifact as the reviewer, publish a release, or weaken the acceptance
-source to fit a result. Use `ask-light`, `project-init`, `to-spec`, or another
-explicit handoff first when those decisions are missing.
+Do not use it to freeze an acceptance baseline, issue a project verdict, or
+replace `project-review`.
 
 ## Boundary, inputs, and outputs
 
-This is `model-invoked` and also supports a manual entry point. An explicit
-manual request remains valid:
+It is `model-invoked` and also supports a manual entry point.
 
-```text
-$review-loop init using docs/acceptance.md
-$review-loop review
-$review-loop resume
-```
-
-The input is a target, approved acceptance source, selected Profile, review
-scope/exclusions, evidence requirements, and writable `.review-loop/` state
-when the mode needs durable records. The output is a Charter, state, findings,
-round evidence, repair disposition, and ultimately a verdict. A successful
-run ends at a durable `PASS`/`FAIL`/`BLOCKED` record; specialist findings do
-not replace that verdict.
+The input packet has four fields: Target, Requirements, Relevant context, and
+Previous findings. Output is normalized findings (`Findings: []` on clean) or
+`REVIEW-ERROR` when a required input is absent. At the bounded limit it hands
+outstanding findings to the caller.
 
 ## Success and `BLOCKED`
 
-Success means the baseline is frozen, admissible evidence covers the declared
-axes, findings are dispositioned, repairs stay in scope, and an independent
-Evaluator has supplied evidence to the Core. `BLOCKED` is correct when the
-acceptance source is missing/unapproved, the target cannot be inspected, the
-required Profile/evidence is unavailable, or the independence/state gate
-cannot proceed. Record the exact smallest unblock action and stop.
+Success means the loop reached `Findings: []` or the caller received the
+outstanding findings at the configured limit. `BLOCKED`/`PASS`/`FAIL` are not
+engine verdicts; `project-review` issues those after composing reviewers
+through this engine.
 
 ## Composition and stopping
 
-It may consume a confirmed `project-init` result, a `to-spec` or `to-tickets`
-handoff, implementation evidence, `code-review` findings, or manuscript
-format QA. `code-review` is a specialist source of findings; `review-loop`
-remains the final authority. Stop at the verdict and preserve the state before
-handing off to `handoff` or release closeout. It does not invoke another
-user-invoked Skill implicitly.
+It composes `generic-review` by default, `code-review` for software diffs, and
+accepted domain reviewers. `project-review` is the final-acceptance owner. Stop
+at a clean result or at the limit and hand off to the caller; do not invoke
+another user-invoked Skill implicitly.
 
 ## Installation and discovery check
 
-For the published v0.1.2 release, install with
+Install with
 `npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'`, refresh the
 host, and inspect the discovered `SKILL.md` plus `agents/openai.yaml` without
-the source checkout. Run the Profile tests under
+the source checkout. Run the tests under
 [skills/review-loop/tests/](../../skills/review-loop/tests/) and keep the
 fresh-install result in
-[INSTALLATION_VERIFICATION.md](../evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.md).
+[INSTALLATION_VERIFICATION.md](../evidence/releases/v0.1.6/INSTALLATION_VERIFICATION.md).

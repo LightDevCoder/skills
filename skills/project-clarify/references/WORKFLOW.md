@@ -8,13 +8,17 @@ this file summarizes the execution order and references the examples.
 
 1. **Inspect** — read applicable project facts with paths and locations.
 2. **Socratic** — call `socratic` to maintain the frontier; ask one at a time.
-3. **Fact work (optional)** — `research`/`prototype` only when authorized.
+3. **Fact work (optional)** — `research`/`prototype` only when authorized;
+   use `to-questionnaire` as the handoff branch when the missing information is
+   held by another person.
 4. **Handoff** — return the `Project clarification handoff` and stop.
 
 ## Composition
 
 - `project-clarify → socratic` (required)
 - optionally `research` / `prototype` per `socratic`'s Unknown routing
+- optionally recommend `to-questionnaire` when another person holds the
+  blocking information
 - large effort may upgrade to `$decision-map`
 
 See [project-clarification-contract.md](project-clarification-contract.md) for

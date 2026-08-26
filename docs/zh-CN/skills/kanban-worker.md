@@ -79,7 +79,7 @@ Agent Avatar: /path/to/codex-icon.png
 
 ## 准入与测试
 
-`kanban-worker` 会访问网络、读取 workspace 文件、改变看板状态，因此走完整准入路径：`skills/kanban-worker/tests/` 下 contract 与 behavior 测试，加上 `review-loop agent-skill` 验收；`BLOCKED` 结论会把它留在目录外。证据见[准入记录](../../evidence/admissions/light-kanban-worker/README.zh-CN.md)（记录仍用原名 `light-kanban-worker`）。v0.1.5 契约变更（同 agent run 不得重叠、首次注册 avatar 要求）带有独立的 `review-loop agent-skill` `PASS`；见 [v0.1.5 release 证据](../../evidence/releases/v0.1.5/README.zh-CN.md)。
+`kanban-worker` 会访问网络、读取 workspace 文件、改变看板状态，因此走完整准入路径：`skills/kanban-worker/tests/` 下 contract 与 behavior 测试，加上 `project-review`（经 `review-loop`）验收；`BLOCKED` 结论会把它留在目录外。证据见[准入记录](../../evidence/admissions/light-kanban-worker/README.zh-CN.md)（记录仍用原名 `light-kanban-worker`）。v0.1.5 契约变更（同 agent run 不得重叠、首次注册 avatar 要求）带有独立的 `project-review` `PASS`；见 [v0.1.5 release 证据](../../evidence/releases/v0.1.5/README.zh-CN.md)。
 
 ## 安装与发现
 

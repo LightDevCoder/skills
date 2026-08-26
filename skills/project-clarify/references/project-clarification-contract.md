@@ -34,16 +34,18 @@ or an unstarted authorized call blocks its downstream decision.
 
 `socratic` is the required model-invoked decision engine. `research` and
 `prototype` are optional model-invoked fact-work capabilities, not stages to
-start by default.
+start by default. `to-questionnaire` is the optional branch when the blocked
+information is held by another person; because it is a user-invoked Skill,
+record it as attempted/recommended rather than auto-running it.
 
-For each invoked or attempted call, record:
+For each invoked, attempted, or recommended call, record:
 
 ```text
-Capability call: socratic | research | prototype
+Capability call: socratic | research | prototype | to-questionnaire
 Question or experiment:
 Blocked decision:
 Authorization and input:
-Call status: not-needed | not-authorized | unavailable | started | result-read | failed
+Call status: not-needed | not-authorized | unavailable | started | result-read | failed | recommended
 Capability outcome: COMPLETE | NEED-INPUT | BOUNDARY | ANSWERED | UNKNOWN | BLOCKED | none
 Result read: path or artifact identifier | none
 Failure or limitation:

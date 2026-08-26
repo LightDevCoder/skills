@@ -95,10 +95,7 @@ function Get-Packages {
 
 function Get-SourceRank {
     param([string]$Category)
-    switch ($Category.ToLowerInvariant()) {
-        'project' { return 6 }; 'global' { return 5 }; 'first-party' { return 4 }
-        'modified-third-party' { return 3 }; 'upstream' { return 2 }; default { return 1 }
-    }
+    return 1
 }
 
 function Get-ContextText {
@@ -234,16 +231,16 @@ function Get-WorkflowRecipes {
             entryCondition = 'A software goal has a defined feature or implementation outcome.'
             projectTypes = @('software'); taskKinds = @('feature', 'implementation', 'specification')
             keywords = @('feature', 'software', 'acceptance', 'implementation')
-            stoppingBoundary = 'Stop after each handoff; review-loop owns the final PASS, FAIL, or BLOCKED verdict.'
-            finalAuthority = 'review-loop'
+            stoppingBoundary = 'Stop after each handoff; project-review owns the final PASS, FAIL, or BLOCKED verdict.'
+            finalAuthority = 'project-review'
             steps = @(
-                [ordered]@{ skill = 'to-spec'; sourceCategory = 'upstream'; fallbackInvocation = 'user-invoked'; expectedInput = 'goal, constraints, and conversation'; expectedOutput = 'traceable specification'; handoffArtifact = 'specification'; stopCondition = 'Specification is explicit enough for a specification review.'; optional = $false },
+                [ordered]@{ skill = 'project-spec'; sourceCategory = 'first-party'; fallbackInvocation = 'user-invoked'; expectedInput = 'goal, constraints, and conversation'; expectedOutput = 'traceable specification'; handoffArtifact = 'specification'; stopCondition = 'Specification is explicit enough for a specification review.'; optional = $false },
                 [ordered]@{ skill = 'review-loop'; sourceCategory = 'first-party'; fallbackInvocation = 'model-invoked'; expectedInput = 'frozen specification and acceptance source'; expectedOutput = 'specification findings or verdict'; handoffArtifact = 'review evidence'; stopCondition = 'Specification review returns a durable finding set or verdict.'; optional = $false },
-                [ordered]@{ skill = 'to-tickets'; sourceCategory = 'upstream'; fallbackInvocation = 'user-invoked'; expectedInput = 'approved specification'; expectedOutput = 'dependency-ordered tracer tickets'; handoffArtifact = 'ticket graph'; stopCondition = 'Tickets are published; do not auto-start implementation.'; optional = $false },
-                [ordered]@{ skill = 'implement'; sourceCategory = 'upstream'; fallbackInvocation = 'user-invoked'; expectedInput = 'one unblocked ticket'; expectedOutput = 'bounded implementation and test evidence'; handoffArtifact = 'implementation commit'; stopCondition = 'One ticket is implemented and handed to review.'; optional = $false },
-                [ordered]@{ skill = 'code-review'; sourceCategory = 'upstream'; fallbackInvocation = 'model-invoked'; expectedInput = 'fixed implementation diff'; expectedOutput = 'Standards and Spec findings'; handoffArtifact = 'specialist review'; stopCondition = 'Findings are supplied to the acceptance loop.'; optional = $false },
-                [ordered]@{ skill = 'review-loop'; sourceCategory = 'first-party'; fallbackInvocation = 'model-invoked'; expectedInput = 'implementation, tests, and specialist findings'; expectedOutput = 'final PASS, FAIL, or BLOCKED verdict'; handoffArtifact = 'review-loop verdict'; stopCondition = 'Preserve the final verdict; do not unlock work from tests alone.'; optional = $false },
-                [ordered]@{ skill = 'handoff'; sourceCategory = 'upstream'; fallbackInvocation = 'user-invoked'; expectedInput = 'accepted result or blocked state'; expectedOutput = 'resume/closeout record'; handoffArtifact = 'handoff document'; stopCondition = 'Close or explicitly resume from the handoff record.'; optional = $false }
+                [ordered]@{ skill = 'project-tickets'; sourceCategory = 'first-party'; fallbackInvocation = 'user-invoked'; expectedInput = 'approved specification'; expectedOutput = 'dependency-ordered tracer tickets'; handoffArtifact = 'ticket graph'; stopCondition = 'Tickets are published; do not auto-start implementation.'; optional = $false },
+                [ordered]@{ skill = 'implement'; sourceCategory = 'first-party'; fallbackInvocation = 'user-invoked'; expectedInput = 'one unblocked ticket'; expectedOutput = 'bounded implementation and test evidence'; handoffArtifact = 'implementation commit'; stopCondition = 'One ticket is implemented and handed to review.'; optional = $false },
+                [ordered]@{ skill = 'code-review'; sourceCategory = 'first-party'; fallbackInvocation = 'model-invoked'; expectedInput = 'fixed implementation diff'; expectedOutput = 'Standards and Spec findings'; handoffArtifact = 'specialist review'; stopCondition = 'Findings are supplied to the acceptance loop.'; optional = $false },
+                [ordered]@{ skill = 'project-review'; sourceCategory = 'first-party'; fallbackInvocation = 'model-invoked'; expectedInput = 'implementation, tests, and specialist findings'; expectedOutput = 'final PASS, FAIL, or BLOCKED verdict'; handoffArtifact = 'project-review verdict'; stopCondition = 'Preserve the final verdict; do not unlock work from tests alone.'; optional = $false },
+                [ordered]@{ skill = 'handoff'; sourceCategory = 'first-party'; fallbackInvocation = 'user-invoked'; expectedInput = 'accepted result or blocked state'; expectedOutput = 'resume/closeout record'; handoffArtifact = 'handoff document'; stopCondition = 'Close or explicitly resume from the handoff record.'; optional = $false }
             )
         },
         [ordered]@{
@@ -252,12 +249,12 @@ function Get-WorkflowRecipes {
             projectTypes = @('software'); taskKinds = @('bug', 'debugging', 'diagnosis')
             keywords = @('bug', 'debug', 'diagnos', 'regression', 'error', 'performance')
             stoppingBoundary = 'Diagnose and hand off one bounded repair; do not turn the recipe into an automatic loop.'
-            finalAuthority = 'review-loop'
+            finalAuthority = 'project-review'
             steps = @(
-                [ordered]@{ skill = 'diagnosing-bugs'; sourceCategory = 'upstream'; fallbackInvocation = 'user-invoked'; expectedInput = 'reported failure and a tight failing reproduction'; expectedOutput = 'root-cause evidence and regression test'; handoffArtifact = 'diagnosis record'; stopCondition = 'The bug is reproduced or the smallest BLOCKED evidence gap is recorded.'; optional = $false },
-                [ordered]@{ skill = 'implement'; sourceCategory = 'upstream'; fallbackInvocation = 'user-invoked'; expectedInput = 'bounded repair ticket'; expectedOutput = 'repair and focused tests'; handoffArtifact = 'repair diff'; stopCondition = 'Repair is ready for specialist review.'; optional = $false },
-                [ordered]@{ skill = 'code-review'; sourceCategory = 'upstream'; fallbackInvocation = 'model-invoked'; expectedInput = 'repair diff'; expectedOutput = 'review findings'; handoffArtifact = 'code review'; stopCondition = 'Findings are handed to review-loop.'; optional = $false },
-                [ordered]@{ skill = 'review-loop'; sourceCategory = 'first-party'; fallbackInvocation = 'model-invoked'; expectedInput = 'diagnosis, repair, tests, and findings'; expectedOutput = 'final PASS, FAIL, or BLOCKED verdict'; handoffArtifact = 'review-loop verdict'; stopCondition = 'Preserve verdict and stop.'; optional = $false }
+                [ordered]@{ skill = 'diagnosing-bugs'; sourceCategory = 'first-party'; fallbackInvocation = 'user-invoked'; expectedInput = 'reported failure and a tight failing reproduction'; expectedOutput = 'root-cause evidence and regression test'; handoffArtifact = 'diagnosis record'; stopCondition = 'The bug is reproduced or the smallest BLOCKED evidence gap is recorded.'; optional = $false },
+                [ordered]@{ skill = 'implement'; sourceCategory = 'first-party'; fallbackInvocation = 'user-invoked'; expectedInput = 'bounded repair ticket'; expectedOutput = 'repair and focused tests'; handoffArtifact = 'repair diff'; stopCondition = 'Repair is ready for specialist review.'; optional = $false },
+                [ordered]@{ skill = 'code-review'; sourceCategory = 'first-party'; fallbackInvocation = 'model-invoked'; expectedInput = 'repair diff'; expectedOutput = 'review findings'; handoffArtifact = 'code review'; stopCondition = 'Findings are handed to review-loop.'; optional = $false },
+                [ordered]@{ skill = 'project-review'; sourceCategory = 'first-party'; fallbackInvocation = 'model-invoked'; expectedInput = 'diagnosis, repair, tests, and findings'; expectedOutput = 'final PASS, FAIL, or BLOCKED verdict'; handoffArtifact = 'project-review verdict'; stopCondition = 'Preserve verdict and stop.'; optional = $false }
             )
         },
         [ordered]@{
@@ -265,16 +262,16 @@ function Get-WorkflowRecipes {
             entryCondition = 'The goal is a governed manuscript, manual, book, or multilingual document project.'
             projectTypes = @('manuscript'); taskKinds = @('initialization', 'production', 'review', 'manuscript')
             keywords = @('manuscript', 'book', 'manual', 'document', 'writing', 'multilingual')
-            stoppingBoundary = 'Preserve explicit handoff and resume boundaries; manuscript-ops and review-loop do not silently call user-invoked Skills.'
-            finalAuthority = 'review-loop'
+            stoppingBoundary = 'Preserve explicit handoff and resume boundaries; manuscript-ops and project-review do not silently call user-invoked Skills.'
+            finalAuthority = 'project-review'
             steps = @(
                 [ordered]@{ skill = 'manuscript-ops'; sourceCategory = 'first-party'; fallbackInvocation = 'model-invoked'; expectedInput = 'manuscript scope and current project state'; expectedOutput = 'routing and state assessment'; handoffArtifact = 'manuscript project state'; stopCondition = 'Routing is explicit before any next user-invoked Skill.'; optional = $false },
-                [ordered]@{ skill = 'grill-me'; sourceCategory = 'upstream'; fallbackInvocation = 'user-invoked'; expectedInput = 'unresolved decisions'; expectedOutput = 'confirmed understanding'; handoffArtifact = 'decision record'; stopCondition = 'Stop when the user confirms shared understanding.'; optional = $true },
-                [ordered]@{ skill = 'wayfinder'; sourceCategory = 'upstream'; fallbackInvocation = 'user-invoked'; expectedInput = 'multi-session uncertainty'; expectedOutput = 'investigation map and decisions'; handoffArtifact = 'wayfinder map'; stopCondition = 'Stop when the route is clear; do not implement from the map.'; optional = $true },
+                [ordered]@{ skill = 'clarify'; sourceCategory = 'first-party'; fallbackInvocation = 'user-invoked'; expectedInput = 'unresolved decisions'; expectedOutput = 'confirmed understanding'; handoffArtifact = 'decision record'; stopCondition = 'Stop when the user confirms shared understanding.'; optional = $true },
+                [ordered]@{ skill = 'decision-map'; sourceCategory = 'first-party'; fallbackInvocation = 'user-invoked'; expectedInput = 'multi-session uncertainty'; expectedOutput = 'investigation map and decisions'; handoffArtifact = 'decision-map'; stopCondition = 'Stop when the route is clear; do not implement from the map.'; optional = $true },
                 [ordered]@{ skill = 'project-init'; sourceCategory = 'first-party'; fallbackInvocation = 'user-invoked'; expectedInput = 'confirmed manuscript preset'; expectedOutput = 'minimal project initialization'; handoffArtifact = 'project guidance'; stopCondition = 'Initialization ends before discovery, specification, implementation, or review.'; optional = $false },
                 [ordered]@{ skill = 'review-loop'; sourceCategory = 'first-party'; fallbackInvocation = 'model-invoked'; expectedInput = 'frozen manuscript acceptance source'; expectedOutput = 'review findings or verdict'; handoffArtifact = 'review evidence'; stopCondition = 'Do not lock or publish without the final verdict.'; optional = $false },
                 [ordered]@{ skill = 'manuscript-ops'; sourceCategory = 'first-party'; fallbackInvocation = 'model-invoked'; expectedInput = 'accepted manuscript plan and evidence'; expectedOutput = 'production and format QA handoff'; handoffArtifact = 'production record'; stopCondition = 'Respect the user-controlled lock and resume boundary.'; optional = $false },
-                [ordered]@{ skill = 'review-loop'; sourceCategory = 'first-party'; fallbackInvocation = 'model-invoked'; expectedInput = 'production artifacts and QA evidence'; expectedOutput = 'final PASS, FAIL, or BLOCKED verdict'; handoffArtifact = 'final manuscript verdict'; stopCondition = 'Stop at the final verdict.'; optional = $false }
+                [ordered]@{ skill = 'project-review'; sourceCategory = 'first-party'; fallbackInvocation = 'model-invoked'; expectedInput = 'production artifacts and QA evidence'; expectedOutput = 'final PASS, FAIL, or BLOCKED verdict'; handoffArtifact = 'project-review verdict'; stopCondition = 'Stop at the final verdict.'; optional = $false }
             )
         },
         [ordered]@{
@@ -283,11 +280,11 @@ function Get-WorkflowRecipes {
             projectTypes = @('skill-development'); taskKinds = @('skill-development', 'research', 'authoring')
             keywords = @('learn', 'source', 'reusable', 'skill', 'distill', 'method')
             stoppingBoundary = 'learn-anything stops at its Method Contract or bounded package handoff; it does not implicitly invoke authoring or review Skills.'
-            finalAuthority = 'review-loop'
+            finalAuthority = 'project-review'
             steps = @(
                 [ordered]@{ skill = 'learn-anything'; sourceCategory = 'first-party'; fallbackInvocation = 'user-invoked'; expectedInput = 'source material and provenance'; expectedOutput = 'Method Contract or precise source gaps'; handoffArtifact = 'method contract'; stopCondition = 'Stop if evidence is insufficient; do not invent a Skill.'; optional = $false },
-                [ordered]@{ skill = 'writing-great-skills'; sourceCategory = 'upstream'; fallbackInvocation = 'model-invoked'; expectedInput = 'approved method contract'; expectedOutput = 'authoring guidance'; handoffArtifact = 'authoring notes'; stopCondition = 'This is optional knowledge, never an implicit learn-anything runtime dependency.'; optional = $true },
-                [ordered]@{ skill = 'review-loop'; sourceCategory = 'first-party'; fallbackInvocation = 'model-invoked'; expectedInput = 'deterministic Skill package and acceptance source'; expectedOutput = 'agent-skill review verdict'; handoffArtifact = 'admission evidence'; stopCondition = 'Admission requires the final review-loop verdict.'; optional = $false }
+                [ordered]@{ skill = 'writing-for-agents'; sourceCategory = 'first-party'; fallbackInvocation = 'model-invoked'; expectedInput = 'approved method contract'; expectedOutput = 'authoring guidance'; handoffArtifact = 'authoring notes'; stopCondition = 'This is optional knowledge, never an implicit learn-anything runtime dependency.'; optional = $true },
+                [ordered]@{ skill = 'project-review'; sourceCategory = 'first-party'; fallbackInvocation = 'model-invoked'; expectedInput = 'deterministic Skill package and acceptance source'; expectedOutput = 'agent-skill review verdict'; handoffArtifact = 'admission evidence'; stopCondition = 'Admission requires the final project-review verdict.'; optional = $false }
             )
         },
         [ordered]@{
@@ -309,22 +306,10 @@ function Get-WorkflowRecipes {
             projectTypes = @('software', 'manuscript', 'skill-development', 'generic')
             taskKinds = @('review', 'final-review', 'acceptance')
             keywords = @('final review', 'acceptance', 'verdict', 'pass', 'blocked')
-            stoppingBoundary = 'review-loop owns the verdict and stops at PASS, FAIL, or BLOCKED.'
-            finalAuthority = 'review-loop'
+            stoppingBoundary = 'project-review owns the verdict and stops at PASS, FAIL, or BLOCKED.'
+            finalAuthority = 'project-review'
             steps = @(
-                [ordered]@{ skill = 'review-loop'; sourceCategory = 'first-party'; fallbackInvocation = 'model-invoked'; expectedInput = 'frozen target, acceptance source, and admissible evidence'; expectedOutput = 'PASS, FAIL, or BLOCKED'; handoffArtifact = 'verdict and durable state'; stopCondition = 'Stop at the final verdict; do not publish from specialist findings alone.'; optional = $false }
-            )
-        },
-        [ordered]@{
-            id = 'private-third-party-dependency'; title = 'Private third-party dependency';
-            entryCondition = 'A requested workflow explicitly depends on a private or modified third-party Skill.'
-            projectTypes = @('software', 'skill-development', 'generic'); taskKinds = @('maintenance', 'review', 'dependency')
-            keywords = @('private third-party', 'third-party dependency', 'modified third-party')
-            stoppingBoundary = 'Report the availability gap; do not install or reveal private content from ask-light.'
-            finalAuthority = 'user resolves availability, then review-loop if acceptance is required'
-            steps = @(
-                [ordered]@{ skill = 'code-review'; sourceCategory = 'modified-third-party'; fallbackInvocation = 'model-invoked'; expectedInput = 'available third-party package and fixed diff'; expectedOutput = 'specialist findings'; handoffArtifact = 'review findings'; stopCondition = 'Stop with an accurate availability gap when the private package is not visible.'; optional = $false },
-                [ordered]@{ skill = 'review-loop'; sourceCategory = 'first-party'; fallbackInvocation = 'model-invoked'; expectedInput = 'package evidence and review findings'; expectedOutput = 'final verdict'; handoffArtifact = 'review-loop verdict'; stopCondition = 'Do not proceed while the required private dependency is unavailable.'; optional = $false }
+                [ordered]@{ skill = 'project-review'; sourceCategory = 'first-party'; fallbackInvocation = 'model-invoked'; expectedInput = 'frozen target, acceptance source, and admissible evidence'; expectedOutput = 'PASS, FAIL, or BLOCKED'; handoffArtifact = 'verdict and durable state'; stopCondition = 'Stop at the final verdict; do not publish from specialist findings alone.'; optional = $false }
             )
         }
     )
@@ -378,11 +363,7 @@ function Get-WorkflowRecommendation {
                 $missing = if (-not [string]::IsNullOrWhiteSpace([string]$candidate.availabilityError)) { [string]$candidate.availabilityError } else { 'Skill metadata or package is unavailable' }
             }
         } else {
-            $missing = switch ($step.sourceCategory) {
-                'modified-third-party' { 'private skills-3rdParty dependency is not visible to the active host' }
-                'upstream' { 'upstream third-party Skill is not visible to the active host' }
-                default { 'first-party Skill is not installed or readable' }
-            }
+            $missing = 'first-party Skill is not installed or readable'
         }
         if (-not $available -and -not $step.optional) { $gaps.Add("step $order $($step.skill): $missing") }
         $steps.Add([ordered]@{
@@ -413,7 +394,7 @@ $availabilityPolicy = Get-AvailabilityPolicy $context $HostName
 $records = [System.Collections.Generic.List[object]]::new(); $gaps = [System.Collections.Generic.List[string]]::new()
 $metadataReads = 0
 foreach ($root in $roots) {
-    $category = [string]$root.category; $rootPath = [string]$root.path
+    $category = 'first-party'; $rootPath = [string]$root.path
     if (-not (Test-Path -LiteralPath $rootPath -PathType Container)) { $gaps.Add("$category root unavailable: $rootPath"); continue }
     foreach ($package in (Get-Packages $rootPath)) {
         $metadataReads++

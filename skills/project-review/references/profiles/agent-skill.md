@@ -81,7 +81,7 @@ specialist for scripts; it reports separate Standards and Spec findings and
 never edits the package or issues the Program's final verdict. Every specialist
 observation is a candidate for the generic finding schema. Candidate
 dispositions remain `confirmed`, `rejected`, `duplicate`, or `out-of-scope`.
-The review-loop Core validates each candidate and owns the final `PASS`, `FAIL`,
+The project-review Core validates each candidate and owns the final `PASS`, `FAIL`,
 or `BLOCKED`.
 
 ## Severity guidance
@@ -112,7 +112,7 @@ The Core may ask its fresh Evaluator to consider `PASS` only when:
   are frozen and agree;
 - structure, metadata, links, and declared resources are valid;
 - a clean installation is discoverable and the package does not depend on
-  undeclared files or prior `.review-loop/` state;
+  undeclared files or prior `.project-review/` state;
 - positive trigger, non-trigger/boundary, and invocation-type observations match
   the Skill contract, including no automatic invocation of another user-invoked
   Skill;

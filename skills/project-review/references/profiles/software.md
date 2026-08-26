@@ -101,7 +101,7 @@ The Core may ask its fresh Evaluator to consider `PASS` only when:
   scope; and
 - the independent Evaluator records the criterion-by-criterion judgment.
 
-The final `PASS`, `FAIL`, or `BLOCKED` is issued and recorded by **review-loop
+The final `PASS`, `FAIL`, or `BLOCKED` is issued and recorded by **project-review
 Core** under the generic stopping rules. A `code-review` report can never close
 the loop by itself.
 

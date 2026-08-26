@@ -41,7 +41,7 @@ def _first_group(pattern: str, text: str, default: str = "") -> str:
 
 
 def get_review_state(case_root: Path) -> ReviewState:
-    path = case_root / ".review-loop" / "state.md"
+    path = case_root / ".project-review" / "state.md"
     raw = path.read_text(encoding="utf-8", errors="replace")
     status = _first_group(r"(?m)^Status: ([^\r\n]+)", raw)
     round_no = int(_first_group(r"(?m)^Round: (\d+)", raw, "0") or "0")
@@ -86,15 +86,15 @@ def set_review_state(
         f"Blocker: {blocker}",
         "Evidence label: executable protocol scenario",
     ]
-    path = case_root / ".review-loop" / "state.md"
+    path = case_root / ".project-review" / "state.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(records) + "\n", encoding="utf-8")
 
 
 def new_review_case(root: Path, name: str, profile: str = "generic") -> Path:
     case_root = root / name
-    (case_root / ".review-loop").mkdir(parents=True, exist_ok=True)
-    (case_root / ".review-loop" / "state.md").write_text(
+    (case_root / ".project-review").mkdir(parents=True, exist_ok=True)
+    (case_root / ".project-review" / "state.md").write_text(
         "\n".join([
             "Status: INIT",
             "Round: 0",
@@ -113,9 +113,9 @@ def new_review_round(case_root: Path, profile: str, next_action: str, producer_e
     if not state.charter_revision:
         raise ValueError("Review round requires a frozen Charter revision")
     next_round = max(1, state.round)
-    verdict_owner = "review-loop Core" if profile in ("software", "manuscript") else ""
+    verdict_owner = "project-review Core" if profile in ("software", "manuscript") else ""
     set_review_state(case_root, "CRITIC", next_round, next_action, profile, state.charter_revision, verdict_owner, "executable protocol scenario")
-    round_path = case_root / f".review-loop/rounds/round-{next_round:02d}"
+    round_path = case_root / f".project-review/rounds/round-{next_round:02d}"
     round_path.mkdir(parents=True, exist_ok=True)
     (round_path / "producer-evidence.md").write_text("\n".join(producer_evidence) + "\n", encoding="utf-8")
     return round_path
@@ -128,16 +128,16 @@ def new_review_next_round(case_root: Path, profile: str, next_action: str, produ
     if not state.charter_revision:
         raise ValueError("Next round requires the existing Charter revision")
     round_no = state.round + 1
-    verdict_owner = "review-loop Core" if profile in ("software", "manuscript") else ""
+    verdict_owner = "project-review Core" if profile in ("software", "manuscript") else ""
     set_review_state(case_root, "CRITIC", round_no, next_action, profile, state.charter_revision, verdict_owner, "executable protocol scenario")
-    round_path = case_root / f".review-loop/rounds/round-{round_no:02d}"
+    round_path = case_root / f".project-review/rounds/round-{round_no:02d}"
     round_path.mkdir(parents=True, exist_ok=True)
     (round_path / "producer-evidence.md").write_text("\n".join(producer_evidence) + "\n", encoding="utf-8")
     return round_path
 
 
 def get_review_finding_ids(case_root: Path) -> list[str]:
-    path = case_root / ".review-loop" / "findings.md"
+    path = case_root / ".project-review" / "findings.md"
     if not path.is_file():
         return []
     ids: list[str] = []
@@ -149,7 +149,7 @@ def get_review_finding_ids(case_root: Path) -> list[str]:
 
 
 def get_confirmed_review_finding_ids(case_root: Path) -> list[str]:
-    path = case_root / ".review-loop" / "findings.md"
+    path = case_root / ".project-review" / "findings.md"
     if not path.is_file():
         return []
     latest: dict[str, str] = {}
@@ -185,7 +185,7 @@ def add_review_finding(
         raise ValueError(f"invalid severity {severity}")
     if disposition not in ("confirmed", "rejected", "duplicate", "out-of-scope"):
         raise ValueError(f"invalid disposition {disposition}")
-    path = case_root / ".review-loop" / "findings.md"
+    path = case_root / ".project-review" / "findings.md"
     prefix = "Re-observed" if path.is_file() else "Finding"
     records = [
         f"{prefix} {finding_id}",
@@ -204,7 +204,7 @@ def add_review_finding(
 
 
 def write_review_repair_evidence(case_root: Path, round_no: int, finding_ids: list[str], evidence_lines: list[str]) -> None:
-    round_path = case_root / f".review-loop/rounds/round-{round_no:02d}"
+    round_path = case_root / f".project-review/rounds/round-{round_no:02d}"
     round_path.mkdir(parents=True, exist_ok=True)
     for finding_id in finding_ids:
         lines = [f"Finding: {finding_id}", f"Stable finding ID: {finding_id}"] + evidence_lines

@@ -355,7 +355,7 @@ def build_routing_snapshot(
         "Structured": ("prepare_lightweight_brief_and_review_plan", None),
         "Project": (
             "handoff_discovery",
-            "Activate grill-me for one-session decisions or wayfinder for multi-session fog using host syntax; then activate manuscript-ops with resume.",
+            "Activate clarify for one-session decisions or decision-map for multi-session fog using host syntax; then activate manuscript-ops with resume.",
         ),
     }
     next_action, next_invocation = next_actions[route]

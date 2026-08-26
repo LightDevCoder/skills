@@ -44,7 +44,7 @@ learner producing the language.
 
 `language-learning` never invokes another user-invoked Skill. A durable
 continuation record requires a separate user choice such as `handoff`; final
-acceptance remains owned by `review-loop`. An incomplete or `BLOCKED`
+acceptance remains owned by `project-review`. An incomplete or `BLOCKED`
 admission does not change the package contract.
 
 ## Verification and release state

@@ -17,7 +17,7 @@ Use it for a manuscript, manual, book, multilingual edition, or format-heavy
 document project with meaningful source, batch, review, or production risk.
 Preflight scores Quick, Structured, or Project and takes exactly one route.
 Do not use it as a generic task router, silent project initializer, automatic
-workflow manager, or substitute for `review-loop`'s generic verdict mechanics.
+workflow manager, or substitute for `project-review`'s final verdict mechanics.
 
 It is `model-invoked` and may also be manually entered when the host permits:
 
@@ -37,25 +37,26 @@ records, review evidence, and production QA records.
 
 ## Handoffs, success, and `BLOCKED`
 
-On a Project route, choose one discovery handoff: `grill-me` for one-session
-decisions or `wayfinder` for multi-session uncertainty, then stop. `grill-me`
+On a Project route, choose one discovery handoff: `clarify` for one-session
+decisions or `decision-map` for multi-session uncertainty, then stop. `clarify`
 is the user-facing entry point; its underlying model-invoked capability is
-`grilling`, so it is one clarification capability rather than two user steps.
+`socratic`, so it is one clarification capability rather than two user steps.
 Continue only after the user explicitly resumes `manuscript-ops`. Before initialization,
 the user must explicitly choose `project-init`; before review, an approved
-`review-loop` Charter is required. `BLOCKED` is correct for a missing root,
+`project-review` Charter is required. `BLOCKED` is correct for a missing root,
 missing dependency, unapproved brief, absent capability, missing evidence, or
 unavailable rendering/round-trip proof. Never claim visual acceptance from a
 syntactically valid file.
 
 ## Composition and final authority
 
-The normal governed path is `manuscript-ops` → `grill-me`/`wayfinder` →
-`project-init` → `review-loop init` → production → `review-loop` manuscript
-review. The user controls every user-invoked handoff and resume. `review-loop`
-owns generic findings, independence, state, and final `PASS`/`FAIL`/`BLOCKED`;
-`manuscript-ops` supplies the manuscript-specific evidence boundary and
-consumes that verdict. Stop at every stated handoff or final verdict.
+The normal governed path is `manuscript-ops` → `clarify`/`decision-map` →
+`project-init` → `project-review init` → production → `project-review`
+manuscript review (through `review-loop` convergence). The user controls every
+user-invoked handoff and resume. `project-review` owns generic findings,
+independence, state, and final `PASS`/`FAIL`/`BLOCKED`; `manuscript-ops`
+supplies the manuscript-specific evidence boundary and consumes that verdict.
+Stop at every stated handoff or final verdict.
 
 ## Installation and discovery check
 

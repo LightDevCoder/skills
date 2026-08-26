@@ -1081,7 +1081,7 @@ def validate_batches(
                     report,
                 )
                 if review_path:
-                    batch_review = validate_review_loop_report(
+                    batch_review = validate_project_review_report(
                         review_path.relative_to(report.root).as_posix(),
                         report,
                     )
@@ -1092,13 +1092,13 @@ def validate_batches(
                     ):
                         report.error(
                             "BATCH_REVIEW",
-                            f"{batch_id} review-loop result hash differs from parsed result",
+                            f"{batch_id} project-review result hash differs from parsed result",
                         )
         if status == "accepted":
             if not batch_review:
                 report.error(
                     "BATCH_REVIEW",
-                        f"{batch_id} accepted status requires a hash-bound review-loop result",
+                        f"{batch_id} accepted status requires a hash-bound project-review result",
                 )
             else:
                 expected_milestone = BATCH_REVIEW_MILESTONES.get(item.get("kind"))
@@ -1552,7 +1552,7 @@ def validate_snapshot_files(
 
 
 def validate_review_matrix(path_value: Any, report: Report) -> dict[str, Any] | None:
-    """Validate the manuscript-specific review profile sent to review-loop."""
+    """Validate the manuscript-specific review profile sent to project-review."""
     if not isinstance(path_value, str):
         return None
     try:
@@ -1632,14 +1632,14 @@ def _validate_manuscript_evidence(
 ) -> set[str]:
     if not isinstance(evidence, list):
         report.error(
-            "REVIEW_LOOP_EVIDENCE",
-            "review-loop result requires manuscript_evidence entries",
+            "PROJECT_REVIEW_EVIDENCE",
+            "project-review result requires manuscript_evidence entries",
         )
         return set()
     axes: set[str] = set()
     for entry in evidence:
         if not isinstance(entry, dict):
-            report.error("REVIEW_LOOP_EVIDENCE", "manuscript evidence entry must be an object")
+            report.error("PROJECT_REVIEW_EVIDENCE", "manuscript evidence entry must be an object")
             continue
         axis = entry.get("axis")
         if (
@@ -1648,7 +1648,7 @@ def _validate_manuscript_evidence(
             or axis in axes
         ):
             report.error(
-                "REVIEW_LOOP_EVIDENCE",
+                "PROJECT_REVIEW_EVIDENCE",
                 f"manuscript evidence has unknown or duplicate axis {axis!r}",
             )
             continue
@@ -1656,14 +1656,14 @@ def _validate_manuscript_evidence(
         artifacts = entry.get("evidence")
         if not isinstance(artifacts, list) or not artifacts:
             report.error(
-                "REVIEW_LOOP_EVIDENCE",
+                "PROJECT_REVIEW_EVIDENCE",
                 f"{axis} requires at least one hashed evidence artifact",
             )
             continue
         for artifact in artifacts:
             if not isinstance(artifact, dict):
                 report.error(
-                    "REVIEW_LOOP_EVIDENCE",
+                    "PROJECT_REVIEW_EVIDENCE",
                     f"{axis} evidence artifacts must be objects",
                 )
                 continue
@@ -1672,27 +1672,27 @@ def _validate_manuscript_evidence(
                 or not artifact["kind"].strip()
             ):
                 report.error(
-                    "REVIEW_LOOP_EVIDENCE",
+                    "PROJECT_REVIEW_EVIDENCE",
                     f"{axis} evidence artifacts require a kind",
                 )
             validate_hashed_path(
                 artifact.get("path"),
                 artifact.get("sha256"),
-                "REVIEW_LOOP_EVIDENCE",
+                "PROJECT_REVIEW_EVIDENCE",
                 report,
             )
     return axes
 
 
-def validate_review_loop_report(
+def validate_project_review_report(
     path_value: Any,
     report: Report,
     _visited: set[str] | None = None,
 ) -> dict[str, Any] | None:
-    """Validate only the manuscript integration envelope emitted by review-loop.
+    """Validate only the manuscript integration envelope emitted by project-review.
 
     Generic findings, repair rounds, independence, review state, and verdict
-    reasoning remain owned by review-loop. This adapter checks the frozen
+    reasoning remain owned by project-review. This adapter checks the frozen
     manuscript snapshot and its domain evidence projection.
     """
     if not isinstance(path_value, str):
@@ -1700,51 +1700,51 @@ def validate_review_loop_report(
     try:
         path = ensure_within_root(report.root, Path(path_value))
     except ContractError as exc:
-        report.error("REVIEW_LOOP_PATH", str(exc))
+        report.error("PROJECT_REVIEW_PATH", str(exc))
         return None
     if not path.is_file():
-        report.error("REVIEW_LOOP_MISSING", f"missing review-loop result: {path_value}")
+        report.error("PROJECT_REVIEW_MISSING", f"missing project-review result: {path_value}")
         return None
     if path.suffix.lower() != ".json":
         report.error(
-            "REVIEW_LOOP_MACHINE",
-            "LifecycleState and GateReceipt must reference the JSON review-loop result",
+            "PROJECT_REVIEW_MACHINE",
+            "LifecycleState and GateReceipt must reference the JSON project-review result",
         )
         return None
     review = read_required(path, report)
     if not review:
         return None
     if review.get("schema_version") != "1":
-        report.error("REVIEW_LOOP_SCHEMA", "review-loop result schema_version must be 1")
-    if review.get("provider") != "review-loop":
-        report.error("REVIEW_LOOP_PROVIDER", "review result must identify review-loop as provider")
+        report.error("PROJECT_REVIEW_SCHEMA", "project-review result schema_version must be 1")
+    if review.get("provider") != "project-review":
+        report.error("PROJECT_REVIEW_PROVIDER", "review result must identify project-review as provider")
     if review.get("profile") != "manuscript":
-        report.error("REVIEW_LOOP_PROFILE", "review result must use the manuscript Profile")
+        report.error("PROJECT_REVIEW_PROFILE", "review result must use the manuscript Profile")
     milestone = review.get("milestone")
     if milestone not in REVIEW_MILESTONES:
-        report.error("REVIEW_LOOP_MILESTONE", "review-loop result milestone is invalid")
+        report.error("PROJECT_REVIEW_MILESTONE", "project-review result milestone is invalid")
     snapshot, snapshot_captured_time, snapshot_captured_at = validate_snapshot_files(
         review.get("artifact_snapshot"),
-        "REVIEW_LOOP_SNAPSHOT",
+        "PROJECT_REVIEW_SNAPSHOT",
         report,
     )
     verdict = review.get("verdict")
     result = verdict.get("result") if isinstance(verdict, dict) else verdict
     if result not in {"PASS", "FAIL", "BLOCKED"}:
         report.error(
-            "REVIEW_LOOP_VERDICT",
-            "review-loop result must expose PASS, FAIL, or BLOCKED",
+            "PROJECT_REVIEW_VERDICT",
+            "project-review result must expose PASS, FAIL, or BLOCKED",
         )
     completed_at = validate_timestamp(
         review.get("completed_at"),
-        "REVIEW_LOOP_COMPLETED_AT",
+        "PROJECT_REVIEW_COMPLETED_AT",
         report,
     )
     manuscript_axes = _validate_manuscript_evidence(
         review.get("manuscript_evidence"),
         report,
     )
-    report.ok("REVIEW_LOOP_RESULT", path_value)
+    report.ok("PROJECT_REVIEW_RESULT", path_value)
     return {
         "path": path.relative_to(report.root).as_posix(),
         "sha256": sha256_file(path),
@@ -1764,8 +1764,8 @@ def validate_review_report(
     report: Report,
     _visited: set[str] | None = None,
 ) -> dict[str, Any] | None:
-    """Compatibility name for the review-loop integration adapter."""
-    return validate_review_loop_report(path_value, report, _visited)
+    """Compatibility name for the project-review integration adapter."""
+    return validate_project_review_report(path_value, report, _visited)
 
 
 def validate_source_register(
@@ -3544,9 +3544,9 @@ def validate_receipts(
                 "GATE_REVIEW",
                 report,
             )
-            parsed_review = validate_review_loop_report(review.get("report_path"), report)
+            parsed_review = validate_project_review_report(review.get("report_path"), report)
             if review.get("verdict") != "PASS":
-                report.error("GATE_REVIEW", f"{gate} requires a review-loop PASS")
+                report.error("GATE_REVIEW", f"{gate} requires a project-review PASS")
             if parsed_review:
                 expected_milestone = GATE_REVIEW_MILESTONES[gate]
                 if parsed_review["milestone"] != expected_milestone:
@@ -3557,7 +3557,7 @@ def validate_receipts(
                 if review.get("verdict") != parsed_review.get("verdict"):
                     report.error(
                         "GATE_REVIEW_MISMATCH",
-                        f"{gate} receipt verdict differs from the hashed review-loop result",
+                        f"{gate} receipt verdict differs from the hashed project-review result",
                     )
                 for artifact_path, artifact_hash in parsed_review["snapshot"].items():
                     if normalized_files.get(artifact_path) != artifact_hash:
@@ -3752,7 +3752,7 @@ def validate_receipts(
                 "active source-locked receipt does not bind the current Source Register",
             )
         source_review = active_source.get("review", {})
-        parsed_source_review = validate_review_loop_report(
+        parsed_source_review = validate_project_review_report(
             source_review.get("report_path"),
             report,
         )
@@ -4196,7 +4196,7 @@ def validate_review_scope(
     if missing_domain_evidence:
         report.error(
             "REVIEW_EVIDENCE",
-            f"review-loop result omits manuscript evidence for: {missing_domain_evidence}",
+            f"project-review result omits manuscript evidence for: {missing_domain_evidence}",
         )
     if lifecycle.get("phase") != "candidate":
         return
@@ -4289,7 +4289,7 @@ def main() -> int:
         matrix_result = validate_review_matrix(lifecycle["review_matrix"], report)
     review_result: dict[str, Any] | None = None
     if lifecycle.get("latest_review_report"):
-        review_result = validate_review_loop_report(
+        review_result = validate_project_review_report(
             lifecycle["latest_review_report"],
             report,
         )
@@ -4315,7 +4315,7 @@ def main() -> int:
         if matrix_result["applicable_axes"] != review_result["manuscript_axes"]:
             report.error(
                 "REVIEW_BINDING",
-                "review-loop manuscript evidence does not exactly cover the profile axes",
+                "project-review manuscript evidence does not exactly cover the profile axes",
             )
         validate_review_scope(
             lifecycle,

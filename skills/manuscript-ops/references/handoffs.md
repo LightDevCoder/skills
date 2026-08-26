@@ -8,9 +8,8 @@ python scripts/check_dependencies.py --catalog <active-skill-catalog>
 ```
 
 For a provenance-complete check, add `--online`; `READY` is required before a
-Project handoff. If Wayfinder selects an optional branch, also pass
-`--require-optional prototype` or
-`--require-optional setup-matt-pocock-skills` as applicable. An unselected
+Project handoff. If Decision-map selects an optional branch, also pass
+`--require-optional prototype` as applicable. An unselected
 optional branch is not a missing dependency.
 
 Repository maintainers use `--online --audit-all` to audit every optional
@@ -18,8 +17,8 @@ contract as well. Do not use `--audit-all` in an ordinary manuscript handoff;
 it changes audit scope, not the selected workflow branch.
 
 Use `--strict-agent-skills` on a client that rejects non-standard frontmatter.
-The pinned `grill-me` user entry starts the underlying `grilling` capability;
-the `grill-me` and `wayfinder` contracts currently use
+The pinned `clarify` user entry starts the underlying `socratic` capability;
+the `clarify` and `decision-map` contracts currently use
 `disable-model-invocation`; a strict client must return `BLOCKED` unless it has
 compatible releases or an explicit host extension.
 
@@ -40,16 +39,16 @@ The `$` and `/` prefixes are host syntax, not part of the portable contract.
 
 Use exactly one route:
 
-- `grill-me`: unresolved decisions can be settled with the user in one session.
-- `wayfinder`: the effort spans sessions and the decision frontier is still
+- `clarify`: unresolved decisions can be settled with the user in one session.
+- `decision-map`: the effort spans sessions and the decision frontier is still
   unclear. Request its local Markdown tracker for manuscript work unless the
   project already has an approved issue tracker.
 
 Logical calls:
 
 ```text
-activate grill-me with: resolve the open manuscript decisions recorded in <path>
-activate wayfinder with: chart this manuscript effort in a local Markdown task graph; do not implement it
+activate clarify with: resolve the open manuscript decisions recorded in <path>
+activate decision-map with: chart this manuscript effort in a local Markdown task graph; do not implement it
 ```
 
 After the dependency stops, ask the user to activate `manuscript-ops` with
@@ -78,7 +77,7 @@ $manuscript-ops resume from <exact-project-root>/.manuscript-ops/state.json
 ## Independent acceptance
 
 After project initialization and a dated baseline, logically activate
-`review-loop` with:
+`project-review` with:
 
 ```text
 init using <approved-brief-path>
@@ -91,32 +90,30 @@ review <milestone> against <charter-path>
 ```
 
 Use its `resume` mode only when durable state makes the next action unambiguous.
-Preserve `PASS`, `FAIL`, `BLOCKED`, and the raw `review-loop` independence
+Preserve `PASS`, `FAIL`, `BLOCKED`, and the raw `project-review` independence
 metadata. Normalize it into the manuscript report without overwriting it:
 `full -> native`; `degraded -> fresh_session` only with evidence of a genuinely
 new isolated session, otherwise `degraded`; `unavailable -> degraded/BLOCKED`.
 
-After `review-loop init`, the expected artifacts are
-`<exact-project-root>/.review-loop/charter.md` and `state.md`. After a milestone
+After `project-review init`, the expected artifacts are
+`<exact-project-root>/.project-review/charter.md` and `state.md`. After a milestone
 review, the expected artifact is the frozen round verdict referenced by
 `state.md`. Once those paths and the reported verdict are checked, logically
 activate `manuscript-ops` with `resume`. In Codex:
 
 ```text
-$manuscript-ops resume from <exact-project-root>/.review-loop/state.md
+$manuscript-ops resume from <exact-project-root>/.project-review/state.md
 ```
 
 ## Dependency closure and order
 
 Install and refresh the agent between layers when necessary:
 
-1. Required discovery closure from `mattpocock/skills`: `grill-me` (the user
-   entry), its underlying `grilling` capability, `wayfinder`, and
-   `domain-modeling`.
-2. Optional Wayfinder branches, before they are selected: `prototype` and
-   `setup-matt-pocock-skills`.
-3. Independent acceptance from `LightDevCoder/Agent-Workflow`:
-   `review-loop`.
+1. Required first-party discovery closure from `LightDevCoder/skills`:
+   `clarify` (the user entry), its underlying `socratic` capability, and
+   `decision-map`.
+2. Optional Decision-map branches, before they are selected: `prototype`.
+3. Independent acceptance from `LightDevCoder/skills`: `project-review`.
 4. `manuscript-ops`.
 
 Never install dependencies automatically during manuscript execution.
@@ -124,8 +121,7 @@ Never install dependencies automatically during manuscript execution.
 ### Generic installer
 
 ```text
-npx skills@latest add mattpocock/skills
-npx skills@latest add LightDevCoder/Agent-Workflow
+npx skills@latest add LightDevCoder/skills
 ```
 
 Select the exact closure above. Use the installer's global flag only when the
@@ -145,33 +141,26 @@ Resolve the default Codex home when `CODEX_HOME` is unset:
 $codexHome = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $HOME '.codex' }
 $installer = Join-Path $codexHome 'skills\.system\skill-installer\scripts\install-skill-from-github.py'
 python $installer `
-  --repo mattpocock/skills `
-  --ref 9603c1cc8118d08bc1b3bf34cf714f62178dea3b `
-  --path skills/productivity/grill-me skills/productivity/grilling skills/engineering/wayfinder skills/engineering/domain-modeling
-python $installer `
-  --repo LightDevCoder/Agent-Workflow `
-  --ref be0c2577347018ad5c9a80f214b8b6cca9bc956e `
-  --path review-loop
+  --repo LightDevCoder/skills `
+  --ref 93f2c3dc7d0dc400ee6aaf4ee240fe28592dfb93 `
+  --path skills/clarify skills/socratic skills/decision-map skills/project-review
 ```
 
-Install `skills/engineering/prototype` and
-`skills/engineering/setup-matt-pocock-skills` only if the chosen Wayfinder
-branch requires them. Start a fresh Codex session after installation.
+Install `skills/prototype` only if the chosen Decision-map branch
+requires it. Start a fresh Codex session after installation.
 
 ### Manual portable installation
 
-Clone `mattpocock/skills` at
-`9603c1cc8118d08bc1b3bf34cf714f62178dea3b` and
-`LightDevCoder/Agent-Workflow` at
-`be0c2577347018ad5c9a80f214b8b6cca9bc956e`. Copy every selected
-folder so it ends at `.agents/skills/<name>/SKILL.md`. For example:
+Clone `LightDevCoder/skills` at
+`93f2c3dc7d0dc400ee6aaf4ee240fe28592dfb93`. Copy every selected
+`skills/<name>` folder so it ends at `.agents/skills/<name>/SKILL.md`. For
+example:
 
 ```text
-.agents/skills/grill-me/SKILL.md
-.agents/skills/grilling/SKILL.md
-.agents/skills/wayfinder/SKILL.md
-.agents/skills/domain-modeling/SKILL.md
-.agents/skills/review-loop/SKILL.md
+.agents/skills/clarify/SKILL.md
+.agents/skills/socratic/SKILL.md
+.agents/skills/decision-map/SKILL.md
+.agents/skills/project-review/SKILL.md
 ```
 
 Do not copy a repository root into a single Skill folder. Confirm each Skill is

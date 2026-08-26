@@ -6,34 +6,30 @@
 
 ## 解决什么问题
 
-`review-loop` 把已经批准的目标与验收来源转成有边界的证据、批评、修复、评估和最终裁决循环。Core 角色冻结基线、保存 durable state、执行停止规则，并拥有 `PASS`、`FAIL`、`BLOCKED` verdict。
+`review-loop` 是轻量 Review Engine：驱动 `review → findings → repair → re-review` 单一循环。它解析 reviewer、调用、收归一化 findings、把确认且 in-scope 的 findings 交回 Producer，并在干净或达到有界上限时停止。
+
+它不拥有项目最终 `PASS`/`FAIL`/`BLOCKED`；那是 `project-review` 的职责。
 
 ## 何时使用 / 不使用
 
-当目标、范围、验收权威、证据边界和适用 Profile 已经明确时使用。可按目标选择 `agent-skill`、`software`、`manuscript`、`specification` 等 Profile。
+当有界评审需要修复收敛时使用：实现 handoff、包评审、或已有 bounded packet 和具体修复路径的例行评审。
 
-不要用它发明产品目标、解决未决架构决策、让 reviewer 代写产物、发布 release，或为了迁就实现而放宽验收源。缺少这些前置决定时，先显式选择 `ask-light`、`project-init`、`to-spec` 等入口。
+不要用它冻结验收基线、签发项目 verdict，或替代 `project-review`。
 
 ## 边界、输入和输出
 
-它是 `model-invoked`，也支持手动入口。手动调用示例：
+它是 `model-invoked`，也支持手动入口。
 
-```text
-$review-loop init using docs/acceptance.md
-$review-loop review
-$review-loop resume
-```
-
-输入是目标、批准的验收源、Profile、范围/排除项、证据要求，以及需要持久化时可写的 `.review-loop/`。输出包括 Charter、state、findings、round evidence、repair disposition 和最终 verdict。专家 findings 不能替代 verdict。
+输入 packet 有四个字段：Target、Requirements、Relevant context、Previous findings。输出为归一化 findings（干净时 `Findings: []`），或缺少必要输入时的 `REVIEW-ERROR`。达到上限时把未决 findings 交给调用方。
 
 ## 成功与 `BLOCKED`
 
-成功要求基线已冻结、声明的验收轴都有 admissible evidence、findings 已处置、修复没有越界，并且独立 Evaluator 已向 Core 提供新鲜证据。验收源缺失/未批准、目标不可读、Profile 或证据不可用、独立性或 state gate 无法推进时，应记录最小解阻动作并返回 `BLOCKED`。
+成功意味着循环到达 `Findings: []`，或在配置上限处把未决 findings 交给调用方。`BLOCKED`/`PASS`/`FAIL` 不是引擎 verdict；`project-review` 经此引擎组合 reviewer 后签发。
 
 ## 组合和停止点
 
-它可以消费 `project-init`、`to-spec`、`to-tickets`、实现证据、`code-review` findings 或 manuscript format QA。`code-review` 只提供 specialist findings；最终权威仍是 `review-loop`。到 verdict 后停止，再交给 `handoff` 或 release closeout；不要隐式调用其他 user-invoked Skill。
+默认组合 `generic-review`；软件 diff 用 `code-review`；有已接受 specialist 时用领域 reviewer。`project-review` 是最终验收拥有者。干净或达上限后停止并交给调用方；不要隐式调用其他 user-invoked Skill。
 
 ## 安装与发现验证
 
-对于已发布的 v0.1.2，使用 `npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'` 安装，刷新 host，在不依赖 source checkout 的情况下检查已发现的 `SKILL.md` 和 `agents/openai.yaml`。运行 [Profile tests](../../../skills/review-loop/tests/)；结果记录在[安装证据](../../evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.zh-CN.md)。
+使用 `npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'` 安装，刷新 host，在不依赖 source checkout 的情况下检查已发现的 `SKILL.md` 和 `agents/openai.yaml`。运行 [tests](../../../skills/review-loop/tests/)；结果记录在[安装证据](../../evidence/releases/v0.1.6/INSTALLATION_VERIFICATION.zh-CN.md)。

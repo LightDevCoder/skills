@@ -52,10 +52,12 @@ The output above is illustrative, not a claim that this host ran the recipe.
 ## Misuse, composition, and stopping
 
 Do not use it as a discovery/specification engine, installer, scheduler, or
-automatic chain. It may point to `project-init`, `learn-anything`,
-`manuscript-ops`, `to-spec`, `implement`, `code-review`, or `review-loop`; the
-user chooses each next explicit entry point. `review-loop` owns any final
-verdict. Stop after the recommendation or the `NEED-INPUT`/`BLOCKED` record.
+automatic chain. It routes only among real first-party Skills and may point to
+`project-init`, `learn-anything`, `manuscript-ops`, `project-spec`,
+`implement`, `code-review`, or `project-review`; the user chooses each next
+explicit entry point. `project-review` owns the final verdict for recipes that
+reach acceptance. Stop after the recommendation or the
+`NEED-INPUT`/`BLOCKED` record.
 
 ## Installation and discovery check
 
@@ -64,5 +66,5 @@ refresh, and inspect `SKILL.md`, `agents/openai.yaml`, and the PowerShell
 scanner without the source checkout. Run
 [ask-light contract tests](../../skills/ask-light/tests/test_ask_light_contract.py)
 and [behavior tests](../../skills/ask-light/tests/test_ask_light_behavior.py),
-including the learn-anything, missing-private-dependency, and ambiguity
+including the learn-anything, non-first-party-not-routed, and ambiguity
 fixtures.

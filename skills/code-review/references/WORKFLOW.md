@@ -33,7 +33,8 @@ Only a non-empty diff proceeds to review.
 Search in this order; the first success is the Spec axis source:
 
 1. Issue references in the captured commit messages (`#123`, `Closes #45`,
-   GitLab `!67`) — fetch via `docs/agents/issue-tracker.md` Wayfinding.
+   GitLab `!67`) — resolve them through the active repository's tracker
+   convention.
 2. A path the user passed in the invocation argument.
 3. A Spec file under `docs/`, `specs/`, or `.scratch/<feature>/` matching the
    branch or feature name (prefer `.scratch/<feature>/spec.md`).
@@ -42,10 +43,8 @@ Search in this order; the first success is the Spec axis source:
 
 When `review-loop` or `project-review` is the caller, its frozen `charter.md`
 and approved Spec revision are the source; treat that as authoritative. The
-canonical software Profile now lives under
-`skills/project-review/references/profiles/software.md` (see
-`project-review` SKILL.md); the former `review-loop` path remains as a
-compatibility fallback.
+`software` Profile is owned by `project-review`; this package does not need to
+resolve that file.
 
 ### 3. Identify the standards sources
 
@@ -122,11 +121,7 @@ Example aggregate shape is shown in [EXAMPLES.md](EXAMPLES.md).
   `rejected`, `duplicate`, or `out-of-scope`; `project-review` Core is the
   only writer that directs a bounded in-scope repair and supplies a fresh
   Evaluator. The final `PASS`, `FAIL`, or `BLOCKED` belongs to
-  `project-review` (see
-  [software.md](../../project-review/references/profiles/software.md); the
-  former `review-loop` path at
-  `../../review-loop/references/profiles/software.md` is a compatibility
-  fallback).
+  `project-review` under the `software` Profile.
 - Do not run a second review pass; convergence is the `review-loop` engine's
   responsibility, final acceptance is `project-review`'s.
 

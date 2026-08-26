@@ -49,13 +49,13 @@ class SoftwareScenario:
             charter_revision = current.charter_revision
         if not charter_revision:
             charter_revision = "software-fixture-1"
-        set_review_state(self.case_root, status, round_no, next_action, "software", charter_revision, "review-loop Core", "executable software protocol scenario", blocker)
+        set_review_state(self.case_root, status, round_no, next_action, "software", charter_revision, "project-review Core", "executable software protocol scenario", blocker)
 
     def initialize(self, acceptance_source: Path) -> None:
         if not acceptance_source.is_file():
             self.set_state("BLOCKED", 0, "record missing acceptance source", "missing acceptance source")
             return
-        charter = self.case_root / ".review-loop" / "charter.md"
+        charter = self.case_root / ".project-review" / "charter.md"
         charter.parent.mkdir(parents=True, exist_ok=True)
         charter.write_text("\n".join([
             "# Acceptance Charter",
@@ -92,7 +92,7 @@ class SoftwareScenario:
         state = self.state()
         if state.status != "CRITIC":
             raise ValueError("code-review report requires CRITIC state")
-        round_path = self.case_root / f".review-loop/rounds/round-{state.round:02d}"
+        round_path = self.case_root / f".project-review/rounds/round-{state.round:02d}"
         round_path.mkdir(parents=True, exist_ok=True)
         (round_path / "code-review-standards.md").write_text("\n".join([
             "# code-review Standards report",
@@ -126,7 +126,7 @@ class SoftwareScenario:
         state = self.state()
         if state.status != "CRITIC":
             raise ValueError("Finding ingestion requires CRITIC state")
-        round_path = self.case_root / f".review-loop/rounds/round-{state.round:02d}"
+        round_path = self.case_root / f".project-review/rounds/round-{state.round:02d}"
         standards_report = (round_path / "code-review-standards.md").read_text(encoding="utf-8")
         spec_report = (round_path / "code-review-spec.md").read_text(encoding="utf-8")
         if "Axis: Standards" not in standards_report or "Axis: Spec" not in spec_report:
@@ -139,7 +139,7 @@ class SoftwareScenario:
             raise ValueError("provided severity expectations do not match code-review reports")
         if f"Stable candidate ID: {standards_finding_id}" not in standards_report or f"Stable candidate ID: {spec_finding_id}" not in spec_report or f"Source finding reference: {standards_source_finding_reference}" not in standards_report or f"Source finding reference: {spec_source_finding_reference}" not in spec_report:
             raise ValueError("code-review reports must retain stable candidate IDs")
-        registry = self.case_root / ".review-loop" / "findings.md"
+        registry = self.case_root / ".project-review" / "findings.md"
         records = [
             f"Re-observed {standards_finding_id} in round {state.round}",
             f"Source: code-review; Axis: Standards; Source finding reference: {standards_source_finding_reference}",
@@ -183,7 +183,7 @@ class SoftwareScenario:
         state = self.state()
         if state.status != "REPAIR":
             raise ValueError("Repair requires REPAIR state")
-        round_path = self.case_root / f".review-loop/rounds/round-{state.round:02d}"
+        round_path = self.case_root / f".project-review/rounds/round-{state.round:02d}"
         if not in_scope:
             self.set_state("FAIL", state.round, "scope-changing repair rejected")
             return
@@ -200,7 +200,7 @@ class SoftwareScenario:
 
     def write_evaluator_verdict(self, outcome: str, context_identity: str, standards_outcome: str, spec_outcome: str, behavior_outcome: str, safety_outcome: str, blocking_findings: str) -> Path:
         state = self.state()
-        round_path = self.case_root / f".review-loop/rounds/round-{state.round:02d}"
+        round_path = self.case_root / f".project-review/rounds/round-{state.round:02d}"
         records = [
             f"# Evaluator Verdict - Round {state.round:02d}",
             f"Context identity: {context_identity}",
@@ -238,8 +238,8 @@ class SoftwareScenario:
             return
         if passed:
             finding_ids = self.confirmed_finding_ids()
-            round_path = self.case_root / f".review-loop/rounds/round-{state.round:02d}"
-            finding_path = self.case_root / ".review-loop" / "findings.md"
+            round_path = self.case_root / f".project-review/rounds/round-{state.round:02d}"
+            finding_path = self.case_root / ".project-review" / "findings.md"
             for finding_id in finding_ids:
                 repair_name = f"repair-evidence-{finding_id}.md"
                 if not (round_path / repair_name).is_file():
@@ -257,11 +257,11 @@ class SoftwareScenario:
                 "Criterion AC-3 (behavioral correctness): PASS", "Criterion AC-4 (operational safety): PASS",
             )):
                 raise ValueError("Evaluator verdict must record criterion-by-criterion software judgments before Core PASS")
-            verdict = self.case_root / ".review-loop" / "verdict.md"
+            verdict = self.case_root / ".project-review" / "verdict.md"
             verdict.write_text("\n".join([
                 "# Review Loop Verdict",
                 "Verdict: PASS",
-                "Issued by: review-loop Core",
+                "Issued by: project-review Core",
                 "Evaluator: fresh independent read-only context",
                 "Specialist input: code-review Standards + Spec findings",
             ]) + "\n", encoding="utf-8")
@@ -306,9 +306,9 @@ class SoftwareProfileBehaviorTest(unittest.TestCase):
             c.check(scenario.state().status == "CRITIC", "code-review specialist PASS does not set final state")
             scenario.ingest_code_review_findings(standards_disposition="confirmed", spec_disposition="confirmed", standards_finding_id="F-001", spec_finding_id="F-002")
             c.check(scenario.state().status == "REPAIR", "code-review findings enter generic REPAIR lifecycle")
-            registry = (case_root / ".review-loop/findings.md").read_text(encoding="utf-8")
-            standards_report = (case_root / ".review-loop/rounds/round-01/code-review-standards.md").read_text(encoding="utf-8")
-            spec_report = (case_root / ".review-loop/rounds/round-01/code-review-spec.md").read_text(encoding="utf-8")
+            registry = (case_root / ".project-review/findings.md").read_text(encoding="utf-8")
+            standards_report = (case_root / ".project-review/rounds/round-01/code-review-standards.md").read_text(encoding="utf-8")
+            spec_report = (case_root / ".project-review/rounds/round-01/code-review-spec.md").read_text(encoding="utf-8")
             c.check(
                 "Axis: Standards" in standards_report and "Source finding reference: CR-STD-001" in standards_report
                 and "Stable candidate ID: F-001" in standards_report and "Severity: High" in standards_report
@@ -324,10 +324,10 @@ class SoftwareProfileBehaviorTest(unittest.TestCase):
             )
             scenario.apply_repair(True)
             scenario.evaluate(c, passed=True, independent_context=True, repair_available=True)
-            evaluator_verdict = (case_root / ".review-loop/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
-            verdict = (case_root / ".review-loop/verdict.md").read_text(encoding="utf-8")
+            evaluator_verdict = (case_root / ".project-review/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
+            verdict = (case_root / ".project-review/verdict.md").read_text(encoding="utf-8")
             assert_evaluator_record(c, evaluator_verdict, overall_outcome="PASS", standards_outcome="PASS", spec_outcome="PASS", behavior_outcome="PASS", safety_outcome="PASS", name="fresh Evaluator records every criterion with linked evidence, labels, and PASS outcome")
-            c.check(scenario.state().status == "PASS" and "Issued by: review-loop Core" in verdict and "Issued by: code-review" not in verdict, "Core owns final PASS verdict")
+            c.check(scenario.state().status == "PASS" and "Issued by: project-review Core" in verdict and "Issued by: code-review" not in verdict, "Core owns final PASS verdict")
 
             case_root = new_review_case(root, "bounded-repair", "software")
             scenario = SoftwareScenario(case_root)
@@ -348,11 +348,11 @@ class SoftwareProfileBehaviorTest(unittest.TestCase):
             scenario.ingest_code_review_findings(standards_disposition="confirmed", spec_disposition="confirmed", standards_finding_id="F-001", spec_finding_id="F-002")
             scenario.apply_repair(True)
             scenario.evaluate(c, passed=True, independent_context=True, repair_available=True)
-            registry = (case_root / ".review-loop/findings.md").read_text(encoding="utf-8")
-            repair_evidence_standards = (case_root / ".review-loop/rounds/round-02/repair-evidence-F-001.md").read_text(encoding="utf-8")
-            repair_evidence_spec = (case_root / ".review-loop/rounds/round-02/repair-evidence-F-002.md").read_text(encoding="utf-8")
-            evaluator_verdict = (case_root / ".review-loop/rounds/round-02/evaluator-verdict.md").read_text(encoding="utf-8")
-            first_round_evaluator = (case_root / ".review-loop/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
+            registry = (case_root / ".project-review/findings.md").read_text(encoding="utf-8")
+            repair_evidence_standards = (case_root / ".project-review/rounds/round-02/repair-evidence-F-001.md").read_text(encoding="utf-8")
+            repair_evidence_spec = (case_root / ".project-review/rounds/round-02/repair-evidence-F-002.md").read_text(encoding="utf-8")
+            evaluator_verdict = (case_root / ".project-review/rounds/round-02/evaluator-verdict.md").read_text(encoding="utf-8")
+            first_round_evaluator = (case_root / ".project-review/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
             assert_evaluator_record(c, first_round_evaluator, overall_outcome="FAIL", standards_outcome="FAIL", spec_outcome="FAIL", behavior_outcome="PASS", safety_outcome="PASS", name="failed Evaluator record includes every criterion with linked evidence, labels, and FAIL outcome")
             c.check(
                 scenario.state().status == "PASS"
@@ -376,7 +376,7 @@ class SoftwareProfileBehaviorTest(unittest.TestCase):
             scenario.write_code_review_report(disposition="confirmed", standards_finding_id="F-003", spec_finding_id="F-004", specialist_verdict="FAIL")
             scenario.ingest_code_review_findings(standards_disposition="confirmed", spec_disposition="confirmed", standards_finding_id="F-003", spec_finding_id="F-004")
             scenario.apply_repair(False)
-            c.check(scenario.state().status == "FAIL" and "scope-changing" in scenario.state().next and not (case_root / ".review-loop/rounds/round-01/repair-evidence.md").is_file(), "scope-changing repair is rejected without Producer edit")
+            c.check(scenario.state().status == "FAIL" and "scope-changing" in scenario.state().next and not (case_root / ".project-review/rounds/round-01/repair-evidence.md").is_file(), "scope-changing repair is rejected without Producer edit")
 
             case_root = new_review_case(root, "independence-block", "software")
             scenario = SoftwareScenario(case_root)
@@ -386,7 +386,7 @@ class SoftwareProfileBehaviorTest(unittest.TestCase):
             scenario.write_code_review_report(disposition="rejected", standards_finding_id="F-005", spec_finding_id="F-006", specialist_verdict="PASS")
             scenario.ingest_code_review_findings(standards_disposition="rejected", spec_disposition="rejected", standards_finding_id="F-005", spec_finding_id="F-006")
             scenario.evaluate(c, passed=True, independent_context=False, repair_available=False)
-            blocked_evaluator = (case_root / ".review-loop/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
+            blocked_evaluator = (case_root / ".project-review/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
             c.check(scenario.state().status == "BLOCKED" and "independent Evaluator" in scenario.state().next, "missing independent context blocks specialist conclusion")
             assert_evaluator_record(c, blocked_evaluator, overall_outcome="BLOCKED", standards_outcome="BLOCKED", spec_outcome="BLOCKED", behavior_outcome="BLOCKED", safety_outcome="BLOCKED", name="independence BLOCKED Evaluator record includes every criterion with linked evidence, labels, and BLOCKED outcome")
 
@@ -397,7 +397,7 @@ class SoftwareProfileBehaviorTest(unittest.TestCase):
             scenario.start_round()
             scenario.write_code_review_report(disposition="confirmed", standards_finding_id="F-009", spec_finding_id="F-010", standards_severity="Critical", spec_severity="Low", specialist_verdict="FAIL")
             scenario.ingest_code_review_findings(standards_disposition="confirmed", spec_disposition="confirmed", standards_finding_id="F-009", spec_finding_id="F-010", standards_severity="Critical", spec_severity="Low")
-            initial_registry = (case_root / ".review-loop/findings.md").read_text(encoding="utf-8")
+            initial_registry = (case_root / ".project-review/findings.md").read_text(encoding="utf-8")
             c.check("Finding F-009" in initial_registry and "Severity: Critical" in initial_registry and "Finding F-010" in initial_registry and "Severity: Low" in initial_registry, "specialist Critical and Low severities enter registry exactly")
             scenario.apply_repair(True)
             scenario.evaluate(c, passed=False, independent_context=True, repair_available=True)
@@ -406,14 +406,14 @@ class SoftwareProfileBehaviorTest(unittest.TestCase):
             scenario.ingest_code_review_findings(standards_disposition="rejected", spec_disposition="rejected", standards_finding_id="F-009", spec_finding_id="F-010", standards_severity="Critical", spec_severity="Low")
             c.check(len(scenario.confirmed_finding_ids()) == 0, "rejected recheck removes IDs from confirmed repair set")
             scenario.evaluate(c, passed=True, independent_context=True, repair_available=False)
-            recheck_registry = (case_root / ".review-loop/findings.md").read_text(encoding="utf-8")
-            recheck_evaluator = (case_root / ".review-loop/rounds/round-02/evaluator-verdict.md").read_text(encoding="utf-8")
+            recheck_registry = (case_root / ".project-review/findings.md").read_text(encoding="utf-8")
+            recheck_evaluator = (case_root / ".project-review/rounds/round-02/evaluator-verdict.md").read_text(encoding="utf-8")
             c.check(
                 scenario.state().status == "PASS" and "Re-observed F-009" in recheck_registry and "Re-observed F-010" in recheck_registry
                 and "Disposition: rejected" in recheck_registry
                 and recheck_registry.count("Severity: Critical") == 2 and recheck_registry.count("Severity: Low") == 2
-                and not (case_root / ".review-loop/rounds/round-02/repair-evidence-F-009.md").is_file()
-                and not (case_root / ".review-loop/rounds/round-02/repair-evidence-F-010.md").is_file(),
+                and not (case_root / ".project-review/rounds/round-02/repair-evidence-F-009.md").is_file()
+                and not (case_root / ".project-review/rounds/round-02/repair-evidence-F-010.md").is_file(),
                 "rejected recheck reaches PASS without stale repair evidence",
             )
             assert_evaluator_record(c, recheck_evaluator, overall_outcome="PASS", standards_outcome="PASS", spec_outcome="PASS", behavior_outcome="PASS", safety_outcome="PASS", name="rejected recheck PASS Evaluator record includes every criterion with linked evidence, labels, and PASS outcome")
@@ -427,7 +427,7 @@ class SoftwareProfileBehaviorTest(unittest.TestCase):
             scenario.ingest_code_review_findings(standards_disposition="confirmed", spec_disposition="confirmed", standards_finding_id="F-007", spec_finding_id="F-008")
             scenario.apply_repair(True)
             scenario.evaluate(c, passed=False, independent_context=True, repair_available=True, maximum_round=1)
-            limit_evaluator = (case_root / ".review-loop/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
+            limit_evaluator = (case_root / ".project-review/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
             c.check(scenario.state().status == "BLOCKED", "maximum-round stop returns BLOCKED")
             assert_evaluator_record(c, limit_evaluator, overall_outcome="BLOCKED", standards_outcome="BLOCKED", spec_outcome="BLOCKED", behavior_outcome="BLOCKED", safety_outcome="BLOCKED", name="maximum-round BLOCKED Evaluator record includes every criterion with linked evidence, labels, and BLOCKED outcome")
 

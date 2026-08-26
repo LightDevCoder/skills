@@ -29,7 +29,7 @@ npx skills add LightDevCoder/skills --skill ask-light --yes --copy --agent '*'
 ```text
 $ask-light next
 $project-init
-$review-loop init using brief.md
+$project-review init using brief.md
 ```
 
 只选择与当前状态匹配的命令。预期结果是可检查的建议、最小初始化报告或 review Charter/state。以下是 Illustrative output（示意输出），不代表本仓库已经运行：
@@ -41,4 +41,4 @@ Execution: recommendation only; nothing was invoked, installed, or orchestrated
 
 ## 4. 停止并 handoff
 
-`$ask-light` 后停止并等待用户选择；`$project-init` 后在 discovery/specification/implementation/final review 前停止；`$review-loop` 后在持久化的 `PASS`、`FAIL` 或 `BLOCKED` verdict 停止。每个 handoff 后都要停止并保留状态。更长的组合见[工作流 recipes](../../docs/zh-CN/workflows/recipes.md)，真实 release 验证见[安装证据](../../docs/evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.zh-CN.md)。
+`$ask-light` 后停止并等待用户选择；`$project-init` 后在 discovery/specification/implementation/final review 前停止；`$project-review` 后在持久化的 `PASS`、`FAIL` 或 `BLOCKED` verdict 停止。每个 handoff 后都要停止并保留状态。更长的组合见[工作流 recipes](../../docs/zh-CN/workflows/recipes.md)，真实 release 验证见[安装证据](../../docs/evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.zh-CN.md)。

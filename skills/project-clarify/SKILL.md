@@ -55,13 +55,17 @@ whether local inspection was sufficient.
   authorized the fact work in the current request.
 - Use `prototype` only for a bounded disposable experiment that distinguishes
   alternatives with a safe non-production boundary.
+- Use `to-questionnaire` when the information needed to unblock a decision is
+  held by another person. Because it is a user-invoked Skill, do not auto-run
+  it; record it in the ledger and, when appropriate, recommend it in the
+  handoff.
 
-For each attempted call, append a ledger entry defined in the contract
-(`Capability call: socratic | research | prototype`, `Blocked decision`,
-`Call status`, `Result read`, etc.). Never mark `result-read` without a
-result path actually read. If the capability is `unavailable` or
-`not-authorized`, retain the gap and keep its downstream decision out of the
-frontier.
+For each attempted or recommended call, append a ledger entry defined in the
+contract (`Capability call: socratic | research | prototype | to-questionnaire`,
+`Blocked decision`, `Call status`, `Result read`, etc.). Never mark
+`result-read` without a result path actually read. If the capability is
+`unavailable` or `not-authorized`, retain the gap and keep its downstream
+decision out of the frontier.
 
 ### 4 — Return the handoff and stop
 

@@ -27,8 +27,8 @@ explicitly (`$code-review`) or as a model-invoked reviewer inside
   `review-loop` (on behalf of `project-review` or another caller) invokes
   this Skill with a frozen fixed point and approved Spec. `project-review`
   uses the `software` Profile; `review-loop` is the convergence engine.
-  The tracker pointer is per
-  [docs/agents/issue-tracker.md](../../docs/agents/issue-tracker.md).
+  Locate the originating issue/Spec through the active repository's tracker
+  convention or the path the user supplied.
 - The diff exists (`git diff <fixed-point>...HEAD` is non-empty). Do not use
   it to invent a target, hunt generic bugs outside the diff, or perform a
   whole-repo redesign.
@@ -67,8 +67,7 @@ project-review → review-loop → code-review → findings → Core validation 
 `code-review` supplies `review` evidence and candidate findings; `project-review`
 Core validates dispositions (`confirmed` / `rejected` / `duplicate` /
 `out-of-scope`), directs only bounded Producer repairs via `review-loop`, and
-owns the final `PASS` / `FAIL` / `BLOCKED` (see
-[software.md](../project-review/references/profiles/software.md) Profile).
+owns the final `PASS` / `FAIL` / `BLOCKED` under the `software` Profile.
 `review-loop` itself drives only the lightweight
 `resolve → invoke → receive → return repair → re-run` loop and stops at
 `Findings: []` or bounded limit without issuing a project verdict.

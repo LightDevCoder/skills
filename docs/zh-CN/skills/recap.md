@@ -24,7 +24,7 @@ $recap
 - **边界：** session 几乎没有上下文时，用一行说明没有可总结的先前活动，不虚构进度。
 - **失败：** 多行、带标签、项目符号、调用工具或改变状态的输出都违反契约，不能作为有效 recap。
 
-`recap` 不会调用另一个 user-invoked Skill。持久化续接记录需要用户另行选择 `handoff`；最终验收仍由 `review-loop` 拥有。缺少 session context 只产生一行边界结果，不能被静默改写成 `review-loop` 的 `BLOCKED` verdict。
+`recap` 不会调用另一个 user-invoked Skill。持久化续接记录需要用户另行选择 `handoff`；最终验收仍由 `project-review` 拥有。缺少 session context 只产生一行边界结果，不能被静默改写成 `project-review` 的 `BLOCKED` verdict。
 
 ## 验证与发布状态
 

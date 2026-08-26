@@ -337,7 +337,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
             c.check(zh.split("/")[-1] in en_path.read_text(encoding="utf-8", errors="replace"), f"{en} does not link its Chinese counterpart.")
             c.check(en.split("/")[-1] in zh_path.read_text(encoding="utf-8", errors="replace"), f"{zh} does not link its English counterpart.")
 
-    guide_parity = ["SKILL.md", "BLOCKED", "review-loop", "user-invoked"]
+    guide_parity = ["SKILL.md", "BLOCKED", "project-review", "user-invoked"]
     for name in ("ask-light", "kanban-worker", "kb-init", "language-learning", "learn-anything", "manuscript-ops", "project-init", "recap", "review-loop"):
         en_path = root / f"docs/skills/{name}.md"
         zh_path = root / f"docs/zh-CN/skills/{name}.md"
@@ -372,7 +372,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 
     c.check("Drive your creativity" in readme, "README About description is missing.")
 
-    workflow_text = read(root, "skills/ask-light/SKILL.md")
+    workflow_text = read(root, "skills/ask-light/SKILL.md") + read(root, "skills/ask-light/references/discovery-contract.md")
     workflow_script = read(root, "skills/ask-light/scripts/ask-light.ps1")
     c.check("$ask-light next" in workflow_text and "$ask-light workflow" in workflow_text, "ask-light must document both explicit modes.")
     c.check("entryCondition" in workflow_text and "missing dependency" in workflow_text and "finalAuthority" in workflow_text, "ask-light workflow output contract is incomplete.")

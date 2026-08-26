@@ -28,14 +28,15 @@ axis (missing Spec yields “no spec available”), adds the explicit guard
 `Do not invoke /code-review or spawn additional agents — perform this review
 directly` to each sub-agent brief to prevent the known fan-out bug, and
 records that the specialist never self-repairs, never runs the repair loop,
-and never decides the final `PASS` / `FAIL` / `BLOCKED` — `review-loop` Core
+and never decides the final `PASS` / `FAIL` / `BLOCKED` — `project-review` Core
 owns the diagnosis, disposition, bounded repair gate, and final verdict per
-its `software` Profile. Detailed prompts, the smell catalogue, and examples are
-kept in `references/` rather than in `SKILL.md`.
+its `software` Profile; `review-loop` is the convergence engine. Detailed
+prompts, the smell catalogue, and examples are kept in `references/` rather
+than in `SKILL.md`.
 
 ADAPT per SPEC §15: retained the upstream two-axis parallel review and
-per-axis aggregation, but mapped the reviewer to Light's `.scratch` tracker
-and `review-loop` (software Profile) lifecycle, added the fan-out guard,
+per-axis aggregation, but mapped the reviewer to Light's first-party tracker
+and `project-review` / `review-loop` lifecycle, added the fan-out guard,
 and separated the concise entry from the detailed workflow in `references/`.
 
 ## MIT notice

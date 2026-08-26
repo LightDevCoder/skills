@@ -1,6 +1,6 @@
 # Acceptance Charter
 
-Use this template for `.review-loop/charter.md`. The Charter freezes what the
+Use this template for `.project-review/charter.md`. The Charter freezes what the
 current review may accept. Keep the source identity and criteria here; do not
 copy them into state, round, or verdict records.
 
@@ -58,7 +58,7 @@ do not review it until confirmation is recorded.
 ## Immutability and change proposals
 
 Never edit an approved Charter to make the current artifact pass. Preserve the
-old revision and append a Change Proposal to `.review-loop/changes.md` when a
+old revision and append a Change Proposal to `.project-review/changes.md` when a
 material change is requested:
 
 ```markdown

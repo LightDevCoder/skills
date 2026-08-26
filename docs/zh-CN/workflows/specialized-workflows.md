@@ -34,9 +34,9 @@ When this workflow reaches <state>, the caller may continue with <skill>.
 
 | Skill | 典型独立入口 | 自然 handoff（可选） | 停止点 |
 | --- | --- | --- | --- |
-| [`manuscript-ops`](../../../skills/manuscript-ops/SKILL.md) | 文稿范围/风险/批次/格式 | 可经用户选择调 `grill-me`/`wayfinder`；已批准 brief/Charter 可交 `project-review`（`manuscript` Profile） | 止于路由决策、Charter 冻结或已 QA 交付 |
+| [`manuscript-ops`](../../../skills/manuscript-ops/SKILL.md) | 文稿范围/风险/批次/格式 | 可经用户选择调 `clarify`/`decision-map`；已批准 brief/Charter 可交 `project-review`（`manuscript` Profile） | 止于路由决策、Charter 冻结或已 QA 交付 |
 | [`kb-init`](../../../skills/kb-init/SKILL.md) | `$kb-init` | 访谈 → 已批 SPEC → 实施；事实不足时可调 `research` | 止于设计或已初始化知识库 |
-| [`learn-anything`](../../../skills/learn-anything/SKILL.md) | 含可复用方法的来源 | 内部 Method Contract → 确定性 builder → `review-loop agent-skill` → 目录/文档同步 | 止于 `method_contract` / `not_promoted` / `BLOCKED` |
+| [`learn-anything`](../../../skills/learn-anything/SKILL.md) | 含可复用方法的来源 | 内部 Method Contract → 确定性 builder → `project-review`（经 `review-loop`）→ 目录/文档同步 | 止于 `method_contract` / `not_promoted` / `BLOCKED` |
 | [`language-learning`](../../../skills/language-learning/SKILL.md) | 语言学习请求 | 六模式各自返回产物 | 止于课程/测验结果 |
 | [`kanban-worker`](../../../skills/kanban-worker/SKILL.md) | 定时唤醒 | `complete` 或 `block` 带原因；下一次唤醒先处理 `reviewFeedback` | 一张任务后停止 |
 | [`recap`](../../../skills/recap/SKILL.md) | `$recap` | 严格一行总结，不继续工作 | 停止 |

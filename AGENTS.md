@@ -1,6 +1,6 @@
 # First-Party Skills Repository Maintenance Contract
 
-> Local workspace tracker: `.scratch/light-skills-refactor/` — see `docs/agents/issue-tracker.md`. This note is local-only and does not alter the maintenance contract below.
+> Local workspace tracker: `.scratch/light-skills-lean-refactor/` — see `docs/agents/issue-tracker.md`. This note is local-only and does not alter the maintenance contract below.
 
 This file routes maintenance work in this repository. Detailed requirements live in the linked governance documents; do not duplicate their rules into individual Skill packages or project instructions.
 

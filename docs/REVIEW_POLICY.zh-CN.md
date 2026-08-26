@@ -16,15 +16,15 @@
 
 ## Review triggers
 
-以下情况适用：新 Skill 准入；改变行为/trigger/invocation/边界/依赖/资源/attribution；改变 runtime executable script/shared test infrastructure/installer；影响 discovery/installation/migration 的 rename/deprecate/remove；以及包含上述变更的 release candidate。仅文档治理改动也要做链接与 cross-reference 检查，但不能替代未来的 `project-review` 或 `review-loop agent-skill` acceptance。
+以下情况适用：新 Skill 准入；改变行为/trigger/invocation/边界/依赖/资源/attribution；改变 runtime executable script/shared test infrastructure/installer；影响 discovery/installation/migration 的 rename/deprecate/remove；以及包含上述变更的 release candidate。仅文档治理改动也要做链接与 cross-reference 检查，但不能替代未来的 `project-review`（经 `review-loop`）acceptance。
 
 ## Profile 与审查
 
 | 变更 | 必需 final acceptance | specialist evidence |
 | --- | --- | --- |
 | 符合条件的低风险纯提示型 Skill | 快速通道单 fresh Evaluator | structure/metadata、隔离 copy/discovery、deterministic 正负 contract tests、显式调用/non-trigger、同步 docs；无 Critic 或 `code-review`。 |
-| 新增或实质改变第一方 Skill | `project-review` 或 `review-loop` 的 `agent-skill` Profile | structural、fresh-install、behavioral、invocation、attribution。 |
-| 包含 executable script | `project-review`/`review-loop` + `agent-skill` | focused/negative/adversarial tests 与 `code-review` findings。 |
+| 新增或实质改变第一方 Skill | `project-review`（`agent-skill` Profile，经 `review-loop`） | structural、fresh-install、behavioral、invocation、attribution。 |
+| 包含 executable script | `project-review`（经 `review-loop` + `code-review`） | focused/negative/adversarial tests 与 `code-review` findings。 |
 | Skill 内的软件 artifact | `project-review` 拥有 verdict，`review-loop` 为引擎 | `code-review` 提供 Standards/Spec findings。 |
 | 文稿/specification artifact | `project-review` 选 `manuscript`/`specification` Profile | artifact-specific 证据与 specialist findings。 |
 | Release candidate | 包级验收 + Program 级验收 | verified release installation 与文档同步证据。 |
@@ -37,9 +37,9 @@ Producer Evidence 须写明精确命令、环境、输入输出、revision、范
 
 ## Repair、verdict 与边界
 
-`review-loop` 仅对已确认、范围内、可在 repair 上限内收敛的 finding 要求 Producer 做有界修复；需改需求、改架构、多张新 ticket、缺 authority/environment/evidence 或 independent review 不可用时，以 `FAIL`/`BLOCKED` 停止。
+`project-review` 仅对已确认、范围内、可在 repair 上限内收敛的 finding 要求 Producer 做有界修复；需改需求、改架构、多张新 ticket、缺 authority/environment/evidence 或 independent review 不可用时，以 `FAIL`/`BLOCKED` 停止。
 
-最终 verdict 由 **`project-review`**（项目/发布）或指定的包 acceptance owner（无独立项目验收时为带 `agent-skill` Profile 的 `review-loop`）签发，绝不由 reviewer 签发：
+最终 verdict 由 **`project-review`** 签发，绝不由 reviewer 或 `review-loop` 签发：
 
 - **PASS：** 全部冻结条件与证据满足。
 - **FAIL：** 范围内条件在 repair 窗口内未满足。

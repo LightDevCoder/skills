@@ -32,7 +32,7 @@ builder 会报告 `created`、`updated`、`no-op`、`duplicate` 或 `blocked`。
 
 ## 组合和停止点
 
-`writing-great-skills` 只能在 Method Contract 后提供可选 authoring knowledge，不是 `learn-anything` 的隐式 runtime dependency。deterministic package build 后交给 `review-loop` 的 `agent-skill` Profile，再走 admission。到 Method Contract、builder 结果或精确 `BLOCKED` 缺口时停止；不要隐式调用其他 user-invoked Skill。
+`writing-for-agents` 只能在 Method Contract 后提供可选 authoring knowledge，不是 `learn-anything` 的隐式 runtime dependency。deterministic package build 后交给 `project-review`（经 `review-loop`）的 `agent-skill` Profile，再走 admission。到 Method Contract、builder 结果或精确 `BLOCKED` 缺口时停止；不要隐式调用其他 user-invoked Skill。
 
 ## 安装与发现验证
 

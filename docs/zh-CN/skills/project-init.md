@@ -20,7 +20,7 @@ $project-init
 
 ## 前置条件、输入和输出
 
-默认目标是当前目录。写入前读取根部 `AGENTS.md`/`CLAUDE.md`、README、manifest、项目文档和当前状态。输入包括项目类型、用户目标、输出物、协作方式、约束和 review level；已有 brief 能回答时不重复询问。需要澄清问题时使用外部的用户入口 `grill-me`；它启动底层 model-invoked 能力 `grilling`。这不能授权额外写入。
+默认目标是当前目录。写入前读取根部 `AGENTS.md`/`CLAUDE.md`、README、manifest、项目文档和当前状态。输入包括项目类型、用户目标、输出物、协作方式、约束和 review level；已有 brief 能回答时不重复询问。它直接问少量短问题，不调用独立澄清 Skill；深度 discovery 属于 `$clarify`/`$project-clarify`/`$decision-map`。
 
 输出包括 preset 或已确认的 fallback、唯一 instruction target、变更路径、能力可用性、验证结果和后续 Skill 建议；不得创建 tickets、implementation plan、final-review record 或竞争性的 specification。
 
@@ -30,7 +30,7 @@ $project-init
 
 ## 组合和停止点
 
-`ask-light` 可以推荐它。初始化后，用户可以显式选择 `to-spec`、`manuscript-ops` 或 `review-loop`；本 Skill 不调用它们。初始化是停止点，不等于 discovery、specification、implementation 或 final review。
+`ask-light` 可以推荐它。初始化后，用户可以显式选择 `project-spec`、`manuscript-ops` 或 `project-review`；本 Skill 不调用它们。初始化是停止点，不等于 discovery、specification、implementation 或 final review。
 
 ## 安装与发现验证
 

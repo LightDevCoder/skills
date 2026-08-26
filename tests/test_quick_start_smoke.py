@@ -27,7 +27,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         and "npx skills add LightDevCoder/skills --skill ask-light" in en
         and "$ask-light next" in en
         and "$project-init" in en
-        and "$review-loop" in en,
+        and "$project-review" in en,
         "English Quick Start is missing a required command.",
     )
     c.check(

@@ -30,26 +30,28 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 
     c.check(bool(re.search(r"(?ms)^---\s*\r?\nname: ask-light\s*\r?\ndescription: .+?\r?\n---", skill)), "frontmatter has name and description only")
     c.check(bool(re.search(r"allow_implicit_invocation:\s*false", metadata)), "Skill is explicit-only")
-    for category in ("project", "global", "first-party", "upstream", "modified-third-party", "other"):
-        c.check(category in (skill + reference), f"source category supported: {category}")
+    c.check("first-party" in (skill + reference), "source category first-party supported")
+    for old_category in ("upstream", "modified-third-party"):
+        c.check(old_category not in (skill + reference), f"non-first-party source category removed: {old_category}")
     for field in ("goal", "artifacts", "blockers", "projectType", "taskKind", "availability", "invocationControl"):
         c.check(field in (reference + skill), f"context field supported: {field}")
     for marker in (
-        "metadata first", "frontmatter", "agents/openai.yaml", "shortlist", "duplicate", "unreadable",
+        "metadata[- ]first", "frontmatter", "agents/openai.yaml", "shortlist", "duplicate", "unreadable",
         "Alternative", "NEED-INPUT", "BLOCKED", "installation", "never execute", "never.*install",
         "body/reference", "availability", "hosts", "readStatus", "metadataStatus: unavailable",
         "metadataReadable", "materially different next actions", "equivalent", "next", "workflow",
         "entryCondition", "expectedInput", "expectedOutput", "stopCondition", "missingDependency",
         "finalAuthority", "nothing was invoked, installed, or orchestrated",
     ):
-        c.check(bool(re.search(marker, skill + reference)), f"contract marker: {marker}")
+        c.check(bool(re.search(marker, skill + reference, flags=re.IGNORECASE)), f"contract marker: {marker}")
     c.check(not re.search(r"TODO|\[TODO", skill), "no template placeholders remain")
     c.check(not re.search(r"(?i)Start-Process|Invoke-Expression|Invoke-RestMethod|Install-Module", script), "scanner has no execution or installation primitive")
     c.check(bool(re.search(r"Get-Content -Raw.*SKILL\.md", script)) and "ShortlistLimit" in script, "scanner reads bodies after shortlist only")
     c.check("ConvertTo-Json" in script, "scanner returns a structured result")
     c.check("Test-CandidateAvailability" in script and "Get-ActionFingerprint" in script and "readableShortlist" in script, "scanner filters availability, distinguishes actions, and rejects unreadable reads")
     c.check(bool(re.search(r"ValidateSet\('next', 'workflow'\)", script)) and "Get-WorkflowRecipes" in script and "Get-WorkflowRecommendation" in script, "scanner exposes explicit next and workflow modes with recipe output")
-    c.check("private skills-3rdParty dependency is not visible" in script, "workflow reports private third-party availability gaps")
+    c.check("missingDependency" in skill + reference, "workflow exposes missing dependency gaps")
+    c.check("project-review" in skill and "finalAuthority" in reference + skill, "final authority belongs to project-review")
 
     return c.assertions, c.failures
 

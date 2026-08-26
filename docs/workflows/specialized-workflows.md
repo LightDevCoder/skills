@@ -40,9 +40,9 @@ Adding a handoff line is not a redesign.
 
 | Skill | Typical standalone entry | Natural handoff (optional) | Stop |
 | --- | --- | --- | --- |
-| [`manuscript-ops`](../../skills/manuscript-ops/SKILL.md) | manuscript scope/risk/batches/formats | May call `grill-me`/`wayfinder` via user choice; may hand its approved brief/Charter to `project-review` (`manuscript` Profile) | stop at routing decision, Charter freeze, or QA'd deliverable |
+| [`manuscript-ops`](../../skills/manuscript-ops/SKILL.md) | manuscript scope/risk/batches/formats | May call `clarify`/`decision-map` via user choice; may hand its approved brief/Charter to `project-review` (`manuscript` Profile) | stop at routing decision, Charter freeze, or QA'd deliverable |
 | [`kb-init`](../../skills/kb-init/SKILL.md) | ` $kb-init` | Interview → approved SPEC → implementation; may call `research` for external facts | stop at design or initialized KB |
-| [`learn-anything`](../../skills/learn-anything/SKILL.md) | source with possible repeated method | Internal Method Contract → deterministic package builder → `review-loop agent-skill` → catalog/doc sync | stop at `method_contract` / `not_promoted` / `BLOCKED` |
+| [`learn-anything`](../../skills/learn-anything/SKILL.md) | source with possible repeated method | Internal Method Contract → deterministic package builder → `project-review` (via `review-loop`) → catalog/doc sync | stop at `method_contract` / `not_promoted` / `BLOCKED` |
 | [`language-learning`](../../skills/language-learning/SKILL.md) | language-learning request | Lessons/flashcards/conversation/grammar/quiz/translation each return their artifact | stop at lesson or quiz result |
 | [`kanban-worker`](../../skills/kanban-worker/SKILL.md) | scheduled wake | `complete` or `block` with reason; next wake picks `reviewFeedback` before new claims | stop after one task |
 | [`recap`](../../skills/recap/SKILL.md) | `$recap` | exactly one line of session summary; never continues work | stop |

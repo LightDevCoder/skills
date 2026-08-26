@@ -31,11 +31,11 @@
 
 ## 4. 从资料提炼 Skill
 
-`learn-anything`（user-invoked）输出内部 Method Contract/`not_promoted`/精确 `BLOCKED`；随后 deterministic builder 输出 `created`/`updated`/`no-op`/`duplicate`/`blocked`。`writing-for-agents` 仅作 authoring knowledge，非 runtime 依赖。完整包交 `project-review`/`review-loop agent-skill` 至 verdict 后再进入 admission 与 collection sync。
+`learn-anything`（user-invoked）输出内部 Method Contract/`not_promoted`/精确 `BLOCKED`；随后 deterministic builder 输出 `created`/`updated`/`no-op`/`duplicate`/`blocked`。`writing-for-agents` 仅作 authoring knowledge，非 runtime 依赖。完整包交 `project-review`（经 `review-loop`）至 verdict 后再进入 admission 与 collection sync。
 
 ## 5. Skill 维护与发布
 
-顺序为 ownership/reuse gate → 有界实现 → 包测试与负向/mutation fixtures → 脚本变更时的 `code-review` → `project-review`/`review-loop` verdict → collection sync、双语、fresh 安装、discovery、release/tag/closeout。ownership 模糊、测试失败、独立审查缺失、安装未验证或双语未同步均 `BLOCKED`。结构检查非 runtime proof。
+顺序为 ownership/reuse gate → 有界实现 → 包测试与负向/mutation fixtures → 脚本变更时的 `code-review` → `project-review` verdict → collection sync、双语、fresh 安装、discovery、release/tag/closeout。ownership 模糊、测试失败、独立审查缺失、安装未验证或双语未同步均 `BLOCKED`。结构检查非 runtime proof。
 
 ## 6. Bug 与 final review
 

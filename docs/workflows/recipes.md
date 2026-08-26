@@ -67,14 +67,14 @@ Each row declares the handoff artifact and stop condition. `user-invoked` means 
 | 1 | `learn-anything` | user-invoked | source + provenance → internal Method Contract or precise gaps | Stop at `method_contract`, `not_promoted`, or `BLOCKED`. |
 | 2 | deterministic package builder | explicit build step after contract | Method Contract → created/updated/no-op/duplicate/blocked | Stop on exact builder state; do not hide duplicate ownership. |
 | 3 | `writing-for-agents` | optional model-invoked knowledge | approved contract → authoring notes | Knowledge only; never a runtime dependency. |
-| 4 | `project-review` or `review-loop` `agent-skill` Profile | model-invoked | complete package + admission source → acceptance verdict | Stop at verdict before admission. |
+| 4 | `project-review` (via `review-loop`) | model-invoked | complete package + admission source → acceptance verdict | Stop at verdict before admission. |
 | 5 | Admission and collection sync | explicit maintainer action | accepted package → catalog, tests, release evidence | Stop after fresh install and release gate. |
 
-**Blocked conditions:** missing method fields, unresolved placeholders, contradictory invocation evidence, unowned duplicate package, missing resource, or unavailable reviewer. **Final authority:** `project-review`/`review-loop` for package acceptance; admission governance for collection entry.
+**Blocked conditions:** missing method fields, unresolved placeholders, contradictory invocation evidence, unowned duplicate package, missing resource, or unavailable reviewer. **Final authority:** `project-review` for package acceptance; admission governance for collection entry.
 
 ## 5. Skill maintenance and release
 
-See [docs/MAINTENANCE.md](../../docs/MAINTENANCE.md) and [docs/REVIEW_POLICY.md](../../docs/REVIEW_POLICY.md): ownership/reuse gate → bounded implementation → tests + adversarial fixtures → `code-review` when scripts changed → `project-review`/`review-loop` verdict → collection sync → fresh install/discovery → release/tag/closeout.
+See [docs/MAINTENANCE.md](../../docs/MAINTENANCE.md) and [docs/REVIEW_POLICY.md](../../docs/REVIEW_POLICY.md): ownership/reuse gate → bounded implementation → tests + adversarial fixtures → `code-review` when scripts changed → `project-review` verdict → collection sync → fresh install/discovery → release/tag/closeout.
 
 ## 6. Bug diagnosis and final review
 

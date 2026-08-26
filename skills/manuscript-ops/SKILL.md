@@ -1,12 +1,12 @@
 ---
 name: manuscript-ops
-description: Route and govern manuscript engineering from small notes and structured reports to large manuals, books, multilingual editions, and reproducible multi-format deliverables. Use when an agent must assess document scope and risk, create or resume a writing project, manage sources and semantic batches, coordinate explicit grill-me, wayfinder, project-init, or review-loop handoffs, freeze or lock drafts, or generate and QA TXT, Markdown, DOCX, PDF, HTML, EPUB, PPTX, and related formats.
+description: Route and govern manuscript engineering from small notes and structured reports to large manuals, books, multilingual editions, and reproducible multi-format deliverables. Use when an agent must assess document scope and risk, create or resume a writing project, manage sources and semantic batches, coordinate explicit clarify, decision-map, project-init, or project-review handoffs, freeze or lock drafts, or generate and QA TXT, Markdown, DOCX, PDF, HTML, EPUB, PPTX, and related formats.
 ---
 
 # Manuscript Ops
 
-For one-session clarification, `grill-me` is the external user-facing entry
-point and `grilling` is its underlying model-invoked capability. Treat them as
+For one-session clarification, `clarify` is the external user-facing entry
+point and `socratic` is its underlying model-invoked capability. Treat them as
 one discovery handoff, not two separate user-facing steps.
 
 Treat the manuscript as a governed state machine, not a single editable file.
@@ -41,7 +41,7 @@ and the selected route is justified by evidence.
   Do not initialize project state. Run only the format and content checks that
   can materially fail.
 - **Structured** — score `4-7`, no hard trigger. Establish a lightweight Brief,
-  source map, outline, output plan, and review axes. Invoke `grill-me` first only
+  source map, outline, output plan, and review axes. Invoke `clarify` first only
   when a key user-intent decision remains unresolved.
 - **Project** — score `8-12` or any hard trigger. Follow the explicit handoff
   sequence below. Never compress it into an internal substitute.
@@ -49,9 +49,9 @@ and the selected route is justified by evidence.
 ## 3. Execute a Project route through explicit handoffs
 
 1. Choose one discovery handoff:
-   - single-session decisions: logically activate `grill-me` to resolve the
+   - single-session decisions: logically activate `clarify` to resolve the
      open manuscript decisions recorded in `<path>`;
-   - multi-session fog: logically activate `wayfinder` to chart the effort in a
+   - multi-session fog: logically activate `decision-map` to chart the effort in a
      local Markdown task graph without implementing it.
    Render these calls using the current host's syntax.
 2. Stop. Continue only after the user explicitly activates `manuscript-ops`
@@ -67,12 +67,12 @@ and the selected route is justified by evidence.
 5. Ask for the fixed initialization gate. After explicit approval, initialize
    or inherit local version control, create the Project Profile and project
    structure, and freeze a dated baseline.
-6. Tell the user to activate `review-loop` with
+6. Tell the user to activate `project-review` with
    `init using <approved-brief-path>`. Stop and resume only after an approved
    review charter exists.
 7. Build the approved outline, batches, locked source, derived editions, and
    finals. Supply the manuscript review profile and artifact evidence to
-   `review-loop` at the outline, candidate, and final milestones and at any
+   `project-review` at the outline, candidate, and final milestones and at any
    project-specific risk gate.
 
 Read [handoffs.md](references/handoffs.md) before emitting a dependency call.
@@ -137,7 +137,7 @@ or the active batch trigger it.
 
 Read [review.md](references/review.md) when constructing the manuscript review
 profile. Pass the frozen profile, artifact snapshot, source authority, batch
-context, and format-QA evidence to `review-loop`. `review-loop` owns generic
+context, and format-QA evidence to `project-review`. `project-review` owns generic
 finding identity and disposition, repair rounds, reviewer independence, review
 state, and the final verdict. `manuscript-ops` records and verifies the
 manuscript-specific evidence boundary and consumes the returned verdict; it does

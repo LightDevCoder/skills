@@ -34,8 +34,8 @@ single line.
 
 `recap` never invokes another user-invoked Skill. A durable continuation record
 requires a separate user choice such as `handoff`; final acceptance remains
-owned by `review-loop`. Missing session context is handled in the one-line
-boundary result and is not silently relabeled as a `review-loop` `BLOCKED`
+owned by `project-review`. Missing session context is handled in the one-line
+boundary result and is not silently relabeled as a `project-review` `BLOCKED`
 verdict.
 
 ## Verification and release state

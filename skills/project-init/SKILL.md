@@ -8,9 +8,9 @@ disable-model-invocation: true
 
 `project-init` is a user-invoked **minimum initialization** aid, not a project
 manager and not a clarification interview. It inspects the target directory,
-asks a small set of questions via the `grill-me`/`grilling` capability, chooses
-one of the presets in [presets.md](references/presets.md), writes the minimum
-useful project guidance, validates what it wrote, and reports the result. Since
+asks a small set of lightweight questions directly, chooses one of the presets
+in [presets.md](references/presets.md), writes the minimum useful project
+guidance, validates what it wrote, and reports the result. Since
 `project-clarify` now exists, this Skill no longer owns full requirement
 clarification — for deep discovery use `$clarify`, `$project-clarify`, or
 `$decision-map` instead. Keep the actual goal and acceptance source in the
@@ -36,9 +36,8 @@ Skill is a reportable capability gap, not a reason to invent a command.
 
 ### 2. Ask lightweight project questions
 
-Use the external user-facing `grill-me` entry point when answers are not
-already explicit. `grill-me` starts the underlying model-invoked `grilling`
-capability; treat this as one clarification capability. Ask one short question at a time and capture six answers:
+Ask the questions directly, one short question at a time, when answers are
+not already explicit. Capture six answers:
 
 1. project type;
 2. user-visible goal;
@@ -114,11 +113,11 @@ confirmation decision if research was used.
 ## Explicit boundaries
 
 This Skill does not run `clarify`, `project-clarify`, `decision-map`, `socratic`,
-`to-spec`, `to-tickets`, `implement`, `final review`, `review-loop`,
-`ask-light`, `learn-anything`, or any other user-invoked Skill. It does not
-manage tickets, perform implementation, establish acceptance, or become a
-permanent project workflow manager. It also does not create a full decision
-map, SPEC, or ticket graph. `grill-me` (through its underlying `grilling`
-capability) and `research` above are the only model-invoked capabilities
-permitted — and only for the stated six questions and confirmed fallback; they
-do not authorize additional writes or a second clarification interview.
+`project-spec`, `project-tickets`, `implement`, `project-review`,
+`review-loop`, `ask-light`, `learn-anything`, or any other user-invoked Skill.
+It does not manage tickets, perform implementation, establish acceptance, or
+become a permanent project workflow manager. It also does not create a full
+decision map, SPEC, or ticket graph. `research` above is the only
+model-invoked capability permitted — and only for the confirmed fallback; the
+direct lightweight questions do not authorize additional writes or a second
+clarification interview.

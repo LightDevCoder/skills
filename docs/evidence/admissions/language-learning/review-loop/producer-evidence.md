@@ -1,7 +1,7 @@
 # Producer Evidence — language-learning fast-track
 
 This is Producer evidence, not final acceptance. Evidence labels follow the
-review-loop [Evidence Protocol](../../../../../skills/review-loop/references/evidence-protocol.md).
+project-review [Evidence Protocol](../../../../../skills/project-review/references/evidence-protocol.md).
 
 ## Scope
 - Charter revision: 1
@@ -65,7 +65,7 @@ review-loop [Evidence Protocol](../../../../../skills/review-loop/references/evi
 ### E-006 — Invocation: no automatic invocation of another user-invoked Skill
 - Evidence label: invocation
 - Run or observation: inspection of SKILL.md and all six references for any instruction to call, run, or chain another user-invoked Skill
-- Expected: the package only recommends other capabilities (e.g. `handoff`, `review-loop`) as explicit user choices and never executes them; the Choose-a-mode table routes only to the package's own references
+- Expected: the package only recommends other capabilities (e.g. `handoff`, `project-review`) as explicit user choices and never executes them; the Choose-a-mode table routes only to the package's own references
 - Observed: `SKILL.md` route table links only to `references/` files inside the package; no other Skill is invoked or loaded; no script or tool call exists anywhere in the package
 - Outcome: PASS
 - Validates: AC-8

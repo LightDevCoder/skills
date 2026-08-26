@@ -62,7 +62,7 @@ class AgentSkillScenario:
             "policy:",
             "  allow_implicit_invocation: true",
         ]) + "\n", encoding="utf-8")
-        charter = self.case_root / ".review-loop" / "charter.md"
+        charter = self.case_root / ".project-review" / "charter.md"
         charter.parent.mkdir(parents=True, exist_ok=True)
         charter.write_text("\n".join([
             "# Acceptance Charter",
@@ -135,7 +135,7 @@ class AgentSkillScenario:
         state = self.state()
         if state.status != "CRITIC":
             raise ValueError("Agent-Skill specialist report requires CRITIC state")
-        round_path = self.case_root / f".review-loop/rounds/round-{state.round:02d}"
+        round_path = self.case_root / f".project-review/rounds/round-{state.round:02d}"
         round_path.mkdir(parents=True, exist_ok=True)
         (round_path / "agent-skill-specialist.md").write_text("\n".join([
             "# Agent-Skill Specialist Report",
@@ -155,7 +155,7 @@ class AgentSkillScenario:
         state = self.state()
         if state.status != "CRITIC":
             raise ValueError("Agent-Skill finding ingestion requires CRITIC state")
-        round_path = self.case_root / f".review-loop/rounds/round-{state.round:02d}"
+        round_path = self.case_root / f".project-review/rounds/round-{state.round:02d}"
         report = (round_path / "agent-skill-specialist.md").read_text(encoding="utf-8")
         if f"Stable candidate ID: {finding_id}" not in report or "Evidence label: review" not in report:
             raise ValueError("specialist report lost stable ID or evidence class")
@@ -186,7 +186,7 @@ class AgentSkillScenario:
 
     def write_evaluator(self, outcome: str, context_identity: str, executable_outcome: str = "PASS") -> None:
         state = self.state()
-        round_path = self.case_root / f".review-loop/rounds/round-{state.round:02d}"
+        round_path = self.case_root / f".project-review/rounds/round-{state.round:02d}"
         round_path.mkdir(parents=True, exist_ok=True)
         producer = (round_path / "producer-evidence.md").read_text(encoding="utf-8")
         exec_label = "structural" if "Executable axis: not applicable" in producer else "review"
@@ -222,9 +222,9 @@ class AgentSkillScenario:
             self.set_state("BLOCKED", state.round, "obtain executable focused, adversarial, and code-review evidence", last_completed_action="executable evidence check", blocker="required executable evidence unavailable")
             return
         if passed:
-            registry = self.case_root / ".review-loop" / "findings.md"
+            registry = self.case_root / ".project-review" / "findings.md"
             for finding_id in get_confirmed_review_finding_ids(self.case_root):
-                repair = self.case_root / f".review-loop/rounds/round-{state.round:02d}/repair-evidence-{finding_id}.md"
+                repair = self.case_root / f".project-review/rounds/round-{state.round:02d}/repair-evidence-{finding_id}.md"
                 if not repair.is_file():
                     raise ValueError(f"Missing repair evidence for {finding_id}")
                 with registry.open("a", encoding="utf-8") as fh:
@@ -234,11 +234,11 @@ class AgentSkillScenario:
                         f"Repair evidence: rounds/round-{state.round:02d}/repair-evidence-{finding_id}.md",
                     ]) + "\n")
             self.write_evaluator("PASS", "fresh independent read-only Evaluator", "PASS")
-            verdict = self.case_root / ".review-loop" / "verdict.md"
+            verdict = self.case_root / ".project-review" / "verdict.md"
             verdict.write_text("\n".join([
                 "# Review Loop Verdict",
                 "Verdict: PASS",
-                "Issued by: review-loop Core",
+                "Issued by: project-review Core",
                 "Evaluator: fresh independent read-only context",
                 "Specialist input: package, installation, invocation, behavior, and interaction evidence",
             ]) + "\n", encoding="utf-8")
@@ -297,10 +297,10 @@ class AgentSkillProfileBehaviorTest(unittest.TestCase):
             scenario.ingest_finding(disposition="rejected", finding_id="F-001")
             c.check(scenario.state().status == "EVALUATE", "rejected package candidate proceeds to fresh Evaluator")
             scenario.evaluate(c, passed=True, independent_context=True)
-            evaluator = (case_root / ".review-loop/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
-            verdict = (case_root / ".review-loop/verdict.md").read_text(encoding="utf-8")
+            evaluator = (case_root / ".project-review/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
+            verdict = (case_root / ".project-review/verdict.md").read_text(encoding="utf-8")
             assert_agent_skill_evaluator_record(c, evaluator, overall_outcome="PASS", name="fresh Evaluator records Agent-Skill axes and Core owns final PASS")
-            c.check(scenario.state().status == "PASS" and "Issued by: review-loop Core" in verdict, "Core verdict record is separate from specialist evidence")
+            c.check(scenario.state().status == "PASS" and "Issued by: project-review Core" in verdict, "Core verdict record is separate from specialist evidence")
 
             case_root = new_review_case(root, "invocation-boundary", "agent-skill")
             scenario = AgentSkillScenario(case_root)
@@ -310,7 +310,7 @@ class AgentSkillProfileBehaviorTest(unittest.TestCase):
             scenario.write_specialist_report(disposition="rejected", finding_id="F-002", axis="invocation contract and boundaries", specialist_verdict="PASS")
             scenario.ingest_finding(disposition="rejected", finding_id="F-002")
             scenario.evaluate(c, passed=True, independent_context=True)
-            boundary_producer = (case_root / ".review-loop/rounds/round-01/producer-evidence.md").read_text(encoding="utf-8")
+            boundary_producer = (case_root / ".project-review/rounds/round-01/producer-evidence.md").read_text(encoding="utf-8")
             c.check(scenario.state().status == "PASS" and "non-trigger request returns no-op recommendation" in boundary_producer and "recommended, not executed" in boundary_producer, "non-trigger boundary recommends without invoking another user Skill")
 
             case_root = new_review_case(root, "missing-source", "agent-skill")
@@ -326,7 +326,7 @@ class AgentSkillProfileBehaviorTest(unittest.TestCase):
             scenario.write_specialist_report(disposition="rejected", finding_id="F-003")
             scenario.ingest_finding(disposition="rejected", finding_id="F-003")
             scenario.evaluate(c, passed=True, independent_context=True, dependency_available=False)
-            dependency_evaluator = (case_root / ".review-loop/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
+            dependency_evaluator = (case_root / ".project-review/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
             assert_agent_skill_evaluator_record(c, dependency_evaluator, overall_outcome="BLOCKED", executable_outcome="BLOCKED", name="missing dependency Evaluator records all axes and BLOCKED")
             c.check(scenario.state().status == "BLOCKED" and "required host dependency unavailable" in scenario.state().raw, "missing dependency returns Core BLOCKED with unblock")
 
@@ -338,7 +338,7 @@ class AgentSkillProfileBehaviorTest(unittest.TestCase):
             scenario.write_specialist_report(disposition="rejected", finding_id="F-004")
             scenario.ingest_finding(disposition="rejected", finding_id="F-004")
             scenario.evaluate(c, passed=True, independent_context=True, dependency_available=True, executable_evidence=False)
-            exec_evaluator = (case_root / ".review-loop/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
+            exec_evaluator = (case_root / ".project-review/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
             assert_agent_skill_evaluator_record(c, exec_evaluator, overall_outcome="BLOCKED", executable_outcome="BLOCKED", name="missing executable evidence blocks with valid labels")
             c.check(scenario.state().status == "BLOCKED" and "executable evidence unavailable" in scenario.state().raw, "missing executable evidence returns Core BLOCKED")
 
@@ -351,7 +351,7 @@ class AgentSkillProfileBehaviorTest(unittest.TestCase):
             scenario.ingest_finding(disposition="confirmed", finding_id="F-005")
             scenario.apply_repair(True)
             scenario.evaluate(c, passed=False, independent_context=True)
-            failed_evaluator = (case_root / ".review-loop/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
+            failed_evaluator = (case_root / ".project-review/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
             assert_agent_skill_evaluator_record(c, failed_evaluator, overall_outcome="FAIL", name="failed Agent-Skill round records all axes and valid labels")
             revision = scenario.state().charter_revision
             c.check(scenario.state().status == "FAIL" and revision == "approved-agent-skill-r2", "failed round retains frozen package revision and bounded next action")
@@ -359,9 +359,9 @@ class AgentSkillProfileBehaviorTest(unittest.TestCase):
             scenario.write_specialist_report(disposition="rejected", finding_id="F-005", specialist_verdict="PASS")
             scenario.ingest_finding(disposition="rejected", finding_id="F-005")
             scenario.evaluate(c, passed=True, independent_context=True)
-            recheck_evaluator = (case_root / ".review-loop/rounds/round-02/evaluator-verdict.md").read_text(encoding="utf-8")
+            recheck_evaluator = (case_root / ".project-review/rounds/round-02/evaluator-verdict.md").read_text(encoding="utf-8")
             assert_agent_skill_evaluator_record(c, recheck_evaluator, overall_outcome="PASS", name="rechecked Agent-Skill round records all axes and valid labels")
-            registry = (case_root / ".review-loop/findings.md").read_text(encoding="utf-8")
+            registry = (case_root / ".project-review/findings.md").read_text(encoding="utf-8")
             c.check(scenario.state().status == "PASS" and len(re.findall(r"(?:Finding|Re-observed) F-005", registry)) == 2 and "Disposition: rejected" in registry, "bounded recheck preserves stable Agent-Skill finding ID")
 
             case_root = new_review_case(root, "scope-change", "agent-skill")
@@ -372,7 +372,7 @@ class AgentSkillProfileBehaviorTest(unittest.TestCase):
             scenario.write_specialist_report(disposition="confirmed", finding_id="F-006", specialist_verdict="FAIL")
             scenario.ingest_finding(disposition="confirmed", finding_id="F-006")
             scenario.apply_repair(False)
-            c.check(scenario.state().status == "FAIL" and "scope-changing" in scenario.state().next and not (case_root / ".review-loop/rounds/round-01/repair-evidence-F-006.md").is_file(), "scope-changing Agent-Skill repair is rejected without Producer edit")
+            c.check(scenario.state().status == "FAIL" and "scope-changing" in scenario.state().next and not (case_root / ".project-review/rounds/round-01/repair-evidence-F-006.md").is_file(), "scope-changing Agent-Skill repair is rejected without Producer edit")
 
             case_root = new_review_case(root, "independence-block", "agent-skill")
             scenario = AgentSkillScenario(case_root)
@@ -392,7 +392,7 @@ class AgentSkillProfileBehaviorTest(unittest.TestCase):
             scenario.write_specialist_report(disposition="rejected", finding_id="F-008")
             scenario.ingest_finding(disposition="rejected", finding_id="F-008")
             scenario.evaluate(c, passed=True, independent_context=True)
-            no_exec_producer = (case_root / ".review-loop/rounds/round-01/producer-evidence.md").read_text(encoding="utf-8")
+            no_exec_producer = (case_root / ".project-review/rounds/round-01/producer-evidence.md").read_text(encoding="utf-8")
             c.check(scenario.state().status == "PASS" and "Executable axis: not applicable" in no_exec_producer, "non-executable Skill records explicit executable-axis applicability")
 
             case_root = new_review_case(root, "maximum-round", "agent-skill")
@@ -403,7 +403,7 @@ class AgentSkillProfileBehaviorTest(unittest.TestCase):
             scenario.write_specialist_report(disposition="rejected", finding_id="F-009")
             scenario.ingest_finding(disposition="rejected", finding_id="F-009")
             scenario.evaluate(c, passed=False, independent_context=True, dependency_available=True, executable_evidence=True, maximum_round=1)
-            limit_evaluator = (case_root / ".review-loop/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
+            limit_evaluator = (case_root / ".project-review/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
             assert_agent_skill_evaluator_record(c, limit_evaluator, overall_outcome="BLOCKED", executable_outcome="BLOCKED", name="maximum-round Agent-Skill Evaluator records all axes and valid labels")
             c.check(scenario.state().status == "BLOCKED" and "maximum rounds" in scenario.state().raw, "maximum repair round returns generic Core BLOCKED")
 

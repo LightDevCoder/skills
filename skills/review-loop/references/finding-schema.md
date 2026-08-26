@@ -1,72 +1,38 @@
-# Finding Registry
+# Finding Schema
 
-`findings.md` is the canonical registry for finding identity and lifecycle.
-Round files preserve what a reviewer observed; they do not create a second
-identity system.
+`review-loop` collects one normalized report per reviewer invocation. This file
+is the local shape; it does not replace any richer registry kept by
+`project-review`.
 
-## Stable identity rules
+## Required fields
 
-- The Finding ID is stable from its first recorded candidate through every later
-  round, disposition, repair, and verdict.
-- Allocate the next unused `F-###` when a candidate is first recorded. An ID
-  must not be reused, even when the candidate is rejected or later resolved.
-- Re-observe the same concern under its existing ID. Mark a genuinely duplicate
-  candidate `duplicate` and link to the canonical ID.
-- Keep the candidate evidence, disposition, and resolution evidence. Do not
-  delete a rejected candidate or replace it with a differently numbered copy.
+Each finding has:
 
-## Registry record
-
-```markdown
-# Finding Registry
-
-## Finding F-001
-- First recorded: round-01
-- Status: pending | confirmed | rejected | duplicate | out-of-scope | resolved
-- Severity: Critical | High | Medium | Low
-- Related acceptance criterion: AC-<n> or <none with reason>
-- Canonical summary: <one stable claim>
-- Related finding: F-<n> or none
-- Current evidence: <round evidence link>
-- Resolution evidence: <required after disposition>
+```yaml
+id: F-001
+state: new | persists | fixed | duplicate
+severity: critical | high | medium | low
+location: path, section, stable anchor, or "whole target"
+problem: concise observable gap
+reason: requirement or evidence that makes it a gap
+suggestion: optional minimal direction; never an implementation order
 ```
 
-## Candidate record
+`id`, `severity`, `location`, `problem`, and `reason` are required; `suggestion`
+is optional.
 
-Store each Critic candidate in `round-N/critic-findings.md` and reference its
-registry ID:
+## Identity rules
 
-```markdown
-## Finding F-001
-- Severity: Critical | High | Medium | Low
-- Related acceptance criterion: AC-<n> or <none with reason>
-- Evidence: <path, command output, or observation>
-- Expected behavior: <Charter-backed result>
-- Observed behavior: <actual result>
-- Recommended minimal repair: <candidate, not an instruction>
-- Disposition: pending | confirmed | rejected | duplicate | out-of-scope
-- Resolution evidence: <verification or technical reason>
-- Related finding: F-<n> or none
-```
+- Allocate the next unused `F-###` from `Previous findings`; never reuse an ID.
+- Reuse an ID when the same gap `persists` after repair.
+- Mark `fixed` only when the original gap is absent in the rechecked target.
+- Mark `duplicate` and link `duplicate_of: F-###` when a candidate repeats an
+  existing canonical concern.
 
-## Dispositions
+## Clean and error reports
 
-- `confirmed`: evidence shows an in-scope gap against the frozen baseline; a
-  bounded repair may be considered.
-- `resolved`: after a bounded Producer repair, the fresh Evaluator no longer
-  reproduces the same gap and links the repair and verification evidence. Keep
-  the original candidate, disposition history, and stable ID.
-- `rejected`: the claim is not reproduced, conflicts with stronger evidence, or
-  rests on an incorrect assumption; state why and retain its evidence.
-- `duplicate`: link to the canonical finding; do not make a second repair path.
-- `out-of-scope`: the concern may be valid but cannot enter the current repair
-  path. Preserve it and use a Change Proposal if it should alter the baseline.
-
-Never confirm a candidate only because the Critic recommends it. Never close a
-finding by changing its severity, deleting evidence, or silently assigning a new
-ID.
-
-After each bounded repair, the Evaluator rechecks the same Finding ID. It marks
-the record `resolved` only when the original acceptance gap is absent and the
-corresponding criterion is evidenced; otherwise it remains `confirmed` for the
-next permitted round.
+- A clean review writes `Findings: []`.
+- A review must not write `PASS`, `FAIL`, or `BLOCKED`; those are final
+  acceptance verdicts owned by `project-review`.
+- A malformed or mutating report is rejected as `REVIEW-ERROR`. The engine
+  stops without a repair.

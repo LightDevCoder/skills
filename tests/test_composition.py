@@ -65,8 +65,10 @@ class CompositionTests(unittest.TestCase):
         text = read_skill("review-loop")
         self.assertIn("generic-review", text, "review-loop must reference generic-review")
         self.assertIn("code-review", text, "review-loop must reference code-review")
-        # review-loop should state it does NOT own final acceptance (which lives in project-review)
-        self.assertTrue("does not decide" in text.lower() or "not this engine" in text.lower() or "belongs to" in text.lower(), "review-loop must clarify it does not own final acceptance")
+        # review-loop must not present itself as the final acceptance owner; project-review owns verdicts
+        self.assertIn("project-review", text, "review-loop must point final acceptance to project-review")
+        self.assertIn("never writes", text, "review-loop must state it never writes PASS/FAIL/BLOCKED")
+        self.assertNotIn("owns `PASS`", text, "review-loop must not claim verdict ownership")
         wf = read_doc("docs/workflows/review-system.md")
         self.assertIn("review-loop", wf)
         self.assertIn("generic-review", wf)

@@ -112,7 +112,7 @@ snapshot. If `user_gate` is `required`, confirmation follows that review.
 
 Do not use page count as the only partitioning rule.
 
-## Manuscript review profile and review-loop result
+## Manuscript review profile and project-review result
 
 The local `ReviewMatrix` file is a manuscript review Profile, not a second
 review engine. It names the frozen artifact snapshot and every manuscript review
@@ -121,10 +121,10 @@ evidence required for that domain audit. Inapplicable axes remain present with a
 reason. On the Project route, the eight non-image axes are mandatory; the image
 axis is added when the source or deliverable contract requires it.
 
-`review-loop` consumes that Profile and owns generic reviewer identity, finding
+`project-review` consumes that Profile and owns generic reviewer identity, finding
 identity and disposition, repair rounds, independence, durable review state, and
 the final verdict. Its JSON ReviewReport is an external result. The manuscript
-integration envelope must identify `provider: review-loop` and `profile:
+integration envelope must identify `provider: project-review` and `profile:
 manuscript`, hash-bind the same artifact snapshot, and retain one typed,
 hash-bound `manuscript_evidence` entry for each applicable manuscript axis.
 `manuscript-ops` validates only this boundary and the lifecycle-specific
@@ -133,7 +133,7 @@ rules.
 
 LifecycleState and GateReceipt reference the external JSON result. A missing,
 stale, or non-PASS result blocks the manuscript gate and is resumed only after
-the review-loop result is imported or refreshed.
+the project-review result is imported or refreshed.
 
 On the Project route, the non-image core axis catalog is always applicable as a
 positive or negative audit. The image axis is additionally mandatory when the
