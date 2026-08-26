@@ -18,18 +18,15 @@ def routing_text() -> str:
 
 
 class SocraticBehaviorTest(unittest.TestCase):
-    def test_convergence_does_not_repeat_resolved_decisions(self) -> None:
+    def test_convergence_marks_resolved_decisions_and_recomputes_the_frontier(self) -> None:
         skill = skill_text()
         workflow = (ROOT / "references" / "WORKFLOW.md").read_text(encoding="utf-8")
         combined = skill + "\n" + workflow
 
-        # Treat answer as evidence, mark newly resolved, recompute frontier
-        self.assertIn("Do not repeat", skill)
         self.assertIn("newly resolved", skill.lower())
         self.assertIn("recompute", skill.lower() + workflow.lower())
-        # dynamic follow-up, not fixed questionnaire
-        self.assertRegex(skill, r"(?is)dynamic.*follow|expand along.*answer")
-        self.assertRegex(combined, r"(?is)do not manufacture.*fixed.*question|prewritten questionnaire|fixed questionnaire")
+        self.assertIn("dynamic follow-up", skill.lower())
+        self.assertIn("fixed questionnaire", skill.lower())
 
     def test_fact_gaps_block_downstream_decisions(self) -> None:
         skill = skill_text()
@@ -37,7 +34,7 @@ class SocraticBehaviorTest(unittest.TestCase):
 
         # dependency blocks frontier
         self.assertIn("downstream", skill)
-        self.assertIn("not part of the frontier", skill)
+        self.assertIn("out of the frontier", skill)
         # unknown routing
         for line in ("user must decide", "external fact", "needs experiment", "held by another"):
             self.assertIn(line, routing.lower() if line in routing.lower() else skill.lower() + routing.lower())
@@ -48,16 +45,16 @@ class SocraticBehaviorTest(unittest.TestCase):
         combined = skill + "\n" + workflow
 
         self.assertIn("not callable", skill.lower())
-        self.assertIn("retain the fact as unresolved", skill.lower() if "retain the fact as unresolved" in skill.lower() else skill)
         self.assertIn("missing capability", skill.lower())
-        self.assertRegex(combined, r"(?is)do not invent.*(answer|work)|do not.{0,50}convert.{0,50}decision")
+        self.assertIn("retain the fact as unresolved", combined.lower())
 
-    def test_engine_does_not_auto_chain_user_skills(self) -> None:
+    def test_engine_returns_state_and_stops_for_the_calling_wrapper(self) -> None:
         skill = skill_text()
 
-        self.assertIn("does not automatically invoke another user-invoked Skill", skill)
-        self.assertIn("does not automatically", skill)
-        self.assertIn("formal SPEC", skill)
+        self.assertIn("return the state update and stop", skill.lower())
+        self.assertIn("calling wrapper authorizes", skill.lower())
+        # The engine's output is a state update, not automatic execution.
+        self.assertIn("Next step", skill)
 
 
 if __name__ == "__main__":

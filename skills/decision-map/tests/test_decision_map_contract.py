@@ -50,8 +50,8 @@ class DecisionMapContractTest(unittest.TestCase):
             "Resolve",
         ):
             self.assertIn(token, combined)
-        # must reference the tracker doc
-        self.assertIn("docs/agents/issue-tracker.md", skill)
+        # the tracker doc is the compatibility authority for map operations
+        self.assertIn("docs/agents/issue-tracker.md", combined)
         self.assertRegex(map_contract, r"(?s)## Destination.*## Notes.*## Decisions so far.*## Not yet specified.*## Out of scope")
 
     def test_composition_uses_four_capabilities_without_duplication(self) -> None:
@@ -59,11 +59,11 @@ class DecisionMapContractTest(unittest.TestCase):
 
         for cap in ("research", "prototype", "socratic", "to-questionnaire"):
             self.assertIn(cap, skill)
-        # composition before duplication
-        self.assertRegex(skill, r"(?is)do not copy.*capabilit|call (them|it)")
+        # composition before duplication: owning capabilities are named, not copied
+        self.assertIn("owning capability", skill)
         self.assertIn("research", skill.lower())
         # at most one ticket per session (except parallel research)
-        self.assertRegex(skill, r"(?is)at most one ticket|never resolve more than one ticket")
+        self.assertIn("at most one non-research ticket", skill)
 
     def test_handoff_to_project_spec_and_no_autochain(self) -> None:
         skill, _, _, workflow = read_contract()
@@ -71,7 +71,7 @@ class DecisionMapContractTest(unittest.TestCase):
 
         self.assertIn("decision-map → project-spec", skill)
         self.assertIn("project-spec", combined)
-        self.assertRegex(skill, r"(?is)do not auto-chain")
+        self.assertIn("recommend explicit `$project-spec` and stop", skill)
         self.assertIn("fog", skill.lower())
         self.assertIn("fog is empty", combined.lower() if "fog is empty" in combined.lower() else combined)
 

@@ -31,15 +31,19 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.check(bool(re.search(r"allow_implicit_invocation:\s*false", metadata)), "Skill is explicit-only")
     for preset in ("generic", "software", "manuscript", "skill-development", "research", "knowledge-base", "data-analysis"):
         c.check(bool(re.search(rf"\| {re.escape(preset)} \|", presets)), f"preset supported: {preset}")
-    for marker in ("project type", "user-visible goal", "expected outputs", "collaboration mode", "important constraints", "required review level"):
+    for marker in ("project type", "user-visible goal", "expected outputs", "collaboration mode", "important constraints"):
         c.check(marker in skill, f"lightweight question captured: {marker}")
-    for marker in ("existing `AGENTS.md`", "existing `CLAUDE.md`", "research", "confirm", "reject", "created path", "declared capability", "Project Initialization"):
+    c.check(bool(re.search(r"required\s+review\s+level", skill)), "lightweight question captured: required review level")
+    for marker in ("existing `AGENTS.md`", "existing `CLAUDE.md`", "research", "confirm", "reject", "created path", "Project Initialization"):
         c.check(marker in (skill + contract), f"initialization contract marker: {marker}")
-    for forbidden in ("project-spec", "project-tickets", "implement", "project-review", "another user-invoked Skill"):
-        c.check(forbidden in skill, f"boundary names forbidden operation: {forbidden}")
+    c.check(bool(re.search(r"declared capabilit", skill + contract)), "initialization contract marker: declared capability")
+    # The boundary lives as a positive execution rule: only `research` is
+    # available as a model-invoked fallback and later user-invoked stages are
+    # not executed by this initializer.
+    c.check("`research` is the only model-invoked" in contract, "research-only model capability boundary")
+    c.check("never executes or orchestrates them" in contract, "initializer does not invoke user-invoked stages")
     for old in ("to-spec", "to-tickets", "final review"):
         c.check(old not in skill, f"old name removed: {old}")
-    c.check("does not run" in skill and ("never invoke" in skill or "must not invoke" in skill), "boundaries prohibit execution")
     c.check(not re.search(r"TODO|\[TODO", skill), "no template placeholders remain")
 
     return c.assertions, c.failures

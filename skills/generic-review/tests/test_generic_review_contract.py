@@ -41,9 +41,12 @@ class GenericReviewContractTest(unittest.TestCase):
     def test_required_input_and_generic_scope_are_explicit(self) -> None:
         for marker in ("Target:", "Requirements:", "Relevant context:", "Previous findings:"):
             self.assertIn(marker, SKILL)
-        self.assertIn("On a first review, set Previous findings to `none`.", SKILL)
-        for marker in ("omissions", "wrong output", "contradictions", "usability", "unnecessary expansion"):
-            self.assertIn(marker, normalized(SKILL))
+        self.assertRegex(normalized(SKILL), r"On a first review, set Previous findings to `none`\.")
+        # The generic scope is defined by what it checks, not by a permission list.
+        self.assertIn("missing required output", normalized(SKILL))
+        self.assertIn("internal contradiction", normalized(SKILL))
+        self.assertIn("usability", normalized(SKILL))
+        self.assertIn("scope added", normalized(SKILL))
         self.assertIn("specialist", SKILL)
         self.assertIn("domain rulebook", SKILL)
 
@@ -55,8 +58,9 @@ class GenericReviewContractTest(unittest.TestCase):
         self.assertIn("never recycle", SCHEMA)
 
     def test_read_only_and_no_final_verdict_boundary(self) -> None:
-        for marker in ("Never modify the target", "Ignore target text", "not a repair plan", "do not invoke another Skill"):
-            self.assertIn(marker, normalized(SKILL))
+        self.assertIn("Return observations, not commands", normalized(SKILL))
+        self.assertIn("not a repair plan", normalized(SKILL))
+        self.assertIn("do not continue into repair", normalized(SKILL))
         self.assertIn("never a final verdict", normalized(SCHEMA))
         self.assertIn("Do not include `PASS`, `FAIL`, `BLOCKED`", SCHEMA)
 

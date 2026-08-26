@@ -23,9 +23,9 @@ class ProjectClarifyBehaviorTest(unittest.TestCase):
             "source and test entry points": "current behavior",
         }
         self.assertEqual(len(existing_project_fixture), 3)
-        self.assertIn("Record each usable fact with its path", skill)
-        self.assertIn("Do not ask the user to decide a fact", skill)
-        self.assertIn("one meaningful frontier question", skill)
+        self.assertIn("stable locator", skill)
+        self.assertIn("not user questions", skill)
+        self.assertIn("unblocked, user-owned frontier", skill)
 
     def test_empty_project_boundary_does_not_invent_facts(self) -> None:
         skill = skill_text()
@@ -33,7 +33,6 @@ class ProjectClarifyBehaviorTest(unittest.TestCase):
         examples = (ROOT / "references" / "EXAMPLES.md").read_text(encoding="utf-8")
         combined = skill + ref + examples
 
-        # contract/examples must state empty project does not invent facts
         self.assertRegex(combined, r"(?is)empty project|no project material exists|empty")
         self.assertRegex(combined, r"(?is)not a reason to invent|do not invent|do not.*invent")
         self.assertIn("evidence gap", combined.lower())
@@ -41,8 +40,8 @@ class ProjectClarifyBehaviorTest(unittest.TestCase):
     def test_refusal_or_no_write_keeps_the_handoff_in_memory(self) -> None:
         skill = skill_text()
 
-        self.assertIn("not an implicit", skill)
-        self.assertIn("only if the user separately names a writable", skill)
+        self.assertIn("in memory by default", skill)
+        self.assertIn("separately names a writable destination", skill)
         self.assertIn("Then stop", skill)
 
     def test_missing_capability_blocks_a_dependency_without_relabeling_it(self) -> None:
@@ -51,8 +50,8 @@ class ProjectClarifyBehaviorTest(unittest.TestCase):
         combined = skill + ref
 
         self.assertRegex(combined, r"(?is)unavailable.*not-authorized|not-authorized.*unavailable")
-        self.assertRegex(combined, r"(?is)retain the (fact )?gap")
-        self.assertIn("keep its downstream", combined)
+        self.assertRegex(combined, r"(?is)leave unavailable or\s+not-authorized gaps unresolved|retain the (fact )?gap")
+        self.assertIn("keep their downstream decisions", combined)
         self.assertRegex(combined, r"(?is)missing capability")
 
     def test_interaction_records_optional_calls_and_returns_a_handoff(self) -> None:

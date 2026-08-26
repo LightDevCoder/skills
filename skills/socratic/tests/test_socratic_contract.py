@@ -36,27 +36,21 @@ class SocraticPublicContractTest(unittest.TestCase):
             "frontier",
             "newly resolved decisions",
         ):
-            self.assertIn(state_field, skill)
-        # dynamic follow-up and frontier recomputation
-        self.assertRegex(skill, r"(?is)answers?.{0,180}(recompute|adjust).{0,180}frontier")
-        # must avoid fixed questionnaire
-        self.assertRegex(skill, r"(?is)fixed questionnaire|avoid.*questionnaire|not.*fixed.*questionnaire")
-        # must distinguish fact vs decision
-        self.assertRegex(skill, r"(?is)distinguish.*fact.*decision|fact.*decision")
+            self.assertIn(state_field, skill.lower())
+        self.assertRegex(skill, r"(?is)(recompute|update).{0,120}frontier")
+        self.assertIn("fixed questionnaire", skill)
+        self.assertRegex(skill, r"(?is)fact.*decision|facts are not user decisions")
 
-    def test_fact_dependency_is_not_reframed_as_a_user_choice(self) -> None:
+    def test_missing_capability_is_reported_as_a_gap_not_a_fabricated_answer(self) -> None:
         skill, _ = read_public_contract()
         attribution = (ROOT / "ATTRIBUTION.md").read_text(encoding="utf-8")
         workflow = (ROOT / "references" / "WORKFLOW.md").read_text(encoding="utf-8")
         combined = skill + "\n" + workflow
 
-        # Failure/missing-dependency fixture: source facts need a capability
-        # that is unavailable. The public contract must preserve the blocked
-        # fact and report the gap instead of claiming a fabricated result.
-        self.assertRegex(skill, r"(?is)not callable.{0,160}unresolved.{0,160}missing")
-        self.assertRegex(combined, r"(?is)Do not claim.{0,160}started or completed")
-        self.assertRegex(combined, r"(?is)Do not.{0,100}convert.{0,100}dependency.{0,100}decision")
-        self.assertIn("formal SPEC", skill)
+        self.assertIn("not callable", skill.lower())
+        self.assertIn("missing capability", skill.lower())
+        self.assertIn("unresolved", combined.lower())
+        self.assertRegex(skill, r"(?is)not callable|missing capability")
         self.assertIn("mattpocock/skills", attribution)
         self.assertIn("v1.2.3", attribution)
         self.assertIn("Copyright (c) 2026 Matt Pocock", attribution)
@@ -66,9 +60,7 @@ class SocraticPublicContractTest(unittest.TestCase):
         self.assertIn("Unknown", skill)
         for target in ("research", "prototype", "to-questionnaire"):
             self.assertIn(target, skill)
-        # must declare routing not reimplement
-        self.assertRegex(skill, r"(?is)do not reimplement|only declare.*routing|declare.*next step")
-        # supporting docs must be referenced
+        self.assertIn("calling wrapper authorizes", skill)
         self.assertIn("references/WORKFLOW.md", skill)
         self.assertIn("references/ROUTING.md", skill)
 

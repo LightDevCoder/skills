@@ -5,71 +5,26 @@ description: Maintain a decision-owned clarification state and ask only the curr
 
 # Socratic
 
-`socratic` is a **model-invoked Clarification Engine**. It turns an ambiguous
-idea, requirement, plan, or process into a small, inspectable decision state.
-It is not a user entry point, a fixed questionnaire, an execution workflow, or
-a formal SPEC generator.
+`socratic` is a model-invoked Clarification Engine for user-owned decisions.
+Use it when a clarification wrapper (`clarify`, `project-clarify`,
+`decision-map`) needs to track a conversation.
 
-Use it only when a clarification wrapper (`clarify`, `project-clarify`,
-`decision-map`) needs to track user-owned choices. See
-[WORKFLOW.md](references/WORKFLOW.md) for the detailed state and turn
-procedure and [EXAMPLES.md](references/EXAMPLES.md) for examples.
+## Core loop
 
-## Core behavior
+1. Receive the latest answer as evidence.
+2. Update `current understanding`.
+3. Mark newly resolved decisions.
+4. Recompute dependencies and the frontier.
+5. Ask only the currently unblocked frontier decisions.
+6. Return the state update and stop.
 
-- Ask with **dynamic follow-up**: expand along the user's last answer instead
-  of stepping through a prewritten questionnaire.
-- **Distinguish fact from decision**: user owns outcomes, priorities,
-  tradeoffs, and acceptable risk; facts belong to the agent (inspection,
-  research, prototype) and are never phrased as a user choice.
-- **Continuously converge**: treat each answer as evidence, update
-  `current understanding`, mark newly resolved decisions, recompute
-  dependencies and the `frontier`, and ask only the currently unblocked
-  frontier.
+Ask with dynamic follow-up, never a fixed questionnaire. Facts are not user
+decisions: inspectable, researchable, or testable gaps are dependencies, not
+choices for the user to invent.
 
-Read [ROUTING.md](references/ROUTING.md) for the Unknown routing contract.
+## State fields
 
-## State to maintain
-
-At each turn, update and return:
-
-- **current understanding** — known goals, constraints, and facts with source
-  or uncertainty marker;
-- **open decisions** — user-owned choices not yet settled;
-- **dependencies** — facts, experiments, or prior choices required before a
-  decision can be asked;
-- **frontier** — the unblocked open decisions that may be asked now;
-- **newly resolved decisions** — choices settled by the latest answer.
-
-Do not repeat a resolved fact or decision. A blocked dependency stays open
-and its downstream decision is not part of the frontier.
-
-## Unknown routing
-
-Do not reimplement `research`, `prototype`, or `to-questionnaire`. Declare the
-next step and stop:
-
-```text
-Unknown
-  ├─ user must decide        → socratic (keep in frontier)
-  ├─ external fact           → research
-  ├─ needs experiment        → prototype
-  └─ held by another person  → to-questionnaire
-```
-
-If the required capability is not callable, retain the fact as unresolved
-and report the missing capability. Do not invent work or convert the
-dependency into a user decision. Details in [ROUTING.md](references/ROUTING.md).
-
-## Composition boundary
-
-The engine does not automatically invoke another user-invoked Skill, launch
-research/prototype, modify project files, or advance into a formal SPEC.
-A calling workflow decides whether to authorize a separate fact-work step.
-
-## Output shape
-
-Return a compact update that keeps the user as final authority:
+Return after every turn:
 
 ```text
 Current understanding:
@@ -81,6 +36,24 @@ Question(s) for the user:
 Next step: wait for decision | authorize fact work | done
 ```
 
-An empty frontier is not permission to invent a conclusion. State whether the
-blocker is a missing fact, missing capability, or no remaining user decision.
-See [WORKFLOW.md](references/WORKFLOW.md) for the full turn procedure.
+A blocked dependency keeps its downstream decision out of the frontier. An
+empty frontier states whether the blocker is a missing fact, a missing
+capability, or no remaining user decision; it never justifies inventing a
+conclusion.
+
+## Unknown routing
+
+Declare the next capability and stop; the calling wrapper authorizes execution.
+
+```text
+user must decide       → socratic (keep in frontier)
+external fact          → research
+needs experiment       → prototype
+held by another person → to-questionnaire
+```
+
+If the required capability is not callable, retain the fact as unresolved and
+report the missing capability. Full turn procedure and routing details are in
+[WORKFLOW.md](references/WORKFLOW.md) and
+[ROUTING.md](references/ROUTING.md); examples are in
+[EXAMPLES.md](references/EXAMPLES.md).
