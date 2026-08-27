@@ -184,3 +184,138 @@ per repository policy. A prose claim or unit test is not host proof.
 
 One local commit is created for this final repair pass. Nothing was pushed,
 tagged, or released. The repository is returned for human final audit.
+---
+
+# Final closure pass — ask-light consumes real project-review durable state
+
+Status: LOCAL COMMIT CREATED (`fix: align ask-light with project-review state`);
+nothing pushed, tagged, or released. Returned for human review.
+
+## Producer contract verified from the repository itself
+
+- Durable state tree (`skills/project-review/references/WORKFLOW.md`):
+  `.project-review/{charter,state,findings,verdict}.md` plus `rounds/`;
+  `.review-loop/` is an accepted backwards-compatibility location when no
+  `.project-review/` exists.
+- Charter ownership fields (`references/acceptance-charter.md`): `Source:` /
+  `Source revision or identity:` identify what was reviewed.
+- Real produced records were inspected under `docs/evidence/admissions/kb-init/review-loop/`
+  and `docs/evidence/releases/v0.1.5/review-loop/`: verdict files write the
+  conclusion as `- Verdict: **PASS**` (markdown-emphasis value); state files
+  record `- Status:` from INIT/READY/CRITIC/REPAIR/EVALUATE/PASS/FAIL/BLOCKED.
+- No runtime producer writes `docs/agents/acceptance.md`,
+  `docs/agents/review-verdict.md`, or effort-level `acceptance*.md`; those were
+  speculative fallback paths inside `ask-light` only.
+
+## Bug reproduced before fixing
+
+Real-layout fixtures (temporary repositories mirroring the producer output):
+
+```text
+current effort + all tickets resolved + .project-review PASS owned by current effort
+→ PRE-FIX: ProjectStage: implementation-complete, Skill: project-review (bug)
+
+current valid PASS + docs/agents/acceptance.md FAIL
+→ PRE-FIX: acceptance-not-passed (stale file contaminated current state)
+
+pointer → superseded effort while another effort SPEC is active
+→ PRE-FIX: silently selected the superseded effort
+```
+
+## Integration repair
+
+- `ask_light.py` now locates `.project-review/` (falling back to `.review-loop/`
+  only when absent) and classifies its ownership by matching the Charter
+  `Source:` citation against the resolved current effort:
+  - cites exactly the current effort → verdict applies;
+    `verdict.md` PASS/passed → `accepted` (emphasis-wrapped values parse);
+    FAIL/BLOCKED/rejected/pending → `acceptance-not-passed`.
+  - cites exactly another named `.scratch` target → historical; ignored for
+    current acceptance (routes to `project-review`, cases C/D).
+  - no Charter, no resolvable citation, mixed citations → fail closed,
+    `review-ownership-unknown` (NEED-INPUT); never inferred PASS.
+  - owned record without a written `verdict.md` → no acceptance claim;
+    routes to `project-review` (its resume mode owns recorded state).
+- Removed authoritative use of legacy root verdict paths and effort-level
+  synthetic globs (`acceptance*.md`, `review*/verdict*.md`,
+  `project-review*.md`); effort identity now uses only Light planning
+  artifacts (spec/map/issues).
+- Field extraction hardened twice: values strip markdown emphasis
+  (`**PASS**`), and field grammar can no longer bridge newlines (a `# Verdict`
+  heading followed by `- Charter revision: 1` previously fabricated a bogus
+  second verdict token).
+- Explicit-PASS semantics preserved: `complete/done` remain non-verdicts;
+  explicit `Verdict: **PASS**` is not downgraded by a same-file
+  `Status: complete`.
+- Contradictory current-effort evidence fails closed:
+  pointer → historical/inactive effort while another effort's SPEC is active →
+  `contradictory-current-effort` (NEED-INPUT). Pointer → active effort wins
+  over a superseded neighbor. Pointer → missing effort stays
+  `ambiguous-current-effort` and is not re-resolved.
+
+## Tests
+
+New real-layout integration regressions (`test_ask_light_behavior.py`, helper
+`write_project_review_state` mirrors WORKFLOW.md/acceptance-charter.md):
+
+A current PASS accepted · B current FAIL not accepted · BLOCKED not accepted ·
+C historical PASS does not accept current · D historical FAIL ignored ·
+E1/E2 unresolvable ownership fails closed · F stale root FAIL cannot
+contaminate current PASS · legacy-root PASS alone proves nothing ·
+`.review-loop/` fallback consumed · owned charter without conclusion routes to
+`project-review` resume · pointer contradictions §11-A/B/C · archive-path
+citation counts as historical.
+
+Legacy fixtures that encoded behavior through files no runtime contract
+produces were migrated onto the real layout (assertions unchanged) or replaced
+by the richer C/D cases; no fail-closed assertion was weakened.
+
+## Validation (this pass, run fresh)
+
+```text
+python3 -m pytest -q            → 231 passed
+python3 -m unittest discover -s tests → Ran 27 tests; OK
+python3 -m compileall -q skills tests → OK
+
+Skill-local suites:
+  skills/ask-light/tests .......... 68 passed
+  skills/project-review/tests ..... 10 passed
+  skills/socratic/tests ........... 21 passed
+  skills/clarify/tests ............ 5 passed
+  skills/project-clarify/tests .... 11 passed
+  skills/project-init/tests ....... 32 passed
+  skills/review-loop/tests ........ 19 passed
+```
+
+## Manual smoke scenarios (live temporary repositories, post-fix)
+
+| Scenario | Result |
+| --- | --- |
+| current-effort `.project-review` PASS | `accepted`, skill none |
+| current-effort `.project-review` FAIL | `acceptance-not-passed` |
+| historical effort A PASS vs current B | B not accepted; `project-review` |
+| stale `docs/agents/acceptance.md` FAIL + current PASS | `accepted` (no contamination) |
+| verdict with unprovable ownership | `review-ownership-unknown` (fail closed) |
+| pointer → superseded effort + other active SPEC | `contradictory-current-effort` |
+| normal single-effort open ticket | `work-in-progress` → `implement` (unchanged) |
+
+## Files changed in this pass
+
+```text
+skills/ask-light/SKILL.md
+skills/ask-light/references/discovery-contract.md
+skills/ask-light/scripts/ask_light.py
+skills/ask-light/tests/test_ask_light_behavior.py
+.scratch/light-skills-core-flow-repair/results.md
+```
+
+## Ownership boundary preserved
+
+No second reviewer contract was created and no `project-review` durable-state
+definition was duplicated into `ask-light`; `discovery-contract.md` states what
+`ask-light` reads and points at the producer package for definitions. Socratic,
+clarify/project-clarify, and project-init were untouched. Host-transition
+behavior is unchanged: user-invoked targets still report
+`host-transition-required`, model-invoked targets `beginning-<skill>`. As
+before, live Codex host transition remains unobserved in this environment
+(previous attempt ended at the account usage limit); nothing was fabricated.

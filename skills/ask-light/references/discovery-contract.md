@@ -35,20 +35,43 @@ skip project inspection and route from the Skill map.
 Project-state evidence is fail-closed:
 
 - Resolve the current/active `.scratch/<effort>` before reading effort-owned
-  SPEC, tickets, or acceptance/review evidence. Historical efforts are ignored.
+  SPEC, tickets, or review evidence. Historical efforts are ignored.
   Multiple active efforts, or historical efforts with no reliable project-level
   pointer, fail closed as `ambiguous-current-effort` instead of guessing by
-  directory order.
+  directory order. A pointer to an explicitly historical/inactive effort while
+  another effort has an active SPEC is contradictory evidence and fails closed
+  as `contradictory-current-effort`; `ask-light` does not choose between the
+  pointer and the active SPEC. A pointer to a missing effort stays
+  `ambiguous-current-effort` and is never silently re-resolved to another
+  candidate.
 - A SPEC counts as active only when it is not superseded, obsolete, archived,
   deprecated, or otherwise retired (including specs under obvious archive/old
   path segments).
 - Ticket completion is established only from explicit resolved statuses.
   Missing statuses or statuses outside the known unresolved/resolved
   vocabulary do **not** count as resolved.
-- Acceptance counts only when the resolved current effort's evidence
-  explicitly records a PASS-style verdict (`PASS`, `passed`). FAIL, BLOCKED,
-  incomplete, pending, lifecycle `complete`/`done`, missing, or unreadable
-  verdicts do **not** count as accepted.
+- Review evidence comes from the canonical `project-review` durable state:
+  `<projectRoot>/.project-review/` (or `.review-loop/` only when no
+  `.project-review/` directory exists). The durable contract — Charter,
+  `state.md`, `verdict.md` — is owned by the producer Skill; this file does not
+  redefine it. `ask-light` reads the Charter `Source:` line to prove the review
+  belongs to the resolved current effort (a `.scratch/<current-effort>` SPEC
+  citation), then reads `verdict.md` for the conclusion:
+  - Proven ownership + explicit PASS (`PASS`/`passed`, markdown emphasis
+    tolerated) → accepted.
+  - Proven ownership + FAIL/BLOCKED/rejected/pending → `acceptance-not-passed`.
+  - Proven ownership + missing/unreadable conclusion → no acceptance claim;
+    `ask-light` routes back to `project-review`, whose resume mode owns the
+    recorded state. Lifecycle values such as `complete`/`done` are never
+    verdicts.
+  - Verdicts citing another effort → ignored for current acceptance.
+  - A record whose ownership cannot be established from the Charter
+    `Source:` fails closed as `review-ownership-unknown`; `ask-light` never
+    infers PASS from an unowned verdict.
+- Legacy human-facing files (`docs/agents/acceptance.md`,
+  `docs/agents/review-verdict.md`, and similar) are produced by no runtime
+  contract here and are **not** authoritative acceptance evidence; they cannot
+  contaminate or complete the current workflow result.
 
 ## Layer A — Light Skill Map
 

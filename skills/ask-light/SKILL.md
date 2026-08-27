@@ -17,9 +17,12 @@ invocation policy after the user agrees.
 1. **Inspect.** Read enough local evidence to understand the current stage:
    repository state, `docs/agents/light-project.md`, `docs/agents/issue-tracker.md`,
    `AGENTS.md`/`CLAUDE.md`, the resolved current `.scratch/<effort>` effort state
-   (active SPEC, tickets, review/acceptance), implementation changes, and
-   review/acceptance state. Ignore historical efforts unless a project-level
-   pointer identifies them. Do not read the whole repository blindly.
+   (active SPEC, tickets), implementation changes, and the canonical
+   `.project-review/` durable review state (consumed per
+   [discovery-contract.md](references/discovery-contract.md); review evidence
+   counts only when it provably belongs to the current effort). Ignore historical
+   efforts unless a project-level pointer identifies them. Do not read the whole
+   repository blindly.
 2. **Explain.** State what the project appears to be trying to do, what stage
    it is in, what is already completed, and what is blocking or logically next.
 3. **Recommend.** Name the next Light Skill and why it fits **now**, including

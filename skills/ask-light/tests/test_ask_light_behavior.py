@@ -65,6 +65,7 @@ def write_project_state(
     ticket_statuses: list[str] | None = None,
     spec_inactive: bool = False,
     acceptance_verdict: str | None = "PASS",
+    acceptance_status: str | None = None,
 ) -> None:
     root.mkdir(parents=True, exist_ok=True)
     if initialized:
@@ -107,12 +108,82 @@ def write_project_state(
         status = "resolved" if resolved_ticket else "open"
         (issues / "01-implement.md").write_text(f"- Status: {status}\n", encoding="utf-8")
     if acceptance:
-        agents = root / "docs" / "agents"
-        agents.mkdir(parents=True, exist_ok=True)
-        if acceptance_verdict is None:
-            (agents / "acceptance.md").write_text("Acceptance record exists.\n", encoding="utf-8")
+        # Acceptance evidence uses the REAL project-review durable layout;
+        # legacy root files were never producer-owned output.
+        if acceptance_status is not None:
+            write_project_review_state(
+                root, reviewed_effort="effort", verdict_content=f"Status: {acceptance_status}\n"
+            )
+        elif acceptance_verdict is None:
+            write_project_review_state(
+                root, reviewed_effort="effort", verdict_content="Acceptance record exists.\n"
+            )
         else:
-            (agents / "acceptance.md").write_text(f"Verdict: {acceptance_verdict}\n", encoding="utf-8")
+            write_project_review_state(root, reviewed_effort="effort", verdict=acceptance_verdict)
+
+
+def write_project_review_state(
+    root: Path,
+    *,
+    reviewed_effort: str | None = None,
+    charter_source: str | None = None,
+    verdict: str | None = "PASS",
+    verdict_content: str | None = None,
+    include_charter: bool = True,
+    dir_name: str = ".project-review",
+) -> Path:
+    """Write a durable record with the REAL project-review layout.
+
+    Mirrors skills/project-review/references/WORKFLOW.md (charter/state/verdict)
+    and the Charter fields from acceptance-charter.md (`Source:` is the
+    review-ownership metadata that identifies what was reviewed).
+    """
+    review_dir = root / dir_name
+    review_dir.mkdir(parents=True, exist_ok=True)
+    if include_charter:
+        if charter_source is not None:
+            source_value = charter_source
+        elif reviewed_effort is not None:
+            source_value = f"approved effort SPEC — `.scratch/{reviewed_effort}/spec.md`"
+        else:
+            source_value = "direct user-provided brief (session request message)"
+        (review_dir / "charter.md").write_text(
+            "# Acceptance Charter\n\n"
+            "## Revision\n"
+            "- Charter revision: 1\n"
+            "- Supersedes: none\n"
+            "\n"
+            "## Acceptance baseline\n"
+            f"- Source: {source_value}\n"
+            "- Source revision or identity: commit 4f1c9ab\n"
+            "- Approval state: approved\n"
+            "\n"
+            "## Review Profile\n"
+            "- Profile: generic\n",
+            encoding="utf-8",
+        )
+    (review_dir / "state.md").write_text(
+        "# Project-review State\n"
+        "- Status: READY\n"
+        "- Round: 1\n",
+        encoding="utf-8",
+    )
+    if verdict_content is not None:
+        (review_dir / "verdict.md").write_text(verdict_content, encoding="utf-8")
+    elif verdict is not None:
+        # Real produced records wrap the value in markdown emphasis.
+        (review_dir / "verdict.md").write_text(
+            "# Verdict\n\n"
+            "- Charter revision: 1\n"
+            "- Profile: generic\n"
+            f"- Verdict: **{verdict}**\n"
+            "- Round: round-01 (final)\n"
+            "\n"
+            "## Conclusion\n"
+            "The frozen baseline is accepted.\n",
+            encoding="utf-8",
+        )
+    return review_dir
 
 
 class AskLightBehaviorTest(unittest.TestCase):
@@ -552,32 +623,6 @@ class AskLightBehaviorTest(unittest.TestCase):
             self.assertEqual(result["projectStage"], "work-in-progress")
             self.assertEqual(result["skill"], "implement")
 
-    def test_current_acceptance_pass_ignores_historical_fail(self) -> None:
-        with tempfile.TemporaryDirectory(prefix="ask-light-multi-c-") as tmp:
-            project = Path(tmp) / "project"
-            write_project_state(project, initialized=True, spec=True)
-            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"], acceptance_verdict="PASS")
-            write_effort_state(project, "previous", acceptance_verdict="FAIL")
-            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
-            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
-            self.assertEqual(result["status"], "RECOMMEND", result)
-            self.assertEqual(result["projectStage"], "accepted")
-            self.assertEqual(result["skill"], "")
-            self.assertEqual(result["next"], "no-execution")
-
-    def test_current_acceptance_fail_ignores_historical_pass(self) -> None:
-        with tempfile.TemporaryDirectory(prefix="ask-light-multi-d-") as tmp:
-            project = Path(tmp) / "project"
-            write_project_state(project, initialized=True, spec=True)
-            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"], acceptance_verdict="FAIL")
-            write_effort_state(project, "previous", acceptance_verdict="PASS")
-            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
-            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
-            self.assertEqual(result["status"], "NEED-INPUT", result)
-            self.assertEqual(result["projectStage"], "acceptance-not-passed")
-            self.assertEqual(result["skill"], "")
-            self.assertNotEqual(result["projectStage"], "accepted")
-
     def test_multiple_active_efforts_fail_closed(self) -> None:
         with tempfile.TemporaryDirectory(prefix="ask-light-multi-e-") as tmp:
             project = Path(tmp) / "project"
@@ -621,7 +666,12 @@ class AskLightBehaviorTest(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="ask-light-multi-h-") as tmp:
             project = Path(tmp) / "project"
             write_project_state(project, initialized=True, spec=True)
-            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"], acceptance_status="complete")
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
+            write_project_review_state(
+                project,
+                reviewed_effort="current",
+                verdict_content="Status: complete\n",
+            )
             context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
             result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
             self.assertEqual(result["status"], "NEED-INPUT", result)
@@ -634,8 +684,11 @@ class AskLightBehaviorTest(unittest.TestCase):
             project = Path(tmp) / "project"
             write_project_state(project, initialized=True, spec=True)
             write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
-            acceptance = project / ".scratch" / "current" / "acceptance.md"
-            acceptance.write_text("Status: complete\nVerdict: PASS\n", encoding="utf-8")
+            write_project_review_state(
+                project,
+                reviewed_effort="current",
+                verdict_content="Status: complete\nVerdict: **PASS**\n",
+            )
             context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
             result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
             self.assertEqual(result["status"], "RECOMMEND", result)
@@ -647,7 +700,8 @@ class AskLightBehaviorTest(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="ask-light-multi-i-") as tmp:
             project = Path(tmp) / "project"
             write_project_state(project, initialized=True, spec=True)
-            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"], acceptance_verdict="PASS")
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
+            write_project_review_state(project, reviewed_effort="current", verdict="PASS")
             context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
             result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
             self.assertEqual(result["status"], "RECOMMEND", result)
@@ -747,6 +801,223 @@ class AskLightBehaviorTest(unittest.TestCase):
         result = self.route("one-line recap")
         self.assertEqual(result["next"], "awaiting-approval")
         self.assertIn("read-only", result["execution"])
+
+
+    def test_project_review_integration_current_pass_is_accepted(self) -> None:
+        # Case A: real .project-review record owned by the current effort, PASS.
+        with tempfile.TemporaryDirectory(prefix="ask-light-pr-a-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
+            write_project_review_state(project, reviewed_effort="current", verdict="PASS")
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "RECOMMEND", result)
+            self.assertEqual(result["projectStage"], "accepted")
+            self.assertEqual(result["skill"], "")
+            self.assertEqual(result["next"], "no-execution")
+            self.assertIn("acceptance passed", result["completed"])
+            self.assertEqual(result["missing"], [])
+
+    def test_project_review_integration_current_fail_is_not_accepted(self) -> None:
+        # Case B: current-effort FAIL verdict must not complete the workflow.
+        with tempfile.TemporaryDirectory(prefix="ask-light-pr-b-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
+            write_project_review_state(project, reviewed_effort="current", verdict="FAIL")
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "NEED-INPUT", result)
+            self.assertEqual(result["projectStage"], "acceptance-not-passed")
+            self.assertNotEqual(result["projectStage"], "accepted")
+
+    def test_project_review_integration_blocked_verdict_is_not_accepted(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-pr-blk-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
+            write_project_review_state(project, reviewed_effort="current", verdict="BLOCKED")
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "NEED-INPUT", result)
+            self.assertEqual(result["projectStage"], "acceptance-not-passed")
+
+    def test_project_review_integration_historical_pass_does_not_accept_current(self) -> None:
+        # Case C: effort A's PASS must not accept current effort B.
+        with tempfile.TemporaryDirectory(prefix="ask-light-pr-c-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "new-effort", spec_status="active", ticket_statuses=["resolved"])
+            write_effort_state(project, "old-effort", spec_status="superseded")
+            write_project_review_state(project, charter_source="`.scratch/old-effort/spec.md`", verdict="PASS")
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "RECOMMEND", result)
+            self.assertEqual(result["projectStage"], "implementation-complete")
+            self.assertEqual(result["skill"], "project-review")
+
+    def test_project_review_integration_historical_fail_is_ignored_for_current(self) -> None:
+        # Case D: a historical effort's FAIL verdict is not current evidence.
+        with tempfile.TemporaryDirectory(prefix="ask-light-pr-d-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "new-effort", spec_status="active", ticket_statuses=["resolved"])
+            write_effort_state(project, "old-effort", spec_status="superseded")
+            write_project_review_state(project, charter_source="`.scratch/old-effort/spec.md`", verdict="FAIL")
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "RECOMMEND", result)
+            self.assertEqual(result["projectStage"], "implementation-complete")
+            self.assertEqual(result["skill"], "project-review")
+
+    def test_project_review_integration_unresolvable_ownership_fails_closed(self) -> None:
+        # Case E1: a verdict without any Charter ownership evidence.
+        with tempfile.TemporaryDirectory(prefix="ask-light-pr-e1-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
+            write_project_review_state(project, include_charter=False, verdict="PASS")
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "NEED-INPUT", result)
+            self.assertEqual(result["projectStage"], "review-ownership-unknown")
+            self.assertEqual(result["skill"], "")
+            self.assertEqual(result["next"], "no-execution")
+            self.assertIn("ownership", result["reason"].lower())
+
+        # Case E2: a Charter whose Source cites no resolvable review target.
+        with tempfile.TemporaryDirectory(prefix="ask-light-pr-e2-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
+            write_project_review_state(project, charter_source="a verbal promise from the user chat", verdict="PASS")
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "NEED-INPUT", result)
+            self.assertEqual(result["projectStage"], "review-ownership-unknown")
+            self.assertNotEqual(result["projectStage"], "accepted")
+
+    def test_stale_root_acceptance_file_cannot_contaminate_current_verdict(self) -> None:
+        # Case F: legacy/root acceptance files are not authoritative evidence.
+        with tempfile.TemporaryDirectory(prefix="ask-light-pr-f-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
+            write_project_review_state(project, reviewed_effort="current", verdict="PASS")
+            agents = project / "docs" / "agents"
+            (agents / "acceptance.md").write_text("Verdict: FAIL\n", encoding="utf-8")
+            (agents / "review-verdict.md").write_text("Verdict: BLOCKED\n", encoding="utf-8")
+            (project / "docs" / "acceptance.md").write_text("Verdict: FAIL\n", encoding="utf-8")
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "RECOMMEND", result)
+            self.assertEqual(result["projectStage"], "accepted")
+
+    def test_legacy_acceptance_paths_alone_do_not_prove_acceptance(self) -> None:
+        # Root-level acceptance files alone were never producer-owned output;
+        # they must not complete a workflow whose review was never run.
+        with tempfile.TemporaryDirectory(prefix="ask-light-pr-f2-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
+            (project / "docs" / "agents").mkdir(parents=True, exist_ok=True)
+            (project / "docs" / "agents" / "acceptance.md").write_text("Verdict: PASS\n", encoding="utf-8")
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["projectStage"], "implementation-complete")
+            self.assertEqual(result["skill"], "project-review")
+
+    def test_review_loop_fallback_directory_is_consumed_when_primary_missing(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-pr-loop-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
+            write_project_review_state(project, reviewed_effort="current", verdict="FAIL", dir_name=".review-loop")
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "NEED-INPUT", result)
+            self.assertEqual(result["projectStage"], "acceptance-not-passed")
+
+    def test_owned_charter_without_conclusion_routes_to_project_review_resume(self) -> None:
+        # A review that owns the current effort but never wrote its final
+        # conclusion has no acceptance verdict; project-review resume decides.
+        with tempfile.TemporaryDirectory(prefix="ask-light-pr-resume-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
+            write_project_review_state(project, reviewed_effort="current", verdict=None)
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["projectStage"], "implementation-complete")
+            self.assertEqual(result["skill"], "project-review")
+            self.assertNotEqual(result["projectStage"], "accepted")
+
+    def test_pointer_to_superseded_effort_with_active_effort_fails_closed(self) -> None:
+        # §11-A: contradictory current-effort evidence fails closed; ask-light
+        # does not choose between the pointer and the active SPEC.
+        with tempfile.TemporaryDirectory(prefix="ask-light-ptr-a-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "old", spec_status="superseded", ticket_statuses=["resolved"])
+            write_effort_state(project, "new", spec_status="active", ticket_statuses=["open"])
+            tracker = project / "docs" / "agents" / "light-project.md"
+            tracker.write_text(tracker.read_text(encoding="utf-8") + "- Current effort: old\n", encoding="utf-8")
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "NEED-INPUT", result)
+            self.assertEqual(result["projectStage"], "contradictory-current-effort")
+            self.assertEqual(result["skill"], "")
+            self.assertEqual(result["next"], "no-execution")
+            self.assertIn("old", result["reason"])
+            self.assertIn("new", result["reason"])
+
+    def test_pointer_to_active_effort_wins_over_superseded_neighbor(self) -> None:
+        # §11-B: an explicit pointer to an active effort is consistent
+        # evidence and remains accepted even when another effort is superseded.
+        with tempfile.TemporaryDirectory(prefix="ask-light-ptr-b-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "new", spec_status="active", ticket_statuses=["open"])
+            write_effort_state(project, "old", spec_status="superseded")
+            tracker = project / "docs" / "agents" / "light-project.md"
+            tracker.write_text(tracker.read_text(encoding="utf-8") + "- Current effort: new\n", encoding="utf-8")
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "RECOMMEND", result)
+            self.assertEqual(result["projectStage"], "work-in-progress")
+            self.assertEqual(result["skill"], "implement")
+
+    def test_pointer_to_missing_effort_is_not_reinterpreted(self) -> None:
+        # §11-C: a dangling pointer never silently re-resolves to another
+        # active effort, even when exactly one candidate exists.
+        with tempfile.TemporaryDirectory(prefix="ask-light-ptr-c-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "elsewhere", spec_status="active", ticket_statuses=["open"])
+            tracker = project / "docs" / "agents" / "light-project.md"
+            tracker.write_text(tracker.read_text(encoding="utf-8") + "- Current effort: vanished\n", encoding="utf-8")
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "NEED-INPUT", result)
+            self.assertEqual(result["projectStage"], "ambiguous-current-effort")
+
+    def test_archive_root_citation_counts_as_historical_review(self) -> None:
+        # A review citing another repo copy's archive path is clearly not the
+        # current effort's review and must not accept the current effort.
+        with tempfile.TemporaryDirectory(prefix="ask-light-pr-hist2-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
+            write_project_review_state(
+                project,
+                charter_source="release audit of `.scratch/archive/completed-feature/spec.md`",
+                verdict="PASS",
+            )
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["projectStage"], "implementation-complete")
+            self.assertEqual(result["skill"], "project-review")
 
 
 if __name__ == "__main__":

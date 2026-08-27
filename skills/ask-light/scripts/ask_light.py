@@ -60,6 +60,15 @@ ACCEPTANCE_FAIL_STATES = {
     "fail", "failed", "blocked", "rejected", "incomplete", "pending", "needs-work",
 }
 
+# Canonical review evidence is the `project-review` durable state produced by
+# skills/project-review (see its references/WORKFLOW.md). The `.review-loop/`
+# directory is a documented backwards-compatibility location; it is consumed
+# only when no `.project-review/` directory exists. Legacy human-facing paths
+# such as docs/agents/acceptance.md are not producer-owned output and never
+# establish current acceptance.
+PROJECT_REVIEW_DIRNAME = ".project-review"
+LEGACY_PROJECT_REVIEW_DIRNAME = ".review-loop"
+
 # Natural-language family navigation is explicit, not token-overlap matching.
 FAMILY_ALIASES = {
     "project": ("project", "projects"),
@@ -161,8 +170,11 @@ def _field_values(text: str, field_names: tuple[str, ...]) -> list[str]:
     such as `; Resolution evidence: ...` is not treated as a status/verdict
     value.
     """
+    # Whitespace inside the field grammar is blank-space-only so a bare
+    # heading line (for example `# Verdict`) can never bridge the separator
+    # dash/colon of the NEXT list item and fabricate a second field value.
     pattern = re.compile(
-        r"(?mi)^\s*(?:[>#-]+\s*)?(?:\*\*)?(?:{})\s*(?:\*\*)?\s*[:=.-]\s*(?:\*\*)?\s*(.+)$".format(
+        r"(?mi)^[ \t]*(?:[>#-]+[ \t]*)?(?:\*\*)?(?:{})[ \t]*(?:\*\*)?[ \t]*[:=.-][ \t]*(?:\*\*)?[ \t]*(.+)$".format(
             "|".join(re.escape(field) for field in field_names)
         )
     )
@@ -171,8 +183,89 @@ def _field_values(text: str, field_names: tuple[str, ...]) -> list[str]:
         raw = match.group(1).strip()
         part = re.split(r"[;,]", raw, maxsplit=1)[0].strip().lower()
         if part:
-            values.append(part.split()[0].strip("():-"))
+            # Real project-review records wrap values in markdown emphasis
+            # (`Verdict: **PASS**`); strip emphasis wrappers, not just parens.
+            values.append(part.split()[0].strip("():-*_"))
     return values
+
+
+def _raw_field_line(text: str, field: str) -> str:
+    """Return the full first-line value of a markdown field (no truncation).
+
+    Unlike `_field_values`, the whole line is preserved so prose/path-bearing
+    fields such as the Charter's `Source:` line stay intact. The lookahead-style
+    anchor keeps `Source revision or identity:` separate from `Source:`.
+    """
+    pattern = re.compile(
+        r"(?mi)^[ \t]*(?:[>#-]+[ \t]*)?(?:\*\*)?" + re.escape(field) + r"(?:\*\*)?[ \t]*[:=][ \t]*(.+)$"
+    )
+    match = pattern.search(text)
+    if not match:
+        return ""
+    return match.group(1).strip().strip("`*_ \t")
+
+
+def _reviewed_scratch_references(source_value: str) -> list[str]:
+    """Extract effort names cited by a Charter Source line.
+
+    Ownership uses this repository's own convention: an effort lives at
+    `.scratch/<name>` and is cited by SPEC path. A citation that names no
+    `.scratch` target cannot prove which effort was reviewed.
+    """
+    return re.findall(r"\.scratch[/\\]([A-Za-z0-9._\-]+)", source_value)
+
+
+def _project_review_dir(root: Path) -> Path | None:
+    primary = root / PROJECT_REVIEW_DIRNAME
+    if primary.is_dir():
+        return primary
+    legacy = root / LEGACY_PROJECT_REVIEW_DIRNAME
+    return legacy if legacy.is_dir() else None
+
+
+def _classify_review_ownership(
+    review_dir: Path,
+    root: Path,
+    current_effort: str | None,
+) -> tuple[str, list[str]]:
+    """Decide whether a durable review record belongs to the current effort.
+
+    Returns ("current"|"historical"|"unresolvable", gaps). A Charter whose
+    Source cites exactly the resolved current effort is "current"; one citing
+    exactly another named `.scratch` target is "historical"; anything else —
+    missing Charter, missing pointer, mixed citations — is unresolvable and
+    must fail closed rather than be guessed.
+    """
+    charter_text = _small_text(review_dir / "charter.md")
+    if not charter_text or not current_effort:
+        gap = (
+            f"`{PROJECT_REVIEW_DIRNAME}/charter.md` is missing or unreadable, so "
+            f"the review's ownership cannot be established; ask-light does not "
+            f"apply a verdict of unknown ownership to the current effort."
+            if not charter_text and review_dir.name == PROJECT_REVIEW_DIRNAME
+            else f"The durable `{LEGACY_PROJECT_REVIEW_DIRNAME}/charter.md` record is missing or "
+            "unreadable, so the review's ownership cannot be established."
+        )
+        return "unresolvable", [gap]
+    source_value = _raw_field_line(charter_text, "Source")
+    references = {name for name in _reviewed_scratch_references(source_value)}
+    if references == {current_effort}:
+        return "current", []
+    if len(references) == 1:
+        other = next(iter(references))
+        return "historical", [
+            f"The durable review record cites `.scratch/{other}` as its reviewed source, "
+            f"not the resolved current effort '{current_effort}'."
+        ]
+    gaps = [
+        f"`{PROJECT_REVIEW_DIRNAME}/charter.md` records "
+        f"'{source_value or '(no Source value)'}' as its acceptance baseline source, "
+        f"which does not identify a single reviewed effort; ask-light cannot prove it "
+        f"belongs to the current effort '{current_effort}' and fails closed.",
+    ]
+    if review_dir.name == LEGACY_PROJECT_REVIEW_DIRNAME:
+        gaps[0] = gaps[0].replace(PROJECT_REVIEW_DIRNAME, LEGACY_PROJECT_REVIEW_DIRNAME)
+    return "unresolvable", gaps
 
 
 def _acceptance_verdicts(text: str) -> list[str]:
@@ -212,13 +305,13 @@ def _is_active_spec(path: Path, root: Path) -> bool:
     return True
 
 
+# Effort identity comes from Light-owned planning artifacts. Review results do
+# not identify an effort; they live in the project-level `.project-review/`
+# durable state and are linked back to an effort through the Charter Source.
 EFFORT_EVIDENCE_PATTERNS = (
     "spec.md",
     "map.md",
     "issues/*.md",
-    "acceptance*.md",
-    "review*/verdict*.md",
-    "project-review*.md",
 )
 
 
@@ -284,60 +377,75 @@ def _explicit_effort_references(root: Path) -> set[str]:
     return references
 
 
-def _resolve_current_effort(root: Path) -> tuple[str | None, bool, list[str]]:
+def _resolve_current_effort(root: Path) -> tuple[str | None, str, list[str]]:
     """Resolve the current/active `.scratch` effort before reading tickets.
 
-    Returns (current_effort_name, ambiguous, gaps). The resolver prefers an
-    explicit project-level pointer, then a single active SPEC effort, then a
-    single non-historical effort with evidence. It fails closed on multiple
-    active/current candidates rather than guessing by directory order.
+    Returns (current_effort_name, failure_stage, gaps). `failure_stage` is
+    empty on success and otherwise one of the fail-closed stages:
+    "ambiguous-current-effort" or "contradictory-current-effort". The resolver
+    prefers an explicit project-level pointer, then a single active SPEC
+    effort, then a single non-historical effort with evidence. It never
+    guesses by directory order, and a pointer that contradicts active SPEC
+    evidence fails closed instead of silently picking either side.
     """
     scratch = root / ".scratch"
     if not scratch.is_dir():
-        return None, False, []
+        return None, "", []
 
     efforts = [
         child for child in sorted(scratch.iterdir())
         if child.is_dir() and _effort_has_evidence(child)
     ]
     if not efforts:
-        return None, False, []
+        return None, "", []
 
     explicit = _explicit_effort_references(root)
     if explicit:
         if len(explicit) > 1:
             names = ", ".join(sorted(explicit))
-            return None, True, [
+            return None, "ambiguous-current-effort", [
                 f"Multiple project-level current-effort pointers were found ({names}); "
                 "the current project workflow cannot be established reliably."
             ]
         name = next(iter(explicit))
         candidate = scratch / name
         if not candidate.is_dir() or not _effort_has_evidence(candidate):
-            return None, True, [
+            return None, "ambiguous-current-effort", [
                 f"Project-level current-effort pointer '{name}' does not match a readable "
                 ".scratch effort; the current workflow cannot be established reliably."
             ]
-        return candidate.name, False, []
+        if _is_historical_effort(candidate, root):
+            competing = sorted(
+                effort.name for effort in efforts
+                if effort.name != name and _is_active_spec(effort / "spec.md", root)
+            )
+            if competing:
+                return None, "contradictory-current-effort", [
+                    f"Project-level current-effort pointer '{name}' targets an effort whose SPEC "
+                    f"records an inactive/historical state, while these efforts have active SPECS: "
+                    f"{', '.join(competing)}. Contradictory current-effort evidence must be resolved "
+                    "(update the pointer or the SPEC states); ask-light does not choose between them."
+                ]
+        return candidate.name, "", []
 
     active = [effort for effort in efforts if _is_active_spec(effort / "spec.md", root)]
     if active:
         if len(active) > 1:
             names = ", ".join(sorted(effort.name for effort in active))
-            return None, True, [
+            return None, "ambiguous-current-effort", [
                 f"Multiple active Light efforts were found ({names}). "
                 "The current project workflow cannot be determined safely."
             ]
-        return active[0].name, False, []
+        return active[0].name, "", []
 
     non_historical = [effort for effort in efforts if not _is_historical_effort(effort, root)]
     if len(non_historical) == 1:
-        return non_historical[0].name, False, []
+        return non_historical[0].name, "", []
 
     root_active_spec = _root_active_spec(root)
     if len(non_historical) > 1:
         names = ", ".join(sorted(effort.name for effort in non_historical))
-        return None, True, [
+        return None, "ambiguous-current-effort", [
             f"Multiple non-historical Light efforts were found ({names}) without a single "
             "active SPEC. The current project workflow cannot be determined safely."
         ]
@@ -345,17 +453,17 @@ def _resolve_current_effort(root: Path) -> tuple[str | None, bool, list[str]]:
     if root_active_spec or len(efforts) > 1:
         if len(efforts) == 1:
             name = efforts[0].name
-            return None, True, [
+            return None, "ambiguous-current-effort", [
                 f"The only Light effort '{name}' is historical/inactive, so it cannot be "
                 "selected as current without a project-level pointer."
             ]
         names = ", ".join(sorted(effort.name for effort in efforts))
-        return None, True, [
+        return None, "ambiguous-current-effort", [
             f"Light efforts exist ({names}) but none is active/current and no reliable "
             "project-level pointer identifies the current effort."
         ]
 
-    return None, False, []
+    return None, "", []
 
 
 def inspect_project_state(project_root: Path) -> dict[str, Any]:
@@ -409,11 +517,11 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
 
     # Resolve the current/active effort before reading effort-owned evidence so
     # historical .scratch efforts cannot contaminate the current workflow state.
-    current_effort, effort_ambiguous, effort_gaps = _resolve_current_effort(root)
+    current_effort, effort_failure, effort_gaps = _resolve_current_effort(root)
     evidence["currentEffort"] = current_effort or ""
-    evidence["ambiguousCurrentEffort"] = effort_ambiguous
-    if effort_ambiguous:
-        evidence["stage"] = "ambiguous-current-effort"
+    evidence["ambiguousCurrentEffort"] = bool(effort_failure)
+    if effort_failure:
+        evidence["stage"] = effort_failure
         evidence["skill"] = ""
         evidence["reason"] = (
             effort_gaps[0]
@@ -473,24 +581,25 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
         and not evidence["unresolvedTickets"]
     )
 
-    # Acceptance/review evidence: project-level verdict paths plus current-effort
-    # owned handoff/verdict paths. Historical effort acceptance is not read.
-    acceptance_candidates = [
-        root / "docs" / "agents" / "acceptance.md",
-        root / "docs" / "acceptance.md",
-        root / "docs" / "agents" / "review-verdict.md",
-    ]
-    scratch_acceptance = []
-    if current_effort:
-        effort_dir = root / ".scratch" / current_effort
-        scratch_acceptance = [
-            path
-            for pattern in ("acceptance*.md", "review*/verdict*.md", "project-review*.md")
-            for path in (effort_dir.glob(pattern) if _has_glob(effort_dir, pattern) else [])
-        ]
-    acceptance_paths = [path for path in [*acceptance_candidates, *scratch_acceptance] if path.is_file()]
-    evidence["hasAcceptanceEvidence"] = bool(acceptance_paths)
-    evidence["acceptancePaths"] = [str(path.relative_to(root)) for path in acceptance_paths[:10]]
+    # Acceptance/review evidence: the canonical `project-review` durable state.
+    # The record is authoritative only when the Charter's Source proves it
+    # reviewed the resolved current effort. Verdicts from historical efforts
+    # are ignored for current acceptance; records of unprovable ownership fail
+    # closed. Legacy human-facing verdict files are never aggregated here.
+    review_dir = _project_review_dir(root)
+    review_ownership = ""
+    review_gaps: list[str] = []
+    acceptance_paths: list[Path] = []
+    if review_dir is not None:
+        review_ownership, review_gaps = _classify_review_ownership(review_dir, root, current_effort)
+        if review_ownership == "current":
+            conclusion = review_dir / "verdict.md"
+            if conclusion.is_file():
+                acceptance_paths = [conclusion]
+                evidence["hasAcceptanceEvidence"] = True
+                evidence["acceptancePaths"] = [str(conclusion.relative_to(root))]
+        elif review_gaps:
+            evidence["gaps"].extend(review_gaps)
 
     acceptance_pass = 0
     acceptance_fail = 0
@@ -559,6 +668,23 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
         evidence["completed"] = ["Light project contract", "active SPEC", "ticket files present"]
         evidence["missing"] = ["reliable ticket completion state"]
         evidence["gaps"] = [evidence["reason"]]
+        return evidence
+
+    # A durable review whose ownership cannot be proven for the current effort
+    # fails closed even though implementation looks finished.
+    if review_dir is not None and review_ownership == "unresolvable":
+        reason = (
+            "A `.project-review` durable record exists but its ownership cannot be established from the "
+            "Charter's `Source:` line, so `ask-light` cannot prove the verdict belongs to the current effort. "
+            f"Fail closed: link the review by recording the reviewed SPEC path "
+            f"(`.scratch/{current_effort or '<effort>'}/spec.md`) in the Charter `Source:`."
+        )
+        evidence["stage"] = "review-ownership-unknown"
+        evidence["skill"] = ""
+        evidence["reason"] = reason
+        evidence["completed"] = ["Light project contract", "active SPEC", "tickets resolved"]
+        evidence["missing"] = ["review ownership proven for the current effort"]
+        evidence["gaps"] = [*evidence["gaps"], reason]
         return evidence
 
     if not evidence["hasAcceptanceEvidence"]:
@@ -1006,7 +1132,8 @@ def next_result(roots: list[dict[str, Any]], context: dict[str, Any], host: str,
     # generic NEED-INPUT or unrelated logical route.
     if project_state.get("stage") in {
         "accepted", "tickets-unknown", "acceptance-not-passed", "acceptance-unknown",
-        "ambiguous-current-effort",
+        "ambiguous-current-effort", "contradictory-current-effort",
+        "review-ownership-unknown",
     }:
         status = "RECOMMEND" if project_state.get("stage") == "accepted" else "NEED-INPUT"
         result = base_result("next", status, project_state.get("gaps", []))
