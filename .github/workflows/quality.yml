@@ -21,40 +21,25 @@ jobs:
         run: |
           set -euo pipefail
           python -m unittest discover -s tests -p "test_*.py"
-          python -m compileall -q skills/learn-anything skills/manuscript-ops skills/kanban-worker/tests tests/test_collection_contract.py
+          python -m compileall -q skills tests
           for f in \
             skills/ask-light/tests/test_ask_light_contract.py \
             skills/kb-init/tests/test_kb_init_contract.py \
             skills/project-init/tests/test_project_init_contract.py \
             skills/project-init/tests/test_project_init_behavior.py \
-            skills/recap/tests/test_recap_contract.py \
-            skills/recap/tests/test_recap_output_contract.py \
             skills/language-learning/tests/test_language_learning_contract.py \
             skills/kanban-worker/tests/test_kanban_worker_contract.py \
             skills/kanban-worker/tests/test_kanban_worker_behavior.py \
-            skills/review-loop/tests/review_protocol_helpers.py \
-            skills/review-loop/tests/test_agent_skill_profile_contract.py \
-            skills/review-loop/tests/test_agent_skill_profile_behavior.py \
-            skills/review-loop/tests/test_generic_profile_contract.py \
-            skills/review-loop/tests/test_generic_profile_behavior.py \
-            skills/review-loop/tests/test_manuscript_profile_contract.py \
-            skills/review-loop/tests/test_manuscript_profile_behavior.py \
-            skills/review-loop/tests/test_software_profile_contract.py \
-            skills/review-loop/tests/test_software_profile_behavior.py \
-            skills/review-loop/tests/test_specification_profile_contract.py \
-            skills/review-loop/tests/test_specification_profile_behavior.py \
+            skills/review-loop/tests/test_review_loop_contract.py \
+            skills/review-loop/tests/test_review_loop_behavior.py \
           ; do
             python "$f"
           done
-      - name: Run ask-light scanner behavior (requires pwsh)
+      - name: Run ask-light router behavior
         shell: bash
         run: |
           set -euo pipefail
-          if command -v pwsh >/dev/null 2>&1; then
-            python skills/ask-light/tests/test_ask_light_behavior.py
-          else
-            echo "pwsh not available; ask-light behavior suite skipped (structural contract still enforced)"
-          fi
+          python skills/ask-light/tests/test_ask_light_behavior.py
       - name: Retired package boundary
         shell: bash
         run: |

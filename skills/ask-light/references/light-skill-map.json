@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "collection": "LightDevCoder/skills",
+  "taskKindRoutes": {
+    "bug": "diagnosing-bugs",
+    "debugging": "diagnosing-bugs",
+    "diagnosis": "diagnosing-bugs",
+    "clarification": "clarify",
+    "initialization": "project-init",
+    "implementation": "implement",
+    "specification": "project-spec",
+    "ticketing": "project-tickets",
+    "review": "code-review",
+    "final-review": "project-review"
+  },
+  "skills": [
+    {"name":"agent-config","patterns":["route .*agent|agent configuration|configur.*agents|parallel .*agent"]},
+    {"name":"ask-light","patterns":["which skill|what skill|don.t know which skill|choose .*skill"]},
+    {"name":"clarify","patterns":["clarif.*(idea|requirement|plan)|fuzzy .*idea|vague .*idea|ambiguous .*idea"]},
+    {"name":"code-review","patterns":["review .*diff|review .*branch|code review|review .*code changes|review .*working tree|review .*work-in-progress"]},
+    {"name":"decision-map","patterns":["decision map|across sessions|multi-session.*decision|large .*foggy|huge .*foggy|foggy .*multi-session"]},
+    {"name":"diagnosing-bugs","patterns":["investigate .*bug|diagnos.*bug|debug .*regression|hard bug|bug .*regression|performance regression"]},
+    {"name":"eli5","patterns":["like i.m five|like i am five|eli5|explain .*simply"]},
+    {"name":"generic-review","patterns":["generic review|review .*artifact|review .*document|review .*draft|review .*content"]},
+    {"name":"handoff","patterns":["handoff|hand off|transfer .*context"]},
+    {"name":"implement","patterns":["implement .*ticket|build .*ticket|execute .*work item|ticket .*ready|ready .*unblocked|unblocked .*ticket"]},
+    {"name":"kanban-worker","patterns":["kanban worker|work .*kanban"]},
+    {"name":"kb-init","patterns":["initialize .*knowledge base|set up .*knowledge base|kb init"]},
+    {"name":"language-learning","patterns":["practice .*conversation|language practice|learn .*language|japanese conversation"]},
+    {"name":"learn-anything","patterns":["learn .*from .*source|turn .*source .*skill|learn anything"]},
+    {"name":"manuscript-ops","patterns":["manuscript workflow|set up .*manuscript|book workflow"]},
+    {"name":"project-clarify","patterns":["clarify .*project|project .*unclear requirement"],"precedencePatterns":["\\b(project|repo|repository)\\b"]},
+    {"name":"project-init","patterns":["initialize .*repo|initialize .*project|new project setup|bootstrap .*repo"]},
+    {"name":"project-review","patterns":["project .*actually complete|final acceptance|final review|issue .*verdict|implementation complete.*acceptance|needs acceptance"],"precedencePatterns":["final acceptance|final review|actually complete|\\bverdict\\b|needs acceptance"]},
+    {"name":"project-spec","patterns":["turn .*requirements .*spec|project spec|write .*specification"]},
+    {"name":"project-tickets","patterns":["break .*spec .*tickets|split .*spec .*tickets|implementation tickets|spec exists.*slic|spec .*needs slicing|slice .*spec"]},
+    {"name":"prototype","patterns":["prototype|experiment .*design|try .*ui|need .*experiment|experiment .*decid"]},
+    {"name":"recap","patterns":["one-line recap|one line recap|recap .*session"]},
+    {"name":"release-workflow","patterns":["release workflow|publish .*release|cut .*release|ready to publish"]},
+    {"name":"research","patterns":["research .*question|investigate .*source|primary sources|missing external fact|external fact|fact .*outside"]},
+    {"name":"resolving-merge-conflicts","patterns":["merge conflict|rebase conflict"]},
+    {"name":"review-loop","patterns":["review loop|repair .*re-review|review convergence"]},
+    {"name":"socratic","patterns":["socratic engine|decision frontier"]},
+    {"name":"tdd","patterns":["test driven|red green refactor|tdd"]},
+    {"name":"teach","patterns":["teach me|multi-session learning"]},
+    {"name":"to-questionnaire","patterns":["questionnaire|ask .*stakeholder|another person .*answer|information .*another person|held by another person|knowledge holder"]},
+    {"name":"wait-what","patterns":["wait what|didn.t understand|explain that again|previous explanation.*not|did not land"]},
+    {"name":"wizard","patterns":["setup wizard|human-only steps|credentials wizard|walk me through .*setup|walk me through .*credentials|set up .*credentials"]},
+    {"name":"writing-for-agents","patterns":["write .*agents.md|write .*skill instructions|writing for agents"]}
+  ],
+  "workflows": [
+    {"id":"new-project-initialization","projectTypes":["generic","software","manuscript","research","skill-development","knowledge-base","data-analysis"],"taskKinds":["initialization","setup","discovery"],"patterns":["initialize|bootstrap|new project"],"steps":[
+      {"skill":"project-init","expectedInput":"confirmed preset, inspected host instruction style, and target repository root","expectedOutput":"validated Light project configuration, issue tracker contract, and instruction pointer","handoffArtifact":"bootstrap report with exact created, updated, and preserved paths","stopCondition":"stop after the bootstrap report; the user selects any later capability"}
+    ],"finalAuthority":"project-init","stoppingBoundary":"Stop after the bootstrap report; later user-invoked stages remain separate."},
+    {"id":"software-feature","projectTypes":["software"],"taskKinds":["feature","implementation","specification"],"patterns":["feature|software|implementation"],"steps":[
+      {"skill":"project-spec","expectedInput":"clarified goal, constraints, decisions, and project contract","expectedOutput":"traceable SPEC with acceptance criteria","handoffArtifact":"approved SPEC artifact","stopCondition":"stop for user approval before ticket slicing"},
+      {"skill":"project-review","expectedInput":"frozen SPEC and its acceptance source","expectedOutput":"specification findings and durable review verdict","handoffArtifact":"SPEC review evidence","stopCondition":"stop at the SPEC review result before ticket creation"},
+      {"skill":"project-tickets","expectedInput":"approved SPEC and local tracker contract","expectedOutput":"dependency-ordered tracer-bullet tickets","handoffArtifact":"ticket graph with one unblocked frontier item","stopCondition":"do not automatically start implement"},
+      {"skill":"implement","expectedInput":"one ready, unblocked ticket plus project context","expectedOutput":"bounded diff and focused verification evidence","handoffArtifact":"implementation handoff for the ticket scope","stopCondition":"stop at the ticket boundary and hand the result to review"},
+      {"skill":"code-review","expectedInput":"fixed baseline, bounded diff, repository standards, and originating SPEC","expectedOutput":"separate Standards and Spec findings","handoffArtifact":"specialist code-review report","stopCondition":"stop after findings; code-review does not accept the change"},
+      {"skill":"project-review","expectedInput":"implementation snapshot, tests, specialist findings, and acceptance source","expectedOutput":"final PASS, FAIL, or BLOCKED verdict","handoffArtifact":"durable project-review verdict and evidence record","stopCondition":"stop at the final verdict"},
+      {"skill":"handoff","expectedInput":"accepted result or precise blocker plus artifact paths","expectedOutput":"portable closeout or resume context","handoffArtifact":"handoff document in the operating-system temporary directory","stopCondition":"stop after the handoff; the user decides whether to resume"}
+    ],"finalAuthority":"project-review","stoppingBoundary":"Stop at each handoff; project-review owns PASS, FAIL, or BLOCKED."},
+    {"id":"bug-diagnosis","projectTypes":["software"],"taskKinds":["bug","debugging","diagnosis"],"patterns":["bug|debug|regression|error"],"steps":[
+      {"skill":"diagnosing-bugs","expectedInput":"reported symptom and access to a red-capable reproduction loop","expectedOutput":"minimized reproduction, supported root cause, and bounded repair direction","handoffArtifact":"diagnosis record with the exact reproduction command","stopCondition":"stop if no red-capable loop can be established"},
+      {"skill":"implement","expectedInput":"confirmed root cause and one bounded repair item","expectedOutput":"repair diff and regression test evidence","handoffArtifact":"verified repair handoff","stopCondition":"stop at the bounded repair scope"},
+      {"skill":"code-review","expectedInput":"fixed baseline, repair diff, standards, and bug acceptance source","expectedOutput":"Standards and Spec findings","handoffArtifact":"specialist code-review report","stopCondition":"stop after findings; code-review does not issue acceptance"},
+      {"skill":"project-review","expectedInput":"reproduction, repair, regression evidence, and specialist findings","expectedOutput":"final PASS, FAIL, or BLOCKED verdict","handoffArtifact":"durable project-review verdict","stopCondition":"stop at the final verdict"}
+    ],"finalAuthority":"project-review","stoppingBoundary":"Stop after one bounded diagnosis and repair reaches project-review."},
+    {"id":"manuscript-project","projectTypes":["manuscript"],"taskKinds":["initialization","feature","workflow"],"patterns":["manuscript|book|editorial"],"steps":[
+      {"skill":"project-init","expectedInput":"approved manuscript brief, target root, and inspected host instruction style","expectedOutput":"mapped Light project state and tracker contract","handoffArtifact":"manuscript bootstrap report","stopCondition":"stop after initialization and wait for explicit resume"},
+      {"skill":"manuscript-ops","expectedInput":"initialized root, source authority, routing dimensions, and output requirements","expectedOutput":"routing snapshot, governed batches, locked sources, formats, and QA evidence","handoffArtifact":"frozen manuscript candidate plus artifact-bound QA record","stopCondition":"stop at each lock, dependency, or explicit handoff boundary"},
+      {"skill":"project-review","expectedInput":"frozen manuscript candidate, review profile, source evidence, and format QA","expectedOutput":"final PASS, FAIL, or BLOCKED verdict","handoffArtifact":"durable manuscript acceptance record","stopCondition":"stop at the final verdict"}
+    ],"finalAuthority":"project-review","stoppingBoundary":"Stop at each explicit handoff; project-review owns final acceptance."},
+    {"id":"source-to-skill","projectTypes":["skill-development"],"taskKinds":["skill-development","learning"],"patterns":["source|skill"],"steps":[
+      {"skill":"learn-anything","expectedInput":"source material with provenance and repeatable method evidence","expectedOutput":"internal Method Contract, not-promoted summary, or precise BLOCKED gaps","handoffArtifact":"complete Method Contract when promotion is justified","stopCondition":"stop at method_contract, not_promoted, or BLOCKED"},
+      {"skill":"project-review","expectedInput":"built package, Method Contract, admission source, and verification evidence","expectedOutput":"package acceptance PASS, FAIL, or BLOCKED verdict","handoffArtifact":"durable package review verdict","stopCondition":"stop at the verdict before admission or collection synchronization"}
+    ],"finalAuthority":"project-review","stoppingBoundary":"Stop after the source-derived capability is reviewed."},
+    {"id":"final-review","projectTypes":["generic","software","manuscript","research","skill-development","knowledge-base","data-analysis"],"taskKinds":["final-review"],"patterns":["final|acceptance|verdict"],"steps":[
+      {"skill":"project-review","expectedInput":"frozen acceptance source, current artifact snapshot, and required specialist evidence","expectedOutput":"durable PASS, FAIL, or BLOCKED verdict","handoffArtifact":"final project-review record","stopCondition":"stop at the durable verdict"}
+    ],"finalAuthority":"project-review","stoppingBoundary":"Stop at the durable PASS, FAIL, or BLOCKED verdict."}
+  ]
+}

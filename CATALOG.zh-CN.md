@@ -33,7 +33,7 @@
 
 ### ask-light
 
-- **作用：** 检查当前 host 并推荐一个下一 Skill 或一个有边界 workflow recipe，不执行推荐。
+- **作用：** 通过 Light 自有语义地图判断意图，独立验证 host availability，再推荐一个下一 Skill 或有边界 recipe。
 - **调用：** 仅 user-invoked；永不执行推荐结果。
 - **包：** [skills/ask-light/](skills/ask-light/)
 - **状态：** 第一方已准入；REFACTOR（在完整 Skill map 建好后最后构建）。
@@ -42,7 +42,7 @@
 
 ### clarify
 
-- **作用：** 面向模糊想法/需求/流程的轻量独立澄清，不产生正式 SPEC。
+- **作用：** 一次调用启动面向模糊想法/需求/流程的连续澄清，不产生正式 SPEC。
 - **调用：** 仅 user-invoked。
 - **包：** [skills/clarify/](skills/clarify/)
 - **状态：** 第一方已准入；ADAPT（Matt `grill-me` → Light，经 `socratic`）。
@@ -168,10 +168,10 @@
 
 ### project-init
 
-- **作用：** 从最小 preset 初始化已确认项目，保留既有指令并验证路径。
+- **作用：** 幂等建立下游 Project Skills 消费的稳定 Light 项目与 tracker 契约。
 - **调用：** 仅 user-invoked。
 - **包：** [skills/project-init/](skills/project-init/)
-- **状态：** 第一方已准入；REFACTOR（完整澄清已移至 `project-clarify`）。
+- **状态：** 第一方已准入；REFACTOR（仓库 bootstrap；完整澄清仍归 `project-clarify`）。
 - **证据：** [skills/project-init/tests/](skills/project-init/tests/)。
 - **安装路径：** host 认可的 Skills root 下的 `skills/project-init/`。
 
@@ -213,11 +213,11 @@
 
 ### recap
 
-- **作用：** 用严格一行总结当前 Agent session，不改历史也不继续任务。
+- **作用：** 用一句简洁文本展示当前 session，不替换或压缩对话历史。
 - **调用：** 仅 user-invoked；唯一入口为 `$recap`。
 - **包：** [skills/recap/](skills/recap/)
-- **状态：** 第一方已准入；纯提示型快速通道 `PASS`，v0.1.2 发布。
-- **证据：** [skills/recap/tests/](skills/recap/tests/)。
+- **状态：** 第一方已准入；v0.1.2 发布的是旧版；仅手动触发的修订仍待当前候选验收，尚未发布。
+- **证据：** 当前修订由 [tests/test_functional_closure.py](tests/test_functional_closure.py) 验证；冻结历史测试保留在 [skills/recap/tests/](skills/recap/tests/)。
 - **安装路径：** host 认可的 Skills root 下的 `skills/recap/`。
 
 ### release-workflow
@@ -258,7 +258,7 @@
 
 ### socratic
 
-- **作用：** 核心澄清引擎——动态、decision-owned 的追问，非固定问卷。
+- **作用：** 核心澄清引擎——内部 decision frontier、轻量建议与共同理解确认。
 - **调用：** Model-invoked（供其他 Skill 调用的引擎）。
 - **包：** [skills/socratic/](skills/socratic/)
 - **状态：** 第一方已准入；ADAPT（Matt `grilling`）。

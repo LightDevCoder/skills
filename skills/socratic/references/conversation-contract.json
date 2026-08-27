@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "internalState": [
+    "currentUnderstanding",
+    "newlyResolvedDecisions",
+    "openDecisions",
+    "dependencies",
+    "frontier",
+    "nextStep"
+  ],
+  "projection": {
+    "frontierDecisionLimit": 1,
+    "acknowledgeLatestEvidence": true,
+    "showMeaningfulTradeoffs": true,
+    "recommendWhenSupported": true,
+    "preserveUserDecision": true
+  },
+  "completion": {
+    "requiresSharedUnderstandingConfirmation": true,
+    "confirmationState": "done",
+    "correctionState": "active"
+  },
+  "persistenceOwner": "decision-map",
+  "factRoutes": {
+    "externalFact": "research",
+    "needsExperiment": "prototype",
+    "heldByAnotherPerson": "to-questionnaire"
+  }
+}

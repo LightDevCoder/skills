@@ -125,7 +125,7 @@ Report the published paths, the blocker graph, and the current frontier
 ## Wayfinding compatibility
 
 The published layout is intentionally parseable by the Wayfinding operations
-defined in `docs/agents/issue-tracker.md:21`:
+defined in the configured `docs/agents/issue-tracker.md` contract:
 
 - **Blocking** — `Blocked by: NN, NN` near the top. A ticket is unblocked
   when every file it lists is `resolved`.

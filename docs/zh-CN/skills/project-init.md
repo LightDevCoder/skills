@@ -6,7 +6,7 @@
 
 ## 解决什么问题
 
-`project-init` 检查目标目录，根据已确认的 preset 写入最小项目指导，并验证写入路径；它是初始化辅助工具，不是项目管理器。
+`project-init` 建立后续 Light Project Skills 真正消费的稳定仓库配置。它保留既有指令与手工备注，只创建有消费者的契约，并可安全重复运行。
 
 ## 何时使用 / 不使用
 
@@ -20,13 +20,15 @@ $project-init
 
 ## 前置条件、输入和输出
 
-默认目标是当前目录。写入前读取根部 `AGENTS.md`/`CLAUDE.md`、README、manifest、项目文档和当前状态。输入包括项目类型、用户目标、输出物、协作方式、约束和 review level；已有 brief 能回答时不重复询问。它直接问少量短问题，不调用独立澄清 Skill；深度 discovery 属于 `$clarify`/`$project-clarify`/`$decision-map`。
+默认目标是当前目录。写入前读取根部指令、README、manifest、项目文档和当前状态。输入包括项目类型、目标、输出、协作、约束、相关 Skills、issue tracker、domain context locator、review profile/acceptance strategy、working area，以及由当前 host 证据确认的 instruction filename。现有 tracker adapter 只支持 `.scratch/<effort>/issues`；其他 locator 需要新增 adapter。两个 preset 都合理时，先比较影响、给出推荐并让用户选择。深度 discovery 属于 `$clarify`/`$project-clarify`/`$decision-map`。
 
-输出包括 preset 或已确认的 fallback、唯一 instruction target、变更路径、能力可用性、验证结果和后续 Skill 建议；不得创建 tickets、implementation plan、final-review record 或竞争性的 specification。
+输出包含一个 instruction pointer、`docs/agents/light-project.md`、`docs/agents/issue-tracker.md`，以及精确的 created/updated/preserved 报告；不创建 triage labels、tickets、implementation plan、final-review record 或竞争性的 specification。
+
+事务式 bootstrap helper 依赖 Python 3.9 或更高版本；缺少该 runtime 时，在任何写入前返回 `BLOCKED`。
 
 ## 成功与 `BLOCKED`
 
-成功要求只创建/更新一个 instruction target，保留旧内容，只有一个 `## Project Initialization` 段落，路径位于目标根内，重复执行保持幂等。根目录不存在、指令冲突无法安全决定、preset 有歧义、fallback 缺少确认或证据时返回 `BLOCKED`。拒绝或未确认的 fallback 不得写入。
+成功要求唯一 instruction pointer 指向稳定契约、两个 managed contract 位于目标根内、三个目标解析为不同文件、手工内容被保留，重复运行只更新一个 managed block 且不复制。根目录不存在、preset 尚未选择或 fallback 缺少确认/证据时返回 `BLOCKED`。
 
 ## 组合和停止点
 

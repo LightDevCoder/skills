@@ -60,7 +60,7 @@ Session: `$decision-map .scratch/skills-refactor` (no ticket arg — takes front
 3. Status → `resolved`, appends to map:
    ```markdown
    ## Decisions so far
-   - [Domain boundary](issues/01-domain-boundary.md) — workflow-scoped, glossary pinned
+   - `Domain boundary → issues/01-domain-boundary.md` — workflow-scoped, glossary pinned
    ```
 4. Graduates fog: `Execution routing` patch becomes ticket
    `05-agent-config-design.md` (Type: prototype, Blocked by: 03). Removes that
@@ -87,8 +87,8 @@ After several sessions, all tickets resolved and fog empty:
 
 ```markdown
 ## Decisions so far
-- [Domain boundary](issues/01-domain-boundary.md) — ...
-- [Clarification family shape](issues/02-clarification-family-shape.md) — socratic base + three entries
+- `Domain boundary → issues/01-domain-boundary.md` — ...
+- `Clarification family shape → issues/02-clarification-family-shape.md` — socratic base + three entries
 - ...
 
 ## Not yet specified
@@ -102,4 +102,3 @@ After several sessions, all tickets resolved and fog empty:
 
 Recommend: `Next: $project-spec using the map's Decisions so far and ticket
 answers; no new clarification needed.` Stop.
-

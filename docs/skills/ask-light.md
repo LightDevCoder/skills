@@ -2,16 +2,16 @@
 
 [中文指南](../zh-CN/skills/ask-light.md)
 
-The scanner and output contract are defined by
+The router and output contract are defined by
 [skills/ask-light/SKILL.md](../../skills/ask-light/SKILL.md) and
 [discovery-contract.md](../../skills/ask-light/references/discovery-contract.md).
 
 ## What it solves
 
-`ask-light` inspects visible Skill metadata and availability, then reports one
-best next Skill or one bounded workflow recipe. It keeps duplicate source
-identities, reads bodies only for a shortlist, reports missing metadata, and
-preserves invocation policy.
+`ask-light` first maps intent through the Light-owned 33-Skill semantic map,
+then checks whether that selection is available on the active host. Optional UI
+metadata never hides a known package, and generic host roots are not accepted
+as first-party provenance.
 
 ## Modes and boundaries
 
@@ -32,11 +32,14 @@ reintroduce `project-workflow`.
 ## Inputs and outputs
 
 Supply goal, artifacts, blockers, project type, task kind, actual host
-availability/readable roots, and invocation control. Metadata is read first;
-body/reference reads are bounded. `RECOMMEND` includes reason and invocation.
-Missing context returns `NEED-INPUT`; an unavailable required package or
-unreadable metadata returns `BLOCKED` with an accurate gap. A private
-`skills-3rdParty` root must never be described as visible when it is absent.
+availability/readable roots, and invocation control. Logical routing comes from
+`light-skill-map.json`; package reads only prove host availability and local
+pointer integrity. Missing context returns `NEED-INPUT`; an unavailable
+selection returns `BLOCKED` while preserving the logical recommendation.
+
+The executable router requires Python 3.9 or newer. The PowerShell launcher
+returns a structured `BLOCKED` result when Python is unavailable; use the
+documented two-layer manual protocol in that environment.
 
 Example result handling:
 
@@ -61,10 +64,13 @@ reach acceptance. Stop after the recommendation or the
 
 ## Installation and discovery check
 
-For the published v0.1.2 release, install with `npx skills add LightDevCoder/skills --skill ask-light --yes --copy --agent '*'`,
-refresh, and inspect `SKILL.md`, `agents/openai.yaml`, and the PowerShell
-scanner without the source checkout. Run
+This router is part of the unreleased 33-package branch. For pre-release
+acceptance, copy the complete `ask-light` package into an isolated
+host-recognized Skill root, refresh, and inspect `SKILL.md`,
+`light-skill-map.json`, the Python router, and the PowerShell compatibility
+launcher without the source checkout. Do not publish an installer command as
+verified until the containing release has passed the release installation gate. Run
 [ask-light contract tests](../../skills/ask-light/tests/test_ask_light_contract.py)
 and [behavior tests](../../skills/ask-light/tests/test_ask_light_behavior.py),
-including the learn-anything, non-first-party-not-routed, and ambiguity
-fixtures.
+including representative top-result, Frozen metadata, provenance, host
+availability, invocation rendering, and pointer-failure cases.

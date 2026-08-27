@@ -1,4 +1,6 @@
-# Migration note
+# Historical migration note
+
+This provenance record is not required for current `review-loop` execution.
 
 The former `review-loop` final-acceptance system (frozen baseline / Charter,
 evidence labels, finding registry dispositions, `PASS`/`FAIL`/`BLOCKED`,

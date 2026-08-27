@@ -2,11 +2,11 @@
 
 [英文指南](../../skills/ask-light.md)
 
-行为与 scanner 输出契约见 [skills/ask-light/SKILL.md](../../../skills/ask-light/SKILL.md) 和 [discovery contract](../../../skills/ask-light/references/discovery-contract.md)。
+行为与 router 输出契约见 [skills/ask-light/SKILL.md](../../../skills/ask-light/SKILL.md) 和 [discovery contract](../../../skills/ask-light/references/discovery-contract.md)。
 
 ## 解决什么问题
 
-`ask-light` 检查当前 host 可见的 Skill metadata 和 availability，返回一个最合适的下一 Skill，或一个有边界的 workflow recipe。它保留重复 source identity，只读取 shortlist 的 body，报告 metadata 缺口，并尊重 invocation policy。
+`ask-light` 先通过 Light 自有的 33-Skill 语义地图判断逻辑匹配，再单独验证该 Skill 在当前 host 是否可用。可选 UI metadata 缺失不会隐藏已知包，generic host root 也不会被当作第一方来源。
 
 ## 模式和边界
 
@@ -21,7 +21,9 @@ $ask-light workflow
 
 ## 输入和输出
 
-提供 goal、artifacts、blockers、project type、task kind、真实 host availability/readable roots 和 invocation control。先读 metadata，再有限读取 body/reference。缺上下文返回 `NEED-INPUT`；必需 Skill 不可见或 metadata 不可读返回带准确缺口的 `BLOCKED`。私有 `skills-3rdParty` 根不存在时，不能声称其可用。
+提供 goal、artifacts、blockers、project type、task kind、真实 host availability/readable roots 和 invocation control。逻辑路由来自 `light-skill-map.json`；包读取只证明 host availability 与本地 pointer 完整性。缺上下文返回 `NEED-INPUT`；选中的 Skill 不可用时保留逻辑推荐并返回 `BLOCKED`。
+
+可执行 router 依赖 Python 3.9 或更高版本。缺少 Python 时，PowerShell launcher 返回结构化 `BLOCKED`；此时按 discovery contract 的双层协议手工完成路由。
 
 示意输出（不是本次 host 已经执行的证明）：
 
@@ -38,4 +40,4 @@ Execution: recommendation only; nothing was invoked, installed, or orchestrated
 
 ## 安装与发现验证
 
-对于已发布的 v0.1.2，使用 `npx skills add LightDevCoder/skills --skill ask-light --yes --copy --agent '*'` 安装，刷新 host，在不依赖 source checkout 的情况下检查 `SKILL.md`、`agents/openai.yaml` 和 PowerShell scanner。运行 [contract test](../../../skills/ask-light/tests/test_ask_light_contract.py) 与 [behavior test](../../../skills/ask-light/tests/test_ask_light_behavior.py)，覆盖 learn-anything、非第一方依赖不路由和歧义 fixtures。
+该 router 属于尚未发布的 33-package 分支。预发布验收时，将完整 `ask-light` 包复制到隔离的 host Skill 根，刷新后在不依赖 source checkout 的情况下检查 `SKILL.md`、`light-skill-map.json`、Python router 与 PowerShell 兼容 launcher；在相应 release 通过发布安装门禁前，不把任何安装命令标记为已验证。运行 [contract test](../../../skills/ask-light/tests/test_ask_light_contract.py) 与 [behavior test](../../../skills/ask-light/tests/test_ask_light_behavior.py)，覆盖代表性 top result、Frozen metadata、来源、host 可用性、调用展示与 pointer failure。

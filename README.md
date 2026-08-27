@@ -48,8 +48,8 @@ Refresh the host, then confirm discovery without the source checkout. See [Insta
 
 ```text
 $ask-light next        # you don't know what's next — get one recommendation and stop
-$project-init          # start a new project from a minimal preset
-$clarify               # vague idea → lightweight decisions, no SPEC yet
+$project-init          # bootstrap stable Light project contracts from a preset
+$clarify               # one invocation → continuous clarification, no SPEC
 $project-clarify       # real project → inspect repo, then decide
 $implement             # one clear ticket in, one verified artifact out
 $project-review        # final acceptance: PASS / FAIL / BLOCKED
@@ -75,7 +75,7 @@ project-review
 release-workflow
 ```
 
-- `project-init` — minimum initialization from a preset; no full clarification.
+- `project-init` — idempotent Light bootstrap with stable project/tracker contracts; no full clarification.
 - `project-clarify → project-spec → project-tickets` — clarify decisions, freeze a SPEC, slice into tracer-bullet tickets.
 - `implement` — general-purpose bounded executor (code, doc, config, Skill).
 - `project-review` — project-level final acceptance; `review-loop` is its convergence engine.
@@ -84,7 +84,7 @@ release-workflow
 Small-task paths:
 
 ```text
-clarify                          # standalone idea triage → stop, no SPEC
+clarify                          # standalone continuous clarification → confirmed understanding
 implement                        # one ready ticket → verify → review-loop when useful
 diagnosing-bugs → implement      # hard bug → tight loop → fix → review
 release-workflow                 # publish only
@@ -100,7 +100,7 @@ $ask-light next
 $ask-light workflow
 ```
 
-`ask-light` is the **Light Workflow Router** — user-invoked, read-only, built last after the full map exists. It inspects goal, artifacts, blockers, project type, task kind, availability, and invocation control across the 33 first-party Skills and returns *one* recommendation (or one bounded recipe) with source, reason, and host-appropriate invocation — then stops. It never installs, executes, or chains another user-invoked Skill.
+`ask-light` is the **Light Workflow Router** — user-invoked and read-only. It resolves logical fit from the Light-owned 33-Skill map, verifies host availability separately, and returns *one* recommendation (or one bounded recipe) with source, reason, and host-appropriate invocation — then stops. It never installs, executes, or chains another user-invoked Skill.
 
 See [ask-light](skills/ask-light/SKILL.md) and [docs/workflows/](docs/workflows/).
 

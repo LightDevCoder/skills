@@ -1,4 +1,6 @@
-# Migration — review-loop → project-review
+# Historical migration — review-loop → project-review
+
+This provenance record is not required for current `project-review` execution.
 
 This file records the provenance and mapping for the `review-loop` →
 `project-review` split (SPEC §9 / §15 / §25 Phase 7, Ticket 11).

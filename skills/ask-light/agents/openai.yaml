@@ -1,7 +1,7 @@
 interface:
   display_name: "Ask Light"
   short_description: "Recommend the best next Skill or one bounded workflow recipe"
-  default_prompt: "Use $ask-light to inspect the active Skill catalog and recommend one next Skill or one bounded workflow recipe without invoking it."
+  default_prompt: "Use $ask-light to map my intent to a known Light Skill, verify host availability, and recommend one next Skill or bounded recipe without invoking it."
 
 policy:
   allow_implicit_invocation: false

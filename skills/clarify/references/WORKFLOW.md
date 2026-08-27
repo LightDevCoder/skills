@@ -18,13 +18,15 @@ Do not start `clarify` from a general vague prompt — wait for the explicit
    vague request).
 2. Call `socratic` (model-invoked) with that context. Let it separate known
    facts, user-owned open decisions, dependencies, and the current frontier.
-3. Present only the frontier question(s) from `socratic`. Do not add a fixed
-   questionnaire or re-ask settled decisions.
-4. Return the compact state summary defined in `SKILL.md` and stop.
-
-On a subsequent `$clarify` invocation with an answer, feed the answer back to
-`socratic`, update the state, recompute the frontier, and present the next
-frontier or the fact-finding gap that blocks it.
+3. Present the conversational projection from `socratic`: acknowledge what the
+   latest answer settled, show one frontier decision and its real tradeoffs,
+   include a recommendation when evidence supports judgment, then ask one
+   question.
+4. Keep the session active. Feed the next ordinary user reply back to
+   `socratic`, recompute the frontier, and present the next useful turn.
+5. When the engine reports no open decision or dependency, synthesize the
+   shared understanding and ask for confirmation. Confirmation ends the
+   session; a correction updates state and continues.
 
 ## Boundaries
 
@@ -33,8 +35,8 @@ frontier or the fact-finding gap that blocks it.
 - No automatic chaining to another user-invoked Skill. If `project-clarify`,
   `research`, `prototype`, or `to-questionnaire` would be useful, recommend
   the explicit invocation and stop.
-- Fact work is reported as a gap, not executed, unless the user separately
-  authorizes it (see `ROUTING.md`).
+- Fact work is reported using `socratic`'s routing result and is not executed
+  unless the user separately authorizes it.
 
 ## Handoff options
 
@@ -42,5 +44,5 @@ frontier or the fact-finding gap that blocks it.
   recommend `$project-clarify` and stop.
 - If the user wants a questionnaire for another person, recommend
   `$to-questionnaire` and stop.
-- Otherwise the user may simply continue `$clarify` turns until the frontier
-  is empty or blocked.
+- Otherwise the user replies normally until the synthesis is confirmed or the
+  frontier is blocked.

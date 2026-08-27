@@ -106,6 +106,17 @@ These Skills are outside the refactor:
 
 Their Skill directories must remain byte-for-byte unchanged.
 
+**User-approved amendment — 2026-08-27:** `recap` is the sole exception to
+this frozen boundary. Its `SKILL.md` may be reduced to required frontmatter and
+one execution sentence that keeps the explicit `$recap` manual trigger. The
+behavior description remains: `show one concise line about the current session
+without replacing or compacting conversation history.` No automatic recap is
+added. No other Frozen package is released from the boundary by this amendment.
+The package-local `recap/tests` files remain byte-for-byte frozen as historical
+tests for the superseded long-form contract; they are excluded from the active
+suite because changing them was not authorized. Repository-level functional
+tests are the acceptance authority for the amended `recap/SKILL.md` contract.
+
 This includes their:
 
 - `SKILL.md`;
@@ -523,7 +534,9 @@ The refactor is complete only when all of the following are true.
 
 ### Frozen integrity
 
-- all six Frozen Skill directories match their pre-refactor hashes exactly.
+- five Frozen Skill directories match their pre-refactor hashes exactly;
+- `recap` matches its pre-refactor hashes except for the single user-approved
+  `SKILL.md` amendment recorded in §4.1.
 
 ### Integration-only integrity
 
@@ -554,6 +567,9 @@ For every Full-refactor Skill:
 
 - the full test suite passes;
 - test collection succeeds cleanly;
+- the active suite excludes only the frozen historical `recap/tests` files
+  identified in §4.1 and replaces their superseded prose checks with current
+  repository-level functional coverage;
 - prose-only assertions have been removed unless literal wording is a real contract;
 - tests protect behavior, invocation, composition, execution, and important boundaries instead of prose layout.
 

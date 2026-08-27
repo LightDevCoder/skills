@@ -1,8 +1,8 @@
 # Ticket contract
 
 Canonical file shape for the tickets `project-tickets` publishes. This contract
-is tracker-native: it matches the local-markdown location described in
-`docs/agents/issue-tracker.md` and the Wayfinding operations at line 21.
+matches the local-markdown tracker selected by `docs/agents/light-project.md`
+and described in `docs/agents/issue-tracker.md`.
 
 ## Location and naming
 
@@ -65,7 +65,7 @@ the criterion it clarifies and note "from prototype".
 
 ## Lifecycle and Wayfinding operations
 
-Per `docs/agents/issue-tracker.md:21`:
+Per the configured `docs/agents/issue-tracker.md` contract:
 
 | Operation | Meaning on this tracker |
 |-----------|-------------------------|

@@ -1,7 +1,7 @@
 interface:
   display_name: "Project Init"
-  short_description: "Initialize software and non-software projects"
-  default_prompt: "Use $project-init to inspect this project and prepare a confirmed minimal initialization."
+  short_description: "Bootstrap stable Light project contracts"
+  default_prompt: "Use $project-init to inspect this repository and create its confirmed, idempotent Light project configuration."
 
 policy:
   allow_implicit_invocation: false

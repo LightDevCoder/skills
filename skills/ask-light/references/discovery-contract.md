@@ -1,125 +1,67 @@
 # Ask-light discovery contract
 
-This reference defines the observable read-only protocol used by `ask-light`
-(Light Workflow Router). Light's first-party collection contains 33 Skills
-across Project Workflow, Clarification & Research, Execution, Review, Reusable
-Capabilities, Specialized Workflows, and Router. This contract covers how the
-router discovers and ranks those first-party Skills without reimplementing
-them.
+`ask-light` resolves two independent questions in order.
 
-## Context record
+## Layer A — Light Skill Map
 
-The caller supplies a JSON-like record. Empty fields remain unknown rather than
-being inferred from a package name.
+[`light-skill-map.json`](light-skill-map.json) is the first-party routing source.
+It records Light Skill names, intent patterns, task-kind aliases, and bounded
+workflow recipes without duplicating package metadata or Skill workflows.
+Logical ranking reads this map, not accidental words in installed `SKILL.md`
+bodies. Category comes from each declared root record; description and
+invocation type come from the package's `SKILL.md` frontmatter.
 
-| Field | Meaning | Examples |
-| --- | --- | --- |
-| `goal` | User-visible outcome or question | "fix the failing parser" |
-| `artifacts` | Relevant artifact paths/types | `src/*.ts`, `README.md`, `figure.png` |
-| `blockers` | Current errors, missing evidence, access, or decisions | "no independent review" |
-| `projectType` | Dominant project domain | `software`, `manuscript`, `research` |
-| `taskKind` | Current operation, not the whole project | `debugging`, `implementation`, `review` |
-| `availability` | Host, readable roots, revisions, and visible capabilities | `codex`, `global Skills readable` |
-| `invocationControl` | User's permitted invocation mode | `explicit-only`, `model-callable`, `either` |
+The caller supplies `goal`, `artifacts`, `blockers`, `projectType`, `taskKind`,
+`availability`, and `invocationControl`. Missing `goal` and `taskKind` returns
+`NEED-INPUT`. Workflow mode requires every context field because a recipe is a
+stronger recommendation. Supported invocation controls are `explicit-only`,
+`model-callable`, and `either`; a model-callable request is compatible only
+with packages whose frontmatter permits model invocation.
 
-`goal` or `taskKind` may be absent only when the result is `NEED-INPUT`.
+## Layer B — Host availability and provenance
 
-The caller selects an explicit mode: `next` returns one next Skill, while
-`workflow` returns one bounded recipe recommendation. The mode never changes
-the no-execution boundary.
+Root records must explicitly declare `category: first-party` or
+`category: light-first-party`. That declaration means the root came from the
+Light collection; a generic host Skill root is not trusted as provenance.
+Packages whose names are absent from the Light Skill Map are ignored even when
+installed beside Light Skills.
 
-## Candidate record and metadata pass
+Availability checks only the required package contract: readable `SKILL.md`
+frontmatter with `name` and `description`, host available/unavailable sets, and
+readable-path boundaries. `agents/openai.yaml` is optional UI metadata and its
+absence never hides a known Light Skill such as Frozen `eli5`.
 
-Each source root is declared as `{ category: first-party, path }`. Project/global
-roots are installation locations, not competing capability categories. If a host
-passes a project/global root, the scanner normalizes its category to
-`first-party` and keeps the resolved path for provenance.
+After logical selection, the router verifies that the selected package is
+available and that its local pointers resolve. Missing or unavailable packages
+return `BLOCKED` without replacing the logical recommendation. Metadata, body,
+and reference read counts remain observable.
 
-For every package directory, the **metadata-first** pass reads only:
+## Invocation rendering
 
-1. the YAML frontmatter in `SKILL.md` up to its closing `---`;
-2. `agents/openai.yaml` when it exists;
-3. file readability and resolved package path.
+- Codex: `$<skill>`
+- Claude Code: `/<skill>`
+- Other hosts: `Skill: <skill>` as a generic supported representation
 
-The pass records `name`, `description`, `displayName`, `shortDescription`,
-`defaultPrompt`, and `allowImplicitInvocation`. A missing, malformed, or
-unreadable field, including any missing display/default-prompt metadata, sets
-`metadataStatus: unavailable` and records a gap. Such a candidate remains
-visible with `metadataReadable: false`, its source, package path, and
-readability details for remediation, but is not eligible for a normal
-recommendation. Bodies and references are not read in this pass.
+The router claims no host-specific behavior beyond these renderings.
 
-The stable identity is:
+## Runtime dependency and manual path
 
-```text
-normalized-name + first-party + resolved-package-path
-```
+`scripts/ask_light.py` requires Python 3.9 or newer. The PowerShell launcher
+detects that runtime and returns `BLOCKED` with an actionable gap when neither
+`python3` nor `python` is available. A host without Python may execute Layer A
+and Layer B manually from this contract: use `light-skill-map.json` only for
+semantic routes and recipes, inspect declared first-party package roots for
+availability and local pointer integrity, render the invocation for the active
+host, derive description and invocation type from `SKILL.md` frontmatter,
+return the result contract below, and stop without invoking it.
 
-Same-name records are grouped, never overwritten. A duplicate installed copy
-remains visible but does not create a second capability or an automatic merge.
+## Result and stop
 
-## Ranking and narrow reads
+Next mode returns `status`, `skill`, first-party `source`, map-backed `reason`,
+host invocation, confidence, at most one material alternative, gaps, read
+counts, and candidates. Workflow mode adds `workflow`, `entryCondition`,
+`steps`, `stoppingBoundary`, `missingDependency`, and `finalAuthority`.
+Unavailable steps also explain the missing dependency in plain language.
 
-Compute a fit score from independent evidence: goal, artifact, blocker,
-project-type, and task-kind matches. Add compatibility for host availability and
-the requested invocation control. A candidate with incomplete metadata,
-unreadable files, or an unavailable host is ineligible. There is no source
-precedence ladder; all candidates are first-party, so the tie-break is the
-normalized path after score and availability.
-
-The scanner sorts by score, compatibility, then normalized path. It reads
-bodies and relative references only for the top `N` candidates (`N=3` by
-default) or for a tied pair. It must expose body/reference read counts so a
-large catalog cannot masquerade as a full-body scan.
-
-Availability is an eligibility gate, not a display hint. If the active context
-declares a host, available/unavailable Skill names, readable paths, or a
-candidate's declared `hosts` list (inline or YAML block-list form), filter
-incompatible candidates before shortlisting and record the exact gap. A
-compatible candidate receives an availability score contribution; an
-unavailable candidate is never recommended.
-
-After shortlisting, a failed `SKILL.md` or linked-reference read sets the
-candidate's `readStatus` to `unavailable`, preserves the read error, and removes
-it from the final recommendation set. If every shortlisted candidate fails a
-body/reference read, return `BLOCKED` with the smallest restore/readability
-remedy rather than accepting metadata-only evidence.
-
-Two candidates are **genuinely ambiguous** only when both are eligible, their
-scores remain within one point after body/reference checks, and their matched
-task evidence represents materially different next actions. Equivalent
-duplicate packages with the same action fingerprint are not ambiguous. Return
-one best candidate and at most one `Alternative`; suppress alternatives for
-ordinary ranking differences.
-
-## Workflow recommendation
-
-Workflow mode uses a small validated recipe catalog rather than a permanent
-state machine. A recipe has an entry condition, participating first-party
-Skills, invocation type, expected input (`expectedInput`), expected output
-(`expectedOutput`), handoff artifact, per-step stop condition
-(`stopCondition`), optional flag, missing dependency, and final authority. The
-supported recipes cover software feature, bug diagnosis, manuscript project,
-source-to-Skill, new project initialization, and final review.
-
-Only candidates visible in the declared first-party roots and passing
-metadata/availability checks are reported as available. A missing first-party
-step stays in the output with `missingDependency`; a required gap makes the
-workflow `BLOCKED`. An uncertain or tied recipe returns `NEED-INPUT`. In
-`explicit-only` mode, a user-invoked `learn-anything` remains eligible and its
-invocation type is reported; explicit-only does not silently exclude it.
-
-## Output and non-execution
-
-`RECOMMEND` contains exactly one best Skill, a context-specific reason, source,
-confidence, and host-appropriate invocation. `NEED-INPUT` asks one question.
-`BLOCKED` lists the missing/unreadable capability and the smallest actionable
-installation/readability remedy. Every result includes metadata/body/reference
-read counts and the statement that no recommendation was invoked or installed.
-
-`ask-light` may inspect files and metadata, but it never executes, orchestrates,
-installs, edits, commits, or delegates the recommended Skill or workflow step:
-nothing was invoked, installed, or orchestrated. The user must invoke the
-printed command or choose each recipe step in a later action. For a recipe that
-reaches acceptance, `project-review` owns the final verdict; recipe output is
-not a verdict.
+Every result states: `nothing was invoked, installed, or orchestrated`.
+`ask-light` never executes the recommendation.

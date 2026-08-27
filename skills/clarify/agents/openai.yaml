@@ -1,7 +1,7 @@
 interface:
   display_name: "Clarify"
-  short_description: "Clarify an ambiguous idea without entering a project workflow"
-  default_prompt: "Use $clarify to identify the current understanding, resolved choices, unresolved decisions, and the next user-owned question."
+  short_description: "Continuously clarify an ambiguous idea"
+  default_prompt: "Use $clarify to start one conversational clarification session and continue through normal replies until shared understanding is confirmed."
 
 policy:
   allow_implicit_invocation: false

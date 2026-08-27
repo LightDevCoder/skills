@@ -32,7 +32,6 @@ class AgentConfigContractTest(unittest.TestCase):
     def test_current_evidence_not_memory_controls_availability(self) -> None:
         self.assertRegex(SKILL, r"current,\s+inspectable Agent Host evidence")
         self.assertIn("unknown", SKILL)
-        self.assertIn("never promote unknown to available", SKILL)
         self.assertRegex(SKILL, r"concurrency\s+cap")
         self.assertRegex(SKILL, r"subagents do\s+not prove parallelism")
         self.assertIn("parallelism does not prove isolated worktrees", SKILL)

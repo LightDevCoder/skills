@@ -39,11 +39,20 @@ Approved Matt PORTs (10) each carry `ATTRIBUTION.md` and have no upstream runtim
 - **Composition over duplication:** `review-loop` is the lightweight review engine; `project-review` owns final `PASS`/`FAIL`/`BLOCKED`; callers name Skills instead of re-documenting their runbooks.
 - **Tests:** prose-only assertions were loosened where literal wording is not a contract; root discovery/composition tests updated for the `project-review` final-acceptance command.
 - **Planning state:** the previous `.scratch/light-skills-refactor/` is archived/superseded; `.scratch/light-skills-lean-refactor/` is now the active planning set with reconstruction analysis and implementation tickets.
-- **Frozen integrity:** the six Frozen Skills (`eli5`, `recap`, `language-learning`, `kb-init`, `kanban-worker`, `learn-anything`) remain byte-for-byte unchanged and hash-verified.
+- **Frozen integrity:** five Frozen Skills (`eli5`, `language-learning`, `kb-init`, `kanban-worker`, `learn-anything`) remain byte-for-byte unchanged and hash-verified. On 2026-08-27 the user explicitly amended the active scope for `recap`, replacing its explanatory body with one manual execution sentence.
+
+### Changed — Functional closure
+
+- **ask-light:** added a Light-owned 33-Skill semantic map, separated logical routing from host availability, treated UI metadata as optional, rejected generic-root provenance, added Codex/Claude/generic invocation rendering, and made the Python router the tested implementation with a PowerShell compatibility launcher.
+- **Project bootstrap:** `project-init` now writes idempotent `docs/agents/light-project.md` and issue-tracker contracts; downstream Project Skills consume only their relevant fields. Ambiguous presets require a concise comparison and recommended choice.
+- **Clarification:** one `$clarify` invocation now continues across normal replies; Socratic state is internal by default, recommendations are conversational, and completion requires shared-understanding confirmation. `socratic` is the sole unknown-routing owner.
+- **Review ownership:** `review-loop` is the sole owner of the lightweight reviewer packet; `project-review` keeps the acceptance registry and verdict. Migration references are explicitly historical.
+- **Tests:** added representative top-routing, empty-repository bootstrap/rerun, clarification lifecycle, local-pointer, ownership, and historical-runtime-boundary tests; removed repaired prose coupling instead of restoring old wording.
+- **recap:** by explicit user amendment, its `SKILL.md` now keeps only required frontmatter plus one manual `$recap` execution sentence; it shows one concise line about the current session without replacing or compacting conversation history.
 
 ### No redesign verification
 
-19 `NO REWRITE/PORT` Skills were `git diff` checked (SPEC §26): `manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `recap`, `eli5`, `release-workflow`, `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts` — only minimal handoff/attribution wiring where a real integration need existed.
+18 `NO REWRITE/PORT` Skills were `git diff` checked (SPEC §26): `manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `eli5`, `release-workflow`, `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts` — only minimal handoff/attribution wiring where a real integration need existed. `recap` is the separately recorded user-approved exception above.
 
 ### Release evidence
 
@@ -128,7 +137,7 @@ Approved Matt PORTs (10) each carry `ATTRIBUTION.md` and have no upstream runtim
 ### Changed
 
 - Test toolchain migrated from Windows PowerShell to cross-platform Python: 21 PowerShell test files replaced by 18 Python suites (collection discovery, header assets, quick start, ask-light contract, project-init contract and behavior, recap contracts, language-learning contract, and review-loop five-profile contract and behavior suites plus protocol helpers), preserving the assertion sets.
-- The ask-light scanner behavior suite still executes the real `scripts/ask-light.ps1` through `pwsh` and skips gracefully when pwsh is absent; CI (ubuntu-latest) ships pwsh and runs it.
+- The ask-light behavior suite executes the portable Python router on every host; `scripts/ask-light.ps1` remains a thin compatibility launcher.
 - CI moved to `ubuntu-latest` (bash + python); retired-boundary and no-PowerShell-test checks added.
 - Documentation updated for the new test file names and the cross-platform manual-fallback snippet; governance wording unchanged.
 

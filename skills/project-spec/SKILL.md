@@ -13,8 +13,9 @@ one formal SPEC that `project-tickets` can slice.
 ## Core behavior
 
 1. **Gather and validate** the clarification handoff or map answers plus a
-   light repo inspection (glossary, ADRs, existing seams). Use the settled
-   facts and decisions as-is; do not reopen them as new questions.
+   light repo inspection. When `docs/agents/light-project.md` exists, consume
+   its goal, outputs, domain-context locators, and working area before reading
+   the named glossary, ADRs, and seams. Use settled facts and decisions as-is.
 2. **Check the blocking-decision gate.** If a truly blocking user-owned
    decision remains, stop spec work and return to `project-clarify` (or the
    map) with the exact blocker and context pointer.

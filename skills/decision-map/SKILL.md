@@ -11,6 +11,11 @@ or multi-session work. Run it only after an explicit `$decision-map` request.
 It charts a persistent decision map on the local markdown tracker and resolves
 it one ticket per session.
 
+When `docs/agents/light-project.md` exists, read only its issue-tracker and
+working-area fields and use the referenced tracker contract. Without bootstrap
+configuration, retain the local `.scratch` contract below and report that
+default in the handoff.
+
 ## Core model
 
 ```text

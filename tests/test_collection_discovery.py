@@ -1,7 +1,8 @@
 """Port of tests/collection-discovery-tests.ps1 — updated for 33-package refactor.
 
-Also composes the recap and language-learning contract suites exactly like the
-PowerShell version dot-sourced them.
+Also composes the unchanged language-learning contract suite exactly like the
+PowerShell version dot-sourced it. The user-amended recap contract is checked by
+the functional-closure suite while its frozen historical tests remain untouched.
 """
 
 from __future__ import annotations
@@ -14,13 +15,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-sys.path.insert(0, str(ROOT / "skills" / "recap" / "tests"))
 sys.path.insert(0, str(ROOT / "skills" / "language-learning" / "tests"))
 sys.path.insert(0, str(ROOT / "skills" / "kanban-worker" / "tests"))
 
 from check_helpers import Checks, read  # noqa: E402
-from test_recap_contract import run_checks as recap_checks  # noqa: E402
-from test_recap_output_contract import run_checks as recap_output_checks  # noqa: E402
 from test_language_learning_contract import run_checks as ll_checks  # noqa: E402
 from test_kanban_worker_contract import run_checks as worker_contract_checks  # noqa: E402
 from test_kanban_worker_behavior import run_checks as worker_behavior_checks  # noqa: E402
@@ -344,7 +342,8 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         if en_path.is_file() and zh_path.is_file():
             en_text = en_path.read_text(encoding="utf-8", errors="replace")
             zh_text = zh_path.read_text(encoding="utf-8", errors="replace")
-            for marker in guide_parity:
+            markers = ["SKILL.md", "$recap", "user-invoked"] if name == "recap" else guide_parity
+            for marker in markers:
                 c.check(marker in en_text and marker in zh_text, f"{name} Skill guides are missing the synchronized semantic marker: {marker}")
 
     secondary_parity = [
@@ -373,10 +372,11 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.check("Drive your creativity" in readme, "README About description is missing.")
 
     workflow_text = read(root, "skills/ask-light/SKILL.md") + read(root, "skills/ask-light/references/discovery-contract.md")
-    workflow_script = read(root, "skills/ask-light/scripts/ask-light.ps1")
+    workflow_script = read(root, "skills/ask-light/scripts/ask_light.py")
+    workflow_map = read(root, "skills/ask-light/references/light-skill-map.json")
     c.check("$ask-light next" in workflow_text and "$ask-light workflow" in workflow_text, "ask-light must document both explicit modes.")
     c.check("entryCondition" in workflow_text and "missing dependency" in workflow_text and "finalAuthority" in workflow_text, "ask-light workflow output contract is incomplete.")
-    c.check(bool(re.search(r"ValidateSet\('next', 'workflow'\)", workflow_script)) and "Get-WorkflowRecipes" in workflow_script, "ask-light scanner lacks explicit workflow mode implementation.")
+    c.check('choices=("next", "workflow")' in workflow_script and '"workflows"' in workflow_map, "ask-light router lacks explicit workflow mode implementation.")
     c.check(bool(re.search(r"allow_implicit_invocation:\s*false", read(root, "skills/learn-anything/agents/openai.yaml"))), "learn-anything must declare explicit-only metadata policy.")
     c.check(bool(re.search(r"allow_implicit_invocation:\s*false", read(root, "skills/recap/agents/openai.yaml"))), "recap must declare explicit-only metadata policy.")
 
@@ -443,18 +443,6 @@ class CollectionDiscoveryTest(unittest.TestCase):
         assertions, failures = run_checks()
         self.assertGreater(assertions, 0)
         self.assertFalse(failures, f"COLLECTION_DISCOVERY=FAIL: {failures}")
-
-
-class RecapContractCompositionTest(unittest.TestCase):
-    def test_recap_contract_composition(self) -> None:
-        assertions, failures = recap_checks()
-        self.assertGreater(assertions, 0)
-        self.assertFalse(failures, f"RECAP_CONTRACT=FAIL: {failures}")
-
-    def test_recap_output_contract_composition(self) -> None:
-        assertions, failures = recap_output_checks()
-        self.assertGreater(assertions, 0)
-        self.assertFalse(failures, f"RECAP_OUTPUT_CONTRACT=FAIL: {failures}")
 
 
 class LanguageLearningContractCompositionTest(unittest.TestCase):

@@ -92,8 +92,8 @@ prose (trim to the decision-rich fragment and note its prototype origin).
 
 ### 6. Publish to the local tracker
 
-Write the approved SPEC to the canonical location per
-`docs/agents/issue-tracker.md`:
+Read `docs/agents/light-project.md` when present and write the approved SPEC
+under its working area according to `docs/agents/issue-tracker.md`:
 
 ```text
 .scratch/<feature>/spec.md

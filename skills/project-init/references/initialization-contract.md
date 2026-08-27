@@ -2,31 +2,66 @@
 
 This reference is loaded when writing or validating a project initialization.
 
+## Stable bootstrap output
+
+`docs/agents/light-project.md` is the compact source of stable project facts:
+
+- project type, goal, outputs, and preset;
+- relevant Skills;
+- issue tracker kind and locator;
+- domain-context locators;
+- review profile and acceptance strategy;
+- working area, collaboration mode, and constraints.
+
+`docs/agents/issue-tracker.md` records the work-item location, SPEC/ticket
+locators, blocking edge, statuses, and frontier rule consumed by
+`decision-map`, `project-spec`, `project-tickets`, and `implement`. Do not create
+`triage-labels.md`: no admitted Light workflow consumes it.
+
+Managed markers allow reruns to update confirmed configuration while preserving
+manual notes outside the block.
+
 ## Instruction-file precedence
 
-Inspect root files case-insensitively. Select exactly one target:
+Inspect root files and the active host before writing. Pass one explicit
+`instructionFile` value: `AGENTS.md` or `CLAUDE.md`. Match an existing file
+case-insensitively or create that exact host target when absent. Do not infer a
+host style from an empty repository. If both styles exist, update only the
+inspected host target, preserve the other file, and report the conflict.
 
-1. existing `AGENTS.md`;
-2. existing `CLAUDE.md` when `AGENTS.md` is absent;
-3. new `AGENTS.md` only when neither exists and the host supports it.
-
-Never replace `CLAUDE.md`, create both files, or rewrite nested instruction
-files unless the user names that file. Preserve unrelated lines and merge a
-single `## Project Initialization` section in place. A rerun updates the values
-inside that section rather than appending another copy.
-If `AGENTS.md` and `CLAUDE.md` conflict, keep both, write only to the selected
-precedence target, and report the conflict instead of silently reconciling it.
+Preserve unrelated lines and merge one `## Project Initialization` pointer to
+the stable contract. A rerun updates that section instead of appending a copy.
+Reject instruction symlinks that resolve to either managed contract; all three
+write targets must resolve to distinct files.
 
 ## Plan and write boundary
 
 Preset plans may proceed after the six lightweight answers. A research fallback
-must show the sources, proposed write set, capability declarations, and checks,
-then stop for an explicit confirmation. `reject` means an empty write set;
+uses `preset: research-fallback` and must show the sources, proposed write set,
+capability declarations, and checks, then stop for an explicit confirmation.
+The confirmed sources, dated confirmation, and validation summary are persisted
+in the stable project contract. `reject` means an empty write set;
 requested changes produce a revised plan and another confirmation gate.
 
-Writes are limited to minimal instructions and an immediately needed project
-document with no equivalent already present. Do not create tickets, workflow
-state, implementation code, review verdicts, or Skill packages.
+Writes are limited to the instruction pointer and the two stable bootstrap
+contracts. Do not create tickets, workflow state, implementation code, review
+verdicts, or Skill packages.
+
+`scripts/bootstrap.py` requires Python 3.9 or newer. When the runtime is absent,
+the write set is empty and the result is `BLOCKED`; there is no manual write
+fallback because the script owns validation, staging, and rollback.
+
+## Downstream consumption
+
+- `project-clarify`: goal, outputs, domain context, tracker locator.
+- `decision-map`: tracker locator and working area.
+- `project-spec`: goal, outputs, domain context, working area.
+- `project-tickets`: issue tracker and working area.
+- `implement`: issue tracker, domain context, and review profile.
+- `project-review`: review profile and acceptance strategy.
+
+Each consumer reads only these fields when the file exists. The Skill's own
+artifact contract remains authoritative for its runtime output.
 
 ## Validation record
 

@@ -23,15 +23,16 @@ def read_contract(root: Path = ROOT) -> tuple[str, str, str]:
 
 class ProjectClarifyContractTest(unittest.TestCase):
     def test_explicit_entry_inspects_facts_before_socratic_questions(self) -> None:
-        skill, metadata, _ = read_contract()
+        skill, metadata, contract = read_contract()
 
         self.assertRegex(skill, r"(?m)^name: project-clarify$")
         self.assertRegex(skill, r"(?m)^disable-model-invocation: true$")
         self.assertRegex(metadata, r"(?m)^\s*allow_implicit_invocation: false$")
         self.assertLess(skill.index("Inspect project facts before asking"), skill.index("Maintain user decisions with `socratic`"))
         # must list project-aware sources
-        for marker in ("README", "AGENTS.md", "CONTEXT.md", "docs/adr"):
-            self.assertIn(marker, skill)
+        combined = skill + "\n" + contract
+        for marker in ("README", "AGENTS.md", "CONTEXT.md", "docs/adr", "docs/agents/light-project.md"):
+            self.assertIn(marker, combined)
         # socratic is the decision engine and questions stay frontier-scoped
         self.assertIn("socratic", skill)
         self.assertIn("unblocked, user-owned frontier", skill)

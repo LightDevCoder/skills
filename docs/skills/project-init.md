@@ -6,9 +6,9 @@ The behavior authority is [skills/project-init/SKILL.md](../../skills/project-in
 
 ## What it solves
 
-`project-init` inspects a target and writes the smallest confirmed project
-guidance from a preset. It preserves existing instructions and validates the
-paths it changed; it is an initialization aid, not a project manager.
+`project-init` bootstraps the stable repository configuration consumed by later
+Light Project Skills. It preserves existing instructions and manual notes,
+creates only consumer-backed contracts, and is safe to rerun.
 
 ## When to use and when not to
 
@@ -23,28 +23,34 @@ permanent workflow. Those are later explicit choices.
 This is `user-invoked only`; the user must select `$project-init`. The target
 defaults to the current directory. Before writing, it reads root
 `AGENTS.md`/`CLAUDE.md`, README, manifests, project documents, and current
-status. It needs the project type, visible goal, outputs, collaboration mode,
-constraints, and required review level, either from the brief or from its
-short questions. It does not use a separate clarification Skill; deep
+status. It needs project type, goal, outputs, collaboration, constraints,
+relevant Skills, issue tracker, domain-context locators, review profile and
+acceptance strategy, working area, and the instruction filename established by
+current host evidence. The supported tracker locator is
+`.scratch/<effort>/issues`; other locators need an adapter. If two presets fit,
+it compares their consequences, recommends one, and asks for the choice. It does not use a separate clarification Skill; deep
 discovery belongs to `$clarify` / `$project-clarify` / `$decision-map`.
 
 ```text
 $project-init
 ```
 
-The output identifies the selected preset or confirmed fallback, one
-instruction target, paths changed, capabilities available/unavailable,
-validation results, and optional next Skills. It must not create tickets,
-implementation plans, final-review records, or a competing specification.
+The output is one instruction pointer plus `docs/agents/light-project.md` and
+`docs/agents/issue-tracker.md`, followed by an exact created/updated/preserved
+report. It does not create triage labels, tickets, implementation plans,
+final-review records, or a competing specification.
+
+The transactional bootstrap helper requires Python 3.9 or newer. If that
+runtime is unavailable, initialization returns `BLOCKED` before writing.
 
 ## Success and `BLOCKED`
 
-Success means exactly one instruction target was updated or created, existing
-content remains present, the `## Project Initialization` section is singular,
-paths stay inside the requested root, and rerunning is idempotent. Return
-`BLOCKED` when the root is absent, instructions conflict without a safe
-precedence decision, the preset is ambiguous, or a confirmed fallback lacks
-its evidence. On rejection or an unconfirmed fallback, write nothing.
+Success means exactly one instruction target points to the stable contract,
+both managed contracts exist inside the requested root, manual content remains,
+all three targets resolve to distinct files, and rerunning updates one managed
+block without duplication. Return `BLOCKED`
+when the root is absent, a preset choice is unresolved, or a confirmed fallback
+lacks evidence. On rejection or an unconfirmed fallback, write nothing.
 
 ## Composition and stopping
 

@@ -19,11 +19,16 @@ Run only after an explicit `$ask-light` request. Do not run a recommended
 Skill, call a Skill, launch a sub-agent, install a package, edit a project, or
 create workflow state. Print the host-appropriate invocation and stop.
 
-The deterministic scanner in [ask-light.ps1](scripts/ask-light.ps1) is an
-optional read-only aid for hosts that can run PowerShell. Use `$ask-light next`
-for one next Skill, or `$ask-light workflow` for one bounded recipe. On hosts
-that cannot run the script, follow [discovery-contract.md](references/discovery-contract.md)
-manually.
+The deterministic router in [ask_light.py](scripts/ask_light.py) is the
+portable read-only implementation; [ask-light.ps1](scripts/ask-light.ps1) is a
+compatibility launcher. Use `$ask-light next` for one next Skill, or
+`$ask-light workflow` for one bounded recipe. The two-layer protocol is in
+[discovery-contract.md](references/discovery-contract.md).
+
+The executable helper requires Python 3.9 or newer. The PowerShell launcher
+returns a structured `BLOCKED` record when that runtime is absent. In that
+case, follow the two layers in `discovery-contract.md` manually from the same
+declared first-party roots and host evidence; do not guess availability.
 
 ## Required input context
 
@@ -33,31 +38,13 @@ capabilities before routing. Collect what is known; do not invent missing
 facts. The context fields are defined in
 [discovery-contract.md](references/discovery-contract.md).
 
-## Typical routing
+## Routing source
 
-`ask-light` routes; it does not reimplement. Apply this map and the project's
-actual stage:
-
-```text
-vague idea                                    → clarify
-existing project + unclear requirements       → project-clarify
-large / foggy / multi-session project         → decision-map
-missing external fact                         → research
-need experiment to decide                     → prototype
-information held by another person            → to-questionnaire
-SPEC exists (needs slicing)                   → project-tickets
-ticket is ready (and unblocked)               → implement
-hard bug / regression / performance issue     → diagnosing-bugs
-implementation complete (needs acceptance)    → project-review (via review-loop)
-ready to publish / release                    → release-workflow
-previous explanation did not land             → wait-what
-```
-
-Specialized workflows (`manuscript-ops`, `kb-init`, `learn-anything`,
-`kanban-worker`) and reusable capabilities (`socratic`, `agent-config`,
-`generic-review`, `code-review`, `tdd`, `handoff`, `wizard`, `teach`,
-`writing-for-agents`, `resolving-merge-conflicts`) remain independent. Route
-to them when their entry condition is the best fit.
+Resolve logical fit from the Light-owned
+[Skill Map](references/light-skill-map.json), then verify the selected Skill
+against the active host. Installed Skill prose is availability evidence, not
+routing semantics. A generic host root or an unknown package beside Light
+Skills is not first-party provenance.
 
 ## Workflow mode
 
@@ -74,13 +61,11 @@ gap.
 
 ## Source and host rules
 
-Route only among real first-party Light Skills visible to the active host.
-Project/global installation roots are locations where first-party Skills live,
-not competing capability sources. Upstream, modified third-party, and private
-`skills-3rdParty` packages are not eligible for recommendation. A missing or
-unreadable candidate gets a manual-install fallback: restore a readable
-first-party package containing `SKILL.md`, refresh the host, and re-run
-`$ask-light`.
+Route only among names in the Light Skill Map and roots explicitly identified
+as Light first-party. Optional UI metadata is not proof of existence; a readable
+`SKILL.md` is the package requirement. A missing or unreadable selection gets a
+manual-install fallback: restore the first-party package, refresh the host, and
+re-run `$ask-light`.
 
 ## Result contract
 
@@ -107,8 +92,7 @@ stops.
 
 ## Verification
 
-Run the package contract and behavior tests. They exercise fresh disposable
-first-party catalogs, duplicate names, large catalogs with shortlist-bounded
-body reads, unavailable metadata, context-based ranking, workflow recipes,
-explicit-only `learn-anything`, genuine ambiguity, installation guidance, and
+Run the package contract and behavior tests. They exercise the representative
+intent matrix, Frozen metadata compatibility, first-party provenance, host
+availability, host invocation rendering, local-pointer failure, workflows, and
 the no-execution boundary.

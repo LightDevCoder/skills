@@ -11,16 +11,13 @@ Ask `socratic`:
 - Frontier: D1, D2 (ask one at a time; recommendation order D1 first).
 
 **Return**:
-```text
-Current understanding: tool for learning Japanese, no platform or audience yet
-Resolved decisions: (none)
-Still unresolved decisions: target audience, platform
-Dependencies and fact-finding gaps: none
-Current question or next step: What learner level should this serve? Beginner
-needs guided grammar; intermediate needs immersion tools. Recommendation depends
-on scope you prefer.
-```
-Then stop.
+
+> I understand that you want a Japanese-learning tool, but the learner level
+> is still open. Beginner would need guided grammar; intermediate could focus
+> on immersion. I'd start with beginners because it gives the first version a
+> clearer learning path. Which audience do you want?
+
+The next normal user reply continues this same session.
 
 ## Example 2 — Fact gap is not a user question
 
@@ -41,7 +38,18 @@ It does not invent pricing or convert the fact into "Which do you prefer?"
 ## Example 3 — No SPEC, explicit stop
 
 After two turns, frontier is empty except for a blocked dependency.
-`clarify` does not create a formal SPEC. It returns the summary, recommends:
+`clarify` does not create a formal SPEC. It reports the gap and recommends:
 "If pricing is needed, run `$research`; if this becomes a project, run
 `$project-clarify`" and stops.
 
+## Example 4 — Shared-understanding confirmation
+
+After the user settles the final decision:
+
+> So the tool is for beginner Japanese learners, starts as a web app, and uses
+> short guided practice rather than open-ended immersion. The remaining
+> assumption is that progress stays local for the first version. If that
+> matches what you mean, this clarification is complete.
+
+"Yes" completes the session. A correction updates the decision state and asks
+the next useful question without another `$clarify` invocation.

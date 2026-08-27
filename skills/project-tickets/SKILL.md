@@ -10,6 +10,11 @@ disable-model-invocation: true
 after an explicit `$project-tickets` request. It turns a verified SPEC into
 numbered, one-file-per-ticket issues on the local markdown tracker.
 
+Resolve the tracker and working area from `docs/agents/light-project.md` and
+its `docs/agents/issue-tracker.md` locator when present. If the configured
+tracker is not the supported local-markdown contract, report `BLOCKED` with the
+missing adapter instead of silently writing `.scratch` files.
+
 ## Core behavior
 
 1. **Verify the SPEC handoff.** Read the SPEC at the supplied path; a missing

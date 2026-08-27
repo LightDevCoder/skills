@@ -39,11 +39,20 @@
 - **组合优于复制：** `review-loop` 是轻量评审引擎；`project-review` 拥有最终 `PASS`/`FAIL`/`BLOCKED`；调用方只命名 Skill，不再复述其内部 runbook。
 - **测试：** 非契约的字面措辞断言已放宽；根 discovery/composition 测试已更新为 `project-review` 作为最终验收命令。
 - **规划状态：** 旧 `.scratch/light-skills-refactor/` 已归档/废弃；`.scratch/light-skills-lean-refactor/` 成为唯一活动规划集，含逻辑重构分析与实施 tickets。
-- **Frozen 完整性：** 六个 Frozen Skills（`eli5`、`recap`、`language-learning`、`kb-init`、`kanban-worker`、`learn-anything`）保持逐字节不变并通过 hash 验证。
+- **Frozen 完整性：** 五个 Frozen Skills（`eli5`、`language-learning`、`kb-init`、`kanban-worker`、`learn-anything`）保持逐字节不变并通过 hash 验证。2026-08-27 用户明确修改活动范围：`recap` 删除说明性正文，只保留一条手动执行语句。
+
+### 变更 — 功能闭环
+
+- **ask-light：** 新增 Light 自有 33-Skill 语义地图，分离逻辑路由与 host availability；UI metadata 改为可选；generic root 不再作为第一方来源；补齐 Codex/Claude/通用调用展示；Python router 成为全平台测试实现，PowerShell 保留为兼容 launcher。
+- **项目 bootstrap：** `project-init` 现在幂等写入 `docs/agents/light-project.md` 与 issue-tracker 契约；下游 Project Skills 只消费所需字段。preset 有歧义时必须简要比较并给出推荐。
+- **澄清：** 一次 `$clarify` 调用可通过普通回复持续推进；Socratic 状态默认仅内部维护，对话在有依据时给建议，完成前必须确认共同理解；unknown routing 只归 `socratic`。
+- **Review 所有权：** 轻量 reviewer packet 只归 `review-loop`；acceptance registry 与 verdict 归 `project-review`；migration reference 明确为历史材料。
+- **测试：** 新增代表性 top routing、空仓库 bootstrap/rerun、clarification lifecycle、本地 pointer、所有权与历史/runtime 边界测试；通过行为测试消除已修复的 prose coupling，而非恢复旧措辞。
+- **recap：** 根据用户明确修订，`SKILL.md` 现在只含必需 frontmatter 与一条手动 `$recap` 执行语句；输出当前 session 的一句简洁摘要，不替换或压缩对话历史。
 
 ### No-Redesign 验证
 
-对 19 个 `NO REWRITE/PORT` 按 `git diff` 逐个检查（SPEC §26）：`manuscript-ops`、`kb-init`、`learn-anything`、`language-learning`、`kanban-worker`、`recap`、`eli5`、`release-workflow`、`research`、`prototype`、`tdd`、`handoff`、`diagnosing-bugs`、`wizard`、`teach`、`wait-what`、`to-questionnaire`、`writing-for-agents`、`resolving-merge-conflicts`——仅在真实集成需求处加最小 handoff/attribution。
+对 18 个 `NO REWRITE/PORT` 按 `git diff` 逐个检查（SPEC §26）：`manuscript-ops`、`kb-init`、`learn-anything`、`language-learning`、`kanban-worker`、`eli5`、`release-workflow`、`research`、`prototype`、`tdd`、`handoff`、`diagnosing-bugs`、`wizard`、`teach`、`wait-what`、`to-questionnaire`、`writing-for-agents`、`resolving-merge-conflicts`——仅在真实集成需求处加最小 handoff/attribution。`recap` 是上文单独记录、经用户批准的例外。
 
 ### 发布证据
 
@@ -128,7 +137,7 @@
 ### 变更
 
 - 测试工具链从 Windows PowerShell 迁移为跨平台 Python：21 个 PowerShell 测试文件替换为 18 个 Python 套件（collection discovery、header assets、quick start、ask-light contract、project-init contract 与 behavior、recap 两个 contract、language-learning contract、review-loop 五个 profile 的 contract 与 behavior 套件及协议 helpers），保留断言集。
-- The ask-light scanner behavior 套件仍通过 `pwsh` 执行真实的 `scripts/ask-light.ps1`，pwsh 缺失时优雅跳过；CI（ubuntu-latest）自带 pwsh 并运行。
+- ask-light behavior 套件在所有 host 直接执行可移植 Python router；`scripts/ask-light.ps1` 仅保留为轻量兼容 launcher。
 - CI 迁至 `ubuntu-latest`（bash + python）；新增 retired-boundary 与 无 PowerShell 测试检查。
 - 文档更新为新测试文件名与跨平台手动 fallback 片段；治理措辞不变。
 

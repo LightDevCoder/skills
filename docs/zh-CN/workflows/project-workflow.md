@@ -8,7 +8,7 @@
 
 ```text
 project-init
-      ↓  （已验证的最小项目状态）
+      ↓  （稳定的 Light 项目与 tracker 契约）
 project-clarify
       ↓  （有界澄清 handoff：理解 / 已决 / 未决 / 缺口）
 project-spec
@@ -28,7 +28,7 @@ release-workflow
 
 | 步骤 | 入口条件 | Skill 与调用 | 输出 / Handoff | 停止点 |
 | --- | --- | --- | --- | --- |
-| 1 | 新项目需要最小可确认起点 | [`project-init`](../../../skills/project-init/SKILL.md) — user-invoked | 已验证最小 preset + 初始化路径 | 停止，由用户选下一步 |
+| 1 | 新项目需要稳定且已确认的起点 | [`project-init`](../../../skills/project-init/SKILL.md) — user-invoked | `docs/agents/light-project.md` + tracker 契约 + instruction pointer | 停止，由用户选下一步 |
 | 2 | 真实项目存在未决决策，仓库事实不应重问 | [`project-clarify`](../../../skills/project-clarify/SKILL.md) — user-invoked → `socratic` 引擎 | 供 `project-spec` 的有界 handoff | 止于澄清 summary，不建 SPEC |
 | 3 | 决策已澄清，需要正式 SPEC | [`project-spec`](../../../skills/project-spec/SKILL.md) — user-invoked | 冻结 SPEC + 验收来源 | 止于待审批；阻塞则返回 `project-clarify` |
 | 4 | SPEC 已批准 | [`project-tickets`](../../../skills/project-tickets/SKILL.md) — user-invoked | 按依赖排序的 tracer-bullet ticket 图 | 停止，不自动起 `implement` |

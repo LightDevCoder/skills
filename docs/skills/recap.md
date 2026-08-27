@@ -7,10 +7,8 @@ This page explains usage without creating a second contract.
 
 ## Purpose
 
-`recap` is a user-invoked, read-only status glance. It summarizes the active
-goal, newest material outcome, and current state in exactly one plain-text line.
-It is independently implemented from Anthropic's documented on-demand recap
-boundary: display a one-line summary without replacing history.
+Show one concise line about the current session without replacing or compacting
+conversation history. The output is capped at 400 characters.
 
 ## Invoke
 
@@ -20,33 +18,20 @@ Select it explicitly:
 $recap
 ```
 
-It must not run automatically. It uses only session context already available,
-runs no tools, changes no files, does not compact history, and stops after the
-single line.
-
-## Expected results
-
-- **Success:** one concise sentence names the latest material outcome and state.
-- **Boundary:** when the session has little context, one line says that no prior
-  activity is available rather than inventing progress.
-- **Failure:** multiline, labeled, bulleted, tool-using, or state-changing output
-  violates the contract and must not be presented as a valid recap.
-
-`recap` never invokes another user-invoked Skill. A durable continuation record
-requires a separate user choice such as `handoff`; final acceptance remains
-owned by `project-review`. Missing session context is handled in the one-line
-boundary result and is not silently relabeled as a `project-review` `BLOCKED`
-verdict.
+The package frontmatter and host metadata keep this entry user-invoked.
 
 ## Verification and release state
 
-Run [the package tests](../../skills/recap/tests/) and inspect
-`agents/openai.yaml` for `allow_implicit_invocation: false`. Fresh-copy and
-independent review evidence is recorded in the
+Run the current amendment checks in
+[tests/test_functional_closure.py](../../tests/test_functional_closure.py).
+The unchanged [package tests](../../skills/recap/tests/) are historical records
+for the prior long-form contract and are not part of the active suite.
+Fresh-copy and independent review evidence is recorded in the
 [admission record](../evidence/admissions/recap/README.md).
 
-`recap` is released in v0.1.2. Install it with
-`npx skills add LightDevCoder/skills --skill recap --yes --copy --agent '*'`,
+The prior `recap` form is released in v0.1.2; this manual-only amendment remains
+unreleased in the current candidate. Install the current stable release form with
+`npx skills add LightDevCoder/skills#v0.1.6 --skill recap --yes --copy --agent '*'`,
 refresh, and confirm discovery without the source checkout under
 [the installation policy](../INSTALLATION.md).
 

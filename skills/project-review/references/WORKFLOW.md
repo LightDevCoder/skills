@@ -23,8 +23,8 @@ action unambiguous; otherwise request the mode.
   verdict.
 - **Producer:** supplies evidence and is the only role that modifies the
   target during an allowed repair.
-- **Critic / reviewer:** read-only; returns candidate findings using
-  [reviewer-contract.md](reviewer-contract.md) or the full registry schema.
+- **Critic / reviewer:** read-only; returns candidate findings using the public
+  `review-loop` reviewer contract or the full project-review registry schema.
 - **Evaluator:** read-only and fresh from the Critic; judges the frozen
   baseline and admissible evidence.
 
@@ -93,8 +93,8 @@ available round, and a writable new round directory.
    bounded packet (`generic-review` for ordinary artifacts, `code-review`
    for software diff, domain reviewer when justified) and call them through
    `review-loop` (`resolve reviewer → invoke reviewer → receive findings`).
-   A reviewer result is a candidate, not an instruction; its shape follows
-   [reviewer-contract.md](reviewer-contract.md).
+   A reviewer result is a candidate, not an instruction; its lightweight shape
+   follows `review-loop`'s public reviewer contract.
 3. **Validate every candidate.** Assign or reuse its stable Finding ID, then
    record one disposition: `confirmed`, `rejected`, `duplicate`, or
    `out-of-scope`. For the software Profile, ingest `code-review` Standards

@@ -46,12 +46,14 @@ resolved, identify affected dependencies, then recompute the frontier.
 3. On an answer, dynamically adjust the next frontier rather than following a
    prewritten order. An answer often settles multiple decisions or surfaces
    new ones.
-4. Return the updated state and any clear, unstarted fact-finding next step.
-   Stop for the user's decision or for separately authorized fact work.
+4. Return the updated internal state and a conversational projection. Recommend
+   an option when the evidence supports a judgment, while preserving the user's
+   decision. Pause for the reply or separately authorized fact work.
 
 ## Stopping
 
-- If frontier is empty and no dependencies remain: `done`.
+- If frontier is empty and no dependencies remain: return a concise synthesis
+  and request shared-understanding confirmation before `done`.
 - If frontier is empty but dependencies are blocked on facts: report the
   fact gap and capability needed; `wait for decision` is not applicable.
 - If a dependency is blocked by missing capability: report the gap, keep the

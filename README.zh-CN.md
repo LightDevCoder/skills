@@ -48,8 +48,8 @@ npx skills add LightDevCoder/skills#v0.1.6 --yes --copy --agent '*'
 
 ```text
 $ask-light next        # 不知道下一步 — 得到一个推荐后停止
-$project-init          # 从最小 preset 初始化项目
-$clarify               # 模糊想法 → 轻量决策，无 SPEC
+$project-init          # 从 preset 建立稳定 Light 项目契约
+$clarify               # 一次调用 → 连续澄清，无 SPEC
 $project-clarify       # 真实项目 → 先检查仓库，再提问
 $implement             # 一个清晰 ticket → 一个已验证产物
 $project-review        # 最终验收：PASS / FAIL / BLOCKED
@@ -75,7 +75,7 @@ project-review
 release-workflow
 ```
 
-- `project-init` — 最小 preset 初始化，不做完整澄清。
+- `project-init` — 幂等 Light bootstrap，建立稳定项目/tracker 契约，不做完整澄清。
 - `project-clarify → project-spec → project-tickets` — 澄清决策、冻结 SPEC、切成 tracer-bullet tickets。
 - `implement` — 通用有边界执行器（代码、文档、配置、Skill）。
 - `project-review` — 项目级最终验收；`review-loop` 是其收敛引擎。
@@ -84,7 +84,7 @@ release-workflow
 小任务路径：
 
 ```text
-clarify                          # 独立想法分流 → 停止，不产生 SPEC
+clarify                          # 独立连续澄清 → 共同理解确认
 implement                        # 一个 ready ticket → 验证 → 需要时 review-loop
 diagnosing-bugs → implement      # 难 bug → 紧反馈环 → 修复 → review
 release-workflow                 # 仅发布
@@ -100,7 +100,7 @@ $ask-light next
 $ask-light workflow
 ```
 
-`ask-light` 是**Light 工作流路由器**—— user-invoked、只读、最后才构建（先把路修好，再画地图）。它基于 goal、artifacts、blockers、project type、task kind、availability 和 invocation control，在 33 个第一方 Skill 中检查，只返回*一个*推荐（或一个有边界 recipe），含来源、理由和 host 适配的调用方式，然后停止。绝不安装、执行或自动串联另一个 user-invoked Skill。
+`ask-light` 是**Light 工作流路由器**—— user-invoked、只读。它先从 Light 自有的 33-Skill 地图判断逻辑匹配，再独立验证 host availability，只返回*一个*推荐（或一个有边界 recipe），含来源、理由和 host 适配的调用方式，然后停止。绝不安装、执行或自动串联另一个 user-invoked Skill。
 
 见 [ask-light](skills/ask-light/SKILL.md) 与 [docs/zh-CN/workflows/](docs/zh-CN/workflows/)。
 

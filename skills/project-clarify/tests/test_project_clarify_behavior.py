@@ -24,8 +24,9 @@ class ProjectClarifyBehaviorTest(unittest.TestCase):
         }
         self.assertEqual(len(existing_project_fixture), 3)
         self.assertIn("stable locator", skill)
-        self.assertIn("not user questions", skill)
-        self.assertIn("unblocked, user-owned frontier", skill)
+        self.assertLess(skill.index("Inspect project facts before asking"), skill.index("Maintain user decisions with `socratic`"))
+        self.assertIn("docs/agents/light-project.md", skill)
+        self.assertRegex(skill, r"Ask only the\s+unblocked, user-owned frontier")
 
     def test_empty_project_boundary_does_not_invent_facts(self) -> None:
         skill = skill_text()

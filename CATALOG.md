@@ -34,17 +34,17 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### ask-light
 
-- **Purpose:** Inspect the active host and recommend one next Skill or one bounded workflow recipe without executing it.
+- **Purpose:** Map intent through Light-owned routing knowledge, verify host availability separately, and recommend one next Skill or bounded recipe.
 - **When to use:** The next step is unclear; you need a router, not an executor.
 - **Invocation:** User-invoked only; never executes the recommendation.
 - **Package:** [skills/ask-light/](skills/ask-light/)
 - **Status:** Admitted first-party; REFACTOR (router built last after the full map).
-- **Evidence:** Contract and scanner tests under [skills/ask-light/tests/](skills/ask-light/tests/); [user guide](docs/skills/ask-light.md).
+- **Evidence:** Semantic-map, provenance, availability, and top-result tests under [skills/ask-light/tests/](skills/ask-light/tests/); [user guide](docs/skills/ask-light.md).
 - **Installation path:** `skills/ask-light/` in a host-recognized Skills root.
 
 ### clarify
 
-- **Purpose:** Lightweight standalone clarification for a vague idea, requirement, or process — no formal SPEC or project workflow.
+- **Purpose:** One-invocation continuous clarification for a vague idea, requirement, or process — no formal SPEC or project workflow.
 - **When to use:** Idea/brainstorm is foggy and no project context is required.
 - **Invocation:** User-invoked only.
 - **Package:** [skills/clarify/](skills/clarify/)
@@ -184,11 +184,11 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### project-init
 
-- **Purpose:** Initialize a confirmed project from a minimal preset while preserving existing instructions and validating paths.
+- **Purpose:** Idempotently bootstrap the stable Light project and tracker contracts consumed by downstream Project Skills.
 - **When to use:** New project needs a minimal, confirmed starting point.
 - **Invocation:** User-invoked only.
 - **Package:** [skills/project-init/](skills/project-init/)
-- **Status:** Admitted first-party; REFACTOR (now minimum initialization; full clarification moved to `project-clarify`).
+- **Status:** Admitted first-party; REFACTOR (repository bootstrap; full clarification remains in `project-clarify`).
 - **Evidence:** Contract and behavior tests under [skills/project-init/tests/](skills/project-init/tests/); [user guide](docs/skills/project-init.md).
 - **Installation path:** `skills/project-init/` in a host-recognized Skills root.
 
@@ -234,12 +234,12 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### recap
 
-- **Purpose:** Generate exactly one line summarizing the current Agent session without changing history.
+- **Purpose:** Show one concise line about the current session without replacing or compacting conversation history.
 - **When to use:** User explicitly invokes `$recap`.
 - **Invocation:** User-invoked only; `$recap` is the sole entry.
 - **Package:** [skills/recap/](skills/recap/)
-- **Status:** Admitted first-party via prompt-only fast-track `PASS`; released in v0.1.2.
-- **Evidence:** Contract and output tests under [skills/recap/tests/](skills/recap/tests/), [user guide](docs/skills/recap.md).
+- **Status:** Admitted first-party; v0.1.2 released the prior form; the manual-only amendment is unreleased pending current-candidate acceptance.
+- **Evidence:** Current amendment tests in [tests/test_functional_closure.py](tests/test_functional_closure.py); frozen historical tests remain under [skills/recap/tests/](skills/recap/tests/); [user guide](docs/skills/recap.md).
 - **Installation path:** `skills/recap/` in a host-recognized Skills root.
 
 ### release-workflow
@@ -284,7 +284,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### socratic
 
-- **Purpose:** Core clarification engine — dynamic, decision-owned questioning without a fixed questionnaire.
+- **Purpose:** Core clarification engine — internal decision frontier with lightweight recommendations and shared-understanding confirmation.
 - **When to use:** Underlies `clarify`, `project-clarify`, `decision-map`; not a standalone project workflow.
 - **Invocation:** Model-invoked (engine for other Skills).
 - **Package:** [skills/socratic/](skills/socratic/)

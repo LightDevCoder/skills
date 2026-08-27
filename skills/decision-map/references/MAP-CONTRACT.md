@@ -1,7 +1,8 @@
 # Map contract
 
-Canonical shapes for the local-markdown tracker, compatible with
-`docs/agents/issue-tracker.md` Wayfinding operations.
+Canonical shapes for the local-markdown tracker. Resolve the tracker and
+working area from `docs/agents/light-project.md` when present, then follow the
+selected `docs/agents/issue-tracker.md` operations.
 
 ## Map file
 
@@ -22,7 +23,7 @@ choosing a ticket.>
 
 <!-- index — one line per closed ticket: gist + link to ticket -->
 
-- [<closed ticket title>](issues/NN-<slug>.md) — <one-line gist of answer>
+- `<closed ticket title> → issues/NN-<slug>.md` — <one-line gist of answer>
 
 ## Not yet specified
 
@@ -69,7 +70,7 @@ On resolve, append:
 
 ## Map operations
 
-Per `docs/agents/issue-tracker.md`:
+Per the configured `docs/agents/issue-tracker.md`:
 
 - **Blocking**: `Blocked by: NN, NN` near the top. A ticket is **unblocked**
   when every ticket it lists is `resolved`.

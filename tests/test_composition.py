@@ -88,12 +88,13 @@ class CompositionTests(unittest.TestCase):
 
     def test_ask_light_routes_to_real_skills(self):
         text = read_skill("ask-light")
-        # Should mention at least 10 real first-party skills
-        real_skills = ["project-init", "project-clarify", "project-spec", "project-tickets", "implement", "project-review", "clarify", "socratic", "research", "prototype", "review-loop"]
-        found = [s for s in real_skills if s in text]
-        self.assertGreaterEqual(len(found), 6, f"ask-light must route to existing first-party Skills, found only {found}")
+        import json
+        skill_map = json.loads(read_doc("skills/ask-light/references/light-skill-map.json"))
+        names = {entry["name"] for entry in skill_map["skills"]}
+        real_skills = {"project-init", "project-clarify", "project-spec", "project-tickets", "implement", "project-review", "clarify", "socratic", "research", "prototype", "review-loop"}
+        self.assertTrue(real_skills.issubset(names))
         # Ensure it does not promise to execute
-        self.assertTrue("never executes" in text.lower() or "never execute" in text.lower(), "ask-light must be read-only router")
+        self.assertIn("read-only", text.lower(), "ask-light must be read-only router")
         # Workflow doc
         wf = read_doc("docs/workflows/project-workflow.md")
         self.assertIn("ask-light", wf)

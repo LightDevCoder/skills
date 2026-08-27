@@ -49,5 +49,7 @@ or `BLOCKED`; those verdicts belong to `project-review`.
   packet and read-only boundary.
 - [finding-schema.md](references/finding-schema.md) — normalized finding shape
   and `REVIEW-ERROR` handling.
+- [migration.md](references/migration.md) — historical provenance only; never
+  required for current runtime execution.
 - Composition targets (invoke by name, do not copy): `generic-review`,
   `code-review`, `project-review`.

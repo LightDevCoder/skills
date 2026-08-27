@@ -12,11 +12,13 @@ and user-owned decisions into a bounded handoff for `project-spec`.
 
 ## Required order
 
-1. **Inspect project facts before asking.** Read the target root's readable
-   material (`README`, `AGENTS.md`, `CLAUDE.md`, `CONTEXT.md`/`CONTEXT-MAP.md`,
-   `docs/adr/`, source/tests/specs, tracker state). Record each usable fact
-   with a stable locator; mark missing or unreadable material as an evidence
-   gap. Facts that inspection can settle are not user questions.
+1. **Inspect project facts before asking.** If
+   `docs/agents/light-project.md` exists, read its goal, outputs, domain-context
+   locators, and tracker locator first. Then inspect the named material plus
+   relevant `README`, instructions, source/tests/specs, and tracker state.
+   Record each usable fact with a stable locator; mark missing or unreadable
+   material as an evidence gap. Facts that inspection can settle are not user
+   questions.
 2. **Maintain user decisions with `socratic`.** Pass inspected facts, unknowns,
    existing decisions, and the goal to the `socratic` engine. Ask only the
    unblocked, user-owned frontier — one meaningful question at a time.

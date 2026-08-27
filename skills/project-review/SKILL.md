@@ -14,6 +14,8 @@ frozen acceptance baseline and issues the final `PASS`, `FAIL`, or `BLOCKED`.
 
 - The project has an approved target/SPEC/brief/ticket graph and a bounded
   implementation to check.
+- When `docs/agents/light-project.md` exists, use its review profile and
+  acceptance strategy as the default, then freeze the actual acceptance source.
 - Use it as the final gate after `implement` or after a batch of tickets,
   before `release-workflow`.
 - Use it for Skill admission when the acceptance source is a package's
@@ -74,8 +76,8 @@ state tree and resume rules.
   and records.
 - [finding-schema.md](references/finding-schema.md) — stable identities,
   dispositions, registry format.
-- [reviewer-contract.md](references/reviewer-contract.md) — local read-only
-  reviewer packet.
+- `review-loop` owns the lightweight read-only reviewer packet; invoke that
+  public contract rather than loading a copied sibling reference.
 - [review-rubric.md](references/review-rubric.md) — generic Core checks and
   Profile-supplied dimensions.
 - [subagent-protocol.md](references/subagent-protocol.md) — read-only
@@ -87,7 +89,7 @@ state tree and resume rules.
   [manuscript.md](references/profiles/manuscript.md),
   [agent-skill.md](references/profiles/agent-skill.md),
   [specification.md](references/profiles/specification.md).
-- [migration.md](references/migration.md) — provenance of the migrated
-  final-acceptance logic.
+- [migration.md](references/migration.md) — historical provenance only; never
+  required for current runtime execution.
 - Composition targets (invoke by name, do not copy): `review-loop`,
   `generic-review`, `code-review`.

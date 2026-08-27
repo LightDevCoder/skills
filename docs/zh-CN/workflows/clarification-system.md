@@ -21,7 +21,7 @@
 ```
 
 - [`socratic`](../../../skills/socratic/SKILL.md) — 核心引擎：动态、decision-owned 的追问，无固定问卷，区分事实与用户决策；本身不是项目流程，被其他 Skill 调用。
-- [`clarify`](../../../skills/clarify/SKILL.md) — **user-invoked 单入口**，面向无项目上下文的模糊想法。`clarify → socratic`。返回 `Current understanding / Resolved / Still unresolved / Gaps` + 当前问题后停止，不产 SPEC。
+- [`clarify`](../../../skills/clarify/SKILL.md) — **user-invoked 单入口**，面向无项目上下文的模糊想法。一次 `$clarify` 启动连续会话，后续普通回复继续 `socratic`；每轮保持对话式，在有依据时给建议，并在共同理解确认、退出或切换 workflow 后结束。不产 SPEC，不自动串联。
 
 ## 面向项目的澄清
 
@@ -44,7 +44,7 @@ Unknown
 
 ## Handoff 规则
 
-- `clarify` 止于 summary；出现正式项目时由*用户*显式调 `project-clarify`/`decision-map`，不自动串联。
+- `clarify` 止于共同理解确认或 blocker；出现正式项目时由*用户*显式调 `project-clarify`/`decision-map`，不自动串联。
 - `project-clarify` 交 `project-spec`；`project-spec` 若仍有阻塞决策则返回 `project-clarify`。
 - `decision-map` 清雾后交 `project-spec`。
 

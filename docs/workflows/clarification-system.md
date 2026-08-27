@@ -21,7 +21,7 @@ This document explains the **Clarification & Research** composition: entry, hand
 ```
 
 - [`socratic`](../../skills/socratic/SKILL.md) — core engine: dynamic, decision-owned questioning; no fixed questionnaire; distinguishes facts vs user decisions. Not a project workflow by itself. Other Skills *call* it; they do not reimplement it.
-- [`clarify`](../../skills/clarify/SKILL.md) — **user-invoked standalone entry** for vague ideas/brainstorms with no project context. `clarify → socratic`. Returns `Current understanding / Resolved / Still unresolved / Gaps` + current question, then stops. No SPEC, no auto-chain.
+- [`clarify`](../../skills/clarify/SKILL.md) — **user-invoked standalone entry** for vague ideas/brainstorms with no project context. One `$clarify` starts a continuous session; normal replies advance `socratic`. Turns stay conversational, include a recommendation when useful, and end only after shared-understanding confirmation, exit, or a workflow switch. No SPEC, no auto-chain.
 
 ## Project-aware clarification
 
@@ -46,7 +46,7 @@ Call the capability; never guess or copy its instructions into the caller. `rese
 
 ## Handoff rules
 
-- `clarify` stops at its summary. If a formal project emerges, the *user* may explicitly invoke `project-clarify` or `decision-map` — no auto-chain.
+- `clarify` stops after confirmed shared understanding or a blocker. If a formal project emerges, the *user* may explicitly invoke `project-clarify` or `decision-map` — no auto-chain.
 - `project-clarify` hands to `project-spec`; if a blocking user decision remains, `project-spec` returns to `project-clarify`.
 - `decision-map` hands to `project-spec` once fog clears.
 

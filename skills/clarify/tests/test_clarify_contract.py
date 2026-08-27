@@ -1,63 +1,48 @@
-"""Public-contract checks for the explicit standalone clarification entry."""
-
 from __future__ import annotations
 
-import re
+import importlib.util
 import unittest
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
-
-
-def read_public_contract(root: Path = ROOT) -> tuple[str, str]:
-    return (
-        (root / "SKILL.md").read_text(encoding="utf-8"),
-        (root / "agents" / "openai.yaml").read_text(encoding="utf-8"),
-    )
+SPEC = importlib.util.spec_from_file_location("clarify_session", ROOT / "scripts" / "session_state.py")
+assert SPEC and SPEC.loader
+SESSION = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(SESSION)
 
 
 class ClarifyPublicContractTest(unittest.TestCase):
-    def test_explicit_entry_uses_the_model_engine_and_returns_a_summary(self) -> None:
-        skill, metadata = read_public_contract()
+    def test_one_invocation_continues_through_normal_answers_to_confirmation(self) -> None:
+        state = SESSION.Session()
+        state = SESSION.transition(state, "invoke")
+        self.assertEqual(state.status, "active")
+        state = SESSION.transition(state, "answer")
+        state = SESSION.transition(state, "answer")
+        self.assertEqual(state.status, "active")
+        state = SESSION.transition(state, "synthesize")
+        self.assertEqual(state.status, "awaiting-confirmation")
+        state = SESSION.transition(state, "confirm")
+        self.assertEqual(state.status, "done")
 
-        self.assertRegex(skill, r"(?m)^name: clarify$")
-        self.assertRegex(skill, r"(?m)^disable-model-invocation: true$")
-        self.assertRegex(metadata, r"(?m)^\s*allow_implicit_invocation: false$")
-        self.assertRegex(skill, r"(?is)explicit.*\$clarify.{0,220}socratic")
-        for result_field in ("Current understanding", "Resolved decisions", "Still unresolved decisions"):
-            self.assertIn(result_field, skill)
-        self.assertRegex(skill, r"(?is)(stop|return).{0,160}user")
+    def test_correction_reopens_the_session_and_invalid_transitions_fail(self) -> None:
+        state = SESSION.transition(SESSION.Session(), "invoke")
+        state = SESSION.transition(state, "synthesize")
+        self.assertEqual(SESSION.transition(state, "correct").status, "active")
+        with self.assertRaises(ValueError):
+            SESSION.transition(SESSION.Session(), "answer")
 
-    def test_missing_dependency_is_reported_as_a_gap_not_a_fabricated_answer(self) -> None:
-        skill, _ = read_public_contract()
-        attribution = (ROOT / "ATTRIBUTION.md").read_text(encoding="utf-8")
+    def test_wrapper_composes_engine_without_deep_reference(self) -> None:
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        workflow = (ROOT / "references" / "WORKFLOW.md").read_text(encoding="utf-8")
+        self.assertEqual(SESSION.POLICY["compositionTarget"], "socratic")
+        self.assertTrue(SESSION.POLICY["ordinaryRepliesContinue"])
+        self.assertTrue(SESSION.POLICY["completionRequiresConfirmation"])
+        self.assertFalse((ROOT / "references" / "ROUTING.md").exists())
+        self.assertNotIn("../../socratic/references", skill + workflow)
 
-        self.assertIn("fact-finding gap", skill)
-        # The composition surface names the fact capabilities without claiming
-        # to execute them itself.
-        for capability in ("research", "prototype", "to-questionnaire"):
-            self.assertIn(capability, skill)
-        self.assertRegex(skill, r"(?is)invent an answer|do not\s+invent")
-        self.assertIn("mattpocock/skills", attribution)
-        self.assertIn("skills/productivity/grill-me/", attribution)
-        self.assertIn("v1.2.3", attribution)
-        self.assertIn("Copyright (c) 2026 Matt Pocock", attribution)
-
-    def test_composition_before_duplication(self) -> None:
-        skill, _ = read_public_contract()
-        # must compose via socratic, not copy its state definition
-        self.assertIn("clarify → socratic", skill)
-        self.assertIn("does not reimplement", skill)
-        self.assertIn("references/WORKFLOW.md", skill)
-        self.assertIn("references/EXAMPLES.md", skill)
-
-    def test_supporting_files_resolve(self) -> None:
-        for name in ("references/WORKFLOW.md", "references/EXAMPLES.md", "references/ROUTING.md"):
-            self.assertTrue((ROOT / name).is_file(), f"missing {name}")
-        wf = (ROOT / "references/WORKFLOW.md").read_text(encoding="utf-8")
-        self.assertIn("socratic", wf.lower())
-        self.assertIn("$clarify", wf)
+    def test_fact_gap_and_auto_chain_boundaries_remain(self) -> None:
+        self.assertFalse(SESSION.POLICY["autoChainUserInvokedSkills"])
+        self.assertEqual(SESSION.POLICY["factWork"], "report-only")
 
 
 if __name__ == "__main__":

@@ -14,8 +14,9 @@ hands it to review.
 
 1. **Pin one work item.** Resolve exactly one ticket, Spec section, or explicit
    conversation slice and record it as the target.
-2. **Inspect relevant context.** Skim only the glossary, ADRs, and files the
-   item touches; record source locations.
+2. **Inspect relevant context.** When `docs/agents/light-project.md` exists,
+   read its tracker, domain-context, and review-profile fields. Then skim only
+   the named glossary, ADRs, and files the item touches; record source locations.
 3. **Route execution when useful.** Call `agent-config` only for role
    splitting, parallelism, or independent review isolation; skip it for a
    bounded solo task.

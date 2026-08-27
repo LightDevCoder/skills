@@ -8,7 +8,7 @@ This document explains how the **Project Workflow** Skills compose. It shows ent
 
 ```text
 project-init
-      ↓  (validated minimal project state)
+      ↓  (stable Light project + tracker contracts)
 project-clarify
       ↓  (bounded clarification handoff: understanding / resolved / unresolved / gaps)
 project-spec
@@ -28,7 +28,7 @@ This is a *recommended* flow, not a required pipeline. Enter mid-stream when the
 
 | Step | Entry condition | Skill & invocation | Output / Handoff | Stop |
 | --- | --- | --- | --- | --- |
-| 1 | New project needs a minimal, confirmed starting point | [`project-init`](../../skills/project-init/SKILL.md) — user-invoked | validated minimal preset + initialized paths | stop; user chooses next |
+| 1 | New project needs a stable, confirmed starting point | [`project-init`](../../skills/project-init/SKILL.md) — user-invoked | `docs/agents/light-project.md` + tracker contract + instruction pointer | stop; user chooses next |
 | 2 | Real project has unresolved decisions; repo facts should not be re-asked | [`project-clarify`](../../skills/project-clarify/SKILL.md) — user-invoked → `socratic` engine | bounded handoff artifact for `project-spec` | stop at clarification summary; do not create SPEC |
 | 3 | Decisions are clarified and a formal SPEC is needed | [`project-spec`](../../skills/project-spec/SKILL.md) — user-invoked | frozen SPEC with acceptance source | stop for approval; if blocked, return to `project-clarify` |
 | 4 | SPEC is approved | [`project-tickets`](../../skills/project-tickets/SKILL.md) — user-invoked | dependency-ordered ticket graph (vertical/tracer-bullet slices) | stop; do not auto-start `implement` |
