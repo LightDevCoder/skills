@@ -58,6 +58,13 @@ Approved Matt PORTs (10) each carry `ATTRIBUTION.md` and have no upstream runtim
 - **Reviewer ownership:** `review-loop/references/reviewer-contract.md` is the single canonical runtime contract; `docs/REVIEWER_CONTRACT.md` (and zh-CN) are now human-facing summaries/pointers.
 - **Header:** README hero remains `Assets/header.png` as the new repository header image.
 
+### Changed — Review baseline integrity
+
+- **ask-light software fixed point:** a `software`-Profile verdict is now consumable only while the current tree still matches the Charter's produced `- Fixed point:` identity on exactly the paths the recorded implementation window touched; dirty or committed drift inside that window stales any old verdict into `review-stale → project-review`, changes outside it never invalidate, and a missing, unresolvable, or undelimitable (repository-first) fixed point fails closed (`review-freshness-unknown`).
+- **ask-light directory baselines:** when the Charter cites a directory source, the whole directory is the reviewed baseline — files appearing inside it after the recorded revision, including untracked ones, now stale the verdict; untracked files outside the cited directory and siblings of file-only sources stay unrelated.
+- **project-review producer contract:** `references/profiles/software.md` documents the durable two-baseline record; the Charter template (`acceptance-charter.md`) gains the software-only `- Fixed point:` line and the `init` workflow freezes it with the baseline.
+- **Tests:** 11 new Git-backed regression tests (17 cases) covering the §13/§14 matrix: fresh PASS, dirty/committed implementation change, unrelated-change isolation, stale FAIL/BLOCKED, missing/unresolvable/unverifiable fixed points, directory tracked modification/deletion, new untracked child, outside-directory noise, and file-source sibling isolation.
+
 ### No redesign verification
 
 18 `NO REWRITE/PORT` Skills were `git diff` checked (SPEC §26): `manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `eli5`, `release-workflow`, `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts` — only minimal handoff/attribution wiring where a real integration need existed. `recap` is the separately recorded user-approved exception above.

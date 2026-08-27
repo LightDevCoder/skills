@@ -245,6 +245,15 @@ def _run_git(root: Path, *args: str):
 _HEX_REVISION_PATTERN = re.compile(r"\b([0-9a-fA-F]{7,40})\b")
 
 
+def _resolvable_git_commit(root: Path, revision_token: str, *, peel: bool = True) -> str:
+    """Return the full commit SHA a revision resolves to locally, else ""."""
+    suffix = "^{commit}" if peel else ""
+    resolved = _run_git(root, "rev-parse", "--verify", "--quiet", f"{revision_token}{suffix}")
+    if resolved is not None and resolved.returncode == 0 and resolved.stdout.strip():
+        return resolved.stdout.strip()
+    return ""
+
+
 def _resolve_recorded_revision(root: Path, revision_value: str) -> tuple[str, str]:
     """Resolve a Charter identity to a local Git commit.
 
@@ -255,9 +264,9 @@ def _resolve_recorded_revision(root: Path, revision_value: str) -> tuple[str, st
     fail closed rather than being guessed into equivalence.
     """
     for candidate in _HEX_REVISION_PATTERN.findall(revision_value):
-        resolved = _run_git(root, "rev-parse", "--verify", "--quiet", f"{candidate}^{{commit}}")
-        if resolved is not None and resolved.returncode == 0 and resolved.stdout.strip():
-            return resolved.stdout.strip(), ""
+        resolved = _resolvable_git_commit(root, candidate)
+        if resolved:
+            return resolved, ""
     return "", "missing" if not revision_value.strip() else "unresolvable"
 
 
@@ -271,8 +280,12 @@ def _classify_review_freshness(
     froze both a Source location and a revision identity; freshness holds only
     while every cited source still matches the recorded commit — including
     uncommitted working-tree modifications, which `git diff <rev> -- <path>`
-    reports alongside committed ones. Anything that cannot be proven fresh is
-    "unknown"; unknown is fail-closed and never grants acceptance.
+    reports alongside committed ones. When a cited source is a directory, the
+    reviewed baseline is that whole directory: files that appear untracked inside
+    it after the revision also invalidate freshness, detected with `git status
+    --porcelain` scoped to exactly the reviewed directory. Anything that cannot
+    be proven fresh is "unknown"; unknown is fail-closed and never grants
+    acceptance.
     """
     revision_value = _raw_field_line(charter_text, "Source revision or identity")
     baseline, failure = _resolve_recorded_revision(root, revision_value)
@@ -332,7 +345,124 @@ def _classify_review_freshness(
                 f"The reviewed source '{relative}' changed after the recorded revision "
                 f"({short_baseline}), including uncommitted working-tree changes.",
             ], baseline
+        # A directory baseline covers everything under it, not only the tracked
+        # content recorded at the revision. Files that appear inside the reviewed
+        # directory afterwards — even untracked ones — change that baseline.
+        if (root / relative).is_dir():
+            directory_status = _run_git(root, "status", "--porcelain", "--", relative)
+            if directory_status is None:
+                return "unknown", [
+                    f"Git could not inspect the reviewed directory '{relative}', so it cannot "
+                    "be proven free of post-review additions."
+                ], baseline
+            if directory_status.returncode != 0:
+                return "unknown", [
+                    f"The freshness comparison for reviewed directory '{relative}' failed "
+                    "(git error), so it cannot be proven unchanged."
+                ], baseline
+            if any(line.startswith("??") for line in directory_status.stdout.splitlines()):
+                return "stale", [
+                    f"A new file appeared inside the reviewed directory '{relative}' after the "
+                    f"recorded revision ({short_baseline}); the frozen directory baseline no longer matches.",
+                ], baseline
     return "current", [], baseline
+
+
+def _reviewed_profile(charter_text: str) -> str:
+    values = _field_values(charter_text, ("Profile",))
+    return values[0] if values else ""
+
+
+def _resolve_revision_chain(root: Path, revision_value: str) -> list[str]:
+    """Resolve every locally verifiable Git commit cited by an identity value.
+
+    Order is preserved so a producer that freezes both window endpoints
+    (`Fixed point: <base> <candidate>`) yields [base, candidate]; duplicates of
+    the same underlying commit collapse to one entry.
+    """
+    chain: list[str] = []
+    for candidate in _HEX_REVISION_PATTERN.findall(revision_value):
+        sha = _resolvable_git_commit(root, candidate)
+        if sha and sha not in chain:
+            chain.append(sha)
+    return chain
+
+
+def _classify_implementation_fixed_point(root: Path, charter_text: str) -> tuple[str, list[str]]:
+    """Check the software Profile's reviewed implementation fixed point.
+
+    Returns ("not-applicable"|"current"|"stale"|"unknown", gaps). A software
+    review binds its verdict to TWO frozen baselines (profiles/software.md): the
+    approved source Charter fields checked by `_classify_review_freshness`, plus
+    the reviewed implementation fixed point recorded by the producer in the
+    Charter `- Fixed point:` field. ask-light consumes that produced identity;
+    it never invents a parallel format.
+
+    Verification compares the current working tree against the reviewed fixed
+    point exactly on the reviewed implementation window — the paths the fixed
+    point's recorded change touched. Two values (<base> <candidate>) delimit
+    that window directly; a single non-root value means the candidate's own
+    change set relative to its parent. A single repository-first commit cannot
+    delimit any window, and changes outside the window stay unrelated and can
+    never invalidate acceptance, while drift inside it — committed or still
+    uncommitted — stales the old verdict. A missing, unresolvable, or
+    undeterminable fixed point fails closed.
+    """
+    if _reviewed_profile(charter_text) != "software":
+        return "not-applicable", []
+    fixed_value = _raw_field_line(charter_text, "Fixed point")
+    if not fixed_value.strip():
+        return "unknown", [
+            "The Charter records the `software` review Profile but no `- Fixed point:` "
+            "identity for the reviewed implementation; a software verdict may only be "
+            "consumed together with the reviewed implementation baseline it froze."
+        ]
+    chain = _resolve_revision_chain(root, fixed_value)
+    if not chain:
+        return "unknown", [
+            f"The Charter's `Fixed point` ('{fixed_value}') does not resolve to a local Git "
+            "commit, so the reviewed implementation baseline cannot be verified; ask-light "
+            "fails closed instead of accepting an unverifiable software review."
+        ]
+    candidate = chain[-1]
+    short_candidate = candidate[:12]
+    if len(chain) >= 2:
+        window = _run_git(root, "diff", "--name-only", chain[0], candidate)
+    else:
+        parent = _resolvable_git_commit(root, f"{candidate}^", peel=False)
+        if not parent:
+            return "unknown", [
+                f"The recorded fixed point ({short_candidate}) is a repository-first commit, so "
+                "the reviewed implementation window cannot be delimited; freeze both window "
+                "endpoints (<base> <candidate>) in the Charter `- Fixed point:` field."
+            ]
+        window = _run_git(root, "diff", "--name-only", parent, candidate)
+    if window is None or window.returncode != 0:
+        return "unknown", [
+            "Git could not reconstruct the reviewed implementation window behind the "
+            "recorded fixed point, so implementation freshness cannot be proven."
+        ]
+    reviewed_paths = [line for line in window.stdout.splitlines() if line.strip()]
+    if not reviewed_paths:
+        return "unknown", [
+            f"The recorded fixed point ({short_candidate}) identifies no reviewed "
+            "implementation content, so there is no reviewed baseline to verify against."
+        ]
+    for relative in reviewed_paths:
+        difference = _run_git(root, "diff", "--quiet", candidate, "--", relative)
+        if difference is None or difference.returncode not in (0, 1):
+            return "unknown", [
+                f"The implementation freshness comparison for '{relative}' failed (git error), "
+                "so it cannot be proven that the reviewed implementation is unchanged."
+            ]
+        if difference.returncode == 1:
+            return "stale", [
+                f"The reviewed implementation '{relative}' changed after the fixed point "
+                f"({short_candidate}) the software review froze, including uncommitted "
+                "working-tree changes; the previous verdict no longer describes the "
+                "current implementation.",
+            ]
+    return "current", []
 
 
 def _project_review_dir(root: Path) -> Path | None:
@@ -721,9 +851,20 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
             if conclusion.is_file():
                 # A verdict applies only to the baseline it reviewed; decide
                 # freshness before any verdict interpretation trusts it.
+                charter_text = _small_text(review_dir / "charter.md")
                 review_freshness, freshness_gaps, _baseline = _classify_review_freshness(
-                    root, _small_text(review_dir / "charter.md")
+                    root, charter_text
                 )
+                if review_freshness == "current":
+                    # Source freshness alone is not the whole software contract:
+                    # a software Profile additionally binds its verdict to the
+                    # reviewed implementation fixed point it froze.
+                    fixed_point_state, fixed_point_gaps = _classify_implementation_fixed_point(
+                        root, charter_text
+                    )
+                    if fixed_point_state in ("stale", "unknown"):
+                        review_freshness = fixed_point_state
+                        freshness_gaps = fixed_point_gaps
                 if review_freshness == "current":
                     acceptance_paths = [conclusion]
                     evidence["hasAcceptanceEvidence"] = True

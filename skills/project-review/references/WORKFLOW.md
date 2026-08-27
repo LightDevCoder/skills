@@ -74,7 +74,10 @@ duplicate.
    applicable Profile and record the reason in the Charter.
 4. Freeze the baseline with the source location, revision or immutable identity,
    scope, exclusions, criteria, required evidence, approval state, and Profile.
-   Use [acceptance-charter.md](acceptance-charter.md).
+   A `software`-Profile review additionally freezes the reviewed implementation
+   fixed point in the Charter's `- Fixed point:` field
+   ([profiles/software.md](profiles/software.md)). Use
+   [acceptance-charter.md](acceptance-charter.md).
 5. Preserve an already approved Charter. A material requirement change needs a
    recorded Change Proposal and new approved revision; it never silently edits
    the current baseline.

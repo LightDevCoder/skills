@@ -15,6 +15,7 @@ copy them into state, round, or verdict records.
 ## Acceptance baseline
 - Source: <approved source path or immutable identifier>
 - Source revision or identity: <commit, version, timestamp, or equivalent>
+- Fixed point: <software Profile only - reviewed implementation commit(s): <base> <candidate>, or the candidate commit when its parent delimits the window>
 - Approval state: approved | pending user confirmation
 - Approval evidence: <source section or confirmation>
 

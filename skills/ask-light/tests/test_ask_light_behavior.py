@@ -192,6 +192,8 @@ def write_project_review_state(
     include_revision: bool = True,
     revision_identity: str | None = "auto",
     dir_name: str = ".project-review",
+    profile: str = "generic",
+    fixed_point: str | None = None,
 ) -> Path:
     """Write a durable record with the REAL project-review layout.
 
@@ -200,7 +202,9 @@ def write_project_review_state(
     was reviewed; `Source revision or identity:` freezes its baseline). With
     ``revision_identity="auto"`` the current project tree is committed first —
     exactly how a real Light workflow freezes a repository source — and the
-    recorded value is that resolvable commit.
+    recorded value is that resolvable commit. ``profile`` and ``fixed_point``
+    mirror the software Profile's second frozen baseline
+    (references/profiles/software.md).
     """
     review_dir = root / dir_name
     review_dir.mkdir(parents=True, exist_ok=True)
@@ -229,7 +233,8 @@ def write_project_review_state(
             + "- Approval state: approved\n"
             "\n"
             "## Review Profile\n"
-            "- Profile: generic\n",
+            f"- Profile: {profile}\n"
+            + (f"- Fixed point: {fixed_point}\n" if fixed_point is not None else ""),
             encoding="utf-8",
         )
     (review_dir / "state.md").write_text(
@@ -1262,6 +1267,264 @@ class ReviewFreshnessRegressionTest(unittest.TestCase):
             (review_dir / "state.md").write_text("- Status: READY\n- Round: 1\n", encoding="utf-8")
             (review_dir / "verdict.md").write_text("# Verdict\n\nVerdict: **PASS**\n", encoding="utf-8")
             result = self.route_project(project)
+            self.assertEqual(result["status"], "RECOMMEND", result)
+            self.assertEqual(result["projectStage"], "accepted", result)
+
+
+class SoftwareReviewFreshnessTest(unittest.TestCase):
+    """§13: a software Profile verdict binds to its reviewed implementation
+    fixed point as well as its approved source baseline.
+
+    The producer contract (skills/project-review references/profiles/software.md)
+    freezes `- Fixed point:` alongside the Charter source fields. Drift on the
+    recorded implementation window — dirty or committed — stales ANY old
+    verdict; changes outside the window stay unrelated; missing/unresolvable
+    identities fail closed.
+    """
+
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory(prefix="ask-light-fixed-")
+        host_root = Path(self.temp.name) / "host"
+        host_root.mkdir()
+        self.roots = install_host_fixture_skills(host_root)
+        self._count = 0
+
+    def tearDown(self) -> None:
+        self.temp.cleanup()
+
+    def route(self, project: Path) -> dict[str, object]:
+        context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+        return ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+
+    def build_reviewed_software_project(
+        self,
+        *,
+        verdict: str = "PASS",
+        include_fixed_point: bool = True,
+        resolvable_fixed_point: bool = True,
+        single_endpoint: bool = False,
+    ) -> tuple[Path, str, str]:
+        """Skeleton commit -> implementation commit, then a software review whose
+        Source is the approved SPEC (base) and whose fixed point names both."""
+        self._count += 1
+        project = Path(self.temp.name) / f"soft-{self._count}"
+        write_project_state(project, initialized=True, spec=True)
+        write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
+        (project / "README.md").write_text("# Project\nv1\n", encoding="utf-8")
+        base = ensure_git_baseline(project)
+        src = project / "src"
+        src.mkdir()
+        (src / "app.py").write_text("print('implementation v1')\n", encoding="utf-8")
+        (src / "util.py").write_text("VALUE = 1\n", encoding="utf-8")
+        _git(project, "add", "-A")
+        commit_all(project, "implement feature v1")
+        candidate = _git(project, "rev-parse", "HEAD").stdout.strip()
+        if not include_fixed_point:
+            fixed_point = None
+        elif not resolvable_fixed_point:
+            fixed_point = "0f1e2d3c4b5a9e8d"
+        elif single_endpoint:
+            fixed_point = candidate
+        else:
+            fixed_point = f"{base} {candidate}"
+        write_project_review_state(
+            project,
+            reviewed_effort="current",
+            verdict=verdict,
+            revision_identity=base,
+            profile="software",
+            fixed_point=fixed_point,
+        )
+        return project, base, candidate
+
+    def change_implementation(self, project: Path, *, commit: bool) -> None:
+        app = project / "src" / "app.py"
+        app.write_text("print('implementation v2')\n", encoding="utf-8")
+        if commit:
+            _git(project, "add", "-A")
+            commit_all(project, "post-review implementation change")
+
+    # A: fresh software PASS on intact source + implementation baselines.
+    def test_fresh_software_pass_is_accepted(self) -> None:
+        for single_endpoint in (False, True):
+            label = "single-endpoint-candidate" if single_endpoint else "two-endpoint-window"
+            with self.subTest(label=label):
+                project, _base, _candidate = self.build_reviewed_software_project(
+                    single_endpoint=single_endpoint,
+                )
+                result = self.route(project)
+                self.assertEqual(result["status"], "RECOMMEND", result)
+                self.assertEqual(result["projectStage"], "accepted", result)
+                self.assertEqual(result["skill"], "")
+                self.assertEqual(result["next"], "no-execution")
+                self.assertIn("acceptance passed", result["completed"])
+
+    # B/C: any post-review implementation drift invalidates a PASS.
+    def test_implementation_change_after_pass_stales_the_review(self) -> None:
+        for label, commit_change in (("dirty", False), ("committed", True)):
+            with self.subTest(label=label):
+                project, _base, _candidate = self.build_reviewed_software_project()
+                self.change_implementation(project, commit=commit_change)
+                result = self.route(project)
+                self.assertEqual(result["projectStage"], "review-stale", result)
+                self.assertEqual(result["skill"], "project-review")
+                combined = str(result["reason"]) + " ".join(str(gap) for gap in result["gaps"])
+                self.assertIn("src/app.py", combined)
+                if label == "dirty":
+                    self.assertIn("uncommitted", combined)
+
+    # D: unrelated files outside the reviewed window keep the PASS valid.
+    def test_unrelated_change_keeps_software_acceptance(self) -> None:
+        for label, commit_change in (("untracked-readme", False), ("committed-readme", True)):
+            with self.subTest(label=label):
+                project, _base, _candidate = self.build_reviewed_software_project()
+                readme = project / "README.md"
+                readme.write_text(readme.read_text(encoding="utf-8") + "\nDocs-only update.\n", encoding="utf-8")
+                (project / "notes.txt").write_text("side note\n", encoding="utf-8")
+                if commit_change:
+                    _git(project, "add", "-A")
+                    commit_all(project, "docs-only change")
+                result = self.route(project)
+                self.assertEqual(result["status"], "RECOMMEND", result)
+                self.assertEqual(result["projectStage"], "accepted", result)
+
+    # E: FAIL/BLOCKED bind to their fixed point too — drift needs fresh review.
+    def test_stale_nonpass_software_verdict_requires_fresh_review(self) -> None:
+        for verdict in ("FAIL", "BLOCKED"):
+            with self.subTest(verdict=verdict):
+                project, _base, _candidate = self.build_reviewed_software_project(verdict=verdict)
+                self.change_implementation(project, commit=True)
+                result = self.route(project)
+                self.assertEqual(result["projectStage"], "review-stale", result)
+                self.assertEqual(result["skill"], "project-review")
+                self.assertNotEqual(result["projectStage"], "acceptance-not-passed")
+
+    # F: a software record without the produced fixed-point identity never accepts.
+    def test_missing_fixed_point_fails_closed(self) -> None:
+        project, _base, _candidate = self.build_reviewed_software_project(include_fixed_point=False)
+        result = self.route(project)
+        self.assertEqual(result["status"], "NEED-INPUT", result)
+        self.assertEqual(result["projectStage"], "review-freshness-unknown", result)
+        self.assertEqual(result["skill"], "")
+        self.assertEqual(result["next"], "no-execution")
+        self.assertNotEqual(result["projectStage"], "accepted")
+        combined = str(result["reason"]) + " ".join(str(gap) for gap in result["gaps"])
+        self.assertIn("Fixed point", combined)
+
+    # G: an unverifiable fixed-point identity also fails closed.
+    def test_unverifiable_fixed_point_fails_closed(self) -> None:
+        project, _base, _candidate = self.build_reviewed_software_project(resolvable_fixed_point=False)
+        result = self.route(project)
+        self.assertEqual(result["status"], "NEED-INPUT", result)
+        self.assertEqual(result["projectStage"], "review-freshness-unknown", result)
+        self.assertEqual(result["next"], "no-execution")
+        combined = str(result["reason"]) + " ".join(str(gap) for gap in result["gaps"])
+        self.assertIn("does not resolve", combined)
+
+    # G2: a repository-first commit cannot delimit a window — never accepted.
+    def test_repository_first_fixed_point_fails_closed(self) -> None:
+        project, base, _candidate = self.build_reviewed_software_project()
+        charter = project / ".project-review" / "charter.md"
+        lines = [
+            f"- Fixed point: {base}" if line.startswith("- Fixed point: ") else line
+            for line in charter.read_text(encoding="utf-8").splitlines()
+        ]
+        charter.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        result = self.route(project)
+        self.assertEqual(result["status"], "NEED-INPUT", result)
+        self.assertEqual(result["projectStage"], "review-freshness-unknown", result)
+        self.assertNotEqual(result["projectStage"], "accepted")
+        combined = str(result["reason"]) + " ".join(str(gap) for gap in result["gaps"])
+        self.assertIn("repository-first", combined)
+
+
+class DirectorySourceBaselineTest(unittest.TestCase):
+    """§14: when the Charter cites a directory source, that whole directory is
+    the reviewed baseline — including files appearing inside it untracked."""
+
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory(prefix="ask-light-dir-")
+        host_root = Path(self.temp.name) / "host"
+        host_root.mkdir()
+        self.roots = install_host_fixture_skills(host_root)
+        self._count = 0
+
+    def tearDown(self) -> None:
+        self.temp.cleanup()
+
+    def route(self, project: Path) -> dict[str, object]:
+        context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+        return ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+
+    def build_directory_source_project(self) -> Path:
+        self._count += 1
+        project = Path(self.temp.name) / f"dir-{self._count}"
+        write_project_state(project, initialized=True, spec=True)
+        write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
+        (project / ".scratch" / "current" / "map.md").write_text("# Map\n", encoding="utf-8")
+        baseline = ensure_git_baseline(project)
+        write_project_review_state(
+            project,
+            charter_source="`.scratch/current`",
+            verdict="PASS",
+            revision_identity=baseline,
+        )
+        return project
+
+    # H: tracked child modification invalidates the directory baseline.
+    def test_tracked_child_modification_stales_the_review(self) -> None:
+        project = self.build_directory_source_project()
+        map_file = project / ".scratch" / "current" / "map.md"
+        map_file.write_text("# Map changed after review\n", encoding="utf-8")
+        result = self.route(project)
+        self.assertEqual(result["projectStage"], "review-stale", result)
+        self.assertEqual(result["skill"], "project-review")
+
+    # I: tracked child deletion invalidates the directory baseline too.
+    def test_tracked_child_deletion_stales_the_review(self) -> None:
+        for label, commit_deletion in (("dirty-deletion", False), ("committed-deletion", True)):
+            with self.subTest(label=label):
+                project = self.build_directory_source_project()
+                (project / ".scratch" / "current" / "map.md").unlink()
+                if commit_deletion:
+                    _git(project, "add", "-A")
+                    commit_all(project, "remove reviewed map")
+                result = self.route(project)
+                self.assertEqual(result["projectStage"], "review-stale", result)
+
+    # J: a brand-new untracked child changes the reviewed directory baseline.
+    def test_new_untracked_child_stales_the_review(self) -> None:
+        project = self.build_directory_source_project()
+        (project / ".scratch" / "current" / "new-baseline-file.md").write_text(
+            "brand-new content inside the reviewed directory\n", encoding="utf-8"
+        )
+        result = self.route(project)
+        self.assertEqual(result["status"], "RECOMMEND", result)
+        self.assertEqual(result["projectStage"], "review-stale", result)
+        self.assertEqual(result["skill"], "project-review")
+        combined = str(result["reason"]) + " ".join(str(gap) for gap in result["gaps"])
+        self.assertIn(".scratch/current", combined)
+
+    # K: untracked noise OUTSIDE the reviewed directory is unrelated.
+    def test_untracked_outside_directory_keeps_the_review_current(self) -> None:
+        project = self.build_directory_source_project()
+        (project / ".scratch" / "elsewhere.txt").write_text("outside the baseline\n", encoding="utf-8")
+        (project / "loose.txt").write_text("also outside\n", encoding="utf-8")
+        result = self.route(project)
+        self.assertEqual(result["status"], "RECOMMEND", result)
+        self.assertEqual(result["projectStage"], "accepted", result)
+
+    # L: a FILE source ignores untracked siblings in the same directory.
+    def test_file_only_source_ignores_untracked_sibling(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-file-src-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
+            write_project_review_state(project, reviewed_effort="current", verdict="PASS")
+            (project / ".scratch" / "current" / "random-note.md").write_text(
+                "sibling noise\n", encoding="utf-8"
+            )
+            result = self.route(project)
             self.assertEqual(result["status"], "RECOMMEND", result)
             self.assertEqual(result["projectStage"], "accepted", result)
 

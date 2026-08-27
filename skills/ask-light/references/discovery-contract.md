@@ -74,7 +74,9 @@ Project-state evidence is fail-closed:
   any conclusion (definitions remain producer-owned):
   - Every cited `.scratch` path still matching the recorded Git commit —
     including uncommitted working-tree modifications — keeps the verdict
-    current; PASS stays accepted.
+    current; PASS stays accepted. A cited directory source is reviewed as a
+    whole baseline: files appearing inside it after the revision, including
+    untracked ones, count as changes to it.
   - A verified change since the recorded revision makes ANY old verdict
     non-authoritative: stage `review-stale`, routed back to `project-review`
     for a fresh review of the changed baseline. A stale FAIL does not keep
@@ -84,6 +86,20 @@ Project-state evidence is fail-closed:
   - A missing, blank, or non-Git-resolvable identity cannot prove freshness
     and fails closed as `review-freshness-unknown`; such a record is never
     treated as accepted.
+- A `software`-Profile review is bound by its producer contract to TWO frozen
+  baselines: the approved source fields above plus the reviewed implementation
+  fixed point (Charter `- Fixed point:`; definitions owned by the
+  `project-review` references). Once source freshness holds, `ask-light`
+  resolves that produced identity and verifies the current tree against it on
+  exactly the paths the recorded window touched:
+  - Implementation drift inside that window — committed or still uncommitted —
+    makes any old verdict stale: stage `review-stale`, routed back to
+    `project-review`.
+  - Changes outside the reviewed window are unrelated and never invalidate the
+    verdict.
+  - A missing, unresolvable, or unverifiable fixed point fails closed as
+    `review-freshness-unknown`; a software verdict is never consumed without a
+    provable implementation baseline.
 - Legacy human-facing files (`docs/agents/acceptance.md`,
   `docs/agents/review-verdict.md`, and similar) are produced by no runtime
   contract here and are **not** authoritative acceptance evidence; they cannot

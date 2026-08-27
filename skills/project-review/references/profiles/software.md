@@ -49,6 +49,25 @@ axis, source finding reference, evidence, severity, and stable `F-###` ID.
 The specialist's own `PASS`/`FAIL` summary is evidence about its axes; it is
 never the Program's acceptance verdict.
 
+### Durable fixed-point record
+
+A software verdict binds to two frozen baselines, and both must be durably
+recorded in the Charter at `init` time:
+
+- the approved source, through the normal `Source:` and
+  `Source revision or identity:` fields; and
+- the reviewed implementation, through a `- Fixed point:` field resolving to
+  local Git commits. Two values (`<base> <candidate>`) delimit the reviewed
+  implementation window directly; one value identifies a candidate commit whose
+  parent delimits its own change set. A repository-first commit may never be
+  the sole value, because no window can be delimited from it.
+
+A consumer may rely on a software verdict only while the current tree still
+matches that fixed point on exactly the paths the recorded window touched;
+anything else requires a fresh review. A missing, unresolvable, or
+undelimitable `Fixed point:` fails the record closed rather than relaxing
+acceptance.
+
 ## Specialist reviewer: `code-review`
 
 Invoke the upstream `code-review` capability with the frozen fixed point and

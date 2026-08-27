@@ -467,3 +467,104 @@ nothing was fabricated.
 - Projects without a Git work tree cannot prove freshness at all and fail
   closed (`review-freshness-unknown`); this is the intended enforcement of the
   producer's freeze-the-revision contract for repository sources.
+
+## Review baseline integrity repair — 2026-08-27 (final repair: software fixed point + directory baseline)
+
+Closes the two documented gaps in "Known freshness boundary" above, per the
+pasted SPEC (Software Fixed-Point Freshness & Directory Baseline Integrity,
+base commit `0fa6304`). Reproduced both bugs in real temporary Git repositories
+before fixing; ask-light returned `accepted` for software-PASS-after-code-change
+and for directory-baseline-with-new-untracked-child pre-fix.
+
+### Software review contract (producer semantics, confirmed)
+
+- Approved source baseline: Charter `Source:` + `Source revision or identity:`
+  (unchanged previous layer).
+- Implementation fixed point: Charter `- Fixed point:` field, now documented by
+  the producer (`skills/project-review/references/profiles/software.md` —
+  "Durable fixed-point record"), added to the Charter template
+  (`acceptance-charter.md`) and frozen at `init` (`references/WORKFLOW.md` step 4).
+- Fixed-point identity source: the produced identity only; ask-light creates no
+  parallel format. Two values `<base> <candidate>` delimit the reviewed window;
+  one value means the candidate's own change set vs its parent.
+- Verification semantics: `git diff --quiet <candidate> -- <path>` per window
+  path (covers committed AND uncommitted drift); repository-first commits cannot
+  delimit a window and fail closed; empty windows fail closed.
+
+### Software freshness results
+
+- fresh PASS → `accepted`; dirty implementation change → `review-stale`;
+  committed implementation change → `review-stale`; unrelated change (README /
+  side files outside window) → still `accepted`; stale FAIL/BLOCKED after
+  implementation change → `review-stale` (old failure not carried to a new
+  baseline); missing fixed point → fail closed (`review-freshness-unknown`,
+  NEED-INPUT, no-execution); unverifiable/unresolvable fixed point → same
+  fail-closed class.
+
+### Directory baseline results
+
+- tracked child modification / deletion → `review-stale`; brand-new untracked
+  child inside the cited directory → `review-stale` (new: scoped
+  `git status --porcelain -- <dir>`); untracked file outside the directory →
+  irrelevant; file-only Source ignores untracked siblings in its directory.
+
+### Tests added
+
+12 Git-backed regression methods (17 cases incl. subTests) in
+`skills/ask-light/tests/test_ask_light_behavior.py`:
+`SoftwareReviewFreshnessTest` (§13 A–G incl. G2 repository-first) and
+`DirectorySourceBaselineTest` (§14 H–L). Existing 72-method behavior suite and
+all fixture helpers extended, not rewritten (`profile=`/`fixed_point=` kwargs).
+
+### Manual smoke (real CLI, live temporary git repositories) — 11/11 OK
+
+fresh software PASS; repository-first fixed point fail-closed; dirty code after
+PASS; committed code after PASS; unrelated README change after PASS; stale FAIL;
+directory untracked addition; outside-directory untracked; file-only source
+sibling; normal flow resolved-tickets→project-review→accepted (pre-review stage
+`implementation-complete`, post-review `accepted`).
+
+### Validation (fresh, post-review-repair)
+
+```text
+python3 -m pytest -q            → 251 passed
+python3 -m unittest discover -s tests → 27 tests OK (245+7 assertions)
+python3 -m compileall -q skills tests → OK
+git status --short              → only in-scope tracked files modified
+
+Skill-local suites:
+ask-light 88 · project-review · socratic · clarify · project-clarify ·
+project-init · review-loop → all OK
+```
+
+### Specialist review evidence
+
+Two-axis independent review ran on the working-tree diff vs fixed point
+`0fa6304` (Standards + Spec sub-agents). Findings applied before commit:
+unreleased CHANGELOG entry added under "Changed — Review baseline integrity";
+Charter template + init workflow now carry the `- Fixed point:` field so the
+producer template matches the consumer contract; root-commit whole-tree window
+fallback removed in favor of fail-closed (spec §9 anti-too-broad);
+Profile matching tightened to exact token; revision-resolution helper deduped.
+Own regression test caught a peel-suffix bug introduced during that dedupe
+(parent probe) and was fixed before validation. Non-applied judgement calls,
+recorded intentionally: discovery-contract keeps a short consumer summary of the
+producer rule (explicitly labelled as producer-owned definition), and failure-
+message ladders stay structurally similar across classifiers.
+
+### Files changed
+
+```text
+CHANGELOG.md
+skills/ask-light/scripts/ask_light.py
+skills/ask-light/references/discovery-contract.md
+skills/ask-light/tests/test_ask_light_behavior.py
+skills/project-review/references/profiles/software.md
+skills/project-review/references/acceptance-charter.md
+skills/project-review/references/WORKFLOW.md
+```
+
+Live Codex host-transition remains unobserved; nothing fabricated. Remaining
+limitation (documented): single-value fixed points protect only the candidate's
+own change set; multi-commit implementation spans must freeze two endpoints per
+the producer reference.
