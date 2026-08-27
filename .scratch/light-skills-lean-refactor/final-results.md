@@ -70,3 +70,42 @@ Commands run and results:
 
 - No version, tag, or GitHub Release created.
 - Commit is local only; no push performed.
+
+## Functional closure pass — 2026-08-27
+
+This section supersedes the earlier repair-pass counts above.
+
+- `ask-light` now owns a tested 33-Skill semantic map, separates logical fit
+  from host availability/provenance, preserves workflow aliases, recursively
+  validates local Markdown pointers, and uses one Python implementation with a
+  thin PowerShell launcher.
+- `project-init` now transactionally creates and updates the stable Light
+  project, tracker, and instruction contracts; reruns preserve manual and
+  optional values, reject unsafe targets, and ignore fenced example headings.
+- one explicit `$clarify` starts a continuous Socratic session across normal
+  replies through recommendation, synthesis, confirmation, correction, and
+  stop.
+- `review-loop` owns the lightweight reviewer packet; `project-review` remains
+  the final acceptance owner.
+- `recap/SKILL.md` is the only user-approved Frozen amendment: explicit-only,
+  one line, at most 400 characters, no conversation-history replacement or
+  compaction. Its unchanged package tests remain historical; current behavior
+  is covered by the repository-level functional suite.
+
+Current validation:
+
+- `python3 -m pytest -q` → **174 passed**.
+- `python3 -m unittest discover -s tests -p "test_*.py"` → **27 tests OK**;
+  245 collection assertions and 7 hook assertions.
+- configured GitHub workflow commands, active package suites, compileall, and
+  `git diff --check` → **PASS**.
+- Frozen baseline except the authorized recap entry → **PASS**.
+- manuscript dependency catalog check → **zero errors, DEGRADED only because
+  the pinned local commit is intentionally unpushed and cannot be checked via
+  GitHub `--online` yet**.
+
+Product candidate commit:
+`b671a90ac10b5777a50ca897a03242cc51949478` (local only).
+
+Fresh final specialist and project Evaluator results are recorded after this
+section when complete.

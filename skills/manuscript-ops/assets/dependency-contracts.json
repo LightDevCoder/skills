@@ -1,20 +1,20 @@
 {
   "schema_version": "1",
-  "observed_at": "2026-08-26",
+  "observed_at": "2026-08-27",
   "dependencies": [
     {
       "name": "clarify",
       "repository": "LightDevCoder/skills",
-      "repository_commit": "93f2c3dc7d0dc400ee6aaf4ee240fe28592dfb93",
+      "repository_commit": "b671a90ac10b5777a50ca897a03242cc51949478",
       "path": "skills/clarify",
-      "blob_sha": "ef9598b6c25201262b566b06d1547a12d899ed7b",
+      "blob_sha": "ac3856edfeb53742db22717caa761bf1922457f8",
       "package_files": [
         "SKILL.md",
         "ATTRIBUTION.md",
         "agents/openai.yaml",
         "references/EXAMPLES.md",
-        "references/ROUTING.md",
         "references/WORKFLOW.md",
+        "scripts/session_state.py",
         "tests/test_clarify_contract.py"
       ],
       "required": true,
@@ -26,9 +26,9 @@
     {
       "name": "socratic",
       "repository": "LightDevCoder/skills",
-      "repository_commit": "93f2c3dc7d0dc400ee6aaf4ee240fe28592dfb93",
+      "repository_commit": "b671a90ac10b5777a50ca897a03242cc51949478",
       "path": "skills/socratic",
-      "blob_sha": "f7e31279dd699d46bd2b9132647605e7bf93625c",
+      "blob_sha": "04a698e107163fe39debfb37c353102444b28238",
       "package_files": [
         "SKILL.md",
         "ATTRIBUTION.md",
@@ -36,6 +36,7 @@
         "references/EXAMPLES.md",
         "references/ROUTING.md",
         "references/WORKFLOW.md",
+        "references/conversation-contract.json",
         "tests/test_socratic_behavior.py",
         "tests/test_socratic_contract.py"
       ],
@@ -48,9 +49,9 @@
     {
       "name": "decision-map",
       "repository": "LightDevCoder/skills",
-      "repository_commit": "93f2c3dc7d0dc400ee6aaf4ee240fe28592dfb93",
+      "repository_commit": "b671a90ac10b5777a50ca897a03242cc51949478",
       "path": "skills/decision-map",
-      "blob_sha": "0752d5c88069744530b3c4caf2b86ea6893c8bce",
+      "blob_sha": "2d26e569da4e5c30a147de64e201b7b93bbef798",
       "package_files": [
         "SKILL.md",
         "ATTRIBUTION.md",
@@ -70,7 +71,7 @@
     {
       "name": "prototype",
       "repository": "LightDevCoder/skills",
-      "repository_commit": "93f2c3dc7d0dc400ee6aaf4ee240fe28592dfb93",
+      "repository_commit": "b671a90ac10b5777a50ca897a03242cc51949478",
       "path": "skills/prototype",
       "blob_sha": "094571156140f5993cce8557dc31383c82817f3e",
       "package_files": [
@@ -89,9 +90,9 @@
     {
       "name": "project-review",
       "repository": "LightDevCoder/skills",
-      "repository_commit": "93f2c3dc7d0dc400ee6aaf4ee240fe28592dfb93",
+      "repository_commit": "b671a90ac10b5777a50ca897a03242cc51949478",
       "path": "skills/project-review",
-      "blob_sha": "7b8fe9469a5c44c152e00542ed4741c6d807451c",
+      "blob_sha": "aed8a63791cb8ba88e798b6eed9a366d22b277a9",
       "package_files": [
         "SKILL.md",
         "agents/openai.yaml",
@@ -108,7 +109,6 @@
         "references/profiles/software.md",
         "references/profiles/specification.md",
         "references/review-rubric.md",
-        "references/reviewer-contract.md",
         "references/stopping-rules.md",
         "references/subagent-protocol.md",
         "tests/review_protocol_helpers.py",

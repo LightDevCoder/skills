@@ -399,7 +399,7 @@ the isolated temporary project.
 Current cumulative validation after the user amendment:
 
 ```text
-python3 -m pytest -q                                  -> 167 passed
+python3 -m pytest -q                                  -> 174 passed
 python3 -m unittest discover -s tests                 -> 27 tests OK
 COLLECTION_PYTHON_ASSERTIONS                          -> 245
 LEARN_ANYTHING_HOOK_ASSERTIONS                        -> 7
@@ -423,3 +423,41 @@ The fresh collaboration reviewer could not start because that reviewer account
 hit its usage limit. Two local `codex review` attempts were stopped when the
 user refined `recap`; neither stale attempt is a clean verdict. A new review of
 the exact current diff is still required.
+
+## Seventh and eighth specialist repair rounds — 2026-08-27
+
+Fresh Sol / High specialist review
+`01a0419a-161f-7da1-b030-a21ace16c605` found three issues: the active GitHub
+workflow still invoked the frozen historical recap contract test, the new
+router omitted the existing `setup` and `discovery` workflow aliases, and the
+catalog accidentally assigned recap's unreleased status to `language-learning`.
+The repair removes both historical recap tests from CI, updates the CI file list
+to the current review-loop suites, runs the Python ask-light behavior suite on
+every CI host, restores both aliases with regression coverage, and corrects the
+bilingual catalog and recap test guidance.
+
+The next fresh Sol / High specialist review
+`01a041a0-8562-7fc3-8f04-5a13c40cc9b3` found four remaining boundaries. The
+repair now:
+
+- recursively validates in-package Markdown references with cycle tracking;
+- ignores fenced Markdown examples when locating the live Project
+  Initialization section;
+- pins the documented stable recap install command to `#v0.1.6`; and
+- refreshes manuscript dependency package trees and blob identities to local
+  product commit `b671a90ac10b5777a50ca897a03242cc51949478`.
+
+Focused post-repair results are 31 ask-light tests, 29 project-init tests, and
+67 combined pytest cases. The current GitHub workflow command set replays
+successfully, and the complete active suite reports 174 pytest cases plus 27
+repository-level unittest cases.
+
+The manuscript dependency check against the local catalog now has zero errors
+and reports `DEGRADED` only because resource-byte comparison requires
+`--online`. The pinned product commit is intentionally local and unpushed for
+human review, so an online GitHub check cannot succeed yet. This is a release
+and remote-availability limitation, not published-install or handoff `READY`
+evidence; no release claim is made.
+
+A fresh clean specialist review and the final independent project Evaluator
+still follow this repair record.

@@ -1,10 +1,10 @@
 """Repository-level pytest configuration.
 
-The Frozen skill suites under ``skills/language-learning/tests`` and
-``skills/recap/tests`` are composed into the root collection tests as imported
-helper modules; their module-level ``test_*`` helper functions are not intended
-to be collected by pytest as standalone tests. Excluding them here keeps
-``pytest -q`` collection clean without modifying any Frozen Skill directory.
+The Frozen language-learning helper is composed into the root collection test.
+The Frozen recap tests describe the superseded long-form contract and remain
+historical after the user-authorized ``SKILL.md`` amendment. Excluding these
+modules keeps ``pytest -q`` aligned with the active suite without modifying a
+Frozen test file.
 """
 
 collect_ignore = [

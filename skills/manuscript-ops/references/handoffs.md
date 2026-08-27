@@ -142,7 +142,7 @@ $codexHome = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $HOME '.c
 $installer = Join-Path $codexHome 'skills\.system\skill-installer\scripts\install-skill-from-github.py'
 python $installer `
   --repo LightDevCoder/skills `
-  --ref 93f2c3dc7d0dc400ee6aaf4ee240fe28592dfb93 `
+  --ref b671a90ac10b5777a50ca897a03242cc51949478 `
   --path skills/clarify skills/socratic skills/decision-map skills/project-review
 ```
 
@@ -152,7 +152,7 @@ requires it. Start a fresh Codex session after installation.
 ### Manual portable installation
 
 Clone `LightDevCoder/skills` at
-`93f2c3dc7d0dc400ee6aaf4ee240fe28592dfb93`. Copy every selected
+`b671a90ac10b5777a50ca897a03242cc51949478`. Copy every selected
 `skills/<name>` folder so it ends at `.agents/skills/<name>/SKILL.md`. For
 example:
 
