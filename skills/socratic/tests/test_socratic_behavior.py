@@ -67,6 +67,34 @@ class SocraticBehaviorTest(unittest.TestCase):
         self.assertEqual(first["options"][0]["label"], "A")
         self.assertTrue(first["recommended"])
 
+    def test_colon_and_q_colon_batch_response_parsing(self) -> None:
+        decisions = sample_decisions()
+        decisions[1].depends_on = []  # make all three independent for parsing
+        frontier = FRONTIER.compute_frontier(decisions)
+        for response in ("1: B\n2: A\n3: C", "Q1: B\nQ2: A\nQ3: C", "1: B, 2: A, 3: C"):
+            with self.subTest(response=response):
+                self.assertEqual(FRONTIER.parse_batch_response(response, frontier), {"D1": "B", "D2": "A", "D3": "C"})
+
+    def test_qualified_colon_answers_preserve_qualifiers(self) -> None:
+        decisions = sample_decisions()
+        decisions[1].depends_on = []  # make all three independent for parsing
+        frontier = FRONTIER.compute_frontier(decisions)
+        answers = FRONTIER.parse_batch_response("Q1: B\nQ2: B, but only locally\nQ3: A", frontier)
+        self.assertEqual(answers["D1"], "B")
+        self.assertIn("but only locally", answers["D2"])
+        self.assertEqual(answers["D3"], "A")
+
+    def test_partial_answer_without_qualifier_keeps_unanswered_open(self) -> None:
+        decisions = sample_decisions()
+        decisions[1].depends_on = []  # make all three independent for parsing
+        frontier = FRONTIER.compute_frontier(decisions)
+        answers = FRONTIER.parse_batch_response("1B, 3C", frontier)
+        self.assertEqual(answers, {"D1": "B", "D3": "C"})
+        FRONTIER.apply_answers(decisions, answers)
+        self.assertFalse(next(item for item in decisions if item.id == "D2").resolved)
+        self.assertEqual(FRONTIER.next_step(decisions), "ask-round")
+
+
     def test_compact_batch_response_parsing(self) -> None:
         frontier = FRONTIER.compute_frontier(sample_decisions())
         answers = FRONTIER.parse_batch_response("1B, 2A", frontier)

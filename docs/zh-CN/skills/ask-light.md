@@ -6,7 +6,7 @@
 
 ## 解决什么问题
 
-`ask-light` 先检查当前项目/工作流状态，再通过 Light 自有的 33-Skill 语义地图判断逻辑匹配，并单独验证该 Skill 在当前 host 是否可用。它给出带工作流理由的下一步建议，等待用户批准后再开始被接受的 Skill。可选 UI metadata 缺失不会隐藏已知包，generic host root 也不会被当作第一方来源。
+`ask-light` 先检查当前项目/工作流状态，再通过 Light 自有的 33-Skill 语义地图判断逻辑匹配，并单独验证该 Skill 在当前 host 是否可用。它给出带工作流理由的下一步建议，等待用户批准后按被接受 Skill 的调用策略处理。可选 UI metadata 缺失不会隐藏已知包，generic host root 也不会被当作第一方来源。
 
 ## 模式和边界
 
@@ -20,7 +20,7 @@ $ask-light <category>
 
 `next` 返回一个基于证据的建议，最多一个真实且动作不同的并列候选。`workflow` 返回 entry condition、步骤、source、invocation type、expected input/output、handoff artifact、stop condition、optional 和 missing dependency。`navigate` 回答“显示项目 Skills”“哪些是学习类”等收藏浏览问题。
 
-批准前 `ask-light` 是只读的：不执行、不安装、不编辑、不委派，也不创建永久 state machine。用户以普通 `yes`/`可以`/`go ahead` 批准后，在当前对话中开始被推荐的 Skill（Codex），或使用 host 支持的转换机制。它不会重新引入退休的 `project-workflow`，也不会在被接受 Skill 之外自动串联。
+批准前 `ask-light` 是只读的：不执行、不安装、不编辑、不委派，也不创建永久 state machine。用户以普通 `yes`/`可以`/`go ahead` 批准后，对 model-invoked 推荐可在当前对话中开始；对 user-invoked 推荐（项目阶段常见情形），仓库策略禁止 `ask-light` 自动启动它，因此只渲染精确调用（Codex 为 `$skill`，Claude Code 为 `/<skill>`）并请用户启动。它不假装执行，不重新引入退休的 `project-workflow`，也不会在被接受 Skill 之外自动串联。
 
 ## 输入和输出
 
@@ -40,7 +40,7 @@ Execution: recommendation phase was read-only; execution begins only after expli
 
 ## 误用、组合和停止点
 
-不要把它当成 discovery/specification 引擎、installer、scheduler 或静默自动串联器。它只路由真实第一方 Skills，可以指向 `project-init`、`learn-anything`、`manuscript-ops`、`project-spec`、`implement`、`code-review` 或 `project-review`，但只有用户同意后才开始执行。需要验收的 recipe 最终 verdict 归 `project-review`；建议后等待批准，或遇到 `NEED-INPUT`/`BLOCKED` 后停止。
+不要把它当成 discovery/specification 引擎、installer、scheduler 或静默自动串联器。它只路由真实第一方 Skills，可以指向 `project-init`、`learn-anything`、`manuscript-ops`、`project-spec`、`implement`、`code-review` 或 `project-review`，但只有用户同意后才按 host 支持的方式执行（model-invoked 可开始；user-invoked 渲染为下一次显式调用）。需要验收的 recipe 最终 verdict 归 `project-review`；建议后等待批准，或遇到 `NEED-INPUT`/`BLOCKED` 后停止。
 
 ## 安装与发现验证
 

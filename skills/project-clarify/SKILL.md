@@ -6,9 +6,12 @@ disable-model-invocation: true
 
 # Project Clarify
 
-`project-clarify` is an explicit, user-invoked project stage. Run it only
-after an explicit `$project-clarify` request. It turns real project evidence
-and user-owned decisions into a bounded handoff for `project-spec`.
+`project-clarify` is an explicit, user-invoked project stage. One
+`$project-clarify` request starts a **continuous clarification session**:
+after each frontier round the user replies normally, the next frontier is
+recomputed and presented again, and only shared-understanding confirmation (or
+an explicit exit/switch) produces the bounded handoff for `project-spec`.
+The user does not need to type `$project-clarify` again between rounds.
 
 ## Required order
 
@@ -30,7 +33,11 @@ and user-owned decisions into a bounded handoff for `project-spec`.
    result as read without a result path actually read; leave unavailable or
    not-authorized gaps unresolved and keep their downstream decisions out of
    the frontier.
-4. **Return the handoff and stop.**
+4. **Continue until completion, then return the handoff and stop.** After
+   every ordinary user reply, use `socratic` again to recompute the frontier
+   and present the next round. When no meaningful frontier remains, confirm
+   shared understanding; after confirmation return the handoff and stop. Do
+   not require a repeated `$project-clarify` invocation for normal replies.
 
 ## Handoff shape
 
@@ -61,4 +68,5 @@ If the effort is large, multi-session, or has many dependent decisions,
 recommend `$decision-map` and stop. The full contract is in
 [project-clarification-contract.md](references/project-clarification-contract.md);
 workflow and examples are in [WORKFLOW.md](references/WORKFLOW.md) and
-[EXAMPLES.md](references/EXAMPLES.md).
+[EXAMPLES.md](references/EXAMPLES.md). Session transitions are specified by
+[session_state.py](scripts/session_state.py).

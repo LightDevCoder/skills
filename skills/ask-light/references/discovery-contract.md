@@ -81,16 +81,24 @@ its local pointers resolve. Missing or unavailable packages return `BLOCKED`
 without replacing the logical recommendation. Metadata, body, and reference
 read counts remain observable.
 
-## Invocation rendering
+## Invocation rendering and approval transition
 
-- Codex: `$<skill>`; after user approval, begin the selected Skill directly.
-- Claude Code: `/<skill>`; use the host’s supported composition path after
-  approval, or document the limitation.
-- Other hosts: `Skill: <skill>` as a generic supported representation; show the
-  limitation when direct transition is unsupported.
+- Codex: `$<skill>`.
+- Claude Code: `/<skill>`.
+- Other hosts: `Skill: <skill>` as a generic supported representation.
 
-The router claims no host-specific behavior beyond these renderings and the
-Codex approval-to-begin behavior described in `SKILL.md`.
+Repository invocation policy is authoritative: `ask-light` is user-invoked and
+must not auto-invoke another user-invoked Skill. Therefore after approval:
+
+- A **model-invoked** accepted Skill may begin in the current conversation
+  where the host supports that.
+- A **user-invoked** accepted Skill (the normal project-stage case: `clarify`,
+  `project-init`, `project-spec`, `project-tickets`, `implement`,
+  `project-clarify`, …) cannot be started by `ask-light` itself. `ask-light`
+  instead renders the exact host invocation and asks the user to start it.
+
+Do not claim a direct Codex transition for a user-invoked target unless the
+host is actually observed to allow it.
 
 ## Runtime dependency and manual path
 
@@ -113,6 +121,8 @@ Unavailable steps also explain the missing dependency in plain language.
 
 Every recommendation result states that the recommendation phase was read-only.
 After the user explicitly approves (`yes`, `可以`, `go ahead`, `do it`,
-`用这个`), the current conversation begins the selected Skill. `ask-light`
-does not auto-execute before consent and does not auto-chain past the accepted
-Skill.
+`用这个`), `ask-light` honors the accepted Skill's invocation type: it may
+begin a model-invoked target where the host supports it, and it renders the
+exact invocation for a user-invoked target instead of faking execution.
+`ask-light` does not auto-execute before consent and does not auto-chain past
+the accepted Skill.

@@ -37,7 +37,7 @@ Each row declares the handoff artifact and stop condition. `user-invoked` means 
 
 | Order | Skill | Invocation | Input → output | Handoff / stop |
 | --- | --- | --- | --- | --- |
-| 1 | `ask-light` | user-invoked | goal, project type, task kind, artifacts, blockers, availability, invocation control → one next Skill or recipe | Recommendation; wait for user approval, then begin the accepted Skill. |
+| 1 | `ask-light` | user-invoked | goal, project type, task kind, artifacts, blockers, availability, invocation control → one next Skill or recipe | Recommendation; wait for user approval, then honor invocation policy (model-invoked may begin; user-invoked target is rendered as the next explicit invocation). |
 | 2 | `project-init` | user-invoked | confirmed preset + target root → minimal instruction update and validation | Initialization report; stop before clarification/spec/implementation/review. |
 | 3 | User-selected next capability | per package policy | confirmed initialized root → next explicit artifact | The user chooses `project-clarify`, `project-spec`, `manuscript-ops`, `learn-anything`, or `project-review`; no implicit chain. |
 

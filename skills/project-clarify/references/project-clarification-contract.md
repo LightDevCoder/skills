@@ -86,8 +86,10 @@ facts.
 
 No project file is written merely to retain the handoff. A user may separately
 name a destination and confirm that write; validate that it is inside the
-target root and report the created path. The run always stops after the
-handoff.
+target root and report the created path. One explicit invocation starts the
+session; ordinary replies continue through frontier rounds, and the session
+stops only after confirmed shared understanding, an explicit exit, or a
+workflow switch. The handoff is returned at that completion boundary.
 
 ## Upgrade to decision-map
 

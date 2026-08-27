@@ -11,9 +11,9 @@ The workflow advisor, router, and output contract are defined by
 `ask-light` first inspects the current project/workflow state, maps intent
 through the Light-owned 33-Skill semantic map, then checks whether that
 selection is available on the active host. It recommends the next Skill with
-workflow reasoning, waits for user approval, and then begins the accepted
-Skill. Optional UI metadata never hides a known package, and generic host
-roots are not accepted as first-party provenance.
+workflow reasoning, waits for user approval, and then honors the accepted
+Skill's invocation policy. Optional UI metadata never hides a known package,
+and generic host roots are not accepted as first-party provenance.
 
 ## Modes and boundaries
 
@@ -34,9 +34,12 @@ Skills are for learning?”.
 
 Before approval, `ask-light` is read-only: it does not invoke, install, edit,
 delegate, or create a permanent state machine. After the user approves with a
-normal `yes`/`可以`/`go ahead`, it begins the recommended Skill in the current
-conversation (Codex) or uses the host-supported transition mechanism. It does
-not reintroduce `project-workflow` and does not auto-chain past the accepted
+normal `yes`/`可以`/`go ahead`, it may begin a model-invoked recommended Skill
+where the host supports that. For a user-invoked recommended Skill (the common
+project-stage case), repository policy forbids `ask-light` from auto-starting
+it, so it renders the exact invocation (`$skill` on Codex, `/<skill>` on
+Claude Code) and asks the user to start it. It does not fake execution, does
+not reintroduce `project-workflow`, and does not auto-chain past the accepted
 Skill.
 
 ## Inputs and outputs
@@ -70,7 +73,9 @@ Do not use it as a discovery/specification engine, installer, scheduler, or
 silent automatic chain. It routes only among real first-party Skills and may
 point to `project-init`, `learn-anything`, `manuscript-ops`, `project-spec`,
 `implement`, `code-review`, or `project-review`; execution begins only after
-user consent. `project-review` owns the final verdict for recipes that reach
+user consent and then only in the host-supported way (model-invoked targets
+may begin; user-invoked targets are rendered as the next explicit invocation).
+`project-review` owns the final verdict for recipes that reach
 acceptance. Stop after the recommendation until approval, or at the
 `NEED-INPUT`/`BLOCKED` record.
 

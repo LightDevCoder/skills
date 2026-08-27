@@ -24,6 +24,41 @@ def write_skill(root: Path, name: str, *, metadata: bool = True, body: str = "Bo
         (package / "agents" / "openai.yaml").write_text("interface:\n  display_name: fixture\n", encoding="utf-8")
 
 
+def write_project_state(
+    root: Path,
+    *,
+    initialized: bool = True,
+    spec: bool = True,
+    unresolved_ticket: bool = False,
+    resolved_ticket: bool = False,
+    acceptance: bool = False,
+    clear_goal: bool = True,
+) -> None:
+    root.mkdir(parents=True, exist_ok=True)
+    if initialized:
+        agents = root / "docs" / "agents"
+        agents.mkdir(parents=True, exist_ok=True)
+        content = "<!-- light-project:managed:start -->\n# Light Project Configuration\n"
+        if clear_goal:
+            content += "- Goal: Build a parser\n- Outputs: parser, tests\n"
+        else:
+            content += "- Goal: ?\n- Outputs: (none recorded)\n"
+        content += "- Relevant Skills: project-spec, project-tickets, implement, project-review\n<!-- light-project:managed:end -->\n"
+        (agents / "light-project.md").write_text(content, encoding="utf-8")
+    if spec:
+        (root / "docs").mkdir(exist_ok=True)
+        (root / "docs" / "SPEC.md").write_text("# SPEC\n\nStable acceptance criteria.\n", encoding="utf-8")
+    if unresolved_ticket or resolved_ticket:
+        issues = root / ".scratch" / "effort" / "issues"
+        issues.mkdir(parents=True, exist_ok=True)
+        status = "resolved" if resolved_ticket else "open"
+        (issues / "01-implement.md").write_text(f"- Status: {status}\n", encoding="utf-8")
+    if acceptance:
+        agents = root / "docs" / "agents"
+        agents.mkdir(parents=True, exist_ok=True)
+        (agents / "acceptance.md").write_text("Verdict: PASS\n", encoding="utf-8")
+
+
 class AskLightBehaviorTest(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory(prefix="ask-light-")
@@ -324,6 +359,68 @@ class AskLightBehaviorTest(unittest.TestCase):
         self.assertIn("project-init", names)
         self.assertIn("project-spec", names)
 
+    def test_project_state_detection_from_real_repository_evidence(self) -> None:
+        cases = {
+            "init-no-spec": ({"initialized": True, "spec": False, "clear_goal": True}, "project-spec", "initialized-no-spec"),
+            "init-unclear": ({"initialized": True, "spec": False, "clear_goal": False}, "project-clarify", "initialized-unclear"),
+            "spec-no-tickets": ({"initialized": True, "spec": True}, "project-tickets", "spec-no-tickets"),
+            "tickets-open": ({"initialized": True, "spec": True, "unresolved_ticket": True}, "implement", "work-in-progress"),
+            "all-resolved": ({"initialized": True, "spec": True, "resolved_ticket": True}, "project-review", "implementation-complete"),
+        }
+        for label, (kwargs, expected_skill, expected_stage) in cases.items():
+            with self.subTest(label=label), tempfile.TemporaryDirectory(prefix="ask-light-project-") as tmp:
+                project = Path(tmp) / "project"
+                write_project_state(project, **kwargs)
+                context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+                result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+                self.assertEqual(result["status"], "RECOMMEND", result)
+                self.assertEqual(result["skill"], expected_skill)
+                self.assertEqual(result["projectStage"], expected_stage)
+                self.assertTrue(result["completed"], "project-state result must list completed evidence")
+                self.assertTrue(result["missing"], "project-state result must list missing evidence")
+                self.assertTrue(result["reason"], "project-state result must include workflow reasoning")
+
+    def test_natural_language_family_navigation(self) -> None:
+        cases = [
+            ("What project skills do I have?", {"family": "project", "expected": {"project-init", "project-spec", "project-tickets", "release-workflow"}}),
+            ("Show me the review skills", {"family": "review", "expected": {"code-review", "generic-review", "project-review", "review-loop"}}),
+            ("Which skills are for learning?", {"family": "learning", "expected": {"eli5", "language-learning", "teach"}}),
+            ("What can I use for bugs?", {"skills": {"diagnosing-bugs"}}),
+            ("What's the difference between clarify and project-clarify?", {"comparison": ("clarify", "project-clarify")}),
+        ]
+        for phrase, expected in cases:
+            with self.subTest(phrase=phrase):
+                result = self.route(phrase, mode="navigate")
+                self.assertEqual(result["status"], "RECOMMEND", result)
+                if "family" in expected:
+                    self.assertEqual(result["family"], expected["family"])
+                    self.assertEqual({item["name"] for item in result["skills"]}, expected["expected"])
+                elif "skills" in expected:
+                    self.assertEqual({item["name"] for item in result["skills"]}, expected["skills"])
+                elif "comparison" in expected:
+                    self.assertEqual((result["comparison"]["left"], result["comparison"]["right"]), expected["comparison"])
+                    self.assertEqual({item["name"] for item in result["skills"]}, set(expected["comparison"]))
+
+    def test_approval_transition_does_not_fake_user_invoked_start(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-approval-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True, resolved_ticket=False, unresolved_ticket=False)
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["skill"], "project-tickets")
+            approved = ASK_LIGHT.approval_transition(result, ASK_LIGHT.load_map())
+            self.assertEqual(approved["next"], "host-transition-required")
+            self.assertIn("user-invoked", approved["execution"])
+            self.assertIn("cannot begin the target itself", approved["execution"])
+
+    def test_approval_transition_can_begin_model_invoked_target(self) -> None:
+        result = self.route("Review whether this project is actually complete")
+        self.assertEqual(result["skill"], "project-review")
+        approved = ASK_LIGHT.approval_transition(result, ASK_LIGHT.load_map())
+        self.assertEqual(approved["next"], "beginning-project-review")
+        self.assertIn("model-invoked", approved["execution"])
+
+
     def test_standalone_routes_skip_project_evidence_requirements(self) -> None:
         for phrase in ("Explain this like I'm five", "Practice Japanese conversation", "Investigate this bug"):
             with self.subTest(phrase=phrase):
@@ -331,12 +428,14 @@ class AskLightBehaviorTest(unittest.TestCase):
                 self.assertEqual(result["status"], "RECOMMEND")
                 self.assertEqual(result["next"], "awaiting-approval")
 
-    def test_approval_to_execution_is_documented_in_skill_contract(self) -> None:
+    def test_approval_policy_is_documented_honestly_in_skill_contract(self) -> None:
         skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
         contract = (ROOT / "references" / "discovery-contract.md").read_text(encoding="utf-8")
         combined = skill + "\n" + contract
-        for token in ("Wait for approval", "Begin the accepted Skill", "yes", "可以", "go ahead", "do it", "用这个", "target command again"):
+        for token in ("Wait for approval", "Honor the host invocation policy", "yes", "可以", "go ahead", "do it", "用这个", "user-invoked", "model-invoked", "does **not** fake execution", "exact invocation"):
             self.assertIn(token, combined)
+        self.assertIn("user-invoked Skill from auto-invoking another user-invoked Skill", combined)
+        self.assertIn("Do not claim a direct transition without host evidence", skill)
         self.assertIn("recommendation phase was read-only", skill)
 
     def test_root_discovery_from_environment(self) -> None:
@@ -350,6 +449,23 @@ class AskLightBehaviorTest(unittest.TestCase):
                 os.environ.pop("LIGHT_SKILL_ROOTS", None)
             else:
                 os.environ["LIGHT_SKILL_ROOTS"] = old
+
+    def test_root_discovery_from_codex_home(self) -> None:
+        codex_home = Path(self.temp.name) / "codex-home"
+        skills_dir = codex_home / "skills"
+        (skills_dir / "ask-light").mkdir(parents=True)
+        (skills_dir / "ask-light" / "SKILL.md").write_text("---\nname: ask-light\ndescription: fixture\n---\n", encoding="utf-8")
+        old = os.environ.get("CODEX_HOME")
+        os.environ["CODEX_HOME"] = str(codex_home)
+        try:
+            roots = ASK_LIGHT.discover_roots()
+            self.assertTrue(any(Path(record["path"]).resolve() == skills_dir.resolve() for record in roots))
+        finally:
+            if old is None:
+                os.environ.pop("CODEX_HOME", None)
+            else:
+                os.environ["CODEX_HOME"] = old
+
 
     def test_results_declare_approval_boundary(self) -> None:
         result = self.route("one-line recap")

@@ -43,10 +43,12 @@ Possible next choices include:
 
 `ask-light` stops after its recommendation **until the user approves**. It does
 not execute, install, delegate, create workflow state, or silently chain
-another user-invoked Skill before consent. After a normal approval, it begins
-the accepted Skill in the current conversation (Codex) or uses the
-host-supported transition mechanism. The selected Skill keeps its own contract
-and evidence boundary.
+another user-invoked Skill before consent. After a normal approval, it may
+begin a model-invoked accepted Skill where the host supports that; for a
+user-invoked accepted Skill it renders the exact invocation and asks the user
+to start it, because repository policy prevents `ask-light` from auto-invoking
+another user-invoked Skill. The selected Skill keeps its own contract and
+evidence boundary.
 
 ## Evidence and status
 

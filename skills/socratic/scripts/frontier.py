@@ -48,33 +48,48 @@ def compute_frontier(decisions: list[Decision]) -> list[Decision]:
 
 
 def parse_batch_response(text: str, frontier: list[Decision]) -> dict[str, str]:
-    """Map a compact batch reply like `1B, 2A, 3C` to decision ids.
+    """Map compact and colon-labelled batch replies to decision ids.
 
-    Also accepts `Q1: ...`, `1: ...`, full prose, and a bare free-text answer
-    when the frontier has exactly one unresolved decision.
+    Supported forms:
+      1B, 2A, 3C
+      1: B
+      2: A
+      3: C
+      Q1: B
+      Q2: A, but only locally
+      Q3: C
+      1B, 3C
+
+    Qualifiers stay attached to the answer they follow. Unanswered questions
+    are intentionally left out of the returned mapping.
     """
     answers: dict[str, str] = {}
     used_ranges: list[tuple[int, int]] = []
 
-    def consume(match: re.Match[str]) -> None:
+    def mark(match: re.Match[str]) -> None:
         used_ranges.append(match.span())
 
+    def inside(match: re.Match[str]) -> bool:
+        start_pos, end_pos = match.span()
+        return any(start_pos < used_end and end_pos > used_start for used_start, used_end in used_ranges)
+
     for index, decision in enumerate(frontier, start=1):
-        # Q1: ... or 1: ...
-        for pattern in (
-            rf"\bQ{index}\s*[:.\-]\s*(.+)",
-            rf"\b{index}\s*[:.\-]\s*(.+)",
-        ):
+        # Colon-labelled forms: Q1: ..., 1: ...
+        colon_patterns = (
+            rf"\bQ{index}\s*[:.\-]\s*(.*?)(?=\b(?:Q?\d+)\s*[:.\-]|\Z)",
+            rf"\b{index}\s*[:.\-]\s*(.*?)(?=\b(?:Q?\d+)\s*[:.\-]|\Z)",
+        )
+        for pattern in colon_patterns:
             match = re.search(pattern, text, re.I | re.S)
-            if match:
-                answers[decision.id] = match.group(1).strip()
-                consume(match)
+            if match and not inside(match):
+                answers[decision.id] = match.group(1).strip().rstrip(",").strip()
+                mark(match)
                 break
         else:
             # Compact 1B / 1 B style, capturing a trailing qualifier when present.
             pattern = rf"(?<!\w){index}\s*([A-Za-z])(?!\w)"
             match = re.search(pattern, text)
-            if match:
+            if match and not inside(match):
                 answer = match.group(1).upper()
                 rest = text[match.end():]
                 if rest.strip():
@@ -84,13 +99,12 @@ def parse_batch_response(text: str, frontier: list[Decision]) -> dict[str, str]:
                     if chunk:
                         answer += f", {chunk}"
                 answers[decision.id] = answer
-                consume(match)
+                mark(match)
 
     if not answers and len(frontier) == 1 and text.strip():
         answers[frontier[0].id] = text.strip()
 
     return answers
-
 
 def apply_answers(decisions: list[Decision], answers: dict[str, str]) -> list[Decision]:
     by_id = {item.id: item for item in decisions}

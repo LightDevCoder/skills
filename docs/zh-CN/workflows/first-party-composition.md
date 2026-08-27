@@ -24,7 +24,7 @@ Agent 已有 goal、artifacts、blockers、project type、task kind、availabili
 在当前对话中开始被接受的 Skill
 ```
 
-可能选择 `project-init`、`project-clarify`、`clarify`、`decision-map`、`research`、`prototype`、`project-spec`、`project-tickets`、`implement`、`diagnosing-bugs`、`project-review`、`review-loop`、`learn-anything`、`recap`、`manuscript-ops` 或 `release-workflow`。其中 `recap` 仅在用户显式需要当前 session 一行摘要时适用。`ask-light` 在用户批准前停止且不执行、安装、delegate、创建 workflow state 或静默串联 user-invoked Skill；用户以 `yes`/`可以`/`go ahead` 批准后，在当前对话中开始被接受的 Skill（Codex），或使用 host 支持的转换机制。选中 Skill 保留自己的契约与证据边界。
+可能选择 `project-init`、`project-clarify`、`clarify`、`decision-map`、`research`、`prototype`、`project-spec`、`project-tickets`、`implement`、`diagnosing-bugs`、`project-review`、`review-loop`、`learn-anything`、`recap`、`manuscript-ops` 或 `release-workflow`。其中 `recap` 仅在用户显式需要当前 session 一行摘要时适用。`ask-light` 在用户批准前停止且不执行、安装、delegate、创建 workflow state 或静默串联 user-invoked Skill；用户以 `yes`/`可以`/`go ahead` 批准后，对 model-invoked 被接受 Skill 可在 host 支持时开始；对 user-invoked 被接受 Skill 则渲染精确调用并请用户启动，因为仓库策略禁止 `ask-light` 自动调用另一个 user-invoked Skill。选中 Skill 保留自己的契约与证据边界。
 
 ## Evidence 与状态
 

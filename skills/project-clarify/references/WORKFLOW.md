@@ -13,7 +13,10 @@ this file summarizes the execution order and references the examples.
 3. **Fact work (optional)** — `research`/`prototype` only when authorized;
    use `to-questionnaire` as the handoff branch when the missing information is
    held by another person.
-4. **Handoff** — return the `Project clarification handoff` and stop.
+4. **Continue and handoff** — after each normal reply, call `socratic` again
+   and present the recomputed frontier. Continue until no meaningful frontier
+   remains; confirm shared understanding, then return the `Project
+   clarification handoff` and stop.
 
 ## Composition
 

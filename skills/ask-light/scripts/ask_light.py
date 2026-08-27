@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Deterministic Light router: semantic map first, host availability second.
+"""Deterministic Light router: project evidence first, semantic map second,
+host availability third.
 
 This helper is read-only during the recommendation phase. The Skill itself
-owns the approval-to-execution transition after the user agrees.
+reports the host-supported transition after user approval.
 """
 
 from __future__ import annotations
@@ -22,6 +23,27 @@ HOST_SKILL_ROOTS = (
     Path.home() / ".codex" / "skills",
     Path.home() / ".claude" / "skills",
     Path.home() / ".config" / "skills",
+)
+
+# Natural-language family navigation is explicit, not token-overlap matching.
+FAMILY_ALIASES = {
+    "project": ("project", "projects"),
+    "review": ("review", "reviews", "acceptance", "verdict"),
+    "learning": ("learning", "learn", "study", "teaching"),
+    "clarification": ("clarification", "clarify", "clarifying"),
+    "implementation": ("implementation", "implement", "building", "coding"),
+    "research": ("research", "investigation"),
+    "knowledge-work": ("knowledge", "writing", "documentation", "docs"),
+    "specialized": ("specialized", "domain"),
+    "utility": ("utility", "utilities", "helpers"),
+    "internal/reusable": ("internal", "reusable"),
+}
+FAMILY_INTENT_WORDS = ("skill", "skills", "which", "show", "list", "for", "what", "browse")
+DIAGNOSTIC_INTENT_PATTERN = re.compile(r"\b(bug|bugs|debug|debugging|diagnos(?:e|is|ing|tic)?|regression|fix)\b", re.I)
+COMPARISON_PATTERN = re.compile(
+    r"\b(?:difference|differences|diff)\b.*?\b(?:between|of)\s+([A-Za-z][A-Za-z0-9-]*)\s+and\s+([A-Za-z][A-Za-z0-9-]*)|"
+    r"\b([A-Za-z][A-Za-z0-9-]*)\s+vs\.?\s+([A-Za-z][A-Za-z0-9-]*)",
+    re.I,
 )
 
 
@@ -79,6 +101,155 @@ def logical_ranking(skill_map: dict[str, Any], context: dict[str, Any]) -> list[
             "matchedTaskKind": task_kind if task_match else "",
         })
     return sorted(ranked, key=lambda item: (-item["logicalScore"], item["name"]))
+
+
+def _small_text(path: Path, max_bytes: int = 64 * 1024) -> str:
+    try:
+        if path.is_file() and path.stat().st_size <= max_bytes:
+            return path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        pass
+    return ""
+
+
+def _has_glob(root: Path, pattern: str) -> bool:
+    try:
+        return any(root.glob(pattern))
+    except OSError:
+        return False
+
+
+def inspect_project_state(project_root: Path) -> dict[str, Any]:
+    """Inspect a bounded set of real project evidence, not the whole repository.
+
+    Returns a stage, completed/missing summaries, and the Light Skill that owns
+    the next step when the evidence supports a deterministic recommendation.
+    """
+    root = project_root.resolve()
+    evidence: dict[str, Any] = {
+        "projectRoot": str(root),
+        "initialized": False,
+        "hasSpec": False,
+        "hasTickets": False,
+        "unresolvedTickets": False,
+        "allTicketsResolved": False,
+        "hasAcceptanceEvidence": False,
+        "specPaths": [],
+        "ticketPaths": [],
+        "acceptancePaths": [],
+    }
+    if not root.is_dir():
+        evidence["stage"] = "unknown"
+        evidence["skill"] = ""
+        evidence["reason"] = "project root is not readable"
+        evidence["gaps"] = ["project root is not readable"]
+        return evidence
+
+    project_contract = root / "docs/agents/light-project.md"
+    evidence["initialized"] = project_contract.is_file()
+
+    # Active SPEC: a few conventional locations plus the .scratch effort root.
+    spec_candidates = [
+        root / "SPEC.md", root / "spec.md",
+        root / "docs" / "SPEC.md", root / "docs" / "spec.md",
+    ]
+    scratch_specs = sorted(root.glob(".scratch/*/spec.md")) if _has_glob(root, ".scratch/*/spec.md") else []
+    spec_paths = [path for path in [*spec_candidates, *scratch_specs] if path.is_file()]
+    evidence["hasSpec"] = bool(spec_paths)
+    evidence["specPaths"] = [str(path.relative_to(root)) for path in spec_paths[:10]]
+
+    # Tickets: local-markdown issue files only, bounded to .scratch/*/issues.
+    ticket_paths = sorted(root.glob(".scratch/*/issues/*.md")) if _has_glob(root, ".scratch/*/issues/*.md") else []
+    ticket_paths = [path for path in ticket_paths if path.is_file()]
+    evidence["hasTickets"] = bool(ticket_paths)
+    evidence["ticketPaths"] = [str(path.relative_to(root)) for path in ticket_paths[:20]]
+
+    resolved_states = {"resolved", "done", "closed", "complete", "completed", "archived", "accepted"}
+    unresolved_states = {"open", "ready", "ready-for-agent", "claimed", "in-progress", "in_progress", "todo", "blocked"}
+    statuses: list[str] = []
+    for ticket in ticket_paths:
+        text = _small_text(ticket)
+        for match in re.finditer(r"(?mi)^\s*(?:-\s*)?(?:Status|State)\s*[:.-]\s*(.+)$", text):
+            statuses.extend(part.strip().lower() for part in re.split(r"[,\s]+", match.group(1)) if part.strip())
+    evidence["unresolvedTickets"] = any(status in unresolved_states for status in statuses)
+    evidence["allTicketsResolved"] = bool(ticket_paths) and bool(statuses) and all(status in resolved_states for status in statuses) and not evidence["unresolvedTickets"]
+
+    # Acceptance/review evidence: bounded to conventional handoff/verdict paths.
+    acceptance_candidates = [
+        root / "docs" / "agents" / "acceptance.md",
+        root / "docs" / "acceptance.md",
+        root / "docs" / "agents" / "review-verdict.md",
+    ]
+    scratch_acceptance = [
+        path for pattern in (".scratch/*/acceptance*.md", ".scratch/*/review*/verdict*.md", ".scratch/*/project-review*.md")
+        for path in (root.glob(pattern) if _has_glob(root, pattern) else [])
+    ]
+    evidence["hasAcceptanceEvidence"] = bool([path for path in [*acceptance_candidates, *scratch_acceptance] if path.is_file()])
+    evidence["acceptancePaths"] = [str(path.relative_to(root)) for path in [*acceptance_candidates, *scratch_acceptance] if path.is_file()][:10]
+
+    # Derive the current Light project stage and the next Skill from evidence.
+    if not evidence["initialized"]:
+        evidence["stage"] = "uninitialized"
+        evidence["skill"] = "project-init"
+        evidence["reason"] = "No docs/agents/light-project.md exists; the repository has not been initialized for Light Project workflows."
+        evidence["completed"] = []
+        evidence["missing"] = ["Light project configuration and tracker contract"]
+        evidence["gaps"] = []
+        return evidence
+
+    if not evidence["hasSpec"]:
+        contract_text = _small_text(project_contract)
+        has_goal = bool(re.search(r"(?im)^-\s*Goal:\s*(?!\?|\(none recorded\)|$)\S", contract_text))
+        has_outputs = bool(re.search(r"(?im)^-\s*Outputs:\s*(?!\(none recorded\)|$)\S", contract_text))
+        goal_state = "clear goal and outputs are recorded" if (has_goal and has_outputs) else "goal/outputs are missing or unclear"
+        if goal_state.startswith("clear"):
+            skill, stage, missing = "project-spec", "initialized-no-spec", ["approved SPEC with acceptance criteria"]
+            reason = "The Light project contract exists and records a goal, but no active SPEC is present. `project-spec` owns turning the recorded goal and constraints into a traceable SPEC."
+        else:
+            skill, stage, missing = "project-clarify", "initialized-unclear", ["clarified goal and constraints before a SPEC can be written"]
+            reason = "The Light project contract exists but does not yet give `project-spec` a clear goal/outputs base. `project-clarify` owns resolving the remaining user-owned decisions first."
+        evidence["stage"] = stage
+        evidence["skill"] = skill
+        evidence["reason"] = reason
+        evidence["completed"] = ["Light project contract present"]
+        evidence["missing"] = missing
+        evidence["gaps"] = []
+        return evidence
+
+    if not evidence["hasTickets"]:
+        evidence["stage"] = "spec-no-tickets"
+        evidence["skill"] = "project-tickets"
+        evidence["reason"] = "A stable SPEC exists but no implementation tickets are present. `project-tickets` owns slicing the SPEC into dependency-ordered, unblocked work items."
+        evidence["completed"] = ["Light project contract", "active SPEC"]
+        evidence["missing"] = ["implementation tickets and unblocked frontier"]
+        evidence["gaps"] = []
+        return evidence
+
+    if evidence["unresolvedTickets"]:
+        evidence["stage"] = "work-in-progress"
+        evidence["skill"] = "implement"
+        evidence["reason"] = "Implementation tickets exist and at least one remains unresolved. `implement` owns executing the next ready, unblocked ticket."
+        evidence["completed"] = ["Light project contract", "active SPEC", "ticket graph"]
+        evidence["missing"] = ["completion of the unresolved ticket(s)"]
+        evidence["gaps"] = []
+        return evidence
+
+    if not evidence["hasAcceptanceEvidence"]:
+        evidence["stage"] = "implementation-complete"
+        evidence["skill"] = "project-review"
+        evidence["reason"] = "Implementation tickets are resolved but no acceptance/review verdict evidence is present. `project-review` owns final acceptance against the frozen baseline."
+        evidence["completed"] = ["Light project contract", "active SPEC", "tickets resolved"]
+        evidence["missing"] = ["final acceptance/review verdict evidence"]
+        evidence["gaps"] = []
+        return evidence
+
+    evidence["stage"] = "accepted"
+    evidence["skill"] = ""
+    evidence["reason"] = "The project already has acceptance/review evidence; there is no obvious next Light project stage from this evidence."
+    evidence["completed"] = ["Light project contract", "active SPEC", "tickets resolved", "acceptance evidence"]
+    evidence["missing"] = []
+    evidence["gaps"] = []
+    return evidence
 
 
 def read_frontmatter(path: Path) -> tuple[dict[str, str], str]:
@@ -217,6 +388,11 @@ def _collection_root_candidates(cwd: Path | None = None) -> list[Path]:
     script_collection = Path(__file__).resolve().parents[2]
     if (script_collection / "ask-light" / "SKILL.md").is_file() and (script_collection / "socratic" / "SKILL.md").is_file():
         candidates.append(script_collection)
+    codex_home = os.environ.get("CODEX_HOME", "").strip()
+    if codex_home:
+        codex_root = Path(codex_home) / "skills"
+        if codex_root.is_dir() and (codex_root / "ask-light" / "SKILL.md").is_file():
+            candidates.append(codex_root)
     for host_root in HOST_SKILL_ROOTS:
         if host_root.is_dir() and (host_root / "ask-light" / "SKILL.md").is_file():
             candidates.append(host_root)
@@ -317,6 +493,9 @@ def base_result(mode: str, status: str, gaps: list[str]) -> dict[str, Any]:
         "candidates": [],
         "next": "awaiting-approval",
         "execution": "recommendation phase was read-only; execution begins only after explicit user approval",
+        "projectStage": "",
+        "completed": [],
+        "missing": [],
     }
 
 
@@ -333,95 +512,243 @@ def workflow_base_result(status: str, gaps: list[str]) -> dict[str, Any]:
     return result
 
 
+def _known_skill(skill_map: dict[str, Any], name: str) -> dict[str, Any] | None:
+    return next((entry for entry in skill_map["skills"] if entry["name"].lower() == name.lower()), None)
+
+
 def navigate_result(skill_map: dict[str, Any], query: str, host: str = "codex") -> dict[str, Any]:
-    text = query.lower()
+    """Resolve collection-navigation intent with explicit family/skill parsing.
+
+    Natural-language examples:
+      "What project skills do I have?"      -> project family only
+      "Show me the review skills"           -> review family only
+      "Which skills are for learning?"      -> learning family only
+      "What can I use for bugs?"            -> diagnostic capabilities
+      "What's the difference between clarify and project-clarify?" -> comparison
+    """
+    text = query.strip()
+    lower = text.lower()
     families = skill_map.get("skillFamilies", {})
-    matches: list[dict[str, Any]] = []
-    for entry in skill_map["skills"]:
-        name = entry["name"]
-        family = families.get(name, "")
-        haystack = f"{name} {family}".lower()
-        if text in name.lower() or text in family or any(alias in haystack for alias in re.split(r"[^a-z0-9]+", text) if alias):
-            matches.append({
-                "name": name,
-                "family": family,
-                "description": entry.get("patterns", [])[:1],
-                "invocation": invocation(name, host),
-            })
-    if not matches:
-        return {
-            "mode": "navigate",
-            "status": "NEED-INPUT",
-            "skill": "",
-            "skills": [],
-            "reason": "",
-            "invocation": "",
-            "gaps": [f"No Light Skill family matched: {query}"],
-            "next": "awaiting-approval",
-            "execution": "recommendation phase was read-only; execution begins only after explicit user approval",
-        }
-    return {
+    known_names = {entry["name"] for entry in skill_map["skills"]}
+    base = {
         "mode": "navigate",
         "status": "RECOMMEND",
-        "skill": matches[0]["name"] if len(matches) == 1 else "",
-        "skills": matches[:10],
-        "reason": f"Light Skill families matched: {', '.join(item['family'] for item in matches[:5])}",
-        "invocation": invocation(matches[0]["name"], host) if len(matches) == 1 else "",
+        "skill": "",
+        "source": "",
+        "invocation": "",
+        "confidence": "high",
+        "alternative": None,
         "gaps": [],
+        "reads": {"metadata": 0, "bodies": 0, "references": 0},
+        "candidates": [],
         "next": "awaiting-approval",
         "execution": "recommendation phase was read-only; execution begins only after explicit user approval",
+        "projectStage": "",
+        "completed": [],
+        "missing": [],
     }
 
+    def matched(query_match: re.Match[str]) -> list[dict[str, Any]]:
+        left, right = query_match.group(1) or query_match.group(3), query_match.group(2) or query_match.group(4)
+        left_entry = _known_skill(skill_map, left)
+        right_entry = _known_skill(skill_map, right)
+        if not left_entry or not right_entry:
+            return []
+        return [
+            {"name": left_entry["name"], "family": families.get(left_entry["name"], ""), "description": left_entry.get("patterns", [])[:1], "invocation": invocation(left_entry["name"], host)},
+            {"name": right_entry["name"], "family": families.get(right_entry["name"], ""), "description": right_entry.get("patterns", [])[:1], "invocation": invocation(right_entry["name"], host)},
+        ]
+
+    comparison = COMPARISON_PATTERN.search(lower)
+    if comparison:
+        matches = matched(comparison)
+        if matches:
+            result = dict(base)
+            result.update({
+                "skill": "",
+                "skills": matches,
+                "reason": f"Comparison requested between {matches[0]['name']} and {matches[1]['name']}: use each Skill's package contract for their exact boundaries.",
+                "comparison": {
+                    "left": matches[0]["name"],
+                    "right": matches[1]["name"],
+                    "families": [matches[0]["family"], matches[1]["family"]],
+                },
+            })
+            return result
+
+    # Explicit family detection: only when a family word appears together with
+    # collection-navigation intent words. This avoids generic-token noise.
+    matched_families: list[str] = []
+    for family, aliases in FAMILY_ALIASES.items():
+        if any(re.search(rf"(?<![A-Za-z0-9-]){re.escape(alias)}(?![A-Za-z0-9-])", lower) for alias in aliases):
+            if any(word in lower for word in FAMILY_INTENT_WORDS):
+                matched_families.append(family)
+    if len(matched_families) == 1:
+        family = matched_families[0]
+        skills = [
+            {"name": entry["name"], "family": family, "description": entry.get("patterns", [])[:1], "invocation": invocation(entry["name"], host)}
+            for entry in skill_map["skills"]
+            if families.get(entry["name"]) == family
+        ]
+        if skills:
+            result = dict(base)
+            result.update({
+                "skill": "",
+                "skills": skills,
+                "reason": f"Light Skill family matched: {family}",
+                "family": family,
+            })
+            return result
+
+    # Diagnostic/bug intent maps to the relevant diagnostic capability.
+    if DIAGNOSTIC_INTENT_PATTERN.search(lower):
+        diagnostics = sorted(
+            [
+                {"name": entry["name"], "family": families.get(entry["name"], ""), "description": entry.get("patterns", [])[:1], "invocation": invocation(entry["name"], host)}
+                for entry in skill_map["skills"]
+                if entry["name"] == "diagnosing-bugs"
+            ],
+            key=lambda item: item["name"],
+        )
+        if diagnostics:
+            result = dict(base)
+            result.update({
+                "skill": "diagnosing-bugs" if len(diagnostics) == 1 else "",
+                "skills": diagnostics,
+                "reason": "Bug/diagnostic intent matched: diagnosing-bugs owns investigating and repairing regressions.",
+            })
+            return result
+
+    # Exact skill-name lookup (still explicit, not arbitrary token overlap).
+    exact = _known_skill(skill_map, lower.strip())
+    if exact:
+        result = dict(base)
+        result.update({
+            "skill": exact["name"],
+            "skills": [{"name": exact["name"], "family": families.get(exact["name"], ""), "description": exact.get("patterns", [])[:1], "invocation": invocation(exact["name"], host)}],
+            "reason": f"Exact Light Skill matched: {exact['name']}",
+        })
+        return result
+
+    result = dict(base)
+    result.update({
+        "status": "NEED-INPUT",
+        "reason": "",
+        "skill": "",
+        "skills": [],
+        "gaps": [f"No Light Skill family matched: {query}"],
+    })
+    return result
 
 def next_result(roots: list[dict[str, Any]], context: dict[str, Any], host: str, skill_map: dict[str, Any]) -> dict[str, Any]:
-    if not context.get("goal") and not context.get("taskKind"):
-        return base_result("next", "NEED-INPUT", ["Provide goal or taskKind before routing."])
+    project_root_value = context.get("projectRoot") or context.get("cwd")
+    project_state: dict[str, Any] = {}
+    if project_root_value:
+        project_state = inspect_project_state(Path(str(project_root_value)))
+
+    goal = str(context.get("goal") or "")
+    task_kind = str(context.get("taskKind") or "")
+    generic_project_question = bool(re.search(r"(?i)\\b(next|stage|status|what.*missing|what.*complete|what.*done)\\b", goal))
+    state_driven = bool(
+        project_state.get("stage")
+        and project_state.get("skill")
+        and not task_kind
+        and (not goal or generic_project_question)
+    )
+    if not goal and not task_kind and not state_driven:
+        return base_result("next", "NEED-INPUT", ["Provide goal, taskKind, or a projectRoot with enough evidence to derive the current stage."])
     control = str(context.get("invocationControl", ""))
     if control not in INVOCATION_CONTROLS:
         return base_result("next", "NEED-INPUT", ["invocationControl must be explicit-only, model-callable, or either."])
-    ranking = logical_ranking(skill_map, context)
-    if not ranking or ranking[0]["logicalScore"] <= 0:
-        return base_result("next", "NEED-INPUT", ["No reliable Light route matches the supplied intent."])
-    tied = [item["name"] for item in ranking if item["logicalScore"] == ranking[0]["logicalScore"]]
-    if len(tied) > 1:
-        return base_result("next", "NEED-INPUT", [f"Material Light route tie: {', '.join(tied)}. Provide the intended outcome or project stage."])
+
+    if state_driven:
+        logical_name = project_state["skill"]
+        logical = next((entry for entry in skill_map["skills"] if entry["name"] == logical_name), None)
+        if logical is None:
+            return base_result("next", "BLOCKED", [f"Derived project stage names an unknown Light Skill: {logical_name}"])
+        reason = project_state.get("reason", "Derived from real project evidence.")
+        evidence = [f"project-state:{project_state['stage']}->{logical_name}"]
+    else:
+        ranking = logical_ranking(skill_map, context)
+        if not ranking or ranking[0]["logicalScore"] <= 0:
+            return base_result("next", "NEED-INPUT", ["No reliable Light route matches the supplied intent."])
+        tied = [item["name"] for item in ranking if item["logicalScore"] == ranking[0]["logicalScore"]]
+        if len(tied) > 1:
+            return base_result("next", "NEED-INPUT", [f"Material Light route tie: {', '.join(tied)}. Provide the intended outcome or project stage."])
+        logical = ranking[0]
+        reason = f"Light Skill Map matched: {', '.join(logical['matchedPatterns'] + logical['matchedPrecedence'])}"
+        if logical["matchedTaskKind"]:
+            reason += f"; taskKind:{logical['matchedTaskKind']}->{logical['name']}"
+        evidence = logical["matchedPatterns"] + logical["matchedPrecedence"]
+        if logical["matchedTaskKind"]:
+            evidence.append(f"taskKind:{logical['matchedTaskKind']}->{logical['name']}")
+
     policy = availability_policy(context, host)
     candidates, gaps, metadata_reads = discover(roots, skill_map, policy)
-    logical = ranking[0]
-    installed = sorted([item for item in candidates if item["name"] == logical["name"] and item["availabilityStatus"] == "available"], key=lambda item: item["packagePath"])
+    selected_name = logical["name"]
+    installed = sorted(
+        [item for item in candidates if item["name"] == selected_name and item["availabilityStatus"] == "available"],
+        key=lambda item: item["packagePath"],
+    )
     if not installed:
-        result = base_result("next", "BLOCKED", gaps + [f"{logical['name']}: known Light Skill is not available on this host."])
-        result.update({"skill": logical["name"], "reads": {"metadata": metadata_reads, "bodies": 0, "references": 0}, "candidates": candidates})
+        result = base_result("next", "BLOCKED", gaps + [f"{selected_name}: known Light Skill is not available on this host."])
+        result.update({
+            "skill": selected_name,
+            "reads": {"metadata": metadata_reads, "bodies": 0, "references": 0},
+            "candidates": candidates,
+            "projectStage": project_state.get("stage", ""),
+            "completed": project_state.get("completed", []),
+            "missing": project_state.get("missing", []),
+        })
         return result
     if len(installed) > 1:
-        result = base_result("next", "BLOCKED", gaps + [f"{logical['name']}: multiple available first-party copies require host precedence evidence."])
-        result.update({"skill": logical["name"], "reads": {"metadata": metadata_reads, "bodies": 0, "references": 0}, "candidates": candidates})
+        result = base_result("next", "BLOCKED", gaps + [f"{selected_name}: multiple available first-party copies require host precedence evidence."])
+        result.update({
+            "skill": selected_name,
+            "reads": {"metadata": metadata_reads, "bodies": 0, "references": 0},
+            "candidates": candidates,
+            "projectStage": project_state.get("stage", ""),
+            "completed": project_state.get("completed", []),
+            "missing": project_state.get("missing", []),
+        })
         return result
     selected = installed[0]
     if not invocation_compatible(selected["invocationType"], control):
         result = base_result(
             "next",
             "BLOCKED",
-            gaps + [f"{selected['name']}: {selected['invocationType']} is incompatible with invocationControl={control}."],
+            gaps + [f"{selected_name}: {selected['invocationType']} is incompatible with invocationControl={control}."],
         )
-        result.update({"skill": selected["name"], "reads": {"metadata": metadata_reads, "bodies": 0, "references": 0}, "candidates": candidates})
+        result.update({
+            "skill": selected_name,
+            "reads": {"metadata": metadata_reads, "bodies": 0, "references": 0},
+            "candidates": candidates,
+            "projectStage": project_state.get("stage", ""),
+            "completed": project_state.get("completed", []),
+            "missing": project_state.get("missing", []),
+        })
         return result
     body_reads, reference_reads, read_error = validate_selected(selected)
     selected["readStatus"] = "unavailable" if read_error else "available"
     if read_error:
-        result = base_result("next", "BLOCKED", gaps + [f"{selected['name']}: {read_error}; restore the first-party package."])
-        result.update({"skill": selected["name"], "reads": {"metadata": metadata_reads, "bodies": body_reads, "references": reference_reads}, "candidates": candidates})
+        result = base_result("next", "BLOCKED", gaps + [f"{selected_name}: {read_error}; restore the first-party package."])
+        result.update({
+            "skill": selected_name,
+            "reads": {"metadata": metadata_reads, "bodies": body_reads, "references": reference_reads},
+            "candidates": candidates,
+            "projectStage": project_state.get("stage", ""),
+            "completed": project_state.get("completed", []),
+            "missing": project_state.get("missing", []),
+        })
         return result
-    evidence = logical["matchedPatterns"] + logical["matchedPrecedence"]
-    if logical["matchedTaskKind"]:
-        evidence.append(f"taskKind:{logical['matchedTaskKind']}->{logical['name']}")
+
     result = {
         "mode": "next",
         "status": "RECOMMEND",
-        "skill": selected["name"],
+        "skill": selected_name,
         "source": f"first-party: {selected['packagePath']}",
-        "reason": f"Light Skill Map matched: {', '.join(evidence)}",
-        "invocation": invocation(selected["name"], policy["host"]),
+        "reason": reason,
+        "invocation": invocation(selected_name, policy["host"]),
         "confidence": "high",
         "alternative": None,
         "gaps": gaps,
@@ -429,8 +756,41 @@ def next_result(roots: list[dict[str, Any]], context: dict[str, Any], host: str,
         "candidates": candidates,
         "next": "awaiting-approval",
         "execution": "recommendation phase was read-only; execution begins only after explicit user approval",
+        "projectStage": project_state.get("stage", ""),
+        "completed": project_state.get("completed", []),
+        "missing": project_state.get("missing", []),
     }
     return result
+def approval_transition(result: dict[str, Any], skill_map: dict[str, Any]) -> dict[str, Any]:
+    """Compute the honest post-approval state for a recommendation result.
+
+    Repository policy is authoritative: a user-invoked Skill (frontmatter
+    `disable-model-invocation: true`) must not be auto-invoked by another
+    Skill. `ask-light` is user-invoked, so after approval it cannot begin a
+    user-invoked target itself; it renders the exact invocation and asks the
+    user to start it. A model-invoked target may begin in the current
+    conversation when the host supports it.
+    """
+    if result.get("status") != "RECOMMEND" or not result.get("skill"):
+        updated = dict(result)
+        updated["next"] = "no-execution"
+        return updated
+    skill_name = result["skill"]
+    candidate = next((item for item in result.get("candidates", []) if item["name"] == skill_name), None)
+    invocation_type = candidate.get("invocationType", "unknown") if candidate else "unknown"
+    updated = dict(result)
+    if invocation_type == "model-invoked":
+        updated["next"] = f"beginning-{skill_name}"
+        updated["execution"] = "user approved; the model-invoked target may begin in this conversation."
+    else:
+        updated["next"] = "host-transition-required"
+        updated["execution"] = (
+            "User approved, but repository policy forbids a user-invoked Skill from auto-invoking another "
+            "user-invoked Skill. `ask-light` cannot begin the target itself; render the exact invocation "
+            "and have the user start it."
+        )
+    return updated
+
 
 
 def workflow_result(roots: list[dict[str, Any]], context: dict[str, Any], host: str, skill_map: dict[str, Any]) -> dict[str, Any]:
