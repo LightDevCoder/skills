@@ -107,5 +107,14 @@ Current validation:
 Product candidate commit:
 `b671a90ac10b5777a50ca897a03242cc51949478` (local only).
 
-Fresh final specialist and project Evaluator results are recorded after this
-section when complete.
+Closure record commit:
+`b6e0515` (`chore: sync closure evidence and dependency pins`) (local only).
+
+## Independent-review boundary
+
+The required fresh independent review of `28ce785..HEAD` could not run on
+2026-08-27: both the direct `codex review --base 28ce785` attempt and the
+fresh `sol_advisor_sol_reviewer` thread were stopped by the Codex usage limit
+before inspecting the diff. This is an availability blocker, not a PASS or
+FAIL verdict. The project remains ready for the owner's human review, with no
+push, tag, or release created.

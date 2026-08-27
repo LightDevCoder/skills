@@ -459,5 +459,20 @@ human review, so an online GitHub check cannot succeed yet. This is a release
 and remote-availability limitation, not published-install or handoff `READY`
 evidence; no release claim is made.
 
-A fresh clean specialist review and the final independent project Evaluator
-still follow this repair record.
+## Final independent-review boundary — 2026-08-27
+
+The required fresh independent review was attempted against the exact current
+diff (`28ce785..HEAD`) in two ways:
+
+```text
+codex review --base 28ce785 -c 'model="gpt-5.6-sol"' -c 'model_reasoning_effort="high"'
+-> BLOCKED before diff inspection: Codex usage limit; retry available 2026-09-01 23:48.
+sol_advisor_sol_reviewer thread
+-> BLOCKED before review: reviewer account hit the same Codex usage limit.
+```
+
+Neither attempt produced a review verdict. Earlier specialist findings were
+repaired and the current test evidence remains valid, but governance requires
+the independent final review before project acceptance can be marked `PASS`.
+The closure candidate is therefore committed locally and ready for human
+review, with the independent-review gate explicitly open.
