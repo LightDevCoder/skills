@@ -19,7 +19,7 @@
 - **Execution** — 在 host 能力范围内做有边界的执行
 - **Review** — 从只读 findings 到项目验收
 - **Specialized Workflows** — 文稿、知识库、学习、看板
-- **Router** — `ask-light` 只推荐下一步，不执行
+- **Router** — `ask-light` 推荐下一步，批准后开始执行
 
 架构决定*有哪些能力以及如何组合*；Skill 写作参照 [Matt Pocock Skills](https://github.com/mattpocock/skills)，host 感知路由参照 [Sol Advisor](https://github.com/DannyMac180/sol-advisor)——均为设计参考，不构成运行时依赖。
 

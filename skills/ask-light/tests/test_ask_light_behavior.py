@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import importlib.util
+import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -41,9 +43,9 @@ class AskLightBehaviorTest(unittest.TestCase):
     def tearDown(self) -> None:
         self.temp.cleanup()
 
-    def route(self, goal: str, *, host: str = "codex", task_kind: str = "", availability=None):
+    def route(self, goal: str, *, host: str = "codex", task_kind: str = "", availability=None, mode: str = "next"):
         context = {"goal": goal, "artifacts": [], "blockers": "", "projectType": "generic", "taskKind": task_kind, "availability": availability or host, "invocationControl": "explicit-only"}
-        return ASK_LIGHT.route(self.roots, context, host)
+        return ASK_LIGHT.route(self.roots, context, host, mode)
 
     def test_representative_intents_choose_the_expected_top_skill(self) -> None:
         cases = {
@@ -241,7 +243,7 @@ class AskLightBehaviorTest(unittest.TestCase):
         self.assertIn("clarified goal", spec["expectedInput"])
         self.assertIn("SPEC artifact", spec["handoffArtifact"])
         self.assertEqual(spec["invocationType"], "user-invoked")
-        self.assertIn("nothing was invoked", result["execution"])
+        self.assertIn("read-only", result["execution"])
         self.assertTrue({"source", "reason", "invocation", "confidence", "alternative", "missingDependency"}.issubset(result))
         self.assertEqual(result["missingDependency"], "")
 
@@ -307,6 +309,52 @@ class AskLightBehaviorTest(unittest.TestCase):
         result = ASK_LIGHT.route(self.roots + [{"category": "first-party", "path": str(duplicate)}], context, mode="workflow")
         self.assertEqual((result["status"], result["skill"]), ("BLOCKED", ""))
         self.assertIn("Duplicate first-party workflow steps", " ".join(result["gaps"]))
+
+    def test_skill_map_exposes_families_for_collection_navigation(self) -> None:
+        data = ASK_LIGHT.load_map()
+        self.assertEqual(set(data["skillFamilies"]), {item["name"] for item in data["skills"]})
+        self.assertEqual(data["skillFamilies"]["project-init"], "project")
+        self.assertEqual(data["skillFamilies"]["socratic"], "clarification")
+
+    def test_navigation_mode_browses_families_without_project_context(self) -> None:
+        result = self.route("project Skills", mode="navigate")
+        self.assertEqual(result["status"], "RECOMMEND")
+        self.assertIn("project", result["reason"])
+        names = {item["name"] for item in result["skills"]}
+        self.assertIn("project-init", names)
+        self.assertIn("project-spec", names)
+
+    def test_standalone_routes_skip_project_evidence_requirements(self) -> None:
+        for phrase in ("Explain this like I'm five", "Practice Japanese conversation", "Investigate this bug"):
+            with self.subTest(phrase=phrase):
+                result = self.route(phrase)
+                self.assertEqual(result["status"], "RECOMMEND")
+                self.assertEqual(result["next"], "awaiting-approval")
+
+    def test_approval_to_execution_is_documented_in_skill_contract(self) -> None:
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        contract = (ROOT / "references" / "discovery-contract.md").read_text(encoding="utf-8")
+        combined = skill + "\n" + contract
+        for token in ("Wait for approval", "Begin the accepted Skill", "yes", "可以", "go ahead", "do it", "用这个", "target command again"):
+            self.assertIn(token, combined)
+        self.assertIn("recommendation phase was read-only", skill)
+
+    def test_root_discovery_from_environment(self) -> None:
+        old = os.environ.get("LIGHT_SKILL_ROOTS")
+        os.environ["LIGHT_SKILL_ROOTS"] = json.dumps([{"category": "first-party", "path": str(self.root)}])
+        try:
+            roots = ASK_LIGHT.discover_roots()
+            self.assertTrue(any(Path(record["path"]).resolve() == self.root.resolve() for record in roots))
+        finally:
+            if old is None:
+                os.environ.pop("LIGHT_SKILL_ROOTS", None)
+            else:
+                os.environ["LIGHT_SKILL_ROOTS"] = old
+
+    def test_results_declare_approval_boundary(self) -> None:
+        result = self.route("one-line recap")
+        self.assertEqual(result["next"], "awaiting-approval")
+        self.assertIn("read-only", result["execution"])
 
 
 if __name__ == "__main__":

@@ -50,6 +50,14 @@ Approved Matt PORTs (10) each carry `ATTRIBUTION.md` and have no upstream runtim
 - **Tests:** added representative top-routing, empty-repository bootstrap/rerun, clarification lifecycle, local-pointer, ownership, and historical-runtime-boundary tests; removed repaired prose coupling instead of restoring old wording.
 - **recap:** by explicit user amendment, its `SKILL.md` now keeps only required frontmatter plus one manual `$recap` execution sentence; it shows one concise line about the current session without replacing or compacting conversation history.
 
+### Changed — Core workflow & Socratic repair
+
+- **ask-light workflow advisor:** `ask-light` now inspects project/workflow evidence, explains the current stage, recommends the next Skill with reasoning, supports collection navigation, discovers Light roots without requiring caller-injected roots, distinguishes first-party provenance from colocated third-party packages, and begins the accepted Skill after explicit user approval on Codex.
+- **Socratic frontier rounds:** `socratic` now asks the complete actionable frontier as a round of numbered independent questions with choices and recommendations, and accepts batch replies like `1B, 2A, 3C`; `clarify` and `project-clarify` use the same round interaction.
+- **project-init availability:** bootstrap now classifies declared relevant capabilities as `available`, `unavailable`, or `unknown` and never silently promotes `unknown` to `available`.
+- **Reviewer ownership:** `review-loop/references/reviewer-contract.md` is the single canonical runtime contract; `docs/REVIEWER_CONTRACT.md` (and zh-CN) are now human-facing summaries/pointers.
+- **Header:** README hero remains `Assets/header.png` as the new repository header image.
+
 ### No redesign verification
 
 18 `NO REWRITE/PORT` Skills were `git diff` checked (SPEC §26): `manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `eli5`, `release-workflow`, `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts` — only minimal handoff/attribution wiring where a real integration need existed. `recap` is the separately recorded user-approved exception above.

@@ -20,8 +20,10 @@ and user-owned decisions into a bounded handoff for `project-spec`.
    material as an evidence gap. Facts that inspection can settle are not user
    questions.
 2. **Maintain user decisions with `socratic`.** Pass inspected facts, unknowns,
-   existing decisions, and the goal to the `socratic` engine. Ask only the
-   unblocked, user-owned frontier — one meaningful question at a time.
+   existing decisions, and the goal to the `socratic` engine. Ask the complete
+   current frontier as a round — multiple independent questions with choices
+   and recommendations when appropriate. Do not ask one question at a time by
+   default.
 3. **Resolve fact and experiment gaps deliberately.** For a fact gap, state
    which decision it blocks and record the authorized capability call
    (`research`, `prototype`, `to-questionnaire`) in the ledger. Never mark a

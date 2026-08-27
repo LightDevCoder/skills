@@ -19,7 +19,7 @@ A workflow system, not a monolithic orchestrator. The repository provides compos
 - **Execution** — do bounded work with host-aware routing
 - **Review** — from read-only findings to project acceptance
 - **Specialized Workflows** — manuscript, knowledge base, learning, kanban
-- **Router** — `ask-light` recommends the next step without executing it
+- **Router** — `ask-light` recommends the next step, then begins it after approval
 
 Architecture decides *which capabilities exist and how they compose*; Skill-writing quality follows [Matt Pocock Skills](https://github.com/mattpocock/skills), and host-aware routing follows [Sol Advisor](https://github.com/DannyMac180/sol-advisor) — both as design references, not runtime dependencies.
 

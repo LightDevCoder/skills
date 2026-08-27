@@ -40,15 +40,30 @@ resolved, identify affected dependencies, then recompute the frontier.
 
 1. Separate the supplied information into known facts, user decisions, and
    fact-finding dependencies (see `ROUTING.md`).
-2. Ask only the current frontier. Keep each question tied to the decision it
-   would settle and state the meaningful options or tradeoff when context
-   provides them. Do not manufacture a fixed set or count of questions.
-3. On an answer, dynamically adjust the next frontier rather than following a
+2. Compute the **complete actionable frontier**: all open decisions whose
+   prerequisites are already settled. Ask that entire frontier as a round.
+   Number questions (`Q1`, `Q2`, ...). For decisions that can be discretized,
+   give concrete options (`A. ...`, `B. ...`, `C. ...`). Give a recommended
+   answer when evidence supports one. Always allow answers outside the listed
+   choices.
+3. Do not ask questions whose answers depend on unresolved decisions from the
+   same round; those belong to a later frontier.
+4. Accept one compact batch reply (`1B, 2A, 3C`), mixed free text, or prose.
+   Map answers to the correct questions, preserve nuance/qualifiers, mark
+   resolved decisions, leave unanswered questions open, and recompute the
+   frontier.
+5. On an answer, dynamically adjust the next frontier rather than following a
    prewritten order. An answer often settles multiple decisions or surfaces
    new ones.
-4. Return the updated internal state and a conversational projection. Recommend
+6. Return the updated internal state and a conversational projection. Recommend
    an option when the evidence supports a judgment, while preserving the user's
    decision. Pause for the reply or separately authorized fact work.
+
+## Round size
+
+Default to the complete actionable frontier. If the frontier is genuinely too
+large to present usefully, split it into coherent batches. Do not impose a
+fixed small-number limit such as one question per round.
 
 ## Stopping
 

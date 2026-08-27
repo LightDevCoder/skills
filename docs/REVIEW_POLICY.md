@@ -8,7 +8,7 @@ This policy assigns review responsibilities and evidence requirements for first-
 
 | Role | What it is | What it does | What it never does |
 | --- | --- | --- | --- |
-| **Reviewer** (`generic-review` · `code-review` · domain) | Read-only specialist; see [Reviewer contract](REVIEWER_CONTRACT.md) | Inspects a bounded target + requirements and returns normalized, evidence-backed `Findings: []` | Repairs the target, directs the Producer, changes requirements, or issues a final verdict |
+| **Reviewer** (`generic-review` · `code-review` · domain) | Read-only specialist; see the [runtime reviewer contract](../skills/review-loop/references/reviewer-contract.md) or the [human summary](REVIEWER_CONTRACT.md) | Inspects a bounded target + requirements and returns normalized, evidence-backed `Findings: []` | Repairs the target, directs the Producer, changes requirements, or issues a final verdict |
 | **`review-loop`** | Lightweight convergence engine | Resolves the reviewer, invokes it, receives findings, returns them to the Producer, re-runs the reviewer, stops when clean or at the bounded repair limit | Owns the frozen acceptance baseline or the project final `PASS`/`FAIL`/`BLOCKED` (that belongs to `project-review`) |
 | **`project-review`** | Project-level final acceptance owner | Freezes the Charter/baseline, composes the right reviewers (`generic-review` / `code-review` / domain), drives them through `review-loop`, validates dispositions, and issues the final `PASS` / `FAIL` / `BLOCKED` | Replaces reviewers' methods or invents missing acceptance criteria |
 
@@ -45,7 +45,7 @@ Self-contained validation tests for an eligible prompt-only Skill do not by them
 
 Producer evidence must identify exact commands, environment, inputs, outputs, revisions, scope, and limitations. The reviewer checks that each evidence item is correctly labeled as structural, installation, behavioral, invocation, script, or review evidence.
 
-The Producer performs repairs. Critics, when required, and Evaluators remain read-only. Every final evaluation uses a fresh, independent Evaluator with the frozen acceptance source and admissible evidence. Reviewers ([REVIEWER_CONTRACT.md](REVIEWER_CONTRACT.md)) follow the normalized input packet (`Target` · `Requirements` · `Relevant context` · `Previous findings`) and return `id`/`severity`/`location`/`problem`/`reason` (+ optional `suggestion`) — never `PASS`/`FAIL`/`BLOCKED`. The fast track omits the separate Critic stage.
+The Producer performs repairs. Critics, when required, and Evaluators remain read-only. Every final evaluation uses a fresh, independent Evaluator with the frozen acceptance source and admissible evidence. Reviewers follow the [runtime reviewer contract](../skills/review-loop/references/reviewer-contract.md) (human summary: [REVIEWER_CONTRACT.md](REVIEWER_CONTRACT.md)) for the normalized input packet (`Target` · `Requirements` · `Relevant context` · `Previous findings`) and return `id`/`severity`/`location`/`problem`/`reason` (+ optional `suggestion`) — never `PASS`/`FAIL`/`BLOCKED`. The fast track omits the separate Critic stage.
 
 ## Bounded repair and verdicts
 

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "internalState": [
     "currentUnderstanding",
     "newlyResolvedDecisions",
@@ -9,10 +9,15 @@
     "nextStep"
   ],
   "projection": {
-    "frontierDecisionLimit": 1,
+    "frontierAsRound": true,
+    "numberedQuestions": true,
+    "multipleIndependentQuestions": true,
+    "choicesWhenDiscretizable": true,
+    "recommendWhenSupported": true,
+    "batchRepliesSupported": true,
+    "allowFreeTextAnswers": true,
     "acknowledgeLatestEvidence": true,
     "showMeaningfulTradeoffs": true,
-    "recommendWhenSupported": true,
     "preserveUserDecision": true
   },
   "completion": {

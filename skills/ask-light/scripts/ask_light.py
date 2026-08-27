@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
-"""Deterministic Light router: semantic map first, host availability second."""
+"""Deterministic Light router: semantic map first, host availability second.
+
+This helper is read-only during the recommendation phase. The Skill itself
+owns the approval-to-execution transition after the user agrees.
+"""
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -12,6 +17,12 @@ from typing import Any
 MAP_PATH = Path(__file__).resolve().parents[1] / "references" / "light-skill-map.json"
 LIGHT_CATEGORIES = {"first-party", "light-first-party"}
 INVOCATION_CONTROLS = {"explicit-only", "model-callable", "either"}
+HOST_SKILL_ROOTS = (
+    Path.home() / ".agents" / "skills",
+    Path.home() / ".codex" / "skills",
+    Path.home() / ".claude" / "skills",
+    Path.home() / ".config" / "skills",
+)
 
 
 def load_map(path: Path = MAP_PATH) -> dict[str, Any]:
@@ -19,7 +30,7 @@ def load_map(path: Path = MAP_PATH) -> dict[str, Any]:
     names = [item["name"] for item in data["skills"]]
     if len(names) != len(set(names)):
         raise ValueError("Light Skill Map contains duplicate names")
-    duplicated_metadata = {"category", "role", "invocation"}
+    duplicated_metadata = {"role", "invocation"}
     for item in data["skills"]:
         if duplicated_metadata.intersection(item):
             raise ValueError(f"Light Skill Map duplicates package metadata for {item['name']}")
@@ -31,6 +42,10 @@ def load_map(path: Path = MAP_PATH) -> dict[str, Any]:
                 raise ValueError(f"workflow {recipe['id']} step is missing handoff fields: {', '.join(sorted(missing))}")
             if step["skill"] not in names:
                 raise ValueError(f"workflow {recipe['id']} references an unknown Light Skill: {step['skill']}")
+    families = data.get("skillFamilies")
+    if families:
+        if set(families) != set(names):
+            raise ValueError("Light Skill Map families do not match the skill list")
     return data
 
 
@@ -192,6 +207,55 @@ def discover(roots: list[dict[str, Any]], skill_map: dict[str, Any], policy: dic
     return candidates, gaps, metadata_reads
 
 
+def _collection_root_candidates(cwd: Path | None = None) -> list[Path]:
+    candidates: list[Path] = []
+    start = Path.cwd() if cwd is None else cwd
+    for base in [start, *list(start.parents)[:5]]:
+        root = base / "skills"
+        if root.is_dir() and (root / "ask-light" / "SKILL.md").is_file() and (root / "socratic" / "SKILL.md").is_file():
+            candidates.append(root)
+    script_collection = Path(__file__).resolve().parents[2]
+    if (script_collection / "ask-light" / "SKILL.md").is_file() and (script_collection / "socratic" / "SKILL.md").is_file():
+        candidates.append(script_collection)
+    for host_root in HOST_SKILL_ROOTS:
+        if host_root.is_dir() and (host_root / "ask-light" / "SKILL.md").is_file():
+            candidates.append(host_root)
+        elif (host_root / "light-skill-map.json").is_file():
+            candidates.append(host_root)
+    return candidates
+
+
+def discover_roots(cwd: Path | None = None) -> list[dict[str, Any]]:
+    """Discover Light first-party roots without requiring caller-supplied roots."""
+    explicit = os.environ.get("LIGHT_SKILL_ROOTS", "").strip()
+    roots: list[dict[str, Any]] = []
+    if explicit:
+        try:
+            parsed = json.loads(explicit)
+            if isinstance(parsed, list):
+                for item in parsed:
+                    if isinstance(item, dict):
+                        roots.append(item)
+                    elif isinstance(item, str):
+                        roots.append({"category": "first-party", "path": item})
+        except json.JSONDecodeError:
+            # A plain path-separated list is also accepted.
+            for item in explicit.split(os.pathsep):
+                if item:
+                    roots.append({"category": "first-party", "path": item})
+    seen: set[Path] = set()
+    for candidate in _collection_root_candidates(cwd):
+        try:
+            resolved = candidate.resolve()
+        except OSError:
+            continue
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        roots.append({"category": "first-party", "path": str(resolved)})
+    return roots
+
+
 def validate_selected(candidate: dict[str, Any]) -> tuple[int, int, str]:
     package = Path(candidate["packagePath"])
     skill = package / "SKILL.md"
@@ -239,7 +303,21 @@ def invocation_compatible(invocation_type: str, control: str) -> bool:
 
 
 def base_result(mode: str, status: str, gaps: list[str]) -> dict[str, Any]:
-    return {"mode": mode, "status": status, "skill": "", "source": "", "reason": "", "invocation": "", "confidence": "low", "alternative": None, "gaps": gaps, "reads": {"metadata": 0, "bodies": 0, "references": 0}, "candidates": [], "execution": "recommendation only; nothing was invoked, installed, or orchestrated"}
+    return {
+        "mode": mode,
+        "status": status,
+        "skill": "",
+        "source": "",
+        "reason": "",
+        "invocation": "",
+        "confidence": "low",
+        "alternative": None,
+        "gaps": gaps,
+        "reads": {"metadata": 0, "bodies": 0, "references": 0},
+        "candidates": [],
+        "next": "awaiting-approval",
+        "execution": "recommendation phase was read-only; execution begins only after explicit user approval",
+    }
 
 
 def workflow_base_result(status: str, gaps: list[str]) -> dict[str, Any]:
@@ -253,6 +331,46 @@ def workflow_base_result(status: str, gaps: list[str]) -> dict[str, Any]:
         "finalAuthority": "",
     })
     return result
+
+
+def navigate_result(skill_map: dict[str, Any], query: str, host: str = "codex") -> dict[str, Any]:
+    text = query.lower()
+    families = skill_map.get("skillFamilies", {})
+    matches: list[dict[str, Any]] = []
+    for entry in skill_map["skills"]:
+        name = entry["name"]
+        family = families.get(name, "")
+        haystack = f"{name} {family}".lower()
+        if text in name.lower() or text in family or any(alias in haystack for alias in re.split(r"[^a-z0-9]+", text) if alias):
+            matches.append({
+                "name": name,
+                "family": family,
+                "description": entry.get("patterns", [])[:1],
+                "invocation": invocation(name, host),
+            })
+    if not matches:
+        return {
+            "mode": "navigate",
+            "status": "NEED-INPUT",
+            "skill": "",
+            "skills": [],
+            "reason": "",
+            "invocation": "",
+            "gaps": [f"No Light Skill family matched: {query}"],
+            "next": "awaiting-approval",
+            "execution": "recommendation phase was read-only; execution begins only after explicit user approval",
+        }
+    return {
+        "mode": "navigate",
+        "status": "RECOMMEND",
+        "skill": matches[0]["name"] if len(matches) == 1 else "",
+        "skills": matches[:10],
+        "reason": f"Light Skill families matched: {', '.join(item['family'] for item in matches[:5])}",
+        "invocation": invocation(matches[0]["name"], host) if len(matches) == 1 else "",
+        "gaps": [],
+        "next": "awaiting-approval",
+        "execution": "recommendation phase was read-only; execution begins only after explicit user approval",
+    }
 
 
 def next_result(roots: list[dict[str, Any]], context: dict[str, Any], host: str, skill_map: dict[str, Any]) -> dict[str, Any]:
@@ -297,7 +415,22 @@ def next_result(roots: list[dict[str, Any]], context: dict[str, Any], host: str,
     evidence = logical["matchedPatterns"] + logical["matchedPrecedence"]
     if logical["matchedTaskKind"]:
         evidence.append(f"taskKind:{logical['matchedTaskKind']}->{logical['name']}")
-    return {"mode": "next", "status": "RECOMMEND", "skill": selected["name"], "source": f"first-party: {selected['packagePath']}", "reason": f"Light Skill Map matched: {', '.join(evidence)}", "invocation": invocation(selected["name"], policy["host"]), "confidence": "high", "alternative": None, "gaps": gaps, "reads": {"metadata": metadata_reads, "bodies": body_reads, "references": reference_reads}, "candidates": candidates, "execution": "recommendation only; nothing was invoked, installed, or orchestrated"}
+    result = {
+        "mode": "next",
+        "status": "RECOMMEND",
+        "skill": selected["name"],
+        "source": f"first-party: {selected['packagePath']}",
+        "reason": f"Light Skill Map matched: {', '.join(evidence)}",
+        "invocation": invocation(selected["name"], policy["host"]),
+        "confidence": "high",
+        "alternative": None,
+        "gaps": gaps,
+        "reads": {"metadata": metadata_reads, "bodies": body_reads, "references": reference_reads},
+        "candidates": candidates,
+        "next": "awaiting-approval",
+        "execution": "recommendation phase was read-only; execution begins only after explicit user approval",
+    }
+    return result
 
 
 def workflow_result(roots: list[dict[str, Any]], context: dict[str, Any], host: str, skill_map: dict[str, Any]) -> dict[str, Any]:
@@ -397,17 +530,23 @@ def workflow_result(roots: list[dict[str, Any]], context: dict[str, Any], host: 
     return result
 
 
-def route(roots: list[dict[str, Any]], context: dict[str, Any], host: str = "codex", mode: str = "next") -> dict[str, Any]:
+def route(roots: list[dict[str, Any]] | None, context: dict[str, Any], host: str = "codex", mode: str = "next") -> dict[str, Any]:
     skill_map = load_map()
-    return workflow_result(roots, context, host, skill_map) if mode == "workflow" else next_result(roots, context, host, skill_map)
+    if roots is None or not roots:
+        roots = discover_roots()
+    if mode == "workflow":
+        return workflow_result(roots, context, host, skill_map)
+    if mode == "navigate":
+        return navigate_result(skill_map, str(context.get("goal", "")), host)
+    return next_result(roots, context, host, skill_map)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--roots-json", required=True)
+    parser.add_argument("--roots-json", default="[]")
     parser.add_argument("--context-json", required=True)
     parser.add_argument("--host-name", default="codex")
-    parser.add_argument("--mode", choices=("next", "workflow"), default="next")
+    parser.add_argument("--mode", choices=("next", "workflow", "navigate"), default="next")
     args = parser.parse_args()
     print(json.dumps(route(json.loads(args.roots_json), json.loads(args.context_json), args.host_name, args.mode), ensure_ascii=False, indent=2))
     return 0

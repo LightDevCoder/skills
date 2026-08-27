@@ -35,7 +35,7 @@ class ProjectClarifyContractTest(unittest.TestCase):
             self.assertIn(marker, combined)
         # socratic is the decision engine and questions stay frontier-scoped
         self.assertIn("socratic", skill)
-        self.assertIn("unblocked, user-owned frontier", skill)
+        self.assertIn("frontier as a round", skill)
 
     def test_invocation_boundaries_and_no_implicit_write_are_explicit(self) -> None:
         skill, metadata, _ = read_contract()

@@ -26,7 +26,7 @@
 | Engine | [`review-loop`](../../../skills/review-loop/SKILL.md) | model-invoked（支持手动） | 解析 reviewer → 调用 → 收 findings → 交 Producer → 重跑；干净或达上限即停 |
 | Acceptance | [`project-review`](../../../skills/project-review/SKILL.md) | model-invoked（支持手动） | 冻结 Charter/baseline、组合 reviewer、经 `review-loop` 驱动并签发最终 `PASS`/`FAIL`/`BLOCKED` |
 
-见 [Reviewer 契约](../../../docs/REVIEWER_CONTRACT.zh-CN.md) 的归一化输入包（`Target`·`Requirements`·`Relevant context`·`Previous findings`）与结果（`Findings: []`）。
+见 [运行时 reviewer 契约](../../../skills/review-loop/references/reviewer-contract.md)（人类摘要：[Reviewer 契约](../../../docs/REVIEWER_CONTRACT.zh-CN.md)）的归一化输入包（`Target`·`Requirements`·`Relevant context`·`Previous findings`）与结果（`Findings: []`）。
 
 ## Entry → Handoff → Stop
 

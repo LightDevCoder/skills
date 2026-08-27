@@ -1,7 +1,7 @@
 interface:
   display_name: "Clarify"
-  short_description: "Continuously clarify an ambiguous idea"
-  default_prompt: "Use $clarify to start one conversational clarification session and continue through normal replies until shared understanding is confirmed."
+  short_description: "Continuously clarify an ambiguous idea in frontier rounds"
+  default_prompt: "Use $clarify to start one conversational clarification session, ask the current frontier as a round, and continue through normal replies until shared understanding is confirmed."
 
 policy:
   allow_implicit_invocation: false

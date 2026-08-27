@@ -27,8 +27,10 @@ Separate the state into:
 - fact or experiment dependencies; and
 - an unblocked question frontier.
 
-Only the frontier may be asked. An unresolved fact, an unavailable capability,
-or an unstarted authorized call blocks its downstream decision.
+Only the frontier may be asked. Present the complete actionable frontier as a
+round: number the questions (`Q1`, `Q2`, ...), add options and recommendations
+when appropriate, and accept batch replies. An unresolved fact, an unavailable
+capability, or an unstarted authorized call blocks its downstream decision.
 
 ## Capability-call ledger
 

@@ -44,6 +44,13 @@ class ClarifyPublicContractTest(unittest.TestCase):
         self.assertFalse(SESSION.POLICY["autoChainUserInvokedSkills"])
         self.assertEqual(SESSION.POLICY["factWork"], "report-only")
 
+    def test_frontier_is_presented_as_a_round_with_batch_replies(self) -> None:
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        workflow = (ROOT / "references" / "WORKFLOW.md").read_text(encoding="utf-8")
+        combined = skill + workflow
+        for token in ("Q1", "Q2", "1B, 2A, 3C", "complete current frontier as a round"):
+            self.assertIn(token, combined)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

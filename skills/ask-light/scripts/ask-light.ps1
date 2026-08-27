@@ -1,9 +1,9 @@
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $true)][string]$RootsJson,
+    [string]$RootsJson = '[]',
     [Parameter(Mandatory = $true)][string]$ContextJson,
     [string]$HostName = 'codex',
-    [ValidateSet('next', 'workflow')][string]$Mode = 'next'
+    [ValidateSet('next', 'workflow', 'navigate')][string]$Mode = 'next'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -35,7 +35,8 @@ if ($null -eq $python) {
         gaps = @('Python 3.9 or newer is unavailable. Follow references/discovery-contract.md manually or install the declared runtime, then rerun $ask-light.')
         reads = [ordered]@{ metadata = 0; bodies = 0; references = 0 }
         candidates = @()
-        execution = 'recommendation only; nothing was invoked, installed, or orchestrated'
+        next = 'awaiting-approval'
+        execution = 'recommendation phase was read-only; execution begins only after explicit user approval'
     }
     if ($Mode -eq 'workflow') {
         $blocked.workflow = ''

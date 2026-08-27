@@ -88,6 +88,33 @@ def validate_config(config: dict[str, Any]) -> None:
                 validate_render_text(f"{key}[{index}]", value)
 
 
+def inspect_capabilities(
+    relevant_skills: list[str],
+    roots: Optional[list[Path]] = None,
+    unavailable: Optional[list[str]] = None,
+) -> list[dict[str, Any]]:
+    """Classify declared relevant Light capabilities without over-claiming.
+
+    Statuses are available, unavailable, or unknown. A missing root means
+    unknown, never a silent promotion to available.
+    """
+    unavailable = unavailable or []
+    results: list[dict[str, Any]] = []
+    for name in relevant_skills:
+        status = "unknown"
+        reason = "no capability root supplied; availability not verified"
+        if roots:
+            matches = [root / name / "SKILL.md" for root in roots if (root / name / "SKILL.md").is_file()]
+            if name in unavailable:
+                status, reason = "unavailable", "declared unavailable by the active host"
+            elif matches:
+                status, reason = "available", "readable SKILL.md found in supplied capability root"
+            else:
+                status, reason = "unavailable", "no readable SKILL.md found in supplied capability root"
+        results.append({"skill": name, "status": status, "reason": reason})
+    return results
+
+
 def csv(values: list[Any]) -> str:
     return ", ".join(str(value) for value in values)
 
@@ -351,11 +378,17 @@ def commit_prepared(root: Path, prepared: dict[Path, tuple[str, str]]) -> None:
         raise
 
 
-def bootstrap(root: Path, config: dict[str, Any]) -> dict[str, Any]:
+def bootstrap(
+    root: Path,
+    config: dict[str, Any],
+    capability_roots: Optional[list[Path]] = None,
+    unavailable_capabilities: Optional[list[str]] = None,
+) -> dict[str, Any]:
     root = root.resolve()
     if not root.is_dir():
         raise ValueError(f"project root does not exist: {root}")
     validate_config(config)
+    capabilities = inspect_capabilities(config["relevantSkills"], capability_roots, unavailable_capabilities)
     project = safe_target(root, PROJECT_PATH, reject_symlink=True)
     tracker = safe_target(root, TRACKER_PATH, reject_symlink=True)
     instruction, instruction_conflict = instruction_target(root, config["instructionFile"])
@@ -382,6 +415,7 @@ def bootstrap(root: Path, config: dict[str, Any]) -> dict[str, Any]:
         "instructionTarget": str(instruction),
         "paths": statuses,
         "conflicts": conflicts,
+        "capabilities": capabilities,
     }
 
 
@@ -389,8 +423,12 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--project-root", required=True, type=Path)
     parser.add_argument("--config-json", required=True)
+    parser.add_argument("--capability-roots-json", default="[]")
+    parser.add_argument("--unavailable-capabilities-json", default="[]")
     args = parser.parse_args()
-    print(json.dumps(bootstrap(args.project_root, json.loads(args.config_json)), indent=2))
+    roots = [Path(value) for value in json.loads(args.capability_roots_json)]
+    unavailable = json.loads(args.unavailable_capabilities_json)
+    print(json.dumps(bootstrap(args.project_root, json.loads(args.config_json), roots, unavailable), indent=2))
     return 0
 
 

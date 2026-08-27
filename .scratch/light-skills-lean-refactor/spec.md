@@ -1,6 +1,6 @@
 # SPEC: Light Skills Lean Architecture Refactor
 
-**Status:** ACTIVE
+**Status:** SUPERSEDED — execution authority retired by `.scratch/light-skills-core-flow-repair/spec.md` (SPEC-light-skills-core-workflow-socratic-repair)
 **Repository:** `LightDevCoder/skills`
 **Primary reference:** `mattpocock/skills`
 **Replaces:** `.scratch/light-skills-refactor/spec.md` and its issue set

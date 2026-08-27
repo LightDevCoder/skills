@@ -67,9 +67,10 @@ artifact contract remains authoritative for its runtime output.
 
 Check that every created path is under the target root, each path exists, the
 selected instruction file retained pre-existing content, and only one
-initialization section exists. Check that each named Skill has discoverable
-metadata; report unavailable capabilities rather than claiming they work.
-Record skipped checks and optional documents explicitly.
+initialization section exists. Check each declared relevant capability and
+classify it as `available`, `unavailable`, or `unknown`; do not silently
+promote `unknown` to `available`. Record skipped checks and optional documents
+explicitly.
 
 ## Capability and invocation boundary
 

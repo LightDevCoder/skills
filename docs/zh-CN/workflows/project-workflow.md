@@ -41,7 +41,7 @@ release-workflow
 ## 未知或专业入口
 
 - 无项目上下文的模糊想法 → [`clarify`](../../../skills/clarify/SKILL.md)（standalone，经 `socratic` 后停止）。
-- 不知入口 → [`ask-light`](../../../skills/ask-light/SKILL.md) `next` — 一个推荐后停止。
+- 不知入口 → [`ask-light`](../../../skills/ask-light/SKILL.md) `next` — 一个推荐，批准后开始执行。
 - 文稿 / 知识库 / 看板 / 学习 → [specialized-workflows](specialized-workflows.md)。
 
-组合是显式的：路由只推荐，执行由用户显式调用。`SKILL.md` 始终是契约。
+组合是显式的：路由推荐，用户批准，被接受的 Skill 开始执行。`SKILL.md` 始终是契约。

@@ -23,7 +23,7 @@
 
 ## 2. 新项目初始化
 
-`ask-light`（user-invoked）收 goal/project type/task kind/artifacts/blockers/availability/invocation control，返回下一 Skill/recipe 后停止。随后 `project-init`（user-invoked）收确认 preset 与 root，写入最小指令并验证后停止。下一能力由用户选，最终验收归 `project-review`。
+`ask-light`（user-invoked）收 goal/project type/task kind/artifacts/blockers/availability/invocation control，返回下一 Skill/recipe；用户批准后开始被接受的 Skill。随后 `project-init`（user-invoked）收确认 preset 与 root，写入最小指令并验证后停止。下一能力由用户选，最终验收归 `project-review`。
 
 ## 3. 文稿项目
 

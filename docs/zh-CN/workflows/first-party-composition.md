@@ -15,13 +15,16 @@ Agent 已有 goal、artifacts、blockers、project type、task kind、availabili
     $ask-light
           |
           v
-一个建议 + host 适用的 invocation
+检查项目阶段 → 一个建议 + 理由
           |
           v
-用户显式选择下一 Skill
+用户批准（yes / 可以 / go ahead）
+          |
+          v
+在当前对话中开始被接受的 Skill
 ```
 
-可能选择 `project-init`、`project-clarify`、`clarify`、`decision-map`、`research`、`prototype`、`project-spec`、`project-tickets`、`implement`、`diagnosing-bugs`、`project-review`、`review-loop`、`learn-anything`、`recap`、`manuscript-ops` 或 `release-workflow`。其中 `recap` 仅在用户显式需要当前 session 一行摘要时适用。`ask-light` 在建议后停止，不执行、安装、delegate、创建 workflow state 或静默串联 user-invoked Skill；选中 Skill 保留自己的契约与证据边界。
+可能选择 `project-init`、`project-clarify`、`clarify`、`decision-map`、`research`、`prototype`、`project-spec`、`project-tickets`、`implement`、`diagnosing-bugs`、`project-review`、`review-loop`、`learn-anything`、`recap`、`manuscript-ops` 或 `release-workflow`。其中 `recap` 仅在用户显式需要当前 session 一行摘要时适用。`ask-light` 在用户批准前停止且不执行、安装、delegate、创建 workflow state 或静默串联 user-invoked Skill；用户以 `yes`/`可以`/`go ahead` 批准后，在当前对话中开始被接受的 Skill（Codex），或使用 host 支持的转换机制。选中 Skill 保留自己的契约与证据边界。
 
 ## Evidence 与状态
 

@@ -15,11 +15,14 @@ exit, or a switch to another workflow.
 ## Execution
 
 1. Call the model-invoked `socratic` engine to maintain internal decision state.
-2. Present only the engine's conversational projection: brief acknowledgement,
-   one useful frontier decision with meaningful options, a recommendation when
-   context supports one, and one question.
-3. Treat the next normal user message as evidence, call `socratic` again, and
-   continue until the completion gate.
+2. Present the engine’s conversational projection: a brief acknowledgement and
+   the **current frontier as a round**. Ask multiple independent questions when
+   they exist, number them (`Q1`, `Q2`, ...), give concrete choices for
+   decisions that can be discretized, and include a recommendation when
+   context supports one.
+3. Accept a compact batch reply (`1B, 2A, 3C`), mixed free text, or normal
+   prose. Treat the next normal user message as evidence, call `socratic`
+   again, and continue until the completion gate.
 
 If a fact-finding gap blocks the frontier, report the gap and the capability
 that would resolve it (`research`, `prototype`, or `to-questionnaire`); do not
@@ -39,7 +42,7 @@ stop cleanly or recommend one separately invoked next Skill. Do not auto-chain.
 clarify → socratic
 ```
 
-`clarify` composes `socratic`; it does not copy the engine's state or unknown
+`clarify` composes `socratic`; it does not copy the engine’s state or unknown
 routing contract. Session transitions are specified by
 [session_state.py](scripts/session_state.py), full turn mechanics are in
 [WORKFLOW.md](references/WORKFLOW.md), and examples are in

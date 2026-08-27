@@ -70,6 +70,12 @@ class FunctionalClosureBoundaryTest(unittest.TestCase):
         self.assertTrue((ROOT / "skills/socratic/references/ROUTING.md").is_file())
         self.assertFalse((ROOT / "skills/project-review/references/reviewer-contract.md").exists())
         self.assertTrue((ROOT / "skills/review-loop/references/reviewer-contract.md").is_file())
+        docs_contract = (ROOT / "docs/REVIEWER_CONTRACT.md").read_text(encoding="utf-8")
+        self.assertIn("skills/review-loop/references/reviewer-contract.md", docs_contract)
+        self.assertNotIn("## Input packet", docs_contract)
+        zh_contract = (ROOT / "docs/REVIEWER_CONTRACT.zh-CN.md").read_text(encoding="utf-8")
+        self.assertIn("skills/review-loop/references/reviewer-contract.md", zh_contract)
+        self.assertNotIn("## 输入包", zh_contract)
 
     def test_historical_material_is_explicitly_runtime_optional(self) -> None:
         for path in (ROOT / "skills/review-loop/references/migration.md", ROOT / "skills/project-review/references/migration.md"):

@@ -36,9 +36,11 @@ tickets, or run later workflow stages.
    The helper requires Python 3.9 or newer; if unavailable, report `BLOCKED`
    before any write instead of emulating the transaction manually.
 5. **Validate and report.** Confirm every created path is inside the target
-   root, the managed blocks are unique, existing text is preserved, and named
-   capabilities are readable or marked unavailable. Report the exact created,
-   updated, and preserved paths, then stop.
+   root, the managed blocks are unique, existing text is preserved, and each
+   declared relevant capability is classified as `available`, `unavailable`,
+   or `unknown`. Never silently promote `unknown` to `available`. Report the
+   exact created, updated, and preserved paths, the capability statuses, and
+   then stop.
 
 ## References
 

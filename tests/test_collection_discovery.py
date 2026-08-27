@@ -376,7 +376,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     workflow_map = read(root, "skills/ask-light/references/light-skill-map.json")
     c.check("$ask-light next" in workflow_text and "$ask-light workflow" in workflow_text, "ask-light must document both explicit modes.")
     c.check("entryCondition" in workflow_text and "missing dependency" in workflow_text and "finalAuthority" in workflow_text, "ask-light workflow output contract is incomplete.")
-    c.check('choices=("next", "workflow")' in workflow_script and '"workflows"' in workflow_map, "ask-light router lacks explicit workflow mode implementation.")
+    c.check('choices=("next", "workflow", "navigate")' in workflow_script and '"workflows"' in workflow_map and '"skillFamilies"' in workflow_map, "ask-light router lacks explicit workflow/navigation mode implementation.")
     c.check(bool(re.search(r"allow_implicit_invocation:\s*false", read(root, "skills/learn-anything/agents/openai.yaml"))), "learn-anything must declare explicit-only metadata policy.")
     c.check(bool(re.search(r"allow_implicit_invocation:\s*false", read(root, "skills/recap/agents/openai.yaml"))), "recap must declare explicit-only metadata policy.")
 

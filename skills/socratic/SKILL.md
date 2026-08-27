@@ -1,6 +1,6 @@
 ---
 name: socratic
-description: Maintain a decision-owned clarification state and ask only the currently unblocked user decisions. Use as a model-invoked engine inside a clarification conversation; do not use it to research facts, perform experimental work, or write a formal specification.
+description: Maintain a decision-owned clarification state and ask the current actionable frontier as a round of independent questions with choices and recommendations. Use as a model-invoked engine inside a clarification conversation; do not use it to research facts, perform experimental work, or write a formal specification.
 ---
 
 # Socratic
@@ -14,14 +14,22 @@ Use it when a clarification wrapper (`clarify`, `project-clarify`,
 1. Receive the latest answer as evidence.
 2. Update `current understanding`.
 3. Mark newly resolved decisions.
-4. Recompute dependencies and the frontier.
-5. Ask only the currently unblocked frontier decisions.
-6. Return internal state plus a lightweight conversational projection to the
-   calling wrapper.
+4. Recompute dependencies and the **frontier**: every meaningful user decision
+   whose prerequisites are already settled.
+5. Ask the complete actionable frontier as a round, not one question at a time.
+6. Return internal state plus a conversational projection to the calling
+   wrapper.
 
-Ask with dynamic follow-up, never a fixed questionnaire. Facts are not user
-decisions: inspectable, researchable, or testable gaps are dependencies, not
-choices for the user to invent.
+Each round normally contains multiple independent questions when multiple
+frontier decisions exist. Number them (`Q1`, `Q2`, ...). Provide concrete
+options when decisions can reasonably be discretized, and include a
+recommendation when evidence supports one; the user owns the decision and may
+always answer outside the listed choices. Accept a compact batch reply
+(`1B, 2A, 3C`), mixed free text, or normal prose, and mark only the answered
+questions resolved.
+
+Facts are not user decisions: inspectable, researchable, or testable gaps are
+dependencies, not choices for the user to invent.
 
 ## Internal state
 
@@ -34,7 +42,7 @@ Newly resolved decisions:
 Open decisions:
 Dependencies and fact-finding gaps:
 Current frontier:
-Next step: wait for decision | authorize fact work | synthesize
+Next step: ask-round | wait for decision | authorize fact work | synthesize
 ```
 
 A blocked dependency keeps its downstream decision out of the frontier. An
@@ -44,16 +52,19 @@ conclusion.
 
 ## Conversational projection
 
-A normal user-facing turn contains a brief acknowledgement, one useful
-frontier decision, its meaningful options/tradeoffs, and one question. Include
-a recommendation when the current evidence supports a judgment; label it as a
-recommendation and leave the decision with the user. Expose the detailed state
-only when it resolves ambiguity, the user asks for it, or `decision-map` needs
-durable state.
+A normal user-facing turn contains a brief acknowledgement and the current
+frontier round: numbered questions, meaningful options/tradeoffs, and a
+recommendation for each question when evidence supports one. Expose the
+detailed state only when it resolves ambiguity, the user asks for it, or
+`decision-map` needs durable state.
 
 When no decision or dependency remains, return a concise synthesis for shared-
 understanding confirmation. `confirmed` means done; a correction updates state
 and recomputes the frontier.
+
+The machine-readable helper in [frontier.py](scripts/frontier.py) models
+frontier computation, batch parsing, and next-step classification for tests
+and deterministic checks.
 
 ## Unknown routing
 

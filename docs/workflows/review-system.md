@@ -26,7 +26,7 @@ This document explains the **Review** composition: reviewer vs engine vs accepta
 | Engine | [`review-loop`](../../skills/review-loop/SKILL.md) | model-invoked (manual entry ok) | resolves reviewer → invokes → receives findings → returns repair to Producer → re-runs reviewer; stops when clean or at bounded limit |
 | Acceptance | [`project-review`](../../skills/project-review/SKILL.md) | model-invoked (manual ok) | freezes Charter/baseline, composes reviewers, drives them through `review-loop`, validates dispositions, issues final `PASS`/`FAIL`/`BLOCKED` |
 
-See [Reviewer contract](../../docs/REVIEWER_CONTRACT.md) for the normalized input packet (`Target` · `Requirements` · `Relevant context` · `Previous findings`) and result shape (`Findings: []`).
+See the [runtime reviewer contract](../../skills/review-loop/references/reviewer-contract.md) (human summary: [Reviewer contract](../../docs/REVIEWER_CONTRACT.md)) for the normalized input packet (`Target` · `Requirements` · `Relevant context` · `Previous findings`) and result shape (`Findings: []`).
 
 ## Entry → Handoff → Stop
 

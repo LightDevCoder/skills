@@ -8,7 +8,7 @@
 
 | 角色 | 是什么 | 做什么 | 绝不做 |
 | --- | --- | --- | --- |
-| **Reviewer**（`generic-review` · `code-review` · 领域 reviewer） | 只读 specialist；见 [Reviewer 契约](REVIEWER_CONTRACT.zh-CN.md) | 检查有界 target + requirements，返回规范化 `Findings: []` | 修复目标、指挥 Producer、改需求或签发 verdict |
+| **Reviewer**（`generic-review` · `code-review` · 领域 reviewer） | 只读 specialist；见 [运行时 reviewer 契约](../skills/review-loop/references/reviewer-contract.md) 或 [人类摘要](REVIEWER_CONTRACT.zh-CN.md) | 检查有界 target + requirements，返回规范化 `Findings: []` | 修复目标、指挥 Producer、改需求或签发 verdict |
 | **`review-loop`** | 轻量收敛引擎 | 解析 reviewer、调用、收 findings、交回 Producer、重跑，干净或达 repair 上限时停止 | 拥有冻结 baseline 或项目最终 `PASS`/`FAIL`/`BLOCKED`（属 `project-review`） |
 | **`project-review`** | 项目级最终验收拥有者 | 冻结 Charter/baseline、组合 reviewer（`generic-review`/`code-review`/领域）、经 `review-loop` 驱动收敛并签发最终 `PASS`/`FAIL`/`BLOCKED` | 替代 reviewer 方法或捏造缺失的验收标准 |
 
@@ -33,7 +33,7 @@
 
 ## 证据与独立性
 
-Producer Evidence 须写明精确命令、环境、输入输出、revision、范围与限制。 reviewer 按 [REVIEWER_CONTRACT.md](REVIEWER_CONTRACT.zh-CN.md) 的输入包（`Target`·`Requirements`·`Relevant context`·`Previous findings`）返回 `id`/`severity`/`location`/`problem`/`reason`（可选 `suggestion`），绝不直接写 `PASS`/`FAIL`/`BLOCKED`。Producer 负责修复；Evaluator 须 fresh independent。快速通道省略单独 Critic；完整路径需要 one fresh independent Evaluator with the frozen baseline and admissible evidence。
+Producer Evidence 须写明精确命令、环境、输入输出、revision、范围与限制。 reviewer 按 [运行时 reviewer 契约](../skills/review-loop/references/reviewer-contract.md)（人类摘要：[REVIEWER_CONTRACT.zh-CN.md](REVIEWER_CONTRACT.zh-CN.md)）的输入包（`Target`·`Requirements`·`Relevant context`·`Previous findings`）返回 `id`/`severity`/`location`/`problem`/`reason`（可选 `suggestion`），绝不直接写 `PASS`/`FAIL`/`BLOCKED`。Producer 负责修复；Evaluator 须 fresh independent。快速通道省略单独 Critic；完整路径需要 one fresh independent Evaluator with the frozen baseline and admissible evidence。
 
 ## Repair、verdict 与边界
 

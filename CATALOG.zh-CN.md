@@ -33,8 +33,8 @@
 
 ### ask-light
 
-- **作用：** 通过 Light 自有语义地图判断意图，独立验证 host availability，再推荐一个下一 Skill 或有边界 recipe。
-- **调用：** 仅 user-invoked；永不执行推荐结果。
+- **作用：** 作为 Light 工作流顾问/导航/router：检查项目与工作流状态，推荐下一步 Skill 并给出理由，用户批准后开始执行。
+- **调用：** 仅 user-invoked；批准前只读，批准后开始被接受的 Skill。
 - **包：** [skills/ask-light/](skills/ask-light/)
 - **状态：** 第一方已准入；REFACTOR（在完整 Skill map 建好后最后构建）。
 - **证据：** [skills/ask-light/tests/](skills/ask-light/tests/) 与 [使用指南](docs/zh-CN/skills/ask-light.md)。
@@ -42,7 +42,7 @@
 
 ### clarify
 
-- **作用：** 一次调用启动面向模糊想法/需求/流程的连续澄清，不产生正式 SPEC。
+- **作用：** 一次调用启动面向模糊想法/需求/流程的连续澄清，不产生正式 SPEC。以一轮多问题形式询问当前 frontier，并接受批量回复。
 - **调用：** 仅 user-invoked。
 - **包：** [skills/clarify/](skills/clarify/)
 - **状态：** 第一方已准入；ADAPT（Matt `grill-me` → Light，经 `socratic`）。
@@ -159,7 +159,7 @@
 
 ### project-clarify
 
-- **作用：** 基于已检查的项目事实澄清真实未决决策，输出给 `project-spec` 的有界 handoff。
+- **作用：** 基于已检查的项目事实澄清真实未决决策，输出给 `project-spec` 的有界 handoff。采用与 `clarify` 相同的 frontier-round 交互，并注入项目证据。
 - **调用：** 仅 user-invoked。
 - **包：** [skills/project-clarify/](skills/project-clarify/)
 - **状态：** 第一方已准入；ADAPT（Matt `grill-with-docs`）。
@@ -258,7 +258,7 @@
 
 ### socratic
 
-- **作用：** 核心澄清引擎——内部 decision frontier、轻量建议与共同理解确认。
+- **作用：** 核心澄清引擎——内部 decision frontier 以一轮多问题呈现，含选项、建议、批量回复与共同理解确认。
 - **调用：** Model-invoked（供其他 Skill 调用的引擎）。
 - **包：** [skills/socratic/](skills/socratic/)
 - **状态：** 第一方已准入；ADAPT（Matt `grilling`）。

@@ -41,7 +41,8 @@ This is a *recommended* flow, not a required pipeline. Enter mid-stream when the
 ## Unknown or specialized entry
 
 - Vague idea with no project context → [`clarify`](../../skills/clarify/SKILL.md) (standalone, via `socratic`, then stop).
-- Don't know the entry → [`ask-light`](../../skills/ask-light/SKILL.md) `next` — one recommendation, then stop.
+- Don't know the entry → [`ask-light`](../../skills/ask-light/SKILL.md) `next` — one recommendation, then begin after approval.
 - Manuscript / knowledge-base / kanban / learning → [specialized-workflows](specialized-workflows.md).
 
-Composition is explicit. The router recommends; the user invokes. `SKILL.md` remains the contract.
+Composition is explicit. The router recommends; the user approves; the accepted
+Skill begins. `SKILL.md` remains the contract.

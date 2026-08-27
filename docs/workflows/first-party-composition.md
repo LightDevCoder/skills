@@ -15,10 +15,13 @@ user goal and current artifacts
         $ask-light
               |
               v
-one recommendation + host-appropriate invocation
+inspect project stage → one recommendation + reasoning
               |
               v
-user explicitly chooses the next Skill
+user approves (yes / 可以 / go ahead)
+              |
+              v
+begin the accepted Skill in the current conversation
 ~~~
 
 Possible next choices include:
@@ -38,7 +41,12 @@ Possible next choices include:
 - `$manuscript-ops` when manuscript scope, state, formats, or review gates need domain routing; or
 - `$release-workflow` when the project passed acceptance and is ready to publish.
 
-`ask-light` stops after its recommendation. It does not execute, install, delegate, create workflow state, or silently chain another user-invoked Skill. The selected Skill keeps its own contract and evidence boundary.
+`ask-light` stops after its recommendation **until the user approves**. It does
+not execute, install, delegate, create workflow state, or silently chain
+another user-invoked Skill before consent. After a normal approval, it begins
+the accepted Skill in the current conversation (Codex) or uses the
+host-supported transition mechanism. The selected Skill keeps its own contract
+and evidence boundary.
 
 ## Evidence and status
 

@@ -19,14 +19,21 @@ Do not start `clarify` from a general vague prompt — wait for the explicit
 2. Call `socratic` (model-invoked) with that context. Let it separate known
    facts, user-owned open decisions, dependencies, and the current frontier.
 3. Present the conversational projection from `socratic`: acknowledge what the
-   latest answer settled, show one frontier decision and its real tradeoffs,
-   include a recommendation when evidence supports judgment, then ask one
-   question.
-4. Keep the session active. Feed the next ordinary user reply back to
-   `socratic`, recompute the frontier, and present the next useful turn.
+   latest answer settled, show the **complete current frontier as a round**,
+   number the questions, include real tradeoffs/options, and add a
+   recommendation for each question when evidence supports judgment.
+4. Keep the session active. Accept one compact batch reply (`1B, 2A, 3C`) or
+   prose; feed the next ordinary user reply back to `socratic`, recompute the
+   frontier, and present the next round.
 5. When the engine reports no open decision or dependency, synthesize the
    shared understanding and ask for confirmation. Confirmation ends the
    session; a correction updates state and continues.
+
+## Round size
+
+Default to the complete actionable frontier. If the frontier is genuinely too
+large to present usefully, split it into coherent batches. Do not force one
+question per round.
 
 ## Boundaries
 

@@ -34,9 +34,9 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### ask-light
 
-- **Purpose:** Map intent through Light-owned routing knowledge, verify host availability separately, and recommend one next Skill or bounded recipe.
-- **When to use:** The next step is unclear; you need a router, not an executor.
-- **Invocation:** User-invoked only; never executes the recommendation.
+- **Purpose:** Act as the Light workflow advisor, navigator, and router: inspect project/workflow state, recommend the next Skill with reasoning, and begin it after user approval.
+- **When to use:** The next step is unclear; you need project-aware routing, collection navigation, or standalone routing.
+- **Invocation:** User-invoked only; read-only before approval, then begins the accepted Skill after consent.
 - **Package:** [skills/ask-light/](skills/ask-light/)
 - **Status:** Admitted first-party; REFACTOR (router built last after the full map).
 - **Evidence:** Semantic-map, provenance, availability, and top-result tests under [skills/ask-light/tests/](skills/ask-light/tests/); [user guide](docs/skills/ask-light.md).
@@ -44,7 +44,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### clarify
 
-- **Purpose:** One-invocation continuous clarification for a vague idea, requirement, or process — no formal SPEC or project workflow.
+- **Purpose:** One-invocation continuous clarification for a vague idea, requirement, or process — no formal SPEC or project workflow. Asks the current frontier as a round of independent questions and accepts batch replies.
 - **When to use:** Idea/brainstorm is foggy and no project context is required.
 - **Invocation:** User-invoked only.
 - **Package:** [skills/clarify/](skills/clarify/)
@@ -174,7 +174,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### project-clarify
 
-- **Purpose:** Clarify a real project's unresolved decisions from inspected project facts; returns a bounded handoff for `project-spec`.
+- **Purpose:** Clarify a real project's unresolved decisions from inspected project facts; returns a bounded handoff for `project-spec`. Uses the same frontier-round interaction as `clarify` with project-aware evidence.
 - **When to use:** Existing project has unclear requirements; facts already in repo should not be re-asked.
 - **Invocation:** User-invoked only.
 - **Package:** [skills/project-clarify/](skills/project-clarify/)
@@ -284,7 +284,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### socratic
 
-- **Purpose:** Core clarification engine — internal decision frontier with lightweight recommendations and shared-understanding confirmation.
+- **Purpose:** Core clarification engine — internal decision frontier with rounds of independent questions, options, recommendations, batch replies, and shared-understanding confirmation.
 - **When to use:** Underlies `clarify`, `project-clarify`, `decision-map`; not a standalone project workflow.
 - **Invocation:** Model-invoked (engine for other Skills).
 - **Package:** [skills/socratic/](skills/socratic/)

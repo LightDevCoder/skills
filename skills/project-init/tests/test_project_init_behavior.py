@@ -405,6 +405,48 @@ class ProjectInitBehaviorTest(unittest.TestCase):
                 self.assertTrue(target.is_symlink())
                 self.assertFalse((root / "AGENTS.md").exists())
 
+    def test_capability_availability_is_classified_and_not_promoted(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="project-init-cap-") as tmp:
+            root = Path(tmp)
+            capability_root = Path(tmp) / "installed-skills"
+            for name in ("project-spec", "project-tickets"):
+                (capability_root / name).mkdir(parents=True)
+                (capability_root / name / "SKILL.md").write_text(f"---\nname: {name}\ndescription: fixture\n---\n", encoding="utf-8")
+
+            cfg = config()
+            report = BOOTSTRAP.bootstrap(root, cfg, capability_roots=[capability_root])
+            statuses = {item["skill"]: item["status"] for item in report["capabilities"]}
+            for name in cfg["relevantSkills"]:
+                self.assertIn(name, statuses)
+            self.assertEqual(statuses["project-spec"], "available")
+            self.assertEqual(statuses["project-tickets"], "available")
+            self.assertEqual(statuses["implement"], "unavailable")
+            self.assertEqual(statuses["project-review"], "unavailable")
+
+    def test_capability_availability_is_unknown_without_a_capability_root(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="project-init-unknown-") as tmp:
+            root = Path(tmp)
+            report = BOOTSTRAP.bootstrap(root, config())
+            statuses = {item["skill"]: item["status"] for item in report["capabilities"]}
+            self.assertTrue(statuses)
+            self.assertTrue(all(status == "unknown" for status in statuses.values()))
+            self.assertIn("not verified", report["capabilities"][0]["reason"])
+
+    def test_explicitly_unavailable_capability_is_not_promoted(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="project-init-unavail-") as tmp:
+            root = Path(tmp)
+            capability_root = Path(tmp) / "installed-skills"
+            (capability_root / "project-spec").mkdir(parents=True)
+            (capability_root / "project-spec" / "SKILL.md").write_text("---\nname: project-spec\ndescription: fixture\n---\n", encoding="utf-8")
+            report = BOOTSTRAP.bootstrap(
+                root,
+                config(),
+                capability_roots=[capability_root],
+                unavailable_capabilities=["project-spec"],
+            )
+            statuses = {item["skill"]: item["status"] for item in report["capabilities"]}
+            self.assertEqual(statuses["project-spec"], "unavailable")
+
     def test_project_family_declares_consumption_of_bootstrap_fields(self) -> None:
         packages = ROOT.parent
         expected = {
