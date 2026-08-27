@@ -58,7 +58,8 @@ class SpecificationScenario:
             "- Authority precedence: approved source register entry 001",
             "- Target: frozen acceptance contract fixture",
             "- Scope: in-scope criteria AC-1..AC-7; exclusions: implementation and release",
-            "- Acceptance source: acceptance.md",
+            "- Source: acceptance.md",
+            "- Source revision or identity: approved source register entry 001, revision r4",
         ]) + "\n", encoding="utf-8")
         set_review_state(self.case_root, "READY", 0, "collect Producer evidence", "specification", "approved-specification-r4", "project-review Core", "specification Charter freeze")
 

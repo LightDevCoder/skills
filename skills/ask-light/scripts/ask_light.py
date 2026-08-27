@@ -12,6 +12,7 @@ import argparse
 import json
 import os
 import re
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -213,6 +214,125 @@ def _reviewed_scratch_references(source_value: str) -> list[str]:
     `.scratch` target cannot prove which effort was reviewed.
     """
     return re.findall(r"\.scratch[/\\]([A-Za-z0-9._\-]+)", source_value)
+
+
+def _reviewed_source_paths(source_value: str) -> list[str]:
+    """Extract concrete `.scratch` file/dir paths cited by the Charter Source.
+
+    Review freshness is scoped to exactly the reviewed baseline the producer
+    recorded — these cited paths — never to unrelated repository activity.
+    """
+    paths: list[str] = []
+    for token in re.findall(r"\.scratch(?:[/\\][A-Za-z0-9._\-]+)+", source_value):
+        normalized = token.replace("\\", "/").rstrip("/")
+        if normalized and normalized not in paths:
+            paths.append(normalized)
+    return paths
+
+
+def _run_git(root: Path, *args: str):
+    try:
+        return subprocess.run(
+            ["git", "-C", str(root), *args],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+_HEX_REVISION_PATTERN = re.compile(r"\b([0-9a-fA-F]{7,40})\b")
+
+
+def _resolve_recorded_revision(root: Path, revision_value: str) -> tuple[str, str]:
+    """Resolve a Charter identity to a local Git commit.
+
+    The producer convention freezes repository sources at a Git revision
+    (WORKFLOW.md: freeze the source location plus revision / immutable
+    identity). Only locally resolvable commits establish freshness; version
+    strings, timestamps, or free-form labels are treated as unverifiable and
+    fail closed rather than being guessed into equivalence.
+    """
+    for candidate in _HEX_REVISION_PATTERN.findall(revision_value):
+        resolved = _run_git(root, "rev-parse", "--verify", "--quiet", f"{candidate}^{{commit}}")
+        if resolved is not None and resolved.returncode == 0 and resolved.stdout.strip():
+            return resolved.stdout.strip(), ""
+    return "", "missing" if not revision_value.strip() else "unresolvable"
+
+
+def _classify_review_freshness(
+    root: Path,
+    charter_text: str,
+) -> tuple[str, list[str], str]:
+    """Decide whether a review verdict still applies to its recorded baseline.
+
+    Returns ("current"|"stale"|"unknown", gaps, baseline_revision). The Charter
+    froze both a Source location and a revision identity; freshness holds only
+    while every cited source still matches the recorded commit — including
+    uncommitted working-tree modifications, which `git diff <rev> -- <path>`
+    reports alongside committed ones. Anything that cannot be proven fresh is
+    "unknown"; unknown is fail-closed and never grants acceptance.
+    """
+    revision_value = _raw_field_line(charter_text, "Source revision or identity")
+    baseline, failure = _resolve_recorded_revision(root, revision_value)
+    if failure == "missing":
+        return "unknown", [
+            "The Charter records no usable `Source revision or identity`, so the "
+            "reviewed baseline cannot be anchored; ask-light does not trust the "
+            "verdict for the current state without that frozen baseline."
+        ], ""
+    inside = _run_git(root, "rev-parse", "--is-inside-work-tree")
+    if inside is None or inside.returncode != 0 or inside.stdout.strip() != "true":
+        return "unknown", [
+            "The project root is not a readable Git work tree, so the recorded "
+            "`Source revision or identity` cannot be verified against it; ask-light "
+            "fails closed instead of assuming the review is still current."
+        ], ""
+    if failure == "unresolvable":
+        return "unknown", [
+            f"The Charter's `Source revision or identity` ('{revision_value}') does not "
+            "resolve to a local Git commit, so review freshness cannot be verified; "
+            "ask-light fails closed rather than guessing an equivalence."
+        ], ""
+    source_value = _raw_field_line(charter_text, "Source")
+    cited_paths = _reviewed_source_paths(source_value)
+    if not cited_paths:
+        return "unknown", [
+            "The Charter's `Source:` line identifies no concrete `.scratch` path at the "
+            "recorded revision, so the reviewed baseline cannot be compared against the "
+            "current state; ask-light fails closed."
+        ], baseline
+    short_baseline = baseline[:12]
+    for relative in cited_paths:
+        present_at_revision = _run_git(root, "cat-file", "-e", f"{baseline}:{relative}")
+        if present_at_revision is None or present_at_revision.returncode != 0:
+            return "unknown", [
+                f"The cited reviewed source '{relative}' does not exist at the recorded "
+                f"revision ({short_baseline}), so verdict freshness cannot be established."
+            ], baseline
+        if not (root / relative).exists():
+            return "stale", [
+                f"The reviewed source '{relative}' was removed after the recorded "
+                f"revision ({short_baseline}); the frozen baseline no longer exists.",
+            ], baseline
+        difference = _run_git(root, "diff", "--quiet", baseline, "--", relative)
+        if difference is None:
+            return "unknown", [
+                f"Git could not compare '{relative}' against the recorded revision, so "
+                "review freshness is undetermined."
+            ], baseline
+        if difference.returncode not in (0, 1):
+            return "unknown", [
+                f"The freshness comparison for '{relative}' failed (git error), so it "
+                "cannot be proven that the reviewed baseline is unchanged."
+            ], baseline
+        if difference.returncode == 1:
+            return "stale", [
+                f"The reviewed source '{relative}' changed after the recorded revision "
+                f"({short_baseline}), including uncommitted working-tree changes.",
+            ], baseline
+    return "current", [], baseline
 
 
 def _project_review_dir(root: Path) -> Path | None:
@@ -583,21 +703,31 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
 
     # Acceptance/review evidence: the canonical `project-review` durable state.
     # The record is authoritative only when the Charter's Source proves it
-    # reviewed the resolved current effort. Verdicts from historical efforts
-    # are ignored for current acceptance; records of unprovable ownership fail
-    # closed. Legacy human-facing verdict files are never aggregated here.
+    # reviewed the resolved current effort AND the reviewed source still
+    # matches the Charter's frozen `Source revision or identity`. Verdicts from
+    # historical efforts are ignored for current acceptance; records whose
+    # ownership or freshness cannot be proven fail closed. Legacy human-facing
+    # verdict files are never aggregated here.
     review_dir = _project_review_dir(root)
     review_ownership = ""
     review_gaps: list[str] = []
+    review_freshness = ""
+    freshness_gaps: list[str] = []
     acceptance_paths: list[Path] = []
     if review_dir is not None:
         review_ownership, review_gaps = _classify_review_ownership(review_dir, root, current_effort)
         if review_ownership == "current":
             conclusion = review_dir / "verdict.md"
             if conclusion.is_file():
-                acceptance_paths = [conclusion]
-                evidence["hasAcceptanceEvidence"] = True
-                evidence["acceptancePaths"] = [str(conclusion.relative_to(root))]
+                # A verdict applies only to the baseline it reviewed; decide
+                # freshness before any verdict interpretation trusts it.
+                review_freshness, freshness_gaps, _baseline = _classify_review_freshness(
+                    root, _small_text(review_dir / "charter.md")
+                )
+                if review_freshness == "current":
+                    acceptance_paths = [conclusion]
+                    evidence["hasAcceptanceEvidence"] = True
+                    evidence["acceptancePaths"] = [str(conclusion.relative_to(root))]
         elif review_gaps:
             evidence["gaps"].extend(review_gaps)
 
@@ -676,7 +806,7 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
         reason = (
             "A `.project-review` durable record exists but its ownership cannot be established from the "
             "Charter's `Source:` line, so `ask-light` cannot prove the verdict belongs to the current effort. "
-            f"Fail closed: link the review by recording the reviewed SPEC path "
+            "Fail closed: link the review by recording the reviewed SPEC path "
             f"(`.scratch/{current_effort or '<effort>'}/spec.md`) in the Charter `Source:`."
         )
         evidence["stage"] = "review-ownership-unknown"
@@ -685,6 +815,40 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
         evidence["completed"] = ["Light project contract", "active SPEC", "tickets resolved"]
         evidence["missing"] = ["review ownership proven for the current effort"]
         evidence["gaps"] = [*evidence["gaps"], reason]
+        return evidence
+
+    # A verdict binds to the baseline revision it reviewed. A verified change
+    # since that revision routes back to project-review for a fresh review,
+    # whatever the old verdict said; PASS stops being accepted and FAIL/BLOCKED
+    # stop being authoritative.
+    if review_ownership == "current" and review_freshness == "stale":
+        detail = freshness_gaps[0] if freshness_gaps else "the reviewed source changed after the recorded revision."
+        reason = (
+            "The current effort has changed since the recorded project-review baseline. "
+            "The previous verdict no longer proves the current state is accepted; run a "
+            f"fresh `project-review` for the current baseline. {detail}"
+        )
+        evidence["stage"] = "review-stale"
+        evidence["skill"] = "project-review"
+        evidence["reason"] = reason
+        evidence["completed"] = ["Light project contract", "active SPEC", "tickets resolved", "recorded project-review baseline exists"]
+        evidence["missing"] = ["a fresh project-review verdict for the changed baseline"]
+        evidence["gaps"] = [*evidence["gaps"], *freshness_gaps]
+        return evidence
+
+    if review_ownership == "current" and review_freshness == "unknown":
+        reason = (
+            "A `.project-review` verdict exists for the current effort, but its freshness "
+            "cannot be verified against the frozen `Source revision or identity` baseline, "
+            "so `ask-light` neither accepts nor reports the old verdict as current. Fail closed: "
+            "re-freeze a verifiable baseline with `project-review`."
+        )
+        evidence["stage"] = "review-freshness-unknown"
+        evidence["skill"] = ""
+        evidence["reason"] = reason
+        evidence["completed"] = ["Light project contract", "active SPEC", "tickets resolved"]
+        evidence["missing"] = ["a verifiable frozen baseline behind the recorded review"]
+        evidence["gaps"] = [*evidence["gaps"], *freshness_gaps]
         return evidence
 
     if not evidence["hasAcceptanceEvidence"]:
@@ -1129,11 +1293,12 @@ def next_result(roots: list[dict[str, Any]], context: dict[str, Any], host: str,
     task_kind = str(context.get("taskKind") or "")
     # Terminating and evidence-blocked project stages are valid conclusions even
     # when no next Skill is recommended. Do not let them fall through into a
-    # generic NEED-INPUT or unrelated logical route.
+    # generic NEED-INPUT or unrelated logical route. (`review-stale` is NOT
+    # listed: its next step is clearly another project-review run.)
     if project_state.get("stage") in {
         "accepted", "tickets-unknown", "acceptance-not-passed", "acceptance-unknown",
         "ambiguous-current-effort", "contradictory-current-effort",
-        "review-ownership-unknown",
+        "review-ownership-unknown", "review-freshness-unknown",
     }:
         status = "RECOMMEND" if project_state.get("stage") == "accepted" else "NEED-INPUT"
         result = base_result("next", status, project_state.get("gaps", []))

@@ -63,7 +63,8 @@ class SoftwareScenario:
             "- Profile: software",
             "- Charter revision: approved-software-spec-r7",
             "- Fixed point: abc1234",
-            "- Acceptance source: acceptance.md",
+            "- Source: acceptance.md",
+            "- Source revision or identity: fixed point abc1234",
         ]) + "\n", encoding="utf-8")
         self.set_state("READY", 0, "collect Producer evidence", "none", "approved-software-spec-r7")
 

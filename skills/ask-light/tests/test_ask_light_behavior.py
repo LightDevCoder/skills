@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -12,6 +13,64 @@ SPEC = importlib.util.spec_from_file_location("ask_light", ROOT / "scripts" / "a
 assert SPEC and SPEC.loader
 ASK_LIGHT = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(ASK_LIGHT)
+
+_GIT_ENV = {
+    **os.environ,
+    "GIT_AUTHOR_NAME": "ask-light-fixture",
+    "GIT_AUTHOR_EMAIL": "ask-light-fixture@example.com",
+    "GIT_COMMITTER_NAME": "ask-light-fixture",
+    "GIT_COMMITTER_EMAIL": "ask-light-fixture@example.com",
+}
+
+
+def _git(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["git", "-C", str(root), *args],
+        env=_GIT_ENV,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+
+
+def commit_all(root: Path, message: str) -> None:
+    committed = _git(
+        root, "-c", "commit.gpgsign=false", "-c", "user.name=ask-light-fixture",
+        "-c", "user.email=ask-light-fixture@example.com",
+        "commit", "-q", "-a", "-m", message,
+    )
+    assert committed.returncode == 0, committed.stderr
+
+
+def ensure_git_baseline(root: Path) -> str:
+    """Commit the current project tree like a real Light workflow would before
+    a review freezes its baseline, and return the recorded HEAD revision."""
+    inside = _git(root, "rev-parse", "--is-inside-work-tree")
+    if inside.returncode != 0 or inside.stdout.strip() != "true":
+        initialized = _git(root, "init", "-q")
+        assert initialized.returncode == 0, initialized.stderr
+    added = _git(root, "add", "-A")
+    assert added.returncode == 0, added.stderr
+    status = _git(root, "status", "--porcelain")
+    if status.stdout.strip():
+        commit_all(root, "record reviewed baseline")
+    head = _git(root, "rev-parse", "HEAD")
+    assert head.returncode == 0, head.stderr
+    return head.stdout.strip()
+
+
+def install_host_fixture_skills(root: Path) -> list[dict[str, object]]:
+    """Write every mapped Skill as an available host package and return roots."""
+    for entry in ASK_LIGHT.load_map()["skills"]:
+        fields, error = ASK_LIGHT.read_frontmatter(ROOT.parent / entry["name"] / "SKILL.md")
+        assert not error, entry["name"]
+        write_skill(
+            root,
+            entry["name"],
+            metadata=entry["name"] != "eli5",
+            user_invoked=fields.get("disable-model-invocation", "").lower() == "true",
+        )
+    return [{"category": "first-party", "path": str(root)}]
 
 
 def write_skill(root: Path, name: str, *, metadata: bool = True, body: str = "Body", user_invoked: bool = False) -> None:
@@ -130,13 +189,18 @@ def write_project_review_state(
     verdict: str | None = "PASS",
     verdict_content: str | None = None,
     include_charter: bool = True,
+    include_revision: bool = True,
+    revision_identity: str | None = "auto",
     dir_name: str = ".project-review",
 ) -> Path:
     """Write a durable record with the REAL project-review layout.
 
     Mirrors skills/project-review/references/WORKFLOW.md (charter/state/verdict)
-    and the Charter fields from acceptance-charter.md (`Source:` is the
-    review-ownership metadata that identifies what was reviewed).
+    and the Charter fields from acceptance-charter.md (`Source:` identifies what
+    was reviewed; `Source revision or identity:` freezes its baseline). With
+    ``revision_identity="auto"`` the current project tree is committed first —
+    exactly how a real Light workflow freezes a repository source — and the
+    recorded value is that resolvable commit.
     """
     review_dir = root / dir_name
     review_dir.mkdir(parents=True, exist_ok=True)
@@ -147,6 +211,12 @@ def write_project_review_state(
             source_value = f"approved effort SPEC — `.scratch/{reviewed_effort}/spec.md`"
         else:
             source_value = "direct user-provided brief (session request message)"
+        if not include_revision:
+            revision_line = ""
+        elif revision_identity == "auto":
+            revision_line = f"- Source revision or identity: commit {ensure_git_baseline(root)}\n"
+        else:
+            revision_line = f"- Source revision or identity: {revision_identity}\n"
         (review_dir / "charter.md").write_text(
             "# Acceptance Charter\n\n"
             "## Revision\n"
@@ -155,8 +225,8 @@ def write_project_review_state(
             "\n"
             "## Acceptance baseline\n"
             f"- Source: {source_value}\n"
-            "- Source revision or identity: commit 4f1c9ab\n"
-            "- Approval state: approved\n"
+            + revision_line
+            + "- Approval state: approved\n"
             "\n"
             "## Review Profile\n"
             "- Profile: generic\n",
@@ -191,16 +261,7 @@ class AskLightBehaviorTest(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory(prefix="ask-light-")
         self.root = Path(self.temp.name) / "light"
         self.root.mkdir()
-        for entry in ASK_LIGHT.load_map()["skills"]:
-            fields, error = ASK_LIGHT.read_frontmatter(ROOT.parent / entry["name"] / "SKILL.md")
-            self.assertFalse(error, entry["name"])
-            write_skill(
-                self.root,
-                entry["name"],
-                metadata=entry["name"] != "eli5",
-                user_invoked=fields.get("disable-model-invocation", "").lower() == "true",
-            )
-        self.roots = [{"category": "first-party", "path": str(self.root)}]
+        self.roots = install_host_fixture_skills(self.root)
 
     def tearDown(self) -> None:
         self.temp.cleanup()
@@ -578,14 +639,18 @@ class AskLightBehaviorTest(unittest.TestCase):
         for label, verdict, expected_status, expected_stage, expected_skill in cases:
             with self.subTest(label=label), tempfile.TemporaryDirectory(prefix="ask-light-accept-") as tmp:
                 project = Path(tmp) / "project"
-                write_project_state(
-                    project,
-                    initialized=True,
-                    spec=True,
-                    ticket_statuses=["resolved"],
-                    acceptance=True,
-                    acceptance_verdict=verdict,
-                )
+                write_project_state(project, initialized=True, spec=True, ticket_statuses=["resolved"])
+                # The real Charter contract freezes the reviewed SPEC itself;
+                # give the effort's cited source a physical presence and commit
+                # it BEFORE the review records its baseline revision.
+                effort_spec = project / ".scratch" / "effort" / "spec.md"
+                effort_spec.write_text("# SPEC\nStatus: active\n", encoding="utf-8")
+                if verdict is None:
+                    write_project_review_state(
+                        project, reviewed_effort="effort", verdict_content="Acceptance record exists.\n"
+                    )
+                else:
+                    write_project_review_state(project, reviewed_effort="effort", verdict=verdict)
                 context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
                 result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
                 self.assertEqual(result["status"], expected_status, result)
@@ -1018,6 +1083,187 @@ class AskLightBehaviorTest(unittest.TestCase):
             result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
             self.assertEqual(result["projectStage"], "implementation-complete")
             self.assertEqual(result["skill"], "project-review")
+
+
+class ReviewFreshnessRegressionTest(unittest.TestCase):
+    """A project-review verdict applies only to the reviewed baseline.
+
+    The Charter freezes BOTH a source location and its revision; ask-light must
+    prove the reviewed source still matches the recorded identity before any
+    verdict (PASS, FAIL, or BLOCKED) remains authoritative for the current
+    effort. Unverifiable or missing identities fail closed.
+    """
+
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory(prefix="ask-light-fresh-")
+        self.host_root = Path(self.temp.name) / "host"
+        self.host_root.mkdir()
+        self.roots = install_host_fixture_skills(self.host_root)
+        self._build_count = 0
+
+    def tearDown(self) -> None:
+        self.temp.cleanup()
+
+    def build_reviewed_project(
+        self,
+        *,
+        effort: str = "current",
+        verdict: str | None = "PASS",
+        **charter_kwargs: object,
+    ) -> Path:
+        self._build_count += 1
+        project = Path(self.temp.name) / f"project-{self._build_count}"
+        write_project_state(project, initialized=True, spec=True)
+        write_effort_state(project, effort, spec_status="active", ticket_statuses=["resolved"])
+        write_project_review_state(project, reviewed_effort=effort, verdict=verdict, **charter_kwargs)
+        return project
+
+    def route_project(self, project: Path) -> dict[str, object]:
+        context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+        return ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+
+    def modify_reviewed_source(self, project: Path, *, commit: bool) -> None:
+        spec = project / ".scratch" / "current" / "spec.md"
+        spec.write_text(spec.read_text(encoding="utf-8") + "\nPost-review change.\n", encoding="utf-8")
+        if commit:
+            commit_all(project, "post-review change")
+
+    # A: unchanged baseline keeps a fresh PASS authoritative.
+    def test_fresh_pass_on_unchanged_baseline_is_accepted(self) -> None:
+        for label, mutate in (("no-change", False), ("untracked-noise-added", True)):
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as tmp:
+                project = Path(tmp) / "project"
+                write_project_state(project, initialized=True, spec=True)
+                write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
+                if mutate:
+                    (project / "notes").mkdir()
+                    (project / "notes" / "scratchpad.md").write_text("unrelated\n", encoding="utf-8")
+                    ensure_git_baseline(project)
+                else:
+                    ensure_git_baseline(project)
+                write_project_review_state(project, reviewed_effort="current", verdict="PASS")
+                result = self.route_project(project)
+                self.assertEqual(result["status"], "RECOMMEND", result)
+                self.assertEqual(result["projectStage"], "accepted")
+                self.assertEqual(result["skill"], "")
+                self.assertEqual(result["next"], "no-execution")
+                self.assertIn("acceptance passed", result["completed"])
+
+    # B: committed change after the recorded revision stales the PASS.
+    def test_committed_change_after_pass_routes_back_to_project_review(self) -> None:
+        project = self.build_reviewed_project(verdict="PASS")
+        self.modify_reviewed_source(project, commit=True)
+        result = self.route_project(project)
+        self.assertNotEqual(result["projectStage"], "accepted")
+        self.assertEqual(result["status"], "RECOMMEND", result)
+        self.assertEqual(result["projectStage"], "review-stale")
+        self.assertEqual(result["skill"], "project-review")
+        self.assertIn("changed since the recorded", str(result["reason"]))
+
+    # C: uncommitted working-tree edits also invalidate the PASS.
+    def test_dirty_working_tree_after_pass_stales_the_review(self) -> None:
+        project = self.build_reviewed_project(verdict="PASS")
+        self.modify_reviewed_source(project, commit=False)
+        result = self.route_project(project)
+        self.assertEqual(result["projectStage"], "review-stale", result)
+        self.assertEqual(result["skill"], "project-review")
+        self.assertIn("working-tree", str(result["reason"]))
+
+    # D: unrelated files never invalidate the review.
+    def test_unrelated_file_change_keeps_fresh_acceptance(self) -> None:
+        for label, commit_unrelated in (("untracked-readme", False), ("committed-readme", True)):
+            with self.subTest(label=label):
+                project = self.build_reviewed_project(verdict="PASS")
+                readme = project / "README.md"
+                readme.write_text("# Project\n\nUnrelated documentation change.\n", encoding="utf-8")
+                if commit_unrelated:
+                    _git(project, "add", "-A")
+                    commit_all(project, "docs only")
+                result = self.route_project(project)
+                self.assertEqual(result["status"], "RECOMMEND", result)
+                self.assertEqual(result["projectStage"], "accepted", result)
+
+    # E: FAIL/BLOCKED applies to its baseline too — a changed baseline needs a
+    # fresh review instead of keeping the old failure authoritative forever.
+    def test_stale_nonpass_verdict_requires_fresh_review(self) -> None:
+        for verdict in ("FAIL", "BLOCKED"):
+            with self.subTest(verdict=verdict):
+                project = self.build_reviewed_project(verdict=verdict)
+                self.modify_reviewed_source(project, commit=True)
+                result = self.route_project(project)
+                self.assertEqual(result["projectStage"], "review-stale", result)
+                self.assertEqual(result["skill"], "project-review")
+                self.assertNotEqual(result["projectStage"], "acceptance-not-passed")
+
+    # F: a non-resolvable revision identity must never grant acceptance.
+    def test_unresolvable_revision_identity_fails_closed(self) -> None:
+        project = self.build_reviewed_project(verdict="PASS", revision_identity="nonsense-or-unavailable")
+        result = self.route_project(project)
+        self.assertEqual(result["status"], "NEED-INPUT", result)
+        self.assertEqual(result["projectStage"], "review-freshness-unknown", result)
+        self.assertEqual(result["skill"], "")
+        self.assertEqual(result["next"], "no-execution")
+        self.assertNotEqual(result["projectStage"], "accepted")
+        combined = str(result["reason"]) + " ".join(str(gap) for gap in result["gaps"])
+        self.assertIn("Source revision or identity", combined)
+
+    # G: blank or missing revision identity also fails closed.
+    def test_missing_revision_identity_fails_closed(self) -> None:
+        for label, kwargs in (
+            ("blank-value", {"revision_identity": ""}),
+            ("field-omitted", {"include_revision": False}),
+        ):
+            with self.subTest(label=label):
+                project = self.build_reviewed_project(verdict="PASS", **kwargs)
+                result = self.route_project(project)
+                self.assertEqual(result["status"], "NEED-INPUT", result)
+                self.assertEqual(result["projectStage"], "review-freshness-unknown", result)
+                self.assertEqual(result["next"], "no-execution")
+                self.assertIn("revision", str(result["reason"]).lower())
+
+    # Canonical producer template layout stays consumable end-to-end.
+    def test_canonical_charter_template_layout_reaches_accepted(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
+            sha = ensure_git_baseline(project)
+            review_dir = project / ".project-review"
+            review_dir.mkdir(parents=True)
+            (review_dir / "charter.md").write_text(
+                "# Acceptance Charter\n"
+                "\n"
+                "## Revision\n"
+                "- Charter revision: 1\n"
+                "- Supersedes: none\n"
+                f"- Created at: 2026-08-27T00:00:00Z\n"
+                "\n"
+                "## Acceptance baseline\n"
+                "- Source: `.scratch/current/spec.md`\n"
+                f"- Source revision or identity: {sha}\n"
+                "- Approval state: approved\n"
+                "\n"
+                "## Review Profile\n"
+                "- Profile: generic\n"
+                "\n"
+                "## Original goal\n"
+                "Prove the canonical producer layout is consumed faithfully.\n"
+                "\n"
+                "## User-visible outcome\n"
+                "The router accepts only when the frozen baseline is intact.\n"
+                "\n"
+                "## Acceptance criteria\n"
+                "- AC-1: baseline freshness verifiable from recorded revision\n"
+                "\n"
+                "## Approved exceptions\n"
+                "- None\n",
+                encoding="utf-8",
+            )
+            (review_dir / "state.md").write_text("- Status: READY\n- Round: 1\n", encoding="utf-8")
+            (review_dir / "verdict.md").write_text("# Verdict\n\nVerdict: **PASS**\n", encoding="utf-8")
+            result = self.route_project(project)
+            self.assertEqual(result["status"], "RECOMMEND", result)
+            self.assertEqual(result["projectStage"], "accepted", result)
 
 
 if __name__ == "__main__":

@@ -319,3 +319,151 @@ behavior is unchanged: user-invoked targets still report
 `host-transition-required`, model-invoked targets `beginning-<skill>`. As
 before, live Codex host transition remains unobserved in this environment
 (previous attempt ended at the account usage limit); nothing was fabricated.
+
+---
+
+# Final closure pass 2 — review freshness and Charter field consistency
+
+Status: LOCAL COMMIT PENDING (`fix: invalidate stale project-review verdicts`);
+nothing pushed, tagged, or released. Returned for human final audit.
+
+## Producer contract reconfirmed from the repository
+
+- `skills/project-review/references/acceptance-charter.md` freezes the
+  acceptance baseline with BOTH `- Source:` (location) and
+  `- Source revision or identity:` (commit / version / timestamp / identity).
+- `references/WORKFLOW.md` step 4: freeze the baseline with the source
+  location **and** revision or immutable identity; the Charter never silently
+  edits it afterward.
+- Real generated charters under `docs/evidence/**` encode both fields
+  (historical evidence — left untouched).
+
+## Bug reproduced before fixing (red first)
+
+`ReviewFreshnessRegressionTest` was written BEFORE the implementation and run
+against commit fba2c82 code:
+
+```text
+committed change after PASS       → PRE-FIX: accepted        (7 red cases)
+dirty working tree after PASS     → PRE-FIX: accepted
+stale FAIL/BLOCKED after change   → PRE-FIX: old verdict kept authoritative
+unverifiable revision + PASS      → PRE-FIX: accepted
+blank/missing revision + PASS     → PRE-FIX: accepted
+```
+
+## Freshness repair (`ask_light.py`, consumer-side only)
+
+- `_classify_review_freshness` resolves the Charter's
+  `Source revision or identity:` to a local Git commit (`rev-parse --verify`)
+  and compares every `.scratch` path cited by `Source:` against it
+  (`cat-file -e <rev>:<path>`, then `git diff --quiet <rev> -- <path>`).
+  Because that diff targets the working tree, uncommitted post-review edits
+  invalidate exactly like committed ones.
+- Verdict freshness gates ALL verdict interpretation: ownership proven →
+  freshness decided → only then PASS/FAIL/BLOCKED parsing.
+- Verified change since the recorded revision → stage `review-stale`,
+  `Skill: project-review`, RECOMMEND routing back for a fresh review;
+  applies to stale PASS, FAIL, and BLOCKED alike (a verdict binds to its
+  baseline). Not downgraded to generic NEED-INPUT.
+- Unrelated repository changes never invalidate: comparison scope is exactly
+  the reviewed source paths the Charter cites (producer semantics; no invented
+  broader/narrower baseline).
+- Fail closed (`review-freshness-unknown`, NEED-INPUT terminal, never
+  accepted): blank/missing identity; identity not resolvable to a local Git
+  commit (timestamps/version strings/free-form labels); project root not a git
+  work tree; cited path absent at the recorded revision; git failure during
+  comparison. Each gap names what could not be verified.
+- Preserved unchanged: current-effort ownership classification, historical
+  review isolation, legacy root acceptance non-authority, `.review-loop/`
+  fallback, owned-charter-without-verdict resume flow,
+  explicit-PASS-vs-lifecycle-status semantics.
+
+## Producer fixture normalization (contract drift)
+
+- Canonical Charter field is `Source:`; four executable profile fixtures in
+  `skills/project-review/tests/` still wrote a synthetic
+  `- Acceptance source:` line. All four now use canonical `- Source:` plus a
+  profile-appropriate `- Source revision or identity:`.
+- Repo-wide drift search confirms zero remaining `Acceptance source:` fields
+  in runtime/tests/docs-contract surfaces; historical evidence records under
+  `docs/evidence/` were classified historical and NOT rewritten.
+- One ask-light test fixture (`test_acceptance_verdicts_are_fail_closed`) had
+  encoded ownership by citing a `.scratch/<effort>/spec.md` that never existed
+  on disk; it now creates and commits the cited SPEC before the review
+  freezes its baseline (fixtures follow the real producer layout instead of
+  weakening runtime logic).
+
+## Tests added
+
+`ReviewFreshnessRegressionTest` (temporary real-git repositories):
+
+A fresh PASS on unchanged baseline accepted (incl. new-untracked-noise) ·
+B committed change after PASS → `review-stale`/project-review · C dirty
+working-tree change → `review-stale` · D unrelated file change keeps
+acceptance · E stale FAIL/BLOCKED require fresh review instead of keeping the
+old conclusion · F nonsense revision identity fails closed · G blank value and
+omitted field fail closed · H full canonical template charter parses end-to-end.
+
+## Validation (this pass, run fresh)
+
+```text
+python3 -m pytest -q            → 239 passed
+python3 -m unittest discover -s tests → OK
+python3 -m compileall -q skills tests → OK
+git status --short              → only in-scope files modified
+
+Skill-local suites (run per file):
+  skills/ask-light/tests .......... 76 tests OK
+  skills/project-review/tests ..... 10 tests OK
+  skills/socratic/tests ........... 21 tests OK
+  skills/clarify/tests ............ 5 tests OK
+  skills/project-clarify/tests .... 11 tests OK
+  skills/project-init/tests ....... 32 tests OK
+  skills/review-loop/tests ........ 19 tests OK
+```
+
+## Manual smoke (real CLI, live temporary git repositories)
+
+| Scenario | Result |
+| --- | --- |
+| fresh PASS | `accepted`, skill none |
+| PASS then committed source change | `review-stale` → `project-review` |
+| PASS then dirty working-tree edit | `review-stale` → `project-review` |
+| unrelated README change after PASS | `accepted` (not invalidated) |
+| FAIL then baseline change | `review-stale` (old FAIL no longer authoritative) |
+| unverifiable revision identity + PASS | `review-freshness-unknown`, NEED-INPUT |
+| canonical template Charter, fresh | `accepted` |
+
+## Files changed in this pass
+
+```text
+skills/ask-light/scripts/ask_light.py
+skills/ask-light/references/discovery-contract.md
+skills/ask-light/tests/test_ask_light_behavior.py
+skills/project-review/tests/test_agent_skill_profile_behavior.py
+skills/project-review/tests/test_manuscript_profile_behavior.py
+skills/project-review/tests/test_software_profile_behavior.py
+skills/project-review/tests/test_specification_profile_behavior.py
+.scratch/light-skills-core-flow-repair/results.md
+```
+
+## Ownership boundary preserved
+
+`project-review` still owns the durable review contract; `ask-light` consumes
+it and `discovery-contract.md` documents consumption rules without redefining
+the Charter format. Socratic, clarify, project-clarify, project-init,
+review-loop, project-workflow exclusion, and all frozen ask-light behaviors are
+unchanged. Live Codex host-transition remains unobserved (unchanged limitation);
+nothing was fabricated.
+
+## Known freshness boundary (documented, accepted)
+
+- Detection covers modification and deletion of the exact reviewed source
+  paths after the recorded revision. A brand-new file added under a
+  directory-cited baseline (e.g. `Source: .scratch/current`) is not part of a
+  git diff against that revision; such additions do not stale the verdict by
+  themselves. Effort-level activity (e.g. reopening/adding tickets) still
+  routes to `implement` through normal ticket-state evidence.
+- Projects without a Git work tree cannot prove freshness at all and fail
+  closed (`review-freshness-unknown`); this is the intended enforcement of the
+  producer's freeze-the-revision contract for repository sources.

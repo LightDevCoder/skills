@@ -57,7 +57,8 @@ class ManuscriptScenario:
             "- Artifact snapshot: manuscript/frozen.md sha256: fixture-artifact-hash",
             "- Source register: .manuscript-ops/sources/source-register.tsv",
             "- Review matrix captured_at: 2026-07-22T00:00:00Z",
-            "- Acceptance source: acceptance.md",
+            "- Source: acceptance.md",
+            "- Source revision or identity: manuscript/frozen.md sha256: fixture-artifact-hash",
         ]) + "\n", encoding="utf-8")
         set_review_state(self.case_root, "READY", 0, "collect Producer evidence", "manuscript", "approved-manuscript-brief-r3", "project-review Core", "manuscript Charter freeze")
 

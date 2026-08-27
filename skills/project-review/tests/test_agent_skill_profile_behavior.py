@@ -72,7 +72,8 @@ class AgentSkillScenario:
             "- Package revision: fixture-skill-1",
             f"- Invocation type: {invocation_type}",
             "- Discovery target: clean installed package",
-            "- Acceptance source: acceptance.md",
+            "- Source: acceptance.md",
+            "- Source revision or identity: package revision fixture-skill-1",
         ]) + "\n", encoding="utf-8")
         set_review_state(self.case_root, "READY", 0, "collect Producer evidence", "agent-skill", "approved-agent-skill-r2", "", "agent-skill Charter freeze")
 

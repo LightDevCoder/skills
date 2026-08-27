@@ -68,6 +68,22 @@ Project-state evidence is fail-closed:
   - A record whose ownership cannot be established from the Charter
     `Source:` fails closed as `review-ownership-unknown`; `ask-light` never
     infers PASS from an unowned verdict.
+- A verdict applies only to the baseline revision it reviewed. After ownership
+  is proven, `ask-light` also verifies the Charter's frozen
+  `Source revision or identity` against the cited source paths before trusting
+  any conclusion (definitions remain producer-owned):
+  - Every cited `.scratch` path still matching the recorded Git commit —
+    including uncommitted working-tree modifications — keeps the verdict
+    current; PASS stays accepted.
+  - A verified change since the recorded revision makes ANY old verdict
+    non-authoritative: stage `review-stale`, routed back to `project-review`
+    for a fresh review of the changed baseline. A stale FAIL does not keep
+    contaminating a baseline it no longer describes.
+  - Freshness checks are scoped to exactly the reviewed source paths. Changes
+    to unrelated files elsewhere in the repository never invalidate a review.
+  - A missing, blank, or non-Git-resolvable identity cannot prove freshness
+    and fails closed as `review-freshness-unknown`; such a record is never
+    treated as accepted.
 - Legacy human-facing files (`docs/agents/acceptance.md`,
   `docs/agents/review-verdict.md`, and similar) are produced by no runtime
   contract here and are **not** authoritative acceptance evidence; they cannot
