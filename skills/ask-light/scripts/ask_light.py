@@ -42,7 +42,8 @@ INACTIVE_SPEC_STATUSES = {
 }
 INACTIVE_SPEC_PATH_SEGMENTS = {
     "archive", "archived", "obsolete", "old", "superseded", "retired",
-    "deprecated", "backup", "bak",
+    "deprecated", "backup", "bak", "previous", "historical", "past",
+    "prior", "completed",
 }
 
 # Ticket completion is fail-closed: only explicit resolved vocabulary counts.
@@ -52,8 +53,9 @@ TICKET_UNRESOLVED_STATES = {
     "todo", "blocked", "awaiting", "awaiting-confirmation", "needs-work",
 }
 
-# Acceptance is also fail-closed: PASS is the only successful verdict.
-ACCEPTANCE_PASS_STATES = {"pass", "passed", "accepted", "approved", "complete", "completed", "done"}
+# Acceptance is fail-closed: only explicit PASS-style verdicts count as
+# successful. Generic lifecycle states such as complete/done are not verdicts.
+ACCEPTANCE_PASS_STATES = {"pass", "passed"}
 ACCEPTANCE_FAIL_STATES = {
     "fail", "failed", "blocked", "rejected", "incomplete", "pending", "needs-work",
 }
@@ -173,6 +175,19 @@ def _field_values(text: str, field_names: tuple[str, ...]) -> list[str]:
     return values
 
 
+def _acceptance_verdicts(text: str) -> list[str]:
+    """Extract acceptance values, preferring verdict/result/outcome fields.
+
+    Generic lifecycle `Status`/`State` values are only used when no explicit
+    verdict field exists, so a `Status: complete` line cannot downgrade an
+    explicit `Verdict: PASS`.
+    """
+    explicit = _field_values(text, ("Verdict", "Result", "Outcome", "Acceptance"))
+    if explicit:
+        return explicit
+    return _field_values(text, ("Status", "State"))
+
+
 def _spec_status(text: str) -> str:
     values = _field_values(text, ("Status", "State"))
     return values[0] if values else ""
@@ -197,6 +212,152 @@ def _is_active_spec(path: Path, root: Path) -> bool:
     return True
 
 
+EFFORT_EVIDENCE_PATTERNS = (
+    "spec.md",
+    "map.md",
+    "issues/*.md",
+    "acceptance*.md",
+    "review*/verdict*.md",
+    "project-review*.md",
+)
+
+
+def _effort_has_evidence(path: Path) -> bool:
+    if not path.is_dir():
+        return False
+    return any(_has_glob(path, pattern) for pattern in EFFORT_EVIDENCE_PATTERNS)
+
+
+def _root_active_spec(root: Path) -> bool:
+    root_specs = [
+        root / "SPEC.md", root / "spec.md",
+        root / "docs" / "SPEC.md", root / "docs" / "spec.md",
+    ]
+    return any(_is_active_spec(path, root) for path in root_specs)
+
+
+def _is_historical_effort(path: Path, root: Path) -> bool:
+    try:
+        relative = path.resolve().relative_to(root.resolve())
+    except (OSError, ValueError):
+        return False
+    if any(part.lower() in INACTIVE_SPEC_PATH_SEGMENTS for part in relative.parts):
+        return True
+    spec = path / "spec.md"
+    return spec.is_file() and not _is_active_spec(spec, root)
+
+
+def _explicit_effort_references(root: Path) -> set[str]:
+    """Read project-level contracts for a concrete effort pointer.
+
+    The bootstrap contract uses `.scratch/<effort>/issues` as a placeholder;
+    a concrete path (for example `.scratch/parser-effort/issues`) or a manual
+    `Current effort:` line can be a reliable pointer. Nothing is inferred from
+    directory ordering or alphabetical names.
+    """
+    references: set[str] = set()
+    effort_field = re.compile(
+        r"(?im)^\s*(?:-\s*)?(?:Current effort|Active effort|Effort)\s*[:=]\s*(.+)$"
+    )
+    tracker_field = re.compile(
+        r"(?im)^\s*(?:-\s*)?(?:Issue tracker|Work item location|SPEC location|Ticket location)\s*[:=]\s*(.+)$"
+    )
+    for relative in ("docs/agents/light-project.md", "docs/agents/issue-tracker.md"):
+        path = root / relative
+        if not path.is_file():
+            continue
+        text = _small_text(path)
+        for match in effort_field.finditer(text):
+            value = match.group(1).strip().strip("`*_")
+            if not value or "<effort>" in value or value.lower() in {"none", "none recorded", "?"}:
+                continue
+            name = value.split()[0].strip("():-")
+            if name:
+                references.add(name)
+        for match in tracker_field.finditer(text):
+            value = match.group(1).strip()
+            found = re.search(r"\.scratch/([^/\s<>]+)", value)
+            if found:
+                name = found.group(1).strip("`*_():-")
+                if name and name != "<effort>":
+                    references.add(name)
+    return references
+
+
+def _resolve_current_effort(root: Path) -> tuple[str | None, bool, list[str]]:
+    """Resolve the current/active `.scratch` effort before reading tickets.
+
+    Returns (current_effort_name, ambiguous, gaps). The resolver prefers an
+    explicit project-level pointer, then a single active SPEC effort, then a
+    single non-historical effort with evidence. It fails closed on multiple
+    active/current candidates rather than guessing by directory order.
+    """
+    scratch = root / ".scratch"
+    if not scratch.is_dir():
+        return None, False, []
+
+    efforts = [
+        child for child in sorted(scratch.iterdir())
+        if child.is_dir() and _effort_has_evidence(child)
+    ]
+    if not efforts:
+        return None, False, []
+
+    explicit = _explicit_effort_references(root)
+    if explicit:
+        if len(explicit) > 1:
+            names = ", ".join(sorted(explicit))
+            return None, True, [
+                f"Multiple project-level current-effort pointers were found ({names}); "
+                "the current project workflow cannot be established reliably."
+            ]
+        name = next(iter(explicit))
+        candidate = scratch / name
+        if not candidate.is_dir() or not _effort_has_evidence(candidate):
+            return None, True, [
+                f"Project-level current-effort pointer '{name}' does not match a readable "
+                ".scratch effort; the current workflow cannot be established reliably."
+            ]
+        return candidate.name, False, []
+
+    active = [effort for effort in efforts if _is_active_spec(effort / "spec.md", root)]
+    if active:
+        if len(active) > 1:
+            names = ", ".join(sorted(effort.name for effort in active))
+            return None, True, [
+                f"Multiple active Light efforts were found ({names}). "
+                "The current project workflow cannot be determined safely."
+            ]
+        return active[0].name, False, []
+
+    non_historical = [effort for effort in efforts if not _is_historical_effort(effort, root)]
+    if len(non_historical) == 1:
+        return non_historical[0].name, False, []
+
+    root_active_spec = _root_active_spec(root)
+    if len(non_historical) > 1:
+        names = ", ".join(sorted(effort.name for effort in non_historical))
+        return None, True, [
+            f"Multiple non-historical Light efforts were found ({names}) without a single "
+            "active SPEC. The current project workflow cannot be determined safely."
+        ]
+
+    if root_active_spec or len(efforts) > 1:
+        if len(efforts) == 1:
+            name = efforts[0].name
+            return None, True, [
+                f"The only Light effort '{name}' is historical/inactive, so it cannot be "
+                "selected as current without a project-level pointer."
+            ]
+        names = ", ".join(sorted(effort.name for effort in efforts))
+        return None, True, [
+            f"Light efforts exist ({names}) but none is active/current and no reliable "
+            "project-level pointer identifies the current effort."
+        ]
+
+    return None, False, []
+
+
 def inspect_project_state(project_root: Path) -> dict[str, Any]:
     """Inspect a bounded set of real project evidence, not the whole repository.
 
@@ -219,6 +380,8 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
         "specPaths": [],
         "ticketPaths": [],
         "acceptancePaths": [],
+        "currentEffort": "",
+        "ambiguousCurrentEffort": False,
         "stage": "",
         "skill": "",
         "reason": "",
@@ -235,20 +398,55 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
     project_contract = root / "docs/agents/light-project.md"
     evidence["initialized"] = project_contract.is_file()
 
-    # Active SPEC: a few conventional locations plus the .scratch effort root.
+    if not evidence["initialized"]:
+        evidence["stage"] = "uninitialized"
+        evidence["skill"] = "project-init"
+        evidence["reason"] = "No docs/agents/light-project.md exists; the repository has not been initialized for Light Project workflows."
+        evidence["completed"] = []
+        evidence["missing"] = ["Light project configuration and tracker contract"]
+        evidence["gaps"] = []
+        return evidence
+
+    # Resolve the current/active effort before reading effort-owned evidence so
+    # historical .scratch efforts cannot contaminate the current workflow state.
+    current_effort, effort_ambiguous, effort_gaps = _resolve_current_effort(root)
+    evidence["currentEffort"] = current_effort or ""
+    evidence["ambiguousCurrentEffort"] = effort_ambiguous
+    if effort_ambiguous:
+        evidence["stage"] = "ambiguous-current-effort"
+        evidence["skill"] = ""
+        evidence["reason"] = (
+            effort_gaps[0]
+            if effort_gaps
+            else "The current Light effort cannot be established reliably from repository evidence."
+        )
+        evidence["completed"] = ["Light project contract present"]
+        evidence["missing"] = ["resolve which Light effort is current"]
+        evidence["gaps"] = effort_gaps
+        return evidence
+
+    # Active SPEC: a few conventional locations plus the resolved effort root.
     # Inactive/superseded/archived specs are not project evidence.
     spec_candidates = [
         root / "SPEC.md", root / "spec.md",
         root / "docs" / "SPEC.md", root / "docs" / "spec.md",
     ]
-    scratch_specs = sorted(root.glob(".scratch/*/spec.md")) if _has_glob(root, ".scratch/*/spec.md") else []
+    scratch_specs = []
+    if current_effort:
+        scratch_spec = root / ".scratch" / current_effort / "spec.md"
+        if scratch_spec.is_file():
+            scratch_specs = [scratch_spec]
     all_spec_candidates = [*spec_candidates, *scratch_specs]
     spec_paths = [path for path in all_spec_candidates if _is_active_spec(path, root)]
     evidence["hasSpec"] = bool(spec_paths)
     evidence["specPaths"] = [str(path.relative_to(root)) for path in spec_paths[:10]]
 
-    # Tickets: local-markdown issue files only, bounded to .scratch/*/issues.
-    ticket_paths = sorted(root.glob(".scratch/*/issues/*.md")) if _has_glob(root, ".scratch/*/issues/*.md") else []
+    # Tickets: local-markdown issue files only, bounded to the current effort.
+    if current_effort:
+        issues_dir = root / ".scratch" / current_effort / "issues"
+        ticket_paths = sorted(issues_dir.glob("*.md")) if issues_dir.is_dir() else []
+    else:
+        ticket_paths = []
     ticket_paths = [path for path in ticket_paths if path.is_file()]
     evidence["hasTickets"] = bool(ticket_paths)
     evidence["ticketPaths"] = [str(path.relative_to(root)) for path in ticket_paths[:20]]
@@ -275,16 +473,21 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
         and not evidence["unresolvedTickets"]
     )
 
-    # Acceptance/review evidence: bounded to conventional handoff/verdict paths.
+    # Acceptance/review evidence: project-level verdict paths plus current-effort
+    # owned handoff/verdict paths. Historical effort acceptance is not read.
     acceptance_candidates = [
         root / "docs" / "agents" / "acceptance.md",
         root / "docs" / "acceptance.md",
         root / "docs" / "agents" / "review-verdict.md",
     ]
-    scratch_acceptance = [
-        path for pattern in (".scratch/*/acceptance*.md", ".scratch/*/review*/verdict*.md", ".scratch/*/project-review*.md")
-        for path in (root.glob(pattern) if _has_glob(root, pattern) else [])
-    ]
+    scratch_acceptance = []
+    if current_effort:
+        effort_dir = root / ".scratch" / current_effort
+        scratch_acceptance = [
+            path
+            for pattern in ("acceptance*.md", "review*/verdict*.md", "project-review*.md")
+            for path in (effort_dir.glob(pattern) if _has_glob(effort_dir, pattern) else [])
+        ]
     acceptance_paths = [path for path in [*acceptance_candidates, *scratch_acceptance] if path.is_file()]
     evidence["hasAcceptanceEvidence"] = bool(acceptance_paths)
     evidence["acceptancePaths"] = [str(path.relative_to(root)) for path in acceptance_paths[:10]]
@@ -293,7 +496,7 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
     acceptance_fail = 0
     acceptance_unknown = 0
     for path in acceptance_paths:
-        verdicts = _field_values(_small_text(path), ("Status", "State", "Verdict", "Result", "Outcome", "Acceptance"))
+        verdicts = _acceptance_verdicts(_small_text(path))
         if not verdicts:
             acceptance_unknown += 1
             continue
@@ -307,16 +510,6 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
     evidence["acceptancePassed"] = bool(acceptance_paths) and acceptance_pass > 0 and acceptance_fail == 0 and acceptance_unknown == 0
     evidence["acceptanceFailed"] = acceptance_fail > 0
     evidence["acceptanceUnknown"] = acceptance_unknown > 0
-
-    # Derive the current Light project stage and the next Skill from evidence.
-    if not evidence["initialized"]:
-        evidence["stage"] = "uninitialized"
-        evidence["skill"] = "project-init"
-        evidence["reason"] = "No docs/agents/light-project.md exists; the repository has not been initialized for Light Project workflows."
-        evidence["completed"] = []
-        evidence["missing"] = ["Light project configuration and tracker contract"]
-        evidence["gaps"] = []
-        return evidence
 
     if not evidence["hasSpec"]:
         contract_text = _small_text(project_contract)
@@ -811,7 +1004,10 @@ def next_result(roots: list[dict[str, Any]], context: dict[str, Any], host: str,
     # Terminating and evidence-blocked project stages are valid conclusions even
     # when no next Skill is recommended. Do not let them fall through into a
     # generic NEED-INPUT or unrelated logical route.
-    if project_state.get("stage") in {"accepted", "tickets-unknown", "acceptance-not-passed", "acceptance-unknown"}:
+    if project_state.get("stage") in {
+        "accepted", "tickets-unknown", "acceptance-not-passed", "acceptance-unknown",
+        "ambiguous-current-effort",
+    }:
         status = "RECOMMEND" if project_state.get("stage") == "accepted" else "NEED-INPUT"
         result = base_result("next", status, project_state.get("gaps", []))
         result.update({

@@ -24,6 +24,34 @@ def write_skill(root: Path, name: str, *, metadata: bool = True, body: str = "Bo
         (package / "agents" / "openai.yaml").write_text("interface:\n  display_name: fixture\n", encoding="utf-8")
 
 
+def write_effort_state(
+    root: Path,
+    name: str,
+    *,
+    spec_status: str | None = None,
+    ticket_statuses: list[str] | None = None,
+    acceptance_verdict: str | None = None,
+    acceptance_status: str | None = None,
+) -> None:
+    """Write one `.scratch/<name>` effort for multi-effort regression tests."""
+    effort = root / ".scratch" / name
+    effort.mkdir(parents=True, exist_ok=True)
+    if spec_status is not None:
+        if spec_status == "active":
+            (effort / "spec.md").write_text("# SPEC\nStatus: active\n", encoding="utf-8")
+        else:
+            (effort / "spec.md").write_text(f"# SPEC\nStatus: {spec_status}\n", encoding="utf-8")
+    if ticket_statuses is not None:
+        issues = effort / "issues"
+        issues.mkdir(parents=True, exist_ok=True)
+        for index, status in enumerate(ticket_statuses, start=1):
+            (issues / f"{index:02d}.md").write_text(f"- Status: {status}\n", encoding="utf-8")
+    if acceptance_verdict is not None:
+        (effort / "acceptance.md").write_text(f"Verdict: {acceptance_verdict}\n", encoding="utf-8")
+    if acceptance_status is not None:
+        (effort / "acceptance.md").write_text(f"Status: {acceptance_status}\n", encoding="utf-8")
+
+
 def write_project_state(
     root: Path,
     *,
@@ -499,6 +527,134 @@ class AskLightBehaviorTest(unittest.TestCase):
                 else:
                     self.assertNotEqual(result["projectStage"], "accepted")
                     self.assertIn("acceptance", result["reason"].lower())
+
+    def test_historical_open_ticket_does_not_pollute_current_resolved_effort(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-multi-a-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
+            write_effort_state(project, "old-effort", ticket_statuses=["open"])
+            context = {"projectRoot": str(project), "goal": "Where is this project now?", "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "RECOMMEND", result)
+            self.assertEqual(result["projectStage"], "implementation-complete")
+            self.assertEqual(result["skill"], "project-review")
+
+    def test_historical_resolved_does_not_hide_current_open_ticket(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-multi-b-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["open"])
+            write_effort_state(project, "old-effort", ticket_statuses=["resolved"])
+            context = {"projectRoot": str(project), "goal": "What should I work on now?", "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "RECOMMEND", result)
+            self.assertEqual(result["projectStage"], "work-in-progress")
+            self.assertEqual(result["skill"], "implement")
+
+    def test_current_acceptance_pass_ignores_historical_fail(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-multi-c-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"], acceptance_verdict="PASS")
+            write_effort_state(project, "previous", acceptance_verdict="FAIL")
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "RECOMMEND", result)
+            self.assertEqual(result["projectStage"], "accepted")
+            self.assertEqual(result["skill"], "")
+            self.assertEqual(result["next"], "no-execution")
+
+    def test_current_acceptance_fail_ignores_historical_pass(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-multi-d-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"], acceptance_verdict="FAIL")
+            write_effort_state(project, "previous", acceptance_verdict="PASS")
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "NEED-INPUT", result)
+            self.assertEqual(result["projectStage"], "acceptance-not-passed")
+            self.assertEqual(result["skill"], "")
+            self.assertNotEqual(result["projectStage"], "accepted")
+
+    def test_multiple_active_efforts_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-multi-e-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "one", spec_status="active")
+            write_effort_state(project, "two", spec_status="active")
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "NEED-INPUT", result)
+            self.assertEqual(result["projectStage"], "ambiguous-current-effort")
+            self.assertEqual(result["skill"], "")
+            self.assertEqual(result["next"], "no-execution")
+            self.assertIn("Multiple active Light efforts", result["reason"])
+
+    def test_superseded_effort_is_not_selected_over_active_effort(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-multi-f-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
+            write_effort_state(project, "superseded", spec_status="superseded", ticket_statuses=["open"])
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "RECOMMEND", result)
+            self.assertEqual(result["projectStage"], "implementation-complete")
+            self.assertEqual(result["skill"], "project-review")
+
+    def test_no_reliable_current_effort_does_not_guess(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-multi-g-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "historical-a", spec_status="superseded", ticket_statuses=["resolved"])
+            write_effort_state(project, "historical-b", spec_status="archived", ticket_statuses=["open"])
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "NEED-INPUT", result)
+            self.assertEqual(result["projectStage"], "ambiguous-current-effort")
+            self.assertEqual(result["skill"], "")
+            self.assertIn("none is active/current", result["reason"])
+
+    def test_generic_complete_acceptance_status_is_not_pass(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-multi-h-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"], acceptance_status="complete")
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "NEED-INPUT", result)
+            self.assertEqual(result["projectStage"], "acceptance-unknown")
+            self.assertEqual(result["skill"], "")
+            self.assertNotEqual(result["projectStage"], "accepted")
+
+    def test_explicit_verdict_pass_is_not_downgraded_by_complete_status(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-multi-i-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
+            acceptance = project / ".scratch" / "current" / "acceptance.md"
+            acceptance.write_text("Status: complete\nVerdict: PASS\n", encoding="utf-8")
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "RECOMMEND", result)
+            self.assertEqual(result["projectStage"], "accepted")
+            self.assertEqual(result["skill"], "")
+            self.assertEqual(result["next"], "no-execution")
+
+    def test_explicit_pass_acceptance_is_accepted(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-multi-i-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"], acceptance_verdict="PASS")
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "RECOMMEND", result)
+            self.assertEqual(result["projectStage"], "accepted")
+            self.assertEqual(result["skill"], "")
+            self.assertEqual(result["next"], "no-execution")
+            self.assertIn("acceptance passed", result["completed"])
 
     def test_natural_language_family_navigation(self) -> None:
         cases = [

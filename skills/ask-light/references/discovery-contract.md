@@ -34,15 +34,21 @@ skip project inspection and route from the Skill map.
 
 Project-state evidence is fail-closed:
 
+- Resolve the current/active `.scratch/<effort>` before reading effort-owned
+  SPEC, tickets, or acceptance/review evidence. Historical efforts are ignored.
+  Multiple active efforts, or historical efforts with no reliable project-level
+  pointer, fail closed as `ambiguous-current-effort` instead of guessing by
+  directory order.
 - A SPEC counts as active only when it is not superseded, obsolete, archived,
   deprecated, or otherwise retired (including specs under obvious archive/old
   path segments).
 - Ticket completion is established only from explicit resolved statuses.
   Missing statuses or statuses outside the known unresolved/resolved
   vocabulary do **not** count as resolved.
-- Acceptance counts only when the repository evidence explicitly records a
-  PASS verdict. FAIL, BLOCKED, incomplete, pending, or unreadable verdicts do
-  **not** count as accepted.
+- Acceptance counts only when the resolved current effort's evidence
+  explicitly records a PASS-style verdict (`PASS`, `passed`). FAIL, BLOCKED,
+  incomplete, pending, lifecycle `complete`/`done`, missing, or unreadable
+  verdicts do **not** count as accepted.
 
 ## Layer A — Light Skill Map
 

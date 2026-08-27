@@ -2,6 +2,80 @@
 
 Status: LOCAL COMMIT CREATED — see `git log -1` for the local repair commit SHA.
 
+## Final narrow repair: current-effort isolation and acceptance semantics
+
+This pass did not restart architecture or the Lean refactor. It closed the
+remaining `ask-light` multi-effort contamination and acceptance vocabulary gaps.
+
+### Current-effort resolution
+
+- `ask-light` now resolves the current/active `.scratch/<effort>` before reading
+  effort-owned SPEC, tickets, or acceptance/review evidence.
+- Resolution prefers an explicit project-level pointer (`Current effort:`,
+  concrete `.scratch/<actual-effort>/...` in `docs/agents/light-project.md` or
+  `docs/agents/issue-tracker.md`), then a single active SPEC effort, then a
+  single non-historical effort with evidence.
+- Multiple active efforts fail closed with `ProjectStage:
+  ambiguous-current-effort` and `NEED-INPUT`; no directory-order guessing.
+- Historical efforts with no reliable pointer also fail closed instead of being
+  selected as current.
+
+### Ticket and acceptance scoping
+
+- Tickets are read only from `.scratch/<current-effort>/issues/`.
+- Acceptance/review evidence is read only from project-level verdict paths and
+  `.scratch/<current-effort>/` handoff/verdict paths.
+- Historical open tickets no longer pollute a resolved current effort.
+- Historical PASS/FAIL acceptance no longer overrides the current effort.
+
+### Acceptance success semantics
+
+- `ACCEPTANCE_PASS_STATES` is tightened to explicit `pass`/`passed` only.
+- Generic lifecycle values (`complete`, `completed`, `done`) are no longer
+  treated as acceptance success.
+- `Status: complete` without an explicit PASS verdict returns
+  `acceptance-unknown` / not accepted.
+
+### New regression tests
+
+Added focused temporary-repository tests for the requested scenarios:
+
+- A: historical unresolved ticket ignored → `project-review`
+- B: historical resolved tickets do not hide current open work → `implement`
+- C: current PASS + historical FAIL → `accepted`
+- D: current FAIL + historical PASS → not accepted
+- E: two active efforts → `ambiguous-current-effort`
+- F: superseded effort ignored over active effort → `project-review`
+- G: no reliable current effort → fail closed
+- H: `Status: complete` without PASS → not accepted
+- I: `Verdict: PASS` → `accepted`
+- J: explicit `Verdict: PASS` is not downgraded by `Status: complete`
+
+### Validation actually performed
+
+```text
+python3 -m pytest -q
+→ 219 passed
+
+python3 -m unittest discover -s tests
+→ Ran 27 tests; OK
+
+python3 -m compileall -q skills tests
+→ OK
+
+Skill-local suites:
+  skills/ask-light/tests .......... 56 passed
+  skills/socratic/tests ........... 21 passed
+  skills/clarify/tests ............  5 passed
+  skills/project-clarify/tests .... 11 passed
+  skills/project-init/tests ....... 32 passed
+  skills/review-loop/tests ........ 19 passed
+```
+
+Manual smoke with real temporary repositories and the actual first-party skill
+root confirmed the scenarios in section 15 of the repair prompt. No Codex host
+smoke was fabricated; the existing live-host limitation remains.
+
 ## What changed in this final pass
 
 This was a narrow final repair pass after the latest human audit. It did not
