@@ -82,6 +82,10 @@ Reads: metadata=<count>; bodies=<count>; references=<count>
 Execution: recommendation phase was read-only; execution begins only after explicit user approval
 ```
 
+For an already accepted project, return a clean terminal result:
+`ProjectStage: accepted`, `Skill: none`, `Completed` includes `acceptance
+passed`, `Missing: none`, and `Next: no-execution`.
+
 ## Verification
 
 Run the package contract and behavior tests. They cover project-state

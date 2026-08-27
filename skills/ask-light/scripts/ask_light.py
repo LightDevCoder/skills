@@ -25,6 +25,39 @@ HOST_SKILL_ROOTS = (
     Path.home() / ".config" / "skills",
 )
 
+# Project-state questions are a small intent class: interrogatives about the
+# current stage, next work, missing/completed work, or what remains. The
+# presence of a projectRoot plus this intent switches ask-light to evidence
+# reasoning instead of generic token overlap.
+PROJECT_STATE_INTENT_PATTERN = re.compile(
+    r"(?i)"
+    r"\b(?:what|where)\b[^?.]*\b(?:next|now|stage|status|missing|left|finished|done|complete|completed|remaining|progress|current)\b"
+    r"|\bwhat\b[^?.]*\b(?:should|can|do)\b[^?.]*\b(?:next|now)\b"
+)
+
+# Light repo convention: a SPEC is active unless it explicitly says it was
+# superseded/obsoleted/archived (or lives in an obvious archive/old segment).
+INACTIVE_SPEC_STATUSES = {
+    "superseded", "obsolete", "archived", "archive", "deprecated", "retired",
+}
+INACTIVE_SPEC_PATH_SEGMENTS = {
+    "archive", "archived", "obsolete", "old", "superseded", "retired",
+    "deprecated", "backup", "bak",
+}
+
+# Ticket completion is fail-closed: only explicit resolved vocabulary counts.
+TICKET_RESOLVED_STATES = {"resolved", "done", "closed", "complete", "completed", "accepted"}
+TICKET_UNRESOLVED_STATES = {
+    "open", "ready", "ready-for-agent", "claimed", "in-progress", "in_progress",
+    "todo", "blocked", "awaiting", "awaiting-confirmation", "needs-work",
+}
+
+# Acceptance is also fail-closed: PASS is the only successful verdict.
+ACCEPTANCE_PASS_STATES = {"pass", "passed", "accepted", "approved", "complete", "completed", "done"}
+ACCEPTANCE_FAIL_STATES = {
+    "fail", "failed", "blocked", "rejected", "incomplete", "pending", "needs-work",
+}
+
 # Natural-language family navigation is explicit, not token-overlap matching.
 FAMILY_ALIASES = {
     "project": ("project", "projects"),
@@ -119,6 +152,51 @@ def _has_glob(root: Path, pattern: str) -> bool:
         return False
 
 
+def _field_values(text: str, field_names: tuple[str, ...]) -> list[str]:
+    """Extract compact status/verdict tokens from markdown field lines.
+
+    Only the first token before a comma/semicolon is returned; trailing prose
+    such as `; Resolution evidence: ...` is not treated as a status/verdict
+    value.
+    """
+    pattern = re.compile(
+        r"(?mi)^\s*(?:[>#-]+\s*)?(?:\*\*)?(?:{})\s*(?:\*\*)?\s*[:=.-]\s*(?:\*\*)?\s*(.+)$".format(
+            "|".join(re.escape(field) for field in field_names)
+        )
+    )
+    values: list[str] = []
+    for match in pattern.finditer(text):
+        raw = match.group(1).strip()
+        part = re.split(r"[;,]", raw, maxsplit=1)[0].strip().lower()
+        if part:
+            values.append(part.split()[0].strip("():-"))
+    return values
+
+
+def _spec_status(text: str) -> str:
+    values = _field_values(text, ("Status", "State"))
+    return values[0] if values else ""
+
+
+def _in_inactive_spec_segment(path: Path, root: Path) -> bool:
+    try:
+        relative = path.resolve().relative_to(root.resolve())
+    except (OSError, ValueError):
+        return False
+    return any(part.lower() in INACTIVE_SPEC_PATH_SEGMENTS for part in relative.parts[:-1])
+
+
+def _is_active_spec(path: Path, root: Path) -> bool:
+    if not path.is_file():
+        return False
+    if _in_inactive_spec_segment(path, root):
+        return False
+    status = _spec_status(_small_text(path)).lower()
+    if status and any(token in status for token in INACTIVE_SPEC_STATUSES):
+        return False
+    return True
+
+
 def inspect_project_state(project_root: Path) -> dict[str, Any]:
     """Inspect a bounded set of real project evidence, not the whole repository.
 
@@ -133,14 +211,23 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
         "hasTickets": False,
         "unresolvedTickets": False,
         "allTicketsResolved": False,
+        "unknownTicketState": False,
         "hasAcceptanceEvidence": False,
+        "acceptancePassed": False,
+        "acceptanceFailed": False,
+        "acceptanceUnknown": False,
         "specPaths": [],
         "ticketPaths": [],
         "acceptancePaths": [],
+        "stage": "",
+        "skill": "",
+        "reason": "",
+        "completed": [],
+        "missing": [],
+        "gaps": [],
     }
     if not root.is_dir():
         evidence["stage"] = "unknown"
-        evidence["skill"] = ""
         evidence["reason"] = "project root is not readable"
         evidence["gaps"] = ["project root is not readable"]
         return evidence
@@ -149,12 +236,14 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
     evidence["initialized"] = project_contract.is_file()
 
     # Active SPEC: a few conventional locations plus the .scratch effort root.
+    # Inactive/superseded/archived specs are not project evidence.
     spec_candidates = [
         root / "SPEC.md", root / "spec.md",
         root / "docs" / "SPEC.md", root / "docs" / "spec.md",
     ]
     scratch_specs = sorted(root.glob(".scratch/*/spec.md")) if _has_glob(root, ".scratch/*/spec.md") else []
-    spec_paths = [path for path in [*spec_candidates, *scratch_specs] if path.is_file()]
+    all_spec_candidates = [*spec_candidates, *scratch_specs]
+    spec_paths = [path for path in all_spec_candidates if _is_active_spec(path, root)]
     evidence["hasSpec"] = bool(spec_paths)
     evidence["specPaths"] = [str(path.relative_to(root)) for path in spec_paths[:10]]
 
@@ -164,15 +253,27 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
     evidence["hasTickets"] = bool(ticket_paths)
     evidence["ticketPaths"] = [str(path.relative_to(root)) for path in ticket_paths[:20]]
 
-    resolved_states = {"resolved", "done", "closed", "complete", "completed", "archived", "accepted"}
-    unresolved_states = {"open", "ready", "ready-for-agent", "claimed", "in-progress", "in_progress", "todo", "blocked"}
+    # Ticket completion is fail-closed. A missing status or a status outside the
+    # known resolved/unresolved vocabulary is unknown, not resolved.
     statuses: list[str] = []
+    unknown_ticket = False
     for ticket in ticket_paths:
-        text = _small_text(ticket)
-        for match in re.finditer(r"(?mi)^\s*(?:-\s*)?(?:Status|State)\s*[:.-]\s*(.+)$", text):
-            statuses.extend(part.strip().lower() for part in re.split(r"[,\s]+", match.group(1)) if part.strip())
-    evidence["unresolvedTickets"] = any(status in unresolved_states for status in statuses)
-    evidence["allTicketsResolved"] = bool(ticket_paths) and bool(statuses) and all(status in resolved_states for status in statuses) and not evidence["unresolvedTickets"]
+        ticket_statuses = _field_values(_small_text(ticket), ("Status", "State"))
+        if not ticket_statuses or any(
+            status not in TICKET_RESOLVED_STATES and status not in TICKET_UNRESOLVED_STATES
+            for status in ticket_statuses
+        ):
+            unknown_ticket = True
+        statuses.extend(ticket_statuses)
+    evidence["unknownTicketState"] = unknown_ticket
+    evidence["unresolvedTickets"] = any(status in TICKET_UNRESOLVED_STATES for status in statuses)
+    evidence["allTicketsResolved"] = (
+        bool(ticket_paths)
+        and not unknown_ticket
+        and bool(statuses)
+        and all(status in TICKET_RESOLVED_STATES for status in statuses)
+        and not evidence["unresolvedTickets"]
+    )
 
     # Acceptance/review evidence: bounded to conventional handoff/verdict paths.
     acceptance_candidates = [
@@ -184,8 +285,28 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
         path for pattern in (".scratch/*/acceptance*.md", ".scratch/*/review*/verdict*.md", ".scratch/*/project-review*.md")
         for path in (root.glob(pattern) if _has_glob(root, pattern) else [])
     ]
-    evidence["hasAcceptanceEvidence"] = bool([path for path in [*acceptance_candidates, *scratch_acceptance] if path.is_file()])
-    evidence["acceptancePaths"] = [str(path.relative_to(root)) for path in [*acceptance_candidates, *scratch_acceptance] if path.is_file()][:10]
+    acceptance_paths = [path for path in [*acceptance_candidates, *scratch_acceptance] if path.is_file()]
+    evidence["hasAcceptanceEvidence"] = bool(acceptance_paths)
+    evidence["acceptancePaths"] = [str(path.relative_to(root)) for path in acceptance_paths[:10]]
+
+    acceptance_pass = 0
+    acceptance_fail = 0
+    acceptance_unknown = 0
+    for path in acceptance_paths:
+        verdicts = _field_values(_small_text(path), ("Status", "State", "Verdict", "Result", "Outcome", "Acceptance"))
+        if not verdicts:
+            acceptance_unknown += 1
+            continue
+        for verdict in verdicts:
+            if verdict in ACCEPTANCE_PASS_STATES:
+                acceptance_pass += 1
+            elif verdict in ACCEPTANCE_FAIL_STATES:
+                acceptance_fail += 1
+            else:
+                acceptance_unknown += 1
+    evidence["acceptancePassed"] = bool(acceptance_paths) and acceptance_pass > 0 and acceptance_fail == 0 and acceptance_unknown == 0
+    evidence["acceptanceFailed"] = acceptance_fail > 0
+    evidence["acceptanceUnknown"] = acceptance_unknown > 0
 
     # Derive the current Light project stage and the next Skill from evidence.
     if not evidence["initialized"]:
@@ -234,6 +355,19 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
         evidence["gaps"] = []
         return evidence
 
+    if evidence["unknownTicketState"]:
+        evidence["stage"] = "tickets-unknown"
+        evidence["skill"] = ""
+        evidence["reason"] = (
+            "Ticket files exist but their completion state cannot be established from repository evidence. "
+            "At least one ticket has no Status field or uses a status outside the known resolved/unresolved "
+            "vocabulary, so `ask-light` cannot claim implementation is complete."
+        )
+        evidence["completed"] = ["Light project contract", "active SPEC", "ticket files present"]
+        evidence["missing"] = ["reliable ticket completion state"]
+        evidence["gaps"] = [evidence["reason"]]
+        return evidence
+
     if not evidence["hasAcceptanceEvidence"]:
         evidence["stage"] = "implementation-complete"
         evidence["skill"] = "project-review"
@@ -243,10 +377,36 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
         evidence["gaps"] = []
         return evidence
 
+    if not evidence["acceptancePassed"]:
+        if evidence["acceptanceFailed"]:
+            evidence["stage"] = "acceptance-not-passed"
+            evidence["reason"] = (
+                "Acceptance evidence exists but reports a FAIL, BLOCKED, rejected, incomplete, or pending "
+                "verdict. This is not a successful acceptance, so `ask-light` does not mark the workflow complete."
+            )
+            evidence["missing"] = ["successful acceptance verdict"]
+        else:
+            evidence["stage"] = "acceptance-unknown"
+            evidence["reason"] = (
+                "Acceptance evidence exists but a clear PASS verdict cannot be established from the repository "
+                "evidence. `ask-light` therefore does not claim the project is accepted."
+            )
+            evidence["missing"] = ["verifiable acceptance PASS verdict"]
+        evidence["skill"] = ""
+        evidence["completed"] = ["Light project contract", "active SPEC", "tickets resolved"]
+        evidence["gaps"] = [evidence["reason"]]
+        return evidence
+
     evidence["stage"] = "accepted"
     evidence["skill"] = ""
-    evidence["reason"] = "The project already has acceptance/review evidence; there is no obvious next Light project stage from this evidence."
-    evidence["completed"] = ["Light project contract", "active SPEC", "tickets resolved", "acceptance evidence"]
+    evidence["reason"] = "The current Light workflow is complete: the project is initialized, has an active SPEC, all implementation tickets are explicitly resolved, and acceptance evidence explicitly passes."
+    evidence["completed"] = [
+        "project initialized",
+        "SPEC completed",
+        "tickets resolved",
+        "implementation completed",
+        "acceptance passed",
+    ]
     evidence["missing"] = []
     evidence["gaps"] = []
     return evidence
@@ -648,12 +808,29 @@ def next_result(roots: list[dict[str, Any]], context: dict[str, Any], host: str,
 
     goal = str(context.get("goal") or "")
     task_kind = str(context.get("taskKind") or "")
-    generic_project_question = bool(re.search(r"(?i)\\b(next|stage|status|what.*missing|what.*complete|what.*done)\\b", goal))
+    # Terminating and evidence-blocked project stages are valid conclusions even
+    # when no next Skill is recommended. Do not let them fall through into a
+    # generic NEED-INPUT or unrelated logical route.
+    if project_state.get("stage") in {"accepted", "tickets-unknown", "acceptance-not-passed", "acceptance-unknown"}:
+        status = "RECOMMEND" if project_state.get("stage") == "accepted" else "NEED-INPUT"
+        result = base_result("next", status, project_state.get("gaps", []))
+        result.update({
+            "skill": "",
+            "reason": project_state.get("reason", ""),
+            "invocation": "",
+            "projectStage": project_state.get("stage", ""),
+            "completed": project_state.get("completed", []),
+            "missing": project_state.get("missing", []),
+        })
+        result["next"] = "no-execution"
+        return result
+
+    project_state_intent = bool(goal and PROJECT_STATE_INTENT_PATTERN.search(goal))
     state_driven = bool(
         project_state.get("stage")
         and project_state.get("skill")
         and not task_kind
-        and (not goal or generic_project_question)
+        and (not goal or project_state_intent)
     )
     if not goal and not task_kind and not state_driven:
         return base_result("next", "NEED-INPUT", ["Provide goal, taskKind, or a projectRoot with enough evidence to derive the current stage."])

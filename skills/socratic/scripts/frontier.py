@@ -20,6 +20,7 @@ class Decision:
         question: str,
         options: list[dict[str, str]] | None = None,
         recommended: str = "",
+        recommendation_reason: str = "",
         depends_on: list[str] | None = None,
         resolved: bool = False,
         answer: str = "",
@@ -29,6 +30,7 @@ class Decision:
         self.question = question
         self.options = options or []
         self.recommended = recommended
+        self.recommendation_reason = recommendation_reason
         self.depends_on = depends_on or []
         self.resolved = resolved
         self.answer = answer
@@ -37,6 +39,12 @@ class Decision:
 
 def _resolved_ids(decisions: list[Decision]) -> set[str]:
     return {item.id for item in decisions if item.resolved}
+
+
+def _clean_answer(value: str) -> str:
+    """Remove stray batch separators around an answer while preserving qualifiers."""
+    value = value.strip().lstrip(",;:").strip().rstrip(",;:").strip()
+    return value
 
 
 def compute_frontier(decisions: list[Decision]) -> list[Decision]:
@@ -52,6 +60,7 @@ def parse_batch_response(text: str, frontier: list[Decision]) -> dict[str, str]:
 
     Supported forms:
       1B, 2A, 3C
+      1B; 2A, but only locally; 3C
       1: B
       2: A
       3: C
@@ -60,8 +69,9 @@ def parse_batch_response(text: str, frontier: list[Decision]) -> dict[str, str]:
       Q3: C
       1B, 3C
 
-    Qualifiers stay attached to the answer they follow. Unanswered questions
-    are intentionally left out of the returned mapping.
+    Semicolon/comma separators are removed cleanly. Qualifiers stay attached
+    to the answer they follow. Unanswered questions are intentionally left out
+    of the returned mapping.
     """
     answers: dict[str, str] = {}
     used_ranges: list[tuple[int, int]] = []
@@ -82,7 +92,7 @@ def parse_batch_response(text: str, frontier: list[Decision]) -> dict[str, str]:
         for pattern in colon_patterns:
             match = re.search(pattern, text, re.I | re.S)
             if match and not inside(match):
-                answers[decision.id] = match.group(1).strip().rstrip(",").strip()
+                answers[decision.id] = _clean_answer(match.group(1))
                 mark(match)
                 break
         else:
@@ -95,7 +105,7 @@ def parse_batch_response(text: str, frontier: list[Decision]) -> dict[str, str]:
                 if rest.strip():
                     next_token = re.search(r"(?<!\w)(?:\d+\s*[A-Za-z]|\d+\s*[:.\-]|Q\d+)", rest)
                     chunk = rest[:next_token.start()] if next_token else rest
-                    chunk = chunk.strip().lstrip(",").strip().rstrip(",").strip()
+                    chunk = _clean_answer(chunk)
                     if chunk:
                         answer += f", {chunk}"
                 answers[decision.id] = answer
@@ -122,6 +132,7 @@ def round_items(decisions: list[Decision]) -> list[dict[str, Any]]:
             "question": item.question,
             "options": item.options,
             "recommended": item.recommended,
+            "recommendation_reason": item.recommendation_reason,
             "depends_on": item.depends_on,
         }
         for item in compute_frontier(decisions)
@@ -147,6 +158,7 @@ if __name__ == "__main__":
             question=item["question"],
             options=item.get("options", []),
             recommended=item.get("recommended", ""),
+            recommendation_reason=item.get("recommendation_reason", ""),
             depends_on=item.get("depends_on", []),
             resolved=item.get("resolved", False),
             answer=item.get("answer", ""),

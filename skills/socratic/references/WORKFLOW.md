@@ -44,20 +44,21 @@ resolved, identify affected dependencies, then recompute the frontier.
    prerequisites are already settled. Ask that entire frontier as a round.
    Number questions (`Q1`, `Q2`, ...). For decisions that can be discretized,
    give concrete options (`A. ...`, `B. ...`, `C. ...`). Give a recommended
-   answer when evidence supports one. Always allow answers outside the listed
-   choices.
+   option and a useful short reason when evidence supports one. Always allow
+   answers outside the listed choices.
 3. Do not ask questions whose answers depend on unresolved decisions from the
    same round; those belong to a later frontier.
-4. Accept one compact batch reply (`1B, 2A, 3C`), mixed free text, or prose.
-   Map answers to the correct questions, preserve nuance/qualifiers, mark
-   resolved decisions, leave unanswered questions open, and recompute the
-   frontier.
+4. Accept one compact batch reply (`1B, 2A, 3C` or `1B; 2A, but only locally;
+   3C`), mixed free text, or prose. Map answers to the correct questions,
+   preserve nuance/qualifiers, mark resolved decisions, leave unanswered
+   questions open, and recompute the frontier.
 5. On an answer, dynamically adjust the next frontier rather than following a
    prewritten order. An answer often settles multiple decisions or surfaces
    new ones.
 6. Return the updated internal state and a conversational projection. Recommend
-   an option when the evidence supports a judgment, while preserving the user's
-   decision. Pause for the reply or separately authorized fact work.
+   an option and give the short reason behind that recommendation when the
+   evidence supports a judgment, while preserving the user's decision. Pause
+   for the reply or separately authorized fact work.
 
 ## Round size
 

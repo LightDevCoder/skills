@@ -48,7 +48,7 @@ class ClarifyPublicContractTest(unittest.TestCase):
         skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
         workflow = (ROOT / "references" / "WORKFLOW.md").read_text(encoding="utf-8")
         combined = skill + workflow
-        for token in ("Q1", "Q2", "1B, 2A, 3C", "complete current frontier as a round"):
+        for token in ("Q1", "Q2", "1B, 2A, 3C", "1B; 2A, but only locally;", "useful short reason", "complete current frontier as a round"):
             self.assertIn(token, combined)
 
 

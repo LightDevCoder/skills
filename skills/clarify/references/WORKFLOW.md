@@ -20,11 +20,12 @@ Do not start `clarify` from a general vague prompt — wait for the explicit
    facts, user-owned open decisions, dependencies, and the current frontier.
 3. Present the conversational projection from `socratic`: acknowledge what the
    latest answer settled, show the **complete current frontier as a round**,
-   number the questions, include real tradeoffs/options, and add a
-   recommendation for each question when evidence supports judgment.
-4. Keep the session active. Accept one compact batch reply (`1B, 2A, 3C`) or
-   prose; feed the next ordinary user reply back to `socratic`, recompute the
-   frontier, and present the next round.
+   number the questions, include real tradeoffs/options, and add a recommended
+   option plus a useful short reason for each question when evidence supports
+   judgment.
+4. Keep the session active. Accept one compact batch reply (`1B, 2A, 3C` or
+   `1B; 2A, but only locally; 3C`) or prose; feed the next ordinary user reply
+   back to `socratic`, recompute the frontier, and present the next round.
 5. When the engine reports no open decision or dependency, synthesize the
    shared understanding and ask for confirmation. Confirmation ends the
    session; a correction updates state and continues.

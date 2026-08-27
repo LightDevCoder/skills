@@ -23,10 +23,11 @@ Use it when a clarification wrapper (`clarify`, `project-clarify`,
 Each round normally contains multiple independent questions when multiple
 frontier decisions exist. Number them (`Q1`, `Q2`, ...). Provide concrete
 options when decisions can reasonably be discretized, and include a
-recommendation when evidence supports one; the user owns the decision and may
-always answer outside the listed choices. Accept a compact batch reply
-(`1B, 2A, 3C`), mixed free text, or normal prose, and mark only the answered
-questions resolved.
+recommended option plus a useful short reason for that recommendation; the
+user owns the decision and may always answer outside the listed choices.
+Accept a compact batch reply (`1B, 2A, 3C` or `1B; 2A, but only locally;
+3C`), mixed free text, or normal prose, and mark only the answered questions
+resolved.
 
 Facts are not user decisions: inspectable, researchable, or testable gaps are
 dependencies, not choices for the user to invent.

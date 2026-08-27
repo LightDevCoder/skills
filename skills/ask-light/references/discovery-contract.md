@@ -32,6 +32,18 @@ Do not read the entire repository blindly. If the request is clearly standalone
 (ELI5, language practice, recap, bug investigation, manuscript setup, teach),
 skip project inspection and route from the Skill map.
 
+Project-state evidence is fail-closed:
+
+- A SPEC counts as active only when it is not superseded, obsolete, archived,
+  deprecated, or otherwise retired (including specs under obvious archive/old
+  path segments).
+- Ticket completion is established only from explicit resolved statuses.
+  Missing statuses or statuses outside the known unresolved/resolved
+  vocabulary do **not** count as resolved.
+- Acceptance counts only when the repository evidence explicitly records a
+  PASS verdict. FAIL, BLOCKED, incomplete, pending, or unreadable verdicts do
+  **not** count as accepted.
+
 ## Layer A — Light Skill Map
 
 [`light-skill-map.json`](light-skill-map.json) is the Light-owned routing and

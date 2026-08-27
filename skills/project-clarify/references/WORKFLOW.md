@@ -8,8 +8,8 @@ this file summarizes the execution order and references the examples.
 
 1. **Inspect** — read applicable project facts with paths and locations.
 2. **Socratic** — call `socratic` to maintain the frontier; present the
-   complete current frontier as a round with numbered questions, choices, and
-   recommendations. Accept batch replies.
+   complete current frontier as a round with numbered questions, choices, a
+   recommended option, and a useful short reason. Accept batch replies.
 3. **Fact work (optional)** — `research`/`prototype` only when authorized;
    use `to-questionnaire` as the handoff branch when the missing information is
    held by another person.

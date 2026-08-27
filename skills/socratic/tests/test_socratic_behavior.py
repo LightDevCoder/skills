@@ -15,9 +15,25 @@ SPEC.loader.exec_module(FRONTIER)
 
 def sample_decisions() -> list[FRONTIER.Decision]:
     return [
-        FRONTIER.Decision("D1", "Output format?", options=[{"label": "A", "text": "Keep structure"}, {"label": "B", "text": "Flatten"}], recommended="A"),
-        FRONTIER.Decision("D2", "Conflict strategy?", options=[{"label": "A", "text": "Overwrite"}, {"label": "B", "text": "Skip"}, {"label": "C", "text": "Prompt"}], recommended="C", depends_on=["D1"]),
-        FRONTIER.Decision("D3", "First platform?", options=[{"label": "A", "text": "macOS"}, {"label": "B", "text": "Cross-platform"}], recommended="A"),
+        FRONTIER.Decision(
+            "D1", "Output format?",
+            options=[{"label": "A", "text": "Keep structure"}, {"label": "B", "text": "Flatten"}],
+            recommended="A",
+            recommendation_reason="Keeping structure preserves context and avoids most rename collisions.",
+        ),
+        FRONTIER.Decision(
+            "D2", "Conflict strategy?",
+            options=[{"label": "A", "text": "Overwrite"}, {"label": "B", "text": "Skip"}, {"label": "C", "text": "Prompt"}],
+            recommended="C",
+            recommendation_reason="Prompting is the safest default when collisions are possible.",
+            depends_on=["D1"],
+        ),
+        FRONTIER.Decision(
+            "D3", "First platform?",
+            options=[{"label": "A", "text": "macOS"}, {"label": "B", "text": "Cross-platform"}],
+            recommended="A",
+            recommendation_reason="macOS only keeps the first version small.",
+        ),
     ]
 
 
@@ -30,6 +46,7 @@ class SocraticBehaviorTest(unittest.TestCase):
         self.assertNotIn("frontierDecisionLimit", CONTRACT["projection"])
         self.assertTrue(CONTRACT["projection"]["acknowledgeLatestEvidence"])
         self.assertTrue(CONTRACT["projection"]["showMeaningfulTradeoffs"])
+        self.assertTrue(CONTRACT["projection"]["recommendationReasonRequired"])
         self.assertIn("frontier", CONTRACT["internalState"])
 
     def test_recommendation_preserves_user_decision(self) -> None:
@@ -66,6 +83,15 @@ class SocraticBehaviorTest(unittest.TestCase):
         first = items[0]
         self.assertEqual(first["options"][0]["label"], "A")
         self.assertTrue(first["recommended"])
+        self.assertTrue(first["recommendation_reason"])
+
+    def test_each_frontier_question_has_a_recommendation_reason(self) -> None:
+        items = FRONTIER.round_items(sample_decisions())
+        self.assertTrue(items)
+        for item in items:
+            with self.subTest(question=item["id"]):
+                self.assertTrue(item["recommended"])
+                self.assertTrue(item["recommendation_reason"].strip())
 
     def test_colon_and_q_colon_batch_response_parsing(self) -> None:
         decisions = sample_decisions()
@@ -74,6 +100,20 @@ class SocraticBehaviorTest(unittest.TestCase):
         for response in ("1: B\n2: A\n3: C", "Q1: B\nQ2: A\nQ3: C", "1: B, 2: A, 3: C"):
             with self.subTest(response=response):
                 self.assertEqual(FRONTIER.parse_batch_response(response, frontier), {"D1": "B", "D2": "A", "D3": "C"})
+
+    def test_semicolon_separated_batch_response_parses_cleanly(self) -> None:
+        decisions = sample_decisions()
+        decisions[1].depends_on = []  # make all three independent for parsing
+        frontier = FRONTIER.compute_frontier(decisions)
+        answers = FRONTIER.parse_batch_response("1B; 2A, but only locally; 3C", frontier)
+        self.assertEqual(answers, {"D1": "B", "D2": "A, but only locally", "D3": "C"})
+
+    def test_semicolon_colon_batch_response_parses_without_stray_punctuation(self) -> None:
+        decisions = sample_decisions()
+        decisions[1].depends_on = []  # make all three independent for parsing
+        frontier = FRONTIER.compute_frontier(decisions)
+        answers = FRONTIER.parse_batch_response("1: B; 2: A; 3: C", frontier)
+        self.assertEqual(answers, {"D1": "B", "D2": "A", "D3": "C"})
 
     def test_qualified_colon_answers_preserve_qualifiers(self) -> None:
         decisions = sample_decisions()

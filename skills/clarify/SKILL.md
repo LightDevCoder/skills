@@ -18,11 +18,11 @@ exit, or a switch to another workflow.
 2. Present the engine’s conversational projection: a brief acknowledgement and
    the **current frontier as a round**. Ask multiple independent questions when
    they exist, number them (`Q1`, `Q2`, ...), give concrete choices for
-   decisions that can be discretized, and include a recommendation when
-   context supports one.
-3. Accept a compact batch reply (`1B, 2A, 3C`), mixed free text, or normal
-   prose. Treat the next normal user message as evidence, call `socratic`
-   again, and continue until the completion gate.
+   decisions that can be discretized, and include a recommended option plus a
+   useful short reason when context supports one.
+3. Accept a compact batch reply (`1B, 2A, 3C` or `1B; 2A, but only locally;
+   3C`), mixed free text, or normal prose. Treat the next normal user message
+   as evidence, call `socratic` again, and continue until the completion gate.
 
 If a fact-finding gap blocks the frontier, report the gap and the capability
 that would resolve it (`research`, `prototype`, or `to-questionnaire`); do not

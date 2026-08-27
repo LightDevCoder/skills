@@ -33,6 +33,10 @@ def write_project_state(
     resolved_ticket: bool = False,
     acceptance: bool = False,
     clear_goal: bool = True,
+    ticket_status: str | None = None,
+    ticket_statuses: list[str] | None = None,
+    spec_inactive: bool = False,
+    acceptance_verdict: str | None = "PASS",
 ) -> None:
     root.mkdir(parents=True, exist_ok=True)
     if initialized:
@@ -45,10 +49,31 @@ def write_project_state(
             content += "- Goal: ?\n- Outputs: (none recorded)\n"
         content += "- Relevant Skills: project-spec, project-tickets, implement, project-review\n<!-- light-project:managed:end -->\n"
         (agents / "light-project.md").write_text(content, encoding="utf-8")
-    if spec:
+    if spec and not spec_inactive:
         (root / "docs").mkdir(exist_ok=True)
         (root / "docs" / "SPEC.md").write_text("# SPEC\n\nStable acceptance criteria.\n", encoding="utf-8")
-    if unresolved_ticket or resolved_ticket:
+    if spec_inactive:
+        old = root / ".scratch" / "old"
+        (old).mkdir(parents=True, exist_ok=True)
+        (old / "spec.md").write_text("# SPEC\n\nStatus: superseded\n", encoding="utf-8")
+    if ticket_statuses is not None:
+        issues = root / ".scratch" / "effort" / "issues"
+        issues.mkdir(parents=True, exist_ok=True)
+        for index, status in enumerate(ticket_statuses, start=1):
+            target = issues / f"{index:02d}-ticket.md"
+            if status is None or status == "":
+                target.write_text("# Ticket body\n\nNo status recorded.\n", encoding="utf-8")
+            else:
+                target.write_text(f"- Status: {status}\n", encoding="utf-8")
+    elif ticket_status is not None:
+        issues = root / ".scratch" / "effort" / "issues"
+        issues.mkdir(parents=True, exist_ok=True)
+        target = issues / "01-ticket.md"
+        if ticket_status == "":
+            target.write_text("# Ticket body\n\nNo status recorded.\n", encoding="utf-8")
+        else:
+            target.write_text(f"- Status: {ticket_status}\n", encoding="utf-8")
+    elif unresolved_ticket or resolved_ticket:
         issues = root / ".scratch" / "effort" / "issues"
         issues.mkdir(parents=True, exist_ok=True)
         status = "resolved" if resolved_ticket else "open"
@@ -56,7 +81,10 @@ def write_project_state(
     if acceptance:
         agents = root / "docs" / "agents"
         agents.mkdir(parents=True, exist_ok=True)
-        (agents / "acceptance.md").write_text("Verdict: PASS\n", encoding="utf-8")
+        if acceptance_verdict is None:
+            (agents / "acceptance.md").write_text("Acceptance record exists.\n", encoding="utf-8")
+        else:
+            (agents / "acceptance.md").write_text(f"Verdict: {acceptance_verdict}\n", encoding="utf-8")
 
 
 class AskLightBehaviorTest(unittest.TestCase):
@@ -379,6 +407,98 @@ class AskLightBehaviorTest(unittest.TestCase):
                 self.assertTrue(result["completed"], "project-state result must list completed evidence")
                 self.assertTrue(result["missing"], "project-state result must list missing evidence")
                 self.assertTrue(result["reason"], "project-state result must include workflow reasoning")
+
+    def test_natural_project_state_questions_use_real_repository_evidence(self) -> None:
+        phrases = [
+            "What's next for this project?",
+            "What should I do next?",
+            "Where is this project now?",
+            "What stage are we at?",
+            "What's missing?",
+            "What have we finished?",
+            "What is left?",
+            "What should I work on now?",
+        ]
+        for phrase in phrases:
+            with self.subTest(phrase=phrase), tempfile.TemporaryDirectory(prefix="ask-light-natural-") as tmp:
+                project = Path(tmp) / "project"
+                write_project_state(project, initialized=True, spec=True)
+                context = {
+                    "projectRoot": str(project),
+                    "goal": phrase,
+                    "invocationControl": "explicit-only",
+                    "availability": "codex",
+                }
+                result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+                self.assertEqual(result["status"], "RECOMMEND", result)
+                self.assertEqual(result["skill"], "project-tickets")
+                self.assertEqual(result["projectStage"], "spec-no-tickets")
+                self.assertNotIn("ticket", phrase.lower(), "prompt must not encode the expected conclusion")
+                self.assertIn("SPEC", result["reason"])
+
+    def test_ticket_state_fail_closed_regressions(self) -> None:
+        cases = [
+            ("missing-status", [None], "NEED-INPUT", "tickets-unknown", ""),
+            ("unknown-status", ["unknown"], "NEED-INPUT", "tickets-unknown", ""),
+            ("mixed-resolved-unknown", ["resolved", "unknown"], "NEED-INPUT", "tickets-unknown", ""),
+            ("resolved-only", ["resolved"], "RECOMMEND", "implementation-complete", "project-review"),
+            ("unresolved", ["open"], "RECOMMEND", "work-in-progress", "implement"),
+        ]
+        for label, statuses, expected_status, expected_stage, expected_skill in cases:
+            with self.subTest(label=label), tempfile.TemporaryDirectory(prefix="ask-light-tickets-") as tmp:
+                project = Path(tmp) / "project"
+                write_project_state(project, initialized=True, spec=True, ticket_statuses=statuses)
+                context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+                result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+                self.assertEqual(result["status"], expected_status, result)
+                self.assertEqual(result["projectStage"], expected_stage)
+                self.assertEqual(result["skill"], expected_skill)
+                if expected_status == "NEED-INPUT":
+                    self.assertIn("cannot be established", result["reason"])
+                    self.assertNotEqual(result["skill"], "project-review")
+
+    def test_superseded_scratch_spec_is_not_active_project_evidence(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-spec-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True, spec_inactive=True)
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "RECOMMEND", result)
+            self.assertEqual(result["skill"], "project-spec")
+            self.assertEqual(result["projectStage"], "initialized-no-spec")
+            self.assertNotEqual(result["projectStage"], "spec-no-tickets")
+
+    def test_acceptance_verdicts_are_fail_closed(self) -> None:
+        cases = [
+            ("pass", "PASS", "RECOMMEND", "accepted", ""),
+            ("fail", "FAIL", "NEED-INPUT", "acceptance-not-passed", ""),
+            ("blocked", "BLOCKED", "NEED-INPUT", "acceptance-not-passed", ""),
+            ("unknown-verdict", "maybe", "NEED-INPUT", "acceptance-unknown", ""),
+            ("missing-verdict", None, "NEED-INPUT", "acceptance-unknown", ""),
+        ]
+        for label, verdict, expected_status, expected_stage, expected_skill in cases:
+            with self.subTest(label=label), tempfile.TemporaryDirectory(prefix="ask-light-accept-") as tmp:
+                project = Path(tmp) / "project"
+                write_project_state(
+                    project,
+                    initialized=True,
+                    spec=True,
+                    ticket_statuses=["resolved"],
+                    acceptance=True,
+                    acceptance_verdict=verdict,
+                )
+                context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+                result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+                self.assertEqual(result["status"], expected_status, result)
+                self.assertEqual(result["projectStage"], expected_stage)
+                self.assertEqual(result["skill"], expected_skill)
+                if expected_status == "RECOMMEND":
+                    self.assertEqual(result["next"], "no-execution")
+                    self.assertIn("acceptance passed", result["completed"])
+                    self.assertEqual(result["missing"], [])
+                else:
+                    self.assertNotEqual(result["projectStage"], "accepted")
+                    self.assertIn("acceptance", result["reason"].lower())
 
     def test_natural_language_family_navigation(self) -> None:
         cases = [
