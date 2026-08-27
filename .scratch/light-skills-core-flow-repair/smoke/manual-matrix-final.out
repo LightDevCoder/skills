@@ -1,0 +1,29 @@
+01. fresh software PASS                                        required=accepted                 observed=accepted                 OK
+02. changed-path drift (dirty)                                 required=review-stale             observed=review-stale             OK
+03. changed-path drift (committed)                             required=review-stale             observed=review-stale             OK
+04. pre-existing in-scope file (dirty)                         required=review-stale             observed=review-stale             OK
+05. pre-existing in-scope file (committed)                     required=review-stale             observed=review-stale             OK
+06. new untracked in-scope implementation file                 required=review-stale             observed=review-stale             OK
+06. new STAGED in-scope implementation file                    required=review-stale             observed=review-stale             OK
+07. committed new in-scope implementation file                 required=review-stale             observed=review-stale             OK
+08. in-scope deletion (dirty)                                  required=review-stale             observed=review-stale             OK
+09. dirty README outside scope                                 required=accepted                 observed=accepted                 OK
+10. committed README outside scope                             required=accepted                 observed=accepted                 OK
+11. whole-repo scope '.' + committed README change             required=review-stale             observed=review-stale             OK
+12. exact-file scope + untracked sibling stays current         required=accepted                 observed=accepted                 OK
+13. missing Implementation scope                               required=review-freshness-unknown observed=review-freshness-unknown OK
+14. mixed valid/invalid scope rejects WHOLE field              required=review-freshness-unknown observed=review-freshness-unknown OK
+15. legacy d00b221 two-value record never accepts              required=review-freshness-unknown observed=review-freshness-unknown OK
+16. Fixed point '<invalid-40hex> <valid>' no salvage           required=review-freshness-unknown observed=review-freshness-unknown OK
+17. missing Reviewed implementation revision                   required=review-freshness-unknown observed=review-freshness-unknown OK
+18. unresolvable Reviewed implementation revision              required=review-freshness-unknown observed=review-freshness-unknown OK
+19. FAIL then in-scope drift                                   required=review-stale             observed=review-stale             OK
+20. BLOCKED then in-scope drift                                required=review-stale             observed=review-stale             OK
+21. review->repair C1(b1562ccb)->C2(20969a47)->PASS binds C2                 required=accepted            observed=accepted                 OK
+22. in-scope change after accepted C2                          required=review-stale             observed=review-stale             OK
+22b. out-of-scope change after accepted C2                             required=accepted            observed=accepted                 OK
+23. directory Source + new untracked child                     required=review-stale             observed=review-stale             OK
+24. untracked outside directory Source                         required=accepted                 observed=accepted                 OK
+25. file Source + untracked sibling                            required=accepted                 observed=accepted                 OK
+
+Manual smoke complete.

@@ -88,3 +88,27 @@ legacy note). `skills/generic-review` was introduced as the default reviewer
 Retained evidence: old `review-loop` tests that validate the final-acceptance
 protocol remain applicable to `project-review`; lightweight engine tests (if
 any) validate `review-loop`'s 5-step convergence and handoff.
+
+## Software baseline contract break (this release train)
+
+The earliest `project-review` software records froze the Charter fixed point
+as two commits (`Fixed point: <base> <candidate>`) and derived consumer
+freshness from exactly the paths that window touched. Human audit proved this
+fail-open: pre-existing or future files inside the accepted component evaded
+freshness, and malformed identities were partially salvaged (invalid tokens
+dropped, duplicates deduplicated).
+
+This is an intentional compatibility break for an unreleased unsafe acceptance
+record format. The software contract now requires three fields
+([profiles/software.md](profiles/software.md)):
+
+- Charter `- Fixed point:` — one full commit SHA, the immutable review base;
+- Charter `- Implementation scope:` — the reviewed software target as
+  repository-relative literal paths;
+- verdict `- Reviewed implementation revision:` — one full commit SHA, the
+  final evaluated candidate.
+
+Records in the old shape, and any record missing these fields, fail closed as
+`review-freshness-unknown`; they are never silently migrated at read time.
+Run a fresh `project-review` under the corrected contract to produce a safe,
+consumable verdict. There is no fallback to touched-window paths.

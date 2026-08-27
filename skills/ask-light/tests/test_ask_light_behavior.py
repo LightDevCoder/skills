@@ -194,6 +194,8 @@ def write_project_review_state(
     dir_name: str = ".project-review",
     profile: str = "generic",
     fixed_point: str | None = None,
+    implementation_scope: str | None = None,
+    final_revision: str | None = None,
 ) -> Path:
     """Write a durable record with the REAL project-review layout.
 
@@ -202,8 +204,10 @@ def write_project_review_state(
     was reviewed; `Source revision or identity:` freezes its baseline). With
     ``revision_identity="auto"`` the current project tree is committed first —
     exactly how a real Light workflow freezes a repository source — and the
-    recorded value is that resolvable commit. ``profile`` and ``fixed_point``
-    mirror the software Profile's second frozen baseline
+    recorded value is that resolvable commit. ``profile`` plus ``fixed_point``
+    (immutable review base), ``implementation_scope`` (reviewed software
+    target), and ``final_revision`` (verdict `- Reviewed implementation
+    revision:`) mirror the software Profile's three-field baseline
     (references/profiles/software.md).
     """
     review_dir = root / dir_name
@@ -234,7 +238,8 @@ def write_project_review_state(
             "\n"
             "## Review Profile\n"
             f"- Profile: {profile}\n"
-            + (f"- Fixed point: {fixed_point}\n" if fixed_point is not None else ""),
+            + (f"- Fixed point: {fixed_point}\n" if fixed_point is not None else "")
+            + (f"- Implementation scope: {implementation_scope}\n" if implementation_scope is not None else ""),
             encoding="utf-8",
         )
     (review_dir / "state.md").write_text(
@@ -252,7 +257,8 @@ def write_project_review_state(
             "- Charter revision: 1\n"
             "- Profile: generic\n"
             f"- Verdict: **{verdict}**\n"
-            "- Round: round-01 (final)\n"
+            + (f"- Reviewed implementation revision: {final_revision}\n" if final_revision is not None else "")
+            + "- Round: round-01 (final)\n"
             "\n"
             "## Conclusion\n"
             "The frozen baseline is accepted.\n",
@@ -1271,15 +1277,21 @@ class ReviewFreshnessRegressionTest(unittest.TestCase):
             self.assertEqual(result["projectStage"], "accepted", result)
 
 
-class SoftwareReviewFreshnessTest(unittest.TestCase):
-    """§13: a software Profile verdict binds to its reviewed implementation
-    fixed point as well as its approved source baseline.
+class SoftwareBaselineFreshnessTest(unittest.TestCase):
+    """Software Profile baseline contract (producer owner:
+    skills/project-review references/profiles/software.md).
 
-    The producer contract (skills/project-review references/profiles/software.md)
-    freezes `- Fixed point:` alongside the Charter source fields. Drift on the
-    recorded implementation window — dirty or committed — stales ANY old
-    verdict; changes outside the window stay unrelated; missing/unresolvable
-    identities fail closed.
+    A software verdict binds to THREE frozen identities: Charter
+    `- Fixed point:` (immutable code-review base, exactly one full SHA),
+    Charter `- Implementation scope:` (the reviewed software target as
+    repository-relative literal paths), and the verdict's
+    `- Reviewed implementation revision:` (the final evaluated candidate).
+    Freshness holds only while, inside that scope, the tree exactly matches
+    the reviewed revision (tracked/committed/staged/unstaged drift and
+    untracked additions alike); the base must delimit the final revision with
+    non-empty in-scope change; malformed/missing identities are never
+    salvaged; FAIL/BLOCKED bind equally; legacy d00b221-shaped records never
+    accept.
     """
 
     def setUp(self) -> None:
@@ -1296,146 +1308,344 @@ class SoftwareReviewFreshnessTest(unittest.TestCase):
         context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
         return ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
 
+    def garbage_sha(self) -> str:
+        return "0f1e2d3c4b5a9876543210fedcba9876543210ab"
+
     def build_reviewed_software_project(
         self,
         *,
         verdict: str = "PASS",
         include_fixed_point: bool = True,
-        resolvable_fixed_point: bool = True,
-        single_endpoint: bool = False,
+        fixed_point_override: str | None = None,
+        include_scope: bool = True,
+        scope_value: str = "src/",
+        include_final_revision: bool = True,
+        final_revision_override: str | None = None,
     ) -> tuple[Path, str, str]:
-        """Skeleton commit -> implementation commit, then a software review whose
-        Source is the approved SPEC (base) and whose fixed point names both."""
+        """Base commit B (holds pre-existing src/common.py) -> implementation
+        commit C1 (adds src/app.py), then a software record whose Source is the
+        approved SPEC at B and whose three-field baseline names B/C1 by default."""
         self._count += 1
         project = Path(self.temp.name) / f"soft-{self._count}"
         write_project_state(project, initialized=True, spec=True)
         write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
         (project / "README.md").write_text("# Project\nv1\n", encoding="utf-8")
-        base = ensure_git_baseline(project)
         src = project / "src"
         src.mkdir()
+        # Pre-existing component member: deliberately untouched by the B..C
+        # review diff so §11-style evasion attempts are exercised directly.
+        (src / "common.py").write_text("VALUE_COMMON = 1\n", encoding="utf-8")
+        base = ensure_git_baseline(project)
         (src / "app.py").write_text("print('implementation v1')\n", encoding="utf-8")
-        (src / "util.py").write_text("VALUE = 1\n", encoding="utf-8")
         _git(project, "add", "-A")
         commit_all(project, "implement feature v1")
         candidate = _git(project, "rev-parse", "HEAD").stdout.strip()
-        if not include_fixed_point:
-            fixed_point = None
-        elif not resolvable_fixed_point:
-            fixed_point = "0f1e2d3c4b5a9e8d"
-        elif single_endpoint:
-            fixed_point = candidate
+        if fixed_point_override == "LEGACY_TWO_VALUE":
+            fixed_value: str | None = f"{base} {candidate}"  # exact d00b221 shape
+        elif fixed_point_override is not None:
+            fixed_value = fixed_point_override
         else:
-            fixed_point = f"{base} {candidate}"
+            fixed_value = base
         write_project_review_state(
             project,
             reviewed_effort="current",
             verdict=verdict,
             revision_identity=base,
             profile="software",
-            fixed_point=fixed_point,
+            fixed_point=fixed_value if include_fixed_point else None,
+            implementation_scope=scope_value if include_scope else None,
+            final_revision=(final_revision_override if final_revision_override is not None else candidate)
+            if include_final_revision else None,
         )
         return project, base, candidate
 
-    def change_implementation(self, project: Path, *, commit: bool) -> None:
-        app = project / "src" / "app.py"
-        app.write_text("print('implementation v2')\n", encoding="utf-8")
+    # -- mutation helpers ---------------------------------------------------
+    def modify(self, project: Path, relative: str, content: str, *, commit: bool = False) -> None:
+        target = project / relative
+        target.write_text(content, encoding="utf-8")
         if commit:
             _git(project, "add", "-A")
-            commit_all(project, "post-review implementation change")
+            commit_all(project, f"modify {relative}")
 
-    # A: fresh software PASS on intact source + implementation baselines.
-    def test_fresh_software_pass_is_accepted(self) -> None:
-        for single_endpoint in (False, True):
-            label = "single-endpoint-candidate" if single_endpoint else "two-endpoint-window"
-            with self.subTest(label=label):
-                project, _base, _candidate = self.build_reviewed_software_project(
-                    single_endpoint=single_endpoint,
-                )
-                result = self.route(project)
-                self.assertEqual(result["status"], "RECOMMEND", result)
-                self.assertEqual(result["projectStage"], "accepted", result)
-                self.assertEqual(result["skill"], "")
-                self.assertEqual(result["next"], "no-execution")
+    def add_file(self, project: Path, relative: str, content: str, *, staged: bool = False, commit: bool = False) -> None:
+        target = project / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(content, encoding="utf-8")
+        if staged or commit:
+            _git(project, "add", "-A")
+        if commit:
+            commit_all(project, f"add {relative}")
+
+    def delete(self, project: Path, relative: str, *, commit: bool = False) -> None:
+        (project / relative).unlink()
+        if commit:
+            _git(project, "add", "-A")
+            commit_all(project, f"delete {relative}")
+
+    def replace_field(self, project: Path, field: str, value: str | None) -> None:
+        charter = project / ".project-review" / "charter.md"
+        prefix = f"- {field}: "
+        kept = [line for line in charter.read_text(encoding="utf-8").splitlines() if not line.startswith(prefix)]
+        if value is not None:
+            kept.append(f"{prefix}{value}")
+        charter.write_text("\n".join(kept) + "\n", encoding="utf-8")
+
+    def assert_accepted(self, project: Path) -> dict[str, object]:
+        result = self.route(project)
+        self.assertEqual(result["status"], "RECOMMEND", result)
+        self.assertEqual(result["projectStage"], "accepted", result)
+        self.assertEqual(result["skill"], "", result)
+        return result
+
+    def assert_unknown(self, project: Path, fragment: str) -> dict[str, object]:
+        result = self.route(project)
+        self.assertNotEqual(result["projectStage"], "accepted", result)
+        self.assertEqual(result["status"], "NEED-INPUT", result)
+        self.assertEqual(result["projectStage"], "review-freshness-unknown", result)
+        self.assertEqual(result["skill"], "", result)
+        self.assertEqual(result["next"], "no-execution", result)
+        combined = str(result["reason"]) + " " + " ".join(str(gap) for gap in result["gaps"])
+        self.assertIn(fragment, combined)
+        return result
+
+    def assert_stale(self, project: Path) -> dict[str, object]:
+        result = self.route(project)
+        self.assertEqual(result["projectStage"], "review-stale", result)
+        self.assertEqual(result["skill"], "project-review", result)
+        return result
+
+    # -- §20 matrix ---------------------------------------------------------
+    def test_valid_baseline_accepts(self) -> None:
+        for scope in ("src/", "src/; README.md"):
+            with self.subTest(scope=scope):
+                project, _base, _candidate = self.build_reviewed_software_project(scope_value=scope)
+                result = self.assert_accepted(project)
                 self.assertIn("acceptance passed", result["completed"])
 
-    # B/C: any post-review implementation drift invalidates a PASS.
-    def test_implementation_change_after_pass_stales_the_review(self) -> None:
+    def test_changed_path_drift_stales_the_review(self) -> None:
         for label, commit_change in (("dirty", False), ("committed", True)):
             with self.subTest(label=label):
                 project, _base, _candidate = self.build_reviewed_software_project()
-                self.change_implementation(project, commit=commit_change)
-                result = self.route(project)
-                self.assertEqual(result["projectStage"], "review-stale", result)
-                self.assertEqual(result["skill"], "project-review")
-                combined = str(result["reason"]) + " ".join(str(gap) for gap in result["gaps"])
+                self.modify(project, "src/app.py", "print('v2')\n", commit=commit_change)
+                result = self.assert_stale(project)
+                combined = str(result["reason"]) + " " + " ".join(str(gap) for gap in result["gaps"])
                 self.assertIn("src/app.py", combined)
-                if label == "dirty":
-                    self.assertIn("uncommitted", combined)
 
-    # D: unrelated files outside the reviewed window keep the PASS valid.
-    def test_unrelated_change_keeps_software_acceptance(self) -> None:
-        for label, commit_change in (("untracked-readme", False), ("committed-readme", True)):
+    def test_preexisting_in_scope_file_outside_original_diff_stales(self) -> None:
+        # §11 regression: src/common.py predates the review window and was not
+        # touched by B..C, yet it belongs to the frozen component scope.
+        for label, commit_change in (("dirty", False), ("committed", True)):
             with self.subTest(label=label):
                 project, _base, _candidate = self.build_reviewed_software_project()
-                readme = project / "README.md"
-                readme.write_text(readme.read_text(encoding="utf-8") + "\nDocs-only update.\n", encoding="utf-8")
-                (project / "notes.txt").write_text("side note\n", encoding="utf-8")
-                if commit_change:
-                    _git(project, "add", "-A")
-                    commit_all(project, "docs-only change")
-                result = self.route(project)
-                self.assertEqual(result["status"], "RECOMMEND", result)
-                self.assertEqual(result["projectStage"], "accepted", result)
+                self.modify(project, "src/common.py", "VALUE_COMMON = 2\n", commit=commit_change)
+                result = self.assert_stale(project)
+                combined = str(result["reason"]) + " " + " ".join(str(gap) for gap in result["gaps"])
+                self.assertIn("src/common.py", combined)
 
-    # E: FAIL/BLOCKED bind to their fixed point too — drift needs fresh review.
-    def test_stale_nonpass_software_verdict_requires_fresh_review(self) -> None:
-        for verdict in ("FAIL", "BLOCKED"):
-            with self.subTest(verdict=verdict):
-                project, _base, _candidate = self.build_reviewed_software_project(verdict=verdict)
-                self.change_implementation(project, commit=True)
-                result = self.route(project)
-                self.assertEqual(result["projectStage"], "review-stale", result)
-                self.assertEqual(result["skill"], "project-review")
-                self.assertNotEqual(result["projectStage"], "acceptance-not-passed")
+    def test_new_in_scope_file_after_pass_stales(self) -> None:
+        for label, kwargs in (
+            ("untracked", {}),
+            ("staged", {"staged": True}),
+            ("committed", {"commit": True}),
+        ):
+            with self.subTest(label=label):
+                project, _base, _candidate = self.build_reviewed_software_project()
+                self.add_file(project, "src/new_feature.py", "NEW = 1\n", **kwargs)
+                result = self.assert_stale(project)
+                combined = str(result["reason"]) + " " + " ".join(str(gap) for gap in result["gaps"])
+                self.assertIn("new_feature.py", combined)
 
-    # F: a software record without the produced fixed-point identity never accepts.
-    def test_missing_fixed_point_fails_closed(self) -> None:
-        project, _base, _candidate = self.build_reviewed_software_project(include_fixed_point=False)
-        result = self.route(project)
-        self.assertEqual(result["status"], "NEED-INPUT", result)
-        self.assertEqual(result["projectStage"], "review-freshness-unknown", result)
-        self.assertEqual(result["skill"], "")
-        self.assertEqual(result["next"], "no-execution")
-        self.assertNotEqual(result["projectStage"], "accepted")
-        combined = str(result["reason"]) + " ".join(str(gap) for gap in result["gaps"])
-        self.assertIn("Fixed point", combined)
+    def test_in_scope_deletion_stales(self) -> None:
+        for label, commit_deletion in (("dirty-deletion", False), ("committed-deletion", True)):
+            with self.subTest(label=label):
+                project, _base, _candidate = self.build_reviewed_software_project()
+                self.delete(project, "src/app.py", commit=commit_deletion)
+                self.assert_stale(project)
 
-    # G: an unverifiable fixed-point identity also fails closed.
-    def test_unverifiable_fixed_point_fails_closed(self) -> None:
-        project, _base, _candidate = self.build_reviewed_software_project(resolvable_fixed_point=False)
-        result = self.route(project)
-        self.assertEqual(result["status"], "NEED-INPUT", result)
-        self.assertEqual(result["projectStage"], "review-freshness-unknown", result)
-        self.assertEqual(result["next"], "no-execution")
-        combined = str(result["reason"]) + " ".join(str(gap) for gap in result["gaps"])
-        self.assertIn("does not resolve", combined)
+    def test_outside_scope_changes_keep_acceptance(self) -> None:
+        for label, action in (
+            ("dirty-readme", "dirty"),
+            ("committed-readme", "committed"),
+            ("untracked-note", "untracked"),
+        ):
+            with self.subTest(label=label):
+                project, _base, _candidate = self.build_reviewed_software_project()
+                if action == "untracked":
+                    (project / "SIDE-NOTES.txt").write_text("note\n", encoding="utf-8")
+                else:
+                    readme = project / "README.md"
+                    readme.write_text(readme.read_text(encoding="utf-8") + "\ndocs update\n", encoding="utf-8")
+                    if action == "committed":
+                        _git(project, "add", "-A")
+                        commit_all(project, "docs-only change")
+                self.assert_accepted(project)
 
-    # G2: a repository-first commit cannot delimit a window — never accepted.
-    def test_repository_first_fixed_point_fails_closed(self) -> None:
-        project, base, _candidate = self.build_reviewed_software_project()
-        charter = project / ".project-review" / "charter.md"
+    def test_exact_file_scope_isolates_siblings(self) -> None:
+        project, _base, _candidate = self.build_reviewed_software_project(scope_value="src/app.py")
+        self.modify(project, "src/app.py", "print('v2')\n")
+        self.assert_stale(project)
+
+        sibling_project, _base, _candidate = self.build_reviewed_software_project(scope_value="src/app.py")
+        self.add_file(sibling_project, "src/sibling.py", "SIB = 1\n")
+        self.assert_accepted(sibling_project)
+
+    def test_whole_repo_scope_has_no_readme_exception(self) -> None:
+        for label, commit_change in (("dirty", False), ("committed", True)):
+            with self.subTest(label=label):
+                project, _base, _candidate = self.build_reviewed_software_project(scope_value=".")
+                self.modify(project, "README.md", "# Project\nv2\n", commit=commit_change)
+                self.assert_stale(project)
+
+    def test_missing_implementation_scope_fails_closed(self) -> None:
+        project, _base, _candidate = self.build_reviewed_software_project(include_scope=False)
+        self.assert_unknown(project, "Implementation scope")
+
+    def test_invalid_scope_entries_fail_closed_whole_field(self) -> None:
+        cases = ("../outside", "/absolute/path", ":(glob)src/**", "src/*",
+                 "src/app[1].py", "src/{a,b}", "src/; ../mixed-invalid")
+        for scope in cases:
+            with self.subTest(scope=scope):
+                project, _base, _candidate = self.build_reviewed_software_project(scope_value=scope)
+                result = self.assert_unknown(project, "Implementation scope")
+                combined = str(result["reason"]) + " " + " ".join(str(gap) for gap in result["gaps"])
+                self.assertIn("fails closed", combined)
+
+    def test_mixed_valid_invalid_scope_has_no_partial_salvage(self) -> None:
+        project, _base, _candidate = self.build_reviewed_software_project(scope_value="src/; ../escape")
+        result = self.assert_unknown(project, "../escape")
+        self.assertIn("whole field fails closed" if False else "partially salvaging", str(result["gaps"]) + str(result["reason"]))
+
+    def test_missing_final_revision_fails_closed(self) -> None:
+        project, _base, _candidate = self.build_reviewed_software_project(include_final_revision=False)
+        self.assert_unknown(project, "Reviewed implementation revision")
+
+    def set_final_revision(self, project: Path, value: str) -> None:
+        verdict = project / ".project-review" / "verdict.md"
+        prefix = "- Reviewed implementation revision: "
         lines = [
-            f"- Fixed point: {base}" if line.startswith("- Fixed point: ") else line
-            for line in charter.read_text(encoding="utf-8").splitlines()
+            f"{prefix}{value}" if line.startswith(prefix) else line
+            for line in verdict.read_text(encoding="utf-8").splitlines()
         ]
-        charter.write_text("\n".join(lines) + "\n", encoding="utf-8")
-        result = self.route(project)
-        self.assertEqual(result["status"], "NEED-INPUT", result)
-        self.assertEqual(result["projectStage"], "review-freshness-unknown", result)
-        self.assertNotEqual(result["projectStage"], "accepted")
+        verdict.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    def test_invalid_final_revision_fails_closed(self) -> None:
+        garbage = self.garbage_sha()
+        values = {
+            "short-sha": ("abc1234", "exactly one full 40-character"),
+            "sha-plus-prose": ("<C1> final", "exactly one full 40-character"),
+            "prose-plus-sha": ("reviewed <C1>", "exactly one full 40-character"),
+            "two-resolvable-shas": ("<C1> <G>", "exactly one full 40-character"),
+            "unresolvable-sha": ("<G>", "does not resolve to a local Git commit"),
+        }
+        for label, (raw_value, fragment) in values.items():
+            with self.subTest(label=label):
+                project, _base, candidate = self.build_reviewed_software_project()
+                final_value = (raw_value
+                               .replace("<C1>", candidate)
+                               .replace("<G>", garbage))
+                self.set_final_revision(project, final_value)
+                self.assert_unknown(project, fragment)
+
+    def test_strict_fixed_point_matrix(self) -> None:
+        garbage = self.garbage_sha()
+        for label, override, fragment in self.fixed_point_cases(garbage):
+            with self.subTest(label=label):
+                project, _base, _candidate = self.build_reviewed_software_project(
+                    include_fixed_point=override is not None,
+                    fixed_point_override=override or "",
+                )
+                self.assert_unknown(project, fragment)
+
+    def fixed_point_cases(self, garbage: str):
+        """Build strict fixed-point cases from one live fixture's SHAs."""
+        probe, base, candidate = self.build_reviewed_software_project()
+        del probe
+        return (
+            ("missing", None, "no `- Fixed point:`"),
+            ("short-sha-plus-prose", f"window {base[:12]}", "exactly one full 40-character"),
+            ("sha-plus-prose", f"{base} review base", "exactly one full 40-character"),
+            ("two-valid-shas-legacy-form", f"{base} {candidate}", "exactly one full 40-character"),
+            ("invalid-plus-valid", f"{garbage} {base}", "exactly one full 40-character"),
+            ("valid-plus-invalid", f"{base} {garbage}", "exactly one full 40-character"),
+            ("same-sha-twice", f"{base} {base}", "exactly one full 40-character"),
+            ("unresolvable-single-sha", garbage, "does not resolve to a local Git commit"),
+        )
+
+    def test_base_equals_final_revision_fails_closed(self) -> None:
+        project, _base, candidate = self.build_reviewed_software_project()
+        self.replace_field(project, "Fixed point", candidate)
+        result = self.assert_unknown(project, "equals the reviewed implementation revision")
         combined = str(result["reason"]) + " ".join(str(gap) for gap in result["gaps"])
-        self.assertIn("repository-first", combined)
+        self.assertIn("cannot delimit any reviewed implementation", combined)
+
+    def test_non_ancestor_base_fails_closed(self) -> None:
+        # A LATER commit cannot have delimited an EARLIER reviewed revision;
+        # the consumer verifies the relationship instead of guessing a base.
+        project, _base, _candidate = self.build_reviewed_software_project(scope_value=".")
+        self.modify(project, "README.md", "# Project\nv2\n", commit=True)
+        later = _git(project, "rev-parse", "HEAD").stdout.strip()
+        self.replace_field(project, "Fixed point", later)
+        self.assert_unknown(project, "does not delimit the reviewed implementation revision")
+
+    def test_empty_in_scope_window_fails_closed(self) -> None:
+        # Implementation changed only src/, but the frozen scope names docs/:
+        # the review window holds no in-scope software change. Never broaden.
+        project, _base, _candidate = self.build_reviewed_software_project(scope_value="docs/")
+        self.assert_unknown(project, "no change inside")
+
+    def test_fail_and_blocked_verdicts_stale_on_in_scope_drift(self) -> None:
+        for verdict_name in ("FAIL", "BLOCKED"):
+            with self.subTest(verdict=verdict_name):
+                project, _base, _candidate = self.build_reviewed_software_project(verdict=verdict_name)
+                self.modify(project, "src/app.py", "print('v2')\n", commit=True)
+                result = self.assert_stale(project)
+                self.assertNotEqual(result["projectStage"], "acceptance-not-passed")
+                self.assertNotEqual(result["projectStage"], "accepted")
+
+    def test_legacy_d00b221_record_never_accepts(self) -> None:
+        # Exact old producer shape: two-value Fixed point, no Implementation
+        # scope, no Reviewed implementation revision. Intentional break of an
+        # unreleased unsafe record format; never silently migrated at read time.
+        project, _base, _candidate = self.build_reviewed_software_project(
+            include_scope=False,
+            include_final_revision=False,
+            fixed_point_override="LEGACY_TWO_VALUE",
+        )
+        self.assert_unknown(project, "Implementation scope")
+
+    def test_review_repair_lifecycle_binds_to_evaluated_revision_c2(self) -> None:
+        # §21 lifecycle: review C1 -> confirmed finding -> bounded in-scope
+        # repair committed as C2 -> fresh evaluator accepts C2 -> the verdict
+        # records C2 (Charter stays immutable). ask-light must compare freshness
+        # against C2, never against the init-era C1.
+        project, _base, c1 = self.build_reviewed_software_project()
+        self.modify(project, "src/app.py", "print('implementation v2 - repaired')\n", commit=True)
+        c2 = _git(project, "rev-parse", "HEAD").stdout.strip()
+        self.assertNotEqual(c1, c2)
+        self.set_final_revision(project, c2)
+        result = self.assert_accepted(project)
+
+        # Post-C2 in-scope drift stales the fresh verdict immediately...
+        self.modify(project, "src/common.py", "VALUE_COMMON = 9\n")
+        self.assert_stale(project)
+
+    def test_out_of_scope_change_after_repair_keeps_acceptance(self) -> None:
+        project, _base, _c1 = self.build_reviewed_software_project()
+        self.modify(project, "src/app.py", "print('implementation v2 - repaired')\n", commit=True)
+        c2 = _git(project, "rev-parse", "HEAD").stdout.strip()
+        self.set_final_revision(project, c2)
+        # Unrelated, out-of-scope change after the accepted repair stays unrelated.
+        self.modify(project, "README.md", "# Project\nv99\n", commit=True)
+        self.assert_accepted(project)
+
+    def test_review_metadata_writes_do_not_self_stale(self) -> None:
+        # §16 guard: committing the review record itself AFTER the evaluated
+        # implementation must not stale the software verdict; review metadata is
+        # not implementation unless the producer froze it inside the scope.
+        project, _base, _candidate = self.build_reviewed_software_project()
+        _git(project, "add", "-A")
+        commit_all(project, "commit durable review records after evaluation")
+        self.assert_accepted(project)
 
 
 class DirectorySourceBaselineTest(unittest.TestCase):

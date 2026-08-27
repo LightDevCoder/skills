@@ -74,8 +74,13 @@ duplicate.
    applicable Profile and record the reason in the Charter.
 4. Freeze the baseline with the source location, revision or immutable identity,
    scope, exclusions, criteria, required evidence, approval state, and Profile.
-   A `software`-Profile review additionally freezes the reviewed implementation
-   fixed point in the Charter's `- Fixed point:` field
+   A `software`-Profile review additionally freezes the immutable code-review
+   base (`- Fixed point:`, exactly one full commit SHA) and the reviewed
+   software target (`- Implementation scope:`, repository-relative literal
+   paths — never inferred from changed paths; if the complete target cannot be
+   established reliably, return `BLOCKED`) in the Charter. Do not freeze the
+   final implementation candidate at `init`; authorized repairs may move it,
+   and the final verdict records it as `- Reviewed implementation revision:`
    ([profiles/software.md](profiles/software.md)). Use
    [acceptance-charter.md](acceptance-charter.md).
 5. Preserve an already approved Charter. A material requirement change needs a
@@ -163,3 +168,12 @@ bounded repair path. At the configured maximum, return `BLOCKED` if acceptance
 is not reached. Do not run another round solely to obtain a favorable result.
 See [stopping-rules.md](stopping-rules.md) and [review-rubric.md](review-rubric.md)
 for transitions, progress, and severity guidance.
+
+For a `software` Profile, every durable `PASS`, `FAIL`, or `BLOCKED` binds the
+immutable baseline to the implementation it actually evaluated by recording
+`- Reviewed implementation revision: <full Git commit SHA>` in `verdict.md`.
+A `PASS` may only be issued while the frozen `Implementation scope` holds no
+uncommitted tracked or untracked changes at evaluation time; unrelated changes
+outside the scope do not block. Any later in-scope drift — dirty, staged,
+committed, or untracked — stales that verdict for consumers and requires a
+fresh review ([profiles/software.md](profiles/software.md)).

@@ -52,7 +52,9 @@ missing; do not infer a pass.
 ## Repair evidence
 
 Write `repair-evidence.md` with the confirmed Finding IDs, bounded files or
-artifacts changed, focused checks or observations, validation-scenario results,
+artifacts changed (all inside the Charter's frozen scope; for a software
+Profile the repaired candidate C2 must be committed in scope before it can be
+re-evaluated), focused checks or observations, validation-scenario results,
 evidence labels, and remaining limitations. Do not replace the original
 candidate, disposition, or Producer evidence.
 
@@ -74,4 +76,7 @@ Keep a compact resume snapshot in `state.md`: captured time, goal, Charter
 revision, Profile, current round, status, independence, blockers, recent
 decisions, open questions, and next action. Keep closeout in `verdict.md` with
 the conclusion, completed and unfinished work, risks, linked evidence, and
-reopen note. These remain views over the Charter and round records.
+reopen note; for a software Profile the closeout also carries
+`- Reviewed implementation revision: <full Git commit SHA>` — the exact
+evaluated candidate every later freshness check compares against. These remain
+views over the Charter and round records.

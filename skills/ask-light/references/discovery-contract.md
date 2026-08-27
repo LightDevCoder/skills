@@ -86,20 +86,31 @@ Project-state evidence is fail-closed:
   - A missing, blank, or non-Git-resolvable identity cannot prove freshness
     and fails closed as `review-freshness-unknown`; such a record is never
     treated as accepted.
-- A `software`-Profile review is bound by its producer contract to TWO frozen
-  baselines: the approved source fields above plus the reviewed implementation
-  fixed point (Charter `- Fixed point:`; definitions owned by the
-  `project-review` references). Once source freshness holds, `ask-light`
-  resolves that produced identity and verifies the current tree against it on
-  exactly the paths the recorded window touched:
-  - Implementation drift inside that window — committed or still uncommitted —
-    makes any old verdict stale: stage `review-stale`, routed back to
-    `project-review`.
-  - Changes outside the reviewed window are unrelated and never invalidate the
-    verdict.
-  - A missing, unresolvable, or unverifiable fixed point fails closed as
-    `review-freshness-unknown`; a software verdict is never consumed without a
-    provable implementation baseline.
+- A `software`-Profile review binds its verdict to the producer-frozen
+  three-field baseline whose definitions are owned by the `project-review`
+  references: Charter `- Fixed point:` (immutable code-review base — exactly
+  one full commit SHA), Charter `- Implementation scope:` (the reviewed
+  software target as repository-relative literal paths, the machine
+  projection of the approved `In scope`), and the verdict's
+  `- Reviewed implementation revision:` (the final evaluated candidate).
+  Once source freshness holds, `ask-light` verifies this produced baseline
+  strictly; nothing is partially salvaged or reinterpreted:
+  - all three identities must parse exactly (one full SHA / a valid literal
+    path list). Missing, malformed, unresolvable, ambiguous, absolute,
+    traversal, pathspec-magic, or wildcard scope entries reject the WHOLE
+    field and fail closed as `review-freshness-unknown`.
+  - the base must differ from and delimit (be an ancestor of) the reviewed
+    implementation revision, and their diff must contain non-empty change
+    inside the scope; otherwise fail closed.
+  - inside that frozen scope the current tree must exactly match the
+    reviewed implementation revision — tracked, staged, committed, and
+    untracked additions alike (`git diff <rev> -- <scope>` plus
+    `git status --porcelain -uall -- <scope>`).
+  - any in-scope drift stales ANY old verdict into
+    `review-stale → project-review`; changes outside the frozen scope are
+    unrelated and never invalidate it. Legacy records frozen before these
+    fields existed (e.g. two-value fixed points) are an intentional break:
+    they never accept and require a fresh `project-review`.
 - Legacy human-facing files (`docs/agents/acceptance.md`,
   `docs/agents/review-verdict.md`, and similar) are produced by no runtime
   contract here and are **not** authoritative acceptance evidence; they cannot

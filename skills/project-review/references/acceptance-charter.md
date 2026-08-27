@@ -15,7 +15,8 @@ copy them into state, round, or verdict records.
 ## Acceptance baseline
 - Source: <approved source path or immutable identifier>
 - Source revision or identity: <commit, version, timestamp, or equivalent>
-- Fixed point: <software Profile only - reviewed implementation commit(s): <base> <candidate>, or the candidate commit when its parent delimits the window>
+- Fixed point: <software Profile only - exactly one full Git commit SHA: the immutable code-review base>
+- Implementation scope: <software Profile only - reviewed software target as ';'-separated repository-relative literal paths>
 - Approval state: approved | pending user confirmation
 - Approval evidence: <source section or confirmation>
 
@@ -55,6 +56,13 @@ Use `Not applicable - <reason>` rather than silently omitting a necessary
 section. A source explicitly approved by the user or program record may create
 an approved Charter. A synthesized baseline starts `pending user confirmation`;
 do not review it until confirmation is recorded.
+
+For a software Profile, `Fixed point` and `Implementation scope` are immutable
+Charter fields frozen at `init` ([profiles/software.md](profiles/software.md)).
+The final implementation candidate is deliberately NOT frozen here: an
+authorized bounded repair moves the candidate during review, so it is recorded
+as `- Reviewed implementation revision:` on the final verdict instead. Never
+edit an approved Charter to chase the current candidate.
 
 ## Immutability and change proposals
 

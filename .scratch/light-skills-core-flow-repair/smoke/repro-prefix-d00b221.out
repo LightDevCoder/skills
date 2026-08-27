@@ -1,0 +1,11 @@
+# Pre-fix reproductions against working tree at HEAD d00b221
+
+A/A1 dirty: modified pre-existing in-scope src/common.py -> 'accepted'   [required per §11: review-stale]  BUG
+A/A2 committed: modified pre-existing in-scope src/common.py -> 'accepted'   [required per §11: review-stale]  BUG
+B/B1 untracked: added src/new_feature.py after PASS -> 'accepted'   [required per §12: review-stale]  BUG
+B/B2 committed: added src/new_feature.py after PASS -> 'accepted'   [required per §12: review-stale]  BUG
+C: Fixed point '<unresolvable 40-hex> <valid-candidate>' -> 'accepted'   [strict contract: unknown]  PARTIAL-SALVAGE BUG
+D: Fixed point '<candidate> <candidate>' -> 'accepted'   [strict contract: unknown]  DEDUPE BUG
+
+Baseline sanity: all four defects above reproduce d00b221 false accepts;
+each must become review-stale / review-freshness-unknown under §10-§14.

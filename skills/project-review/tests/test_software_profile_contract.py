@@ -83,6 +83,57 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.require_match("TC-SW-005 generic stop", workflow, r"(?i)Stop scope expansion")
     c.require_match("TC-SW-005 no lifecycle duplication", profile, r"(?i)does not replace.*state machine|generic lifecycle.*stopping rules")
 
+    # TC-SW-006..009: three-field software baseline contract (breaks the old
+    # two-value `<base> <candidate>` window rule; consumers fail closed on it).
+    c.require_match("TC-SW-006 baseline record section", profile, r"(?im)^### Durable software baseline record$")
+    c.require_match("TC-SW-006 fixed point grammar", profile,
+                    r"(?is)`Fixed point`.*exactly one full 40-character commit SHA")
+    c.require_match("TC-SW-006 fixed point is review base", profile,
+                    r"(?is)`Fixed point`.*immutable base.*review base")
+    c.require_match("TC-SW-006 effective-commit freeze rule", profile,
+                    r"(?i)freeze the actual effective commit.*never the\s+mutable")
+    c.require_no_match("TC-SW-006 two-value grammar removed", profile, r"<base> <candidate>")
+    c.require_no_match("TC-SW-006 touched-window rule removed", profile,
+                       r"paths the recorded window touched")
+
+    c.require_match("TC-SW-007 scope field grammar", profile,
+                    r"(?is)`Implementation scope`.*repo-relative literal")
+    c.require_match("TC-SW-007 scope projects In scope", profile,
+                    r"(?is)machine-readable projection of this Charter's approved software\s+`In scope`")
+    c.require_match("TC-SW-007 scope never inferred from changed paths", profile,
+                    r"(?is)Never derive the scope from changed paths")
+    c.require_match("TC-SW-007 unverifiable target blocked", profile,
+                    r"(?is)cannot be\s+established reliably, return `BLOCKED`")
+    c.require_match("TC-SW-007 whole-field rejection", profile, r"(?i)rejects the WHOLE field")
+    c.require_match("TC-SW-007 no implicit readme exception", profile,
+                    r"(?is)implicit documentation exceptions:\s*with scope `\.?`\s*"
+                    r"a README change counts;\s*with scope `src/?`\s*a root README stays outside")
+    c.require_match("TC-SW-008 final revision on verdict", profile,
+                    r"(?is)`Reviewed implementation revision`.*\.project-review/verdict\.md")
+    c.require_match("TC-SW-008 charter notes candidate lives on verdict",
+                    Path(root / "references" / "acceptance-charter.md").read_text(encoding="utf-8"),
+                    r"(?i)deliberately NOT frozen here")
+    c.require_match("TC-SW-008 repair moves candidate C1 to C2", profile,
+                    r"(?is)may move\s+the candidate from C1 to C2")
+    c.require_match("TC-SW-008 pass requires clean in-scope tree", profile,
+                    r"(?i)no uncommitted tracked or untracked changes")
+    c.require_match("TC-SW-008 lifecycle rules section", profile,
+                    r"(?im)^### Baseline lifecycle rules$")
+    c.require_match("TC-SW-009 review metadata kept out of scope", profile,
+                    r"(?is)Keep project-review's own mutable records out of the frozen target")
+    c.require_match("TC-SW-009 metadata directories named", profile,
+                    r"(?is)`\.project-review/`, `\.review-loop/`")
+    c.require_match("TC-SW-009 whole-repo born-stale warning", profile,
+                    r"(?is)whole-repo scope `\.`\s*includes them")
+    c.require_match("TC-WF-008 init freezes base plus scope", workflow,
+                    r"(?is)`- Fixed point:`.*one full commit SHA.*`- Implementation scope:`")
+    c.require_match("TC-WF-008 init does not freeze final candidate", workflow,
+                    r"(?is)do not freeze\s+the\s+final\s+implementation\s+candidate\s+at\s+`init`")
+    c.require_match("TC-WF-008 verdict records evaluated revision", workflow,
+                    r"(?i)`- Reviewed implementation revision: <full Git commit SHA>`")
+    c.require_match("TC-EV-008 closeout carries revision binding", evidence,
+                    r"(?i)Reviewed implementation revision")
+
     return c.assertions, c.failures
 
 

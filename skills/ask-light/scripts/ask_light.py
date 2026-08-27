@@ -190,12 +190,16 @@ def _field_values(text: str, field_names: tuple[str, ...]) -> list[str]:
     return values
 
 
-def _raw_field_line(text: str, field: str) -> str:
+def _raw_field_line(text: str, field: str, *, strip_wrappers: bool = True) -> str:
     """Return the full first-line value of a markdown field (no truncation).
 
     Unlike `_field_values`, the whole line is preserved so prose/path-bearing
     fields such as the Charter's `Source:` line stay intact. The lookahead-style
     anchor keeps `Source revision or identity:` separate from `Source:`.
+    With ``strip_wrappers=False`` the value keeps its exact characters —
+    required by the strict scope grammar, where wrapper-stripping would
+    silently rewrite an invalid literal path (``src/*`` -> ``src/``) into a
+    different acceptable one.
     """
     pattern = re.compile(
         r"(?mi)^[ \t]*(?:[>#-]+[ \t]*)?(?:\*\*)?" + re.escape(field) + r"(?:\*\*)?[ \t]*[:=][ \t]*(.+)$"
@@ -203,7 +207,8 @@ def _raw_field_line(text: str, field: str) -> str:
     match = pattern.search(text)
     if not match:
         return ""
-    return match.group(1).strip().strip("`*_ \t")
+    value = match.group(1).strip()
+    return value.strip("`*_ \t") if strip_wrappers else value
 
 
 def _reviewed_scratch_references(source_value: str) -> list[str]:
@@ -373,94 +378,234 @@ def _reviewed_profile(charter_text: str) -> str:
     return values[0] if values else ""
 
 
-def _resolve_revision_chain(root: Path, revision_value: str) -> list[str]:
-    """Resolve every locally verifiable Git commit cited by an identity value.
+# Strict software-baseline grammars (producer owner: skills/project-review).
+# The canonical Charter/verdict identity fields carry exactly ONE full
+# 40-character commit SHA; the implementation scope carries semicolon-
+# separated repository-relative LITERAL paths. Both are fail-closed: there is
+# no salvage path that reduces a malformed value into a different valid form.
+_EXACT_COMMIT_PATTERN = re.compile(r"[0-9a-fA-F]{40}")
+_SCOPE_FORBIDDEN_CHARACTERS = "`\"'*?[]{}\\"
 
-    Order is preserved so a producer that freezes both window endpoints
-    (`Fixed point: <base> <candidate>`) yields [base, candidate]; duplicates of
-    the same underlying commit collapse to one entry.
+
+def _parse_exact_commit_token(raw_value: str) -> str:
+    """Apply the strict single-commit grammar to one field value.
+
+    After Markdown wrapper trimming the complete value must be exactly one
+    full 40-character hexadecimal SHA. Prose, short SHAs, or second endpoints
+    are malformed — never partially salvaged or deduplicated.
     """
-    chain: list[str] = []
-    for candidate in _HEX_REVISION_PATTERN.findall(revision_value):
-        sha = _resolvable_git_commit(root, candidate)
-        if sha and sha not in chain:
-            chain.append(sha)
-    return chain
+    token = raw_value.strip().strip("`*_ \t")
+    return token if _EXACT_COMMIT_PATTERN.fullmatch(token) else ""
 
 
-def _classify_implementation_fixed_point(root: Path, charter_text: str) -> tuple[str, list[str]]:
-    """Check the software Profile's reviewed implementation fixed point.
+def _parse_exact_commit_field(root: Path, text: str, field: str) -> tuple[str, str]:
+    """Resolve a strict identity field to its locally verifiable full commit.
+
+    Returns (full_sha, "") or ("", failure) with failure in {"missing",
+    "malformed", "unresolvable"}. A written SHA that resolves to some other
+    object (e.g. an annotated tag peeled to another commit) is not the
+    recorded commit identity and fails closed instead of being retargeted.
+    """
+    raw = _raw_field_line(text, field)
+    if not raw.strip():
+        return "", "missing"
+    token = _parse_exact_commit_token(raw)
+    if not token:
+        return "", "malformed"
+    resolved = _resolvable_git_commit(root, token)
+    if not resolved or resolved.lower() != token.lower():
+        return "", "unresolvable"
+    return resolved, ""
+
+
+def _parse_implementation_scope(raw_value: str) -> tuple[list[str], str]:
+    """Parse the software `Implementation scope:` field, failing closed.
+
+    Returns (entries, "") or ([], error_description). Every semicolon-
+    separated entry must be a repository-relative POSIX literal path: no empty
+    entries, absolute paths, `..` traversal, Git pathspec magic, wildcard/
+    glob/backslash/quoting characters. One invalid entry rejects the WHOLE
+    field — valid entries are never partially salvaged.
+    """
+    entries: list[str] = []
+    for part in raw_value.split(";"):
+        entry = part.strip()
+        if not entry:
+            return [], "empty/malformed scope entry between ';' separators"
+        if any(character in entry for character in _SCOPE_FORBIDDEN_CHARACTERS):
+            return [], f"'{entry}' uses characters outside the literal-path grammar"
+        if entry.startswith(":"):
+            return [], f"'{entry}' uses Git pathspec magic"
+        if entry.startswith("/"):
+            return [], f"'{entry}' is absolute instead of repository-relative"
+        if ".." in Path(entry).parts:
+            return [], f"'{entry}' contains '..' traversal"
+        entries.append(entry)
+    if not entries:
+        return [], "no entries recorded"
+    return entries, ""
+
+
+def _classify_software_implementation_freshness(
+    root: Path,
+    charter_text: str,
+    verdict_text: str,
+) -> tuple[str, list[str]]:
+    """Verify the software Profile's three-field implementation baseline.
 
     Returns ("not-applicable"|"current"|"stale"|"unknown", gaps). A software
-    review binds its verdict to TWO frozen baselines (profiles/software.md): the
-    approved source Charter fields checked by `_classify_review_freshness`, plus
-    the reviewed implementation fixed point recorded by the producer in the
-    Charter `- Fixed point:` field. ask-light consumes that produced identity;
-    it never invents a parallel format.
+    verdict binds to THREE produced identities (profiles/software.md):
 
-    Verification compares the current working tree against the reviewed fixed
-    point exactly on the reviewed implementation window — the paths the fixed
-    point's recorded change touched. Two values (<base> <candidate>) delimit
-    that window directly; a single non-root value means the candidate's own
-    change set relative to its parent. A single repository-first commit cannot
-    delimit any window, and changes outside the window stay unrelated and can
-    never invalidate acceptance, while drift inside it — committed or still
-    uncommitted — stales the old verdict. A missing, unresolvable, or
-    undeterminable fixed point fails closed.
+    - Charter `- Fixed point:` — exactly one full commit SHA, the immutable
+      code-review base the review was delimited from;
+    - Charter `- Implementation scope:` — the immutable reviewed software
+      target as repository-relative literal paths (the machine projection of
+      the Charter's approved software `In scope`);
+    - verdict `- Reviewed implementation revision:` — exactly one full commit
+      SHA, the final candidate the fresh Evaluator judged. It lives on the
+      verdict, not the Charter, because authorized bounded repairs may move
+      the candidate during review.
+
+    Freshness holds only while, inside the frozen scope, the current tree
+    exactly matches the reviewed implementation revision (`git diff <rev> --
+    <scope>` covers tracked/committed/staged/unstaged drift) and no untracked
+    file appears inside the scope (`git status --porcelain -uall -- <scope>`).
+    The base must differ from and delimit the final revision, and the B..C
+    review window must contain non-empty in-scope change. Anything that cannot
+    be proven is "unknown"; unknown is fail-closed and never grants acceptance.
     """
     if _reviewed_profile(charter_text) != "software":
         return "not-applicable", []
-    fixed_value = _raw_field_line(charter_text, "Fixed point")
-    if not fixed_value.strip():
+
+    base_revision, failure = _parse_exact_commit_field(root, charter_text, "Fixed point")
+    short_base = base_revision[:12] if base_revision else ""
+    if failure == "missing":
         return "unknown", [
             "The Charter records the `software` review Profile but no `- Fixed point:` "
-            "identity for the reviewed implementation; a software verdict may only be "
-            "consumed together with the reviewed implementation baseline it froze."
+            "identity; a software verdict may only be consumed together with the "
+            "immutable code-review base it froze."
         ]
-    chain = _resolve_revision_chain(root, fixed_value)
-    if not chain:
+    if failure == "malformed":
         return "unknown", [
-            f"The Charter's `Fixed point` ('{fixed_value}') does not resolve to a local Git "
-            "commit, so the reviewed implementation baseline cannot be verified; ask-light "
-            "fails closed instead of accepting an unverifiable software review."
+            "The Charter's `Fixed point` value is not exactly one full 40-character "
+            "commit SHA, so the immutable review base cannot be established; ask-light "
+            "does not salvage partial identities and fails closed."
         ]
-    candidate = chain[-1]
-    short_candidate = candidate[:12]
-    if len(chain) >= 2:
-        window = _run_git(root, "diff", "--name-only", chain[0], candidate)
-    else:
-        parent = _resolvable_git_commit(root, f"{candidate}^", peel=False)
-        if not parent:
-            return "unknown", [
-                f"The recorded fixed point ({short_candidate}) is a repository-first commit, so "
-                "the reviewed implementation window cannot be delimited; freeze both window "
-                "endpoints (<base> <candidate>) in the Charter `- Fixed point:` field."
-            ]
-        window = _run_git(root, "diff", "--name-only", parent, candidate)
+    if failure == "unresolvable":
+        return "unknown", [
+            "The Charter's `Fixed point` SHA does not resolve to a local Git commit, so "
+            "the immutable review base cannot be verified; ask-light fails closed."
+        ]
+
+    scope_raw = _raw_field_line(charter_text, "Implementation scope", strip_wrappers=False)
+    if not scope_raw.strip():
+        return "unknown", [
+            "The Charter records the `software` review Profile but no `- Implementation "
+            "scope:` target, so the reviewed software component cannot be delimited; "
+            "ask-light never infers scope from changed paths and fails closed."
+        ]
+    scope_entries, scope_error = _parse_implementation_scope(scope_raw)
+    if scope_error:
+        return "unknown", [
+            f"The Charter's `Implementation scope` is unverifiable ({scope_error}), so "
+            "the reviewed software target cannot be trusted; the whole field fails "
+            "closed rather than partially salvaging valid entries."
+        ]
+
+    final_revision, failure = _parse_exact_commit_field(
+        root, verdict_text, "Reviewed implementation revision"
+    )
+    if failure == "missing":
+        return "unknown", [
+            "The durable verdict records no `- Reviewed implementation revision:`, so the "
+            "evaluated implementation candidate cannot be identified; ask-light never "
+            "falls back to the fixed-point window's touched paths and fails closed."
+        ]
+    if failure == "malformed":
+        return "unknown", [
+            "The verdict's `Reviewed implementation revision` is not exactly one full "
+            "40-character commit SHA, so the evaluated candidate cannot be bound; "
+            "ask-light fails closed instead of salvaging the value."
+        ]
+    if failure == "unresolvable":
+        return "unknown", [
+            "The verdict's `Reviewed implementation revision` SHA does not resolve to a "
+            "local Git commit, so the evaluated candidate cannot be compared to the "
+            "current state; ask-light fails closed."
+        ]
+    short_final = final_revision[:12]
+
+    if final_revision == base_revision:
+        return "unknown", [
+            f"The frozen review base ({short_base}) equals the reviewed implementation "
+            "revision, so it cannot delimit any reviewed implementation; ask-light fails "
+            "closed instead of inventing a base."
+        ]
+    ancestor = _run_git(root, "merge-base", "--is-ancestor", base_revision, final_revision)
+    if ancestor is None or ancestor.returncode != 0:
+        return "unknown", [
+            f"The frozen review base ({short_base}) does not delimit the reviewed "
+            f"implementation revision ({short_final}); the base/final relationship cannot "
+            "be proven, so the verdict fails closed."
+        ]
+
+    window = _run_git(
+        root, "--literal-pathspecs", "diff", "--name-only", base_revision, final_revision,
+        "--", *scope_entries,
+    )
     if window is None or window.returncode != 0:
         return "unknown", [
-            "Git could not reconstruct the reviewed implementation window behind the "
-            "recorded fixed point, so implementation freshness cannot be proven."
+            "Git could not reconstruct the reviewed window behind the frozen base and "
+            "final revision, so implementation freshness cannot be proven."
         ]
-    reviewed_paths = [line for line in window.stdout.splitlines() if line.strip()]
-    if not reviewed_paths:
+    if not any(line.strip() for line in window.stdout.splitlines()):
         return "unknown", [
-            f"The recorded fixed point ({short_candidate}) identifies no reviewed "
-            "implementation content, so there is no reviewed baseline to verify against."
+            f"The reviewed window ({short_base}..{short_final}) contains no change inside "
+            "the frozen `Implementation scope`, so the software review has no in-scope "
+            "content to verify; ask-light does not broaden the scope to manufacture one."
         ]
-    for relative in reviewed_paths:
-        difference = _run_git(root, "diff", "--quiet", candidate, "--", relative)
-        if difference is None or difference.returncode not in (0, 1):
-            return "unknown", [
-                f"The implementation freshness comparison for '{relative}' failed (git error), "
-                "so it cannot be proven that the reviewed implementation is unchanged."
-            ]
-        if difference.returncode == 1:
+
+    drift = _run_git(
+        root, "--literal-pathspecs", "diff", "--name-status", final_revision,
+        "--", *scope_entries,
+    )
+    if drift is None or drift.returncode not in (0, 1):
+        return "unknown", [
+            "The implementation freshness comparison failed (git error), so it cannot be "
+            "proven that the reviewed implementation is unchanged."
+        ]
+    changed = [line for line in drift.stdout.splitlines() if line.strip()]
+    if changed:
+        names = ", ".join(line.split("\t")[-1] for line in changed[:3])
+        extra = "" if len(changed) <= 3 else f" (+{len(changed) - 3} more)"
+        return "stale", [
+            f"The reviewed implementation changed after the evaluated revision "
+            f"({short_final}): {names}{extra} — including uncommitted working-tree "
+            "changes; the previous verdict no longer describes the current "
+            "implementation inside the frozen scope.",
+        ]
+
+    directory_status = _run_git(
+        root, "--literal-pathspecs", "status", "--porcelain", "--untracked-files=all",
+        "--", *scope_entries,
+    )
+    if directory_status is None:
+        return "unknown", [
+            "Git could not inspect the frozen implementation scope for post-review "
+            "additions, so it cannot be proven unchanged."
+        ]
+    if directory_status.returncode != 0:
+        return "unknown", [
+            "The implementation scope status check failed (git error), so it cannot be "
+            "proven free of post-review additions."
+        ]
+    for line in directory_status.stdout.splitlines():
+        if line.startswith("??"):
+            added = line[3:].strip()
             return "stale", [
-                f"The reviewed implementation '{relative}' changed after the fixed point "
-                f"({short_candidate}) the software review froze, including uncommitted "
-                "working-tree changes; the previous verdict no longer describes the "
-                "current implementation.",
+                f"A new file appeared inside the frozen implementation scope after the "
+                f"evaluated revision ({short_final}): '{added}'; the reviewed "
+                "implementation baseline no longer matches the current tree.",
             ]
     return "current", []
 
@@ -858,13 +1003,16 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
                 if review_freshness == "current":
                     # Source freshness alone is not the whole software contract:
                     # a software Profile additionally binds its verdict to the
-                    # reviewed implementation fixed point it froze.
-                    fixed_point_state, fixed_point_gaps = _classify_implementation_fixed_point(
-                        root, charter_text
+                    # producer-frozen review base + implementation scope plus the
+                    # reviewed implementation revision recorded on the verdict.
+                    implementation_state, implementation_gaps = (
+                        _classify_software_implementation_freshness(
+                            root, charter_text, _small_text(conclusion)
+                        )
                     )
-                    if fixed_point_state in ("stale", "unknown"):
-                        review_freshness = fixed_point_state
-                        freshness_gaps = fixed_point_gaps
+                    if implementation_state in ("stale", "unknown"):
+                        review_freshness = implementation_state
+                        freshness_gaps = implementation_gaps
                 if review_freshness == "current":
                     acceptance_paths = [conclusion]
                     evidence["hasAcceptanceEvidence"] = True
@@ -980,9 +1128,12 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
     if review_ownership == "current" and review_freshness == "unknown":
         reason = (
             "A `.project-review` verdict exists for the current effort, but its freshness "
-            "cannot be verified against the frozen `Source revision or identity` baseline, "
-            "so `ask-light` neither accepts nor reports the old verdict as current. Fail closed: "
-            "re-freeze a verifiable baseline with `project-review`."
+            "cannot be verified against the frozen baseline it recorded (the Charter's "
+            "`Source revision or identity`, or for a software Profile also the frozen "
+            "`Fixed point` / `Implementation scope` / verdict `- Reviewed implementation "
+            "revision` identities), so `ask-light` neither accepts nor reports the old "
+            "verdict as current. Fail closed: re-freeze a verifiable baseline with "
+            "`project-review`."
         )
         evidence["stage"] = "review-freshness-unknown"
         evidence["skill"] = ""

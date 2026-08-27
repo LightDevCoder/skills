@@ -65,6 +65,54 @@ Approved Matt PORTs (10) each carry `ATTRIBUTION.md` and have no upstream runtim
 - **project-review producer contract:** `references/profiles/software.md` documents the durable two-baseline record; the Charter template (`acceptance-charter.md`) gains the software-only `- Fixed point:` line and the `init` workflow freezes it with the baseline.
 - **Tests:** 11 new Git-backed regression tests (17 cases) covering the §13/§14 matrix: fresh PASS, dirty/committed implementation change, unrelated-change isolation, stale FAIL/BLOCKED, missing/unresolvable/unverifiable fixed points, directory tracked modification/deletion, new untracked child, outside-directory noise, and file-source sibling isolation.
 
+> History note: the fixed-point rule stated in this section was audited as
+> fail-open (changed-file-set monitoring plus salvageable identities) and is
+> **superseded before any release** by "Software review baseline contract"
+> below. It is preserved verbatim because the audit trail must show what the
+> earlier rule claimed, not relabel it.
+
+### Changed — Software review baseline contract (supersedes the two-value fixed-point rule above before any release)
+
+Human audit reproduced false `accepted` verdicts behind the earlier unreleased
+rule: pre-existing in-scope files untouched by the review diff, and files
+created inside the component after PASS, evaded freshness because the monitored
+set was derived from the window's changed paths; malformed fixed points were
+partially salvaged (invalid tokens dropped, duplicates deduplicated); and
+freezing the candidate in the immutable Charter contradicted the authorized
+review → bounded repair → re-review lifecycle. Fixed as a producer+consumer
+contract, fail-closed throughout:
+
+- **Three-field software baseline (producer `project-review`):** the Charter
+  freezes `- Fixed point:` (exactly one full commit SHA — the immutable
+  code-review base; freeze the effective delimiting commit, never a mutable
+  branch name) and `- Implementation scope:` (`';'`-separated repository-
+  relative literal paths — the machine projection of the approved software
+  `In scope`; stable component roots, never inferred from changed paths,
+  extensions, or common directories; unverifiable targets are `BLOCKED`, one
+  invalid entry rejects the whole field). The final candidate is not frozen at
+  `init`: every durable `PASS`/`FAIL`/`BLOCKED` records
+  `- Reviewed implementation revision:` on `verdict.md`, so a legitimate C1→C2
+  repair re-binds acceptance without mutating the Charter.
+- **Consumer freshness invariant (`ask-light`):** a software verdict is only
+  consumable when all three identities parse strictly (no salvage/dedupe),
+  the base differs from and delimits the final revision with non-empty
+  in-scope change, and — inside the frozen scope — tracked, staged, committed,
+  and untracked additions alike still match the reviewed revision. In-scope
+  drift stales ANY old verdict (`review-stale`); out-of-scope changes stay
+  unrelated; whole-repo scope `.` deliberately stales on README changes (no
+  hidden exceptions); old-shape records never accept (`review-freshness-unknown`)
+  and require a fresh `project-review`.
+- **Tests:** Git-backed matrix rewritten to ~45 cases across 22 methods:
+  §10–§14 freshness matrix (changed/pre-existing/new/deleted in-scope,
+  out-of-scope isolation, exact-file scope, whole-repo scope), strict
+  fixed-point and final-revision grammars, scope validation incl. mixed
+  valid/invalid, base/final relationship checks, FAIL/BLOCKED binding,
+  legacy-record break, §16 self-staling guard, and the mandatory
+  review→repair→PASS lifecycle binding to C2.
+- **Docs:** `project-review` references (software profile, Charter template,
+  workflow, evidence protocol, migration note) define the contract;
+  `ask-light` discovery-contract carries only the concise consumer summary.
+
 ### No redesign verification
 
 18 `NO REWRITE/PORT` Skills were `git diff` checked (SPEC §26): `manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `eli5`, `release-workflow`, `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts` — only minimal handoff/attribution wiring where a real integration need existed. `recap` is the separately recorded user-approved exception above.

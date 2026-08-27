@@ -568,3 +568,206 @@ Live Codex host-transition remains unobserved; nothing fabricated. Remaining
 limitation (documented): single-value fixed points protect only the candidate's
 own change set; multi-commit implementation spans must freeze two endpoints per
 the producer reference.
+
+# Final closure — software review baseline contract (supersedes d00b221 two-value grammar)
+
+Human audit baseline: `d00b221` (`fix: validate complete project-review baseline`),
+verdict NEEDS REPAIR. This round closes the remaining false-accept class as a
+contract (producer + consumer together), per the final repair prompt. Reproductions
+and smokes live in `.scratch/light-skills-core-flow-repair/smoke/`.
+
+## Pre-fix reproductions (run against d00b221 working tree, real temp Git repos)
+
+Script: `smoke/repro-prefix-d00b221.py`; captured output: `smoke/repro-prefix-d00b221.out`.
+
+```text
+A/A1 dirty:    modify pre-existing in-scope src/common.py (untouched by B..C diff) -> accepted   BUG  (required: review-stale)
+A/A2 committed: same, committed                                                                    -> accepted   BUG
+B/B1 untracked: new src/new_feature.py after PASS                                                  -> accepted   BUG  (required: review-stale)
+B/B2 committed: new src/new_feature.py after PASS, committed                                       -> accepted   BUG
+C: Fixed point '<unresolvable-40hex> <valid-candidate>'        -> accepted                         PARTIAL-SALVAGE BUG (required: review-freshness-unknown)
+D: Fixed point '<candidate> <candidate>' (deduped to one entry) -> accepted                        DEDUPE BUG          (required: review-freshness-unknown)
+```
+
+Root causes confirmed live:
+
+1. `_classify_implementation_fixed_point` derived the monitored set from
+   `git diff --name-only <window>` — i.e. changed-file-set != complete
+   implementation scope; pre-existing and future in-scope files evaded freshness.
+2. `_resolve_revision_chain` salvaged revision chains (extract → resolve → drop
+   failures → dedupe → reinterpret by count), so malformed identities were
+   silently reduced into a valid-looking one-value form.
+3. Freezing the candidate inside the immutable Charter at `init` contradicts the
+   authorized review→repair→re-review lifecycle (C1 repaired to C2 would either
+   instantly stale against C1 or force a Charter mutation).
+
+## Final producer contract (this round)
+
+Three distinct concepts, never conflated:
+
+```text
+Fixed point                      (Charter, immutable, frozen at init)
+  - Fixed point: <one full 40-hex commit SHA>
+  = the immutable code-review REVIEW BASE. The effective delimiting commit is
+    frozen, never a mutable branch name. Not the final candidate.
+
+Implementation scope             (Charter, immutable, frozen at init)
+  - Implementation scope: <repo-relative literal path>; <repo-relative literal path>; ...
+  = machine projection of the Charter's approved software `In scope`: the
+    complete component whose state must equal the accepted implementation.
+    Stable component roots (`src/`, `src/; tests/; pyproject.toml`, or `.`
+    only when the whole repo is the target). NEVER derived from changed
+    paths / common dirs / extensions; unverifiable target => BLOCKED;
+    one invalid entry rejects the WHOLE field; no README exception — the
+    scope decides.
+
+Reviewed implementation revision (verdict.md, per verdict)
+  - Reviewed implementation revision: <one full 40-hex commit SHA>
+  = the exact committed candidate the final fresh Evaluator judged. Lives on
+    the verdict, NOT the Charter, because authorized bounded repairs legally
+    move C1 -> C2; the verdict re-binds the immutable requirements without
+    mutating the Charter.
+```
+
+Freshness algorithm (consumer, `ask_light.py::_classify_software_implementation_freshness`):
+
+```text
+profile gate == software (else not-applicable, Source layer governs)
+1. strict-parse Fixed point      (exactly one full SHA, resolves AS that commit; else unknown)
+2. strict-parse Implementation scope (literal grammar, whole-field; else unknown)
+3. strict-parse final revision from verdict.md (same grammar; else unknown)
+4. B != C; merge-base --is-ancestor B C   (else unknown)
+5. git --literal-pathspecs diff --name-only B C -- <scope> non-empty (else unknown; never broaden)
+6. git --literal-pathspecs diff --name-status C -- <scope> must be empty
+   (covers tracked/staged/unstaged/committed drift + deletions; else stale)
+7. git --literal-pathspecs status --porcelain -uall -- <scope> must have no "??"
+   (untracked additions; else stale)
+current IFF 1-7 hold. FAIL/BLOCKED bind equally (drift -> review-stale).
+Source freshness (§22) unchanged and AND-ed with implementation freshness.
+Review metadata (.project-review/, .review-loop/, .scratch/) stays out of
+scope unless genuinely the artifact (§16; producer guidance added).
+```
+
+Scope grammar: repo-relative POSIX literal paths, `;` separator; rejects
+empty entries, absolute, `..`, pathspec magic (leading `:`), wildcard/glob
+chars (incl. `[ ] { }` brackets added from Reviewer B advisory), backslash,
+quoting wrappers; extraction skips markdown wrapper-stripping so `src/*`
+cannot be silently rewritten to `src/` (real bug found by the new tests).
+
+Legacy `d00b221` behavior: old two-value records and any record missing
+`Implementation scope` / `Reviewed implementation revision` never reach
+`accepted` — `review-freshness-unknown` / NEED-INPUT; no read-time migration
+(documented in project-review `references/migration.md` and CHANGELOG).
+
+## Tests added / changed this round
+
+`skills/ask-light/tests/test_ask_light_behavior.py`:
+- `SoftwareReviewFreshnessTest` rewritten as `SoftwareBaselineFreshnessTest`
+  (22 methods / ~50 cases incl. subTests): §20 valid baseline, changed-path
+  dirty/committed, §11 pre-existing-outside-diff dirty/committed, §12 new
+  file untracked/staged/committed, in-scope deletion, out-of-scope isolation,
+  exact-file scope sibling isolation, whole-repo `.` README staleness, missing/
+  invalid/mixed scope (whole-field, no salvage), missing/invalid final revision
+  (short/prose/two/unresolvable), strict fixed-point matrix (8 forms incl.
+  legacy two-value + unresolvable single), base==final, non-ancestor base,
+  empty in-scope window, FAIL/BLOCKED staleness, legacy d00b221 fixture,
+  §21 review→repair→PASS binding to C2 (+ post-C2 in/out-of-scope variants),
+  §16 metadata-commit self-staling guard.
+- `write_project_review_state` gained `implementation_scope` / `final_revision`.
+
+`skills/project-review/tests/test_software_profile_contract.py`: TC-SW-006..009
+structural contract checks (baseline record section, fixed-point grammar +
+review-base semantics, two-value/window rule forbidden via require_no_match,
+scope grammar + never-inferred + BLOCKED + whole-field + no-README-exception,
+verdict revision ownership, clean-in-scope-tree PASS rule, lifecycle rules,
+init freeze wording, closeout binding, §16 metadata guidance).
+
+## Review→repair→PASS lifecycle result (§21, real git)
+
+```text
+B frozen; C1 = initial impl commit -> confirmed finding -> bounded in-scope
+repair committed as C2 -> fresh evaluator verdict records C2 -> ask-light:
+accepted (compares against C2, NOT C1). Post-C2 in-scope change -> review-stale.
+Post-C2 out-of-scope committed change -> still accepted.
+Smoke lines 21/22/22b in smoke/manual-matrix-final.out; regression test
+test_review_repair_lifecycle_binds_to_evaluated_revision_c2.
+```
+
+## Manual smoke matrix (§26) — smoke/manual-matrix-final.py, real CLI git
+
+27/27 rows OK (25 required scenarios + staged-file extra + out-of-scope-after-C2
+extra). Full observed outputs: `smoke/manual-matrix-final.out`. Highlights:
+pre-existing in-scope dirty/committed -> review-stale (04/05); new in-scope
+untracked/staged/committed -> review-stale (06/06b/07); whole-repo scope README
+-> review-stale (11); exact-file scope sibling -> accepted (12); missing scope
+(13), mixed-invalid scope (14), legacy two-SHA (15), invalid+valid SHA (16),
+missing/unresolvable final revision (17/18) -> review-freshness-unknown;
+FAIL/BLOCKED drift (19/20) -> review-stale; directory-Source layers (23-25)
+unchanged and green.
+
+## Specialist findings and dispositions (§27)
+
+- Reviewer B (consumer/adversarial, ~60 live probes incl. argv-spy on git):
+  B1-B12 all NO (no salvage, no evasion, no false stale, no legacy accept).
+  ADVISORY applied: `[]{}` added to forbidden scope characters (glob
+  metachars) + regression cases. ADVISORY noted, no change: Profile-token
+  leniency arms fail-safe (gate-armed = stricter); committed symlink content
+  inherently unverifiable (git domain limit).
+- Reviewer A (producer/lifecycle): Q1/Q2/Q4 NO (contract holds), Q3 YES only
+  for whole-repo scope `.` (closeout writes born-stale the PASS — fails safe).
+  ADVISORY applied: explicit producer guidance added to
+  `profiles/software.md` lifecycle rules (keep `.project-review/`,
+  `.review-loop/`, `.scratch/` records out of the frozen target) + structural
+  contract tests TC-SW-009. ADVISORY applied: CHANGELOG superseded section
+  now carries an explicit history note (not relabeled, superseded-before-release).
+
+## Validation (fresh, after specialist-review fixes)
+
+```text
+python3 -m pytest -q             -> 266 passed
+python3 -m unittest discover -s tests -> OK (COLLECTION 245 + HOOKS 7 assertions)
+python3 -m compileall -q skills tests -> OK
+git diff --check                 -> OK
+
+Skill-local suites: ask-light 103 · project-review 10 · socratic 21 ·
+clarify 5 · project-clarify 11 · project-init 32 · review-loop 19 — all OK
+```
+
+## Self-audit answers (§30, from code/tests)
+
+All seven audit questions: **NO** — pre-existing in-scope files cannot
+survive (scope-wide diff, tests+smoke 04/05); new in-scope files cannot
+(untracked/staged/committed arms, smoke 06/06b/07); malformed fixed points
+cannot be reduced to a valid grammar (fullmatch single-token, 8-form matrix);
+scope cannot be partially accepted (whole-field rejection); a verdict cannot
+reference C1 after C2 was evaluated (verdict-bound revision, lifecycle smoke);
+out-of-scope changes cannot falsely stale (scope-limited checks, smoke 09/10/
+12/22b/24/25); legacy records cannot reach accepted (smoke 15 + fixture test).
+
+## Files changed
+
+```text
+CHANGELOG.md
+skills/ask-light/scripts/ask_light.py
+skills/ask-light/references/discovery-contract.md
+skills/ask-light/tests/test_ask_light_behavior.py
+skills/project-review/references/WORKFLOW.md
+skills/project-review/references/acceptance-charter.md
+skills/project-review/references/evidence-protocol.md
+skills/project-review/references/migration.md
+skills/project-review/references/profiles/software.md
+skills/project-review/tests/test_software_profile_contract.py
+.scratch/light-skills-core-flow-repair/results.md
+.scratch/light-skills-core-flow-repair/smoke/repro-prefix-d00b221.{py,out}
+.scratch/light-skills-core-flow-repair/smoke/manual-matrix-final.{py,out}
+```
+
+## Remaining limitations
+
+- Committed symlink CONTENT inside a frozen scope is not verifiable by Git
+  content comparison (inherent git limit; noted by Reviewer B).
+- Truncated (>64KB) charter/verdict files may hide baseline fields; failure
+  direction is fail-closed (unknown), never a false accept.
+- The consumer trusts the producer-frozen scope's derivation quality only
+  structurally; scope-choice soundness remains a producer-side duty enforced
+  by documentation + contract tests, not by ask-light semantics.

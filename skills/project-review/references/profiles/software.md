@@ -33,7 +33,8 @@ generic lifecycle and stopping rules.
 The software review packet must include the following, with labels from the
 generic [Evidence Protocol](../evidence-protocol.md):
 
-- the fixed-point identity and non-empty diff reviewed by `code-review`;
+- the frozen `Fixed point` / `Implementation scope` identities and the
+  non-empty in-scope diff reviewed by `code-review`;
 - the approved Spec or equivalent acceptance source and its immutable revision;
 - separate `code-review` reports for **Standards** and **Spec** findings;
 - focused automated tests covering changed success, boundary, and failure
@@ -49,24 +50,76 @@ axis, source finding reference, evidence, severity, and stable `F-###` ID.
 The specialist's own `PASS`/`FAIL` summary is evidence about its axes; it is
 never the Program's acceptance verdict.
 
-### Durable fixed-point record
+### Durable software baseline record
 
-A software verdict binds to two frozen baselines, and both must be durably
-recorded in the Charter at `init` time:
+A software verdict binds to a three-part produced identity. Two parts freeze
+in the Charter at `init`; the third is recorded on the final verdict because
+authorized bounded repairs may legitimately move the evaluated candidate
+during the review lifecycle.
 
-- the approved source, through the normal `Source:` and
-  `Source revision or identity:` fields; and
-- the reviewed implementation, through a `- Fixed point:` field resolving to
-  local Git commits. Two values (`<base> <candidate>`) delimit the reviewed
-  implementation window directly; one value identifies a candidate commit whose
-  parent delimits its own change set. A repository-first commit may never be
-  the sole value, because no window can be delimited from it.
+1. **`Fixed point`** — `- Fixed point: <full Git commit SHA>` in the Charter.
+   Exactly one full 40-character commit SHA: the immutable base from which
+   `code-review` reviews the software change. This is the *review base*, not
+   the final accepted implementation. When the caller names a branch or tag,
+   freeze the actual effective commit that delimits the review, never the
+   mutable ref name. No prose, no second endpoint, no short SHA.
+2. **`Implementation scope`** — `- Implementation scope: <repo-relative literal
+   path>; <repo-relative literal path>; ...` in the Charter: the
+   machine-readable projection of this Charter's approved software
+   `In scope`, i.e. the complete component whose state must remain equal to
+   the accepted implementation. Freeze stable component roots (`src/`,
+   `src/; tests/; pyproject.toml`), or `.` only when the whole repository
+   intentionally is the reviewed target — not merely the files the current
+   diff happens to touch. Never derive the scope from changed paths, from a
+   common directory of those paths, or from file extensions. Establish it
+   from the approved acceptance target, explicit SPEC/Charter paths, project
+   or ticket scope, repository/component boundaries, or an explicit
+   user-approved target; if the complete software target cannot be
+   established reliably, return `BLOCKED` instead of guessing a narrow scope
+   just to continue. Every entry must be a repository-relative POSIX literal
+   path: an absolute path, `..` traversal, Git pathspec magic, wildcard/glob
+   characters, quoting wrappers, or one malformed entry inside an otherwise
+   valid list rejects the WHOLE field — valid entries are never partially
+   salvaged. There are no implicit documentation exceptions: with scope `.`
+   a README change counts; with scope `src/` a root README stays outside
+   acceptance. The scope decides, never a hard-coded filename rule.
+3. **`Reviewed implementation revision`** — `- Reviewed implementation
+   revision: <full Git commit SHA>` on `.project-review/verdict.md`: the
+   exact committed implementation the final fresh Evaluator judged. It lives
+   on the verdict rather than in the immutable Charter precisely because
+   `review → confirmed finding → bounded repair → re-review → fresh
+   Evaluator → PASS` may move the candidate from C1 to C2; the verdict then
+   binds the immutable Charter requirements to C2 without mutating the
+   Charter.
 
-A consumer may rely on a software verdict only while the current tree still
-matches that fixed point on exactly the paths the recorded window touched;
-anything else requires a fresh review. A missing, unresolvable, or
-undelimitable `Fixed point:` fails the record closed rather than relaxing
-acceptance.
+### Baseline lifecycle rules
+
+- Each review round evaluates the current implementation delimited by the
+  frozen `Fixed point`. The window from `Fixed point` to the reviewed
+  candidate must contain non-empty change inside `Implementation scope`;
+  a diff that only touches out-of-scope files is not software evidence, and
+  the scope is never broadened to manufacture one.
+- An authorized repair stays inside the frozen scope. Before C2 can become
+  the durable reviewed implementation, the in-scope repair is committed, the
+  required focused evidence and specialist review are refreshed, a fresh
+  Evaluator judges C2, and the verdict records C2 — never C1. Do not mutate
+  the Charter's `Fixed point` to make a repair fit.
+- A durable `PASS`, `FAIL`, or `BLOCKED` always names the implementation
+  revision it evaluated. At final evaluation time the frozen scope must hold
+  no uncommitted tracked or untracked changes: a `PASS` never binds while
+  additional in-scope implementation work exists. Unrelated dirty files
+  outside the scope do not block acceptance.
+- Files that pre-existed inside the scope but were untouched by the review
+  diff, and files created inside the scope afterwards (tracked or untracked),
+  still belong to the accepted component; drifting them invalidates the
+  verdict whatever the review window once said.
+- Keep project-review's own mutable records out of the frozen target.
+  `.project-review/`, `.review-loop/`, and `.scratch/` acceptance/spec/ticket
+  state are review metadata, not implementation — unless they genuinely are
+  the software artifact under review. In particular, a whole-repo scope `.`
+  includes them: the closeout writes that record the verdict would then be
+  in-scope drift and stale the PASS the moment it is issued. Freeze the real
+  component scope instead.
 
 ## Specialist reviewer: `code-review`
 
@@ -110,7 +163,8 @@ scope change.
 The Core may ask its fresh Evaluator to consider `PASS` only when:
 
 - the fixed point, approved Spec, and software Profile are frozen and match
-  the reviewed target;
+  the reviewed target, and the verdict records the exact implementation
+  revision (`Reviewed implementation revision`) the fresh Evaluator judged;
 - every applicable axis has correctly labeled evidence, including both
   `code-review` axes and required behavioral/operational scenarios;
 - each specialist candidate has a generic disposition and every confirmed
@@ -128,9 +182,10 @@ the loop by itself.
 
 Return the generic `FAIL` or `BLOCKED` outcome as applicable when:
 
-- the fixed point, approved Spec, or required `code-review` axis is missing;
-- the diff is empty, the code-review report is a repository-wide redesign, or
-  the report cannot identify the changed software scope;
+- the fixed point, implementation scope, approved Spec, or required
+  `code-review` axis is missing, malformed, or cannot be verified;
+- the in-scope diff is empty (out-of-scope-only change), the code-review report is a
+  repository-wide redesign, or the report cannot identify the changed software scope;
 - tests are absent where required, pass without assertions, or cannot exercise
   a required success/boundary/failure scenario;
 - a candidate is accepted solely because `code-review` recommended it, or a
