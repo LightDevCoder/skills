@@ -254,6 +254,7 @@ Assessment: <what the project appears to be doing, what is finished,
 what is unresolved, and why the recommendation fits now>
 
 Skill: <one name, or none only when legitimately terminal / needs-input>
+Scope: current-workflow | independent | standalone
 Reason: <context-specific workflow reasoning, not a generic description>
 Alternative: <at most one, with why it is not primary>
 Source: first-party: <validated package path>

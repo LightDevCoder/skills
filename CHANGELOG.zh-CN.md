@@ -12,8 +12,8 @@
 - **implement 中 agent-config 用户显式自选：** 重构 `implement` 使其绝不自动调用 `agent-config`。当编排（角色拆分、并行、评审隔离）有实质帮助时，向用户提供显式选择；用户拒绝或在无模型选择能力的宿主上运行时绝不阻塞正常实现。简单的独立任务直接执行，不打扰用户。
 - **ask-light 模型主导混合顾问重构：** 将 `ask-light` 重构为模型主导的工作流顾问，采用五阶段架构：（1）请求意图解析（模型），（2）项目/宿主事实收集（代码），（3）候选 Skill 理解（模型 + 紧凑目录元数据），（4）最终工作流判断（模型），（5）选择验证与转换（代码 + 宿主能力）。
 - **规范项目流对齐：** 在 `ask-light`、配方、地图与文档中恢复 `project-clarify → project-spec → project-tickets → implement → project-review` 规范链路，移除了在 `project-tickets` 前插入 SPEC-review 门禁的逻辑。
-- **严格作用域与验证安全：** 增加严格作用域词汇校验（`current-workflow`、`independent`、`standalone`）、防止绕过硬约束的显式 `Skill: none` 验证，以及显式批准跨轮次的作用域保留。
-- **受信任宿主能力证据：** 明确已批准用户调用转换的受信任宿主证据结构（`approvedUserInvokedTransition: {"state": "available", "source": "host-runtime"}`），拒绝模型推断或未验证的布尔值。
+- **严格作用域与验证安全：** 增加严格作用域词汇校验（`current-workflow`、`independent`、`standalone`）、显式 `Skill: none` 仅在真实 accepted 阶段允许通过的验证，以及显式批准跨轮次的作用域保留与缺失/非法作用域 fail-closed 机制。
+- **受信任宿主能力证据：** 明确已批准用户调用转换的受信任宿主能力通道要求，拒绝模型/上下文 JSON 伪造与未验证布尔值，在缺少真实宿主通道时安全降级为渲染精确调用（`host-transition-required`）。
 - **内容验证的澄清就绪性：** 增强澄清就绪性判定，要求具备生产者契约标识与目标（`readyFor: project-spec`）。
 - **ask_light.py 证据服务：** Python 辅助程序现纯粹作为事实证据、目录、配方与验证服务（`ask-light-evidence/1`）。移除了 `PROJECT_STATE_INTENT_PATTERN` 及所有基于正则/taskKind/评分的语义路由权威。返回结构化事实（projectContract、currentEffort、spec、tickets、review、artifactSignals）与作用域硬约束，不返回任何确定性 Skill 推荐。
 - **工作流模式：** 重构 `recipes_result`（`--mode workflow`），发布带有步骤可用性与 handoff 的规范配方，移除了确定性正则胜者选择；由模型进行语义选择并锚定至当前实际状态。

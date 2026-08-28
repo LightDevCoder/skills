@@ -42,6 +42,7 @@ $ask-light <category>
 Mode: next
 Status: RECOMMEND
 Skill: project-tickets
+Scope: current-workflow
 Next: awaiting-approval
 Execution: recommendation phase was read-only; execution begins only after explicit user approval
 ```

@@ -545,53 +545,144 @@ class StrictScopeAndNoneValidationTest(unittest.TestCase):
             self.assertTrue(val["checks"]["hardConstraintsRespected"])
             self.assertIn("current effort accepted", val["reason"])
 
-    def test_skill_none_invalid_for_active_review(self) -> None:
-        """SPEC §8: Skill none cannot bypass an active review hard constraint."""
+    def test_skill_none_invalid_for_all_non_terminal_current_workflow_stages(self) -> None:
+        """SPEC §8, §9: Reject Skill: none for any non-terminal current-workflow state."""
+        # 1. Uninitialized project
         with tempfile.TemporaryDirectory() as tmp:
-            proj = Path(tmp) / "project"
-            write_project_state(proj, initialized=True, spec=True, ticket_statuses=["resolved"])
-            effort_spec = proj / ".scratch" / "effort" / "spec.md"
-            effort_spec.write_text("# SPEC\nStatus: active\n", encoding="utf-8")
-            write_project_review_state(proj, reviewed_effort="effort", status="READY", verdict=None)
-            ev = ASK_LIGHT.inspect_project_evidence(proj)
-
+            p_uninit = Path(tmp) / "uninit"
+            p_uninit.mkdir()
+            ev_uninit = ASK_LIGHT.inspect_project_evidence(p_uninit)
+            self.assertEqual(ev_uninit["stage"], "uninitialized")
             val = ASK_LIGHT.validate_recommendation(
-                "none", evidence=ev, roots=self.roots, host="codex", scope="current-workflow"
+                "none", evidence=ev_uninit, roots=self.roots, host="codex", scope="current-workflow"
             )
             self.assertEqual(val["status"], "BLOCKED")
             self.assertFalse(val["checks"]["hardConstraintsRespected"])
-            self.assertIn("active-review", val["reason"])
 
-    def test_skill_none_invalid_when_ready_ticket_exists(self) -> None:
-        """SPEC §8: Skill none is invalid when ready tickets exist in current-workflow."""
+        # 2. Initialized (no SPEC)
         with tempfile.TemporaryDirectory() as tmp:
-            proj = Path(tmp) / "project"
-            write_project_state(proj, initialized=True, spec=True)
-            issues = proj / ".scratch" / "effort" / "issues"
+            p_init = Path(tmp) / "init"
+            write_project_state(p_init, initialized=True, spec=False)
+            ev_init = ASK_LIGHT.inspect_project_evidence(p_init)
+            self.assertEqual(ev_init["stage"], "initialized")
+            val = ASK_LIGHT.validate_recommendation(
+                "none", evidence=ev_init, roots=self.roots, host="codex", scope="current-workflow"
+            )
+            self.assertEqual(val["status"], "BLOCKED")
+
+        # 3. Initialized with research
+        with tempfile.TemporaryDirectory() as tmp:
+            p_res = Path(tmp) / "init_res"
+            write_project_state(p_res, initialized=True, spec=False)
+            docs_res = p_res / "docs" / "research"
+            docs_res.mkdir(parents=True)
+            (docs_res / "findings.md").write_text("# Research\n", encoding="utf-8")
+            ev_res = ASK_LIGHT.inspect_project_evidence(p_res)
+            self.assertEqual(ev_res["stage"], "initialized")
+            val = ASK_LIGHT.validate_recommendation(
+                "none", evidence=ev_res, roots=self.roots, host="codex", scope="current-workflow"
+            )
+            self.assertEqual(val["status"], "BLOCKED")
+
+        # 4. Clarification ready but no SPEC (stage is initialized, artifactSignals.clarification has readyFor project-spec)
+        with tempfile.TemporaryDirectory() as tmp:
+            p_clar = Path(tmp) / "clar_ready"
+            write_project_state(p_clar, initialized=True, spec=False)
+            docs_agents = p_clar / "docs" / "agents"
+            docs_agents.mkdir(parents=True, exist_ok=True)
+            (docs_agents / "clarification-handoff.md").write_text(
+                "Project clarification handoff\n- Status: ready-for-next-stage\n- Recommended next explicit invocation: project-spec\n",
+                encoding="utf-8",
+            )
+            ev_clar = ASK_LIGHT.inspect_project_evidence(p_clar)
+            self.assertEqual(ev_clar["stage"], "initialized")
+            self.assertTrue(any(s.get("readyFor") == "project-spec" for s in ev_clar.get("artifactSignals", {}).get("clarification", [])))
+            val = ASK_LIGHT.validate_recommendation(
+                "none", evidence=ev_clar, roots=self.roots, host="codex", scope="current-workflow"
+            )
+            self.assertEqual(val["status"], "BLOCKED")
+
+        # 5. SPEC ready without tickets
+        with tempfile.TemporaryDirectory() as tmp:
+            p_spec = Path(tmp) / "spec_ready"
+            write_project_state(p_spec, initialized=True, spec=True)
+            ev_spec = ASK_LIGHT.inspect_project_evidence(p_spec)
+            self.assertEqual(ev_spec["stage"], "spec-no-tickets")
+            val = ASK_LIGHT.validate_recommendation(
+                "none", evidence=ev_spec, roots=self.roots, host="codex", scope="current-workflow"
+            )
+            self.assertEqual(val["status"], "BLOCKED")
+
+        # 6. Ready implementation ticket
+        with tempfile.TemporaryDirectory() as tmp:
+            p_wip = Path(tmp) / "wip"
+            write_project_state(p_wip, initialized=True, spec=True)
+            issues = p_wip / ".scratch" / "effort" / "issues"
             issues.mkdir(parents=True, exist_ok=True)
             (issues / "01-ticket.md").write_text("- Status: open\n", encoding="utf-8")
-            ev = ASK_LIGHT.inspect_project_evidence(proj)
-
+            ev_wip = ASK_LIGHT.inspect_project_evidence(p_wip)
+            self.assertEqual(ev_wip["stage"], "work-in-progress")
             val = ASK_LIGHT.validate_recommendation(
-                "none", evidence=ev, roots=self.roots, host="codex", scope="current-workflow"
+                "none", evidence=ev_wip, roots=self.roots, host="codex", scope="current-workflow"
             )
             self.assertEqual(val["status"], "BLOCKED")
-            self.assertIn("ready implementation ticket exists", val["reason"])
 
-    def test_skill_none_blocked_on_ambiguous_effort(self) -> None:
-        """SPEC §8: Skill none cannot bypass ambiguous current effort."""
+        # 7. Active project review
         with tempfile.TemporaryDirectory() as tmp:
-            proj = Path(tmp) / "project"
-            write_project_state(proj, initialized=True, spec=True)
-            write_effort_state(proj, "alpha", spec_status="active")
-            write_effort_state(proj, "beta", spec_status="active")
-            ev = ASK_LIGHT.inspect_project_evidence(proj)
-
+            p_rev = Path(tmp) / "rev_active"
+            write_project_state(p_rev, initialized=True, spec=True, ticket_statuses=["resolved"])
+            effort_spec = p_rev / ".scratch" / "effort" / "spec.md"
+            effort_spec.write_text("# SPEC\nStatus: active\n", encoding="utf-8")
+            write_project_review_state(p_rev, reviewed_effort="effort", status="READY", verdict=None)
+            ev_rev = ASK_LIGHT.inspect_project_evidence(p_rev)
+            self.assertEqual(ev_rev["stage"], "project-review")
             val = ASK_LIGHT.validate_recommendation(
-                "none", evidence=ev, roots=self.roots, host="codex", scope="current-workflow"
+                "none", evidence=ev_rev, roots=self.roots, host="codex", scope="current-workflow"
             )
             self.assertEqual(val["status"], "BLOCKED")
-            self.assertIn("ambiguous-current-effort", val["reason"])
+
+        # 8. Stale review
+        with tempfile.TemporaryDirectory() as tmp:
+            p_stale = Path(tmp) / "rev_stale"
+            write_project_state(p_stale, initialized=True, spec=True)
+            write_effort_state(p_stale, "current", spec_status="active", ticket_statuses=["resolved"])
+            ensure_git_baseline(p_stale)
+            write_project_review_state(p_stale, reviewed_effort="current", verdict="PASS")
+            spec_file = p_stale / ".scratch" / "current" / "spec.md"
+            spec_file.write_text(spec_file.read_text(encoding="utf-8") + "\nDirty drift\n", encoding="utf-8")
+            ev_stale = ASK_LIGHT.inspect_project_evidence(p_stale)
+            self.assertEqual(ev_stale["stage"], "review-stale")
+            val = ASK_LIGHT.validate_recommendation(
+                "none", evidence=ev_stale, roots=self.roots, host="codex", scope="current-workflow"
+            )
+            self.assertEqual(val["status"], "BLOCKED")
+
+        # 9. Ambiguous current effort
+        with tempfile.TemporaryDirectory() as tmp:
+            p_amb = Path(tmp) / "amb_effort"
+            write_project_state(p_amb, initialized=True, spec=True)
+            write_effort_state(p_amb, "alpha", spec_status="active")
+            write_effort_state(p_amb, "beta", spec_status="active")
+            ev_amb = ASK_LIGHT.inspect_project_evidence(p_amb)
+            self.assertEqual(ev_amb["stage"], "ambiguous-current-effort")
+            val = ASK_LIGHT.validate_recommendation(
+                "none", evidence=ev_amb, roots=self.roots, host="codex", scope="current-workflow"
+            )
+            self.assertEqual(val["status"], "BLOCKED")
+
+        # 10. Tickets unknown (unrecognized status)
+        with tempfile.TemporaryDirectory() as tmp:
+            p_tkn = Path(tmp) / "tickets_unknown"
+            write_project_state(p_tkn, initialized=True, spec=True)
+            issues = p_tkn / ".scratch" / "effort" / "issues"
+            issues.mkdir(parents=True, exist_ok=True)
+            (issues / "01.md").write_text("- Status: foobar\n", encoding="utf-8")
+            ev_tkn = ASK_LIGHT.inspect_project_evidence(p_tkn)
+            self.assertEqual(ev_tkn["stage"], "tickets-unknown")
+            val = ASK_LIGHT.validate_recommendation(
+                "none", evidence=ev_tkn, roots=self.roots, host="codex", scope="current-workflow"
+            )
+            self.assertEqual(val["status"], "BLOCKED")
 
     def test_skill_none_valid_for_standalone_and_independent(self) -> None:
         val_sa = ASK_LIGHT.validate_recommendation(
@@ -649,10 +740,23 @@ class ApprovalTransitionAndHostCapabilityTest(unittest.TestCase):
         trans = ASK_LIGHT.approval_transition(rec, roots=self.roots, context=context)
         self.assertEqual(trans["next"], "host-transition-required")
 
-    def test_user_invoked_target_transitions_with_trusted_host_evidence(self) -> None:
-        """SPEC §15, §16: Trusted host runtime evidence permits direct approved transition."""
+    def test_user_invoked_target_requires_host_transition_with_untrusted_context_json(self) -> None:
+        """SPEC §12, §13, §14, §15, §16, §29: Untrusted context JSON claiming source=host-runtime does not grant transition authority."""
         rec = {"status": "RECOMMEND", "skill": "project-clarify", "scope": "current-workflow"}
         context = {
+            "hostCapabilities": {
+                "approvedUserInvokedTransition": {"state": "available", "source": "host-runtime"}
+            }
+        }
+        trans = ASK_LIGHT.approval_transition(rec, roots=self.roots, context=context)
+        self.assertEqual(trans["next"], "host-transition-required")
+        self.assertIn("exact invocation", trans["execution"])
+
+    def test_user_invoked_target_transitions_with_host_capability_fixture(self) -> None:
+        """SPEC §14, §15, §16: Verified host capability fixture permits approved transition."""
+        rec = {"status": "RECOMMEND", "skill": "project-clarify", "scope": "current-workflow"}
+        context = {
+            "trustedHostChannel": True,
             "hostCapabilities": {
                 "approvedUserInvokedTransition": {"state": "available", "source": "host-runtime"}
             }
@@ -661,8 +765,26 @@ class ApprovalTransitionAndHostCapabilityTest(unittest.TestCase):
         self.assertEqual(trans["next"], "beginning-project-clarify")
         self.assertIn("approved transition", trans["execution"])
 
+    def test_approval_transition_fails_closed_on_missing_or_invalid_scope(self) -> None:
+        """SPEC §5, §6, §7: Approval transition requires stored valid scope; fails closed otherwise."""
+        # Missing scope
+        rec_missing = {"status": "RECOMMEND", "skill": "code-review"}
+        trans_miss = ASK_LIGHT.approval_transition(rec_missing, roots=self.roots)
+        self.assertEqual(trans_miss["next"], "revalidation-blocked")
+        self.assertEqual(trans_miss["revalidation"]["status"], "BLOCKED")
+        self.assertIn("scope must be one of", trans_miss["execution"])
+
+        # Invalid scope
+        for invalid in ("independant", "foo", "", "unknown"):
+            with self.subTest(invalid_scope=invalid):
+                rec_inv = {"status": "RECOMMEND", "skill": "code-review", "scope": invalid}
+                trans_inv = ASK_LIGHT.approval_transition(rec_inv, roots=self.roots)
+                self.assertEqual(trans_inv["next"], "revalidation-blocked")
+                self.assertEqual(trans_inv["revalidation"]["status"], "BLOCKED")
+                self.assertIn("scope must be one of", trans_inv["execution"])
+
     def test_approval_preserves_independent_scope_under_active_review(self) -> None:
-        """SPEC §10, §11, §12: Scope preservation across approval under active project-review."""
+        """SPEC §5, §7, §27: Scope preservation across approval under active project-review."""
         with tempfile.TemporaryDirectory() as tmp:
             proj = Path(tmp) / "project"
             write_project_state(proj, initialized=True, spec=True, ticket_statuses=["resolved"])
@@ -672,10 +794,19 @@ class ApprovalTransitionAndHostCapabilityTest(unittest.TestCase):
 
             context = {
                 "projectRoot": str(proj),
-                "hostCapabilities": {
-                    "approvedUserInvokedTransition": {"state": "available", "source": "host-runtime"}
-                }
             }
+
+            rec = {
+                "status": "RECOMMEND",
+                "skill": "code-review",
+                "scope": "independent",
+                "source": "first-party",
+            }
+            trans = ASK_LIGHT.approval_transition(rec, roots=self.roots, context=context)
+            self.assertEqual(trans["scope"], "independent")
+            self.assertEqual(trans["revalidation"]["scope"], "independent")
+            self.assertEqual(trans["revalidation"]["status"], "VALIDATED")
+            self.assertEqual(trans["next"], "beginning-code-review")
 
             rec = {
                 "status": "RECOMMEND",
@@ -1256,6 +1387,36 @@ class FreshnessRegressionMatrixTest(unittest.TestCase):
         )
         self.assertEqual(ASK_LIGHT.inspect_project_evidence(p_amb)["stage"], "review-freshness-unknown")
 
+    def test_duplicate_charter_source_fails_closed(self) -> None:
+        """SPEC §17: Duplicate Charter Source violates producer singleton contract."""
+        p = self.build_project("PASS")
+        charter = p / ".project-review" / "charter.md"
+        charter.write_text(
+            "# Charter\n- Charter revision: 1\n- Source: `.scratch/current/spec.md`\n- Source: `.scratch/other/spec.md`\n- Source revision or identity: 1111111111111111111111111111111111111111\n- Profile: generic\n",
+            encoding="utf-8",
+        )
+        ev = ASK_LIGHT.inspect_project_evidence(p)
+        self.assertEqual(ev["stage"], "review-ownership-unknown")
+        self.assertEqual(ev["review"]["ownership"], "unresolvable")
+        self.assertFalse(ev["review"]["accepted"])
+        self.assertTrue(any(c.get("ownerSkill") == "project-review" for c in ev.get("hardConstraints", [])))
+        val = ASK_LIGHT.validate_recommendation("none", evidence=ev, roots=self.roots, scope="current-workflow")
+        self.assertEqual(val["status"], "BLOCKED")
+
+    def test_duplicate_charter_source_revision_fails_closed(self) -> None:
+        """SPEC §17: Duplicate Charter Source revision or identity fails closed."""
+        p = self.build_project("PASS")
+        charter = p / ".project-review" / "charter.md"
+        charter.write_text(
+            "# Charter\n- Charter revision: 1\n- Source: `.scratch/current/spec.md`\n- Source revision or identity: 1111111111111111111111111111111111111111\n- Source revision or identity: 2222222222222222222222222222222222222222\n- Profile: generic\n",
+            encoding="utf-8",
+        )
+        ev = ASK_LIGHT.inspect_project_evidence(p)
+        self.assertEqual(ev["stage"], "review-freshness-unknown")
+        self.assertEqual(ev["review"]["freshness"], "unknown")
+        val = ASK_LIGHT.validate_recommendation("none", evidence=ev, roots=self.roots, scope="current-workflow")
+        self.assertEqual(val["status"], "BLOCKED")
+
 
 # ---------------------------------------------------------------------------
 # Software Baseline Matrix Tests (SPEC §21)
@@ -1335,13 +1496,93 @@ class SoftwareReviewBaselineMatrixTest(unittest.TestCase):
         append_durable_field(p_dup / ".project-review" / "charter.md", "- Fixed point: 0123456789abcdef0123456789abcdef01234567")
         self.assertEqual(ASK_LIGHT.inspect_project_evidence(p_dup)["stage"], "review-freshness-unknown")
 
-    def test_base_equals_final_or_not_ancestor_fails_closed(self) -> None:
+    def test_base_equals_final_revision_fails_closed(self) -> None:
+        """SPEC §19: Fixed point == reviewed final revision fails closed."""
         p_eq, b, _ = self.build_software_project(final_revision_override="SAME")
         # Overwrite final revision to equal base
         verdict_text = (p_eq / ".project-review" / "verdict.md").read_text(encoding="utf-8")
         verdict_text = verdict_text.replace("SAME", b)
         (p_eq / ".project-review" / "verdict.md").write_text(verdict_text, encoding="utf-8")
         self.assertEqual(ASK_LIGHT.inspect_project_evidence(p_eq)["stage"], "review-freshness-unknown")
+
+    def test_fixed_point_not_ancestor_fails_closed(self) -> None:
+        """SPEC §19: Fixed point is not an ancestor of reviewed final revision fails closed."""
+        self._count += 1
+        root = Path(self.temp.name) / f"not-ancestor-{self._count}"
+        write_project_state(root, initialized=True, spec=True)
+        write_effort_state(root, "current", spec_status="active", ticket_statuses=["resolved"])
+        src = root / "src"
+        src.mkdir(parents=True)
+        (src / "app.py").write_text("print(1)\n", encoding="utf-8")
+        base = ensure_git_baseline(root)
+
+        # Create branch A for fixed point
+        _git(root, "checkout", "-b", "branch-a")
+        (src / "app.py").write_text("print('branch A')\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        commit_all(root, "commit on branch A")
+        branch_a_rev = _git(root, "rev-parse", "HEAD").stdout.strip()
+
+        # Create diverged branch B from base
+        _git(root, "checkout", base)
+        _git(root, "checkout", "-b", "branch-b")
+        (src / "app.py").write_text("print('branch B')\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        commit_all(root, "commit on branch B")
+        branch_b_rev = _git(root, "rev-parse", "HEAD").stdout.strip()
+
+        # Review with fixed_point = branch_a_rev and final_revision = branch_b_rev (branch_a is not ancestor of branch_b)
+        write_project_review_state(
+            root,
+            reviewed_effort="current",
+            verdict="PASS",
+            revision_identity=base,
+            profile="software",
+            fixed_point=branch_a_rev,
+            implementation_scope="src/",
+            final_revision=branch_b_rev,
+        )
+        self.assertEqual(ASK_LIGHT.inspect_project_evidence(root)["stage"], "review-freshness-unknown")
+
+    def test_nested_and_out_of_scope_ignored_drift(self) -> None:
+        """SPEC §18: In-scope nested ignored drift stales software review; out-of-scope ignored drift does not."""
+        p, _, _ = self.build_software_project()
+        self.assertEqual(ASK_LIGHT.inspect_project_evidence(p)["stage"], "accepted")
+
+        # 1. Out-of-scope ignored file does NOT invalidate review
+        doc_dir = p / "doc"
+        doc_dir.mkdir(parents=True, exist_ok=True)
+        add_ignore_rule(p, "doc/ignored.txt")
+        (doc_dir / "ignored.txt").write_text("out-of-scope ignored\n", encoding="utf-8")
+        self.assertEqual(ASK_LIGHT.inspect_project_evidence(p)["stage"], "accepted")
+
+        # 2. Nested in-scope ignored file DOES invalidate software review
+        nested_dir = p / "src" / "nested" / "sub"
+        nested_dir.mkdir(parents=True, exist_ok=True)
+        add_ignore_rule(p, "src/nested/sub/ignored.py")
+        (nested_dir / "ignored.py").write_text("print('nested ignored')\n", encoding="utf-8")
+        ev_stale = ASK_LIGHT.inspect_project_evidence(p)
+        self.assertEqual(ev_stale["stage"], "review-stale")
+        self.assertEqual(ev_stale["review"]["freshness"], "stale")
+
+    def test_software_current_in_scope_and_out_of_scope_drift(self) -> None:
+        """SPEC §20: Current in-scope drift stales software review; out-of-scope drift does not."""
+        p, _, _ = self.build_software_project()
+        self.assertEqual(ASK_LIGHT.inspect_project_evidence(p)["stage"], "accepted")
+
+        # Out-of-scope modification
+        (p / "notes.txt").write_text("some note\n", encoding="utf-8")
+        _git(p, "add", "-A")
+        commit_all(p, "out of scope commit")
+        self.assertEqual(ASK_LIGHT.inspect_project_evidence(p)["stage"], "accepted")
+
+        # In-scope modification
+        (p / "src" / "app.py").write_text("print('drift')\n", encoding="utf-8")
+        _git(p, "add", "-A")
+        commit_all(p, "in scope drift commit")
+        ev_stale = ASK_LIGHT.inspect_project_evidence(p)
+        self.assertEqual(ev_stale["stage"], "review-stale")
+        self.assertEqual(ev_stale["review"]["freshness"], "stale")
 
     def test_implementation_scope_validation_matrix(self) -> None:
         # missing scope
@@ -1562,6 +1803,35 @@ class DiscoveryAndProvenanceMatrixTest(unittest.TestCase):
         val = ASK_LIGHT.validate_recommendation("eli5", roots=roots, host="codex", scope="standalone")
         self.assertEqual(val["status"], "BLOCKED")
         self.assertIn("body/reference unreadable", val["reason"])
+
+    def test_source_checkout_root_discovery(self) -> None:
+        """SPEC §21: Discover roots from source checkout containing skills/ask-light and skills/socratic."""
+        repo_root = self.root / "repo"
+        skills_dir = repo_root / "skills"
+        write_skill(skills_dir, "ask-light")
+        write_skill(skills_dir, "socratic")
+        sub_dir = repo_root / "nested" / "sub"
+        sub_dir.mkdir(parents=True)
+        roots = ASK_LIGHT.discover_roots(cwd=sub_dir)
+        paths = [r["path"] for r in roots]
+        self.assertIn(str(skills_dir.resolve()), paths)
+
+    def test_installed_host_root_discovery(self) -> None:
+        """SPEC §21: Discover roots from installed host CODEX_HOME."""
+        codex_home = self.root / "codex_home"
+        skills_dir = codex_home / "skills"
+        write_skill(skills_dir, "ask-light")
+        old_env = os.environ.get("CODEX_HOME")
+        os.environ["CODEX_HOME"] = str(codex_home)
+        try:
+            roots = ASK_LIGHT.discover_roots()
+            paths = [r["path"] for r in roots]
+            self.assertIn(str(skills_dir.resolve()), paths)
+        finally:
+            if old_env is None:
+                del os.environ["CODEX_HOME"]
+            else:
+                os.environ["CODEX_HOME"] = old_env
 
 
 # ---------------------------------------------------------------------------

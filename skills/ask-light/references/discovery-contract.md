@@ -411,10 +411,10 @@ The transition itself is host-aware:
 
 - A **model-invoked** accepted Skill may begin in the current conversation
   where the host supports that.
-- A **user-invoked** accepted Skill begins itself only where trusted host
-  evidence (`hostCapabilities.approvedUserInvokedTransition: {"state": "available", "source": "host-runtime"}`)
-  proves explicit approved transitions are supported. The user's explicit approval
+- A **user-invoked** accepted Skill begins itself only where genuine trusted host
+  channel evidence proves explicit approved transitions are supported. The user's explicit approval
   constitutes the required authorization for that exact target, without auto-chaining past it.
+  Model-built context JSON claiming `source: host-runtime` without a verified host channel cannot grant transition authority.
 - Otherwise `ask-light` renders the exact invocation (`$<skill>` on Codex, `/<skill>` on Claude
   Code) and asks the user to start it. It does **not** fake execution, does not assume every host
   supports recursive Skill invocation, and never treats user prose or model inference as proof of host capability.
@@ -437,8 +437,8 @@ contract, and stop until the user approves execution.
 ## Result and approval
 
 The final user-visible record is assembled by the model per the `SKILL.md`
-result contract: the model fills `Skill`, `Reason`, `Alternative`, and
-`Assessment` from its own reasoning over evidence and candidate contracts;
+result contract: the model fills `Skill`, `Scope` (`current-workflow` | `independent` | `standalone`),
+`Reason`, `Alternative`, and `Assessment` from its own reasoning over evidence and candidate contracts;
 deterministic validation fills/validates `Source`, `Invocation`, availability,
 invocation type, and provenance. A `RECOMMEND` result must always contain a
 real recommended Skill unless the project is legitimately terminal — an empty

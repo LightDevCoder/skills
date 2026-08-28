@@ -2543,10 +2543,22 @@ def _known_skill(skill_map: dict[str, Any], name: str) -> dict[str, Any] | None:
 def _is_trusted_host_transition_supported(context: dict[str, Any]) -> bool:
     """Verify whether host capability evidence verifiably permits approved transition.
 
-    Host capability evidence must come from host-owned runtime evidence (e.g.
-    `{"approvedUserInvokedTransition": {"state": "available", "source": "host-runtime"}}`),
-    never from model inference, user prose, or unverified booleans.
+    Ordinary model- or caller-supplied context JSON cannot grant transition authority
+    merely by containing string labels such as `source: host-runtime`. Only genuine
+    host-owned capability channels (such as runtime-injected harness metadata or
+    verified host capability fixtures with explicit host channel provenance) are trusted.
+    When unverified, ask-light fails safe and returns host-transition-required to have the
+    user invoke the target directly.
     """
+    if not isinstance(context, dict):
+        return False
+    has_trusted_channel = bool(
+        context.get("_trusted_host_channel")
+        or context.get("trustedHostChannel")
+        or os.environ.get("LIGHT_TRUSTED_HOST_CHANNEL") == "1"
+    )
+    if not has_trusted_channel:
+        return False
     capabilities = context.get("hostCapabilities")
     if not isinstance(capabilities, dict):
         return False
@@ -2629,7 +2641,12 @@ def validate_recommendation(
         result["logicalRecommendation"] = ""
         result["checks"]["noSkillSelected"] = True
 
-        if scope == "current-workflow" and evidence:
+        if scope == "current-workflow":
+            if not evidence:
+                result["checks"]["hardConstraintsRespected"] = False
+                return blocked(
+                    "current-workflow requires project evidence and cannot terminate with Skill: none on an uninitialized/unresolved workspace."
+                )
             violated: dict[str, Any] | None = None
             for constraint in evidence.get("hardConstraints", []):
                 if constraint.get("blocking"):
@@ -2650,10 +2667,11 @@ def validate_recommendation(
                 result["status"] = "VALIDATED"
                 result["reason"] = "current effort accepted; workflow complete with no mandatory next Skill"
                 return result
-            result["checks"]["hardConstraintsRespected"] = True
-            result["status"] = "VALIDATED"
-            result["reason"] = "no Skill selected; no mandatory next Skill required"
-            return result
+            result["checks"]["hardConstraintsRespected"] = False
+            stage_val = evidence.get("stage", "unknown")
+            return blocked(
+                f"current-workflow is non-terminal (stage: '{stage_val}'); cannot select Skill: none."
+            )
         else:
             result["checks"]["hardConstraintsRespected"] = True
             result["status"] = "VALIDATED"
@@ -2776,7 +2794,25 @@ def approval_transition(
     context = context or {}
     updated = dict(recommendation or {})
     selected = str((recommendation or {}).get("skill", "") or "").strip().lower()
-    scope = str((recommendation or {}).get("scope", "") or context.get("scope", "") or CONSTRAINT_SCOPE_DEFAULT)
+    raw_scope = (recommendation or {}).get("scope")
+    if raw_scope is None or not str(raw_scope).strip() or str(raw_scope).strip() not in CONSTRAINT_SCOPES:
+        scope = str(raw_scope or "").strip()
+        updated["scope"] = scope
+        updated["next"] = "revalidation-blocked"
+        updated["execution"] = (
+            f"User approval cannot be executed: scope must be one of {', '.join(CONSTRAINT_SCOPES)} "
+            f"(got '{scope or 'empty'}'). Do not invent a default scope; revalidate or reconstruct the recommendation."
+        )
+        updated["revalidation"] = {
+            "status": "BLOCKED",
+            "scope": scope,
+            "reason": f"scope must be one of {', '.join(CONSTRAINT_SCOPES)} (got '{scope or 'empty'}').",
+            "source": "",
+            "invocation": "",
+            "invocationType": "",
+        }
+        return updated
+    scope = str(raw_scope).strip()
     updated["scope"] = scope
     if (recommendation or {}).get("status") != "RECOMMEND" or not selected or selected == "none":
         updated["next"] = "no-execution"
@@ -2827,14 +2863,6 @@ def approval_transition(
     updated["execution"] = (
         "User approved, but repository policy forbids a user-invoked Skill from auto-invoking another "
         "user-invoked Skill and this host exposes no verified approved-transition capability evidence. Render the "
-        f"exact invocation ({validation.get('invocation', '')}) and have the user start it. Do not claim a "
-        "direct transition without host evidence."
-    )
-    return updated
-    updated["next"] = "host-transition-required"
-    updated["execution"] = (
-        "User approved, but repository policy forbids a user-invoked Skill from auto-invoking another "
-        "user-invoked Skill and this host exposes no verified approved-transition capability. Render the "
         f"exact invocation ({validation.get('invocation', '')}) and have the user start it. Do not claim a "
         "direct transition without host evidence."
     )
