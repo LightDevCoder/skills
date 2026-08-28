@@ -29,13 +29,17 @@ Light Skills 正式发布 v0.2.0，引入完整的 33 个第一方 Skill 架构�
 
 ## 安装与验证
 
-- **全量安装：**
-  ```text
-  npx skills add LightDevCoder/skills --yes --copy --agent '*'
+- **交互式安装（推荐）：**
+  ```bash
+  npx skills add LightDevCoder/skills
   ```
-- **指定版本：**
-  ```text
-  npx skills add LightDevCoder/skills#v0.2.0 --yes --copy --agent '*'
+- **指定稳定版本：**
+  ```bash
+  npx skills add LightDevCoder/skills#v0.2.0
+  ```
+- **单 Skill 安装示例：**
+  ```bash
+  npx skills add LightDevCoder/skills --skill project-review
   ```
 
 验证结果：本地全套自动化测试（Pytest 309 tests、Unittest 27 tests、Compileall、Git diff check）与 GitHub Actions CI（Run ID `33137041472`）全部通过。在全新隔离环境中实测 generic latest 与 pinned `#v0.2.0` 全集合及全部 33 个单个包安装矩阵，66/66 全部验证通过。
