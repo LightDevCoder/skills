@@ -62,14 +62,20 @@ Project-state evidence is fail-closed:
   - Active review state (`INIT`, `READY`, `CRITIC`, `REPAIR`, `EVALUATE`) →
     routed to `project-review` (stage `project-review`); any previous verdict
     is non-authoritative.
-  - Missing, empty, or malformed `state.md`, missing/ambiguous canonical
-    fields (`Status:`, `Charter revision:`, `Profile:`), Charter revision
-    mismatch, or Profile mismatch → fail closed as `review-state-unknown`.
+  - Missing, empty, or malformed `state.md`, missing/ambiguous/non-positive
+    canonical fields (`Status:`, `Charter revision:`, `Profile:`, `Round:` where
+    Round >= 1), Charter revision mismatch, or Profile mismatch → fail closed as
+    `review-state-unknown`.
   - Terminal review state (`PASS`, `FAIL`, `BLOCKED`) requires an agreeing
-    `verdict.md`; State/Verdict conflicts fail closed as `acceptance-unknown`.
+    `verdict.md` with complete singleton transaction identity (`Verdict:`,
+    `Charter revision:`, `Profile:`, `Round:`, and software `Reviewed implementation revision:`).
+    Canonical `Verdict:` is the only authoritative terminal conclusion field in durable
+    `verdict.md`; aliases such as `Result:`, `Outcome:`, `Acceptance:`, `Status:`, or `State:`
+    are not accepted substitutes. Accepted terminal verdict grammar is strictly closed to
+    `PASS | FAIL | BLOCKED` (semantic aliases fail closed). State/Verdict conflicts,
+    missing/duplicate/malformed fields, or non-canonical values fail closed as `acceptance-unknown`.
   - Proven ownership + coherent PASS + fresh baseline → `accepted`.
-  - Proven ownership + coherent FAIL/BLOCKED/rejected + fresh baseline →
-    `acceptance-not-passed`.
+  - Proven ownership + coherent FAIL/BLOCKED + fresh baseline → `acceptance-not-passed`.
   - Verdicts citing another effort → ignored for current acceptance.
   - A record whose ownership cannot be established from the Charter
     `Source:` fails closed as `review-ownership-unknown`; `ask-light` never
@@ -80,14 +86,15 @@ Project-state evidence is fail-closed:
   any conclusion (definitions remain producer-owned):
   - Canonical durable fields are singleton fields: `Charter revision:`,
     `Source:`, `Source revision or identity:`, and `Profile:` in the Charter,
-    `Status:`, `Charter revision:`, and `Profile:` in `state.md`, plus the
-    software-only `Fixed point:` / `Implementation scope:` and the verdict's
-    `Reviewed implementation revision:`. Each must appear exactly once — a
-    missing or duplicated field (even identically duplicated, in either field
-    order) is invalid durable state and fails closed as
-    `review-ownership-unknown`, `review-state-unknown`, or
-    `review-freshness-unknown`; `ask-light` never reads "first value wins" from
-    an authoritative field.
+    `Status:`, `Charter revision:`, `Profile:`, and `Round:` (Round >= 1) in `state.md`,
+    plus `Verdict:` (strict `PASS | FAIL | BLOCKED`), `Charter revision:`, `Profile:`,
+    and `Round:` (Round >= 1) in `verdict.md`, and the software-only
+    `Fixed point:` / `Implementation scope:` (Charter) and `Reviewed implementation revision:`
+    (Verdict). Each must appear exactly once — a missing, malformed, or duplicated field
+    (even identically duplicated, in either field order) is invalid durable state and
+    fails closed as `review-ownership-unknown`, `review-state-unknown`, or
+    `acceptance-unknown` / `review-freshness-unknown`; `ask-light` never reads "first value wins"
+    from an authoritative field.
   - Every cited `.scratch` path still matching the recorded Git commit —
     including uncommitted working-tree modifications — keeps the verdict
     current; PASS stays accepted. A cited directory source is reviewed as a

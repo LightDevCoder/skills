@@ -1343,3 +1343,127 @@ None within the scope of review transaction identity. The durable 3-part transac
 - Git assume-unchanged / skip-worktree can hide tracked modifications from `git diff` (git-domain limit, carried forward unchanged).
 - Live Codex host-transition evidence is unavailable in this environment (carried forward unchanged).
 - Identical duplicate `Verdict: PASS` lines are interpretation-invariant and still accepted when State is PASS (conflicting verdict values fail closed as `acceptance-unknown`).
+
+---
+
+# Final Repair Results — Canonical Verdict Singleton + Strict Terminal Grammar
+
+## Human audit baseline
+
+`8e488d11be951e7622fa833de0af7ee8446ee26d` (`fix: bind terminal review transaction identity`)
+
+## Root cause
+
+1. In `8e488d1`, `_classify_review_transaction` evaluated `verdict.md` by calling `_acceptance_verdicts`, which permitted fallback acceptance aliases (`Result:`, `Outcome:`, `Acceptance:`, `Status:`, `State:`), violating the canonical `Verdict:` singleton requirement of durable `verdict.md`.
+2. Duplicate `Verdict:` lines (e.g. `Verdict: PASS\nVerdict: PASS`) were reduced via set deduplication to `{"PASS"}` and falsely accepted rather than failing closed on non-singleton cardinality.
+3. Verdict conclusion normalization accepted non-canonical semantic aliases (e.g. `PASSED`, `FAILED`, `REJECTED`, `INCOMPLETE`, `NEEDS-WORK`, `PENDING`, `SUCCESS`, `ACCEPTED`, `DENIED`) instead of enforcing strict closed terminal grammar `PASS | FAIL | BLOCKED`.
+4. `_parse_canonical_round` permitted non-positive round integers (such as `0`, `00`, `round-00`), whereas producer lifecycle strictly begins at `Round 1` (`round >= 1`).
+
+## Implementation change
+
+1. **Canonical Verdict Singleton (`P0`):** `_classify_review_transaction` now extracts `Verdict:` via `_singleton_field_value(verdict_text, "Verdict")`. Missing `Verdict:` (0 occurrences) or duplicate `Verdict:` (2+ occurrences, even when identical) strictly fails closed as `acceptance-unknown`. Fallback aliases (`Result:`, `Outcome:`, `Acceptance:`, `Status:`, `State:`) are rejected.
+2. **Strict Terminal Conclusion Grammar (`P0`):** Added `_TERMINAL_VERDICT_PATTERN` and `_parse_canonical_terminal_verdict` enforcing that durable `verdict.md` conclusions strictly match `PASS | FAIL | BLOCKED` (with standard markdown formatting/wrapper stripping and optional `(final)`/`(closed)` suffix). All semantic aliases fail closed as `acceptance-unknown`.
+3. **Positive Round Grammar (`P1`):** `_parse_canonical_round` requires `val >= 1`. Non-positive round values (`0`, `00`, `round-00`, `round-00 (final)`) fail closed as malformed: `review-state-unknown` for `state.md` and `acceptance-unknown` for `verdict.md`. Positive canonical forms (`1`, `01`, `2`, `round-1`, `round-01`, `round-01 (final)`, `round-01 (closed)`) remain accepted.
+4. **Coherence & Freshness Preservation:** The authoritative review pipeline order (`parse Charter` → `parse State` → `active state routing` → `parse canonical Verdict singleton` → `validate strict PASS/FAIL/BLOCKED` → `validate Verdict Charter rev` → `validate Verdict Profile` → `validate Verdict Round` → `State Round == Verdict Round` → `State Status == Verdict conclusion` → `Source/software freshness` → `final accepted/acceptance-not-passed/review-stale`) is strictly preserved without moving freshness ahead of transaction coherence.
+5. **Documentation Parity:** Updated `discovery-contract.md`, `WORKFLOW.md`, `acceptance-charter.md`, and `evidence-protocol.md` to document canonical `Verdict:` singleton, strict `PASS | FAIL | BLOCKED` grammar, alias rejection, and `Round >= 1`.
+
+## New adversarial regressions
+
+Extended `ReviewTransactionCoherenceTest` in `skills/ask-light/tests/test_ask_light_behavior.py`:
+- `test_missing_verdict_with_legacy_alias_fails_closed` (`Result: PASS`, `Outcome: PASS`, `Acceptance: PASS`, `Status: PASS`, `State: PASS`, bold variants) → `acceptance-unknown`
+- `test_duplicate_identical_and_conflicting_verdict_fails_closed` (duplicate `PASS+PASS`, `FAIL+FAIL`, `BLOCKED+BLOCKED`, `PASS+FAIL`, `PASS+BLOCKED`, `FAIL+BLOCKED`, `PASS+FAIL+BLOCKED`) → `acceptance-unknown`
+- `test_verdict_semantic_aliases_fail_closed` (`PASSED`, `FAILED`, `REJECTED`, `INCOMPLETE`, `NEEDS-WORK`, `PENDING`, `SUCCESS`, `ACCEPTED`, `DENIED`, bold/case variants) → `acceptance-unknown`
+- `test_state_round_malformed_fails_closed` (`0`, `00`, `round-00`, `round-00 (final)`, plus non-numeric malformed strings) → `review-state-unknown`
+- `test_verdict_round_missing_or_duplicate_or_malformed_fails_closed` (`0`, `00`, `round-00`, `round-00 (final)`) → `acceptance-unknown`
+- `test_positive_round_forms_accepted` (`1`, `01`, `2`, `round-1`, `round-01`, `round-01 (final)`, `round-01 (closed)`) → `accepted` when matching
+
+## Smoke results
+
+Extended `.scratch/light-skills-core-flow-repair/smoke/manual-matrix-terminal-identity.py` to 41 scenarios (24 base + 17 adversarial regressions), all passing:
+
+```text
+#   | Scenario                                       | Observed Stage         | Expected Stage         | Match
+---------------------------------------------------------------------------------------------------------
+1   | coherent PASS same round                       | accepted               | accepted               | PASS
+2   | PASS State round2 + PASS Verdict round1        | acceptance-unknown     | acceptance-unknown     | PASS
+3   | FAIL State round2 + FAIL Verdict round1        | acceptance-unknown     | acceptance-unknown     | PASS
+4   | BLOCKED State round2 + BLOCKED Verdict round1  | acceptance-unknown     | acceptance-unknown     | PASS
+5   | missing State Round                            | review-state-unknown   | review-state-unknown   | PASS
+6   | duplicate State Round                          | review-state-unknown   | review-state-unknown   | PASS
+7   | missing Verdict Round                          | acceptance-unknown     | acceptance-unknown     | PASS
+8   | duplicate Verdict Round                        | acceptance-unknown     | acceptance-unknown     | PASS
+9   | missing Verdict Charter revision               | acceptance-unknown     | acceptance-unknown     | PASS
+10  | missing Verdict Profile                        | acceptance-unknown     | acceptance-unknown     | PASS
+11  | Verdict revision mismatch                      | acceptance-unknown     | acceptance-unknown     | PASS
+12  | Verdict profile mismatch                       | acceptance-unknown     | acceptance-unknown     | PASS
+13  | State FAIL + Verdict FAIL/BLOCKED              | acceptance-unknown     | acceptance-unknown     | PASS
+14  | State BLOCKED + Verdict BLOCKED/FAIL           | acceptance-unknown     | acceptance-unknown     | PASS
+15  | Round1 PASS                                    | accepted               | accepted               | PASS
+16  | reopen Round2 READY + old PASS                 | project-review         | project-review         | PASS
+17  | Round2 EVALUATE + old PASS                     | project-review         | project-review         | PASS
+18  | Round2 PASS + old Round1 PASS                  | acceptance-unknown     | acceptance-unknown     | PASS
+19  | fresh Round2 PASS Verdict                      | accepted               | accepted               | PASS
+20  | C1->C2 current-round PASS                      | accepted               | accepted               | PASS
+21  | post-C2 in-scope drift                         | review-stale           | review-stale           | PASS
+22  | out-of-scope README                            | accepted               | accepted               | PASS
+23  | ignored in-scope file                          | review-stale           | review-stale           | PASS
+24  | ignored Source child                           | review-stale           | review-stale           | PASS
+25  | missing Verdict + Result: PASS                 | acceptance-unknown     | acceptance-unknown     | PASS
+26  | missing Verdict + Outcome: PASS                | acceptance-unknown     | acceptance-unknown     | PASS
+27  | missing Verdict + Acceptance: PASS             | acceptance-unknown     | acceptance-unknown     | PASS
+28  | missing Verdict + Status: PASS                 | acceptance-unknown     | acceptance-unknown     | PASS
+29  | missing Verdict + State: PASS                  | acceptance-unknown     | acceptance-unknown     | PASS
+30  | duplicate Verdict: PASS + PASS                 | acceptance-unknown     | acceptance-unknown     | PASS
+31  | duplicate Verdict: FAIL + FAIL                 | acceptance-unknown     | acceptance-unknown     | PASS
+32  | duplicate Verdict: PASS + FAIL                 | acceptance-unknown     | acceptance-unknown     | PASS
+33  | Verdict: PASSED                                | acceptance-unknown     | acceptance-unknown     | PASS
+34  | Verdict: FAILED                                | acceptance-unknown     | acceptance-unknown     | PASS
+35  | Verdict: REJECTED                              | acceptance-unknown     | acceptance-unknown     | PASS
+36  | Verdict: INCOMPLETE                            | acceptance-unknown     | acceptance-unknown     | PASS
+37  | Verdict: NEEDS-WORK                            | acceptance-unknown     | acceptance-unknown     | PASS
+38  | Verdict: PENDING                               | acceptance-unknown     | acceptance-unknown     | PASS
+39  | State Round: 0                                 | review-state-unknown   | review-state-unknown   | PASS
+40  | Verdict Round: 0                               | acceptance-unknown     | acceptance-unknown     | PASS
+41  | State/Verdict Round: round-00                  | review-state-unknown   | review-state-unknown   | PASS
+---------------------------------------------------------------------------------------------------------
+Overall Result: ALL 41 PASSED
+```
+
+## Full validation results
+
+```text
+python3 -m pytest -q                        → 309 passed in 36.87s
+python3 -m unittest discover -s tests       → OK (COLLECTION 245 + HOOKS 7 assertions)
+python3 -m compileall -q skills tests       → OK
+git diff --check                            → OK (clean)
+git status --short                          → only in-scope files modified
+
+Local skill suites:
+- ask-light (146 tests)                     → OK
+- project-review (10 tests)                 → OK
+- socratic (21 tests)                       → OK
+- clarify (5 tests)                         → OK
+- project-clarify (11 tests)                → OK
+- project-init (32 tests)                   → OK
+- review-loop (19 tests)                    → OK
+```
+
+## Files changed
+
+- `skills/ask-light/scripts/ask_light.py`
+- `skills/ask-light/references/discovery-contract.md`
+- `skills/ask-light/tests/test_ask_light_behavior.py`
+- `skills/project-review/references/WORKFLOW.md`
+- `skills/project-review/references/acceptance-charter.md`
+- `skills/project-review/references/evidence-protocol.md`
+- `.scratch/light-skills-core-flow-repair/smoke/manual-matrix-terminal-identity.py`
+- `.scratch/light-skills-core-flow-repair/smoke/manual-matrix-terminal-identity.out`
+- `.scratch/light-skills-core-flow-repair/results.md`
+
+## Remaining limitations
+
+None within the scope of canonical verdict singleton and strict terminal grammar.
+- >64 KB durable-record truncation fails closed (carried forward unchanged).
+- Scope-choice quality remains a producer responsibility (carried forward unchanged).
+- Git assume-unchanged / skip-worktree can hide tracked modifications from `git diff` (git-domain limit, carried forward unchanged).
+- Live Codex host-transition evidence is unavailable in this environment (carried forward unchanged).

@@ -24,5 +24,22 @@
 22  | out-of-scope README                            | accepted               | accepted               | PASS
 23  | ignored in-scope file                          | review-stale           | review-stale           | PASS
 24  | ignored Source child                           | review-stale           | review-stale           | PASS
+25  | missing Verdict + Result: PASS                 | acceptance-unknown     | acceptance-unknown     | PASS
+26  | missing Verdict + Outcome: PASS                | acceptance-unknown     | acceptance-unknown     | PASS
+27  | missing Verdict + Acceptance: PASS             | acceptance-unknown     | acceptance-unknown     | PASS
+28  | missing Verdict + Status: PASS                 | acceptance-unknown     | acceptance-unknown     | PASS
+29  | missing Verdict + State: PASS                  | acceptance-unknown     | acceptance-unknown     | PASS
+30  | duplicate Verdict: PASS + PASS                 | acceptance-unknown     | acceptance-unknown     | PASS
+31  | duplicate Verdict: FAIL + FAIL                 | acceptance-unknown     | acceptance-unknown     | PASS
+32  | duplicate Verdict: PASS + FAIL                 | acceptance-unknown     | acceptance-unknown     | PASS
+33  | Verdict: PASSED                                | acceptance-unknown     | acceptance-unknown     | PASS
+34  | Verdict: FAILED                                | acceptance-unknown     | acceptance-unknown     | PASS
+35  | Verdict: REJECTED                              | acceptance-unknown     | acceptance-unknown     | PASS
+36  | Verdict: INCOMPLETE                            | acceptance-unknown     | acceptance-unknown     | PASS
+37  | Verdict: NEEDS-WORK                            | acceptance-unknown     | acceptance-unknown     | PASS
+38  | Verdict: PENDING                               | acceptance-unknown     | acceptance-unknown     | PASS
+39  | State Round: 0                                 | review-state-unknown   | review-state-unknown   | PASS
+40  | Verdict Round: 0                               | acceptance-unknown     | acceptance-unknown     | PASS
+41  | State/Verdict Round: round-00                  | review-state-unknown   | review-state-unknown   | PASS
 ---------------------------------------------------------------------------------------------------------
-Overall Result: ALL 24 PASSED
+Overall Result: ALL 41 PASSED

@@ -2284,7 +2284,7 @@ class ReviewTransactionCoherenceTest(unittest.TestCase):
                 self.assertEqual(result["projectStage"], "review-state-unknown", result)
 
     def test_state_round_malformed_fails_closed(self) -> None:
-        malformed_rounds = ("invalid", "round-xyz", "2 of 3", "", "1 2")
+        malformed_rounds = ("invalid", "round-xyz", "2 of 3", "", "1 2", "0", "00", "round-00", "round-00 (final)")
         for bad_round in malformed_rounds:
             with self.subTest(bad_round=bad_round):
                 project, _b, _c = self.build_project(status="PASS", verdict="PASS")
@@ -2324,8 +2324,8 @@ class ReviewTransactionCoherenceTest(unittest.TestCase):
         self.assertEqual(result["status"], "NEED-INPUT", result)
         self.assertEqual(result["projectStage"], "acceptance-unknown", result)
 
-        # 4. Malformed Round in verdict.md
-        for bad_round in ("invalid", "1 of 2", ""):
+        # 4. Malformed / non-positive Round in verdict.md
+        for bad_round in ("invalid", "1 of 2", "", "0", "00", "round-00", "round-00 (final)"):
             with self.subTest(bad_round=bad_round):
                 project, _b, _c = self.build_project(status="PASS", verdict="PASS")
                 verdict_file = project / ".project-review" / "verdict.md"
@@ -2445,8 +2445,11 @@ class ReviewTransactionCoherenceTest(unittest.TestCase):
                 self.assertEqual(result["status"], exp_status, result)
                 self.assertEqual(result["projectStage"], exp_stage, result)
 
-        # Conflicting multi-verdict combinations all fail closed as acceptance-unknown
+        # Duplicate and conflicting multi-verdict combinations all fail closed as acceptance-unknown
         conflict_verdict_lines = [
+            ("duplicate PASS + PASS", "- Verdict: PASS\n- Verdict: PASS\n"),
+            ("duplicate FAIL + FAIL", "- Verdict: FAIL\n- Verdict: FAIL\n"),
+            ("duplicate BLOCKED + BLOCKED", "- Verdict: BLOCKED\n- Verdict: BLOCKED\n"),
             ("PASS + FAIL", "- Verdict: PASS\n- Verdict: FAIL\n"),
             ("PASS + BLOCKED", "- Verdict: PASS\n- Verdict: BLOCKED\n"),
             ("FAIL + BLOCKED", "- Verdict: FAIL\n- Verdict: BLOCKED\n"),
@@ -2464,6 +2467,101 @@ class ReviewTransactionCoherenceTest(unittest.TestCase):
                     result = self.route(project)
                     self.assertEqual(result["status"], "NEED-INPUT", result)
                     self.assertEqual(result["projectStage"], "acceptance-unknown", result)
+
+    def test_missing_verdict_with_legacy_alias_fails_closed(self) -> None:
+        aliases = [
+            ("Result", "- Result: PASS\n"),
+            ("Outcome", "- Outcome: PASS\n"),
+            ("Acceptance", "- Acceptance: PASS\n"),
+            ("Status", "- Status: PASS\n"),
+            ("State", "- State: PASS\n"),
+            ("Result-bold", "- Result: **PASS**\n"),
+            ("Acceptance-bold", "- Acceptance: **PASS**\n"),
+        ]
+        for label, alias_line in aliases:
+            with self.subTest(label=label):
+                project, _b, _c = self.build_project(status="PASS", verdict="PASS")
+                verdict_file = project / ".project-review" / "verdict.md"
+                verdict_file.write_text(
+                    "# Verdict\n"
+                    "- Charter revision: 1\n"
+                    "- Profile: generic\n"
+                    "- Round: 1\n"
+                    f"{alias_line}",
+                    encoding="utf-8",
+                )
+                result = self.route(project)
+                self.assertEqual(result["status"], "NEED-INPUT", result)
+                self.assertEqual(result["projectStage"], "acceptance-unknown", result)
+
+    def test_verdict_semantic_aliases_fail_closed(self) -> None:
+        semantic_aliases = (
+            "PASSED",
+            "passed",
+            "**PASSED**",
+            "FAILED",
+            "failed",
+            "REJECTED",
+            "rejected",
+            "INCOMPLETE",
+            "incomplete",
+            "NEEDS-WORK",
+            "needs-work",
+            "PENDING",
+            "pending",
+            "SUCCESS",
+            "success",
+            "ACCEPTED",
+            "accepted",
+            "DENIED",
+            "denied",
+        )
+        for alias in semantic_aliases:
+            with self.subTest(alias=alias):
+                project, _b, _c = self.build_project(status="PASS", verdict="PASS")
+                verdict_file = project / ".project-review" / "verdict.md"
+                verdict_file.write_text(
+                    "# Verdict\n"
+                    "- Charter revision: 1\n"
+                    "- Profile: generic\n"
+                    "- Round: 1\n"
+                    f"- Verdict: {alias}\n",
+                    encoding="utf-8",
+                )
+                result = self.route(project)
+                self.assertEqual(result["status"], "NEED-INPUT", result)
+                self.assertEqual(result["projectStage"], "acceptance-unknown", result)
+
+    def test_positive_round_forms_accepted(self) -> None:
+        positive_forms = [
+            ("1", "1", 1),
+            ("01", "01", 1),
+            ("2", "2", 2),
+            ("round-1", "round-1", 1),
+            ("round-01", "round-01", 1),
+            ("round-01 (final)", "round-01 (final)", 1),
+            ("round-01 (closed)", "round-01 (closed)", 1),
+            ("1", "round-01 (final)", 1),
+            ("round-2", "2", 2),
+        ]
+        for s_round, v_round, num in positive_forms:
+            with self.subTest(s_round=s_round, v_round=v_round):
+                project, _b, _c = self.build_project(status="PASS", verdict="PASS")
+                state_file = project / ".project-review" / "state.md"
+                state_file.write_text(
+                    "# State\n- Status: PASS\n- Charter revision: 1\n- Profile: generic\n"
+                    f"- Round: {s_round}\n",
+                    encoding="utf-8",
+                )
+                verdict_file = project / ".project-review" / "verdict.md"
+                verdict_file.write_text(
+                    "# Verdict\n- Charter revision: 1\n- Profile: generic\n- Verdict: **PASS**\n"
+                    f"- Round: {v_round}\n",
+                    encoding="utf-8",
+                )
+                result = self.route(project)
+                self.assertEqual(result["status"], "RECOMMEND", result)
+                self.assertEqual(result["projectStage"], "accepted", result)
 
     def test_unknown_and_non_canonical_status_fail_closed(self) -> None:
         unknown_statuses = ("UNKNOWN", "NOT-PASS", "PASSING", "READY FOR PASS", "COMPLETE", "DONE")

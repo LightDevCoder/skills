@@ -73,15 +73,15 @@ Review evidence informs the Core; it is not the frozen acceptance baseline.
 ## Resume and closeout views
 
 Keep a compact resume snapshot in `state.md`: captured time, goal, Charter
-revision, Profile, current round (`- Round: <integer>`), status (`- Status:`),
+revision, Profile, current round (`- Round: <integer >= 1>`), status (`- Status:`),
 independence, blockers, recent decisions, open questions, and next action.
 `state.md` is authoritative for the current review lifecycle state: when a
 review is active or reopened, old verdicts do not remain authoritative.
 Keep closeout in `verdict.md` with:
 - `- Charter revision: <n>`
 - `- Profile: <name>`
-- `- Verdict: PASS | FAIL | BLOCKED` (unique terminal conclusion)
-- `- Round: <round identity, e.g. round-01 (final) or 1>`
+- `- Verdict: PASS | FAIL | BLOCKED` (singleton terminal conclusion; no aliases such as Result/Outcome/Acceptance/Status/State)
+- `- Round: <positive round identity >= 1, e.g. round-01 (final) or 1>`
 - `- Reviewed implementation revision: <full Git commit SHA>` (software Profile only)
 plus completed and unfinished work, risks, linked evidence, and reopen note.
 A verdict is authoritative only when it agrees with a terminal `state.md` for the

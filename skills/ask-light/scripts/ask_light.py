@@ -767,13 +767,23 @@ _ROUND_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+# Canonical terminal Verdict grammar (producer owner: skills/project-review).
+# Accepts exactly PASS, FAIL, or BLOCKED (case-insensitive, formatting wrappers stripped,
+# optional `(final)` or `(closed)` suffix).
+# Loose text, semantic aliases (e.g. `PASSED`, `FAILED`, `REJECTED`, `INCOMPLETE`,
+# `NEEDS-WORK`, `PENDING`, `SUCCESS`, `ACCEPTED`, `DENIED`), or arbitrary prose fail closed.
+_TERMINAL_VERDICT_PATTERN = re.compile(
+    r"^(?:(?:\*\*|`|__)?)(PASS|FAIL|BLOCKED)(?:(?:\*\*|`|__)?)(?:[ \t]+(?:\(final\)|\(closed\)))?$",
+    re.IGNORECASE,
+)
+
 
 def _parse_canonical_round(raw_value: str) -> tuple[int | None, str]:
-    """Extract a canonical non-negative integer round from producer round syntax.
+    """Extract a canonical positive integer round (>= 1) from producer round syntax.
 
     Accepts forms like `1`, `01`, `round-01`, `round-1`, `round-01 (final)`,
-    `round-01 (closed)`. Rejects arbitrary prose, empty values, or malformed
-    tokens, failing closed as (None, "malformed").
+    `round-01 (closed)`. Rejects non-positive rounds (0, 00, round-00), arbitrary
+    prose, empty values, or malformed tokens, failing closed as (None, "malformed").
     """
     clean = raw_value.strip().strip("`*_ \t")
     if not clean:
@@ -781,7 +791,28 @@ def _parse_canonical_round(raw_value: str) -> tuple[int | None, str]:
     match = _ROUND_PATTERN.match(clean)
     if not match:
         return None, "malformed"
-    return int(match.group(1)), ""
+    val = int(match.group(1))
+    if val < 1:
+        return None, "malformed"
+    return val, ""
+
+
+def _parse_canonical_terminal_verdict(raw_value: str) -> tuple[str | None, str]:
+    r"""Extract a strict canonical terminal verdict (PASS, FAIL, BLOCKED).
+
+    Accepts `PASS`, `FAIL`, `BLOCKED` (and normalized formatting like `pass`,
+    `**PASS**`, `\`PASS\``, `PASS (final)`, `PASS (closed)`).
+    Rejects semantic aliases (PASSED, FAILED, REJECTED, INCOMPLETE, NEEDS-WORK,
+    PENDING, SUCCESS, ACCEPTED, DENIED) or arbitrary tokens, failing closed as
+    (None, "malformed").
+    """
+    clean = raw_value.strip().strip("`*_ \t")
+    if not clean:
+        return None, "malformed"
+    match = _TERMINAL_VERDICT_PATTERN.match(clean)
+    if not match:
+        return None, "malformed"
+    return match.group(1).upper(), ""
 
 
 def _singleton_round_field(text: str, field: str = "Round") -> tuple[int | None, str, str]:
@@ -1200,6 +1231,65 @@ def _classify_review_transaction(
             "acceptancePaths": [],
         }
 
+    v_verdict_raw, v_verdict_fail = _singleton_field_value(verdict_text, "Verdict")
+    if v_verdict_fail == "missing":
+        reason = (
+            f"`{dir_name}/verdict.md` records no canonical `Verdict:` field line; "
+            "ask-light requires terminal acceptance verdict identity and fails closed."
+        )
+        return {
+            "stage": "acceptance-unknown",
+            "skill": "",
+            "reason": reason,
+            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
+            "missing": [f"canonical Verdict in {dir_name}/verdict.md"],
+            "gaps": [reason],
+            "hasAcceptanceEvidence": True,
+            "acceptancePassed": False,
+            "acceptanceFailed": False,
+            "acceptanceUnknown": True,
+            "acceptancePaths": [str(verdict_path.relative_to(root))],
+        }
+    if v_verdict_fail == "ambiguous":
+        reason = (
+            f"`{dir_name}/verdict.md` records more than one canonical `Verdict:` field line; "
+            "duplicate canonical fields violate the producer singleton contract and ask-light "
+            "fails closed."
+        )
+        return {
+            "stage": "acceptance-unknown",
+            "skill": "",
+            "reason": reason,
+            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
+            "missing": [f"unambiguous singleton Verdict in {dir_name}/verdict.md"],
+            "gaps": [reason],
+            "hasAcceptanceEvidence": True,
+            "acceptancePassed": False,
+            "acceptanceFailed": False,
+            "acceptanceUnknown": True,
+            "acceptancePaths": [str(verdict_path.relative_to(root))],
+        }
+
+    verdict_conclusion, v_verdict_parse_err = _parse_canonical_terminal_verdict(v_verdict_raw)
+    if v_verdict_parse_err:
+        reason = (
+            f"`{dir_name}/verdict.md` records an unknown or non-canonical terminal acceptance Verdict ('{v_verdict_raw}'); "
+            "ask-light requires a strict canonical terminal conclusion (PASS, FAIL, or BLOCKED) and fails closed."
+        )
+        return {
+            "stage": "acceptance-unknown",
+            "skill": "",
+            "reason": reason,
+            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
+            "missing": [f"valid canonical terminal Verdict (PASS, FAIL, or BLOCKED) in {dir_name}/verdict.md"],
+            "gaps": [reason],
+            "hasAcceptanceEvidence": True,
+            "acceptancePassed": False,
+            "acceptanceFailed": False,
+            "acceptanceUnknown": True,
+            "acceptancePaths": [str(verdict_path.relative_to(root))],
+        }
+
     v_rev_raw, v_rev_fail = _singleton_field_value(verdict_text, "Charter revision")
     if v_rev_fail == "missing":
         reason = (
@@ -1391,58 +1481,6 @@ def _classify_review_transaction(
             "acceptancePaths": [str(verdict_path.relative_to(root))],
         }
 
-    verdicts = _acceptance_verdicts(verdict_text)
-    if not verdicts:
-        reason = (
-            f"The review state is terminal ({status_token}) but no clear acceptance verdict can be "
-            f"extracted from `{dir_name}/verdict.md`; ask-light fails closed."
-        )
-        return {
-            "stage": "acceptance-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"verifiable acceptance verdict in {dir_name}/verdict.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": True,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [str(verdict_path.relative_to(root))],
-        }
-
-    conclusions: set[str] = set()
-    for v in verdicts:
-        v_low = v.lower()
-        if v_low in ACCEPTANCE_PASS_STATES:
-            conclusions.add("PASS")
-        elif v_low in {"fail", "failed", "rejected", "incomplete", "needs-work"}:
-            conclusions.add("FAIL")
-        elif v_low in {"blocked", "pending"}:
-            conclusions.add("BLOCKED")
-        else:
-            conclusions.add("UNKNOWN")
-
-    if "UNKNOWN" in conclusions or len(conclusions) != 1:
-        reason = (
-            f"Durable acceptance verdict is ambiguous or conflicting ({', '.join(verdicts)}); "
-            "ask-light requires exactly one unambiguous terminal verdict conclusion and fails closed."
-        )
-        return {
-            "stage": "acceptance-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": ["unambiguous singleton acceptance verdict conclusion"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": True,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [str(verdict_path.relative_to(root))],
-        }
-
-    verdict_conclusion = next(iter(conclusions))
     if status_token != verdict_conclusion:
         reason = (
             f"Durable review state and acceptance verdict conflict: state.md records Status: {status_token} while "

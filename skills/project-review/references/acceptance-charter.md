@@ -60,8 +60,9 @@ do not review it until confirmation is recorded.
 Canonical durable fields are singleton fields: `- Charter revision:`,
 `- Source:`, `- Source revision or identity:`, and `- Profile:` (plus the
 software-only `- Fixed point:` and `- Implementation scope:`) in `charter.md`,
-`- Status:`, `- Charter revision:`, `- Profile:`, and `- Round:` in `state.md`,
-and `- Verdict:`, `- Charter revision:`, `- Profile:`, and `- Round:` (plus
+`- Status:`, `- Charter revision:`, `- Profile:`, and `- Round:` (with Round >= 1) in `state.md`,
+and `- Verdict:` (strictly `PASS | FAIL | BLOCKED`, no aliases such as Result/Outcome/Acceptance/Status/State),
+`- Charter revision:`, `- Profile:`, and `- Round:` (with Round >= 1, plus
 software `- Reviewed implementation revision:`) in `verdict.md` must each appear
 exactly once and remain mutually coherent across the entire transaction. A missing,
 duplicated (even identically), or ambiguous canonical field is invalid durable

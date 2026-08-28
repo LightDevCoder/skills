@@ -71,12 +71,14 @@ transaction:
   across `charter.md`, `state.md`, and `verdict.md` must be mutually coherent
   and match exactly.
 - Canonical fields in `state.md` (`Status:`, `Charter revision:`, `Profile:`,
-  `Round:`) and terminal `verdict.md` (`Verdict:`, `Charter revision:`,
-  `Profile:`, `Round:`, plus software `Reviewed implementation revision:`)
-  are authoritative singleton fields; missing, ambiguous, or duplicate fields
-  fail closed.
-- Terminal Verdict semantics must be unique: exactly one conclusion (`PASS`,
-  `FAIL`, or `BLOCKED`) must be recorded without conflicting verdict fields.
+  `Round:`, with Round >= 1) and terminal `verdict.md` (`Verdict:`, `Charter revision:`,
+  `Profile:`, `Round:`, with Round >= 1, plus software `Reviewed implementation revision:`)
+  are authoritative singleton fields; missing, ambiguous, or duplicate fields fail closed.
+  `Verdict:` is the only authoritative terminal conclusion field in durable `verdict.md`;
+  `Result:`, `Outcome:`, `Acceptance:`, `Status:`, and `State:` are not accepted substitutes.
+- Terminal Verdict semantics must be unique and strictly conform to `PASS | FAIL | BLOCKED`
+  without semantic aliases or conflicting verdict fields. Duplicate `Verdict:` lines fail closed
+  even when identical.
 `findings.md` is the canonical finding registry. Round files preserve
 observations and evidence. Keep facts in authoritative record and link rather
 than duplicate.

@@ -312,6 +312,142 @@ def run_smoke():
         (p24 / ".scratch" / "core-repair" / "notes.tmp").write_text("temporary note\n", encoding="utf-8")
         record(24, "ignored Source child", route(p24), "review-stale")
 
+        # 25. missing Verdict + Result: PASS -> acceptance-unknown
+        p25 = t_root / "p25"
+        b25, rd25 = build_base(p25)
+        (rd25 / "charter.md").write_text(f"# Charter\n- Charter revision: 1\n- Profile: generic\n- Source: approved effort SPEC — `.scratch/core-repair/spec.md`\n- Source revision or identity: commit {b25}\n", encoding="utf-8")
+        (rd25 / "state.md").write_text("# State\n- Status: PASS\n- Charter revision: 1\n- Profile: generic\n- Round: 1\n", encoding="utf-8")
+        (rd25 / "verdict.md").write_text("# Verdict\n- Charter revision: 1\n- Profile: generic\n- Result: PASS\n- Round: 1\n", encoding="utf-8")
+        record(25, "missing Verdict + Result: PASS", route(p25), "acceptance-unknown")
+
+        # 26. missing Verdict + Outcome: PASS -> acceptance-unknown
+        p26 = t_root / "p26"
+        b26, rd26 = build_base(p26)
+        (rd26 / "charter.md").write_text(f"# Charter\n- Charter revision: 1\n- Profile: generic\n- Source: approved effort SPEC — `.scratch/core-repair/spec.md`\n- Source revision or identity: commit {b26}\n", encoding="utf-8")
+        (rd26 / "state.md").write_text("# State\n- Status: PASS\n- Charter revision: 1\n- Profile: generic\n- Round: 1\n", encoding="utf-8")
+        (rd26 / "verdict.md").write_text("# Verdict\n- Charter revision: 1\n- Profile: generic\n- Outcome: PASS\n- Round: 1\n", encoding="utf-8")
+        record(26, "missing Verdict + Outcome: PASS", route(p26), "acceptance-unknown")
+
+        # 27. missing Verdict + Acceptance: PASS -> acceptance-unknown
+        p27 = t_root / "p27"
+        b27, rd27 = build_base(p27)
+        (rd27 / "charter.md").write_text(f"# Charter\n- Charter revision: 1\n- Profile: generic\n- Source: approved effort SPEC — `.scratch/core-repair/spec.md`\n- Source revision or identity: commit {b27}\n", encoding="utf-8")
+        (rd27 / "state.md").write_text("# State\n- Status: PASS\n- Charter revision: 1\n- Profile: generic\n- Round: 1\n", encoding="utf-8")
+        (rd27 / "verdict.md").write_text("# Verdict\n- Charter revision: 1\n- Profile: generic\n- Acceptance: PASS\n- Round: 1\n", encoding="utf-8")
+        record(27, "missing Verdict + Acceptance: PASS", route(p27), "acceptance-unknown")
+
+        # 28. missing Verdict + Status: PASS -> acceptance-unknown
+        p28 = t_root / "p28"
+        b28, rd28 = build_base(p28)
+        (rd28 / "charter.md").write_text(f"# Charter\n- Charter revision: 1\n- Profile: generic\n- Source: approved effort SPEC — `.scratch/core-repair/spec.md`\n- Source revision or identity: commit {b28}\n", encoding="utf-8")
+        (rd28 / "state.md").write_text("# State\n- Status: PASS\n- Charter revision: 1\n- Profile: generic\n- Round: 1\n", encoding="utf-8")
+        (rd28 / "verdict.md").write_text("# Verdict\n- Charter revision: 1\n- Profile: generic\n- Status: PASS\n- Round: 1\n", encoding="utf-8")
+        record(28, "missing Verdict + Status: PASS", route(p28), "acceptance-unknown")
+
+        # 29. missing Verdict + State: PASS -> acceptance-unknown
+        p29 = t_root / "p29"
+        b29, rd29 = build_base(p29)
+        (rd29 / "charter.md").write_text(f"# Charter\n- Charter revision: 1\n- Profile: generic\n- Source: approved effort SPEC — `.scratch/core-repair/spec.md`\n- Source revision or identity: commit {b29}\n", encoding="utf-8")
+        (rd29 / "state.md").write_text("# State\n- Status: PASS\n- Charter revision: 1\n- Profile: generic\n- Round: 1\n", encoding="utf-8")
+        (rd29 / "verdict.md").write_text("# Verdict\n- Charter revision: 1\n- Profile: generic\n- State: PASS\n- Round: 1\n", encoding="utf-8")
+        record(29, "missing Verdict + State: PASS", route(p29), "acceptance-unknown")
+
+        # 30. duplicate Verdict: PASS + PASS -> acceptance-unknown
+        p30 = t_root / "p30"
+        b30, rd30 = build_base(p30)
+        (rd30 / "charter.md").write_text(f"# Charter\n- Charter revision: 1\n- Profile: generic\n- Source: approved effort SPEC — `.scratch/core-repair/spec.md`\n- Source revision or identity: commit {b30}\n", encoding="utf-8")
+        (rd30 / "state.md").write_text("# State\n- Status: PASS\n- Charter revision: 1\n- Profile: generic\n- Round: 1\n", encoding="utf-8")
+        (rd30 / "verdict.md").write_text("# Verdict\n- Charter revision: 1\n- Profile: generic\n- Verdict: PASS\n- Verdict: PASS\n- Round: 1\n", encoding="utf-8")
+        record(30, "duplicate Verdict: PASS + PASS", route(p30), "acceptance-unknown")
+
+        # 31. duplicate Verdict: FAIL + FAIL -> acceptance-unknown
+        p31 = t_root / "p31"
+        b31, rd31 = build_base(p31)
+        (rd31 / "charter.md").write_text(f"# Charter\n- Charter revision: 1\n- Profile: generic\n- Source: approved effort SPEC — `.scratch/core-repair/spec.md`\n- Source revision or identity: commit {b31}\n", encoding="utf-8")
+        (rd31 / "state.md").write_text("# State\n- Status: FAIL\n- Charter revision: 1\n- Profile: generic\n- Round: 1\n", encoding="utf-8")
+        (rd31 / "verdict.md").write_text("# Verdict\n- Charter revision: 1\n- Profile: generic\n- Verdict: FAIL\n- Verdict: FAIL\n- Round: 1\n", encoding="utf-8")
+        record(31, "duplicate Verdict: FAIL + FAIL", route(p31), "acceptance-unknown")
+
+        # 32. duplicate Verdict: PASS + FAIL -> acceptance-unknown
+        p32 = t_root / "p32"
+        b32, rd32 = build_base(p32)
+        (rd32 / "charter.md").write_text(f"# Charter\n- Charter revision: 1\n- Profile: generic\n- Source: approved effort SPEC — `.scratch/core-repair/spec.md`\n- Source revision or identity: commit {b32}\n", encoding="utf-8")
+        (rd32 / "state.md").write_text("# State\n- Status: PASS\n- Charter revision: 1\n- Profile: generic\n- Round: 1\n", encoding="utf-8")
+        (rd32 / "verdict.md").write_text("# Verdict\n- Charter revision: 1\n- Profile: generic\n- Verdict: PASS\n- Verdict: FAIL\n- Round: 1\n", encoding="utf-8")
+        record(32, "duplicate Verdict: PASS + FAIL", route(p32), "acceptance-unknown")
+
+        # 33. Verdict: PASSED -> acceptance-unknown
+        p33 = t_root / "p33"
+        b33, rd33 = build_base(p33)
+        (rd33 / "charter.md").write_text(f"# Charter\n- Charter revision: 1\n- Profile: generic\n- Source: approved effort SPEC — `.scratch/core-repair/spec.md`\n- Source revision or identity: commit {b33}\n", encoding="utf-8")
+        (rd33 / "state.md").write_text("# State\n- Status: PASS\n- Charter revision: 1\n- Profile: generic\n- Round: 1\n", encoding="utf-8")
+        (rd33 / "verdict.md").write_text("# Verdict\n- Charter revision: 1\n- Profile: generic\n- Verdict: PASSED\n- Round: 1\n", encoding="utf-8")
+        record(33, "Verdict: PASSED", route(p33), "acceptance-unknown")
+
+        # 34. Verdict: FAILED -> acceptance-unknown
+        p34 = t_root / "p34"
+        b34, rd34 = build_base(p34)
+        (rd34 / "charter.md").write_text(f"# Charter\n- Charter revision: 1\n- Profile: generic\n- Source: approved effort SPEC — `.scratch/core-repair/spec.md`\n- Source revision or identity: commit {b34}\n", encoding="utf-8")
+        (rd34 / "state.md").write_text("# State\n- Status: FAIL\n- Charter revision: 1\n- Profile: generic\n- Round: 1\n", encoding="utf-8")
+        (rd34 / "verdict.md").write_text("# Verdict\n- Charter revision: 1\n- Profile: generic\n- Verdict: FAILED\n- Round: 1\n", encoding="utf-8")
+        record(34, "Verdict: FAILED", route(p34), "acceptance-unknown")
+
+        # 35. Verdict: REJECTED -> acceptance-unknown
+        p35 = t_root / "p35"
+        b35, rd35 = build_base(p35)
+        (rd35 / "charter.md").write_text(f"# Charter\n- Charter revision: 1\n- Profile: generic\n- Source: approved effort SPEC — `.scratch/core-repair/spec.md`\n- Source revision or identity: commit {b35}\n", encoding="utf-8")
+        (rd35 / "state.md").write_text("# State\n- Status: FAIL\n- Charter revision: 1\n- Profile: generic\n- Round: 1\n", encoding="utf-8")
+        (rd35 / "verdict.md").write_text("# Verdict\n- Charter revision: 1\n- Profile: generic\n- Verdict: REJECTED\n- Round: 1\n", encoding="utf-8")
+        record(35, "Verdict: REJECTED", route(p35), "acceptance-unknown")
+
+        # 36. Verdict: INCOMPLETE -> acceptance-unknown
+        p36 = t_root / "p36"
+        b36, rd36 = build_base(p36)
+        (rd36 / "charter.md").write_text(f"# Charter\n- Charter revision: 1\n- Profile: generic\n- Source: approved effort SPEC — `.scratch/core-repair/spec.md`\n- Source revision or identity: commit {b36}\n", encoding="utf-8")
+        (rd36 / "state.md").write_text("# State\n- Status: FAIL\n- Charter revision: 1\n- Profile: generic\n- Round: 1\n", encoding="utf-8")
+        (rd36 / "verdict.md").write_text("# Verdict\n- Charter revision: 1\n- Profile: generic\n- Verdict: INCOMPLETE\n- Round: 1\n", encoding="utf-8")
+        record(36, "Verdict: INCOMPLETE", route(p36), "acceptance-unknown")
+
+        # 37. Verdict: NEEDS-WORK -> acceptance-unknown
+        p37 = t_root / "p37"
+        b37, rd37 = build_base(p37)
+        (rd37 / "charter.md").write_text(f"# Charter\n- Charter revision: 1\n- Profile: generic\n- Source: approved effort SPEC — `.scratch/core-repair/spec.md`\n- Source revision or identity: commit {b37}\n", encoding="utf-8")
+        (rd37 / "state.md").write_text("# State\n- Status: FAIL\n- Charter revision: 1\n- Profile: generic\n- Round: 1\n", encoding="utf-8")
+        (rd37 / "verdict.md").write_text("# Verdict\n- Charter revision: 1\n- Profile: generic\n- Verdict: NEEDS-WORK\n- Round: 1\n", encoding="utf-8")
+        record(37, "Verdict: NEEDS-WORK", route(p37), "acceptance-unknown")
+
+        # 38. Verdict: PENDING -> acceptance-unknown
+        p38 = t_root / "p38"
+        b38, rd38 = build_base(p38)
+        (rd38 / "charter.md").write_text(f"# Charter\n- Charter revision: 1\n- Profile: generic\n- Source: approved effort SPEC — `.scratch/core-repair/spec.md`\n- Source revision or identity: commit {b38}\n", encoding="utf-8")
+        (rd38 / "state.md").write_text("# State\n- Status: BLOCKED\n- Charter revision: 1\n- Profile: generic\n- Round: 1\n", encoding="utf-8")
+        (rd38 / "verdict.md").write_text("# Verdict\n- Charter revision: 1\n- Profile: generic\n- Verdict: PENDING\n- Round: 1\n", encoding="utf-8")
+        record(38, "Verdict: PENDING", route(p38), "acceptance-unknown")
+
+        # 39. State Round: 0 -> review-state-unknown
+        p39 = t_root / "p39"
+        b39, rd39 = build_base(p39)
+        (rd39 / "charter.md").write_text(f"# Charter\n- Charter revision: 1\n- Profile: generic\n- Source: approved effort SPEC — `.scratch/core-repair/spec.md`\n- Source revision or identity: commit {b39}\n", encoding="utf-8")
+        (rd39 / "state.md").write_text("# State\n- Status: PASS\n- Charter revision: 1\n- Profile: generic\n- Round: 0\n", encoding="utf-8")
+        (rd39 / "verdict.md").write_text("# Verdict\n- Charter revision: 1\n- Profile: generic\n- Verdict: PASS\n- Round: 1\n", encoding="utf-8")
+        record(39, "State Round: 0", route(p39), "review-state-unknown")
+
+        # 40. Verdict Round: 0 -> acceptance-unknown
+        p40 = t_root / "p40"
+        b40, rd40 = build_base(p40)
+        (rd40 / "charter.md").write_text(f"# Charter\n- Charter revision: 1\n- Profile: generic\n- Source: approved effort SPEC — `.scratch/core-repair/spec.md`\n- Source revision or identity: commit {b40}\n", encoding="utf-8")
+        (rd40 / "state.md").write_text("# State\n- Status: PASS\n- Charter revision: 1\n- Profile: generic\n- Round: 1\n", encoding="utf-8")
+        (rd40 / "verdict.md").write_text("# Verdict\n- Charter revision: 1\n- Profile: generic\n- Verdict: PASS\n- Round: 0\n", encoding="utf-8")
+        record(40, "Verdict Round: 0", route(p40), "acceptance-unknown")
+
+        # 41. State/Verdict Round: round-00 -> fail closed
+        p41 = t_root / "p41"
+        b41, rd41 = build_base(p41)
+        (rd41 / "charter.md").write_text(f"# Charter\n- Charter revision: 1\n- Profile: generic\n- Source: approved effort SPEC — `.scratch/core-repair/spec.md`\n- Source revision or identity: commit {b41}\n", encoding="utf-8")
+        (rd41 / "state.md").write_text("# State\n- Status: PASS\n- Charter revision: 1\n- Profile: generic\n- Round: round-00\n", encoding="utf-8")
+        (rd41 / "verdict.md").write_text("# Verdict\n- Charter revision: 1\n- Profile: generic\n- Verdict: PASS\n- Round: round-00\n", encoding="utf-8")
+        record(41, "State/Verdict Round: round-00", route(p41), "review-state-unknown")
+
     # Print summary table
     print(f"{'#':<3} | {'Scenario':<46} | {'Observed Stage':<22} | {'Expected Stage':<22} | {'Match'}")
     print("-" * 105)
@@ -322,7 +458,7 @@ def run_smoke():
             all_ok = False
         print(f"{num:<3} | {name:<46} | {stage:<22} | {exp_stage:<22} | {status_str}")
     print("-" * 105)
-    print(f"Overall Result: {'ALL 24 PASSED' if all_ok else 'SOME FAILED'}")
+    print(f"Overall Result: {'ALL ' + str(len(results)) + ' PASSED' if all_ok else 'SOME FAILED'}")
     return all_ok
 
 
