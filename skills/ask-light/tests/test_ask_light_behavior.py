@@ -267,6 +267,30 @@ def write_project_review_state(
     return review_dir
 
 
+def append_durable_field(path: Path, line: str) -> None:
+    """Tamper helper (§21): append one canonical field line to a durable record.
+
+    Normal producer fixtures never generate duplicate canonical fields, so
+    adversarial tests must mutate otherwise-valid records explicitly.
+    """
+    text = path.read_text(encoding="utf-8").rstrip("\n")
+    path.write_text(f"{text}\n{line}\n", encoding="utf-8")
+
+
+def add_ignore_rule(root: Path, pattern: str, *, mechanism: str = "gitignore") -> None:
+    """Hide `pattern` from git status via .gitignore or .git/info/exclude."""
+    if mechanism == "gitignore":
+        target = root / ".gitignore"
+    elif mechanism == "info-exclude":
+        target = root / ".git" / "info" / "exclude"
+        target.parent.mkdir(parents=True, exist_ok=True)
+    else:
+        raise ValueError(mechanism)
+    existing = target.read_text(encoding="utf-8") if target.exists() else ""
+    separator = "" if not existing or existing.endswith("\n") else "\n"
+    target.write_text(f"{existing}{separator}{pattern}\n", encoding="utf-8")
+
+
 class AskLightBehaviorTest(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory(prefix="ask-light-")
@@ -1232,6 +1256,112 @@ class ReviewFreshnessRegressionTest(unittest.TestCase):
                 self.assertEqual(result["next"], "no-execution")
                 self.assertIn("revision", str(result["reason"]).lower())
 
+    # §20: exactly one unambiguous Git commit identity in one field is usable.
+    def test_single_valid_source_revision_is_accepted(self) -> None:
+        project = self.build_reviewed_project(verdict="PASS")
+        sha = _git(project, "rev-parse", "HEAD").stdout.strip()
+        charter = (project / ".project-review" / "charter.md").read_text(encoding="utf-8")
+        self.assertIn(f"- Source revision or identity: commit {sha}", charter)
+        result = self.route_project(project)
+        self.assertEqual((result["status"], result["projectStage"]), ("RECOMMEND", "accepted"))
+
+    # §20: multi-candidate Source revision values are never salvaged.
+    def test_ambiguous_source_revision_value_fails_closed(self) -> None:
+        garbage = "0f1e2d3c4b5a9876543210fedcba9876543210ab"
+        probe = self.build_reviewed_project(verdict="PASS")
+        sha = _git(probe, "rev-parse", "HEAD").stdout.strip()
+        # A second locally resolvable commit for the valid+valid case.
+        (probe / "README.md").write_text("# Project\nsecond commit\n", encoding="utf-8")
+        _git(probe, "add", "-A")
+        commit_all(probe, "unrelated second commit")
+        other_sha = _git(probe, "rev-parse", "HEAD").stdout.strip()
+        cases = (
+            ("invalid-only", garbage),
+            ("invalid-plus-valid", f"{garbage} {sha}"),
+            ("valid-plus-invalid", f"{sha} {garbage}"),
+            ("valid-a-plus-valid-b", f"{sha} {other_sha}"),
+            ("same-valid-sha-twice", f"{sha} {sha}"),
+        )
+        for label, value in cases:
+            with self.subTest(label=label):
+                project = self.build_reviewed_project(verdict="PASS", revision_identity=value)
+                result = self.route_project(project)
+                self.assertNotEqual(result["projectStage"], "accepted", result)
+                self.assertEqual(result["status"], "NEED-INPUT", result)
+                self.assertEqual(result["projectStage"], "review-freshness-unknown", result)
+                self.assertEqual(result["skill"], "", result)
+                self.assertEqual(result["next"], "no-execution", result)
+
+    # §20: duplicate canonical Source revision fields are ambiguous even when
+    # the duplicated values are identical, in either field order.
+    def test_duplicate_source_revision_fields_fail_closed(self) -> None:
+        garbage = "0f1e2d3c4b5a9876543210fedcba9876543210ab"
+        for label, first_kwargs, appended in (
+            ("identical-duplicate", {}, None),
+            ("valid-first-invalid-second", {}, f"- Source revision or identity: {garbage}"),
+            ("invalid-first-valid-second", {"revision_identity": garbage}, None),
+        ):
+            with self.subTest(label=label):
+                project = self.build_reviewed_project(verdict="PASS", **first_kwargs)
+                if appended is None:
+                    appended = (
+                        "- Source revision or identity: "
+                        + _git(project, "rev-parse", "HEAD").stdout.strip()
+                    )
+                append_durable_field(
+                    project / ".project-review" / "charter.md", appended
+                )
+                result = self.route_project(project)
+                self.assertEqual(result["status"], "NEED-INPUT", result)
+                self.assertEqual(result["projectStage"], "review-freshness-unknown", result)
+                self.assertEqual(result["skill"], "", result)
+                self.assertEqual(result["next"], "no-execution", result)
+
+    # §6/§20: duplicate canonical Source fields make review ownership
+    # unresolvable even when one of them matches the current effort.
+    def test_duplicate_source_fields_fail_closed(self) -> None:
+        for label, base_kwargs, appended in (
+            ("current-effort-first", {}, "- Source: `.scratch/other/spec.md`"),
+            ("other-effort-first", {"charter_source": "`.scratch/other/spec.md`"},
+             "- Source: `.scratch/current/spec.md`"),
+            ("identical-duplicate", {}, "- Source: `.scratch/current/spec.md`"),
+        ):
+            with self.subTest(label=label):
+                project = self.build_reviewed_project(verdict="PASS", **base_kwargs)
+                append_durable_field(project / ".project-review" / "charter.md", appended)
+                result = self.route_project(project)
+                self.assertEqual(result["status"], "NEED-INPUT", result)
+                self.assertEqual(result["projectStage"], "review-ownership-unknown", result)
+                self.assertEqual(result["skill"], "", result)
+                self.assertEqual(result["next"], "no-execution", result)
+                self.assertNotEqual(result["projectStage"], "accepted")
+                self.assertNotEqual(result["projectStage"], "implementation-complete")
+
+    # §5/§20: a durable Charter without exactly one Profile never falls back
+    # to the generic contract — the Profile selects the freshness contract.
+    def test_missing_or_duplicate_profile_fails_closed(self) -> None:
+        for label, mutate in (
+            ("missing-profile", "remove"),
+            ("duplicate-identical", "duplicate"),
+        ):
+            with self.subTest(label=label):
+                project = self.build_reviewed_project(verdict="PASS")
+                charter = project / ".project-review" / "charter.md"
+                if mutate == "remove":
+                    kept = [
+                        line for line in charter.read_text(encoding="utf-8").splitlines()
+                        if not line.startswith("- Profile: ")
+                    ]
+                    charter.write_text("\n".join(kept) + "\n", encoding="utf-8")
+                else:
+                    append_durable_field(charter, "- Profile: generic")
+                result = self.route_project(project)
+                self.assertEqual(result["status"], "NEED-INPUT", result)
+                self.assertEqual(result["projectStage"], "review-freshness-unknown", result)
+                self.assertEqual(result["skill"], "", result)
+                self.assertEqual(result["next"], "no-execution", result)
+                self.assertNotEqual(result["projectStage"], "accepted")
+
     # Canonical producer template layout stays consumable end-to-end.
     def test_canonical_charter_template_layout_reaches_accepted(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -1647,6 +1777,196 @@ class SoftwareBaselineFreshnessTest(unittest.TestCase):
         commit_all(project, "commit durable review records after evaluation")
         self.assert_accepted(project)
 
+    # -- §20/§21 singleton durable-field cardinality --------------------------
+    # Normal producer fixtures never emit duplicate canonical fields, so these
+    # tests tamper otherwise-valid accepted records and call the real route().
+
+    def set_charter_field_lines(self, project: Path, field: str, lines: list[str]) -> None:
+        """Replace the canonical `- {field}:` line with exactly `lines`."""
+        charter = project / ".project-review" / "charter.md"
+        prefix = f"- {field}: "
+        out: list[str] = []
+        for line in charter.read_text(encoding="utf-8").splitlines():
+            if line.startswith(prefix):
+                out.extend(lines)
+            else:
+                out.append(line)
+        charter.write_text("\n".join(out) + "\n", encoding="utf-8")
+
+    def set_verdict_field_lines(self, project: Path, field: str, lines: list[str]) -> None:
+        verdict = project / ".project-review" / "verdict.md"
+        prefix = f"- {field}: "
+        out: list[str] = []
+        for line in verdict.read_text(encoding="utf-8").splitlines():
+            if line.startswith(prefix):
+                out.extend(lines)
+            else:
+                out.append(line)
+        verdict.write_text("\n".join(out) + "\n", encoding="utf-8")
+
+    def test_duplicate_profile_fails_closed(self) -> None:
+        for label, lines in (
+            ("identical-software", ["- Profile: software", "- Profile: software"]),
+            ("generic-first-software-second", ["- Profile: generic", "- Profile: software"]),
+            ("software-first-generic-second", ["- Profile: software", "- Profile: generic"]),
+        ):
+            with self.subTest(label=label):
+                project, _base, _candidate = self.build_reviewed_software_project()
+                self.assert_accepted(project)
+                self.set_charter_field_lines(project, "Profile", lines)
+                self.assert_unknown(project, "Profile")
+
+    def test_missing_profile_with_in_scope_drift_is_never_accepted(self) -> None:
+        project, _base, _candidate = self.build_reviewed_software_project()
+        self.assert_accepted(project)
+        self.set_charter_field_lines(project, "Profile", [])
+        self.modify(project, "src/app.py", "print('v2')\n", commit=True)
+        # Missing Profile must not silently skip software freshness: fail
+        # closed (review-freshness-unknown), never accepted.
+        self.assert_unknown(project, "Profile")
+
+    def test_duplicate_fixed_point_fails_closed_both_orders(self) -> None:
+        garbage = self.garbage_sha()
+        for label, first_valid in (
+            ("valid-first-invalid-second", True),
+            ("invalid-first-valid-second", False),
+            ("identical", True),
+        ):
+            with self.subTest(label=label):
+                project, base, _candidate = self.build_reviewed_software_project()
+                self.assert_accepted(project)
+                if label == "identical":
+                    lines = [f"- Fixed point: {base}", f"- Fixed point: {base}"]
+                elif first_valid:
+                    lines = [f"- Fixed point: {base}", f"- Fixed point: {garbage}"]
+                else:
+                    lines = [f"- Fixed point: {garbage}", f"- Fixed point: {base}"]
+                self.set_charter_field_lines(project, "Fixed point", lines)
+                self.assert_unknown(project, "Fixed point")
+
+    def test_duplicate_implementation_scope_fails_closed_both_orders(self) -> None:
+        for label, lines in (
+            ("identical", ["- Implementation scope: src/", "- Implementation scope: src/"]),
+            ("valid-first", ["- Implementation scope: src/", "- Implementation scope: docs/"]),
+            ("invalid-grammar-first", ["- Implementation scope: ../outside", "- Implementation scope: src/"]),
+        ):
+            with self.subTest(label=label):
+                project, _base, _candidate = self.build_reviewed_software_project()
+                self.assert_accepted(project)
+                self.set_charter_field_lines(project, "Implementation scope", lines)
+                self.assert_unknown(project, "Implementation scope")
+
+    def test_duplicate_final_revision_fails_closed_both_orders(self) -> None:
+        garbage = self.garbage_sha()
+        for label, second_invalid in (
+            ("identical", False),
+            ("valid-first-invalid-second", True),
+            ("invalid-first-valid-second", True),
+        ):
+            with self.subTest(label=label):
+                project, _base, candidate = self.build_reviewed_software_project()
+                self.assert_accepted(project)
+                if label == "identical":
+                    lines = [
+                        f"- Reviewed implementation revision: {candidate}",
+                        f"- Reviewed implementation revision: {candidate}",
+                    ]
+                elif label == "valid-first-invalid-second":
+                    lines = [
+                        f"- Reviewed implementation revision: {candidate}",
+                        f"- Reviewed implementation revision: {garbage}",
+                    ]
+                else:
+                    lines = [
+                        f"- Reviewed implementation revision: {garbage}",
+                        f"- Reviewed implementation revision: {candidate}",
+                    ]
+                self.set_verdict_field_lines(
+                    project, "Reviewed implementation revision", lines
+                )
+                self.assert_unknown(project, "Reviewed implementation revision")
+
+    # -- §20 ignored-file completeness inside the frozen scope ----------------
+
+    def test_ignored_in_scope_new_file_stales(self) -> None:
+        for label, mechanism in (("gitignore", "gitignore"), ("info-exclude", "info-exclude")):
+            with self.subTest(label=label):
+                project, _base, _candidate = self.build_reviewed_software_project()
+                self.assert_accepted(project)
+                add_ignore_rule(project, "new_hidden.py", mechanism=mechanism)
+                self.add_file(project, "src/new_hidden.py", "HIDDEN = 1\n")
+                result = self.assert_stale(project)
+                combined = str(result["reason"]) + " " + " ".join(str(gap) for gap in result["gaps"])
+                self.assertIn("new_hidden.py", combined)
+
+    def test_nested_ignored_in_scope_file_stales(self) -> None:
+        project, _base, _candidate = self.build_reviewed_software_project()
+        self.assert_accepted(project)
+        add_ignore_rule(project, "generated/")
+        self.add_file(project, "src/generated/new.py", "GENERATED = 1\n")
+        result = self.assert_stale(project)
+        combined = str(result["reason"]) + " " + " ".join(str(gap) for gap in result["gaps"])
+        self.assertIn("generated/new.py", combined)
+
+    def test_out_of_scope_ignored_files_keep_acceptance(self) -> None:
+        project, _base, _candidate = self.build_reviewed_software_project()
+        self.assert_accepted(project)
+        add_ignore_rule(project, "*.tmp")
+        add_ignore_rule(project, "generated.md", mechanism="info-exclude")
+        (project / "build.tmp").write_text("cache\n", encoding="utf-8")
+        (project / "docs" / "generated.md").write_text("generated\n", encoding="utf-8")
+        self.assert_accepted(project)
+
+    def test_exact_file_scope_ignores_ignored_sibling(self) -> None:
+        project, _base, _candidate = self.build_reviewed_software_project(scope_value="src/app.py")
+        self.assert_accepted(project)
+        add_ignore_rule(project, "sibling.py")
+        self.add_file(project, "src/sibling.py", "SIB = 1\n")
+        self.assert_accepted(project)
+
+    def test_whole_repo_scope_counts_ignored_files(self) -> None:
+        # With scope "." the durable records are in-scope files, so a verdict
+        # recording its own commit is impossible (hash fixed point; §16
+        # born-stale guidance). The ignored-file behavior is therefore checked
+        # through the real classifier on a real repo whose tree is clean at
+        # the recorded revision, with the verdict passed as produced text.
+        project, base, candidate = self.build_reviewed_software_project(scope_value=".")
+        _git(project, "add", "-A")
+        commit_all(project, "commit durable review records after evaluation")
+        records_commit = _git(project, "rev-parse", "HEAD").stdout.strip()
+        charter = (project / ".project-review" / "charter.md").read_text(encoding="utf-8")
+        verdict = (project / ".project-review" / "verdict.md").read_text(encoding="utf-8")
+        verdict = verdict.replace(
+            f"- Reviewed implementation revision: {candidate}",
+            f"- Reviewed implementation revision: {records_commit}",
+        )
+        state = ASK_LIGHT._classify_software_implementation_freshness(
+            project, charter, verdict
+        )
+        self.assertEqual(state, ("current", []), state)
+        add_ignore_rule(project, "cache.data", mechanism="info-exclude")
+        (project / "cache.data").write_text("junk\n", encoding="utf-8")
+        state = ASK_LIGHT._classify_software_implementation_freshness(
+            project, charter, verdict
+        )
+        self.assertEqual(state[0], "stale", state)
+        self.assertIn("cache.data", state[1][0])
+
+        # Reviewer-B adversarial case: a whitespace-only filename is a real
+        # scope entry and must not be dropped by blank-line filtering.
+        whitespace_file = project / " "
+        whitespace_file.write_text("space named\n", encoding="utf-8")
+        state = ASK_LIGHT._classify_software_implementation_freshness(
+            project, charter, verdict
+        )
+        self.assertEqual(state[0], "stale", state)
+        self.assertIn(" ", state[1][0])
+        whitespace_file.unlink()
+        state = ASK_LIGHT._classify_software_implementation_freshness(
+            project, charter, verdict
+        )
+        self.assertEqual(state[0], "stale", state)  # cache.data still drifts
+
 
 class DirectorySourceBaselineTest(unittest.TestCase):
     """§14: when the Charter cites a directory source, that whole directory is
@@ -1733,6 +2053,57 @@ class DirectorySourceBaselineTest(unittest.TestCase):
             write_project_review_state(project, reviewed_effort="current", verdict="PASS")
             (project / ".scratch" / "current" / "random-note.md").write_text(
                 "sibling noise\n", encoding="utf-8"
+            )
+            result = self.route(project)
+            self.assertEqual(result["status"], "RECOMMEND", result)
+            self.assertEqual(result["projectStage"], "accepted", result)
+
+    # §14/§20: ignored children of a directory Source are still baseline
+    # members — Git ignore rules hide them from status, not from freshness.
+    def test_ignored_child_stales_the_directory_baseline(self) -> None:
+        for label, mechanism in (("gitignore", "gitignore"), ("info-exclude", "info-exclude")):
+            with self.subTest(label=label):
+                project = self.build_directory_source_project()
+                add_ignore_rule(project, "hidden.md", mechanism=mechanism)
+                (project / ".scratch" / "current" / "hidden.md").write_text(
+                    "hidden child\n", encoding="utf-8"
+                )
+                result = self.route(project)
+                self.assertEqual(result["projectStage"], "review-stale", result)
+                combined = str(result["reason"]) + " " + " ".join(str(gap) for gap in result["gaps"])
+                self.assertIn("hidden.md", combined)
+
+    def test_nested_ignored_child_stales_the_directory_baseline(self) -> None:
+        project = self.build_directory_source_project()
+        add_ignore_rule(project, "generated/")
+        nested = project / ".scratch" / "current" / "generated" / "nested.md"
+        nested.parent.mkdir(parents=True)
+        nested.write_text("nested ignored child\n", encoding="utf-8")
+        result = self.route(project)
+        self.assertEqual(result["projectStage"], "review-stale", result)
+        combined = str(result["reason"]) + " " + " ".join(str(gap) for gap in result["gaps"])
+        self.assertIn("generated/nested.md", combined)
+
+    # §17: the ignored-file fix must not widen the baseline — an ignored file
+    # outside the cited directory stays unrelated.
+    def test_ignored_file_outside_directory_keeps_review_current(self) -> None:
+        project = self.build_directory_source_project()
+        add_ignore_rule(project, "*.tmp")
+        (project / "loose.tmp").write_text("outside the baseline\n", encoding="utf-8")
+        result = self.route(project)
+        self.assertEqual(result["status"], "RECOMMEND", result)
+        self.assertEqual(result["projectStage"], "accepted", result)
+
+    # §15: exact-file Sources keep file-only semantics even for ignored siblings.
+    def test_file_only_source_ignores_ignored_sibling(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-file-ign-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
+            write_project_review_state(project, reviewed_effort="current", verdict="PASS")
+            add_ignore_rule(project, "random-note.md")
+            (project / ".scratch" / "current" / "random-note.md").write_text(
+                "ignored sibling noise\n", encoding="utf-8"
             )
             result = self.route(project)
             self.assertEqual(result["status"], "RECOMMEND", result)

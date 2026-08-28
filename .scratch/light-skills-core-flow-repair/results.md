@@ -771,3 +771,221 @@ skills/project-review/tests/test_software_profile_contract.py
 - The consumer trusts the producer-frozen scope's derivation quality only
   structurally; scope-choice soundness remains a producer-side duty enforced
   by documentation + contract tests, not by ask-light semantics.
+
+---
+
+# Final hardening pass — durable review state edge cases (baseline `52d8638`)
+
+Human audit baseline: `52d8638` (`fix: finalize software review baseline contract`),
+verdict NEEDS REPAIR. Narrow repair only: the accepted baseline architecture
+(Charter fixed point / implementation scope / verdict reviewed implementation
+revision, and the review→repair→re-review lifecycle) was frozen and untouched.
+Reproductions and smokes live in
+`.scratch/light-skills-core-flow-repair/smoke/` (`repro-prefix-52d8638.*`,
+`manual-matrix-hardening.*`).
+
+## Pre-fix reproductions (§19, real temp Git repos, real route() path)
+
+Script `smoke/repro-prefix-52d8638.py`; captured output
+`smoke/repro-prefix-52d8638.out` (pre-fix section). All 15 rows reproduced
+false `accepted` against `52d8638`:
+
+```text
+A  duplicate Profile (generic first) + committed in-scope drift  -> accepted  BUG
+B  missing Profile + committed in-scope drift                    -> accepted  BUG
+C1 duplicate identical Fixed point        C2 duplicate conflicting Fixed point -> accepted  BUG
+D1 duplicate identical Implementation scope D2 conflicting                    -> accepted  BUG
+E1 duplicate identical Reviewed implementation revision E2 conflicting        -> accepted  BUG
+F  duplicate Source (current effort cited first)                 -> accepted  BUG
+G1 Source revision '<invalid-40hex> <valid-sha>'                 -> accepted  BUG
+G2 Source revision '<valid-sha-A> <valid-sha-B>'                 -> accepted  BUG
+H1/H2 ignored in-scope src/new_hidden.py (.gitignore / .git/info/exclude)     -> accepted  BUG
+I1/I2 ignored .scratch/current/hidden.md child (both mechanisms)              -> accepted  BUG
+```
+
+Root causes:
+
+1. **First-match canonical field parsing** — `_raw_field_line(.search)` and
+   `_reviewed_profile(.values[0])` read "first value wins" from authoritative
+   fields, so duplicate (or missing) Profile silently skipped software
+   freshness and duplicate baseline fields preserved `accepted`.
+2. **Permissive Source revision salvage** — `_resolve_recorded_revision`
+   extracted all commit-like tokens and returned the first resolvable one,
+   selecting one SHA out of an ambiguous value (the removed failure mode of
+   the old two-value Fixed point, still alive in `Source revision or identity`).
+3. **Ignored files hidden from `git status`** — both directory-Source and
+   implementation-scope new-file detection scanned
+   `git status --porcelain -uall`, which never reports files hidden by
+   `.gitignore` / `.git/info/exclude` / global excludes files.
+
+## Singleton-field contract (§3–§5, §8, §26)
+
+Canonical producer-owned fields are singleton fields; cardinality is part of
+validity. New `_raw_field_occurrences` (same canonical field-line regex as
+before, `finditer`) + `_singleton_field_value` enforce:
+
+```text
+exactly 1 occurrence -> parse and validate (existing wrapper trimming kept)
+0 occurrences        -> missing  -> fail closed (unknown / ownership unknown)
+>1 occurrences       -> ambiguous -> fail closed — even identical values,
+                        in any field order; never "first wins"
+```
+
+Enforced for `Source:`, `Source revision or identity:`, `Profile:` (Charter),
+`Fixed point:`, `Implementation scope:` (Charter), `Reviewed implementation
+revision:` (verdict). A missing or duplicated `Profile:` fails closed as
+`review-freshness-unknown` (NEED-INPUT, no-execution) — it never falls back to
+generic behavior; `not-applicable` is reachable only when exactly one Profile
+value parses and is not `software`. Duplicate `Source:` fails ownership
+closed (`review-ownership-unknown`) even when one occurrence matches the
+current effort. `_parse_exact_commit_field` gained the `ambiguous` failure for
+`Fixed point` / `Reviewed implementation revision`.
+
+## Source identity parsing behavior (§9–§11)
+
+`_resolve_recorded_revision` no longer salvages: the value is usable only when
+it carries exactly ONE commit-like token that resolves locally. invalid+valid,
+valid+valid, duplicated SHAs (incl. mixed case), short-prefix+full-SHA of the
+same commit → `ambiguous` → unknown. 0 usable tokens (free-form labels,
+timestamps, version strings) → `unresolvable` → unknown. Non-Git immutable
+identities remain unsupported by the consumer (no verifier exists → unknown;
+unchanged, do not guess). The strict exactly-one-full-40-hex grammar is
+unchanged for `Fixed point` / `Reviewed implementation revision`.
+
+## Ignored-file detection behavior (§12–§18, §26)
+
+Both new-file checks now use
+`git --literal-pathspecs ls-files --others -- <scope>` WITHOUT
+`--exclude-standard`, so ignored files count as post-review additions; Git
+ignore controls status presentation, not scope membership. Preserved:
+
+- tracked / staged / committed drift still detected by
+  `git diff <rev> -- <scope>` (checked first; deletions and committed
+  additions included) — no regression to `Reviewed implementation revision`
+  or Source revision comparison;
+- directory Source `.scratch/current`: any new child anywhere under it
+  (ordinary, `.gitignore`, info/exclude, nested) stales; files outside the
+  directory stay irrelevant;
+- exact-file Source / exact-file scope: siblings never widen the baseline;
+- whole-repo scope `.`: ignored files anywhere in scope count;
+- out-of-scope caches/build artifacts stay irrelevant (no repo-wide scan);
+- entries are filtered by emptiness only — a whitespace-only filename is a
+  real entry (Reviewer-B defect repair below).
+
+## Tests added (§20–§21)
+
+`skills/ask-light/tests/test_ask_light_behavior.py`: 103 → 122 methods.
+Singleton cardinality matrix through the REAL route path (duplicate identical
+/ conflicting / order-reversed Profile, Source, Source revision or identity,
+Fixed point, Implementation scope, Reviewed implementation revision; missing
+Profile with drift; missing/duplicate generic Profile); Source-revision
+ambiguity matrix (single valid control; invalid-only; invalid+valid;
+valid+invalid; valid A+B; same SHA twice; duplicate fields); ignored-file
+matrix (in-scope `.gitignore` / info/exclude / nested ignored; out-of-scope
+ignored root+docs; exact-file scope sibling; whole-repo scope incl.
+whitespace-filename adversarial case; directory-Source children both
+mechanisms + nested; outside-directory ignored file; file-only Source ignored
+sibling). Tamper tests mutate otherwise-valid accepted records via
+`append_durable_field` / `set_*_field_lines` helpers and call `route()`.
+`skills/project-review/tests/test_software_profile_contract.py`: TC-SW-008
+re-aligned to the ignored-files wording + TC-SW-006 singleton-fields check.
+
+## Manual smoke matrix (§22) — real CLI, real Git: 20/20 OK
+
+`smoke/manual-matrix-hardening.py` → `manual-matrix-hardening.out` (observed
+output per row): fresh software PASS accepted; duplicate Profile + drift,
+missing Profile + drift, duplicate Source/Fixed point/Implementation scope/
+Reviewed implementation revision, Source revision invalid+valid and validA+
+validB → not accepted (`review-freshness-unknown` / `review-ownership-
+unknown`); ignored in-scope file via .gitignore and info/exclude, ignored
+directory-Source child, whole-repo scope ignored file, post-C2 in-scope
+tracked drift → `review-stale`; ignored out-of-scope file, ignored file
+outside directory Source, file-only Source + ignored sibling, exact-file scope
++ ignored sibling, unrelated README → `accepted`; C1→repair→C2 lifecycle →
+accepted at C2.
+
+## Specialist review findings and dispositions (§27)
+
+Reviewer A (durable-state parsing): Q1–Q4 all PASS with live adversarial
+probes (identical/conflicting/cross-section duplicates for all six fields;
+missing Profile with drift; token soup incl. prefix-of-same-commit,
+mixed-case, glued 41+-hex runs; full order-flip battery; 16 line-format
+variants × 6 fields regex-delta check; CRLF). No valid defects. Dispositions:
+advisory "identical duplicate `Verdict: PASS` still accepted" — NOT repaired:
+verdict parsing is aggregate-unanimous (any conflicting value already fails
+closed; identical duplication is interpretation-invariant), recorded as a
+known limitation; advisory `_spec_status` first-value-wins — out of scope
+(SPEC-status routing frozen by §1); advisory per-document singleton ownership,
+fenced-code-block occurrences, 7–40 token latitude — intended/accepted;
+advisory cosmetic ambiguous-Source gap text — REPAIRED.
+
+Reviewer B (Git scope completeness): Q1–Q5 all PASS with 30+ live repos
+(.gitignore, info/exclude, GLOBAL core.excludesFile proven active in-process,
+negated patterns, ignored directories, nested/deep/unicode/space names,
+anchored and `**` exclude forms; scope containment incl. shared-prefix
+siblings; exact-file non-widening; directory-Source regression battery;
+drift-before-others interplay, four drift categories covered exactly once).
+One VALID defect found and REPAIRED: a whitespace-only filename at repo root
+evaded the scope-others check under scope `.` because the blank-line filter
+used `line.strip()` — replaced with emptiness-only filtering in both checks +
+regression test. Advisories (pre-existing, unchanged): empty untracked
+directories invisible to git (both channels); C-quoted unicode names in gap
+messages (cosmetic); embedded repos listed collapsed → stale (fail-closed);
+assume-unchanged/skip-worktree can hide tracked modifications from
+`git diff` (git-domain limit).
+
+## Full validation (§28, run fresh after all fixes)
+
+```text
+python3 -m pytest -q             → 285 passed
+python3 -m unittest discover -s tests → OK (COLLECTION 245 + HOOKS 7 assertions)
+python3 -m compileall -q skills tests → OK
+git diff --check                 → OK
+git status --short               → only intended changes
+
+Skill-local suites: ask-light 122 · project-review 10 · socratic 21 ·
+clarify 5 · project-clarify 11 · project-init 32 · review-loop 19 — all OK
+```
+
+## Final self-audit (§30, from the tests above)
+
+Duplicate Profile → freshness skipped? NO (repro A, matrix 02, tamper tests).
+Missing Profile → skipped? NO (repro B, matrix 03). Duplicate Source resolves
+ownership? NO (matrix 04). Duplicate Fixed point / Implementation scope /
+Reviewed implementation revision select one value? NO (matrices 05–07).
+Source revision salvage from ambiguous input? NO (matrices 08–09, Reviewer A
+Q3). .gitignore / info/exclude hide in-scope new implementation files? NO
+(matrices 10–11, Reviewer B Q1–Q2 incl. global excludes). Ignored Source
+children evade directory freshness? NO (matrix 13). Ignored-file fix
+incorrectly invalidates exact-file or out-of-scope paths? NO (matrices
+12/14/15/16, Reviewer B Q3–Q4). C1→C2 lifecycle works? YES (matrix 18–20,
+lifecycle test). All answers from executed tests; none unknown/untested.
+
+## Files changed
+
+```text
+CHANGELOG.md
+skills/ask-light/scripts/ask_light.py
+skills/ask-light/references/discovery-contract.md
+skills/ask-light/tests/test_ask_light_behavior.py
+skills/project-review/references/WORKFLOW.md
+skills/project-review/references/acceptance-charter.md
+skills/project-review/references/profiles/software.md
+skills/project-review/tests/test_software_profile_contract.py
+.scratch/light-skills-core-flow-repair/results.md
+.scratch/light-skills-core-flow-repair/smoke/repro-prefix-52d8638.{py,out}
+.scratch/light-skills-core-flow-repair/smoke/manual-matrix-hardening.{py,out}
+```
+
+## Remaining limitations
+
+- Carried forward unchanged: committed symlink content beyond the link value
+  is unverifiable by Git; truncated (>64 KB) records fail closed; scope-choice
+  soundness remains a producer duty; live Codex host transition unobserved.
+- This round, by design: identical duplicate `Verdict: PASS` values are
+  interpretation-invariant and still accepted (any conflicting verdict value
+  fails closed); SPEC `Status:` duplication is outside the durable review
+  contract (frozen routing); field-shaped lines inside fenced code blocks
+  count as occurrences (over-strict, fail-closed); a single 7–40-hex token
+  remains a valid free-form `Source revision or identity` (field name allows
+  identity forms; strict 40-hex only for the software identities).

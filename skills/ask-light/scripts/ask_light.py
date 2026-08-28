@@ -190,13 +190,13 @@ def _field_values(text: str, field_names: tuple[str, ...]) -> list[str]:
     return values
 
 
-def _raw_field_line(text: str, field: str, *, strip_wrappers: bool = True) -> str:
-    """Return the full first-line value of a markdown field (no truncation).
+def _raw_field_occurrences(text: str, field: str, *, strip_wrappers: bool = True) -> list[str]:
+    """Return every canonical field-line value for `field`, in file order.
 
-    Unlike `_field_values`, the whole line is preserved so prose/path-bearing
+    Unlike `_field_values`, whole lines are preserved so prose/path-bearing
     fields such as the Charter's `Source:` line stay intact. The lookahead-style
     anchor keeps `Source revision or identity:` separate from `Source:`.
-    With ``strip_wrappers=False`` the value keeps its exact characters —
+    With ``strip_wrappers=False`` values keep their exact characters —
     required by the strict scope grammar, where wrapper-stripping would
     silently rewrite an invalid literal path (``src/*`` -> ``src/``) into a
     different acceptable one.
@@ -204,11 +204,29 @@ def _raw_field_line(text: str, field: str, *, strip_wrappers: bool = True) -> st
     pattern = re.compile(
         r"(?mi)^[ \t]*(?:[>#-]+[ \t]*)?(?:\*\*)?" + re.escape(field) + r"(?:\*\*)?[ \t]*[:=][ \t]*(.+)$"
     )
-    match = pattern.search(text)
-    if not match:
-        return ""
-    value = match.group(1).strip()
-    return value.strip("`*_ \t") if strip_wrappers else value
+    values: list[str] = []
+    for match in pattern.finditer(text):
+        value = match.group(1).strip()
+        values.append(value.strip("`*_ \t") if strip_wrappers else value)
+    return values
+
+
+def _singleton_field_value(text: str, field: str, *, strip_wrappers: bool = True) -> tuple[str, str]:
+    """Read one producer-owned singleton field, failing closed on cardinality.
+
+    Authoritative durable fields are singleton fields: cardinality is part of
+    validity. Returns (value, "") for exactly one canonical occurrence,
+    ("", "missing") for zero, and ("", "ambiguous") for more than one — even
+    when the duplicated values are identical. A duplicated canonical field
+    means the durable record no longer conforms to the producer contract, so
+    the consumer never interprets "first value wins".
+    """
+    occurrences = _raw_field_occurrences(text, field, strip_wrappers=strip_wrappers)
+    if not occurrences:
+        return "", "missing"
+    if len(occurrences) > 1:
+        return "", "ambiguous"
+    return occurrences[0], ""
 
 
 def _reviewed_scratch_references(source_value: str) -> list[str]:
@@ -260,19 +278,27 @@ def _resolvable_git_commit(root: Path, revision_token: str, *, peel: bool = True
 
 
 def _resolve_recorded_revision(root: Path, revision_value: str) -> tuple[str, str]:
-    """Resolve a Charter identity to a local Git commit.
+    """Resolve a Charter identity to exactly one locally verifiable Git commit.
 
     The producer convention freezes repository sources at a Git revision
     (WORKFLOW.md: freeze the source location plus revision / immutable
-    identity). Only locally resolvable commits establish freshness; version
-    strings, timestamps, or free-form labels are treated as unverifiable and
-    fail closed rather than being guessed into equivalence.
+    identity). The value is usable only when it carries exactly ONE
+    commit-like token that resolves locally: multiple commit-like tokens —
+    including duplicate SHAs, or an unresolvable token beside a resolvable
+    one — leave the frozen identity ambiguous and fail closed instead of
+    salvaging one candidate. Version strings, timestamps, or free-form labels
+    carry no verifiable token and fail closed rather than being guessed into
+    equivalence.
     """
-    for candidate in _HEX_REVISION_PATTERN.findall(revision_value):
-        resolved = _resolvable_git_commit(root, candidate)
-        if resolved:
-            return resolved, ""
-    return "", "missing" if not revision_value.strip() else "unresolvable"
+    tokens = _HEX_REVISION_PATTERN.findall(revision_value)
+    if not revision_value.strip():
+        return "", "missing"
+    if len(tokens) != 1:
+        return "", "ambiguous" if len(tokens) > 1 else "unresolvable"
+    resolved = _resolvable_git_commit(root, tokens[0])
+    if not resolved:
+        return "", "unresolvable"
+    return resolved, ""
 
 
 def _classify_review_freshness(
@@ -286,13 +312,38 @@ def _classify_review_freshness(
     while every cited source still matches the recorded commit — including
     uncommitted working-tree modifications, which `git diff <rev> -- <path>`
     reports alongside committed ones. When a cited source is a directory, the
-    reviewed baseline is that whole directory: files that appear untracked inside
-    it after the revision also invalidate freshness, detected with `git status
-    --porcelain` scoped to exactly the reviewed directory. Anything that cannot
-    be proven fresh is "unknown"; unknown is fail-closed and never grants
-    acceptance.
+    reviewed baseline is that whole directory: files that appear inside it after
+    the revision also invalidate freshness, detected with
+    `git ls-files --others` (without `--exclude-standard`, so files hidden by
+    Git ignore rules still count). Canonical fields are singleton fields: a
+    missing or duplicated `Profile:`, `Source:`, or `Source revision or
+    identity:` line means the durable record does not conform to the producer
+    contract and fails closed. Anything that cannot be proven fresh is
+    "unknown"; unknown is fail-closed and never grants acceptance.
     """
-    revision_value = _raw_field_line(charter_text, "Source revision or identity")
+    profile, profile_failure = _reviewed_profile_field(charter_text)
+    if profile_failure:
+        detail = (
+            "no canonical `- Profile:` line found"
+            if profile_failure == "missing"
+            else "more than one canonical `- Profile:` line found"
+        )
+        return "unknown", [
+            f"The Charter's `Profile:` field is {profile_failure} ({detail}), so the "
+            "review Profile that selects the freshness contract cannot be "
+            "established; ask-light does not fall back to a default Profile and "
+            "fails closed."
+        ], ""
+    revision_value, revision_failure = _singleton_field_value(
+        charter_text, "Source revision or identity"
+    )
+    if revision_failure == "ambiguous":
+        return "unknown", [
+            "The Charter records more than one canonical `Source revision or "
+            "identity:` field line, so the frozen baseline identity is ambiguous; "
+            "ask-light does not choose between duplicate canonical fields and "
+            "fails closed."
+        ], ""
     baseline, failure = _resolve_recorded_revision(root, revision_value)
     if failure == "missing":
         return "unknown", [
@@ -307,13 +358,26 @@ def _classify_review_freshness(
             "`Source revision or identity` cannot be verified against it; ask-light "
             "fails closed instead of assuming the review is still current."
         ], ""
+    if failure == "ambiguous":
+        return "unknown", [
+            f"The Charter's `Source revision or identity` ('{revision_value}') does not "
+            "carry exactly one unambiguous Git commit identity, so the frozen baseline "
+            "cannot be verified; ask-light does not salvage one candidate from an "
+            "ambiguous value and fails closed."
+        ], ""
     if failure == "unresolvable":
         return "unknown", [
             f"The Charter's `Source revision or identity` ('{revision_value}') does not "
             "resolve to a local Git commit, so review freshness cannot be verified; "
             "ask-light fails closed rather than guessing an equivalence."
         ], ""
-    source_value = _raw_field_line(charter_text, "Source")
+    source_value, source_failure = _singleton_field_value(charter_text, "Source")
+    if source_failure == "ambiguous":
+        return "unknown", [
+            "The Charter records more than one canonical `Source:` field line, so the "
+            "reviewed baseline location is ambiguous; ask-light does not choose one "
+            "Source from an ambiguous Charter and fails closed."
+        ], baseline
     cited_paths = _reviewed_source_paths(source_value)
     if not cited_paths:
         return "unknown", [
@@ -352,30 +416,53 @@ def _classify_review_freshness(
             ], baseline
         # A directory baseline covers everything under it, not only the tracked
         # content recorded at the revision. Files that appear inside the reviewed
-        # directory afterwards — even untracked ones — change that baseline.
+        # directory afterwards — untracked or ignored alike — change that
+        # baseline. `git status` hides ignored files, so completeness is checked
+        # with `git ls-files --others` WITHOUT `--exclude-standard` and with
+        # literal pathspecs (the cited path is producer-owned, not a glob).
         if (root / relative).is_dir():
-            directory_status = _run_git(root, "status", "--porcelain", "--", relative)
-            if directory_status is None:
+            directory_children = _run_git(
+                root, "--literal-pathspecs", "ls-files", "--others", "--", relative,
+            )
+            if directory_children is None:
                 return "unknown", [
                     f"Git could not inspect the reviewed directory '{relative}', so it cannot "
                     "be proven free of post-review additions."
                 ], baseline
-            if directory_status.returncode != 0:
+            if directory_children.returncode != 0:
                 return "unknown", [
-                    f"The freshness comparison for reviewed directory '{relative}' failed "
+                    f"The completeness check for reviewed directory '{relative}' failed "
                     "(git error), so it cannot be proven unchanged."
                 ], baseline
-            if any(line.startswith("??") for line in directory_status.stdout.splitlines()):
+            added = [line for line in directory_children.stdout.splitlines() if line]
+            if added:
+                names = ", ".join(added[:3])
+                extra = "" if len(added) <= 3 else f" (+{len(added) - 3} more)"
                 return "stale", [
-                    f"A new file appeared inside the reviewed directory '{relative}' after the "
-                    f"recorded revision ({short_baseline}); the frozen directory baseline no longer matches.",
+                    f"New files appeared inside the reviewed directory '{relative}' after the "
+                    f"recorded revision ({short_baseline}): {names}{extra} — including files "
+                    "Git ignore rules hide from status; the frozen directory baseline "
+                    "no longer matches.",
                 ], baseline
     return "current", [], baseline
 
 
-def _reviewed_profile(charter_text: str) -> str:
-    values = _field_values(charter_text, ("Profile",))
-    return values[0] if values else ""
+def _reviewed_profile_field(charter_text: str) -> tuple[str, str]:
+    """Parse the Charter's singleton `Profile:` field, failing closed.
+
+    Returns (profile, "") or ("", failure) with failure in {"missing",
+    "ambiguous"}. The Profile decides which freshness contract a verdict is
+    consumed under, so first-match or duplicate-tolerant parsing would let a
+    tampered record skip the software baseline checks entirely; the Profile
+    must appear exactly once.
+    """
+    raw, failure = _singleton_field_value(charter_text, "Profile")
+    if failure:
+        return "", failure
+    part = re.split(r"[;,]", raw, maxsplit=1)[0].strip().lower()
+    if not part:
+        return "", "missing"
+    return part.split()[0].strip("():-*_"), ""
 
 
 # Strict software-baseline grammars (producer owner: skills/project-review).
@@ -401,14 +488,15 @@ def _parse_exact_commit_token(raw_value: str) -> str:
 def _parse_exact_commit_field(root: Path, text: str, field: str) -> tuple[str, str]:
     """Resolve a strict identity field to its locally verifiable full commit.
 
-    Returns (full_sha, "") or ("", failure) with failure in {"missing",
-    "malformed", "unresolvable"}. A written SHA that resolves to some other
-    object (e.g. an annotated tag peeled to another commit) is not the
-    recorded commit identity and fails closed instead of being retargeted.
+    The field is a producer-owned singleton: returns (full_sha, "") or ("",
+    failure) with failure in {"missing", "ambiguous", "malformed",
+    "unresolvable"}. A written SHA that resolves to some other object (e.g. an
+    annotated tag peeled to another commit) is not the recorded commit identity
+    and fails closed instead of being retargeted.
     """
-    raw = _raw_field_line(text, field)
-    if not raw.strip():
-        return "", "missing"
+    raw, failure = _singleton_field_value(text, field)
+    if failure:
+        return "", failure
     token = _parse_exact_commit_token(raw)
     if not token:
         return "", "malformed"
@@ -468,13 +556,29 @@ def _classify_software_implementation_freshness(
 
     Freshness holds only while, inside the frozen scope, the current tree
     exactly matches the reviewed implementation revision (`git diff <rev> --
-    <scope>` covers tracked/committed/staged/unstaged drift) and no untracked
-    file appears inside the scope (`git status --porcelain -uall -- <scope>`).
-    The base must differ from and delimit the final revision, and the B..C
-    review window must contain non-empty in-scope change. Anything that cannot
-    be proven is "unknown"; unknown is fail-closed and never grants acceptance.
+    <scope>` covers tracked/committed/staged/unstaged drift) and no new file
+    appears inside the scope — detected with `git ls-files --others` WITHOUT
+    `--exclude-standard`, so files hidden from `git status` by Git ignore rules
+    still count. The base must differ from and delimit the final revision, and
+    the B..C review window must contain non-empty in-scope change. All three
+    identity fields are producer-owned singletons: missing, duplicated (even
+    identically), or ambiguous fields fail closed. Anything that cannot be
+    proven is "unknown"; unknown is fail-closed and never grants acceptance.
     """
-    if _reviewed_profile(charter_text) != "software":
+    profile, profile_failure = _reviewed_profile_field(charter_text)
+    if profile_failure:
+        detail = (
+            "no canonical `- Profile:` line found"
+            if profile_failure == "missing"
+            else "more than one canonical `- Profile:` line found"
+        )
+        return "unknown", [
+            "The Charter's `Profile:` field is not exactly one canonical value "
+            f"({detail}), so the review Profile that selects the freshness "
+            "contract cannot be established; ask-light does not silently fall "
+            "back to the generic contract and fails closed."
+        ]
+    if profile != "software":
         return "not-applicable", []
 
     base_revision, failure = _parse_exact_commit_field(root, charter_text, "Fixed point")
@@ -484,6 +588,13 @@ def _classify_software_implementation_freshness(
             "The Charter records the `software` review Profile but no `- Fixed point:` "
             "identity; a software verdict may only be consumed together with the "
             "immutable code-review base it froze."
+        ]
+    if failure == "ambiguous":
+        return "unknown", [
+            "The Charter records more than one canonical `- Fixed point:` field line, "
+            "so the immutable review base is ambiguous; duplicate canonical fields "
+            "violate the producer singleton contract and ask-light fails closed "
+            "instead of selecting one."
         ]
     if failure == "malformed":
         return "unknown", [
@@ -497,7 +608,16 @@ def _classify_software_implementation_freshness(
             "the immutable review base cannot be verified; ask-light fails closed."
         ]
 
-    scope_raw = _raw_field_line(charter_text, "Implementation scope", strip_wrappers=False)
+    scope_raw, scope_cardinality = _singleton_field_value(
+        charter_text, "Implementation scope", strip_wrappers=False
+    )
+    if scope_cardinality == "ambiguous":
+        return "unknown", [
+            "The Charter records more than one canonical `- Implementation scope:` "
+            "field line, so the reviewed software target is ambiguous; duplicate "
+            "canonical fields violate the producer singleton contract and ask-light "
+            "fails closed instead of selecting one."
+        ]
     if not scope_raw.strip():
         return "unknown", [
             "The Charter records the `software` review Profile but no `- Implementation "
@@ -520,6 +640,12 @@ def _classify_software_implementation_freshness(
             "The durable verdict records no `- Reviewed implementation revision:`, so the "
             "evaluated implementation candidate cannot be identified; ask-light never "
             "falls back to the fixed-point window's touched paths and fails closed."
+        ]
+    if failure == "ambiguous":
+        return "unknown", [
+            "The durable verdict records more than one canonical `- Reviewed "
+            "implementation revision:` field line, so the evaluated candidate is "
+            "ambiguous; ask-light fails closed instead of selecting one."
         ]
     if failure == "malformed":
         return "unknown", [
@@ -585,28 +711,39 @@ def _classify_software_implementation_freshness(
             "implementation inside the frozen scope.",
         ]
 
-    directory_status = _run_git(
-        root, "--literal-pathspecs", "status", "--porcelain", "--untracked-files=all",
-        "--", *scope_entries,
+    # Scope completeness: any file present inside the frozen scope that is not
+    # tracked at the evaluated revision is post-review drift. `git status`
+    # hides ignored files, so the check uses `git ls-files --others` WITHOUT
+    # `--exclude-standard` (Git ignore controls status presentation, not scope
+    # membership) and literal path semantics — scope entries are producer-owned
+    # literal paths, never glob patterns. Files added and staged or committed
+    # after the revision were already caught by the drift comparison above;
+    # anything still listed here is new on disk.
+    scope_children = _run_git(
+        root, "--literal-pathspecs", "ls-files", "--others", "--", *scope_entries,
     )
-    if directory_status is None:
+    if scope_children is None:
         return "unknown", [
             "Git could not inspect the frozen implementation scope for post-review "
             "additions, so it cannot be proven unchanged."
         ]
-    if directory_status.returncode != 0:
+    if scope_children.returncode != 0:
         return "unknown", [
-            "The implementation scope status check failed (git error), so it cannot be "
-            "proven free of post-review additions."
+            "The implementation scope completeness check failed (git error), so it "
+            "cannot be proven free of post-review additions."
         ]
-    for line in directory_status.stdout.splitlines():
-        if line.startswith("??"):
-            added = line[3:].strip()
-            return "stale", [
-                f"A new file appeared inside the frozen implementation scope after the "
-                f"evaluated revision ({short_final}): '{added}'; the reviewed "
-                "implementation baseline no longer matches the current tree.",
-            ]
+    # A whitespace-only filename is a real entry, so entries are filtered by
+    # emptiness only — never by stripping, which would hide such a file.
+    added = [line for line in scope_children.stdout.splitlines() if line]
+    if added:
+        names = ", ".join(added[:3])
+        extra = "" if len(added) <= 3 else f" (+{len(added) - 3} more)"
+        return "stale", [
+            f"A new file appeared inside the frozen implementation scope after the "
+            f"evaluated revision ({short_final}): {names}{extra} — including files "
+            "Git ignore rules hide from status; the reviewed implementation "
+            "baseline no longer matches the current tree.",
+        ]
     return "current", []
 
 
@@ -642,7 +779,17 @@ def _classify_review_ownership(
             "unreadable, so the review's ownership cannot be established."
         )
         return "unresolvable", [gap]
-    source_value = _raw_field_line(charter_text, "Source")
+    source_value, source_failure = _singleton_field_value(charter_text, "Source")
+    if source_failure == "ambiguous":
+        gaps = [
+            f"`{PROJECT_REVIEW_DIRNAME}/charter.md` records more than one canonical "
+            "`Source:` field line, so the reviewed effort is ambiguous; ask-light cannot "
+            f"prove it belongs to the current effort '{current_effort}' and fails closed "
+            "instead of selecting one Source."
+        ]
+        if review_dir.name == LEGACY_PROJECT_REVIEW_DIRNAME:
+            gaps[0] = gaps[0].replace(PROJECT_REVIEW_DIRNAME, LEGACY_PROJECT_REVIEW_DIRNAME)
+        return "unresolvable", gaps
     references = {name for name in _reviewed_scratch_references(source_value)}
     if references == {current_effort}:
         return "current", []

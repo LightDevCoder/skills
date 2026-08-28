@@ -1,0 +1,43 @@
+# Pre-fix reproductions against working tree at HEAD 52d8638
+
+A duplicate Profile (generic first) + in-scope drift: observed='accepted' required='review-freshness-unknown' -> FALSE ACCEPT (BUG)
+B missing Profile + in-scope drift: observed='accepted' required='review-freshness-unknown' -> FALSE ACCEPT (BUG)
+C1 duplicate identical Fixed point: observed='accepted' required='review-freshness-unknown' -> FALSE ACCEPT (BUG)
+C2 duplicate conflicting Fixed point (valid first): observed='accepted' required='review-freshness-unknown' -> FALSE ACCEPT (BUG)
+D1 duplicate identical Implementation scope: observed='accepted' required='review-freshness-unknown' -> FALSE ACCEPT (BUG)
+D2 duplicate conflicting Implementation scope: observed='accepted' required='review-freshness-unknown' -> FALSE ACCEPT (BUG)
+E1 duplicate identical Reviewed implementation revision: observed='accepted' required='review-freshness-unknown' -> FALSE ACCEPT (BUG)
+E2 duplicate conflicting Reviewed implementation revision: observed='accepted' required='review-freshness-unknown' -> FALSE ACCEPT (BUG)
+F duplicate Source (current effort first): observed='accepted' required='review-ownership-unknown' -> FALSE ACCEPT (BUG)
+G1 Source revision '<invalid-40hex> <valid-sha>': observed='accepted' required='review-freshness-unknown' -> FALSE ACCEPT (BUG)
+G2 Source revision '<valid-sha-A> <valid-sha-B>': observed='accepted' required='review-freshness-unknown' -> FALSE ACCEPT (BUG)
+H1 .gitignore ignored in-scope src/new_hidden.py: observed='accepted' required='review-stale' -> FALSE ACCEPT (BUG)
+H2 .git/info/exclude ignored in-scope src/new_hidden.py: observed='accepted' required='review-stale' -> FALSE ACCEPT (BUG)
+I1 .gitignore ignored .scratch/current/hidden.md: observed='accepted' required='review-stale' -> FALSE ACCEPT (BUG)
+I2 .git/info/exclude ignored .scratch/current/hidden.md: observed='accepted' required='review-stale' -> FALSE ACCEPT (BUG)
+
+All rows above record the PRE-FIX behavior at the stated baseline;
+each 'FALSE ACCEPT (BUG)' row must become its required stage post-fix.
+
+# POST-FIX confirmation (same script, after the singleton/identity/ignored-file repair)
+
+A pre-drift observation: duplicate Profile alone -> 'review-freshness-unknown'
+A duplicate Profile (generic first) + in-scope drift: observed='review-freshness-unknown' required='review-freshness-unknown' -> not accepted (ok)
+B pre-drift observation: missing Profile alone -> 'review-freshness-unknown'
+B missing Profile + in-scope drift: observed='review-freshness-unknown' required='review-freshness-unknown' -> not accepted (ok)
+C1 duplicate identical Fixed point: observed='review-freshness-unknown' required='review-freshness-unknown' -> not accepted (ok)
+C2 duplicate conflicting Fixed point (valid first): observed='review-freshness-unknown' required='review-freshness-unknown' -> not accepted (ok)
+D1 duplicate identical Implementation scope: observed='review-freshness-unknown' required='review-freshness-unknown' -> not accepted (ok)
+D2 duplicate conflicting Implementation scope: observed='review-freshness-unknown' required='review-freshness-unknown' -> not accepted (ok)
+E1 duplicate identical Reviewed implementation revision: observed='review-freshness-unknown' required='review-freshness-unknown' -> not accepted (ok)
+E2 duplicate conflicting Reviewed implementation revision: observed='review-freshness-unknown' required='review-freshness-unknown' -> not accepted (ok)
+F duplicate Source (current effort first): observed='review-ownership-unknown' required='review-ownership-unknown' -> not accepted (ok)
+G1 Source revision '<invalid-40hex> <valid-sha>': observed='review-freshness-unknown' required='review-freshness-unknown' -> not accepted (ok)
+G2 Source revision '<valid-sha-A> <valid-sha-B>': observed='review-freshness-unknown' required='review-freshness-unknown' -> not accepted (ok)
+H1 .gitignore ignored in-scope src/new_hidden.py: observed='review-stale' required='review-stale' -> not accepted (ok)
+H2 .git/info/exclude ignored in-scope src/new_hidden.py: observed='review-stale' required='review-stale' -> not accepted (ok)
+I1 .gitignore ignored .scratch/current/hidden.md: observed='review-stale' required='review-stale' -> not accepted (ok)
+I2 .git/info/exclude ignored .scratch/current/hidden.md: observed='review-stale' required='review-stale' -> not accepted (ok)
+
+All rows above record the PRE-FIX behavior at the stated baseline;
+each 'FALSE ACCEPT (BUG)' row must become its required stage post-fix.

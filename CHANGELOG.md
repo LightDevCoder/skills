@@ -113,6 +113,44 @@ contract, fail-closed throughout:
   workflow, evidence protocol, migration note) define the contract;
   `ask-light` discovery-contract carries only the concise consumer summary.
 
+### Changed — Durable baseline hardening (singleton fields, unambiguous identities, ignored-file completeness)
+
+Human audit reproduced three false-`accepted` classes at `52d8638`: duplicate
+canonical durable fields were consumed first-match-wins (duplicate/missing
+`Profile` silently skipped software freshness); multi-candidate
+`Source revision or identity` values were salvaged to the first resolvable SHA;
+and files hidden from `git status` by `.gitignore` / `.git/info/exclude` evaded
+directory-Source and implementation-scope freshness. Closed fail-closed:
+
+- **Singleton durable fields:** canonical producer-owned fields (`Source:`,
+  `Source revision or identity:`, `Profile:` in the Charter; `Fixed point:`,
+  `Implementation scope:` in the Charter; `Reviewed implementation revision:`
+  on the verdict) are singleton fields — cardinality is part of validity.
+  Exactly one occurrence parses; zero or more than one (even identically
+  duplicated) fails closed as `review-freshness-unknown` /
+  `review-ownership-unknown`, in any field order. `ask-light` never reads
+  "first value wins" from an authoritative field.
+- **Unambiguous Source identities:** `Source revision or identity` is usable
+  only when it carries exactly one unambiguous locally resolvable Git commit;
+  invalid+valid, valid+valid, duplicated, or duplicate-field values all fail
+  closed with no partial salvage. Non-Git identities remain unsupported by the
+  consumer (fail closed, unchanged).
+- **Ignored-file completeness:** directory-Source and implementation-scope
+  new-file detection now uses `git ls-files --others` (literal pathspecs,
+  without `--exclude-standard`), so ignored in-scope files stale the verdict
+  like any other addition. Git ignore controls status presentation, not scope
+  membership; exact-file scopes, file-only Sources, and out-of-scope paths
+  keep their narrow semantics.
+- **Producer docs:** `project-review` references (Charter template, software
+  profile, workflow) state the singleton rule and that reviewed scope
+  completeness includes Git-ignored files; `ask-light` discovery-contract
+  carries the consumer summary.
+- **Tests:** 19 new Git-backed regression methods (122 total in the ask-light
+  suite): singleton cardinality matrix incl. order independence and durable-
+  record tamper through the real route path, Source-revision ambiguity matrix,
+  ignored-file matrix (in-scope/out-of-scope, exact-file, whole-repo,
+  directory-Source children), and valid-baseline positive controls.
+
 ### No redesign verification
 
 18 `NO REWRITE/PORT` Skills were `git diff` checked (SPEC §26): `manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `eli5`, `release-workflow`, `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts` — only minimal handoff/attribution wiring where a real integration need existed. `recap` is the separately recorded user-approved exception above.

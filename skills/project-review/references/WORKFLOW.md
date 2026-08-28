@@ -173,7 +173,8 @@ For a `software` Profile, every durable `PASS`, `FAIL`, or `BLOCKED` binds the
 immutable baseline to the implementation it actually evaluated by recording
 `- Reviewed implementation revision: <full Git commit SHA>` in `verdict.md`.
 A `PASS` may only be issued while the frozen `Implementation scope` holds no
-uncommitted tracked or untracked changes at evaluation time; unrelated changes
-outside the scope do not block. Any later in-scope drift — dirty, staged,
-committed, or untracked — stales that verdict for consumers and requires a
-fresh review ([profiles/software.md](profiles/software.md)).
+uncommitted tracked, untracked, or ignored changes at evaluation time — Git
+ignore rules hide files from `git status`, not from the reviewed component;
+unrelated changes outside the scope do not block. Any later in-scope drift —
+dirty, staged, committed, untracked, or ignored — stales that verdict for
+consumers and requires a fresh review ([profiles/software.md](profiles/software.md)).

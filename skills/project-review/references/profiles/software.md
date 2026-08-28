@@ -55,7 +55,10 @@ never the Program's acceptance verdict.
 A software verdict binds to a three-part produced identity. Two parts freeze
 in the Charter at `init`; the third is recorded on the final verdict because
 authorized bounded repairs may legitimately move the evaluated candidate
-during the review lifecycle.
+during the review lifecycle. Each field is a singleton field: it must appear
+exactly once in its record. A missing, duplicated (even identically), or
+ambiguous occurrence is invalid durable review state, and consumers fail
+closed instead of selecting a value.
 
 1. **`Fixed point`** — `- Fixed point: <full Git commit SHA>` in the Charter.
    Exactly one full 40-character commit SHA: the immutable base from which
@@ -106,13 +109,15 @@ during the review lifecycle.
   the Charter's `Fixed point` to make a repair fit.
 - A durable `PASS`, `FAIL`, or `BLOCKED` always names the implementation
   revision it evaluated. At final evaluation time the frozen scope must hold
-  no uncommitted tracked or untracked changes: a `PASS` never binds while
-  additional in-scope implementation work exists. Unrelated dirty files
-  outside the scope do not block acceptance.
+  no uncommitted tracked, untracked, or ignored changes: Git ignore rules
+  hide files from `git status`, not from the reviewed component, so an
+  ignored file inside the scope is drift exactly like any other addition. A
+  `PASS` never binds while additional in-scope implementation work exists.
+  Unrelated dirty files outside the scope do not block acceptance.
 - Files that pre-existed inside the scope but were untouched by the review
-  diff, and files created inside the scope afterwards (tracked or untracked),
-  still belong to the accepted component; drifting them invalidates the
-  verdict whatever the review window once said.
+  diff, and files created inside the scope afterwards (tracked, untracked,
+  or ignored), still belong to the accepted component; drifting them
+  invalidates the verdict whatever the review window once said.
 - Keep project-review's own mutable records out of the frozen target.
   `.project-review/`, `.review-loop/`, and `.scratch/` acceptance/spec/ticket
   state are review metadata, not implementation — unless they genuinely are

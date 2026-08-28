@@ -95,6 +95,9 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.require_no_match("TC-SW-006 two-value grammar removed", profile, r"<base> <candidate>")
     c.require_no_match("TC-SW-006 touched-window rule removed", profile,
                        r"paths the recorded window touched")
+    c.require_match("TC-SW-006 singleton fields rule", profile,
+                    r"(?is)Each field is a singleton field.*exactly\s+once"
+                    r".*duplicated \(even identically\).*fail\s+closed")
 
     c.require_match("TC-SW-007 scope field grammar", profile,
                     r"(?is)`Implementation scope`.*repo-relative literal")
@@ -116,7 +119,9 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.require_match("TC-SW-008 repair moves candidate C1 to C2", profile,
                     r"(?is)may move\s+the candidate from C1 to C2")
     c.require_match("TC-SW-008 pass requires clean in-scope tree", profile,
-                    r"(?i)no uncommitted tracked or untracked changes")
+                    r"(?i)no uncommitted tracked, untracked, or ignored changes")
+    c.require_match("TC-SW-008 ignored files count as scope drift", profile,
+                    r"(?i)Git ignore rules\s+hide files from `git status`, not from the reviewed component")
     c.require_match("TC-SW-008 lifecycle rules section", profile,
                     r"(?im)^### Baseline lifecycle rules$")
     c.require_match("TC-SW-009 review metadata kept out of scope", profile,

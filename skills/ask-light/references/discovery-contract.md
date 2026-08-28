@@ -72,11 +72,24 @@ Project-state evidence is fail-closed:
   is proven, `ask-light` also verifies the Charter's frozen
   `Source revision or identity` against the cited source paths before trusting
   any conclusion (definitions remain producer-owned):
+  - Canonical durable fields are singleton fields: `Source:`,
+    `Source revision or identity:`, and `Profile:` in the Charter, plus the
+    software-only `Fixed point:` / `Implementation scope:` and the verdict's
+    `Reviewed implementation revision:`. Each must appear exactly once — a
+    missing or duplicated field (even identically duplicated, in either field
+    order) is invalid durable state and fails closed as
+    `review-ownership-unknown` or `review-freshness-unknown`; `ask-light`
+    never reads "first value wins" from an authoritative field.
   - Every cited `.scratch` path still matching the recorded Git commit —
     including uncommitted working-tree modifications — keeps the verdict
     current; PASS stays accepted. A cited directory source is reviewed as a
     whole baseline: files appearing inside it after the revision, including
-    untracked ones, count as changes to it.
+    untracked and Git-ignored ones (detected via `git ls-files --others`
+    without `--exclude-standard`), count as changes to it.
+  - The recorded identity is usable only when it carries exactly one
+    unambiguous locally resolvable Git commit; multi-candidate values
+    (invalid+valid, valid+valid, duplicated tokens, or duplicate fields) fail
+    closed with no partial salvage.
   - A verified change since the recorded revision makes ANY old verdict
     non-authoritative: stage `review-stale`, routed back to `project-review`
     for a fresh review of the changed baseline. A stale FAIL does not keep
@@ -103,9 +116,11 @@ Project-state evidence is fail-closed:
     implementation revision, and their diff must contain non-empty change
     inside the scope; otherwise fail closed.
   - inside that frozen scope the current tree must exactly match the
-    reviewed implementation revision — tracked, staged, committed, and
-    untracked additions alike (`git diff <rev> -- <scope>` plus
-    `git status --porcelain -uall -- <scope>`).
+    reviewed implementation revision — tracked, staged, committed, untracked,
+    and Git-ignored additions alike (`git diff <rev> -- <scope>` plus
+    `git ls-files --others` with literal pathspecs and no
+    `--exclude-standard`; Git ignore controls status presentation, not scope
+    membership).
   - any in-scope drift stales ANY old verdict into
     `review-stale → project-review`; changes outside the frozen scope are
     unrelated and never invalidate it. Legacy records frozen before these

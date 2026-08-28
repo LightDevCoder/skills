@@ -1,0 +1,44 @@
+# Post-fix manual smoke matrix (§22) — real CLI against working tree at 52d8638
+
+01. fresh software PASS
+    expected='accepted' observed='accepted' -> OK
+02. duplicate Profile + implementation drift
+    expected='not accepted' observed='review-freshness-unknown' -> OK
+03. missing Profile + implementation drift
+    expected='not accepted' observed='review-freshness-unknown' -> OK
+04. duplicate Source
+    expected='review-ownership-unknown' observed='review-ownership-unknown' -> OK
+05. duplicate Fixed point
+    expected='review-freshness-unknown' observed='review-freshness-unknown' -> OK
+06. duplicate Implementation scope
+    expected='review-freshness-unknown' observed='review-freshness-unknown' -> OK
+07. duplicate Reviewed implementation revision
+    expected='review-freshness-unknown' observed='review-freshness-unknown' -> OK
+08. Source revision invalid+valid
+    expected='review-freshness-unknown' observed='review-freshness-unknown' -> OK
+09. Source revision validA+validB
+    expected='review-freshness-unknown' observed='review-freshness-unknown' -> OK
+10. ignored in-scope src/new_hidden.py via gitignore
+    expected='review-stale' observed='review-stale' -> OK
+11. ignored in-scope src/new_hidden.py via info-exclude
+    expected='review-stale' observed='review-stale' -> OK
+12. ignored out-of-scope root build.tmp
+    expected='accepted' observed='accepted' -> OK
+13. ignored .scratch/current/hidden.md child
+    expected='review-stale' observed='review-stale' -> OK
+14. ignored file outside directory Source
+    expected='accepted' observed='accepted' -> OK
+15. file-only Source + ignored sibling
+    expected='accepted' observed='accepted' -> OK
+16. exact-file scope + ignored sibling
+    expected='accepted' observed='accepted' -> OK
+17. whole-repository scope + ignored file
+    expected='review-stale' observed='review-stale' -> OK
+18. C1 -> repair -> C2 lifecycle accepted at C2
+    expected='accepted' observed='accepted' -> OK
+19. post-C2 in-scope tracked drift
+    expected='review-stale' observed='review-stale' -> OK
+20. unrelated README outside scope
+    expected='accepted' observed='accepted' -> OK
+
+20/20 rows OK
