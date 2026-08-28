@@ -1,6 +1,6 @@
 # v0.2.0 — Light Workflow 33-Skill Architecture 发布说明
 
-[English release receipt](RELEASE_RECEIPT.md)
+[English release receipt](https://github.com/LightDevCoder/skills/blob/main/docs/evidence/releases/v0.2.0/RELEASE_RECEIPT.md) · [English Release Notes](https://github.com/LightDevCoder/skills/blob/main/docs/evidence/releases/v0.2.0/RELEASE_NOTES.md)
 
 ## 本次更新
 
