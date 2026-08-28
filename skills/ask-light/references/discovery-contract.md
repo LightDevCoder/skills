@@ -4,6 +4,9 @@
 state, logical routing, and host availability. It then waits for approval
 before beginning the selected Skill.
 
+`ask_light.py` is the deterministic evidence and validation helper. Final
+semantic workflow recommendation belongs to `ask-light` model reasoning.
+
 ## Layer 0 — Project/workflow state
 
 Before routing, inspect enough local evidence to answer:
@@ -12,7 +15,31 @@ Before routing, inspect enough local evidence to answer:
 - What stage is it currently in?
 - What has already been completed?
 - What is blocking or logically next?
-- Which Light Skill best owns that next step?
+
+For **hard deterministic states** — uninitialized projects, ambiguous efforts,
+active reviews, review transaction integrity — the helper identifies the
+owning Skill directly. These are state ownership rules, not semantic choices.
+
+For **semantic workflow choices** — when the project is initialized but the
+next step depends on requirement readiness, research completeness, or
+decision clarity — the helper returns structured evidence (`projectEvidence`)
+without a Skill recommendation. The model reasons from this evidence plus
+the current conversation context and relevant Skill contracts to select and
+justify the recommendation.
+
+The evidence record includes:
+
+```text
+projectContract:  goal/outputs/constraints status
+currentEffort:    resolved effort name and status
+spec:             existence, active status, paths
+tickets:          existence, resolution state
+review:           existence, acceptance status
+researchArtifacts:       docs/research/*.md
+clarificationArtifacts:  clarification readiness records
+availableSkills:         discovered available Light Skills
+hardBlockers:            deterministic blockers
+```
 
 Relevant evidence, when present:
 

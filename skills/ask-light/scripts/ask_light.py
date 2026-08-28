@@ -1848,11 +1848,57 @@ def _resolve_current_effort(root: Path) -> tuple[str | None, str, list[str]]:
     return None, "", []
 
 
+def _find_research_artifacts(root: Path) -> list[str]:
+    """Return repository-relative paths for research documents."""
+    research_dir = root / "docs" / "research"
+    artifacts: list[str] = []
+    if research_dir.is_dir():
+        try:
+            for path in sorted(research_dir.iterdir()):
+                if path.is_file() and path.suffix.lower() in (".md", ".txt"):
+                    artifacts.append(str(path.relative_to(root)))
+        except OSError:
+            pass
+    return artifacts
+
+
+def _find_clarification_artifacts(root: Path, current_effort: str | None) -> list[str]:
+    """Return repository-relative paths for clarification readiness records."""
+    artifacts: list[str] = []
+    candidates: list[Path] = []
+    agents_dir = root / "docs" / "agents"
+    if agents_dir.is_dir():
+        try:
+            candidates.extend(
+                path for path in agents_dir.iterdir()
+                if path.is_file() and "clarif" in path.name.lower()
+            )
+        except OSError:
+            pass
+    if current_effort:
+        effort_dir = root / ".scratch" / current_effort
+        if effort_dir.is_dir():
+            try:
+                candidates.extend(
+                    path for path in effort_dir.iterdir()
+                    if path.is_file() and "clarif" in path.name.lower()
+                )
+            except OSError:
+                pass
+    for path in sorted(candidates):
+        if path.suffix.lower() in (".md", ".txt"):
+            artifacts.append(str(path.relative_to(root)))
+    return artifacts
+
+
 def inspect_project_state(project_root: Path) -> dict[str, Any]:
     """Inspect a bounded set of real project evidence, not the whole repository.
 
-    Returns a stage, completed/missing summaries, and the Light Skill that owns
-    the next step when the evidence supports a deterministic recommendation.
+    Returns a stage and structured evidence. For hard deterministic states
+    (uninitialized, ambiguous effort, active review, etc.) a ``skill`` is
+    included. For semantic workflow choices (initialized but no SPEC) the
+    ``skill`` field is empty and the caller — typically the model — owns the
+    final recommendation using the returned evidence plus conversation context.
     """
     root = project_root.resolve()
     evidence: dict[str, Any] = {
@@ -1979,19 +2025,25 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
         contract_text = _small_text(project_contract)
         has_goal = bool(re.search(r"(?im)^-\s*Goal:\s*(?!\?|\(none recorded\)|$)\S", contract_text))
         has_outputs = bool(re.search(r"(?im)^-\s*Outputs:\s*(?!\(none recorded\)|$)\S", contract_text))
-        goal_state = "clear goal and outputs are recorded" if (has_goal and has_outputs) else "goal/outputs are missing or unclear"
-        if goal_state.startswith("clear"):
-            skill, stage, missing = "project-spec", "initialized-no-spec", ["approved SPEC with acceptance criteria"]
-            reason = "The Light project contract exists and records a goal, but no active SPEC is present. `project-spec` owns turning the recorded goal and constraints into a traceable SPEC."
-        else:
-            skill, stage, missing = "project-clarify", "initialized-unclear", ["clarified goal and constraints before a SPEC can be written"]
-            reason = "The Light project contract exists but does not yet give `project-spec` a clear goal/outputs base. `project-clarify` owns resolving the remaining user-owned decisions first."
-        evidence["stage"] = stage
-        evidence["skill"] = skill
-        evidence["reason"] = reason
+        has_constraints = bool(re.search(r"(?im)^-\s*Constraints:\s*(?!\?|\(none recorded\)|$)\S", contract_text))
+
+        research_artifacts = _find_research_artifacts(root)
+        clarification_artifacts = _find_clarification_artifacts(root, current_effort)
+
+        evidence["stage"] = "initialized"
+        evidence["skill"] = ""
+        evidence["reason"] = ""
         evidence["completed"] = ["Light project contract present"]
-        evidence["missing"] = missing
+        evidence["missing"] = ["active SPEC"]
         evidence["gaps"] = []
+        evidence["projectContract"] = {
+            "path": str(project_contract.relative_to(root)),
+            "goalRecorded": has_goal,
+            "outputsRecorded": has_outputs,
+            "constraintsRecorded": has_constraints,
+        }
+        evidence["researchArtifacts"] = research_artifacts
+        evidence["clarificationArtifacts"] = clarification_artifacts
         return evidence
 
     if not evidence["hasTickets"]:
@@ -2506,7 +2558,22 @@ def next_result(roots: list[dict[str, Any]], context: dict[str, Any], host: str,
         and not task_kind
         and (not goal or project_state_intent)
     )
-    if not goal and not task_kind and not state_driven:
+    # Semantic project state: the inspector identified the stage but the
+    # workflow choice is not deterministic (e.g. initialized, no SPEC).
+    # Return the structured evidence so the model owns the recommendation.
+    state_semantic = bool(
+        project_state.get("stage")
+        and not project_state.get("skill")
+        and project_state.get("stage") not in {
+            "accepted", "tickets-unknown", "acceptance-not-passed",
+            "acceptance-unknown", "ambiguous-current-effort",
+            "contradictory-current-effort", "review-ownership-unknown",
+            "review-freshness-unknown", "review-state-unknown", "unknown",
+        }
+        and not task_kind
+        and (not goal or project_state_intent)
+    )
+    if not goal and not task_kind and not state_driven and not state_semantic:
         return base_result("next", "NEED-INPUT", ["Provide goal, taskKind, or a projectRoot with enough evidence to derive the current stage."])
     control = str(context.get("invocationControl", ""))
     if control not in INVOCATION_CONTROLS:
@@ -2519,6 +2586,60 @@ def next_result(roots: list[dict[str, Any]], context: dict[str, Any], host: str,
             return base_result("next", "BLOCKED", [f"Derived project stage names an unknown Light Skill: {logical_name}"])
         reason = project_state.get("reason", "Derived from real project evidence.")
         evidence = [f"project-state:{project_state['stage']}->{logical_name}"]
+    elif state_semantic:
+        policy = availability_policy(context, host)
+        candidates, gaps, metadata_reads = discover(roots, skill_map, policy)
+        available_names = sorted({
+            item["name"] for item in candidates
+            if item["availabilityStatus"] == "available"
+        })
+        result = {
+            "mode": "next",
+            "status": "RECOMMEND",
+            "skill": "",
+            "source": "",
+            "reason": "",
+            "invocation": "",
+            "confidence": "",
+            "alternative": None,
+            "gaps": gaps,
+            "reads": {"metadata": metadata_reads, "bodies": 0, "references": 0},
+            "candidates": candidates,
+            "next": "awaiting-approval",
+            "execution": "recommendation phase was read-only; execution begins only after explicit user approval",
+            "projectStage": project_state.get("stage", ""),
+            "completed": project_state.get("completed", []),
+            "missing": project_state.get("missing", []),
+            "projectEvidence": {
+                "projectContract": project_state.get("projectContract", {}),
+                "currentEffort": {
+                    "name": project_state.get("currentEffort") or None,
+                    "status": "active" if project_state.get("currentEffort") else "none",
+                    "gaps": [],
+                },
+                "spec": {
+                    "exists": project_state.get("hasSpec", False),
+                    "active": project_state.get("hasSpec", False),
+                    "paths": project_state.get("specPaths", []),
+                },
+                "tickets": {
+                    "exists": project_state.get("hasTickets", False),
+                    "allResolved": project_state.get("allTicketsResolved", False),
+                    "unknownState": project_state.get("unknownTicketState", False),
+                    "paths": project_state.get("ticketPaths", []),
+                },
+                "review": {
+                    "exists": project_state.get("hasAcceptanceEvidence", False),
+                    "accepted": project_state.get("acceptancePassed", False),
+                    "gaps": [],
+                },
+                "researchArtifacts": project_state.get("researchArtifacts", []),
+                "clarificationArtifacts": project_state.get("clarificationArtifacts", []),
+                "availableSkills": available_names,
+                "hardBlockers": [],
+            },
+        }
+        return result
     else:
         ranking = logical_ranking(skill_map, context)
         if not ranking or ranking[0]["logicalScore"] <= 0:

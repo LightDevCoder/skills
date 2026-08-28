@@ -4,6 +4,19 @@
 
 所有变更都必须记录在实际版本/tag 对应的条目中，不能因为文档已起草就提前宣称 release。
 
+## 未发布
+
+### 变更
+
+- **ask-light 混合路由器：** `ask_light.py` 现为确定性证据检查器。对于已初始化但无活跃 SPEC 的项目，返回结构化证据（`projectEvidence`），不再给出确定性 Skill 推荐。模型拥有语义工作流判断权——根据证据、对话上下文和 Skill 合约在 `project-clarify`、`project-spec`、`research`、`prototype` 等候选者中做出决策。硬确定性路由（未初始化 → `project-init`、活跃评审 → `project-review`、模糊 effort → fail closed 等）保持代码所有权不变。
+- **ask-light 证据字段：** `inspect_project_state` 返回 `projectContract`（目标/产出/约束状态）、`researchArtifacts` 和 `clarificationArtifacts` 供模型推理。`initialized-no-spec` 与 `initialized-unclear` 阶段替换为单一 `initialized` 阶段加事实性证据字段。
+- **ask-light SKILL.md：** 记录混合架构、模型拥有的工作流判断、Skill 前置条件、澄清就绪性、推荐质量合约及硬证据覆盖规则。
+- **ask-light discovery-contract.md：** Layer 0 更新为证据检查器/模型推理分离。
+
+### 新增
+
+- **混合路由器回归测试：** Worktable 回归测试（init + research + 无澄清 → `project-clarify` 证据）、已澄清项目反向回归测试（澄清就绪文件 → `project-spec` 证据）、硬确定性路由保护、模糊 effort fail-closed、证据检查器单元测试及可用 Skill 合约验证。`HybridRouterRegressionTest` 新增 15 个测试。
+
 ## 0.2.0 — 2026-08-28
 
 ### 新增 — 33 包 Light 工作流架构

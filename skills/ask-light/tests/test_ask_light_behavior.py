@@ -597,14 +597,12 @@ class AskLightBehaviorTest(unittest.TestCase):
         self.assertIn("project-spec", names)
 
     def test_project_state_detection_from_real_repository_evidence(self) -> None:
-        cases = {
-            "init-no-spec": ({"initialized": True, "spec": False, "clear_goal": True}, "project-spec", "initialized-no-spec"),
-            "init-unclear": ({"initialized": True, "spec": False, "clear_goal": False}, "project-clarify", "initialized-unclear"),
+        hard_cases = {
             "spec-no-tickets": ({"initialized": True, "spec": True}, "project-tickets", "spec-no-tickets"),
             "tickets-open": ({"initialized": True, "spec": True, "unresolved_ticket": True}, "implement", "work-in-progress"),
             "all-resolved": ({"initialized": True, "spec": True, "resolved_ticket": True}, "project-review", "implementation-complete"),
         }
-        for label, (kwargs, expected_skill, expected_stage) in cases.items():
+        for label, (kwargs, expected_skill, expected_stage) in hard_cases.items():
             with self.subTest(label=label), tempfile.TemporaryDirectory(prefix="ask-light-project-") as tmp:
                 project = Path(tmp) / "project"
                 write_project_state(project, **kwargs)
@@ -616,6 +614,38 @@ class AskLightBehaviorTest(unittest.TestCase):
                 self.assertTrue(result["completed"], "project-state result must list completed evidence")
                 self.assertTrue(result["missing"], "project-state result must list missing evidence")
                 self.assertTrue(result["reason"], "project-state result must include workflow reasoning")
+
+    def test_initialized_no_spec_returns_evidence_not_recommendation(self) -> None:
+        """When initialized with no active SPEC, the helper returns structured
+        evidence and no deterministic skill — the model owns the recommendation."""
+        semantic_cases = {
+            "goal-clear": {"initialized": True, "spec": False, "clear_goal": True},
+            "goal-unclear": {"initialized": True, "spec": False, "clear_goal": False},
+        }
+        for label, kwargs in semantic_cases.items():
+            with self.subTest(label=label), tempfile.TemporaryDirectory(prefix="ask-light-semantic-") as tmp:
+                project = Path(tmp) / "project"
+                write_project_state(project, **kwargs)
+                context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+                result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+                self.assertEqual(result["status"], "RECOMMEND", result)
+                self.assertEqual(result["skill"], "", "semantic path must not pick a deterministic skill")
+                self.assertEqual(result["projectStage"], "initialized")
+                self.assertIn("projectEvidence", result)
+                ev = result["projectEvidence"]
+                self.assertIn("projectContract", ev)
+                self.assertIn("goalRecorded", ev["projectContract"])
+                self.assertIn("outputsRecorded", ev["projectContract"])
+                self.assertIn("constraintsRecorded", ev["projectContract"])
+                self.assertIsInstance(ev["researchArtifacts"], list)
+                self.assertIsInstance(ev["clarificationArtifacts"], list)
+                self.assertIsInstance(ev["availableSkills"], list)
+                self.assertFalse(ev["spec"]["exists"])
+                if label == "goal-clear":
+                    self.assertTrue(ev["projectContract"]["goalRecorded"])
+                    self.assertTrue(ev["projectContract"]["outputsRecorded"])
+                else:
+                    self.assertFalse(ev["projectContract"]["goalRecorded"])
 
     def test_natural_project_state_questions_use_real_repository_evidence(self) -> None:
         phrases = [
@@ -673,9 +703,10 @@ class AskLightBehaviorTest(unittest.TestCase):
             context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
             result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
             self.assertEqual(result["status"], "RECOMMEND", result)
-            self.assertEqual(result["skill"], "project-spec")
-            self.assertEqual(result["projectStage"], "initialized-no-spec")
+            self.assertEqual(result["projectStage"], "initialized")
             self.assertNotEqual(result["projectStage"], "spec-no-tickets")
+            self.assertEqual(result["skill"], "", "superseded spec triggers semantic path, not deterministic routing")
+            self.assertIn("projectEvidence", result)
 
     def test_acceptance_verdicts_are_fail_closed(self) -> None:
         cases = [
@@ -1134,6 +1165,241 @@ class AskLightBehaviorTest(unittest.TestCase):
             result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
             self.assertEqual(result["projectStage"], "implementation-complete")
             self.assertEqual(result["skill"], "project-review")
+
+
+class HybridRouterRegressionTest(unittest.TestCase):
+    """Regression tests for the hybrid router architecture.
+
+    Evidence inspector tests are deterministic Python tests.
+    Recommendation tests verify the evidence contract and expected decision
+    principles without pretending model reasoning is a deterministic parser.
+    """
+
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory(prefix="ask-light-hybrid-")
+        self.root = Path(self.temp.name) / "light"
+        self.root.mkdir()
+        self.roots = install_host_fixture_skills(self.root)
+
+    def tearDown(self) -> None:
+        self.temp.cleanup()
+
+    # -- A. Worktable regression (SPEC §21-A) --
+    def test_worktable_regression_returns_evidence_for_clarification(self) -> None:
+        """Init + research + Goal + Outputs + no clarification + no SPEC
+        must return evidence that supports project-clarify, not project-spec."""
+        with tempfile.TemporaryDirectory(prefix="ask-light-worktable-") as tmp:
+            project = Path(tmp) / "project"
+            project.mkdir(parents=True)
+            agents = project / "docs" / "agents"
+            agents.mkdir(parents=True)
+            (agents / "light-project.md").write_text(
+                "<!-- light-project:managed:start -->\n"
+                "# Light Project Configuration\n"
+                "- Goal: Build a modular personal AI Worktable\n"
+                "- Outputs: WebUI, Agent backend, Todo, Calendar, Email, File management, Custom modules\n"
+                "- Relevant Skills: project-spec, project-tickets, implement, project-review\n"
+                "<!-- light-project:managed:end -->\n",
+                encoding="utf-8",
+            )
+            research_dir = project / "docs" / "research"
+            research_dir.mkdir(parents=True)
+            (research_dir / "worktable-definition-and-landscape.md").write_text(
+                "# Worktable definition and landscape\nResearch artifact.\n",
+                encoding="utf-8",
+            )
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "RECOMMEND")
+            self.assertEqual(result["projectStage"], "initialized")
+            self.assertEqual(result["skill"], "", "must not deterministically pick a skill")
+            ev = result["projectEvidence"]
+            self.assertTrue(ev["projectContract"]["goalRecorded"])
+            self.assertTrue(ev["projectContract"]["outputsRecorded"])
+            self.assertFalse(ev["spec"]["exists"])
+            self.assertGreater(len(ev["researchArtifacts"]), 0, "research artifact must be detected")
+            self.assertEqual(len(ev["clarificationArtifacts"]), 0, "no clarification readiness")
+
+    # -- B. Clarified project (SPEC §21-B) --
+    def test_clarified_project_returns_evidence_for_spec(self) -> None:
+        """Init + clarification ready + no SPEC must return evidence that
+        supports project-spec, including the clarification artifact."""
+        with tempfile.TemporaryDirectory(prefix="ask-light-clarified-") as tmp:
+            project = Path(tmp) / "project"
+            project.mkdir(parents=True)
+            agents = project / "docs" / "agents"
+            agents.mkdir(parents=True)
+            (agents / "light-project.md").write_text(
+                "<!-- light-project:managed:start -->\n"
+                "# Light Project Configuration\n"
+                "- Goal: Build a modular personal AI Worktable\n"
+                "- Outputs: WebUI, Agent backend\n"
+                "- Relevant Skills: project-spec, project-tickets, implement, project-review\n"
+                "<!-- light-project:managed:end -->\n",
+                encoding="utf-8",
+            )
+            (agents / "clarification-readiness.md").write_text(
+                "# Clarification Readiness\n"
+                "- Status: ready-for-next-stage\n"
+                "- Recommended next explicit invocation: project-spec\n",
+                encoding="utf-8",
+            )
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "RECOMMEND")
+            self.assertEqual(result["projectStage"], "initialized")
+            self.assertEqual(result["skill"], "", "semantic path, not deterministic")
+            ev = result["projectEvidence"]
+            self.assertTrue(ev["projectContract"]["goalRecorded"])
+            self.assertGreater(len(ev["clarificationArtifacts"]), 0, "clarification readiness must be detected")
+            self.assertFalse(ev["spec"]["exists"])
+
+    # -- C/D. Evidence structure for external-fact and runnable-uncertainty --
+    def test_evidence_includes_available_skills_for_model_reasoning(self) -> None:
+        """The semantic path must include availableSkills so the model can
+        reason about research, prototype, or other candidates."""
+        with tempfile.TemporaryDirectory(prefix="ask-light-avail-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=False, clear_goal=True)
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "RECOMMEND")
+            self.assertIn("projectEvidence", result)
+            available = result["projectEvidence"]["availableSkills"]
+            self.assertIsInstance(available, list)
+            for expected in ("project-clarify", "project-spec", "research", "prototype"):
+                self.assertIn(expected, available, f"{expected} must be available for model reasoning")
+
+    # -- F. Hard deterministic state (SPEC §21-F) --
+    def test_uninitialized_routes_deterministically_to_project_init(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-uninit-") as tmp:
+            project = Path(tmp) / "project"
+            project.mkdir(parents=True)
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "RECOMMEND")
+            self.assertEqual(result["skill"], "project-init")
+            self.assertEqual(result["projectStage"], "uninitialized")
+
+    def test_active_review_routes_deterministically_to_project_review(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-review-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True, ticket_statuses=["resolved"])
+            effort_spec = project / ".scratch" / "effort" / "spec.md"
+            effort_spec.write_text("# SPEC\nStatus: active\n", encoding="utf-8")
+            write_project_review_state(
+                project,
+                reviewed_effort="effort",
+                status="READY",
+                verdict=None,
+            )
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["skill"], "project-review")
+            self.assertEqual(result["projectStage"], "project-review")
+
+    def test_unresolved_tickets_routes_deterministically_to_implement(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-impl-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True, unresolved_ticket=True)
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["skill"], "implement")
+            self.assertEqual(result["projectStage"], "work-in-progress")
+
+    def test_spec_no_tickets_routes_deterministically_to_project_tickets(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-tickets-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=True)
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["skill"], "project-tickets")
+            self.assertEqual(result["projectStage"], "spec-no-tickets")
+
+    # -- G. Ambiguous current effort (SPEC §21-G) --
+    def test_ambiguous_effort_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-ambig-") as tmp:
+            project = Path(tmp) / "project"
+            project.mkdir(parents=True)
+            (project / "docs" / "agents").mkdir(parents=True)
+            (project / "docs" / "agents" / "light-project.md").write_text(
+                "<!-- light-project:managed:start -->\n# Light Project Configuration\n"
+                "- Goal: Test\n- Outputs: result\n<!-- light-project:managed:end -->\n",
+                encoding="utf-8",
+            )
+            write_effort_state(project, "alpha", spec_status="active", ticket_statuses=["open"])
+            write_effort_state(project, "beta", spec_status="active", ticket_statuses=["open"])
+            context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
+            result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+            self.assertEqual(result["status"], "NEED-INPUT")
+            self.assertIn(result["projectStage"], ("ambiguous-current-effort", "contradictory-current-effort"))
+
+    # -- Evidence inspector unit tests --
+    def test_inspect_project_state_initialized_returns_no_skill(self) -> None:
+        """inspect_project_state for initialized-no-spec must return
+        stage='initialized' and skill='' (no deterministic recommendation)."""
+        with tempfile.TemporaryDirectory(prefix="ask-light-inspect-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=False, clear_goal=True)
+            state = ASK_LIGHT.inspect_project_state(project)
+            self.assertEqual(state["stage"], "initialized")
+            self.assertEqual(state["skill"], "")
+            self.assertIn("projectContract", state)
+            self.assertTrue(state["projectContract"]["goalRecorded"])
+            self.assertTrue(state["projectContract"]["outputsRecorded"])
+
+    def test_inspect_project_state_unclear_goal_returns_no_skill(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-inspect2-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=False, clear_goal=False)
+            state = ASK_LIGHT.inspect_project_state(project)
+            self.assertEqual(state["stage"], "initialized")
+            self.assertEqual(state["skill"], "")
+            self.assertFalse(state["projectContract"]["goalRecorded"])
+
+    def test_inspect_project_state_detects_research_artifacts(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-research-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=False, clear_goal=True)
+            research_dir = project / "docs" / "research"
+            research_dir.mkdir(parents=True)
+            (research_dir / "api-landscape.md").write_text("# Research\n", encoding="utf-8")
+            state = ASK_LIGHT.inspect_project_state(project)
+            self.assertEqual(state["stage"], "initialized")
+            self.assertIn("docs/research/api-landscape.md", state["researchArtifacts"])
+
+    def test_inspect_project_state_detects_clarification_artifacts(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="ask-light-clarif-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=False, clear_goal=True)
+            agents = project / "docs" / "agents"
+            (agents / "clarification-readiness.md").write_text(
+                "Status: ready-for-next-stage\n", encoding="utf-8",
+            )
+            state = ASK_LIGHT.inspect_project_state(project)
+            self.assertEqual(state["stage"], "initialized")
+            self.assertIn("docs/agents/clarification-readiness.md", state["clarificationArtifacts"])
+
+    def test_inspect_project_state_hard_states_unchanged(self) -> None:
+        """Hard deterministic states must still return a skill."""
+        with tempfile.TemporaryDirectory(prefix="ask-light-hard-") as tmp:
+            project = Path(tmp) / "project"
+            project.mkdir(parents=True)
+            state = ASK_LIGHT.inspect_project_state(project)
+            self.assertEqual(state["stage"], "uninitialized")
+            self.assertEqual(state["skill"], "project-init")
+
+    def test_semantic_path_goal_outputs_not_treated_as_clarification(self) -> None:
+        """Goal + Outputs must NOT be treated as proof of requirement
+        clarification (the original Worktable regression)."""
+        with tempfile.TemporaryDirectory(prefix="ask-light-notclarif-") as tmp:
+            project = Path(tmp) / "project"
+            write_project_state(project, initialized=True, spec=False, clear_goal=True)
+            state = ASK_LIGHT.inspect_project_state(project)
+            self.assertEqual(state["stage"], "initialized")
+            self.assertEqual(state["skill"], "")
+            self.assertTrue(state["projectContract"]["goalRecorded"])
+            self.assertEqual(len(state.get("clarificationArtifacts", [])), 0)
 
 
 class ReviewFreshnessRegressionTest(unittest.TestCase):

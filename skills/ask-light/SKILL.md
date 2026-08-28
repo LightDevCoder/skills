@@ -12,6 +12,28 @@ answers “where is this work, what is missing, and which Light Skill owns the
 next step?”, then handles the accepted Skill according to the host’s
 invocation policy after the user agrees.
 
+## Hybrid architecture
+
+`ask-light` uses a two-layer architecture:
+
+- **Deterministic layer** (`ask_light.py`): collects project evidence and
+  establishes trusted state — facts, invariants, and hard ownership rules.
+  Code decides facts. It does not make semantic workflow recommendations.
+- **Model layer** (this contract): selects the workflow step from trusted
+  state, the current conversation, and relevant Skill contracts. Model
+  decides what to do next.
+
+Hard deterministic routing remains code-owned: uninitialized projects route
+to `project-init`, active review states route to `project-review`, ambiguous
+efforts fail closed, and review transaction integrity is never overridden.
+
+Semantic workflow choices — which Skill fits when more than one path is
+plausible — are model-owned. The deterministic layer returns structured
+evidence (stage, project contract status, research/clarification artifacts,
+available Skills). The model reasons from that evidence, the current
+conversation, and the relevant Skill contracts to select and justify the
+recommendation.
+
 ## Session flow
 
 1. **Inspect.** Read enough local evidence to understand the current stage:
@@ -25,7 +47,12 @@ invocation policy after the user agrees.
    repository blindly.
 2. **Explain.** State what the project appears to be trying to do, what stage
    it is in, what is already completed, and what is blocking or logically next.
-3. **Recommend.** Name the next Light Skill and why it fits **now**, including
+3. **Recommend.** When the deterministic layer returns a hard Skill (e.g.
+   `project-init` for an uninitialized project, `project-review` for an active
+   review), use it directly. When the deterministic layer returns structured
+   evidence without a Skill (the `projectEvidence` field is present), reason
+   from evidence, conversation context, and relevant Skill contracts to select
+   the best next Skill. Name the Skill and why it fits **now**, including
    why obvious neighboring alternatives are not the best next step when that
    distinction matters.
 4. **Wait for approval.** Do not execute before the user explicitly agrees.
@@ -39,6 +66,72 @@ invocation policy after the user agrees.
    (`$<skill>` on Codex, `/<skill>` on Claude Code) and asks the user to start
    it. Do not claim a direct transition without host evidence.
 
+## Model-owned workflow judgment
+
+When the evidence inspector returns `projectEvidence` (no deterministic
+`skill`), the model owns the final recommendation. Reason from:
+
+1. The current user request and conversation context.
+2. The structured project evidence (contract status, research artifacts,
+   clarification artifacts, available Skills).
+3. Relevant Skill contracts — read only the likely candidates, not all 33.
+
+### Skill preconditions
+
+Use these relationships as guides, not a rigid state machine:
+
+- `project-init` creates the project contract; does not clarify requirements.
+- `project-clarify` inspects real project facts, resolves user-owned
+  decisions, produces a ready-for-next-stage clarification handoff.
+- `decision-map` handles large, foggy, or multi-session decision spaces.
+- `research` resolves external fact gaps; feeds clarification and planning
+  but does not itself prove requirements are clarified.
+- `prototype` answers questions that need runnable, visual, or behavioral
+  evidence.
+- `project-spec` consumes already-clarified material; does not reopen the
+  interview by default.
+- `project-tickets` consumes an approved SPEC.
+- `implement` consumes ready bounded work.
+- `project-review` owns final acceptance.
+
+### Clarification readiness
+
+A clarification readiness record (persisted by `project-clarify` in
+`docs/agents/` or `.scratch/<effort>/`) is positive evidence. But absence
+of a persisted record does not prove clarification never happened — the
+current conversation may contain the handoff. Use both filesystem evidence
+and conversation context.
+
+### Recommendation quality
+
+For semantic recommendations, produce:
+
+- One primary Skill.
+- Why it is the best next step now, citing specific evidence.
+- What evidence supports that judgment.
+- At most one meaningful alternative.
+- Why that alternative is not primary.
+
+Do not repeat generic Skill descriptions. The reason must reflect the
+actual project state.
+
+### Hard evidence overrides model imagination
+
+The model must never invent state contrary to deterministic evidence:
+
+- Inspector says review stale → model cannot claim accepted.
+- Inspector says two current efforts conflict → model cannot choose one.
+- Inspector says Skill unavailable → model cannot claim it can execute.
+- Inspector says no SPEC exists → model cannot claim tickets are current.
+
+### Use conversation context
+
+Do not pretend the filesystem is the entire world. When deciding the next
+Skill, the model may use relevant current-session facts: the user just
+completed research, already answered clarification questions, rejected a
+direction, or a handoff was produced earlier in the same conversation.
+Deterministic project inspection supplements this context, not erases it.
+
 ## Modes
 
 - `$ask-light next` — one next-Skill recommendation with workflow reasoning.
@@ -49,10 +142,11 @@ invocation policy after the user agrees.
   bug`, `Set up a manuscript workflow`) route without requiring project
   inspection.
 
-Use [ask_light.py](scripts/ask_light.py) as the deterministic routing helper;
-[ask-light.ps1](scripts/ask-light.ps1) is a compatibility launcher. The
-helper is read-only during the recommendation phase. Logical routing and the
-collection taxonomy come from
+Use [ask_light.py](scripts/ask_light.py) as the deterministic evidence and
+validation helper; [ask-light.ps1](scripts/ask-light.ps1) is a compatibility
+launcher. The helper is read-only during the recommendation phase; final
+semantic workflow recommendation belongs to `ask-light` model reasoning.
+Logical routing and the collection taxonomy come from
 [light-skill-map.json](references/light-skill-map.json). Full discovery and
 approval protocol is in [discovery-contract.md](references/discovery-contract.md).
 
@@ -85,6 +179,11 @@ Next: awaiting-approval | host-transition-required | beginning-<skill> | no-exec
 Reads: metadata=<count>; bodies=<count>; references=<count>
 Execution: recommendation phase was read-only; execution begins only after explicit user approval
 ```
+
+When the deterministic layer returns `projectEvidence`, the result also
+includes the structured evidence record. The model fills in `Skill`,
+`Reason`, and `Alternative` from its own reasoning — these are not copied
+from the Python output.
 
 For an already accepted project, return a clean terminal result:
 `ProjectStage: accepted`, `Skill: none`, `Completed` includes `acceptance

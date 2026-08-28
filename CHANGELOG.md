@@ -4,6 +4,19 @@
 
 All notable changes are recorded here. A release entry must be tied to an actual version or tag and must not be created merely because a document was drafted.
 
+## Unreleased
+
+### Changed
+
+- **ask-light hybrid router:** `ask_light.py` is now a deterministic evidence inspector. For initialized projects without an active SPEC, it returns structured evidence (`projectEvidence`) instead of a deterministic Skill recommendation. The model owns semantic workflow judgment — deciding between `project-clarify`, `project-spec`, `research`, `prototype`, and other candidates based on evidence, conversation context, and Skill contracts. Hard deterministic routing (uninitialized → `project-init`, active review → `project-review`, ambiguous effort → fail closed, etc.) remains code-owned and unchanged.
+- **ask-light evidence fields:** `inspect_project_state` returns `projectContract` (goal/outputs/constraints status), `researchArtifacts`, and `clarificationArtifacts` for model reasoning. The `initialized-no-spec` and `initialized-unclear` stages are replaced by a single `initialized` stage with factual evidence fields.
+- **ask-light SKILL.md:** Documents the hybrid architecture, model-owned workflow judgment, Skill preconditions, clarification readiness, recommendation quality contract, and hard-evidence-override rules.
+- **ask-light discovery-contract.md:** Updated Layer 0 to describe the evidence inspector / model reasoning split.
+
+### Added
+
+- **Hybrid router regression tests:** Worktable regression (init + research + no clarification → evidence for `project-clarify`), clarified project reverse regression (clarification readiness artifact → evidence for `project-spec`), hard deterministic routing preservation, ambiguous effort fail-closed, evidence inspector unit tests, and available-skills contract verification. 15 new tests in `HybridRouterRegressionTest`.
+
 ## 0.2.0 — 2026-08-28
 
 ### Added — 33-package Light workflow architecture
