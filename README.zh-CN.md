@@ -106,7 +106,7 @@ $ask-light next
 $ask-light workflow
 ```
 
-`ask-light` 是只读路由器。它会分析当前工作区状态与仓库内的 33 个 Skill，推荐最合适的下一步行动或工作流组合，并在操作前向你解释推荐理由。
+`ask-light` 是 Light 工作流顾问、导航器与路由入口。它检查真实项目与工作流状态，由模型判断最合适的下一 Skill，解释原因，并在用户批准后按 Skill 调用策略与 Host 能力完成安全转换（支持的环境下可直接开始 model-invoked 目标；缺少直接 Host 转换通道时安全降级为渲染精确调用）。
 
 详见 [ask-light](skills/ask-light/SKILL.md) 与 [docs/zh-CN/workflows/](docs/zh-CN/workflows/)。
 

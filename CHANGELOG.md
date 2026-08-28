@@ -70,7 +70,7 @@ Approved Matt PORTs (11) each carry `ATTRIBUTION.md` and have no upstream runtim
 
 ### Changed — Core workflow & Socratic repair
 
-- **ask-light workflow advisor:** `ask-light` now inspects project/workflow evidence, explains the current stage, recommends the next Skill with reasoning, supports collection navigation, discovers Light roots without requiring caller-injected roots, distinguishes first-party provenance from colocated third-party packages, and begins the accepted Skill after explicit user approval on Codex.
+- **ask-light workflow advisor:** `ask-light` now inspects project/workflow evidence, explains the current stage, recommends the next Skill with reasoning, supports collection navigation, discovers Light roots without requiring caller-injected roots, distinguishes first-party provenance from colocated third-party packages, and transitions safely after user approval (direct execution on Codex was an intermediate state; final Unreleased behavior is defined by the current Host transition policy above).
 - **Socratic frontier rounds:** `socratic` now asks the complete actionable frontier as a round of numbered independent questions with choices and recommendations, and accepts batch replies like `1B, 2A, 3C`; `clarify` and `project-clarify` use the same round interaction.
 - **project-init availability:** bootstrap now classifies declared relevant capabilities as `available`, `unavailable`, or `unknown` and never silently promotes `unknown` to `available`.
 - **Reviewer ownership:** `review-loop/references/reviewer-contract.md` is the single canonical runtime contract; `docs/REVIEWER_CONTRACT.md` (and zh-CN) are now human-facing summaries/pointers.

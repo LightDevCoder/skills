@@ -21,7 +21,11 @@ inspect project stage → one recommendation + reasoning
 user approves (yes / 可以 / go ahead)
               |
               v
-begin the accepted Skill in the current conversation
+validate + honor invocation policy
+              |
+              +--> model-invoked: begin where supported
+              |
+              `--> user-invoked: exact invocation / host-transition-required when needed
 ~~~
 
 Possible next choices include:

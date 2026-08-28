@@ -33,8 +33,8 @@
 
 ### ask-light
 
-- **作用：** 作为 Light 工作流顾问/导航/router：检查项目与工作流状态，推荐下一步 Skill 并给出理由，用户批准后开始执行。
-- **调用：** 仅 user-invoked；批准前只读，批准后开始被接受的 Skill。
+- **作用：** 作为 Light 工作流顾问、导航器与路由入口：检查项目与工作流状态，推荐下一步 Skill 并给出理由，用户批准后安全转换。
+- **调用：** 仅 user-invoked；批准前只读。批准后支持的环境下可直接开始 model-invoked 目标，user-invoked 目标遵循 Host 转换策略并在缺少直接通道时渲染精确调用。
 - **包：** [skills/ask-light/](skills/ask-light/)
 - **状态：** 第一方已准入；REFACTOR（在完整 Skill map 建好后最后构建）。
 - **证据：** [skills/ask-light/tests/](skills/ask-light/tests/) 与 [使用指南](docs/zh-CN/skills/ask-light.md)。

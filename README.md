@@ -106,7 +106,7 @@ $ask-light next
 $ask-light workflow
 ```
 
-`ask-light` is a read-only router. It evaluates your current workspace against the 33 Skills in the collection and recommends one relevant Skill or bounded sequence, explaining the rationale before you choose to invoke it.
+`ask-light` is the Light workflow advisor, navigator, and router. It inspects project and workflow evidence, reasons about the best next Skill, explains why, and waits for approval before a validated host-aware transition (model-invoked targets may begin where supported; user-invoked targets fall back to rendering the exact invocation when direct Host transition is unavailable).
 
 See [ask-light](skills/ask-light/SKILL.md) and [docs/workflows/](docs/workflows/).
 

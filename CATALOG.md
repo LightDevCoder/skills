@@ -34,9 +34,9 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### ask-light
 
-- **Purpose:** Act as the Light workflow advisor, navigator, and router: inspect project/workflow state, recommend the next Skill with reasoning, and begin it after user approval.
+- **Purpose:** Act as the Light workflow advisor, navigator, and router: inspect project/workflow state, recommend the next Skill with reasoning, and transition safely after user approval.
 - **When to use:** The next step is unclear; you need project-aware routing, collection navigation, or standalone routing.
-- **Invocation:** User-invoked only; read-only before approval, then begins the accepted Skill after consent.
+- **Invocation:** User-invoked only; read-only before approval. After approval, model-invoked targets may begin where supported; user-invoked targets follow Host transition policy and render the exact invocation when direct transition is unavailable.
 - **Package:** [skills/ask-light/](skills/ask-light/)
 - **Status:** Admitted first-party; REFACTOR (router built last after the full map).
 - **Evidence:** Semantic-map, provenance, availability, and top-result tests under [skills/ask-light/tests/](skills/ask-light/tests/); [user guide](docs/skills/ask-light.md).

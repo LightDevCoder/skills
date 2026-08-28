@@ -21,7 +21,11 @@ Agent 已有 goal、artifacts、blockers、project type、task kind、availabili
 用户批准（yes / 可以 / go ahead）
           |
           v
-在当前对话中开始被接受的 Skill
+校验并遵循调用策略
+          |
+          +--> model-invoked：在受支持的 host 开始
+          |
+          `--> user-invoked：缺少直接通道时渲染精确调用 / host-transition-required
 ```
 
 可能选择 `project-init`、`project-clarify`、`clarify`、`decision-map`、`research`、`prototype`、`project-spec`、`project-tickets`、`implement`、`diagnosing-bugs`、`project-review`、`review-loop`、`learn-anything`、`recap`、`manuscript-ops` 或 `release-workflow`。其中 `recap` 仅在用户显式需要当前 session 一行摘要时适用。`ask-light` 在用户批准前停止且不执行、安装、delegate、创建 workflow state 或静默串联 user-invoked Skill；用户以 `yes`/`可以`/`go ahead` 批准后，对 model-invoked 被接受 Skill 可在 host 支持时开始；对 user-invoked 被接受 Skill，在有验证过的 host 证据时可直接进入，否则渲染精确调用并请用户启动。选中 Skill 保留自己的契约与证据边界。
