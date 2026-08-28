@@ -11,17 +11,16 @@
 - **agent-config 宿主中立化重构：** 将 `agent-config` 重构为区分当前可执行模型与模型可选择性（`model_selection` / `per_agent_model_selection`）。对于具备当前可执行模型但缺少模型选择器或子代理的宿主环境，安全降级至单模型多代理或单模型单代理路径，不再返回 `BOUNDARY`。
 - **implement 中 agent-config 用户显式自选：** 重构 `implement` 使其绝不自动调用 `agent-config`。当编排（角色拆分、并行、评审隔离）有实质帮助时，向用户提供显式选择；用户拒绝或在无模型选择能力的宿主上运行时绝不阻塞正常实现。简单的独立任务直接执行，不打扰用户。
 - **ask-light 模型主导混合顾问重构：** 将 `ask-light` 重构为模型主导的工作流顾问，采用五阶段架构：（1）请求意图解析（模型），（2）项目/宿主事实收集（代码），（3）候选 Skill 理解（模型 + 紧凑目录元数据），（4）最终工作流判断（模型），（5）选择验证与转换（代码 + 宿主能力）。
+- **规范项目流对齐：** 在 `ask-light`、配方、地图与文档中恢复 `project-clarify → project-spec → project-tickets → implement → project-review` 规范链路，移除了在 `project-tickets` 前插入 SPEC-review 门禁的逻辑。
+- **严格作用域与验证安全：** 增加严格作用域词汇校验（`current-workflow`、`independent`、`standalone`）、防止绕过硬约束的显式 `Skill: none` 验证，以及显式批准跨轮次的作用域保留。
+- **受信任宿主能力证据：** 明确已批准用户调用转换的受信任宿主证据结构（`approvedUserInvokedTransition: {"state": "available", "source": "host-runtime"}`），拒绝模型推断或未验证的布尔值。
+- **内容验证的澄清就绪性：** 增强澄清就绪性判定，要求具备生产者契约标识与目标（`readyFor: project-spec`）。
 - **ask_light.py 证据服务：** Python 辅助程序现纯粹作为事实证据、目录、配方与验证服务（`ask-light-evidence/1`）。移除了 `PROJECT_STATE_INTENT_PATTERN` 及所有基于正则/taskKind/评分的语义路由权威。返回结构化事实（projectContract、currentEffort、spec、tickets、review、artifactSignals）与作用域硬约束，不返回任何确定性 Skill 推荐。
-- **后置模型选择验证：** 新增确定性 `validate_recommendation`（`--mode validate`），验证 Light 地图成员资格、首方单一份额、frontmatter 合法性、宿主可用性、调用兼容性、本地指针解析以及作用域硬约束合规性，绝不静默替换其他 Skill。
-- **作用域硬约束：** 硬性项目状态（未初始化、模糊 effort、活跃评审、过期评审）以作用域约束（`appliesTo: current-workflow`）呈现，而非全局提前中断，防止项目状态劫持独立任务、新 effort 或独立请求。
-- **票据前沿与澄清信号：** 使用 `Status:` 和 `Blocked by:` 合约将票据解析为 `ready`、`blocked`、`claimed`、`resolved` 和 `unknown` 桶。以内容验证的 handoff 信号分类取代基于文件名的澄清猜测。
-- **宿主感知批准转换：** 增加执行前重新验证机制，以及对已批准转换至用户调用目标的宿主能力感知。
 - **工作流模式：** 重构 `recipes_result`（`--mode workflow`），发布带有步骤可用性与 handoff 的规范配方，移除了确定性正则胜者选择；由模型进行语义选择并锚定至当前实际状态。
-- **ask-light 合约：** 更新 `SKILL.md`、`discovery-contract.md` 与 `light-skill-map.json`，体现模型主导顾问合约与“候选提示仅供参考”的地图像限权威。
 
 ### 新增
 
-- **全方位测试套件：** 确定性证据测试、路由器边界测试（证明 Python 不做语义决策）、硬状态作用域测试、评审事务与新鲜度回归套件，以及 `agent-config`/`implement` 关系测试。
+- **全方位回归测试套件：** 覆盖评审事务一致性、源码/实现新鲜度、软件三字段基线验证、当前 effort 解析、发现与来源检查、严格作用域验证及 `agent-config`/`implement` 关系测试的完整矩阵。
 
 ## 0.2.0 — 2026-08-28
 

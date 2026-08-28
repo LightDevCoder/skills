@@ -69,10 +69,10 @@ TICKET-CONTRACT): `Status:` and `Blocked by:` header fields.
 
 ### Durable review state
 
-Review evidence is inspected at EVERY project stage — the canonical software
-workflow runs `project-spec → project-review → project-tickets`, so a SPEC
-review can be the live workflow state before any ticket exists. Do not wait
-for implementation to finish before reading `.project-review/`.
+Review evidence is inspected across project stages where durable review state exists.
+The canonical software workflow runs `project-clarify → project-spec → project-tickets → implement → project-review`.
+With an active SPEC and no tickets, the canonical next step is `project-tickets`. When an active review round,
+stale review, or completed implementation acceptance exists, the review transaction provides factual evidence.
 
 The record reports `ownership` (current/historical/unresolvable), lifecycle
 `status` (INIT/READY/CRITIC/REPAIR/EVALUATE/PASS/FAIL/BLOCKED), terminal
@@ -411,17 +411,13 @@ The transition itself is host-aware:
 
 - A **model-invoked** accepted Skill may begin in the current conversation
   where the host supports that.
-- A **user-invoked** accepted Skill begins itself only where the host
-  verifiably permits an explicit approved transition — the user's explicit
-  approval may constitute the required authorization there. Otherwise
-  render the exact invocation (`$<skill>` on Codex, `/<skill>` on Claude
-  Code) and ask the user to start it.
-- Otherwise `ask-light` renders the exact invocation and asks the user to
-  start it. It does **not** fake execution, does not assume every host
-  supports recursive Skill invocation, and does not claim a transition is
-  impossible merely because the target normally requires explicit user
-  invocation — it checks the actual host capability and documents the tested
-  behavior.
+- A **user-invoked** accepted Skill begins itself only where trusted host
+  evidence (`hostCapabilities.approvedUserInvokedTransition: {"state": "available", "source": "host-runtime"}`)
+  proves explicit approved transitions are supported. The user's explicit approval
+  constitutes the required authorization for that exact target, without auto-chaining past it.
+- Otherwise `ask-light` renders the exact invocation (`$<skill>` on Codex, `/<skill>` on Claude
+  Code) and asks the user to start it. It does **not** fake execution, does not assume every host
+  supports recursive Skill invocation, and never treats user prose or model inference as proof of host capability.
 
 `ask-light` does not auto-execute before consent and does not auto-chain past
 the accepted Skill.

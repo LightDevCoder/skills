@@ -106,7 +106,7 @@ Missing external fact                               → research
 Answer requires seeing runnable behavior/UI/state   → prototype
 Information belongs to another person               → to-questionnaire
 Already-clarified project material                  → project-spec
-Approved / reviewed SPEC ready for slicing          → project-tickets
+Active / approved SPEC ready for slicing            → project-tickets
 Ready unblocked ticket                              → implement
 Hard bug needing a reproducible loop                → diagnosing-bugs
 Implementation/review acceptance needed             → project-review
@@ -121,12 +121,10 @@ Boundary reasoning that matters most:
   already-clarified material. When goal and outputs are recorded but
   user-owned decisions are not shown as settled, `project-clarify` fits and
   `project-spec` is premature.
-- Do not skip SPEC review: the canonical software workflow runs
-  `project-spec → project-review → project-tickets`. With an active SPEC, no
-  tickets, and no fresh applicable SPEC review PASS, `project-review` comes
-  before `project-tickets` when the workflow contract requires SPEC review;
-  with a fresh applicable SPEC review PASS and no tickets, `project-tickets`
-  is next.
+- Canonical project flow is `project-clarify → project-spec → project-tickets → implement → project-review`.
+  With an active SPEC and no implementation tickets, the canonical next step is
+  `project-tickets` to break the specification into dependency-ordered tracer-bullet tickets.
+  Do not insert `project-review` before `project-tickets` merely because a SPEC exists.
 - Ticket frontier: at least one ready unblocked ticket is a strong
   current-workflow fact for `implement`. Unresolved tickets with **zero**
   ready frontier items must not be presented as implementable work.

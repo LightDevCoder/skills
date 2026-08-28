@@ -17,7 +17,7 @@
 
 ## 1. 软件项目
 
-入口已明确时，顺序为 `project-spec`（user-invoked）→ `project-review`（经 `review-loop` + `generic-review`）→ `project-tickets`（user-invoked）→ `implement`（user-invoked）→ `code-review`（model-invoked）→ `project-review`（经 `review-loop` 拥有最终 verdict）→ `handoff`（user-invoked）。每步的输入/输出/handoff/停止见[英文版](../../workflows/recipes.md#1-software-feature)。
+入口已明确时，顺序为 `project-spec`（user-invoked）→ `project-tickets`（user-invoked）→ `implement`（user-invoked）→ `code-review`（model-invoked）→ `project-review`（经 `review-loop` 拥有最终 verdict）→ `handoff`（user-invoked）。每步的输入/输出/handoff/停止见[英文版](../../workflows/recipes.md#1-software-feature)。
 
 缺 acceptance authority、未批准 ticket、实现依赖或 independent evaluator 时 `BLOCKED`。证据含 SPEC、ticket 图、commit、focused tests、specialist findings、`project-review`/`review-loop` verdict 与 handoff；到 `PASS`/`FAIL`/`BLOCKED` 停止。
 

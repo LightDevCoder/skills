@@ -22,7 +22,7 @@ general-purpose bounded executor. It keeps the upstream five-beat rhythm
 (read the work item → tdd at seams → typecheck/tests → review) but widens
 the scope beyond code to document, configuration, research artifact, Skill,
 and generic project task. It adds a general flow
-`inspect relevant context → agent-config when useful → execute (branch by
+`inspect relevant context → determine whether routing materially helps → offer user choice (accept → agent-config, decline → direct execution) → execute (branch by
 artifact type) → verify → review-loop when appropriate`, routes
 `code → tdd → code-review` and `non-code → artifact → generic-review` as
 composable calls, and explains how to consume `project-tickets`' local

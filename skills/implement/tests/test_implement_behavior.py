@@ -1,7 +1,8 @@
-"""Behavioral simulation checks for implement decision rules (SPEC §11).
+"""Contract simulation / behavior model tests for implement decision rules (SPEC §11).
 
-Validates the decision logic of implement when interacting with agent-config,
-user intent, and host model-selection limits.
+Validates the decision logic and behavioral model of implement when
+interacting with agent-config, user intent, and host model-selection limits
+using test-local simulation.
 """
 
 from __future__ import annotations

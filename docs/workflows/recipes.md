@@ -21,13 +21,12 @@ Each row declares the handoff artifact and stop condition. `user-invoked` means 
 
 | Order | Skill | Invocation | Input → output | Handoff / stop |
 | --- | --- | --- | --- | --- |
-| 1 | `project-spec` | user-invoked | goal, constraints + clarified decisions → traceable SPEC | SPEC artifact; stop for user approval. |
-| 2 | `project-review` (spec) | model-invoked via `review-loop` + `generic-review` | frozen SPEC + acceptance source → findings / verdict | Review evidence; stop at result. |
-| 3 | `project-tickets` | user-invoked | approved SPEC → dependency-ordered tracer tickets | Ticket graph; do not auto-start `implement`. |
-| 4 | `implement` | user-invoked | one unblocked ticket → bounded diff + tests | Commit evidence; stop at ticket scope. |
-| 5 | `code-review` | model-invoked | fixed diff → Standards/Spec findings | Specialist review; it does not accept the change. |
-| 6 | `project-review` | model-invoked via `review-loop` + `code-review`/`generic-review` | implementation + tests + findings → final verdict | Durable `PASS`/`FAIL`/`BLOCKED`; stop. |
-| 7 | `handoff` | user-invoked | accepted result or blocker → closeout/resume record | Closeout artifact; user decides whether to resume. |
+| 1 | `project-spec` | user-invoked | goal, constraints + clarified decisions → traceable SPEC | SPEC artifact; stop for user approval before ticket slicing. |
+| 2 | `project-tickets` | user-invoked | approved SPEC → dependency-ordered tracer tickets | Ticket graph; do not auto-start `implement`. |
+| 3 | `implement` | user-invoked | one unblocked ticket → bounded diff + tests | Commit evidence; stop at ticket scope. |
+| 4 | `code-review` | model-invoked | fixed diff → Standards/Spec findings | Specialist review; it does not accept the change. |
+| 5 | `project-review` | model-invoked via `review-loop` + `code-review`/`generic-review` | implementation + tests + findings → final verdict | Durable `PASS`/`FAIL`/`BLOCKED`; stop. |
+| 6 | `handoff` | user-invoked | accepted result or blocker → closeout/resume record | Closeout artifact; user decides whether to resume. |
 
 **Blocked conditions:** missing acceptance authority, unapproved tickets, unresolved dependencies, or absent independent evaluator. **Evidence:** SPEC, ticket graph, commit, focused tests, specialist findings, `project-review`/`review-loop` state/verdict, and `handoff`.
 

@@ -1513,7 +1513,7 @@ def _classify_clarification_signals(root: Path, current_effort: str | None) -> l
     recognized handoff `Status` together with a `Recommended next explicit
     invocation` field. A filename containing "clarif" alone is NOT evidence;
     unrecognized or missing statuses classify as "unknown" (fail-closed —
-    never ready).
+    never ready). Readiness requires producer-contract identity and target.
     """
     records: list[dict[str, Any]] = []
     for path in _clarification_candidate_files(root, current_effort):
@@ -1523,18 +1523,37 @@ def _classify_clarification_signals(root: Path, current_effort: str | None) -> l
         marker = CLARIFICATION_HANDOFF_MARKER in text.lower()
         statuses = _field_values(text, ("Status",))
         recognized = [status for status in statuses if status in CLARIFICATION_STATUS_STATES]
-        recommended = _field_values(text, (CLARIFICATION_RECOMMENDED_FIELD,))
+        recommended = _field_values(text, (CLARIFICATION_RECOMMENDED_FIELD, "Recommended next invocation", "Recommended next explicit invocation"))
         if not marker and not (recognized and recommended):
             continue
         raw_status = recognized[0] if recognized else ""
-        state = CLARIFICATION_STATUS_STATES.get(raw_status, "unknown")
+        raw_state = CLARIFICATION_STATUS_STATES.get(raw_status, "unknown")
+        rec_next = recommended[0] if recommended else ""
+        if raw_state == "ready":
+            if rec_next in ("project-spec", "spec"):
+                state = "ready"
+                ready_for = "project-spec"
+                is_ready = True
+            elif rec_next:
+                state = "ready"
+                ready_for = rec_next
+                is_ready = True
+            else:
+                state = "incomplete-readiness"
+                ready_for = ""
+                is_ready = False
+        else:
+            state = raw_state
+            ready_for = ""
+            is_ready = False
         records.append({
             "path": str(path.relative_to(root)),
             "marker": marker,
             "status": raw_status or "unknown",
             "state": state,
-            "recommendedNext": recommended[0] if recommended else "",
-            "ready": state == "ready",
+            "recommendedNext": rec_next,
+            "readyFor": ready_for,
+            "ready": is_ready,
         })
     return records
 
@@ -1735,13 +1754,13 @@ def _empty_evidence(note: str = "no project root was resolved; standalone and se
 
 
 def _inspect_review_evidence(root: Path, current_effort: str | None) -> dict[str, Any]:
-    """Inspect the durable review state at EVERY project stage (fail-closed).
+    """Inspect the durable review state when present (fail-closed).
 
-    The canonical software workflow runs project-spec → project-review →
-    project-tickets, so a review transaction can be the live workflow state
-    before any ticket exists. The record reports ownership, lifecycle status,
-    verdict, freshness, and profile as facts; the model determines what the
-    review applies to using the producer-owned review contract.
+    The canonical software workflow runs project-clarify → project-spec →
+    project-tickets → implement → project-review. The record reports
+    ownership, lifecycle status, verdict, freshness, and profile as facts;
+    the model determines what the review applies to using the producer-owned
+    review contract.
     """
     review_dir = _project_review_dir(root)
     record = _empty_review()
@@ -1840,8 +1859,7 @@ def inspect_project_evidence(project_root: Path) -> dict[str, Any]:
         "paths": [str(path.relative_to(root)) for path in spec_paths[:10]],
     }
 
-    # Durable review state is inspected at EVERY stage (SPEC review happens
-    # before tickets exist in the canonical workflow).
+    # Inspect durable review state when present.
     review_record = _inspect_review_evidence(root, current_effort)
     evidence["review"] = review_record
     if review_record.get("gaps"):
@@ -1932,6 +1950,13 @@ def inspect_project_evidence(project_root: Path) -> dict[str, Any]:
         ]
         return evidence
 
+    if not tickets["exists"]:
+        evidence["stage"] = "spec-no-tickets"
+        evidence["reason"] = ""
+        evidence["completed"] = ["Light project contract", "active SPEC"]
+        evidence["missing"] = ["implementation tickets and unblocked frontier"]
+        return evidence
+
     if not tickets["allResolved"]:
         evidence["stage"] = "work-in-progress"
         evidence["reason"] = (
@@ -1941,13 +1966,6 @@ def inspect_project_evidence(project_root: Path) -> dict[str, Any]:
         )
         evidence["completed"] = ["Light project contract", "active SPEC", "ticket graph"]
         evidence["missing"] = ["completion of the unresolved ticket(s)"]
-        return evidence
-
-    if not tickets["exists"]:
-        evidence["stage"] = "spec-no-tickets"
-        evidence["reason"] = ""
-        evidence["completed"] = ["Light project contract", "active SPEC"]
-        evidence["missing"] = ["implementation tickets and unblocked frontier"]
         return evidence
 
     # All tickets explicitly resolved: acceptance evidence decides the stage.
@@ -2170,21 +2188,42 @@ def discover_roots(cwd: Path | None = None) -> list[dict[str, Any]]:
     """Discover Light first-party roots without requiring caller-supplied roots."""
     explicit = os.environ.get("LIGHT_SKILL_ROOTS", "").strip()
     roots: list[dict[str, Any]] = []
+    seen: set[Path] = set()
     if explicit:
         try:
             parsed = json.loads(explicit)
             if isinstance(parsed, list):
                 for item in parsed:
                     if isinstance(item, dict):
-                        roots.append(item)
-                    elif isinstance(item, str):
-                        roots.append({"category": "first-party", "path": item})
+                        cat = str(item.get("category", "first-party"))
+                        raw_p = item.get("path")
+                        if isinstance(raw_p, str) and raw_p.strip():
+                            try:
+                                res_p = Path(raw_p).resolve()
+                            except OSError:
+                                res_p = Path(raw_p)
+                            if res_p not in seen:
+                                seen.add(res_p)
+                                roots.append({"category": cat, "path": str(res_p)})
+                    elif isinstance(item, str) and item.strip():
+                        try:
+                            res_p = Path(item).resolve()
+                        except OSError:
+                            res_p = Path(item)
+                        if res_p not in seen:
+                            seen.add(res_p)
+                            roots.append({"category": "first-party", "path": str(res_p)})
         except json.JSONDecodeError:
             # A plain path-separated list is also accepted.
             for item in explicit.split(os.pathsep):
-                if item:
-                    roots.append({"category": "first-party", "path": item})
-    seen: set[Path] = set()
+                if item.strip():
+                    try:
+                        res_p = Path(item).resolve()
+                    except OSError:
+                        res_p = Path(item)
+                    if res_p not in seen:
+                        seen.add(res_p)
+                        roots.append({"category": "first-party", "path": str(res_p)})
     for candidate in _collection_root_candidates(cwd):
         try:
             resolved = candidate.resolve()
@@ -2501,6 +2540,25 @@ def _known_skill(skill_map: dict[str, Any], name: str) -> dict[str, Any] | None:
 # Post-model selection validation (deterministic; §30).
 # ---------------------------------------------------------------------------
 
+def _is_trusted_host_transition_supported(context: dict[str, Any]) -> bool:
+    """Verify whether host capability evidence verifiably permits approved transition.
+
+    Host capability evidence must come from host-owned runtime evidence (e.g.
+    `{"approvedUserInvokedTransition": {"state": "available", "source": "host-runtime"}}`),
+    never from model inference, user prose, or unverified booleans.
+    """
+    capabilities = context.get("hostCapabilities")
+    if not isinstance(capabilities, dict):
+        return False
+    cap = capabilities.get("approvedUserInvokedTransition")
+    if isinstance(cap, dict):
+        state = str(cap.get("state", "")).strip().lower()
+        source = str(cap.get("source", "")).strip().lower()
+        if state == "available" and source in ("host-runtime", "host-environment", "host", "runtime", "platform"):
+            return True
+    return False
+
+
 def validate_recommendation(
     selected_skill: str,
     *,
@@ -2527,7 +2585,6 @@ def validate_recommendation(
     if roots is None or not roots:
         roots = discover_roots()
     context = context or {}
-    scope = scope or CONSTRAINT_SCOPE_DEFAULT
     selected = str(selected_skill or "").strip().lower()
     result: dict[str, Any] = {
         "mode": "validate",
@@ -2564,13 +2621,44 @@ def validate_recommendation(
         result["gaps"].append(reason)
         return result
 
+    if scope not in CONSTRAINT_SCOPES:
+        return blocked(f"scope must be one of {', '.join(CONSTRAINT_SCOPES)} (got '{scope}').")
+
     if not selected or selected == "none":
         result["selectedSkill"] = ""
         result["logicalRecommendation"] = ""
         result["checks"]["noSkillSelected"] = True
-        result["checks"]["hardConstraintsRespected"] = True
-        result["reason"] = "no Skill selected; the recommendation is a terminal or needs-input answer"
-        return result
+
+        if scope == "current-workflow" and evidence:
+            violated: dict[str, Any] | None = None
+            for constraint in evidence.get("hardConstraints", []):
+                if constraint.get("blocking"):
+                    violated = constraint
+                    break
+            if violated is not None:
+                result["checks"]["hardConstraintsRespected"] = False
+                owner_text = f" and is owned by `{violated['ownerSkill']}`" if violated.get("ownerSkill") else ""
+                return blocked(
+                    f"current-workflow hard constraint '{violated['type']}' applies{owner_text}; "
+                    "cannot select Skill: none while hard state is unresolved."
+                )
+            if evidence.get("stage") == "work-in-progress" and evidence.get("tickets", {}).get("frontierReady"):
+                result["checks"]["hardConstraintsRespected"] = False
+                return blocked("ready implementation ticket exists; current-workflow cannot terminate with Skill: none.")
+            if evidence.get("stage") == "accepted":
+                result["checks"]["hardConstraintsRespected"] = True
+                result["status"] = "VALIDATED"
+                result["reason"] = "current effort accepted; workflow complete with no mandatory next Skill"
+                return result
+            result["checks"]["hardConstraintsRespected"] = True
+            result["status"] = "VALIDATED"
+            result["reason"] = "no Skill selected; no mandatory next Skill required"
+            return result
+        else:
+            result["checks"]["hardConstraintsRespected"] = True
+            result["status"] = "VALIDATED"
+            result["reason"] = "no Skill selected; standalone/independent request requires no Skill"
+            return result
 
     if not any(entry["name"].lower() == selected for entry in skill_map["skills"]):
         return blocked(
@@ -2688,10 +2776,11 @@ def approval_transition(
     context = context or {}
     updated = dict(recommendation or {})
     selected = str((recommendation or {}).get("skill", "") or "").strip().lower()
-    if (recommendation or {}).get("status") != "RECOMMEND" or not selected:
+    scope = str((recommendation or {}).get("scope", "") or context.get("scope", "") or CONSTRAINT_SCOPE_DEFAULT)
+    updated["scope"] = scope
+    if (recommendation or {}).get("status") != "RECOMMEND" or not selected or selected == "none":
         updated["next"] = "no-execution"
         return updated
-    scope = str((recommendation or {}).get("scope", "") or CONSTRAINT_SCOPE_DEFAULT)
     project_root_value = context.get("projectRoot") or context.get("cwd")
     evidence = None
     if project_root_value and str(project_root_value).strip():
@@ -2708,6 +2797,7 @@ def approval_transition(
     )
     updated["revalidation"] = {
         "status": validation["status"],
+        "scope": validation.get("scope", scope),
         "reason": validation.get("reason", ""),
         "source": validation.get("source", ""),
         "invocation": validation.get("invocation", ""),
@@ -2725,8 +2815,7 @@ def approval_transition(
         updated["next"] = f"beginning-{selected}"
         updated["execution"] = "User approved; the model-invoked target may begin in this conversation."
         return updated
-    capabilities = context.get("hostCapabilities") or {}
-    if capabilities.get("approvedUserInvokedTransition") is True:
+    if _is_trusted_host_transition_supported(context):
         updated["next"] = f"beginning-{selected}"
         updated["execution"] = (
             "User approved; this host verifiably permits an explicit approved transition into a "
@@ -2734,6 +2823,14 @@ def approval_transition(
             "Record the observed host capability with the transition."
         )
         return updated
+    updated["next"] = "host-transition-required"
+    updated["execution"] = (
+        "User approved, but repository policy forbids a user-invoked Skill from auto-invoking another "
+        "user-invoked Skill and this host exposes no verified approved-transition capability evidence. Render the "
+        f"exact invocation ({validation.get('invocation', '')}) and have the user start it. Do not claim a "
+        "direct transition without host evidence."
+    )
+    return updated
     updated["next"] = "host-transition-required"
     updated["execution"] = (
         "User approved, but repository policy forbids a user-invoked Skill from auto-invoking another "

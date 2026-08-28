@@ -1,7 +1,8 @@
-"""Representative host-evidence and downgrade checks for agent-config.
+"""Contract simulation / behavior model tests for agent-config.
 
-The fixtures model evidence supplied to the prompt.  They validate the
-declared decision table, not a live host query or live multi-agent execution.
+The fixtures model evidence supplied to the prompt in a test-local simulator.
+They validate the declared decision table and contract rules, not a live host
+query or live multi-agent execution.
 """
 
 from __future__ import annotations

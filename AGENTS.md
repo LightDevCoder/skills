@@ -57,7 +57,7 @@ Do not bloat this file into SPEC — governance details live in the linked docs.
 
 Every package must declare and test one invocation type:
 
-- **User-invoked:** manually selected entry point (must not auto-invoke another user-invoked Skill; may recommend next user-invoked Skill and stop, and may call a model-invoked capability).
+- **User-invoked:** manually selected entry point. Silent or implicit chaining into another user-invoked Skill is forbidden; an advisor may recommend a next user-invoked Skill and, upon explicit user approval and verified host support, transition into that exact target without auto-chaining past it. It may call a model-invoked capability.
 - **Model-invoked:** reusable capability callable by the model or another Skill.
 
 ## Lifecycle work
