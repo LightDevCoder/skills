@@ -4,7 +4,7 @@
 
 所有变更都必须记录在实际版本/tag 对应的条目中，不能因为文档已起草就提前宣称 release。
 
-## 未发布（Unreleased）
+## 未发布 — 目标 v0.2.0
 
 ### 新增 — 33 包 Light 工作流架构
 
@@ -14,13 +14,13 @@
 - **Execution（5）：** `agent-config`（新增，host-agnostic，参照 Sol Advisor）、`implement`（Matt `implement` → 通用执行器）、`tdd`、`diagnosing-bugs`、`resolving-merge-conflicts`。
 - **Review（4）：** `review-loop` 重构为轻量引擎 + `generic-review`（新增默认 reviewer）+ `code-review`（Adapt）+ `project-review`（新增，拥有冻结 baseline 与最终 `PASS`/`FAIL`/`BLOCKED`，自旧 `review-loop` 迁移）。
 - **Productivity & Communication（4）：** `handoff`、`wizard`、`wait-what`、`writing-for-agents`（Matt PORT）。
-- **Learning（3）：** `eli5`（自 `LightDevCoder/ELI5` 迁移）、`teach`（PORT）、`language-learning`（保留）。
+- **Learning（3）：** `eli5`（源自上游 `DreambigOu/ELI5` @ `a766623`，经临时迁移 fork `LightDevCoder/ELI5`）、`teach`（PORT）、`language-learning`（保留）。
 - **Router（1）：** `ask-light` 最后重构为跨 33 Skill 的 Light Workflow Router。
 - **Specialized Workflows（8）：** `manuscript-ops`、`kb-init`、`learn-anything`、`language-learning`、`kanban-worker`、`recap`、`eli5`、`release-workflow`——已做 standalone + composition 验证，仅在真实缺口处加最小 handoff。
 
 合计 **33** 个第一方 Skill（见 [CATALOG.zh-CN.md](CATALOG.zh-CN.md)）。
 
-已批准的 Matt PORT（10 个）各带 `ATTRIBUTION.md` 且无上游运行时依赖：`research`、`prototype`、`tdd`、`handoff`、`diagnosing-bugs`、`wizard`、`teach`、`wait-what`、`to-questionnaire`、`writing-for-agents`、`resolving-merge-conflicts`。保留上游行为；Light 变更限于运行时解耦与 handoff 串联。
+已批准的 Matt PORT（11 个）各带 `ATTRIBUTION.md` 且无上游运行时依赖：`research`、`prototype`、`tdd`、`handoff`、`diagnosing-bugs`、`wizard`、`teach`、`wait-what`、`to-questionnaire`、`writing-for-agents`、`resolving-merge-conflicts`。保留上游行为；Light 变更限于运行时解耦与 handoff 串联。
 
 ### 变更
 

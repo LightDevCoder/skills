@@ -33,7 +33,17 @@ tagging, verify the candidate is internally consistent:
    a gate has not run.
 4. Tests assert the candidate markers (release-evidence `NOT TESTED`,
    stable-boundary wording, semantic-pair parity).
-5. Run the full suite (below). All green.
+5. Run the full validation suite (below) and all package-local suites. All green.
+
+Validation gates:
+```bash
+python3 -m pytest -q
+python3 -m unittest discover -s tests
+python3 -m compileall -q skills tests
+git diff --check
+git status --short
+```
+Package-local validation suites to run: `ask-light`, `project-review`, `socratic`, `clarify`, `project-clarify`, `project-init`, `review-loop`, `kb-init`, `kanban-worker`, `language-learning`.
 
 Completion criterion: the suite passes with the candidate framing, and no doc
 or test claims a verified install or a PASS where a gate has not run.
@@ -41,40 +51,55 @@ or test claims a verified install or a PASS where a gate has not run.
 Commit as the candidate (e.g. `release: prepare vX.Y.Z first-party collection
 candidate`).
 
-## Phase 2 — Tag and GitHub release
+## Phase 2 — Tag, push main, and create GitHub release
 
-> **Gate — explicit human approval before publication.** Creating the tag and
-> GitHub release is a public, externally visible action and is **not** covered
-> by the original release request itself. Before running any command in this
-> phase you MUST stop and obtain explicit human approval:
+> **Gate — explicit human approval before publication.** Pushing `main`, creating
+> the annotated tag, and publishing the GitHub release are public, externally visible
+> actions and are **not** covered by the original release request itself. Generic
+> installation (`npx skills add LightDevCoder/skills ...`) resolves the repository's
+> default revision, so remote `main` must point to the candidate commit for generic
+> `latest` verification to succeed. Before running any command in this phase you
+> MUST stop and obtain explicit human approval:
 >
-> 1. Present the candidate commit hash, the target tag `vX.Y.Z`, and a one-line
->    summary of what the release publishes (packages/upstreams affected).
-> 2. Ask the user to confirm with a clear yes/no choice (for example via the
->    `ask_user_question` tool). Do not treat the original release request, or
->    any earlier conversational agreement or version choice, as proxy consent.
-> 3. Tag and publish only after a clear affirmative answer. If the user
->    declines or requests changes, return to Phase 1 and revise the candidate;
->    do not publish anything.
+> 1. Present the candidate commit hash, the target tag `vX.Y.Z`, a summary of what
+>    the release publishes (33 first-party packages / architecture additions), and
+>    the exact public actions about to occur (`push candidate main` + `push tag` +
+>    `create GitHub Release`).
+> 2. Ask the user to confirm with a clear yes/no choice:
+>    `Publish this candidate to origin/main, create tag vX.Y.Z, and create the GitHub Release? YES / NO`
+>    Do not treat the original release request, or any earlier conversational agreement
+>    or version choice, as proxy consent.
+> 3. Tag and publish only after a clear affirmative answer. If the user declines
+>    or requests changes, return to Phase 1 and revise the candidate; do not publish anything.
 >
 > This checkpoint approves publishing the **candidate only**: the fresh-install
 > verification in Phase 3 still runs afterwards, and nothing is declared
 > `released` / `VERIFIED` until Phase 4.
 
-Tag the candidate commit, not a later commit:
+Tag the candidate commit and publish `main` and the tag together (preferring atomic push):
 
 ```bash
-git tag -a vX.Y.Z -m "vX.Y.Z first-party Skills collection / Release candidate: ..."
-git push origin vX.Y.Z
+git tag -a vX.Y.Z -m "vX.Y.Z — <title>"
+git push --atomic origin main vX.Y.Z
+# If the remote does not support atomic push, record that fact and use safe sequential pushes:
+# git push origin main && git push origin vX.Y.Z
+
 gh release create vX.Y.Z --title "vX.Y.Z — ..." --notes-file release-body.md
 ```
 
-The release body uses candidate framing: the fresh installs are `NOT TESTED`
-until the verification record is published.
+Verify identity across references:
+```bash
+git rev-parse HEAD
+git rev-parse vX.Y.Z^{}
+git ls-remote origin refs/heads/main refs/tags/vX.Y.Z
+```
+Required identity: candidate commit == origin/main == vX.Y.Z peeled commit.
 
-Completion criterion: explicit human approval was recorded for publishing the
-candidate, `git rev-parse vX.Y.Z^{}` resolves to the candidate commit, the
-release is public, and CI passes on the tag commit.
+CI semantics: GitHub Actions `collection-quality` runs on `push to main`, `pull_request`, and `workflow_dispatch`. Release evidence confirms `collection-quality PASS on the candidate commit` on `main`, and separately proves `vX.Y.Z` resolves to that same candidate commit.
+
+The release body uses candidate framing: fresh installs are `NOT TESTED` until the verification record is published.
+
+Completion criterion: explicit human approval was recorded for publishing the candidate, `git rev-parse vX.Y.Z^{}` resolves to the candidate commit, origin/main matches candidate commit, the release is public, and CI passes on the candidate commit on main.
 
 ## Phase 3 — Fresh-install verification
 
@@ -118,16 +143,17 @@ Flip the whole tree from candidate to released:
    `PASS`, boundary wording to the new stable, semantic parity to the
    published phrases. Install-command guidance uses the generic `latest` form
    (`--agent '*'`, no version) with the pinned form retained for reproducibility.
-5. Run the full suite again.
+5. Run the full validation suite again.
 
-Full suite:
+Validation gates:
 ```bash
-pwsh -File tests/collection-discovery-tests.ps1
-pwsh -File tests/quick-start-smoke-tests.ps1
-pwsh -File tests/header-asset-tests.ps1
-python -m unittest discover -s tests -p "test*.py"
-python -m compileall -q skills tests/test_collection_contract.py
+python3 -m pytest -q
+python3 -m unittest discover -s tests
+python3 -m compileall -q skills tests
+git diff --check
+git status --short
 ```
+Package-local validation suites to run: `ask-light`, `project-review`, `socratic`, `clarify`, `project-clarify`, `project-init`, `review-loop`, `kb-init`, `kanban-worker`, `language-learning`.
 
 Completion criterion: the suite passes with released framing, the publish
 commit is pushed, CI passes on it, and the GitHub release body is updated to

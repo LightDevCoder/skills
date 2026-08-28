@@ -4,7 +4,7 @@
 
 All notable changes are recorded here. A release entry must be tied to an actual version or tag and must not be created merely because a document was drafted.
 
-## Unreleased
+## Unreleased — target v0.2.0
 
 ### Added — 33-package Light workflow architecture
 
@@ -14,13 +14,13 @@ All notable changes are recorded here. A release entry must be tied to an actual
 - **Execution (5):** `agent-config` (new, host-agnostic, Sol Advisor reference), `implement` (MatT `implement` → general-purpose executor), `tdd`, `diagnosing-bugs`, `resolving-merge-conflicts`.
 - **Review (4):** `review-loop` refactored to lightweight engine + `generic-review` (new default) + `code-review` (adapted) + `project-review` (new, owns frozen baseline and final `PASS`/`FAIL`/`BLOCKED`; migrated from old `review-loop` final-acceptance logic).
 - **Productivity & Communication (4):** `handoff`, `wizard`, `wait-what`, `writing-for-agents` (Matt PORTs).
-- **Learning (3):** `eli5` (migrated from `LightDevCoder/ELI5`), `teach` (PORT), `language-learning` (preserved).
+- **Learning (3):** `eli5` (migrated from upstream `DreambigOu/ELI5` @ `a766623`, via temporary migration fork `LightDevCoder/ELI5`), `teach` (PORT), `language-learning` (preserved).
 - **Router (1):** `ask-light` refactored last as the Light Workflow Router across 33 Skills.
 - **Specialized Workflows (8):** `manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `recap`, `eli5`, `release-workflow` — verified standalone + composition with only minimal handoff patches.
 
 Total **33** first-party Skills under `skills/` (see [CATALOG.md](CATALOG.md)).
 
-Approved Matt PORTs (10) each carry `ATTRIBUTION.md` and have no upstream runtime dependency: `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts`. Port preserves upstream behavior; Light changes are limited to runtime decoupling and handoff wiring.
+Approved Matt PORTs (11) each carry `ATTRIBUTION.md` and have no upstream runtime dependency: `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts`. Port preserves upstream behavior; Light changes are limited to runtime decoupling and handoff wiring.
 
 ### Changed
 

@@ -81,8 +81,8 @@
 - **作用：** 按指定受众水平解释任意主题、代码或错误。
 - **调用：** Model-invoked。
 - **包：** [skills/eli5/](skills/eli5/)
-- **状态：** 第一方已准入；MIGRATE — NO REWRITE（来自 `LightDevCoder/ELI5`）。
-- **证据：** [SKILL.md](skills/eli5/SKILL.md)。
+- **状态：** 第一方已准入；MIGRATE — NO REWRITE（源自上游 `DreambigOu/ELI5` @ `a766623`，经临时迁移 fork `LightDevCoder/ELI5`）。
+- **证据：** [SKILL.md](skills/eli5/SKILL.md)、[ATTRIBUTION.md](skills/eli5/ATTRIBUTION.md)。
 - **安装路径：** host 认可的 Skills root 下的 `skills/eli5/`。
 
 ### generic-review
