@@ -18,7 +18,7 @@ All are first-party and self-contained; no install of `mattpocock/skills` or `so
 
 | Situation | Entry | Typical path | Handoff / Stop |
 | --- | --- | --- | --- |
-| One clear ticket / SPEC slice | [`implement`](../../skills/implement/SKILL.md) — user-invoked | `implement` → inspect context → *optional* `agent-config` when routing/review/independence matters → execute → verify → hand to `review-loop` with the right reviewer | bounded diff + focused tests + verification evidence; stop at ticket scope |
+| One clear ticket / SPEC slice | [`implement`](../../skills/implement/SKILL.md) — user-invoked | `implement` → inspect context → *optional* `agent-config` offer (when routing/review/independence materially helps) → execute → verify → hand to `review-loop` with the right reviewer | bounded diff + focused tests + verification evidence; stop at ticket scope |
 | Need to decide execution topology | [`agent-config`](../../skills/agent-config/SKILL.md) — model-invoked | requires: bounded task + acceptance authority + change units with ownership + current host evidence; returns `multi-model/multi-agent` / `single-model/multi-agent` / `single-model/single-agent` / `BOUNDARY` | execution plan, not execution; Controller still performs work per plan |
 | Code feature/fix should be test-first | [`tdd`](../../skills/tdd/SKILL.md) — model-invoked | `red → green → refactor` with real tests | tests + implementation slice |
 | Hard bug / regression | [`diagnosing-bugs`](../../skills/diagnosing-bugs/SKILL.md) — model-invoked | build a tight `pass/fail` signal → reproduce → hypothesize → instrument → fix → cleanup | fix with feedback loop evidence |

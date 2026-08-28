@@ -82,28 +82,54 @@ handoff gap — report it rather than inventing a broader scope.
 - Keep this inspection bounded; it exists to avoid proposing a seam the repo
   cannot host.
 
-### 3. Route execution when useful (optional)
+### 3. Offer execution routing when materially useful (optional opt-in)
 
-Call the model-invoked `agent-config` only when the task benefits from
-explicit routing:
+`agent-config` is an optional planning enhancement, not an automatic call.
+`implement` never invokes `agent-config` automatically unless the user explicitly
+requested routing.
 
-- the work benefits from parallel disjoint ownership units,
-- independent review isolation matters (a fresh reviewer context is required),
-- ownership, concurrency cap, or worktree isolation must be declared.
+#### A. Evaluate whether routing would materially help
 
-Inputs to `agent-config` are exactly the bounded item, its acceptance source,
-declared change units with exact file ownership, current Host evidence as
-`agent-config` defines, and any non-negotiable review/worktree constraints.
+Assess whether the task would benefit from:
 
-- If Host evidence shows a single-model single-agent Host, `agent-config`
-  returns a serial plan with a self-check gate rather than a purported
-  independent reviewer. Treat that as the routing; do not invent parallelism.
-- For a bounded solo task whose structure is already settled, skip
-  `agent-config` entirely (SPEC §8: "when useful" rather than mandatory
-  orchestration).
+- role splitting across distinct models or agent specializations;
+- multi-model routing;
+- parallel execution across disjoint change units;
+- explicit file ownership and concurrency planning;
+- reviewer isolation (fresh read-only execution context);
+- isolated worktrees.
 
-Never guess model names or infer capabilities from memory. Do not start work
-that requires an `agent-config` gate before the plan is accepted.
+For clearly bounded solo work (e.g., modifying one function, fixing a typo,
+updating a configuration file, adding an isolated test, or updating documentation),
+skip the offer and proceed directly with single-agent execution.
+
+#### B. User choice contract
+
+When routing could materially help:
+
+1. Present the choice explicitly to the user:
+   - Option A: Use `agent-config` to map host capabilities and plan execution roles.
+   - Option B: Continue directly with single-agent execution using the current model.
+2. If the user accepts: invoke `agent-config` (model-invoked), present the plan,
+   and execute according to the resulting plan.
+3. If the user declines: continue implementation directly without blocking.
+
+#### C. Explicit user intent overrides
+
+- If the user's invocation already expressed explicit intent to route (e.g.,
+  "use agent-config", "use routing", "plan agents first"): invoke `agent-config`
+  directly without asking again.
+- If the user's invocation explicitly skipped routing (e.g., "don't use
+  agent-config", "skip routing", "just implement it"): do not offer or invoke
+  `agent-config` during that run.
+
+#### D. Non-blocking fallback
+
+`implement` remains fully functional without `agent-config`. A missing model
+selector, unavailable `agent-config`, or user decline must never convert into a
+`BLOCKED` implementation by default. Unless the task itself carries a hard,
+unresolvable constraint, continue safely under serial execution with the current
+model.
 
 ### 4. Execute the bounded slice
 

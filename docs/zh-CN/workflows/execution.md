@@ -18,7 +18,7 @@
 
 | 场景 | 入口 | 典型路径 | Handoff / 停止 |
 | --- | --- | --- | --- |
-| 单个清晰 ticket/SPEC 切片 | [`implement`](../../../skills/implement/SKILL.md) — user-invoked | `implement` → 查上下文 → 必要时 `agent-config`（当路由/独立性重要） → 执行 → 验证 → 交 `review-loop` 配对应 reviewer | 有界 diff + 聚焦测试 + 验证证据；止于 ticket 范围 |
+| 单个清晰 ticket/SPEC 切片 | [`implement`](../../../skills/implement/SKILL.md) — user-invoked | `implement` → 查上下文 → 当路由/独立性重要时提供可选 `agent-config` → 执行 → 验证 → 交 `review-loop` 配对应 reviewer | 有界 diff + 聚焦测试 + 验证证据；止于 ticket 范围 |
 | 需决定执行拓扑 | [`agent-config`](../../../skills/agent-config/SKILL.md) — model-invoked | 需：有界任务 + 验收权威 + 带 ownership 的 change units + 当前 host 证据；返回 `multi-model/multi-agent` / `single-model/multi-agent` / `single-model/single-agent` / `BOUNDARY` | 产出执行计划，不直接执行 |
 | 代码功能应测试先行 | [`tdd`](../../../skills/tdd/SKILL.md) — model-invoked | `red → green → refactor` 真测试循环 | 测试 + 实现切片 |
 | 难 bug / 回退 | [`diagnosing-bugs`](../../../skills/diagnosing-bugs/SKILL.md) — model-invoked | 建紧 `pass/fail` 信号 → 复现 → 假设 → 埋点 → 修复 → 清理 | 带反馈环的修复 |

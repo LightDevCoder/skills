@@ -34,21 +34,33 @@ class AgentConfigContractTest(unittest.TestCase):
         self.assertIn("unknown", SKILL)
         self.assertRegex(SKILL, r"concurrency\s+cap")
         self.assertRegex(SKILL, r"subagents do\s+not prove parallelism")
-        self.assertIn("parallelism does not prove isolated worktrees", SKILL)
+        self.assertRegex(SKILL, r"parallelism does not prove\s+isolated worktrees")
+        self.assertRegex(SKILL, r"executable current model does not prove\s+selectable")
         # The host-evidence schema enforces the same rule machine-readably.
-        for marker in ("available", "unavailable", "unknown", "host-runtime", "positive integer", "Reject a false inventory claim"):
+        for marker in (
+            "available",
+            "unavailable",
+            "unknown",
+            "host-runtime",
+            "positive integer",
+            "Reject a false inventory claim",
+            "models.current",
+            "models.selectable",
+            "model_selection",
+            "per_agent_model_selection",
+        ):
             self.assertIn(marker, HOST_SCHEMA)
 
     def test_all_three_safe_route_shapes_are_defined(self) -> None:
         for marker in (
             "Multi-model, multi-agent",
-            "Single-model, multi-agent",
-            "Single-model, single-agent",
+            "Single-model / fixed-model, multi-agent",
+            "Single-model / fixed-model, single-agent",
             "per-agent model selection",
             "session/thread",
             "fresh",
             "self-check",
-            "no selectable model",
+            "no current executable model or selectable model",
         ):
             self.assertIn(marker, SKILL)
 

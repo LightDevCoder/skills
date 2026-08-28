@@ -32,7 +32,7 @@ This is a *recommended* flow, not a required pipeline. Enter mid-stream when the
 | 2 | Real project has unresolved decisions; repo facts should not be re-asked | [`project-clarify`](../../skills/project-clarify/SKILL.md) — user-invoked → `socratic` engine | bounded handoff artifact for `project-spec` | stop at clarification summary; do not create SPEC |
 | 3 | Decisions are clarified and a formal SPEC is needed | [`project-spec`](../../skills/project-spec/SKILL.md) — user-invoked | frozen SPEC with acceptance source | stop for approval; if blocked, return to `project-clarify` |
 | 4 | SPEC is approved | [`project-tickets`](../../skills/project-tickets/SKILL.md) — user-invoked | dependency-ordered ticket graph (vertical/tracer-bullet slices) | stop; do not auto-start `implement` |
-| 5 | One ticket is unblocked and unambiguous | [`implement`](../../skills/implement/SKILL.md) — user-invoked, may call `agent-config` / `tdd` internally | bounded diff + tests + local verification | stop at ticket scope; hand to review when appropriate |
+| 5 | One ticket is unblocked and unambiguous | [`implement`](../../skills/implement/SKILL.md) — user-invoked, may offer `agent-config` / call `tdd` internally | bounded diff + tests + local verification | stop at ticket scope; hand to review when appropriate |
 | 6 | Artifact needs final acceptance | [`project-review`](../../skills/project-review/SKILL.md) — model-invoked (or manual) via `review-loop` | frozen Charter + reviewer findings + final verdict `PASS`/`FAIL`/`BLOCKED` | stop at verdict |
 | 7 | Project passed acceptance | [`release-workflow`](../../skills/release-workflow/SKILL.md) — model-invoked | synchronized docs/catalog/tests, tag, release | stop |
 

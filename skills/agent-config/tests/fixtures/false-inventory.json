@@ -1,10 +1,18 @@
 {
   "schema_version": "1",
   "host": {"id": "fixture-host", "observed_at": "2026-08-24T00:00:00Z"},
-  "models": [
-    {"id": "invented-model", "selectable": {"state": "available", "evidence": null}}
-  ],
+  "models": {
+    "current": {
+      "id": "invented-model",
+      "state": "available",
+      "evidence": null
+    },
+    "selectable": [
+      {"id": "invented-model", "state": "available", "evidence": null}
+    ]
+  },
   "capabilities": {
+    "model_selection": {"state": "available", "evidence": null},
     "subagents": {"state": "available", "evidence": null},
     "per_agent_model_selection": {"state": "available", "evidence": null},
     "parallelism": {"state": "available", "evidence": null},

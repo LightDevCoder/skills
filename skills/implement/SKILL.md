@@ -1,6 +1,6 @@
 ---
 name: implement
-description: Execute one bounded, already-decided work item — code, document, configuration, research artifact, Skill, or generic project task — by inspecting relevant context, routing execution when useful, verifying locally, and handing the result to review-loop with the appropriate specialist reviewer.
+description: Execute one bounded, already-decided work item — code, document, configuration, research artifact, Skill, or generic project task — by inspecting relevant context, offering agent-config routing when materially useful, verifying locally, and handing the result to review-loop with the appropriate specialist reviewer.
 disable-model-invocation: true
 ---
 
@@ -17,9 +17,12 @@ hands it to review.
 2. **Inspect relevant context.** When `docs/agents/light-project.md` exists,
    read its tracker, domain-context, and review-profile fields. Then skim only
    the named glossary, ADRs, and files the item touches; record source locations.
-3. **Route execution when useful.** Call `agent-config` only for role
-   splitting, parallelism, or independent review isolation; skip it for a
-   bounded solo task.
+3. **Offer execution routing when materially useful.** When role splitting,
+   multi-model routing, parallel execution, or reviewer isolation would
+   materially help, offer the user a choice to invoke `agent-config` or
+   proceed directly. If the user explicitly requested routing, invoke
+   `agent-config` directly; if the user declined or disabled routing, or for
+   bounded solo work, proceed directly without blocking.
 4. **Execute the bounded slice, then verify.** Use `tdd` for code when
    appropriate; produce non-code artifacts per their contract. Verify locally
    (tests, render, schema, or domain check).
@@ -30,13 +33,25 @@ hands it to review.
 ## Composition
 
 ```text
-implement → agent-config when useful
-implement → tdd when appropriate
-implement → review-loop → code-review (code) / generic-review (non-code)
+implement
+   ↓
+inspect bounded task
+   ↓
+would routing materially help?
+   ├─ no  → execute directly
+   └─ yes → offer agent-config
+              ├─ accept  → agent-config → execute
+              └─ decline → execute directly
+   ↓
+tdd when appropriate
+   ↓
+review-loop → code-review (code) / generic-review (non-code)
 ```
 
-`implement` composes these capabilities; it does not reimplement them. A
-missing or blocked item is a `BLOCKED` handoff gap — report the smallest
+`implement` composes these capabilities; it does not reimplement them.
+`agent-config` is an optional enhancement: declining it or running on a Host
+without model-routing capabilities does not block implementation. A missing or
+blocked prerequisite is a `BLOCKED` handoff gap — report the smallest
 unblock and stop. Full per-artifact procedures are in
 [WORKFLOW.md](references/WORKFLOW.md); examples are in
 [EXAMPLES.md](references/EXAMPLES.md).

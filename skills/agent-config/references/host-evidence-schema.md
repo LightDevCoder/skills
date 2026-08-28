@@ -8,13 +8,22 @@ these fields.
 {
   "schema_version": "1",
   "host": {"id": "opaque-current-host", "observed_at": "2026-08-24T00:00:00Z"},
-  "models": [
-    {
+  "models": {
+    "current": {
       "id": "opaque-model-id",
-      "selectable": {"state": "available", "evidence": {"kind": "host-runtime", "locator": "host model selector", "observed_at": "2026-08-24T00:00:00Z"}}
-    }
-  ],
+      "state": "available",
+      "evidence": {"kind": "host-runtime", "locator": "current session model", "observed_at": "2026-08-24T00:00:00Z"}
+    },
+    "selectable": [
+      {
+        "id": "opaque-model-id",
+        "state": "available",
+        "evidence": {"kind": "host-runtime", "locator": "host model selector", "observed_at": "2026-08-24T00:00:00Z"}
+      }
+    ]
+  },
   "capabilities": {
+    "model_selection": {"state": "unknown", "evidence": null},
     "subagents": {"state": "unknown", "evidence": null},
     "per_agent_model_selection": {"state": "unknown", "evidence": null},
     "parallelism": {"state": "unknown", "evidence": null},
@@ -31,7 +40,13 @@ these fields.
 - `state` is exactly `available`, `unavailable`, or `unknown`.
 - An `available` or `unavailable` claim has evidence from the current Host:
   `kind`, `locator`, and `observed_at`. `host-runtime` is the preferred kind
-  for a selectable model or scheduling capability.
+  for a model or scheduling capability.
+- `models.current` records the executable model of the active session.
+- `models.selectable` records models that the Host can actively select or switch.
+- `capabilities.model_selection` and `capabilities.per_agent_model_selection`
+  record whether model switching and per-agent model assignment are supported.
+- An executable model (`models.current` available) does not require or imply
+  that `model_selection` or `per_agent_model_selection` is available.
 - `unknown` has `evidence: null`; it is not an error and must not be filled
   from model memory, a static role file, or an unverified user assertion.
 - A `concurrency_cap` is available only when `limit` is a positive integer and
