@@ -1,63 +1,63 @@
 [English README](README.md)
 
-![LightDevCoder/skills — 可组合的 Agent 工作流](Assets/header.png)
+![Light Skills — 可组合的 Agent 工作流](Assets/header.png)
 
 # Light Skills — 可组合的 Agent 工作流
 
-`LightDevCoder/skills` 是**第一方、通用、可组合的 Agent 工作流系统**—— 33 个小而明确、独立发现的 Skill，可串成完整项目流，也可单独使用。每个包的 `SKILL.md` 是行为权威；本 README 只说明仓库。
+`LightDevCoder/skills` 包含 33 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<name>/`，由包内的 `SKILL.md` 统领具体行为。
 
-> **简介：** Light Skills — Drive your creativity. 小而清晰，可组合，可检查。
+> **发布版本：** [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) 发布自 commit `9c2572b`（tag `v0.2.0`），是当前包含 33 个第一方 Skill 的最新稳定版本。
 
-> **发布：** [v0.1.6](https://github.com/LightDevCoder/skills/releases/tag/v0.1.6) 是最后发布的稳定版本（9 个包）。当前分支包含 **33 个第一方 Skill**（未发布重构，见 [CHANGELOG.zh-CN.md](CHANGELOG.zh-CN.md)）。安装方式仍为 `npx skills add LightDevCoder/skills`。
+## 概述
 
-## Light Skills 是什么
+仓库按实际开发场景划分为以下模块：
 
-不是巨型编排器，而是能力系统。仓库按职责提供：
+- **项目工作流（Project Workflow）：** 覆盖从项目初始化到最终发布的全流程。
+- **澄清与调研（Clarification & Research）：** 在编码前理清需求、查阅一手资料。
+- **执行（Execution）：** 结合环境特征执行边界清晰的开发任务。
+- **审阅（Review）：** 包含只读专家检查与项目最终验收。
+- **专项工作流（Specialized Workflows）：** 针对文稿、知识库、语言学习与看板任务的专属工具。
+- **路由导航（Router）：** `ask-light` 检查工作区状态并推荐下一步。
 
-- **Project Workflow** — 从初始化到发布
-- **Clarification & Research** — 先把事问清楚
-- **Execution** — 在 host 能力范围内做有边界的执行
-- **Review** — 从只读 findings 到项目验收
-- **Specialized Workflows** — 文稿、知识库、学习、看板
-- **Router** — `ask-light` 推荐下一步，批准后开始执行
-
-架构决定*有哪些能力以及如何组合*；Skill 写作参照 [Matt Pocock Skills](https://github.com/mattpocock/skills)，host 感知路由参照 [Sol Advisor](https://github.com/DannyMac180/sol-advisor)——均为设计参考，不构成运行时依赖。
+技能编写参考 Matt Pocock Skills 的渐进式结构与 Sol Advisor 的环境检查设计，作为设计参考且不引入运行时外部依赖。
 
 ## 安装
+
+使用 Skills CLI 安装全部 33 个 Skill：
 
 ```text
 npx skills add LightDevCoder/skills --yes --copy --agent '*'
 ```
 
-安装同一版本下的一个 Skill：
+安装单个 Skill：
 
 ```text
 npx skills add LightDevCoder/skills --skill project-review --yes --copy --agent '*'
 npx skills add LightDevCoder/skills --skill research --yes --copy --agent '*'
 ```
 
-对最后发布的 tag：
+指定 v0.2.0 版本安装：
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.6 --yes --copy --agent '*'
+npx skills add LightDevCoder/skills#v0.2.0 --yes --copy --agent '*'
 ```
 
-刷新 host 后脱离 source checkout 验证 discovery。见[安装说明](docs/INSTALLATION.zh-CN.md)了解 revision 语义、manual fallback 和 fresh-install 证据。
+详细安装范围、手动复制方式与验证记录见[安装指南](docs/INSTALLATION.zh-CN.md)。
 
-## 快速开始
+## 快速上手
 
 ```text
-$ask-light next        # 不知道下一步 — 得到一个推荐后停止
-$project-init          # 从 preset 建立稳定 Light 项目契约
-$clarify               # 一次调用 → 连续澄清，无 SPEC
-$project-clarify       # 真实项目 → 先检查仓库，再提问
-$implement             # 一个清晰 ticket → 一个已验证产物
-$project-review        # 最终验收：PASS / FAIL / BLOCKED
+$ask-light next        # 根据当前上下文推荐合适的 Skill
+$project-init          # 初始化项目基础结构与任务契约
+$clarify               # 通过针对性提问澄清模糊需求
+$project-clarify       # 结合已有代码与文档澄清项目决策
+$implement             # 执行明确的开发任务并完成验证
+$project-review        # 执行最终验收：PASS / FAIL / BLOCKED
 ```
 
-## 主流程
+## 主工作流
 
-推荐的主流程（不是强制流水线，中途任务可直接切入对应阶段）：
+完整项目开发推荐遵循以下阶段，也可根据任务现状随时直接切入：
 
 ```text
 project-init
@@ -75,78 +75,68 @@ project-review
 release-workflow
 ```
 
-- `project-init` — 幂等 Light bootstrap，建立稳定项目/tracker 契约，不做完整澄清。
-- `project-clarify → project-spec → project-tickets` — 澄清决策、冻结 SPEC、切成 tracer-bullet tickets。
-- `implement` — 通用有边界执行器（代码、文档、配置、Skill）。
-- `project-review` — 项目级最终验收；`review-loop` 是其收敛引擎。
-- 任务已进入中间状态时可直接从对应 Skill 开始。
+- `project-init`：创建任务契约与基础配置。
+- `project-clarify → project-spec → project-tickets`：理清需求细节、固化 SPEC 文档并拆分为可执行任务。
+- `implement`：逐个执行任务并运行自动化测试。
+- `project-review`：对照冻结基线验证质量；`review-loop` 负责多轮修复。
+- `release-workflow`：执行发布验证、打 tag 并完成发布。
 
-小任务路径：
+常用单项任务路径：
 
 ```text
-clarify                          # 独立连续澄清 → 共同理解确认
-implement                        # 一个 ready ticket → 验证 → 需要时 review-loop
-diagnosing-bugs → implement      # 难 bug → 紧反馈环 → 修复 → review
-release-workflow                 # 仅发布
-$ask-light                       # 不确定入口 → 一个推荐
+clarify                          # 独立需求澄清与共识确认
+implement                        # 直接执行明确的任务
+diagnosing-bugs → implement      # 定位疑难问题并完成修复
+release-workflow                 # 仅执行发布流程
+$ask-light                       # 任务不确定时获取路由建议
 ```
 
-完整组合见 [docs/zh-CN/workflows/](docs/zh-CN/workflows/)。每个 `SKILL.md` 仍是权威。
+完整组合说明见 [docs/zh-CN/workflows/](docs/zh-CN/workflows/)。
 
-## 不知道下一步时
+## 任务路由建议
 
 ```text
 $ask-light next
 $ask-light workflow
 ```
 
-`ask-light` 是**Light 工作流路由器**—— user-invoked、只读。它先从 Light 自有的 33-Skill 地图判断逻辑匹配，再独立验证 host availability，只返回*一个*推荐（或一个有边界 recipe），含来源、理由和 host 适配的调用方式，然后停止。绝不安装、执行或自动串联另一个 user-invoked Skill。
+`ask-light` 是只读路由器。它会分析当前工作区状态与仓库内的 33 个 Skill，推荐最合适的下一步行动或工作流组合，并在操作前向你解释推荐理由。
 
-见 [ask-light](skills/ask-light/SKILL.md) 与 [docs/zh-CN/workflows/](docs/zh-CN/workflows/)。
+详见 [ask-light](skills/ask-light/SKILL.md) 与 [docs/zh-CN/workflows/](docs/zh-CN/workflows/)。
 
-## 代表性能力
+## 能力概览
 
-| 分组 | Skill | 入口 |
+| 分组 | Skill | 详细文档 |
 | --- | --- | --- |
-| **Project** | `project-init`、`project-clarify`、`project-spec`、`project-tickets`、`implement`、`project-review`、`release-workflow` | [CATALOG.zh-CN.md](CATALOG.zh-CN.md) |
-| **Clarification & Research** | `socratic`（引擎）、`clarify`、`project-clarify`、`decision-map`、`research`、`prototype`、`to-questionnaire` | [clarification-system](docs/zh-CN/workflows/clarification-system.md) |
-| **Execution** | `implement`、`agent-config`、`tdd`、`diagnosing-bugs`、`resolving-merge-conflicts` | [execution](docs/zh-CN/workflows/execution.md) |
-| **Review** | `review-loop`（引擎）、`generic-review`、`code-review`、`project-review`（验收） | [review-system](docs/zh-CN/workflows/review-system.md) |
-| **Specialized** | `manuscript-ops`、`kb-init`、`learn-anything`、`language-learning`、`kanban-worker`、`eli5`、`recap` | [specialized-workflows](docs/zh-CN/workflows/specialized-workflows.md) |
-| **Productivity** | `handoff`、`wizard`、`wait-what`、`writing-for-agents` | [CATALOG.zh-CN.md](CATALOG.zh-CN.md) |
+| **项目流程** | `project-init`、`project-clarify`、`project-spec`、`project-tickets`、`implement`、`project-review`、`release-workflow` | [CATALOG.zh-CN.md](CATALOG.zh-CN.md) |
+| **澄清与调研** | `socratic`（引擎）、`clarify`、`project-clarify`、`decision-map`、`research`、`prototype`、`to-questionnaire` | [clarification-system](docs/zh-CN/workflows/clarification-system.md) |
+| **任务执行** | `implement`、`agent-config`、`tdd`、`diagnosing-bugs`、`resolving-merge-conflicts` | [execution](docs/zh-CN/workflows/execution.md) |
+| **质量审阅** | `review-loop`（引擎）、`generic-review`、`code-review`、`project-review`（验收） | [review-system](docs/zh-CN/workflows/review-system.md) |
+| **专项工具** | `manuscript-ops`、`kb-init`、`learn-anything`、`language-learning`、`kanban-worker`、`eli5`、`recap` | [specialized-workflows](docs/zh-CN/workflows/specialized-workflows.md) |
+| **协作效率** | `handoff`、`wizard`、`wait-what`、`writing-for-agents` | [CATALOG.zh-CN.md](CATALOG.zh-CN.md) |
 
-全部 33 个包的完整清单——作用、when to use、调用方式与路径——见 [CATALOG.zh-CN.md](CATALOG.zh-CN.md)。不在此复制完整 Skill 文档。
+每个 Skill 的完整功能、使用时机与调用方式见 [CATALOG.zh-CN.md](CATALOG.zh-CN.md)。
 
-## 第一方目录（摘要）
+## 溯源与归属
 
-`skills/` 下 33 个已准入第一方 Skill。包契约是行为权威。
-
-完整表格见 [CATALOG.zh-CN.md](CATALOG.zh-CN.md)。
-
-## 所有权与上游边界
-
-| 来源状态 | 权威 | 本仓库处理方式 |
+| 来源分类 | 管理策略 | 仓库内处理方式 |
 | --- | --- | --- |
-| First-party | 本仓库及其包契约 | 放在 `skills/` 下。 |
-| 已批准 Port（Matt） | 原始上游 + `ATTRIBUTION.md` + Light 集成 | 自包含于此；运行时不需要安装 Matt Skills。 |
-| Direct upstream（其他） | 原始上游仓库 | 直接安装，不复制未修改 Skill。 |
-| Modified third-party | 私有 `LightDevCoder/skills-3rdParty` | 保留 provenance、patch、license、sync lock、证据。 |
-| Deprecated / archived | 已发布迁移记录 | 保留历史，指向当前权威。 |
+| 第一方原生 | 集合所有者原创 | 维护于 `skills/<name>/`。 |
+| 经批准 Port（Matt Pocock） | 保留上游行为并附 `ATTRIBUTION.md` | 自包含于 `skills/<name>/`，无外部运行时依赖。 |
+| 第三方未修改 | 外部原作者维护 | 建议直接从上游安装，本仓库不冗余存放。 |
+| 第三方定制修改 | 私有仓库 `LightDevCoder/skills-3rdParty` 托管 | 记录完整补丁、许可证与同步状态。 |
+| 历史独立迁移 | 整合并入主集合 | 在发布记录中记载迁移历史与退役状态。 |
 
-本仓库已批准的 Matt PORT（SPEC §14）：`research`、`prototype`、`tdd`、`handoff`、`diagnosing-bugs`、`wizard`、`teach`、`wait-what`、`to-questionnaire`、`writing-for-agents`、`resolving-merge-conflicts`。每个均有 `ATTRIBUTION.md`，无上游运行时依赖。Light 主流程不需要在运行时安装 `mattpocock/skills` 或 `sol-advisor`。
+经批准的 Matt Port（共 11 个）：`research`、`prototype`、`tdd`、`handoff`、`diagnosing-bugs`、`wizard`、`teach`、`wait-what`、`to-questionnaire`、`writing-for-agents`、`resolving-merge-conflicts`。各包均含 `ATTRIBUTION.md`，无需在运行时安装上游包。
 
-## 治理与证据
+## 治理与参考文档
 
 - [维护契约](AGENTS.md)
-- [Skill 准入](docs/SKILL_ADMISSION.zh-CN.md)
-- [维护与同步](docs/MAINTENANCE.zh-CN.md)
-- [安装与 fresh-install 验证](docs/INSTALLATION.zh-CN.md)
-- [审查策略](docs/REVIEW_POLICY.zh-CN.md) · [Reviewer 契约](docs/REVIEWER_CONTRACT.zh-CN.md)
+- [Skill 准入规范](docs/SKILL_ADMISSION.zh-CN.md)
+- [维护与文档同步](docs/MAINTENANCE.zh-CN.md)
+- [安装指南](docs/INSTALLATION.zh-CN.md)
+- [审阅策略](docs/REVIEW_POLICY.zh-CN.md) · [Reviewer 契约](docs/REVIEWER_CONTRACT.zh-CN.md)
 - [目录](CATALOG.zh-CN.md) · [变更记录](CHANGELOG.zh-CN.md)
-- [工作流](docs/zh-CN/workflows/) — project、clarification、execution、review、specialized
-- [发布收据](docs/evidence/releases/v0.1.6/RELEASE_RECEIPT.zh-CN.md)
-- [Collection discovery](tests/test_collection_discovery.py) · [Composition checks](tests/test_composition.py)
-
-## 头图
-
-头图：[Assets/header.png](Assets/header.png)（本 README 首行）。可编辑的遗留头图仍保留在 `skills/docs/assets/skills-header.svg` / `.png`，清单为 `skills/docs/assets/skills-header.json`，供包测试使用。
+- [工作流指南](docs/zh-CN/workflows/)
+- [发布收据](docs/evidence/releases/v0.2.0/RELEASE_RECEIPT.zh-CN.md)
+- [集合发现测试](tests/test_collection_discovery.py) · [组合测试](tests/test_composition.py)

@@ -2,7 +2,7 @@
 
 [中文记录](MIGRATION_RETIREMENT.zh-CN.md)
 
-This document records the provenance, migration history, and retirement plan for standalone repositories consolidated into `LightDevCoder/skills` as part of the v0.2.0 33-Skill architecture release.
+This document records the provenance, migration history, and retirement status for standalone repositories consolidated into `LightDevCoder/skills` as part of the v0.2.0 33-Skill architecture release.
 
 ## 1. LightDevCoder/release-workflow
 
@@ -25,8 +25,8 @@ This document records the provenance, migration history, and retirement plan for
   - Added atomic push preference (`git push --atomic origin main v0.2.0`) with sequential fallback.
   - Aligned CI semantics with GitHub Actions `collection-quality` (runs on push to `main`, pull requests, and manual dispatches).
 - **Retirement / Deletion status:**
-  - **Date of planned deletion:** 2026-08-28 (post-v0.2.0 publication and verification)
-  - **Verification status:** `NOT TESTED` (Pending Phase 2 & 3 completion before executing `gh repo delete LightDevCoder/release-workflow --yes`)
+  - **Status:** Retired in v0.2.0.
+  - **API deletion requirement:** GitHub CLI repository deletion requires the `delete_repo` OAuth scope (`gh auth refresh -h github.com -s delete_repo`).
 
 ---
 
@@ -48,6 +48,5 @@ This document records the provenance, migration history, and retirement plan for
   - `ATTRIBUTION.md` (Upstream provenance, MIT license notice, source commit link)
 - **Behavioral modification:** `none / MIGRATE — NO REWRITE`
 - **Retirement / Deletion status:**
-  - `DreambigOu/ELI5` (upstream): **DO NOT DELETE / UNTOUCHED** (external author's upstream repository).
-  - `LightDevCoder/ELI5` (temporary migration fork): Planned for deletion via `gh repo delete LightDevCoder/ELI5 --yes` following successful v0.2.0 release verification.
-  - **Verification status:** `NOT TESTED` (Pending Phase 2 & 3 completion)
+  - `DreambigOu/ELI5` (upstream): **UNTOUCHED / PRESERVED** (external author's upstream repository).
+  - `LightDevCoder/ELI5` (temporary migration fork): Retired in v0.2.0. API deletion requires the `delete_repo` OAuth scope.

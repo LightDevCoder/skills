@@ -2,17 +2,17 @@
 
 [中文安装说明](INSTALLATION.zh-CN.md)
 
-The public first-party collection's current stable release is [v0.1.6](https://github.com/LightDevCoder/skills/releases/tag/v0.1.6), published from commit `e8c3589031bbc1cb76d7f928761ce3f60ebea3e1`. The **current branch** contains 33 admitted Skills (unreleased refactor); `v0.1.6` shipped 9. Package contracts remain inside `skills/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
+The public first-party collection's current stable release is [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0), published from commit `9c2572bc0361e1e2c34cb4b6c02fdaa4ed349d47`. It provides **33 admitted first-party Skills** (the previous stable was `v0.1.6` with 9 packages). Package contracts remain inside `skills/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
 
-The standard install command is the generic `latest` form: it follows the repository's default revision, so every `npx skills add LightDevCoder/skills` install gets the current collection on the default branch. As of `v0.1.6` the default revision contained nine Skills; the unreleased 33-package branch resolves to 33 via the same `latest` form once it is published or when installing from a local checkout. The `v0.1.6` commands below were verified against fresh destinations at that tag in the [v0.1.6 installation verification](evidence/releases/v0.1.6/INSTALLATION_VERIFICATION.md).
+The standard install command is the generic `latest` form: it follows the repository's default revision, so `npx skills add LightDevCoder/skills` installs the current collection on the default branch. The `v0.2.0` commands below were verified against fresh destinations in the [v0.2.0 installation verification](evidence/releases/v0.2.0/INSTALLATION_VERIFICATION.md).
 
 ## Revision semantics
 
 The official Skills CLI accepts a `#ref` fragment in a GitHub source. The fragment is passed as the Git revision; a source without a fragment uses the repository's default revision. The parser and clone behavior are documented in the [official Skills CLI source parser](https://raw.githubusercontent.com/vercel-labs/skills/main/src/source-parser.ts) and [Git helper](https://raw.githubusercontent.com/vercel-labs/skills/main/src/git.ts).
 
-The generic `latest` command below uses no fragment and therefore follows the repository's default revision: it installs the current collection and is the standard way to install. The pinned `#v0.1.6` form selects the published tag and is retained for reproducible installs and release verification. Neither form is a claim about a future default revision; re-run discovery against the fresh destination for the resolved content.
+The generic `latest` command below uses no fragment and therefore follows the repository's default revision: it installs the current collection and is the standard way to install. The pinned `#v0.2.0` form selects the published tag and is retained for reproducible installs and release verification. Neither form is a claim about a future default revision; re-run discovery against the fresh destination for the resolved content.
 
-For the generic `latest` forms, which follow the current default revision (33 packages on this branch, 9 on `v0.1.6`), use:
+For the generic `latest` forms (installing all 33 packages), use:
 
 ```text
 npx skills add LightDevCoder/skills --yes --copy --agent '*'
@@ -21,21 +21,20 @@ npx skills add LightDevCoder/skills --skill project-review --yes --copy --agent 
 npx skills add LightDevCoder/skills --skill research --yes --copy --agent '*'
 ```
 
-## Current branch (unreleased, 33 packages)
+## v0.2.0 release commands (current stable, 33 packages)
 
-The current branch is an unreleased refactor with 33 first-party Skills (see [CATALOG.md](../CATALOG.md) and unreleased entry in [CHANGELOG.md](../CHANGELOG.md)). Its whole-collection generic command resolves to the same 33-package set:
+The v0.2.0 release commands were verified against the published v0.2.0 tag in fresh isolated environments, installing the complete 33-package collection:
 
 ```text
-npx skills add LightDevCoder/skills --yes --copy --agent '*'
-npx skills add LightDevCoder/skills --skill agent-config --yes --copy --agent '*'
-npx skills add LightDevCoder/skills --skill implement --yes --copy --agent '*'
+npx skills add LightDevCoder/skills#v0.2.0 --yes --copy --agent '*'
+npx skills add LightDevCoder/skills#v0.2.0 --skill project-review --yes --copy --agent '*'
+npx skills add LightDevCoder/skills#v0.2.0 --skill agent-config --yes --copy --agent '*'
+npx skills add LightDevCoder/skills#v0.2.0 --skill implement --yes --copy --agent '*'
 ```
 
-Fresh-install verification for this 33-package content will be recorded against the next published tag; until then these `latest` forms are templates whose resolved count is verified by [tests/test_collection_discovery.py](../tests/test_collection_discovery.py) (structural inventory, not a fresh-host run).
+## Historical v0.1.6 release commands
 
-## v0.1.6 release commands
-
-The v0.1.6 release commands were verified against the published v0.1.6 tag and installed the nine-package collection at that revision:
+The previous v0.1.6 release commands were verified against the published v0.1.6 tag and installed the nine-package collection at that revision:
 
 ```text
 npx skills add LightDevCoder/skills#v0.1.6 --yes --copy --agent '*'

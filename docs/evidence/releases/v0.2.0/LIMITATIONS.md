@@ -5,3 +5,4 @@
 - `evals.json` is a semantic regression fixture, not an executed model-evaluation harness; it is reviewed as spec coverage.
 - Fresh installation verification tests CLI discovery and structure in clean, isolated environments; live host refresh and model runtime execution on specific proprietary agents remain host-dependent and are not claimed beyond CLI discovery.
 - Name collisions: Light approved Ports are self-contained and do not depend on `mattpocock/skills`. However, installing both collections into the same physical destination directory without namespace scoping may result in filename collisions depending on host precedence rules. Project-scoped installation is recommended when managing multiple collections.
+- Standalone repository retirement: `LightDevCoder/release-workflow` and `LightDevCoder/ELI5` are deprecated and retired as of v0.2.0. Deleting them via the GitHub API requires the `delete_repo` OAuth scope on the GitHub CLI token.

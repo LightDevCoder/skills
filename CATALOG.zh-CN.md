@@ -10,13 +10,13 @@
 | --- | --- |
 | 集合 | Light Skills — Composable Agent Workflows |
 | 包数量 | 33 个已准入第一方 Skill |
-| 当前状态 | 未发布重构（33 个包）在 main；最后稳定版为 [v0.1.6](https://github.com/LightDevCoder/skills/releases/tag/v0.1.6)（9 个包） |
-| 稳定版本 | [v0.1.6](https://github.com/LightDevCoder/skills/releases/tag/v0.1.6)（9 个包） |
+| 当前状态 | 已发布 [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0)（包含 33 个第一方包） |
+| 稳定版本 | [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0)（33 个包；上一稳定版为 9 个包的 v0.1.6） |
 | 安装权威 | [docs/INSTALLATION.zh-CN.md](docs/INSTALLATION.zh-CN.md) |
 | 发现检查 | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
-| 证据 | [v0.1.6 发布证据](docs/evidence/releases/v0.1.6/RELEASE_RECEIPT.zh-CN.md) |
+| 证据 | [v0.2.0 发布证据](docs/evidence/releases/v0.2.0/RELEASE_RECEIPT.zh-CN.md) |
 
-`v0.1.1` 发布五个包；`v0.1.2` 增加 `recap` 与 `language-learning`（七个）；`v0.1.3` 迁移测试工具链；`v0.1.4` 增加 `kanban-worker`；`v0.1.5` 收紧看板调度与身份；`v0.1.6` 增加 `kb-init`。当前分支新增其余 24 个包，形成 33 包架构（见 [CHANGELOG.zh-CN.md](CHANGELOG.zh-CN.md) 未发布）。
+`v0.1.1` 发布五个包；`v0.1.2` 增加 `recap` 与 `language-learning`（七个）；`v0.1.3` 迁移测试工具链；`v0.1.4` 增加 `kanban-worker`；`v0.1.5` 收紧看板调度与身份；`v0.1.6` 增加 `kb-init`（九个）。`v0.2.0` 正式发布涵盖项目工作流、澄清、执行、审阅与专项工具的完整 33 包架构（见 [CHANGELOG.zh-CN.md](CHANGELOG.zh-CN.md)）。
 
 本表无未修改的上游复制。获批的 Matt PORT 均带 `ATTRIBUTION.md` 且无需上游运行时依赖。
 

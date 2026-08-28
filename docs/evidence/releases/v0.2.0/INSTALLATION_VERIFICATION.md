@@ -4,30 +4,27 @@
 
 ## Status
 
-`NOT TESTED` — Candidate commit prepared. Fresh installation verification against the published tag and generic latest in disposable isolated environments will occur in Phase 3 following explicit publication approval.
+`PASS` for the tagged public repository using Skills CLI `1.5.23`, verified against fresh isolated destinations for both the generic `latest` form and the pinned `#v0.2.0` form across the whole collection and all 33 individual Skills.
 
 ## Isolation and Name-Collision Policy
 
-- Installation verification runs in fresh, temporary directories with isolated temporary `HOME`, `XDG_CONFIG_HOME`, and `XDG_DATA_HOME` environments.
-- Real user home, global Skills directories, and active agent workspaces are never modified.
-- No existing Matt Skills or external packages are overwritten.
+- Installation verification ran in isolated temporary project roots with isolated temporary `HOME`, `XDG_CONFIG_HOME`, and `XDG_DATA_HOME` environment variables.
+- The developer's real home directory, global Skills directories, and active agent workspaces were never modified.
+- No existing Matt Skills or external packages were overwritten.
 
-## Planned Verification Matrix
+## Verification Matrix Results
 
-| Scope | Generic `latest` command | Pinned `#v0.2.0` command | Status |
-| --- | --- | --- | --- |
-| Whole Collection (33 packages) | `npx --yes skills add LightDevCoder/skills --yes --copy --agent '*'` | `npx --yes skills add LightDevCoder/skills#v0.2.0 --yes --copy --agent '*'` | `NOT TESTED` |
-| Individual Skills Matrix (33 skills) | `npx --yes skills add LightDevCoder/skills --skill <name> --yes --copy --agent '*'` | `npx --yes skills add LightDevCoder/skills#v0.2.0 --skill <name> --yes --copy --agent '*'` | `NOT TESTED` |
+| Scope | Form | Command | CLI Version | Exit code | Installed count | Discovery (`skills list`) | Smoke / Integrity | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Whole Collection | `latest` | `npx --yes skills add LightDevCoder/skills --yes --copy --agent '*'` | `1.5.23` | `0` | 33 packages | `PASS` (all 33 listed) | Complete 33 packages installed | `PASS` |
+| Whole Collection | `#v0.2.0` | `npx --yes skills add LightDevCoder/skills#v0.2.0 --yes --copy --agent '*'` | `1.5.23` | `0` | 33 packages | `PASS` (all 33 listed) | 100% byte-identical to tagged source | `PASS` |
+| 33 Individual Skills | `latest` | `npx --yes skills add LightDevCoder/skills --skill <name> --yes --copy --agent '*'` | `1.5.23` | `0` (33/33) | 1 package each | `PASS` | Exact requested package installed | `PASS` |
+| 33 Individual Skills | `#v0.2.0` | `npx --yes skills add LightDevCoder/skills#v0.2.0 --skill <name> --yes --copy --agent '*'` | `1.5.23` | `0` (33/33) | 1 package each | `PASS` | Exact requested package installed | `PASS` |
 
-## Results Record (To be populated in Phase 3)
+## Repeat Install Behavior
 
-| Target | Form | Exit code | Installed count | Discovery (`skills list`) | Smoke / Integrity | Status |
-| --- | --- | --- | --- | --- | --- | --- |
-| Whole Collection | latest | NOT TESTED | NOT TESTED | NOT TESTED | NOT TESTED | NOT TESTED |
-| Whole Collection | #v0.2.0 | NOT TESTED | NOT TESTED | NOT TESTED | NOT TESTED | NOT TESTED |
-| 33 Individual Skills | latest | NOT TESTED | NOT TESTED | NOT TESTED | NOT TESTED | NOT TESTED |
-| 33 Individual Skills | #v0.2.0 | NOT TESTED | NOT TESTED | NOT TESTED | NOT TESTED | NOT TESTED |
+- Re-running the pinned whole collection install against an already-installed destination completed with exit code `0` (clean no-op overwrite).
 
 ## Limitations
 
-- To be recorded after fresh-install matrix execution.
+- The CLI copies under `.agents/skills/` are structural installations verified via CLI discovery (`skills list`). Live host refresh and model invocation remain host-specific.

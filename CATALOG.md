@@ -10,13 +10,13 @@ This catalog is synchronized from the 33 admitted package directories under `ski
 | --- | --- |
 | Collection | Light Skills — Composable Agent Workflows |
 | Package count | 33 admitted first-party Skills |
-| Current state | Unreleased refactor (33 packages) on main; last stable is [v0.1.6](https://github.com/LightDevCoder/skills/releases/tag/v0.1.6) with 9 packages |
-| Stable release | [v0.1.6](https://github.com/LightDevCoder/skills/releases/tag/v0.1.6) (9 packages) |
+| Current state | Released [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) with 33 first-party packages |
+| Stable release | [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) (33 packages; previous stable was v0.1.6 with 9 packages) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
-| Evidence | [v0.1.6 release evidence](docs/evidence/releases/v0.1.6/) |
+| Evidence | [v0.2.0 release evidence](docs/evidence/releases/v0.2.0/) |
 
-`v0.1.1` shipped five packages; `v0.1.2` added `recap` and `language-learning` (seven); `v0.1.3` migrated the test toolchain; `v0.1.4` added `kanban-worker`; `v0.1.5` tightened kanban scheduling and identity; `v0.1.6` added `kb-init`. The current branch adds the remaining 24 packages for a 33-package architecture (see [CHANGELOG.md](CHANGELOG.md) unreleased).
+`v0.1.1` shipped five packages; `v0.1.2` added `recap` and `language-learning` (seven); `v0.1.3` migrated the test toolchain; `v0.1.4` added `kanban-worker`; `v0.1.5` tightened kanban scheduling and identity; `v0.1.6` added `kb-init` (nine). `v0.2.0` released the full 33-package architecture across project workflow, clarification, execution, review, and specialized tools (see [CHANGELOG.md](CHANGELOG.md)).
 
 No package in this table is an unmodified upstream copy. Approved Matt PORTs carry `ATTRIBUTION.md` and no upstream runtime dependency.
 

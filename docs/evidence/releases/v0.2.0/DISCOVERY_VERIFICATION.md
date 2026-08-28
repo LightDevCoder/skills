@@ -2,6 +2,10 @@
 
 [中文记录](DISCOVERY_VERIFICATION.zh-CN.md)
 
-Status: `NOT TESTED` — Pending publication and fresh-install execution.
+Status: `PASS` (Skills CLI `1.5.23`)
 
-Following tag publication and fresh installation into isolated environments without a source checkout, `npx --yes skills list` will be run to verify discovery of all 33 installed packages (and single packages for per-skill installations).
+Following installation into fresh isolated destinations without a source checkout:
+- Whole collection installation: `npx --yes skills list` exits `0` and discovers all 33 installed packages.
+- Individual Skill installations: `npx --yes skills list` exits `0` and discovers exactly the installed package for each of the 33 Skills.
+
+Detailed per-command results and paths are recorded in [INSTALLATION_VERIFICATION.md](INSTALLATION_VERIFICATION.md).

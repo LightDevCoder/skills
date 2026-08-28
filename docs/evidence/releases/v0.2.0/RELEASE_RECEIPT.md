@@ -2,7 +2,7 @@
 
 [中文收据](RELEASE_RECEIPT.zh-CN.md)
 
-Status: `CANDIDATE` — release candidate prepared; tag creation, public release, and fresh-install verification pending Phase 2 publication gate and Phase 3 verification.
+Status: `RELEASED` — Tag published (`v0.2.0`), GitHub Release published, CI PASS on candidate commit, and fresh installation verification PASS across all 33 packages.
 
 ## Identity
 
@@ -10,8 +10,8 @@ Status: `CANDIDATE` — release candidate prepared; tag creation, public release
 | --- | --- |
 | Repository | `LightDevCoder/skills` (public) |
 | Release | `v0.2.0` |
-| Release commit | `NOT TESTED` (candidate commit SHA to be recorded upon candidate commit creation) |
-| Release tag | `v0.2.0` (pending creation) |
+| Release commit | `9c2572bc0361e1e2c34cb4b6c02fdaa4ed349d47` |
+| Release tag | `v0.2.0` |
 | Release URL | https://github.com/LightDevCoder/skills/releases/tag/v0.2.0 |
 | Scope | Release the complete 33 first-party Skills architecture (24 new/refactored/adapted/ported packages added to the 9 packages from v0.1.6), including project workflow, clarification/Socratic engine, review/project-review architecture, ask-light advisor, and ELI5/release-workflow migration provenance. |
 
@@ -25,15 +25,15 @@ Status: `CANDIDATE` — release candidate prepared; tag creation, public release
 - Established self-contained approved Ports with full attribution (`ATTRIBUTION.md`) and zero upstream runtime dependencies.
 - Migrated standalone `LightDevCoder/release-workflow` and `LightDevCoder/ELI5` into the collection with full provenance records and planned retirement.
 
-## Candidate Verification Checklist
+## Release Verification Checklist
 
 | Gate | Status | Evidence |
 | --- | --- | --- |
-| Local Candidate Test Suite | `PASS` (Candidate baseline) | [TEST_SUMMARY.md](TEST_SUMMARY.md) |
-| Phase 2 Human Approval Gate | `PENDING` | Required explicit YES before tag creation and push |
-| GitHub Actions CI (`collection-quality`) | `NOT TESTED` | Pending push to main |
-| Pinned Whole Collection Fresh Install | `NOT TESTED` | [INSTALLATION_VERIFICATION.md](INSTALLATION_VERIFICATION.md) |
-| Generic Latest Whole Collection Fresh Install | `NOT TESTED` | [INSTALLATION_VERIFICATION.md](INSTALLATION_VERIFICATION.md) |
-| 33 Individual Skills Fresh Install Matrix | `NOT TESTED` | [INSTALLATION_VERIFICATION.md](INSTALLATION_VERIFICATION.md) |
-| Standalone Repositories Retirement | `NOT TESTED` | [MIGRATION_RETIREMENT.md](MIGRATION_RETIREMENT.md) |
-| Discovery Verification | `NOT TESTED` | [DISCOVERY_VERIFICATION.md](DISCOVERY_VERIFICATION.md) |
+| Local Candidate Test Suite | `PASS` | 309 pytest, 27 unittest (245 assertions), compileall OK, git diff --check OK |
+| Phase 2 Human Approval Gate | `PASS` | Explicit human approval confirmed |
+| GitHub Actions CI (`collection-quality`) | `PASS` | Run ID `33137041472` (22s) |
+| Pinned Whole Collection Fresh Install | `PASS` | Installed 33 packages, byte-identical to source |
+| Generic Latest Whole Collection Fresh Install | `PASS` | Installed 33 packages, exit code 0 |
+| 33 Individual Skills Fresh Install Matrix | `PASS` | 66/66 installs (33 latest + 33 pinned) exit 0, 1 package each |
+| Discovery Verification | `PASS` | `npx --yes skills list` discovers installed packages without source checkout |
+| Standalone Repositories Retirement | `RETIRED` | Provenance recorded in [MIGRATION_RETIREMENT.md](MIGRATION_RETIREMENT.md) |

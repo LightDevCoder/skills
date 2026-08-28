@@ -2,17 +2,17 @@
 
 [English installation guide](INSTALLATION.md)
 
-公开第一方集合当前稳定版本是 [v0.1.6](https://github.com/LightDevCoder/skills/releases/tag/v0.1.6)，发布自 commit `e8c3589031bbc1cb76d7f928761ce3f60ebea3e1`。**当前分支**包含 33 个已准入 Skill（未发布重构）；`v0.1.6` 为 9 个包。`skills/<name>/` 内的包契约仍是行为权威；本页只规定安装和验证证据。
+公开第一方集合当前稳定版本是 [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0)，发布自 commit `9c2572bc0361e1e2c34cb4b6c02fdaa4ed349d47`。它提供 **33 个已准入的第一方 Skill**（上一稳定版为 9 个包的 `v0.1.6`）。`skills/<name>/` 内的包契约仍是行为权威；本页规定安装方法与验证记录。
 
-标准安装命令是通用 `latest` 形式：它跟随仓库默认 revision，因此每次 `npx skills add LightDevCoder/skills` 都安装默认分支上的当前集合。`v0.1.6` 时默认分支包含九个 Skill；当前 33 包分支通过同一 `latest` 形式解析为 33 个包（发布后或从本地 checkout 安装时生效）。下面的 `v0.1.6` 命令已在该 tag 针对 fresh destination 验证，见 [v0.1.6 安装验证](evidence/releases/v0.1.6/INSTALLATION_VERIFICATION.zh-CN.md)。
+标准安装命令是通用 `latest` 形式：它跟随仓库默认 revision，因此 `npx skills add LightDevCoder/skills` 安装默认分支上的当前 33 包集合。下面的 `v0.2.0` 命令已在独立隔离环境中针对全新目录完成验证，见 [v0.2.0 安装验证](evidence/releases/v0.2.0/INSTALLATION_VERIFICATION.zh-CN.md)。
 
 ## Revision 语义
 
 官方 Skills CLI 支持 GitHub source 的 `#ref` fragment，并将其作为 Git revision；没有 fragment 的仓库简写使用仓库默认 revision。可查看 [官方 source parser](https://raw.githubusercontent.com/vercel-labs/skills/main/src/source-parser.ts) 和 [Git helper](https://raw.githubusercontent.com/vercel-labs/skills/main/src/git.ts)。
 
-下面的通用 `latest` 命令不带 fragment，因此跟随仓库默认 revision：它安装当前集合，是标准安装方式。pinned `#v0.1.6` 形式选择已发布的 tag，用于可复现安装与 release 验证。两者都不是对未来默认 revision 的声明；对 fresh destination 重新运行 discovery，以获取解析后的实际内容。
+下面的通用 `latest` 命令不带 fragment，因此跟随仓库默认 revision：它安装当前集合，是标准安装方式。pinned `#v0.2.0` 形式选择已发布的 tag，用于可复现安装与 release 验证。两者都不是对未来默认 revision 的声明；对 fresh destination 重新运行 discovery，以获取解析后的实际内容。
 
-通用 `latest` 形式（跟随当前默认 revision；本分支 33 个包，`v0.1.6` 为 9 个）为：
+通用 `latest` 形式（安装全部 33 个包）为：
 
 ```text
 npx skills add LightDevCoder/skills --yes --copy --agent '*'
@@ -21,21 +21,20 @@ npx skills add LightDevCoder/skills --skill project-review --yes --copy --agent 
 npx skills add LightDevCoder/skills --skill research --yes --copy --agent '*'
 ```
 
-## 当前分支（未发布，33 个包）
+## v0.2.0 release 命令（当前稳定版，33 个包）
 
-当前分支为含 33 个第一方 Skill 的未发布重构（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md) 与 [CHANGELOG.zh-CN.md](../CHANGELOG.zh-CN.md) 未发布）。其全量通用命令解析为 33 包集合：
+v0.2.0 release 命令在全新隔离环境中针对已发布的 v0.2.0 tag 进行了完整验证，安装全部 33 个包：
 
 ```text
-npx skills add LightDevCoder/skills --yes --copy --agent '*'
-npx skills add LightDevCoder/skills --skill agent-config --yes --copy --agent '*'
-npx skills add LightDevCoder/skills --skill implement --yes --copy --agent '*'
+npx skills add LightDevCoder/skills#v0.2.0 --yes --copy --agent '*'
+npx skills add LightDevCoder/skills#v0.2.0 --skill project-review --yes --copy --agent '*'
+npx skills add LightDevCoder/skills#v0.2.0 --skill agent-config --yes --copy --agent '*'
+npx skills add LightDevCoder/skills#v0.2.0 --skill implement --yes --copy --agent '*'
 ```
 
-针对该 33 包内容的 fresh-install 验证将在下一发布 tag 记录；在此之前这些 `latest` 形式为模板，其解析数量由 [tests/test_collection_discovery.py](../tests/test_collection_discovery.py) 做结构 inventory 验证（非 fresh-host 运行）。
+## 历史 v0.1.6 release 命令
 
-## v0.1.6 release 命令
-
-v0.1.6 release 命令针对已发布的 v0.1.6 tag 验证，在该 revision 安装九包集合：
+上一版本的 v0.1.6 release 命令针对已发布的 v0.1.6 tag 验证，在该 revision 安装九包集合：
 
 ```text
 npx skills add LightDevCoder/skills#v0.1.6 --yes --copy --agent '*'

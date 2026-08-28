@@ -78,6 +78,7 @@ class CollectionContractTests(unittest.TestCase):
             "docs/workflows/execution.md", "docs/workflows/review-system.md",
             "docs/workflows/specialized-workflows.md",
             "docs/evidence/releases/v0.1.1/RELEASE_RECEIPT.md",
+            "docs/evidence/releases/v0.2.0/RELEASE_RECEIPT.md",
             "docs/workflows/recipes.md", "docs/zh-CN/workflows/recipes.md",
             "examples/quick-start/README.md", "examples/quick-start/README.zh-CN.md",
         ]
@@ -96,11 +97,13 @@ class CollectionContractTests(unittest.TestCase):
         self.check("npx skills add LightDevCoder/skills#v0.1.3" in installation, "installation historical pinned v0.1.3 install")
         self.check("npx skills add LightDevCoder/skills#v0.1.4" in installation, "installation historical pinned v0.1.4 install")
         self.check("npx skills add LightDevCoder/skills#v0.1.5" in installation, "installation pinned v0.1.5 install")
+        self.check("npx skills add LightDevCoder/skills#v0.1.6" in installation, "installation pinned v0.1.6 install")
+        self.check("npx skills add LightDevCoder/skills#v0.2.0" in installation, "installation pinned v0.2.0 install")
         self.check("default revision" in installation and "#ref" in installation, "installation revision semantics")
-        self.check("LightDevCoder/skills" in readme and "Drive your creativity" in readme, "homepage about copy")
-        self.check(re.search(r"v0\.1\.6.{0,160}is published from", readme, re.I | re.S) is not None, "README published v0.1.6 release")
+        self.check("LightDevCoder/skills" in readme, "homepage about copy")
+        self.check(re.search(r"v0\.2\.0.{0,160}is published from", readme, re.I | re.S) is not None, "README published v0.2.0 release")
         self.check("33" in catalog and "admitted" in catalog, "catalog 33-package boundary")
-        self.check("v0.1.6" in catalog, "catalog mentions v0.1.6")
+        self.check("v0.2.0" in catalog, "catalog mentions v0.2.0")
         for label, text in (("admission", admission), ("admission zh-CN", admission_zh),
                             ("review policy", review_policy), ("review policy zh-CN", review_policy_zh)):
             self.check(re.search(r"prompt-only|纯提示型", text) is not None, f"{label} prompt-only fast track")

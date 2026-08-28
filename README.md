@@ -4,60 +4,60 @@
 
 # Light Skills — Composable Agent Workflows
 
-`LightDevCoder/skills` is a **first-party, general-purpose, composable Agent workflow system** — 33 small, explicit, independently discoverable Skills that combine into a complete project flow or run standalone. Each package owns its `SKILL.md` contract; this README explains the repository.
+`LightDevCoder/skills` provides 33 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<name>/` and defines its own behavior in `SKILL.md`.
 
-> **About:** Light Skills — Drive your creativity. Small, composable, inspectable.
+> **Release:** [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) is published from commit `9c2572b` (tag `v0.2.0`) and is the current stable release with 33 first-party Skills.
 
-> **Release:** [v0.1.6](https://github.com/LightDevCoder/skills/releases/tag/v0.1.6) is published from commit `e8c3589` (tag `v0.1.6`) and is the last published stable (9 packages). The current branch contains **33 first-party Skills** (unreleased refactor — see [CHANGELOG.md](CHANGELOG.md)). Skills are still installed with `npx skills add LightDevCoder/skills`.
+## Overview
 
-## What is Light Skills
+The repository organizes capabilities into focused areas:
 
-A workflow system, not a monolithic orchestrator. The repository provides composable capabilities across:
+- **Project Workflow:** end-to-end delivery from project bootstrap to release.
+- **Clarification & Research:** structured questions and primary-source investigation before building.
+- **Execution:** bounded implementation tasks with host-aware execution planning.
+- **Review:** read-only specialist checks and final project acceptance.
+- **Specialized Workflows:** dedicated tooling for manuscripts, knowledge bases, language learning, and kanban boards.
+- **Router:** `ask-light` inspects workspace state to suggest next steps.
 
-- **Project Workflow** — from initialization to release
-- **Clarification & Research** — decide before you build
-- **Execution** — do bounded work with host-aware routing
-- **Review** — from read-only findings to project acceptance
-- **Specialized Workflows** — manuscript, knowledge base, learning, kanban
-- **Router** — `ask-light` recommends the next step, then begins it after approval
-
-Architecture decides *which capabilities exist and how they compose*; Skill-writing quality follows [Matt Pocock Skills](https://github.com/mattpocock/skills), and host-aware routing follows [Sol Advisor](https://github.com/DannyMac180/sol-advisor) — both as design references, not runtime dependencies.
+Skills follow the progressive disclosure patterns of Matt Pocock Skills and the host-evidence inspection approach of Sol Advisor as design references without adding runtime dependencies.
 
 ## Installation
+
+Install all 33 Skills using the Skills CLI:
 
 ```text
 npx skills add LightDevCoder/skills --yes --copy --agent '*'
 ```
 
-One Skill at the same revision:
+Install a single Skill:
 
 ```text
 npx skills add LightDevCoder/skills --skill project-review --yes --copy --agent '*'
 npx skills add LightDevCoder/skills --skill research --yes --copy --agent '*'
 ```
 
-For the last published tag:
+Pin to the v0.2.0 release:
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.6 --yes --copy --agent '*'
+npx skills add LightDevCoder/skills#v0.2.0 --yes --copy --agent '*'
 ```
 
-Refresh the host, then confirm discovery without the source checkout. See [Installation](docs/INSTALLATION.md) for revision semantics, manual fallback, and fresh-install evidence.
+See [Installation](docs/INSTALLATION.md) for scope options, manual file copying, and verification notes.
 
 ## Quick Start
 
 ```text
-$ask-light next        # you don't know what's next — get one recommendation and stop
-$project-init          # bootstrap stable Light project contracts from a preset
-$clarify               # one invocation → continuous clarification, no SPEC
-$project-clarify       # real project → inspect repo, then decide
-$implement             # one clear ticket in, one verified artifact out
-$project-review        # final acceptance: PASS / FAIL / BLOCKED
+$ask-light next        # Suggest the next appropriate Skill from current context
+$project-init          # Bootstrap project structure and tracker contracts
+$clarify               # Clarify requirements through targeted questions
+$project-clarify       # Clarify project decisions using repository context
+$implement             # Execute a ready ticket with verification
+$project-review        # Run final acceptance checks: PASS / FAIL / BLOCKED
 ```
 
-## Main workflow
+## Main Workflow
 
-The recommended project flow (not a required pipeline — enter mid-stream when appropriate):
+A typical project progresses through these stages, though you can start directly at any stage:
 
 ```text
 project-init
@@ -75,38 +75,38 @@ project-review
 release-workflow
 ```
 
-- `project-init` — idempotent Light bootstrap with stable project/tracker contracts; no full clarification.
-- `project-clarify → project-spec → project-tickets` — clarify decisions, freeze a SPEC, slice into tracer-bullet tickets.
-- `implement` — general-purpose bounded executor (code, doc, config, Skill).
-- `project-review` — project-level final acceptance; `review-loop` is its convergence engine.
-- Any stage may enter directly when the task is already in that state.
+- `project-init`: sets up tracker contracts and initial configuration.
+- `project-clarify → project-spec → project-tickets`: clarifies requirements, writes the specification, and splits work into executable tickets.
+- `implement`: implements one ticket at a time with automated checks.
+- `project-review`: verifies quality against frozen baselines; `review-loop` handles iterative fixes.
+- `release-workflow`: runs release validation, tagging, and publication.
 
-Small-task paths:
+Direct paths for common tasks:
 
 ```text
-clarify                          # standalone continuous clarification → confirmed understanding
-implement                        # one ready ticket → verify → review-loop when useful
-diagnosing-bugs → implement      # hard bug → tight loop → fix → review
-release-workflow                 # publish only
-$ask-light                       # unknown entry → one recommendation
+clarify                          # Standalone brainstorming and clarification
+implement                        # Implement a well-defined ticket directly
+diagnosing-bugs → implement      # Diagnose an issue, then apply the fix
+release-workflow                 # Publish an approved release
+$ask-light                       # Route unclear tasks to the right Skill
 ```
 
-Full composition is in [docs/workflows/](docs/workflows/). Each `SKILL.md` stays the authority.
+See [docs/workflows/](docs/workflows/) for full workflow guides.
 
-## When you don't know what's next
+## Finding the Right Skill
 
 ```text
 $ask-light next
 $ask-light workflow
 ```
 
-`ask-light` is the **Light Workflow Router** — user-invoked and read-only. It resolves logical fit from the Light-owned 33-Skill map, verifies host availability separately, and returns *one* recommendation (or one bounded recipe) with source, reason, and host-appropriate invocation — then stops. It never installs, executes, or chains another user-invoked Skill.
+`ask-light` is a read-only router. It evaluates your current workspace against the 33 Skills in the collection and recommends one relevant Skill or bounded sequence, explaining the rationale before you choose to invoke it.
 
 See [ask-light](skills/ask-light/SKILL.md) and [docs/workflows/](docs/workflows/).
 
-## Representative capabilities
+## Skills Overview
 
-| Group | Skills | Entry |
+| Group | Skills | Details |
 | --- | --- | --- |
 | **Project** | `project-init`, `project-clarify`, `project-spec`, `project-tickets`, `implement`, `project-review`, `release-workflow` | [CATALOG.md](CATALOG.md) |
 | **Clarification & Research** | `socratic` (engine), `clarify`, `project-clarify`, `decision-map`, `research`, `prototype`, `to-questionnaire` | [clarification-system](docs/workflows/clarification-system.md) |
@@ -115,38 +115,28 @@ See [ask-light](skills/ask-light/SKILL.md) and [docs/workflows/](docs/workflows/
 | **Specialized** | `manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `eli5`, `recap` | [specialized-workflows](docs/workflows/specialized-workflows.md) |
 | **Productivity** | `handoff`, `wizard`, `wait-what`, `writing-for-agents` | [CATALOG.md](CATALOG.md) |
 
-Full inventory — purpose, when to use, invocation, and package path for all 33 — is in [CATALOG.md](CATALOG.md). Do not duplicate full Skill contracts here.
+See [CATALOG.md](CATALOG.md) for full descriptions, invocation modes, and package paths.
 
-## First-party catalog (summary)
+## Provenance and Attribution
 
-33 admitted first-party Skills under `skills/`. Package contracts are the behavior authority.
-
-See [CATALOG.md](CATALOG.md) for the complete table.
-
-## Ownership and upstream boundaries
-
-| Source state | Authority | Treatment here |
+| Origin | Policy | Repository Treatment |
 | --- | --- | --- |
-| First-party | This repository and its admitted package contracts | Included under `skills/`. |
-| Approved Port (Matt) | Original upstream + `ATTRIBUTION.md` + Light integration | Self-contained here; no runtime install of Matt Skills required. |
-| Direct upstream (other) | Original upstream repository | Install directly; do not copy unchanged Skill here. |
-| Modified third-party | Private `LightDevCoder/skills-3rdParty` | Keep provenance, patches, licenses, sync locks, evidence. |
-| Deprecated / archived | Released migration record | Keep history, point to current authority. |
+| First-party | Collection owner authored | Maintained in `skills/<name>/`. |
+| Approved Port (Matt Pocock) | Upstream behavior preserved with `ATTRIBUTION.md` | Self-contained in `skills/<name>/` without upstream runtime dependencies. |
+| Third-party unmodified | External upstream | Recommended for direct installation; not duplicated here. |
+| Modified third-party | Managed in private `LightDevCoder/skills-3rdParty` | Retains full patches, licenses, and sync locks. |
+| Retired standalone | Consolidated into collection | Documented with migration history in release records. |
 
-Approved Matt PORTs in this repo (SPEC §14): `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts`. Each has `ATTRIBUTION.md` and no upstream runtime dependency. Light main workflow does not require `mattpocock/skills` or `sol-advisor` at runtime.
+Approved Matt Ports (11 packages): `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts`. Each package contains `ATTRIBUTION.md` and runs without external runtime dependencies.
 
-## Governance and evidence
+## Documentation
 
-- [Maintenance contract](AGENTS.md)
-- [Skill admission](docs/SKILL_ADMISSION.md)
-- [Maintenance and synchronization](docs/MAINTENANCE.md)
-- [Installation and fresh-install verification](docs/INSTALLATION.md)
-- [Review policy](docs/REVIEW_POLICY.md) · [Reviewer contract](docs/REVIEWER_CONTRACT.md)
+- [Maintenance Contract](AGENTS.md)
+- [Skill Admission Policy](docs/SKILL_ADMISSION.md)
+- [Maintenance and Synchronization](docs/MAINTENANCE.md)
+- [Installation Guide](docs/INSTALLATION.md)
+- [Review Policy](docs/REVIEW_POLICY.md) · [Reviewer Contract](docs/REVIEWER_CONTRACT.md)
 - [Catalog](CATALOG.md) · [Changelog](CHANGELOG.md)
-- [Workflows](docs/workflows/) — project, clarification, execution, review, specialized
-- [Release receipt](docs/evidence/releases/v0.1.6/RELEASE_RECEIPT.md)
-- [Collection discovery](tests/test_collection_discovery.py) · [Composition checks](tests/test_composition.py)
-
-## Hero asset
-
-Header image: [Assets/header.png](Assets/header.png) (first line of this README). The editable legacy header remains at `skills/docs/assets/skills-header.svg` / `.png` with manifest `skills/docs/assets/skills-header.json` for package tests.
+- [Workflow Guides](docs/workflows/)
+- [Release Receipt](docs/evidence/releases/v0.2.0/RELEASE_RECEIPT.md)
+- [Collection Discovery Tests](tests/test_collection_discovery.py) · [Composition Tests](tests/test_composition.py)

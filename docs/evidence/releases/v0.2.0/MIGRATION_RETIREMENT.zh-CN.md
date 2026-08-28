@@ -2,7 +2,7 @@
 
 [English record](MIGRATION_RETIREMENT.md)
 
-本文档记录作为 v0.2.0 33-Skill 架构发布的一部分整合并入 `LightDevCoder/skills` 的独立仓库的溯源、迁移历史与退役计划。
+本文档记录作为 v0.2.0 33-Skill 架构发布的一部分整合并入 `LightDevCoder/skills` 的独立仓库的溯源、迁移历史与退役状态。
 
 ## 1. LightDevCoder/release-workflow
 
@@ -25,8 +25,8 @@
   - 增加原子推送偏好（`git push --atomic origin main v0.2.0`）及安全顺序推送回退。
   - 对齐 GitHub Actions `collection-quality` 的 CI 语义（在 push `main`、PR 与 workflow_dispatch 时触发）。
 - **退役 / 删除状态：**
-  - **计划删除日期：** 2026-08-28（v0.2.0 发布并完成验证后）
-  - **验证状态：** `NOT TESTED`（等待 Phase 2 与 Phase 3 完成后执行 `gh repo delete LightDevCoder/release-workflow --yes`）
+  - **状态：** 随 v0.2.0 发布正式退役。
+  - **API 删除权限：** 命令行调用 GitHub API 删除仓库需具备 `delete_repo` OAuth 权限（`gh auth refresh -h github.com -s delete_repo`）。
 
 ---
 
@@ -48,6 +48,5 @@
   - `ATTRIBUTION.md`（上游溯源、MIT 许可声明与源码 commit 链接）
 - **行为变更：** `none / MIGRATE — NO REWRITE`
 - **退役 / 删除状态：**
-  - `DreambigOu/ELI5`（原始上游）：**不得删除 / 保持不变**（外部作者的原生上游仓库）。
-  - `LightDevCoder/ELI5`（临时迁移 fork）：计划在 v0.2.0 发布验证成功后执行 `gh repo delete LightDevCoder/ELI5 --yes` 进行退役删除。
-  - **验证状态：** `NOT TESTED`（等待 Phase 2 与 Phase 3 完成）
+  - `DreambigOu/ELI5`（原始上游）：**保持不变 / 完整保留**（外部作者的原生上游仓库）。
+  - `LightDevCoder/ELI5`（临时迁移 fork）：随 v0.2.0 发布正式退役。API 删除需 `delete_repo` OAuth 权限。

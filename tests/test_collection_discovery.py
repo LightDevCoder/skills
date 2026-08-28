@@ -115,6 +115,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.1\.4", installation)), "Installation guide is missing the historical pinned v0.1.4 release command.")
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.1\.5", installation)), "Installation guide is missing the pinned v0.1.5 release command.")
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.1\.6", installation)), "Installation guide is missing the pinned v0.1.6 release command.")
+    c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.2\.0", installation)), "Installation guide is missing the pinned v0.2.0 release command.")
     c.check(bool(re.search(r"#ref|fragment|default revision", installation)), "Installation guide must explain revision semantics rather than overclaim shorthand immutability.")
     c.check("commands target the immutable v0.1.0 release" not in installation, "Installation guide must not claim the old shorthand is permanently immutable.")
     c.check(not re.search(r"not a verified command|<owner>/<repository>", installation), "Installation guide still contains unresolved pre-release command wording.")
@@ -123,9 +124,9 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         all(token in installation for token in ("source_root", "skill_name", "destination_root")),
         "Manual fallback must use valid shell variables.",
     )
-    c.check(bool(re.search(r"(?is)v0\.1\.6.{0,160}is published from", readme)), "README must present v0.1.6 as the published release.")
+    c.check(bool(re.search(r"(?is)v0\.2\.0.{0,160}is published from", readme)), "README must present v0.2.0 as the published release.")
     c.check("33" in catalog and "admitted" in catalog, "Catalog must present the 33-package collection.")
-    c.check("v0.1.6" in catalog, "Catalog must mention v0.1.6.")
+    c.check("v0.2.0" in catalog, "Catalog must mention v0.2.0.")
     c.check("33" in readme, "README must mention 33 Skills.")
     c.check(bool(re.search(r"ask-light", readme, re.IGNORECASE)), "README must mention ask-light entry.")
     c.check(bool(re.search(r"project-init.*project-clarify.*project-spec.*project-tickets.*implement.*project-review.*release-workflow", readme, re.DOTALL | re.IGNORECASE)), "README must present the main workflow project-init → project-clarify → project-spec → project-tickets → implement → project-review → release-workflow.")
@@ -240,6 +241,8 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         "docs/evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.md",
         "docs/evidence/releases/v0.1.6/RELEASE_RECEIPT.md",
         "docs/evidence/releases/v0.1.6/INSTALLATION_VERIFICATION.md",
+        "docs/evidence/releases/v0.2.0/RELEASE_RECEIPT.md",
+        "docs/evidence/releases/v0.2.0/INSTALLATION_VERIFICATION.md",
         ".github/workflows/quality.yml",
     ]:
         c.check((root / required).is_file(), f"Required documentation path is missing: {required}")
@@ -295,7 +298,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     semantic_matrix = [
         ("README.md", "README.zh-CN.md", [("Light Skills", "Light Skills"), ("ask-light", "ask-light"), ("Assets/header.png", "Assets/header.png")]),
         ("CATALOG.md", "CATALOG.zh-CN.md", [("Collection status", "集合状态"), ("Stable release", "稳定版本"), ("Installation authority", "安装权威")]),
-        ("CHANGELOG.md", "CHANGELOG.zh-CN.md", [("Unreleased", "未发布"), ("ATTRIBUTION", "ATTRIBUTION")]),
+        ("CHANGELOG.md", "CHANGELOG.zh-CN.md", [("0.2.0", "0.2.0"), ("ATTRIBUTION", "ATTRIBUTION")]),
         ("docs/INSTALLATION.md", "docs/INSTALLATION.zh-CN.md", [("Revision semantics", "Revision 语义"), ("Historical v0.1.0 verification", "历史 v0.1.0 验证"), ("Manual fallback", "手动 fallback")]),
         ("docs/MAINTENANCE.md", "docs/MAINTENANCE.zh-CN.md", [("Authoritative records", "权威记录"), ("Synchronization matrix", "同步矩阵"), ("closeout", "closeout")]),
         ("docs/REVIEW_POLICY.md", "docs/REVIEW_POLICY.zh-CN.md", [("Reviewer vs review-loop vs project-review", "Reviewer vs review-loop vs project-review"), ("project-review", "project-review"), ("BLOCKED", "BLOCKED")]),
@@ -369,7 +372,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
             for marker in markers:
                 c.check(marker in en_text and marker in zh_text, f"{name} {revision} release evidence is missing the synchronized semantic marker: {marker}")
 
-    c.check("Drive your creativity" in readme, "README About description is missing.")
+    c.check("LightDevCoder/skills" in readme, "README must mention repository identity.")
 
     workflow_text = read(root, "skills/ask-light/SKILL.md") + read(root, "skills/ask-light/references/discovery-contract.md")
     workflow_script = read(root, "skills/ask-light/scripts/ask_light.py")

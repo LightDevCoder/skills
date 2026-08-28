@@ -4,7 +4,7 @@
 
 All notable changes are recorded here. A release entry must be tied to an actual version or tag and must not be created merely because a document was drafted.
 
-## Unreleased — target v0.2.0
+## 0.2.0 — 2026-08-28
 
 ### Added — 33-package Light workflow architecture
 
