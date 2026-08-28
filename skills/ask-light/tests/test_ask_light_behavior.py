@@ -186,6 +186,10 @@ def write_project_review_state(
     *,
     reviewed_effort: str | None = None,
     charter_source: str | None = None,
+    charter_revision: str = "1",
+    status: str | None = None,
+    state_content: str | None = None,
+    include_state: bool = True,
     verdict: str | None = "PASS",
     verdict_content: str | None = None,
     include_charter: bool = True,
@@ -228,7 +232,7 @@ def write_project_review_state(
         (review_dir / "charter.md").write_text(
             "# Acceptance Charter\n\n"
             "## Revision\n"
-            "- Charter revision: 1\n"
+            f"- Charter revision: {charter_revision}\n"
             "- Supersedes: none\n"
             "\n"
             "## Acceptance baseline\n"
@@ -242,20 +246,30 @@ def write_project_review_state(
             + (f"- Implementation scope: {implementation_scope}\n" if implementation_scope is not None else ""),
             encoding="utf-8",
         )
-    (review_dir / "state.md").write_text(
-        "# Project-review State\n"
-        "- Status: READY\n"
-        "- Round: 1\n",
-        encoding="utf-8",
-    )
+    if state_content is not None:
+        (review_dir / "state.md").write_text(state_content, encoding="utf-8")
+    elif include_state:
+        state_status = (
+            status
+            if status is not None
+            else (verdict if verdict in ("PASS", "FAIL", "BLOCKED") else "PASS")
+        )
+        (review_dir / "state.md").write_text(
+            "# Project-review State\n"
+            f"- Status: {state_status}\n"
+            f"- Charter revision: {charter_revision}\n"
+            f"- Profile: {profile}\n"
+            "- Round: 1\n",
+            encoding="utf-8",
+        )
     if verdict_content is not None:
         (review_dir / "verdict.md").write_text(verdict_content, encoding="utf-8")
     elif verdict is not None:
         # Real produced records wrap the value in markdown emphasis.
         (review_dir / "verdict.md").write_text(
             "# Verdict\n\n"
-            "- Charter revision: 1\n"
-            "- Profile: generic\n"
+            f"- Charter revision: {charter_revision}\n"
+            f"- Profile: {profile}\n"
             f"- Verdict: **{verdict}**\n"
             + (f"- Reviewed implementation revision: {final_revision}\n" if final_revision is not None else "")
             + "- Round: round-01 (final)\n"
@@ -1046,10 +1060,10 @@ class AskLightBehaviorTest(unittest.TestCase):
             project = Path(tmp) / "project"
             write_project_state(project, initialized=True, spec=True)
             write_effort_state(project, "current", spec_status="active", ticket_statuses=["resolved"])
-            write_project_review_state(project, reviewed_effort="current", verdict=None)
+            write_project_review_state(project, reviewed_effort="current", status="READY", verdict=None)
             context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
             result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
-            self.assertEqual(result["projectStage"], "implementation-complete")
+            self.assertEqual(result["projectStage"], "project-review")
             self.assertEqual(result["skill"], "project-review")
             self.assertNotEqual(result["projectStage"], "accepted")
 
@@ -1400,7 +1414,10 @@ class ReviewFreshnessRegressionTest(unittest.TestCase):
                 "- None\n",
                 encoding="utf-8",
             )
-            (review_dir / "state.md").write_text("- Status: READY\n- Round: 1\n", encoding="utf-8")
+            (review_dir / "state.md").write_text(
+                "# Project-review State\n- Status: PASS\n- Charter revision: 1\n- Profile: generic\n- Round: 1\n",
+                encoding="utf-8",
+            )
             (review_dir / "verdict.md").write_text("# Verdict\n\nVerdict: **PASS**\n", encoding="utf-8")
             result = self.route_project(project)
             self.assertEqual(result["status"], "RECOMMEND", result)
@@ -2108,6 +2125,346 @@ class DirectorySourceBaselineTest(unittest.TestCase):
             result = self.route(project)
             self.assertEqual(result["status"], "RECOMMEND", result)
             self.assertEqual(result["projectStage"], "accepted", result)
+
+
+class ReviewTransactionCoherenceTest(unittest.TestCase):
+    """Review durable transaction coherence tests (charter.md + state.md + verdict.md)."""
+
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory(prefix="ask-light-tx-")
+        host_root = Path(self.temp.name) / "host"
+        host_root.mkdir()
+        self.roots = install_host_fixture_skills(host_root)
+        self._count = 0
+
+    def tearDown(self) -> None:
+        self.temp.cleanup()
+
+    def route(self, project_root: Path) -> dict[str, Any]:
+        context = {
+            "projectRoot": str(project_root),
+            "invocationControl": "explicit-only",
+            "availability": "codex",
+        }
+        return ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
+
+    def build_project(
+        self,
+        *,
+        profile: str = "generic",
+        charter_rev: str = "1",
+        state_rev: str = "1",
+        status: str = "PASS",
+        verdict: str | None = "PASS",
+        verdict_rev: str | None = "1",
+        verdict_profile: str | None = None,
+        scope: str = "src/app.py",
+    ) -> tuple[Path, str, str]:
+        self._count += 1
+        root = Path(self.temp.name) / f"tx-proj-{self._count}"
+        write_project_state(root, initialized=True, spec=True)
+        write_effort_state(root, "current", spec_status="active", ticket_statuses=["resolved"])
+        src = root / "src"
+        src.mkdir(parents=True, exist_ok=True)
+        (src / "app.py").write_text("print(1)\n", encoding="utf-8")
+        base_sha = ensure_git_baseline(root)
+
+        (src / "app.py").write_text("print(2)\n", encoding="utf-8")
+        _git(root, "add", "-A")
+        commit_all(root, "candidate commit")
+        cand_sha = _git(root, "rev-parse", "HEAD").stdout.strip()
+
+        rdir = root / ".project-review"
+        rdir.mkdir(parents=True, exist_ok=True)
+        (rdir / "charter.md").write_text(
+            "# Acceptance Charter\n\n"
+            "## Revision\n"
+            f"- Charter revision: {charter_rev}\n"
+            "- Supersedes: none\n\n"
+            "## Acceptance baseline\n"
+            "- Source: approved effort SPEC — `.scratch/current/spec.md`\n"
+            f"- Source revision or identity: commit {base_sha}\n"
+            + (f"- Fixed point: {base_sha}\n- Implementation scope: {scope}\n" if profile == "software" else "")
+            + "- Approval state: approved\n\n"
+            "## Review Profile\n"
+            f"- Profile: {profile}\n",
+            encoding="utf-8",
+        )
+        (rdir / "state.md").write_text(
+            "# Project-review State\n"
+            f"- Status: {status}\n"
+            f"- Charter revision: {state_rev}\n"
+            f"- Profile: {profile}\n"
+            "- Round: 1\n",
+            encoding="utf-8",
+        )
+        if verdict is not None:
+            v_profile = verdict_profile or profile
+            (rdir / "verdict.md").write_text(
+                "# Verdict\n\n"
+                f"- Charter revision: {verdict_rev or charter_rev}\n"
+                f"- Profile: {v_profile}\n"
+                f"- Verdict: **{verdict}**\n"
+                + (f"- Reviewed implementation revision: {cand_sha}\n" if profile == "software" else "")
+                + "- Round: round-01 (final)\n\n"
+                "## Conclusion\nBaseline accepted.\n",
+                encoding="utf-8",
+            )
+        return root, base_sha, cand_sha
+
+    def test_coherent_pass_software_and_generic_accepted(self) -> None:
+        for profile in ("generic", "software"):
+            with self.subTest(profile=profile):
+                project, _b, _c = self.build_project(profile=profile, status="PASS", verdict="PASS")
+                result = self.route(project)
+                self.assertEqual(result["status"], "RECOMMEND", result)
+                self.assertEqual(result["projectStage"], "accepted", result)
+
+    def test_active_review_states_override_old_pass_verdict(self) -> None:
+        for active_status in ("INIT", "READY", "CRITIC", "REPAIR", "EVALUATE"):
+            with self.subTest(status=active_status):
+                project, _b, _c = self.build_project(status=active_status, verdict="PASS")
+                result = self.route(project)
+                self.assertEqual(result["status"], "RECOMMEND", result)
+                self.assertEqual(result["projectStage"], "project-review", result)
+                self.assertEqual(result["skill"], "project-review", result)
+                self.assertNotEqual(result["projectStage"], "accepted")
+
+    def test_missing_state_file_fails_closed(self) -> None:
+        project, _b, _c = self.build_project(status="PASS", verdict="PASS")
+        (project / ".project-review" / "state.md").unlink()
+        result = self.route(project)
+        self.assertEqual(result["status"], "NEED-INPUT", result)
+        self.assertEqual(result["projectStage"], "review-state-unknown", result)
+
+    def test_empty_or_whitespace_state_file_fails_closed(self) -> None:
+        for empty_val in ("", "   \n\n  \t  "):
+            with self.subTest(empty_val=repr(empty_val)):
+                project, _b, _c = self.build_project(status="PASS", verdict="PASS")
+                (project / ".project-review" / "state.md").write_text(empty_val, encoding="utf-8")
+                result = self.route(project)
+                self.assertEqual(result["status"], "NEED-INPUT", result)
+                self.assertEqual(result["projectStage"], "review-state-unknown", result)
+
+    def test_missing_canonical_state_fields_fail_closed(self) -> None:
+        fields = ("Status", "Charter revision", "Profile")
+        for field in fields:
+            with self.subTest(field=field):
+                project, _b, _c = self.build_project(status="PASS", verdict="PASS")
+                state_file = project / ".project-review" / "state.md"
+                lines = [line for line in state_file.read_text(encoding="utf-8").splitlines() if not line.startswith(f"- {field}:")]
+                state_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
+                result = self.route(project)
+                self.assertEqual(result["status"], "NEED-INPUT", result)
+                self.assertEqual(result["projectStage"], "review-state-unknown", result)
+
+    def test_duplicate_canonical_state_fields_fail_closed(self) -> None:
+        cases = [
+            ("duplicate-status-identical", "- Status: PASS"),
+            ("duplicate-status-conflicting", "- Status: READY"),
+            ("duplicate-rev-identical", "- Charter revision: 1"),
+            ("duplicate-rev-conflicting", "- Charter revision: 2"),
+            ("duplicate-profile-identical", "- Profile: generic"),
+            ("duplicate-profile-conflicting", "- Profile: software"),
+        ]
+        for label, extra_line in cases:
+            with self.subTest(label=label):
+                project, _b, _c = self.build_project(status="PASS", verdict="PASS")
+                state_file = project / ".project-review" / "state.md"
+                append_durable_field(state_file, extra_line)
+                result = self.route(project)
+                self.assertEqual(result["status"], "NEED-INPUT", result)
+                self.assertEqual(result["projectStage"], "review-state-unknown", result)
+
+    def test_unknown_and_non_canonical_status_fail_closed(self) -> None:
+        unknown_statuses = ("UNKNOWN", "NOT-PASS", "PASSING", "READY FOR PASS", "COMPLETE", "DONE")
+        for bad_status in unknown_statuses:
+            with self.subTest(status=bad_status):
+                project, _b, _c = self.build_project(status=bad_status, verdict="PASS")
+                result = self.route(project)
+                self.assertEqual(result["status"], "NEED-INPUT", result)
+                self.assertEqual(result["projectStage"], "review-state-unknown", result)
+
+    def test_terminal_state_and_verdict_agreement(self) -> None:
+        cases = [
+            ("PASS", "PASS", "RECOMMEND", "accepted"),
+            ("FAIL", "FAIL", "NEED-INPUT", "acceptance-not-passed"),
+            ("BLOCKED", "BLOCKED", "NEED-INPUT", "acceptance-not-passed"),
+        ]
+        for s_status, v_verdict, exp_status, exp_stage in cases:
+            with self.subTest(state=s_status, verdict=v_verdict):
+                project, _b, _c = self.build_project(status=s_status, verdict=v_verdict)
+                result = self.route(project)
+                self.assertEqual(result["status"], exp_status, result)
+                self.assertEqual(result["projectStage"], exp_stage, result)
+
+    def test_terminal_state_and_verdict_conflicts_fail_closed(self) -> None:
+        conflicts = [
+            ("PASS", "FAIL"),
+            ("PASS", "BLOCKED"),
+            ("FAIL", "PASS"),
+            ("FAIL", "BLOCKED"),
+            ("BLOCKED", "PASS"),
+            ("BLOCKED", "FAIL"),
+        ]
+        for s_status, v_verdict in conflicts:
+            with self.subTest(state=s_status, verdict=v_verdict):
+                project, _b, _c = self.build_project(status=s_status, verdict=v_verdict)
+                result = self.route(project)
+                self.assertEqual(result["status"], "NEED-INPUT", result)
+                self.assertEqual(result["projectStage"], "acceptance-unknown", result)
+
+    def test_missing_or_empty_verdict_for_terminal_state_fails_closed(self) -> None:
+        for s_status in ("PASS", "FAIL", "BLOCKED"):
+            with self.subTest(status=s_status):
+                project, _b, _c = self.build_project(status=s_status, verdict=None)
+                result = self.route(project)
+                self.assertEqual(result["status"], "NEED-INPUT", result)
+                self.assertEqual(result["projectStage"], "review-state-unknown", result)
+
+    def test_charter_revision_mismatch_fails_closed(self) -> None:
+        # Charter revision 2, State revision 1, Verdict PASS -> not accepted
+        project, _b, _c = self.build_project(charter_rev="2", state_rev="1", status="PASS", verdict="PASS")
+        result = self.route(project)
+        self.assertEqual(result["status"], "NEED-INPUT", result)
+        self.assertEqual(result["projectStage"], "review-state-unknown", result)
+
+    def test_profile_mismatch_fails_closed(self) -> None:
+        project, _b, _c = self.build_project(profile="software", status="PASS", verdict="PASS")
+        # Change state profile to generic
+        state_file = project / ".project-review" / "state.md"
+        state_file.write_text(
+            "# State\n- Status: PASS\n- Charter revision: 1\n- Profile: generic\n- Round: 1\n",
+            encoding="utf-8",
+        )
+        result = self.route(project)
+        self.assertEqual(result["status"], "NEED-INPUT", result)
+        self.assertEqual(result["projectStage"], "review-state-unknown", result)
+
+    def test_reopen_lifecycle_full_sequence(self) -> None:
+        # 1. Start with PASS + PASS -> accepted
+        project, _b, _c = self.build_project(status="PASS", verdict="PASS")
+        result = self.route(project)
+        self.assertEqual(result["projectStage"], "accepted")
+
+        # 2. Reopen review: State becomes READY (keeping old PASS verdict) -> project-review
+        state_file = project / ".project-review" / "state.md"
+        state_file.write_text(
+            "# State\n- Status: READY\n- Charter revision: 1\n- Profile: generic\n- Round: 2\n",
+            encoding="utf-8",
+        )
+        result = self.route(project)
+        self.assertEqual(result["projectStage"], "project-review")
+        self.assertEqual(result["skill"], "project-review")
+
+        # 3. Advance to CRITIC -> project-review
+        state_file.write_text(
+            "# State\n- Status: CRITIC\n- Charter revision: 1\n- Profile: generic\n- Round: 2\n",
+            encoding="utf-8",
+        )
+        result = self.route(project)
+        self.assertEqual(result["projectStage"], "project-review")
+
+        # 4. Advance to REPAIR -> project-review
+        state_file.write_text(
+            "# State\n- Status: REPAIR\n- Charter revision: 1\n- Profile: generic\n- Round: 2\n",
+            encoding="utf-8",
+        )
+        result = self.route(project)
+        self.assertEqual(result["projectStage"], "project-review")
+
+        # 5. Advance to EVALUATE -> project-review
+        state_file.write_text(
+            "# State\n- Status: EVALUATE\n- Charter revision: 1\n- Profile: generic\n- Round: 2\n",
+            encoding="utf-8",
+        )
+        result = self.route(project)
+        self.assertEqual(result["projectStage"], "project-review")
+
+        # 6. Fresh evaluation completes: State PASS + fresh Verdict PASS -> accepted
+        state_file.write_text(
+            "# State\n- Status: PASS\n- Charter revision: 1\n- Profile: generic\n- Round: 2\n",
+            encoding="utf-8",
+        )
+        verdict_file = project / ".project-review" / "verdict.md"
+        verdict_file.write_text(
+            "# Verdict\n- Charter revision: 1\n- Profile: generic\n- Verdict: **PASS**\n- Round: round-02 (final)\n",
+            encoding="utf-8",
+        )
+        result = self.route(project)
+        self.assertEqual(result["projectStage"], "accepted")
+
+    def test_charter_revision_update_lifecycle(self) -> None:
+        # 1. rev1 PASS -> accepted
+        project, _b, _c = self.build_project(charter_rev="1", state_rev="1", status="PASS", verdict="PASS")
+        self.assertEqual(self.route(project)["projectStage"], "accepted")
+
+        # 2. Charter updated to rev 2 (state still rev 1) -> not accepted (review-state-unknown)
+        charter = project / ".project-review" / "charter.md"
+        lines = [line if not line.startswith("- Charter revision:") else "- Charter revision: 2" for line in charter.read_text(encoding="utf-8").splitlines()]
+        charter.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        self.assertEqual(self.route(project)["projectStage"], "review-state-unknown")
+
+        # 3. New review starts: State READY / rev 2 -> project-review
+        state_file = project / ".project-review" / "state.md"
+        state_file.write_text(
+            "# State\n- Status: READY\n- Charter revision: 2\n- Profile: generic\n- Round: 1\n",
+            encoding="utf-8",
+        )
+        result = self.route(project)
+        self.assertEqual(result["projectStage"], "project-review")
+        self.assertEqual(result["skill"], "project-review")
+
+        # 4. Review completes: State PASS rev 2 + new Verdict PASS rev 2 -> accepted
+        state_file.write_text(
+            "# State\n- Status: PASS\n- Charter revision: 2\n- Profile: generic\n- Round: 1\n",
+            encoding="utf-8",
+        )
+        verdict_file = project / ".project-review" / "verdict.md"
+        verdict_file.write_text(
+            "# Verdict\n- Charter revision: 2\n- Profile: generic\n- Verdict: **PASS**\n- Round: round-01 (final)\n",
+            encoding="utf-8",
+        )
+        self.assertEqual(self.route(project)["projectStage"], "accepted")
+
+    def test_c1_repair_c2_with_reopen_lifecycle(self) -> None:
+        project, base_sha, c1_sha = self.build_project(profile="software", status="READY", verdict="PASS")
+
+        # Repair to C2
+        (project / "src" / "app.py").write_text("print('repair C2')\n", encoding="utf-8")
+        _git(project, "add", "src/app.py")
+        commit_all(project, "commit C2")
+        c2_sha = _git(project, "rev-parse", "HEAD").stdout.strip()
+
+        # Fresh evaluation completes for C2
+        (project / ".project-review" / "state.md").write_text(
+            "# State\n- Status: PASS\n- Charter revision: 1\n- Profile: software\n- Round: 2\n",
+            encoding="utf-8",
+        )
+        (project / ".project-review" / "verdict.md").write_text(
+            f"# Verdict\n- Charter revision: 1\n- Profile: software\n- Verdict: **PASS**\n"
+            f"- Reviewed implementation revision: {c2_sha}\n- Round: round-02 (final)\n",
+            encoding="utf-8",
+        )
+        self.assertEqual(self.route(project)["projectStage"], "accepted")
+
+        # Reopen review for another pass
+        (project / ".project-review" / "state.md").write_text(
+            "# State\n- Status: READY\n- Charter revision: 1\n- Profile: software\n- Round: 3\n",
+            encoding="utf-8",
+        )
+        result = self.route(project)
+        self.assertEqual(result["projectStage"], "project-review")
+        self.assertNotEqual(result["projectStage"], "accepted")
+
+        # Fresh PASS completes round 3
+        (project / ".project-review" / "state.md").write_text(
+            "# State\n- Status: PASS\n- Charter revision: 1\n- Profile: software\n- Round: 3\n",
+            encoding="utf-8",
+        )
+        self.assertEqual(self.route(project)["projectStage"], "accepted")
+
+
 
 
 if __name__ == "__main__":

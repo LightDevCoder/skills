@@ -57,15 +57,16 @@ section. A source explicitly approved by the user or program record may create
 an approved Charter. A synthesized baseline starts `pending user confirmation`;
 do not review it until confirmation is recorded.
 
-Canonical durable fields are singleton fields: `- Source:`,
-`- Source revision or identity:`, and `- Profile:` (plus the software-only
-`- Fixed point:` and `- Implementation scope:`) must each appear exactly once.
-A missing, duplicated (even identically), or ambiguous canonical field is
-invalid durable review state — consumers fail closed rather than choosing a
-value. A reviewed directory `Source:` is a complete baseline: files that
-appear inside it after the recorded revision count against freshness even
-when Git ignore rules hide them from `git status` — ignore configuration
-controls status presentation, not baseline membership.
+Canonical durable fields are singleton fields: `- Charter revision:`,
+`- Source:`, `- Source revision or identity:`, and `- Profile:` (plus the
+software-only `- Fixed point:` and `- Implementation scope:`) must each appear
+exactly once and remain coherent with `state.md` and `verdict.md`. A missing,
+duplicated (even identically), or ambiguous canonical field is invalid durable
+review state — consumers fail closed rather than choosing a value. A reviewed
+directory `Source:` is a complete baseline: files that appear inside it after
+the recorded revision count against freshness even when Git ignore rules hide
+them from `git status` — ignore configuration controls status presentation,
+not baseline membership.
 
 For a software Profile, `Fixed point` and `Implementation scope` are immutable
 Charter fields frozen at `init` ([profiles/software.md](profiles/software.md)).

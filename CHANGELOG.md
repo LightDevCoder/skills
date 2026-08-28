@@ -151,6 +151,32 @@ directory-Source and implementation-scope freshness. Closed fail-closed:
   ignored-file matrix (in-scope/out-of-scope, exact-file, whole-repo,
   directory-Source children), and valid-baseline positive controls.
 
+### Changed — Durable review transaction coherence (charter.md + state.md + verdict.md)
+
+Human audit reproduced false-`accepted` verdicts at `38f4f9b` when `state.md` was
+active/non-terminal (READY, CRITIC, REPAIR, EVALUATE), missing, or updated to a
+new Charter revision while leaving a previous PASS verdict in place. `ask-light`
+now evaluates `charter.md` + `state.md` + `verdict.md` as one coherent review
+transaction:
+
+- **State file required:** `state.md` must exist and establish canonical
+  singleton fields (`Status:`, `Charter revision:`, `Profile:`). Missing or
+  duplicate fields fail closed as `review-state-unknown`.
+- **Active state overrides old verdict:** active review states (`INIT`, `READY`,
+  `CRITIC`, `REPAIR`, `EVALUATE`) immediately route to `project-review` (stage
+  `project-review`); any previous `verdict.md` is non-authoritative and never
+  accepted.
+- **Terminal State/Verdict agreement:** terminal review states (`PASS`, `FAIL`,
+  `BLOCKED`) require an agreeing `verdict.md`; conflicts fail closed as
+  `acceptance-unknown`.
+- **Charter revision & Profile coherence:** `state.md` must match `charter.md`
+  on both `Charter revision` and `Profile`; mismatches fail closed as
+  `review-state-unknown`.
+- **Tests & smoke:** 15 new test methods (300 total tests in pytest suite, 137
+  in ask-light suite) covering the full transaction matrix, reopen lifecycle,
+  Charter update lifecycle, C1→repair→C2 lifecycle, and 24 manual smoke
+  scenarios on real durable state.
+
 ### No redesign verification
 
 18 `NO REWRITE/PORT` Skills were `git diff` checked (SPEC §26): `manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `eli5`, `release-workflow`, `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts` — only minimal handoff/attribution wiring where a real integration need existed. `recap` is the separately recorded user-approved exception above.

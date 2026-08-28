@@ -53,33 +53,41 @@ Project-state evidence is fail-closed:
 - Review evidence comes from the canonical `project-review` durable state:
   `<projectRoot>/.project-review/` (or `.review-loop/` only when no
   `.project-review/` directory exists). The durable contract — Charter,
-  `state.md`, `verdict.md` — is owned by the producer Skill; this file does not
-  redefine it. `ask-light` reads the Charter `Source:` line to prove the review
-  belongs to the resolved current effort (a `.scratch/<current-effort>` SPEC
-  citation), then reads `verdict.md` for the conclusion:
-  - Proven ownership + explicit PASS (`PASS`/`passed`, markdown emphasis
-    tolerated) → accepted.
-  - Proven ownership + FAIL/BLOCKED/rejected/pending → `acceptance-not-passed`.
-  - Proven ownership + missing/unreadable conclusion → no acceptance claim;
-    `ask-light` routes back to `project-review`, whose resume mode owns the
-    recorded state. Lifecycle values such as `complete`/`done` are never
-    verdicts.
+  `state.md`, `verdict.md` — forms one coherent durable review transaction
+  owned by the producer Skill; this file does not redefine it. `ask-light`
+  reads the Charter `Source:` line to prove the review belongs to the resolved
+  current effort (a `.scratch/<current-effort>` SPEC citation), checks that
+  `state.md` is coherent with the Charter revision and Profile, and determines
+  the active or terminal review state:
+  - Active review state (`INIT`, `READY`, `CRITIC`, `REPAIR`, `EVALUATE`) →
+    routed to `project-review` (stage `project-review`); any previous verdict
+    is non-authoritative.
+  - Missing, empty, or malformed `state.md`, missing/ambiguous canonical
+    fields (`Status:`, `Charter revision:`, `Profile:`), Charter revision
+    mismatch, or Profile mismatch → fail closed as `review-state-unknown`.
+  - Terminal review state (`PASS`, `FAIL`, `BLOCKED`) requires an agreeing
+    `verdict.md`; State/Verdict conflicts fail closed as `acceptance-unknown`.
+  - Proven ownership + coherent PASS + fresh baseline → `accepted`.
+  - Proven ownership + coherent FAIL/BLOCKED/rejected + fresh baseline →
+    `acceptance-not-passed`.
   - Verdicts citing another effort → ignored for current acceptance.
   - A record whose ownership cannot be established from the Charter
     `Source:` fails closed as `review-ownership-unknown`; `ask-light` never
     infers PASS from an unowned verdict.
 - A verdict applies only to the baseline revision it reviewed. After ownership
-  is proven, `ask-light` also verifies the Charter's frozen
+  and state coherence are proven, `ask-light` also verifies the Charter's frozen
   `Source revision or identity` against the cited source paths before trusting
   any conclusion (definitions remain producer-owned):
-  - Canonical durable fields are singleton fields: `Source:`,
-    `Source revision or identity:`, and `Profile:` in the Charter, plus the
+  - Canonical durable fields are singleton fields: `Charter revision:`,
+    `Source:`, `Source revision or identity:`, and `Profile:` in the Charter,
+    `Status:`, `Charter revision:`, and `Profile:` in `state.md`, plus the
     software-only `Fixed point:` / `Implementation scope:` and the verdict's
     `Reviewed implementation revision:`. Each must appear exactly once — a
     missing or duplicated field (even identically duplicated, in either field
     order) is invalid durable state and fails closed as
-    `review-ownership-unknown` or `review-freshness-unknown`; `ask-light`
-    never reads "first value wins" from an authoritative field.
+    `review-ownership-unknown`, `review-state-unknown`, or
+    `review-freshness-unknown`; `ask-light` never reads "first value wins" from
+    an authoritative field.
   - Every cited `.scratch` path still matching the recorded Git commit —
     including uncommitted working-tree modifications — keeps the verdict
     current; PASS stays accepted. A cited directory source is reviewed as a

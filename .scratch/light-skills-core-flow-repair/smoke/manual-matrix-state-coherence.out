@@ -1,0 +1,28 @@
+Scenario                                      | ProjectStage           | Skill           | Verdict
+-----------------------------------------------------------------------------------------------
+1. coherent PASS transaction                  | accepted               |                 | [PASS]
+2. READY + old PASS                           | project-review         | project-review  | [PASS]
+3. CRITIC + old PASS                          | project-review         | project-review  | [PASS]
+4. REPAIR + old PASS                          | project-review         | project-review  | [PASS]
+5. EVALUATE + old PASS                        | project-review         | project-review  | [PASS]
+6. missing state.md                           | review-state-unknown   |                 | [PASS]
+7. missing Status                             | review-state-unknown   |                 | [PASS]
+8. duplicate Status                           | review-state-unknown   |                 | [PASS]
+9. unknown Status                             | review-state-unknown   |                 | [PASS]
+10. State FAIL + Verdict PASS                 | acceptance-unknown     |                 | [PASS]
+11. State PASS + Verdict FAIL                 | acceptance-unknown     |                 | [PASS]
+12. State BLOCKED + Verdict PASS              | acceptance-unknown     |                 | [PASS]
+13. Charter revision mismatch                 | review-state-unknown   |                 | [PASS]
+14. Profile mismatch                          | review-state-unknown   |                 | [PASS]
+15. rev1 PASS                                 | accepted               |                 | [PASS]
+16. Charter changes to rev2                   | review-state-unknown   |                 | [PASS]
+17. READY rev2                                | project-review         | project-review  | [PASS]
+18. PASS rev2 + fresh PASS                    | accepted               |                 | [PASS]
+19. C1->repair->C2 PASS                       | accepted               |                 | [PASS]
+20. reopen C2 review                          | project-review         | project-review  | [PASS]
+21. post-C2 in-scope drift                    | review-stale           | project-review  | [PASS]
+22. out-of-scope README                       | accepted               |                 | [PASS]
+23. ignored in-scope implementation file      | review-stale           | project-review  | [PASS]
+24. ignored directory Source child            | review-stale           | project-review  | [PASS]
+-----------------------------------------------------------------------------------------------
+ALL 24 SCENARIOS PASSED: True

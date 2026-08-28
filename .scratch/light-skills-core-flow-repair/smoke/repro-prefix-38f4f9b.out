@@ -1,0 +1,9 @@
+=== Pre-fix Reproduction Matrix (Baseline 38f4f9b) ===
+A (READY + PASS): project-review | skill: project-review
+B (CRITIC + PASS): project-review | skill: project-review
+C (REPAIR + PASS): project-review | skill: project-review
+D (EVALUATE + PASS): project-review | skill: project-review
+E (missing state.md + PASS): review-state-unknown | skill: 
+F (Charter rev 2, State rev 1 + PASS): review-state-unknown | skill: 
+G (Profile mismatch generic vs software): review-state-unknown | skill: 
+H (State FAIL + Verdict PASS): acceptance-unknown | skill: 

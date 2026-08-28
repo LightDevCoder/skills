@@ -57,11 +57,23 @@ overwrite an existing Charter, finding, or round record.
         `-- evaluator-verdict.md
 ```
 
-`charter.md` is the frozen acceptance baseline. `findings.md` is the canonical
-finding registry. `state.md` is the current status, round, blocker, and next
-action. Round files preserve observations and evidence; `verdict.md` is the
-latest conclusion. Keep facts in authoritative record and link rather than
-duplicate.
+`charter.md`, `state.md`, and `verdict.md` form one coherent durable review
+transaction:
+- `charter.md` defines what is being reviewed (Charter revision, Profile,
+  Source baseline, Fixed point, and Implementation scope).
+- `state.md` is authoritative for the current review lifecycle state (`Status`,
+  `Charter revision`, `Profile`, `Round`, and next action).
+- `verdict.md` is authoritative only for a coherent terminal State (`PASS`,
+  `FAIL`, `BLOCKED`). When a review is active or reopened (`INIT`, `READY`,
+  `CRITIC`, `REPAIR`, `EVALUATE`), old verdicts do not remain authoritative.
+- For terminal acceptance, `state.md` and `verdict.md` must agree, and `Charter
+  revision` and `Profile` across `charter.md`, `state.md`, and `verdict.md`
+  must be mutually coherent.
+- Canonical fields in `state.md` (`Status:`, `Charter revision:`, `Profile:`)
+  are singleton fields; missing, ambiguous, or duplicate fields fail closed.
+`findings.md` is the canonical finding registry. Round files preserve
+observations and evidence. Keep facts in authoritative record and link rather
+than duplicate.
 
 ## `init` workflow
 

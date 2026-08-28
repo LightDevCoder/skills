@@ -982,10 +982,193 @@ skills/project-review/tests/test_software_profile_contract.py
 - Carried forward unchanged: committed symlink content beyond the link value
   is unverifiable by Git; truncated (>64 KB) records fail closed; scope-choice
   soundness remains a producer duty; live Codex host transition unobserved.
-- This round, by design: identical duplicate `Verdict: PASS` values are
-  interpretation-invariant and still accepted (any conflicting verdict value
-  fails closed); SPEC `Status:` duplication is outside the durable review
-  contract (frozen routing); field-shaped lines inside fenced code blocks
-  count as occurrences (over-strict, fail-closed); a single 7–40-hex token
-  remains a valid free-form `Source revision or identity` (field name allows
-  identity forms; strict 40-hex only for the software identities).
+	- This round, by design: identical duplicate `Verdict: PASS` values are
+	  interpretation-invariant and still accepted (any conflicting verdict value
+	  fails closed); SPEC `Status:` duplication is outside the durable review
+	  contract (frozen routing); field-shaped lines inside fenced code blocks
+	  count as occurrences (over-strict, fail-closed); a single 7–40-hex token
+	  remains a valid free-form `Source revision or identity` (field name allows
+	  identity forms; strict 40-hex only for the software identities).
+
+---
+
+# Final Repair Results — Durable Review Transaction Coherence
+
+## Human audit baseline
+
+`38f4f9b867777a95c818ef7d3845e2bb42c679b0` (`fix: harden project-review durable baseline`)
+
+## Pre-fix state.md reproductions (§28)
+
+Against baseline `38f4f9b`, `ask-light` evaluated `charter.md` and `verdict.md` while completely ignoring `.project-review/state.md`. Executed with real project-review durable state (`.scratch/light-skills-core-flow-repair/smoke/repro-prefix-38f4f9b.{py,out}`):
+
+- **A (State READY + old Verdict PASS):** returned `accepted` ❌ (false positive; active review bypassed).
+- **B (State CRITIC + old Verdict PASS):** returned `accepted` ❌ (false positive; active review bypassed).
+- **C (State REPAIR + old Verdict PASS):** returned `accepted` ❌ (false positive; active review bypassed).
+- **D (State EVALUATE + old Verdict PASS):** returned `accepted` ❌ (false positive; active review bypassed).
+- **E (missing state.md + Verdict PASS):** returned `accepted` ❌ (false positive; missing lifecycle state ignored).
+- **F (Charter rev 2, State/Verdict rev 1):** returned `accepted` ❌ (false positive; revision mismatch bypassed).
+- **G (State Profile != Charter Profile):** returned `accepted` ❌ (false positive; profile mismatch bypassed).
+- **H (State FAIL + Verdict PASS):** returned `accepted` ❌ (false positive; record conflict bypassed).
+
+## Root cause
+
+`ask-light`'s `inspect_project_state` read `charter.md` for ownership/freshness and `verdict.md` for conclusion without checking `state.md`. Consequently, whenever review was active/reopened (`READY`, `CRITIC`, `REPAIR`, `EVALUATE`), `state.md` was missing, or the Charter was updated to a new revision, any pre-existing `verdict.md` with `PASS` survived as authoritative acceptance.
+
+## Final durable transaction contract (§4–§16)
+
+`charter.md` + `state.md` + `verdict.md` are evaluated as one indivisible durable review transaction:
+1. **Charter (`charter.md`):** defines what is being reviewed (Charter revision, Profile, Source baseline, Fixed point, Implementation scope).
+2. **State (`state.md`):** defines where the review currently is in its lifecycle (`Status:`, `Charter revision:`, `Profile:`, `Round:`).
+3. **Verdict (`verdict.md`):** records the terminal closeout conclusion for that exact review.
+
+A verdict is authoritative if and only if all three parts are mutually coherent.
+
+## Canonical State fields (§6, §7)
+
+`state.md` is mandatory and must establish:
+- `- Status:` (exact token from canonical state machine)
+- `- Charter revision:` (exact revision identifier)
+- `- Profile:` (normalized lowercase profile token)
+
+All State fields are authoritative singletons: exactly 1 occurrence parses; 0 or >1 occurrences (even identical duplicates) fail closed as `review-state-unknown`.
+
+## State status semantics (§8, §9, §26)
+
+- **Active / Non-Terminal States (`INIT`, `READY`, `CRITIC`, `REPAIR`, `EVALUATE`):** review is in progress. Routes immediately to `project-review` (stage `project-review`, skill `project-review`). Any previous `verdict.md` is non-authoritative and never accepted.
+- **Terminal States (`PASS`, `FAIL`, `BLOCKED`):** review is complete; requires an agreeing `verdict.md`.
+- **Unknown Status:** any non-canonical status (`UNKNOWN`, `NOT-PASS`, `PASSING`, `READY FOR PASS`) fails closed as `review-state-unknown`. Exact token matching only (no substring matching).
+
+## Charter revision coherence (§13)
+
+`state.md`'s `Charter revision` must match `charter.md`'s `Charter revision` exactly. If `verdict.md` records `Charter revision`, it must also match. Any mismatch fails closed as `review-state-unknown`.
+
+## Profile coherence (§14)
+
+`state.md`'s `Profile` must match `charter.md`'s `Profile` (and `verdict.md`'s `Profile` if recorded). Any mismatch fails closed as `review-state-unknown`.
+
+## Terminal State / Verdict agreement (§10)
+
+For terminal review states:
+- `State PASS` + `Verdict PASS` → coherent terminal PASS (evaluates freshness).
+- `State FAIL` + `Verdict FAIL` → coherent terminal FAIL (`acceptance-not-passed` when fresh).
+- `State BLOCKED` + `Verdict BLOCKED` → coherent terminal BLOCKED (`acceptance-not-passed` when fresh).
+- Conflicts (`PASS`+`FAIL`, `PASS`+`BLOCKED`, `FAIL`+`PASS`, `FAIL`+`BLOCKED`, `BLOCKED`+`PASS`, `BLOCKED`+`FAIL`) fail closed as `acceptance-unknown`.
+
+## Reopen lifecycle (§17)
+
+1. Initial round: `State PASS` + `Verdict PASS` → `accepted`.
+2. Review reopened: `State READY` (with previous `Verdict PASS`) → `project-review` (not accepted).
+3. Review progresses: `CRITIC` → `REPAIR` → `EVALUATE` → `project-review` (not accepted).
+4. Fresh evaluation completes: `State PASS` + fresh `Verdict PASS` → `accepted`.
+
+## Charter revision update lifecycle (§18)
+
+1. `Charter rev 1` + `State PASS rev 1` + `Verdict PASS rev 1` → `accepted`.
+2. Charter updated to `Charter rev 2` (state still rev 1) → `review-state-unknown` (not accepted).
+3. New review started: `State READY rev 2` → `project-review`.
+4. Review completes: `State PASS rev 2` + `Verdict PASS rev 2` → `accepted`.
+
+## Regression tests (§29–§32)
+
+Added `ReviewTransactionCoherenceTest` (15 methods) in `skills/ask-light/tests/test_ask_light_behavior.py`:
+- `test_coherent_pass_software_and_generic_accepted` (generic & software profiles)
+- `test_active_review_states_override_old_pass_verdict` (`INIT`, `READY`, `CRITIC`, `REPAIR`, `EVALUATE`)
+- `test_missing_state_file_fails_closed`
+- `test_empty_or_whitespace_state_file_fails_closed`
+- `test_missing_canonical_state_fields_fail_closed` (`Status`, `Charter revision`, `Profile`)
+- `test_duplicate_canonical_state_fields_fail_closed` (identical & conflicting duplicates)
+- `test_unknown_and_non_canonical_status_fail_closed`
+- `test_terminal_state_and_verdict_agreement` (`PASS`, `FAIL`, `BLOCKED`)
+- `test_terminal_state_and_verdict_conflicts_fail_closed` (6 conflict combinations)
+- `test_missing_or_empty_verdict_for_terminal_state_fails_closed`
+- `test_charter_revision_mismatch_fails_closed`
+- `test_profile_mismatch_fails_closed`
+- `test_reopen_lifecycle_full_sequence`
+- `test_charter_revision_update_lifecycle`
+- `test_c1_repair_c2_with_reopen_lifecycle`
+
+All 285 pre-existing tests + 15 new test methods (300 total) pass cleanly.
+
+## Manual smoke results (§36)
+
+Ran full 24-scenario smoke matrix against real durable state on disk (`.scratch/light-skills-core-flow-repair/smoke/manual-matrix-state-coherence.{py,out}`):
+
+```text
+Scenario                                      | ProjectStage           | Skill           | Verdict
+-----------------------------------------------------------------------------------------------
+1. coherent PASS transaction                  | accepted               |                 | [PASS]
+2. READY + old PASS                           | project-review         | project-review  | [PASS]
+3. CRITIC + old PASS                          | project-review         | project-review  | [PASS]
+4. REPAIR + old PASS                          | project-review         | project-review  | [PASS]
+5. EVALUATE + old PASS                        | project-review         | project-review  | [PASS]
+6. missing state.md                           | review-state-unknown   |                 | [PASS]
+7. missing Status                             | review-state-unknown   |                 | [PASS]
+8. duplicate Status                           | review-state-unknown   |                 | [PASS]
+9. unknown Status                             | review-state-unknown   |                 | [PASS]
+10. State FAIL + Verdict PASS                 | acceptance-unknown     |                 | [PASS]
+11. State PASS + Verdict FAIL                 | acceptance-unknown     |                 | [PASS]
+12. State BLOCKED + Verdict PASS              | acceptance-unknown     |                 | [PASS]
+13. Charter revision mismatch                 | review-state-unknown   |                 | [PASS]
+14. Profile mismatch                          | review-state-unknown   |                 | [PASS]
+15. rev1 PASS                                 | accepted               |                 | [PASS]
+16. Charter changes to rev2                   | review-state-unknown   |                 | [PASS]
+17. READY rev2                                | project-review         | project-review  | [PASS]
+18. PASS rev2 + fresh PASS                    | accepted               |                 | [PASS]
+19. C1->repair->C2 PASS                       | accepted               |                 | [PASS]
+20. reopen C2 review                          | project-review         | project-review  | [PASS]
+21. post-C2 in-scope drift                    | review-stale           | project-review  | [PASS]
+22. out-of-scope README                       | accepted               |                 | [PASS]
+23. ignored in-scope implementation file      | review-stale           | project-review  | [PASS]
+24. ignored directory Source child            | review-stale           | project-review  | [PASS]
+-----------------------------------------------------------------------------------------------
+ALL 24 SCENARIOS PASSED: True
+```
+
+## Specialist review findings (§35)
+
+- **Reviewer A (Producer state machine coherence):** Q1–Q4 all verified with test coverage and manual smoke. Active states never trust old verdicts; Charter revision changes invalidate old state; Profile mismatches fail closed; reopen lifecycle transitions cleanly without dead ends.
+- **Reviewer B (Consumer fail-closed behavior):** Q1–Q4 all verified with test coverage and manual smoke. Missing/empty `state.md` and missing/duplicate canonical fields fail closed; singleton parsing enforces cardinality; old verdicts cannot bypass State; terminal conflicts fail closed without precedence assumptions.
+
+## Full validation (§37)
+
+```text
+python3 -m pytest -q                        → 300 passed
+python3 -m unittest discover -s tests       → OK (COLLECTION 245 + HOOKS 7 assertions)
+python3 -m compileall -q skills tests       → OK
+git diff --check                            → OK
+git status --short                          → only intended changes
+
+Local skill suites:
+- ask-light (137 tests)                     → OK
+- project-review (10 tests)                 → OK
+- socratic (21 tests)                       → OK
+- clarify (5 tests)                         → OK
+- project-clarify (11 tests)                → OK
+- project-init (32 tests)                   → OK
+- review-loop (19 tests)                    → OK
+```
+
+## Files changed
+
+```text
+CHANGELOG.md
+skills/ask-light/scripts/ask_light.py
+skills/ask-light/references/discovery-contract.md
+skills/ask-light/tests/test_ask_light_behavior.py
+skills/project-review/references/WORKFLOW.md
+skills/project-review/references/acceptance-charter.md
+skills/project-review/references/evidence-protocol.md
+.scratch/light-skills-core-flow-repair/results.md
+.scratch/light-skills-core-flow-repair/smoke/repro-prefix-38f4f9b.{py,out}
+.scratch/light-skills-core-flow-repair/smoke/manual-matrix-state-coherence.{py,out}
+```
+
+## Remaining accepted limitations
+
+- Symlink target contents outside Git's tracked representation remain unverifiable by Git (carried forward unchanged).
+- >64 KB durable-record truncation fails closed (carried forward unchanged).
+- Scope-choice quality remains a producer responsibility (carried forward unchanged).
+- Git assume-unchanged / skip-worktree can hide tracked modifications from `git diff` (git-domain limit, carried forward unchanged).
+- Live Codex host-transition evidence is unavailable in this environment (carried forward unchanged).
+- Identical duplicate `Verdict: PASS` lines are interpretation-invariant and still accepted when State is PASS (conflicting verdict values fail closed as `acceptance-unknown`).
