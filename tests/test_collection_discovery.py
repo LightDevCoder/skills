@@ -108,8 +108,8 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
             len(png_bytes) > 100 and png_bytes[0] == 137 and png_bytes[1] == 80 and png_bytes[2] == 78 and png_bytes[3] == 71,
             "Header PNG does not have a valid PNG signature.",
         )
-    c.check("npx skills add LightDevCoder/skills --yes --copy --agent '*'" in installation, "Installation guide is missing the generic whole-repository latest install command.")
-    c.check("npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'" in installation, "Installation guide is missing the generic per-Skill latest install command.")
+    c.check("npx skills add LightDevCoder/skills" in installation, "Installation guide is missing the generic whole-repository latest install command.")
+    c.check("npx skills add LightDevCoder/skills --skill project-review" in installation, "Installation guide is missing the generic per-Skill latest install command.")
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.1\.2", installation)), "Installation guide is missing the historical pinned v0.1.2 release command.")
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.1\.3", installation)), "Installation guide is missing the historical pinned v0.1.3 release command.")
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.1\.4", installation)), "Installation guide is missing the historical pinned v0.1.4 release command.")

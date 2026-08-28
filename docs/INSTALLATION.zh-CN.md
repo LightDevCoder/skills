@@ -4,33 +4,74 @@
 
 公开第一方集合当前稳定版本是 [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0)，发布自 commit `9c2572bc0361e1e2c34cb4b6c02fdaa4ed349d47`。它提供 **33 个已准入的第一方 Skill**（上一稳定版为 9 个包的 `v0.1.6`）。`skills/<name>/` 内的包契约仍是行为权威；本页规定安装方法与验证记录。
 
-标准安装命令是通用 `latest` 形式：它跟随仓库默认 revision，因此 `npx skills add LightDevCoder/skills` 安装默认分支上的当前 33 包集合。下面的 `v0.2.0` 命令已在独立隔离环境中针对全新目录完成验证，见 [v0.2.0 安装验证](evidence/releases/v0.2.0/INSTALLATION_VERIFICATION.zh-CN.md)。
+标准安装命令是通用 `latest` 形式：它跟随仓库默认 revision，因此 `npx skills add LightDevCoder/skills` 是推荐的交互式安装入口，可按需选择 Skill 与目标 Agent。pinned release 命令选择已发布的 tag，用于可复现安装。历史验证命令（曾用于在隔离环境中跨所有受支持 Agent 测试完整集合）与历史证据一同记录在下方。
+
+## 推荐安装方式
+
+### 交互式安装（推荐）
+
+运行交互式安装命令，按需挑选所需的 Skill 及目标 Agent：
+
+```bash
+npx skills add LightDevCoder/skills
+```
+
+### 安装单个 Skill
+
+若只需安装指定 Skill，无需在全量集合中选择：
+
+```bash
+npx skills add LightDevCoder/skills --skill project-review
+npx skills add LightDevCoder/skills --skill research
+```
+
+### 指定稳定版本安装（Pinned Release）
+
+通过指定发布的 Release Tag 进行确定性安装：
+
+```bash
+npx skills add LightDevCoder/skills#v0.2.0
+npx skills add LightDevCoder/skills#v0.2.0 --skill project-review
+```
+
+### 直接指定目标 Agent
+
+若已明确所需配置的 Agent，可传入 `--agent <agent>` 参数：
+
+```bash
+npx skills add LightDevCoder/skills --agent claude-code
+```
+
+> **关于 Agent 目标的说明：** 请仅指定实际使用的 Agent。除非你确实希望为本机上所有受支持的 Agent 目录均写入 Skill，否则请勿传入 `--agent '*'`。
+
+### 安装选项与参数说明
+
+- **安装范围（Scope）：** 默认情况下，Skills CLI 会交互提示选择项目级（Project-local）或全局/用户级（Global/user-level）安装。使用 `-g` 或 `--global` 可直接安装至用户主目录。
+- **复制模式（`--copy`）：** 默认情况下，Skills CLI 会通过规范位置建立符号链接（Symlink），避免在多个 Agent 目录间重复复制文件。仅在宿主环境不支持符号链接或确实需要为每个 Agent 维护独立副本时使用 `--copy`。注意：强制复制模式会将 Skill 文件完整写入每个目标 Agent 目录。
+- **非交互/自动化（`--yes` / `-y`）：** 跳过交互式确认提示。在未指定 `--skill` 或 `--agent` 时，`--yes` 会将所有 Skill 安装至检测到的 Agent。在 CI 或自动化脚本中，请将 `--yes` 与明确的 `--skill` 和 `--agent` 配合使用（例如 `npx skills add LightDevCoder/skills#v0.2.0 --skill project-review --agent claude-code --yes`）。
 
 ## Revision 语义
 
 官方 Skills CLI 支持 GitHub source 的 `#ref` fragment，并将其作为 Git revision；没有 fragment 的仓库简写使用仓库默认 revision。可查看 [官方 source parser](https://raw.githubusercontent.com/vercel-labs/skills/main/src/source-parser.ts) 和 [Git helper](https://raw.githubusercontent.com/vercel-labs/skills/main/src/git.ts)。
 
-下面的通用 `latest` 命令不带 fragment，因此跟随仓库默认 revision：它安装当前集合，是标准安装方式。pinned `#v0.2.0` 形式选择已发布的 tag，用于可复现安装与 release 验证。两者都不是对未来默认 revision 的声明；对 fresh destination 重新运行 discovery，以获取解析后的实际内容。
+下面的通用 `latest` 命令不带 fragment，因此跟随仓库默认 revision：它从默认分支安装，是推荐的通用入口。pinned `#v0.2.0` 形式选择已发布的 tag，用于可复现安装与 release 验证。两者都不是对未来默认 revision 的声明；对 fresh destination 重新运行 discovery，以获取解析后的实际内容。
 
-通用 `latest` 形式（安装全部 33 个包）为：
+## 历史 Release 验证记录
 
-```text
-npx skills add LightDevCoder/skills --yes --copy --agent '*'
-npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'
-npx skills add LightDevCoder/skills --skill project-review --yes --copy --agent '*'
-npx skills add LightDevCoder/skills --skill research --yes --copy --agent '*'
-```
+历史 Release 验证在隔离环境中通过批量参数（例如 `--yes --copy --agent '*'`）完成了全量集合安装测试。发布验证测试使用这些参数是为了同时验证所有目标环境，而面向用户的当前推荐命令已去除了全量通配与不必要的强制复制。
 
-## v0.2.0 release 命令（当前稳定版，33 个包）
+### 历史 v0.2.0 验证（33 个包）
 
-v0.2.0 release 命令在全新隔离环境中针对已发布的 v0.2.0 tag 进行了完整验证，安装全部 33 个包：
+v0.2.0 release 命令在全新隔离环境中针对已发布的 v0.2.0 tag 进行了完整验证：
 
-```text
+```bash
 npx skills add LightDevCoder/skills#v0.2.0 --yes --copy --agent '*'
 npx skills add LightDevCoder/skills#v0.2.0 --skill project-review --yes --copy --agent '*'
 npx skills add LightDevCoder/skills#v0.2.0 --skill agent-config --yes --copy --agent '*'
 npx skills add LightDevCoder/skills#v0.2.0 --skill implement --yes --copy --agent '*'
 ```
+
+详见 [v0.2.0 安装验证](evidence/releases/v0.2.0/INSTALLATION_VERIFICATION.zh-CN.md)。
 
 ## 历史 v0.1.6 release 命令
 

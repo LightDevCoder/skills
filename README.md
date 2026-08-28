@@ -23,26 +23,32 @@ Skills follow the progressive disclosure patterns of Matt Pocock Skills and the 
 
 ## Installation
 
-Install all 33 Skills using the Skills CLI:
+Install Light Skills using the interactive Skills CLI:
 
-```text
-npx skills add LightDevCoder/skills --yes --copy --agent '*'
+```bash
+npx skills add LightDevCoder/skills
 ```
 
 Install a single Skill:
 
-```text
-npx skills add LightDevCoder/skills --skill project-review --yes --copy --agent '*'
-npx skills add LightDevCoder/skills --skill research --yes --copy --agent '*'
+```bash
+npx skills add LightDevCoder/skills --skill project-review
+npx skills add LightDevCoder/skills --skill research
 ```
 
 Pin to the v0.2.0 release:
 
-```text
-npx skills add LightDevCoder/skills#v0.2.0 --yes --copy --agent '*'
+```bash
+npx skills add LightDevCoder/skills#v0.2.0
 ```
 
-See [Installation](docs/INSTALLATION.md) for scope options, manual file copying, and verification notes.
+Target a specific Agent directly:
+
+```bash
+npx skills add LightDevCoder/skills --agent claude-code
+```
+
+See [Installation](docs/INSTALLATION.md) for advanced options (explicit agent targets, copy mode, non-interactive CI flags), manual file copying, and verification notes.
 
 ## Quick Start
 

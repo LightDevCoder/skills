@@ -36,4 +36,4 @@ builder 会报告 `created`、`updated`、`no-op`、`duplicate` 或 `blocked`。
 
 ## 安装与发现验证
 
-对于已发布的 v0.1.2，使用 `npx skills add LightDevCoder/skills --skill learn-anything --yes --copy --agent '*'` 安装，刷新 host，在脱离 source checkout 的情况下检查 `SKILL.md`、`agents/openai.yaml` 和 `hooks/`。显式 metadata 必须包含 `allow_implicit_invocation: false`。
+使用 `npx skills add LightDevCoder/skills --skill learn-anything` 安装，刷新 host，在脱离 source checkout 的情况下检查 `SKILL.md`、`agents/openai.yaml` 和 `hooks/`。显式 metadata 必须包含 `allow_implicit_invocation: false`。

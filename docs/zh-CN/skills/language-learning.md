@@ -36,7 +36,7 @@ $language-learning Spanish, flashcards for: perro, gato, casa
 
 运行 [package tests](../../../skills/language-learning/tests/)，并检查 `agents/openai.yaml` 中的 `allow_implicit_invocation: false`。纯提示型快速通道 `PASS` 准入证据见[准入记录](../../evidence/admissions/language-learning/README.zh-CN.md)。
 
-`language-learning` 已在 v0.1.2 中发布。使用 `npx skills add LightDevCoder/skills --skill language-learning --yes --copy --agent '*'` 安装，刷新 host，并在脱离 source checkout 的情况下确认 discovery；见[安装策略](../../INSTALLATION.zh-CN.md)。
+`language-learning` 已在 v0.1.2 中发布。使用 `npx skills add LightDevCoder/skills --skill language-learning` 安装，刷新 host，并在脱离 source checkout 的情况下确认 discovery；见[安装策略](../../INSTALLATION.zh-CN.md)。
 
 ## 行为来源
 

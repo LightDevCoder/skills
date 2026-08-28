@@ -31,7 +31,7 @@ Fresh-copy and independent review evidence is recorded in the
 
 The prior `recap` form is released in v0.1.2; this manual-only amendment remains
 unreleased in the current candidate. Install the current stable release form with
-`npx skills add LightDevCoder/skills#v0.1.6 --skill recap --yes --copy --agent '*'`,
+`npx skills add LightDevCoder/skills#v0.1.6 --skill recap`,
 refresh, and confirm discovery without the source checkout under
 [the installation policy](../INSTALLATION.md).
 

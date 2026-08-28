@@ -8,18 +8,18 @@ workflow and not a record of commands already run.
 
 ## 1. Install
 
-The commands below install the published v0.1.2 release. The output remains a
+The commands below install the published collection. The output remains a
 recommendation boundary; installation does not authorize automatic chaining.
 
-```text
-npx skills add LightDevCoder/skills --yes --copy --agent '*'
+```bash
+npx skills add LightDevCoder/skills
 ```
 
 Refresh the Agent host and confirm discovery without this source checkout.
 For a single package, use for example:
 
-```text
-npx skills add LightDevCoder/skills --skill ask-light --yes --copy --agent '*'
+```bash
+npx skills add LightDevCoder/skills --skill ask-light
 ```
 
 ## 2. Inspect the example

@@ -50,6 +50,6 @@ is `PASS` with no unresolved `BLOCKED` condition. Evidence is recorded in the
 [admission record](../evidence/admissions/kb-init/README.md).
 
 `kb-init` is released in v0.1.6. Install it with
-`npx skills add LightDevCoder/skills --skill kb-init --yes --copy --agent '*'`,
+`npx skills add LightDevCoder/skills --skill kb-init`,
 refresh, and confirm discovery without the source checkout under
 the [installation policy](../INSTALLATION.md).

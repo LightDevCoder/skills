@@ -23,26 +23,32 @@
 
 ## 安装
 
-使用 Skills CLI 安装全部 33 个 Skill：
+使用 Skills CLI 交互式安装 Light Skills：
 
-```text
-npx skills add LightDevCoder/skills --yes --copy --agent '*'
+```bash
+npx skills add LightDevCoder/skills
 ```
 
 安装单个 Skill：
 
-```text
-npx skills add LightDevCoder/skills --skill project-review --yes --copy --agent '*'
-npx skills add LightDevCoder/skills --skill research --yes --copy --agent '*'
+```bash
+npx skills add LightDevCoder/skills --skill project-review
+npx skills add LightDevCoder/skills --skill research
 ```
 
-指定 v0.2.0 版本安装：
+指定 v0.2.0 稳定版本安装：
 
-```text
-npx skills add LightDevCoder/skills#v0.2.0 --yes --copy --agent '*'
+```bash
+npx skills add LightDevCoder/skills#v0.2.0
 ```
 
-详细安装范围、手动复制方式与验证记录见[安装指南](docs/INSTALLATION.zh-CN.md)。
+直接指定目标 Agent：
+
+```bash
+npx skills add LightDevCoder/skills --agent claude-code
+```
+
+详细安装选项（指定 Agent、独立复制模式、非交互式 CI 安装）、手动复制方式与验证记录见[安装指南](docs/INSTALLATION.zh-CN.md)。
 
 ## 快速上手
 

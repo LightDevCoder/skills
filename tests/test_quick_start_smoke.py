@@ -23,7 +23,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     agents = (root / "examples/quick-start/AGENTS.md").read_text(encoding="utf-8", errors="replace")
 
     c.check(
-        "npx skills add LightDevCoder/skills --yes --copy --agent '*'" in en
+        "npx skills add LightDevCoder/skills" in en
         and "npx skills add LightDevCoder/skills --skill ask-light" in en
         and "$ask-light next" in en
         and "$project-init" in en

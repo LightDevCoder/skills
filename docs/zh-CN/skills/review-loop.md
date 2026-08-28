@@ -32,4 +32,4 @@
 
 ## 安装与发现验证
 
-使用 `npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'` 安装，刷新 host，在不依赖 source checkout 的情况下检查已发现的 `SKILL.md` 和 `agents/openai.yaml`。运行 [tests](../../../skills/review-loop/tests/)；结果记录在[安装证据](../../evidence/releases/v0.1.6/INSTALLATION_VERIFICATION.zh-CN.md)。
+使用 `npx skills add LightDevCoder/skills --skill review-loop` 安装，刷新 host，在不依赖 source checkout 的情况下检查已发现的 `SKILL.md` 和 `agents/openai.yaml`。运行 [tests](../../../skills/review-loop/tests/)；结果记录在[安装证据](../../evidence/releases/v0.1.6/INSTALLATION_VERIFICATION.zh-CN.md)。

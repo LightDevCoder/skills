@@ -85,9 +85,9 @@ Agent Avatar: /path/to/codex-icon.png
 
 从当前版本安装：
 
-```text
-npx skills add LightDevCoder/skills --skill kanban-worker --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.1.6 --skill kanban-worker --yes --copy --agent '*'
+```bash
+npx skills add LightDevCoder/skills --skill kanban-worker
+npx skills add LightDevCoder/skills#v0.1.6 --skill kanban-worker
 ```
 
 v0.1.5 的 pinned `#v0.1.5 --skill light-kanban-worker` 命令安装在旧名下，保留在 v0.1.5 安装记录中。刷新 host 并在脱离 source checkout 的情况下确认 discovery。兼容 Light-Kanban v1.0.4+。

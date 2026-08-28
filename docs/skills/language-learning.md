@@ -55,7 +55,7 @@ fast-track `PASS` admission evidence is recorded in the
 [admission record](../evidence/admissions/language-learning/README.md).
 
 `language-learning` is released in v0.1.2. Install it with
-`npx skills add LightDevCoder/skills --skill language-learning --yes --copy --agent '*'`,
+`npx skills add LightDevCoder/skills --skill language-learning`,
 refresh, and confirm discovery without the source checkout under
 [the installation policy](../INSTALLATION.md).
 

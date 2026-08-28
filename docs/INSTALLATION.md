@@ -4,33 +4,74 @@
 
 The public first-party collection's current stable release is [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0), published from commit `9c2572bc0361e1e2c34cb4b6c02fdaa4ed349d47`. It provides **33 admitted first-party Skills** (the previous stable was `v0.1.6` with 9 packages). Package contracts remain inside `skills/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
 
-The standard install command is the generic `latest` form: it follows the repository's default revision, so `npx skills add LightDevCoder/skills` installs the current collection on the default branch. The `v0.2.0` commands below were verified against fresh destinations in the [v0.2.0 installation verification](evidence/releases/v0.2.0/INSTALLATION_VERIFICATION.md).
+The standard install command is the generic `latest` form: it follows the repository's default revision, so `npx skills add LightDevCoder/skills` is the recommended interactive entry point to select the desired Skills and Agent hosts. Pinned release commands select published tags for reproducible installs. Historical verification commands (which tested full-collection installations across all supported agents) are documented below alongside historical evidence.
+
+## Recommended installation
+
+### Interactive installation (recommended)
+
+Run the interactive installer and choose the Skills and target Agent hosts you want:
+
+```bash
+npx skills add LightDevCoder/skills
+```
+
+### Install a single Skill
+
+To install a specific Skill without selecting from the entire collection:
+
+```bash
+npx skills add LightDevCoder/skills --skill project-review
+npx skills add LightDevCoder/skills --skill research
+```
+
+### Pinned release installation
+
+To install from a specific published release tag:
+
+```bash
+npx skills add LightDevCoder/skills#v0.2.0
+npx skills add LightDevCoder/skills#v0.2.0 --skill project-review
+```
+
+### Explicit Agent target
+
+If you know the specific Agent host you want to target, pass `--agent <agent>`:
+
+```bash
+npx skills add LightDevCoder/skills --agent claude-code
+```
+
+> **Note on Agent targeting:** Specify only the Agent hosts you actually use. Do not pass `--agent '*'` unless you explicitly intend to populate skill directories for every supported Agent host on your machine.
+
+### Installation options and flags
+
+- **Scope:** The CLI prompts for installation scope (Project-local vs. Global/user-level) by default. Use `-g` or `--global` to install globally to user home directories.
+- **Copy mode (`--copy`):** By default, Skills CLI uses symlinks from a canonical location to avoid duplicating files across multiple agent folders. Use `--copy` only when your host environment does not support symlinks or when you require fully independent copies per agent directory. Note that forcing copy mode duplicates skill files into each target agent's directory.
+- **Non-interactive / CI (`--yes` / `-y`):** Skips interactive confirmation prompts. When used without `--skill` or `--agent`, `--yes` installs all skills to detected agents. In CI or automated environments, combine `--yes` with explicit `--skill` and `--agent` flags (e.g. `npx skills add LightDevCoder/skills#v0.2.0 --skill project-review --agent claude-code --yes`).
 
 ## Revision semantics
 
 The official Skills CLI accepts a `#ref` fragment in a GitHub source. The fragment is passed as the Git revision; a source without a fragment uses the repository's default revision. The parser and clone behavior are documented in the [official Skills CLI source parser](https://raw.githubusercontent.com/vercel-labs/skills/main/src/source-parser.ts) and [Git helper](https://raw.githubusercontent.com/vercel-labs/skills/main/src/git.ts).
 
-The generic `latest` command below uses no fragment and therefore follows the repository's default revision: it installs the current collection and is the standard way to install. The pinned `#v0.2.0` form selects the published tag and is retained for reproducible installs and release verification. Neither form is a claim about a future default revision; re-run discovery against the fresh destination for the resolved content.
+The generic `latest` command uses no fragment and therefore follows the repository's default revision: it installs from the current default branch. The pinned `#v0.2.0` form selects the published tag and is retained for reproducible installs and release verification. Neither form is a claim about a future default revision; re-run discovery against the fresh destination for the resolved content.
 
-For the generic `latest` forms (installing all 33 packages), use:
+## Historical release verification records
 
-```text
-npx skills add LightDevCoder/skills --yes --copy --agent '*'
-npx skills add LightDevCoder/skills --skill review-loop --yes --copy --agent '*'
-npx skills add LightDevCoder/skills --skill project-review --yes --copy --agent '*'
-npx skills add LightDevCoder/skills --skill research --yes --copy --agent '*'
-```
+Historical release verifications tested full-collection installations in isolated environments using explicit batch flags (e.g., `--yes --copy --agent '*'`). While those batch flags were used during release verification testing to validate all targets simultaneously, the current recommended user-facing commands above omit blanket agent targeting and unnecessary copy flags.
 
-## v0.2.0 release commands (current stable, 33 packages)
+### Historical v0.2.0 verification (33 packages)
 
-The v0.2.0 release commands were verified against the published v0.2.0 tag in fresh isolated environments, installing the complete 33-package collection:
+The v0.2.0 release commands were verified against the published v0.2.0 tag in fresh isolated environments:
 
-```text
+```bash
 npx skills add LightDevCoder/skills#v0.2.0 --yes --copy --agent '*'
 npx skills add LightDevCoder/skills#v0.2.0 --skill project-review --yes --copy --agent '*'
 npx skills add LightDevCoder/skills#v0.2.0 --skill agent-config --yes --copy --agent '*'
 npx skills add LightDevCoder/skills#v0.2.0 --skill implement --yes --copy --agent '*'
 ```
+
+See the [v0.2.0 installation verification](evidence/releases/v0.2.0/INSTALLATION_VERIFICATION.md).
 
 ## Historical v0.1.6 release commands
 

@@ -8,16 +8,16 @@
 
 ## 1. 安装
 
-下列命令安装已发布的 v0.1.2。示例输出仍然只展示选择边界；安装不会授权自动串联。
+下列命令安装公开发布的 Skill 集合。示例输出仍然只展示选择边界；安装不会授权自动串联。
 
-```text
-npx skills add LightDevCoder/skills --yes --copy --agent '*'
+```bash
+npx skills add LightDevCoder/skills
 ```
 
 刷新 Agent host，并在脱离 source checkout 的情况下确认 discovery。只安装一个包时，例如：
 
-```text
-npx skills add LightDevCoder/skills --skill ask-light --yes --copy --agent '*'
+```bash
+npx skills add LightDevCoder/skills --skill ask-light
 ```
 
 ## 2. 查看示例
