@@ -1,0 +1,9 @@
+=== Running Pre-Fix Reproductions against d414a3b ===
+Repro A (Round mismatch): stage=accepted (expected post-fix: acceptance-unknown)
+Repro B (missing State Round): stage=accepted (expected post-fix: review-state-unknown)
+Repro C (duplicate State Round): stage=accepted (expected post-fix: review-state-unknown)
+Repro D (missing Verdict Round): stage=accepted (expected post-fix: acceptance-unknown)
+Repro E (missing Verdict Charter revision): stage=accepted (expected post-fix: acceptance-unknown)
+Repro F (missing Verdict Profile): stage=accepted (expected post-fix: acceptance-unknown)
+Repro G1 (FAIL State, Verdict FAIL+BLOCKED): stage=acceptance-not-passed (expected post-fix: acceptance-unknown)
+Repro G2 (BLOCKED State, Verdict BLOCKED+FAIL): stage=acceptance-not-passed (expected post-fix: acceptance-unknown)

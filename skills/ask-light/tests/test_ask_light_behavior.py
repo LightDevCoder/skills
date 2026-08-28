@@ -696,7 +696,9 @@ class AskLightBehaviorTest(unittest.TestCase):
                 effort_spec.write_text("# SPEC\nStatus: active\n", encoding="utf-8")
                 if verdict is None:
                     write_project_review_state(
-                        project, reviewed_effort="effort", verdict_content="Acceptance record exists.\n"
+                        project,
+                        reviewed_effort="effort",
+                        verdict_content="# Verdict\n- Charter revision: 1\n- Profile: generic\n- Round: 1\nAcceptance record exists.\n",
                     )
                 else:
                     write_project_review_state(project, reviewed_effort="effort", verdict=verdict)
@@ -801,7 +803,7 @@ class AskLightBehaviorTest(unittest.TestCase):
             write_project_review_state(
                 project,
                 reviewed_effort="current",
-                verdict_content="Status: complete\nVerdict: **PASS**\n",
+                verdict_content="- Charter revision: 1\n- Profile: generic\n- Round: 1\nStatus: complete\nVerdict: **PASS**\n",
             )
             context = {"projectRoot": str(project), "invocationControl": "explicit-only", "availability": "codex"}
             result = ASK_LIGHT.route(self.roots, context, host="codex", mode="next")
@@ -1418,7 +1420,10 @@ class ReviewFreshnessRegressionTest(unittest.TestCase):
                 "# Project-review State\n- Status: PASS\n- Charter revision: 1\n- Profile: generic\n- Round: 1\n",
                 encoding="utf-8",
             )
-            (review_dir / "verdict.md").write_text("# Verdict\n\nVerdict: **PASS**\n", encoding="utf-8")
+            (review_dir / "verdict.md").write_text(
+                "# Verdict\n- Charter revision: 1\n- Profile: generic\n- Round: round-01 (final)\nVerdict: **PASS**\n",
+                encoding="utf-8",
+            )
             result = self.route_project(project)
             self.assertEqual(result["status"], "RECOMMEND", result)
             self.assertEqual(result["projectStage"], "accepted", result)
@@ -2247,7 +2252,7 @@ class ReviewTransactionCoherenceTest(unittest.TestCase):
                 self.assertEqual(result["projectStage"], "review-state-unknown", result)
 
     def test_missing_canonical_state_fields_fail_closed(self) -> None:
-        fields = ("Status", "Charter revision", "Profile")
+        fields = ("Status", "Charter revision", "Profile", "Round")
         for field in fields:
             with self.subTest(field=field):
                 project, _b, _c = self.build_project(status="PASS", verdict="PASS")
@@ -2266,6 +2271,8 @@ class ReviewTransactionCoherenceTest(unittest.TestCase):
             ("duplicate-rev-conflicting", "- Charter revision: 2"),
             ("duplicate-profile-identical", "- Profile: generic"),
             ("duplicate-profile-conflicting", "- Profile: software"),
+            ("duplicate-round-identical", "- Round: 1"),
+            ("duplicate-round-conflicting", "- Round: 2"),
         ]
         for label, extra_line in cases:
             with self.subTest(label=label):
@@ -2275,6 +2282,188 @@ class ReviewTransactionCoherenceTest(unittest.TestCase):
                 result = self.route(project)
                 self.assertEqual(result["status"], "NEED-INPUT", result)
                 self.assertEqual(result["projectStage"], "review-state-unknown", result)
+
+    def test_state_round_malformed_fails_closed(self) -> None:
+        malformed_rounds = ("invalid", "round-xyz", "2 of 3", "", "1 2")
+        for bad_round in malformed_rounds:
+            with self.subTest(bad_round=bad_round):
+                project, _b, _c = self.build_project(status="PASS", verdict="PASS")
+                state_file = project / ".project-review" / "state.md"
+                lines = [
+                    line if not line.startswith("- Round:") else f"- Round: {bad_round}"
+                    for line in state_file.read_text(encoding="utf-8").splitlines()
+                ]
+                state_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
+                result = self.route(project)
+                self.assertEqual(result["status"], "NEED-INPUT", result)
+                self.assertEqual(result["projectStage"], "review-state-unknown", result)
+
+    def test_verdict_round_missing_or_duplicate_or_malformed_fails_closed(self) -> None:
+        # 1. Missing Round in verdict.md
+        project, _b, _c = self.build_project(status="PASS", verdict="PASS")
+        verdict_file = project / ".project-review" / "verdict.md"
+        lines = [line for line in verdict_file.read_text(encoding="utf-8").splitlines() if not line.startswith("- Round:")]
+        verdict_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        result = self.route(project)
+        self.assertEqual(result["status"], "NEED-INPUT", result)
+        self.assertEqual(result["projectStage"], "acceptance-unknown", result)
+
+        # 2. Duplicate identical Round in verdict.md
+        project, _b, _c = self.build_project(status="PASS", verdict="PASS")
+        verdict_file = project / ".project-review" / "verdict.md"
+        append_durable_field(verdict_file, "- Round: round-01 (final)")
+        result = self.route(project)
+        self.assertEqual(result["status"], "NEED-INPUT", result)
+        self.assertEqual(result["projectStage"], "acceptance-unknown", result)
+
+        # 3. Duplicate conflicting Round in verdict.md
+        project, _b, _c = self.build_project(status="PASS", verdict="PASS")
+        verdict_file = project / ".project-review" / "verdict.md"
+        append_durable_field(verdict_file, "- Round: round-02 (final)")
+        result = self.route(project)
+        self.assertEqual(result["status"], "NEED-INPUT", result)
+        self.assertEqual(result["projectStage"], "acceptance-unknown", result)
+
+        # 4. Malformed Round in verdict.md
+        for bad_round in ("invalid", "1 of 2", ""):
+            with self.subTest(bad_round=bad_round):
+                project, _b, _c = self.build_project(status="PASS", verdict="PASS")
+                verdict_file = project / ".project-review" / "verdict.md"
+                lines = [
+                    line if not line.startswith("- Round:") else f"- Round: {bad_round}"
+                    for line in verdict_file.read_text(encoding="utf-8").splitlines()
+                ]
+                verdict_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
+                result = self.route(project)
+                self.assertEqual(result["status"], "NEED-INPUT", result)
+                self.assertEqual(result["projectStage"], "acceptance-unknown", result)
+
+    def test_round_mismatch_fails_closed(self) -> None:
+        cases = [
+            ("PASS", "PASS"),
+            ("FAIL", "FAIL"),
+            ("BLOCKED", "BLOCKED"),
+        ]
+        for s_status, v_verdict in cases:
+            with self.subTest(state=s_status, verdict=v_verdict):
+                project, _b, _c = self.build_project(status=s_status, verdict=v_verdict)
+                # State round 2, Verdict round 1
+                state_file = project / ".project-review" / "state.md"
+                state_file.write_text(
+                    f"# State\n- Status: {s_status}\n- Charter revision: 1\n- Profile: generic\n- Round: 2\n",
+                    encoding="utf-8",
+                )
+                verdict_file = project / ".project-review" / "verdict.md"
+                verdict_file.write_text(
+                    f"# Verdict\n- Charter revision: 1\n- Profile: generic\n- Verdict: **{v_verdict}**\n- Round: round-01 (final)\n",
+                    encoding="utf-8",
+                )
+                result = self.route(project)
+                self.assertEqual(result["status"], "NEED-INPUT", result)
+                self.assertEqual(result["projectStage"], "acceptance-unknown", result)
+
+    def test_verdict_charter_revision_missing_duplicate_mismatch_fails_closed(self) -> None:
+        # Missing Charter revision on verdict
+        project, _b, _c = self.build_project(status="PASS", verdict="PASS")
+        verdict_file = project / ".project-review" / "verdict.md"
+        lines = [line for line in verdict_file.read_text(encoding="utf-8").splitlines() if not line.startswith("- Charter revision:")]
+        verdict_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        result = self.route(project)
+        self.assertEqual(result["status"], "NEED-INPUT", result)
+        self.assertEqual(result["projectStage"], "acceptance-unknown", result)
+
+        # Duplicate identical Charter revision on verdict
+        project, _b, _c = self.build_project(status="PASS", verdict="PASS")
+        verdict_file = project / ".project-review" / "verdict.md"
+        append_durable_field(verdict_file, "- Charter revision: 1")
+        result = self.route(project)
+        self.assertEqual(result["status"], "NEED-INPUT", result)
+        self.assertEqual(result["projectStage"], "acceptance-unknown", result)
+
+        # Duplicate conflicting Charter revision on verdict
+        project, _b, _c = self.build_project(status="PASS", verdict="PASS")
+        verdict_file = project / ".project-review" / "verdict.md"
+        append_durable_field(verdict_file, "- Charter revision: 2")
+        result = self.route(project)
+        self.assertEqual(result["status"], "NEED-INPUT", result)
+        self.assertEqual(result["projectStage"], "acceptance-unknown", result)
+
+        # Charter revision mismatch: Charter/State rev 2, Verdict rev 1
+        project, _b, _c = self.build_project(charter_rev="2", state_rev="2", status="PASS", verdict="PASS", verdict_rev="1")
+        result = self.route(project)
+        self.assertEqual(result["status"], "NEED-INPUT", result)
+        self.assertEqual(result["projectStage"], "acceptance-unknown", result)
+
+    def test_verdict_profile_missing_duplicate_mismatch_fails_closed(self) -> None:
+        # Missing Profile on verdict
+        project, _b, _c = self.build_project(status="PASS", verdict="PASS")
+        verdict_file = project / ".project-review" / "verdict.md"
+        lines = [line for line in verdict_file.read_text(encoding="utf-8").splitlines() if not line.startswith("- Profile:")]
+        verdict_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        result = self.route(project)
+        self.assertEqual(result["status"], "NEED-INPUT", result)
+        self.assertEqual(result["projectStage"], "acceptance-unknown", result)
+
+        # Duplicate identical Profile on verdict
+        project, _b, _c = self.build_project(status="PASS", verdict="PASS")
+        verdict_file = project / ".project-review" / "verdict.md"
+        append_durable_field(verdict_file, "- Profile: generic")
+        result = self.route(project)
+        self.assertEqual(result["status"], "NEED-INPUT", result)
+        self.assertEqual(result["projectStage"], "acceptance-unknown", result)
+
+        # Duplicate conflicting Profile on verdict
+        project, _b, _c = self.build_project(status="PASS", verdict="PASS")
+        verdict_file = project / ".project-review" / "verdict.md"
+        append_durable_field(verdict_file, "- Profile: software")
+        result = self.route(project)
+        self.assertEqual(result["status"], "NEED-INPUT", result)
+        self.assertEqual(result["projectStage"], "acceptance-unknown", result)
+
+        # Profile mismatch: Charter/State software, Verdict generic
+        project, _b, _c = self.build_project(profile="software", status="PASS", verdict="PASS", verdict_profile="generic")
+        result = self.route(project)
+        self.assertEqual(result["status"], "NEED-INPUT", result)
+        self.assertEqual(result["projectStage"], "acceptance-unknown", result)
+
+        # Profile mismatch: Charter/State generic, Verdict software
+        project, _b, _c = self.build_project(profile="generic", status="PASS", verdict="PASS", verdict_profile="software")
+        result = self.route(project)
+        self.assertEqual(result["status"], "NEED-INPUT", result)
+        self.assertEqual(result["projectStage"], "acceptance-unknown", result)
+
+    def test_terminal_verdict_semantic_uniqueness(self) -> None:
+        # Valid singleton conclusions
+        for status, verdict, exp_status, exp_stage in (
+            ("PASS", "PASS", "RECOMMEND", "accepted"),
+            ("FAIL", "FAIL", "NEED-INPUT", "acceptance-not-passed"),
+            ("BLOCKED", "BLOCKED", "NEED-INPUT", "acceptance-not-passed"),
+        ):
+            with self.subTest(status=status, verdict=verdict):
+                project, _b, _c = self.build_project(status=status, verdict=verdict)
+                result = self.route(project)
+                self.assertEqual(result["status"], exp_status, result)
+                self.assertEqual(result["projectStage"], exp_stage, result)
+
+        # Conflicting multi-verdict combinations all fail closed as acceptance-unknown
+        conflict_verdict_lines = [
+            ("PASS + FAIL", "- Verdict: PASS\n- Verdict: FAIL\n"),
+            ("PASS + BLOCKED", "- Verdict: PASS\n- Verdict: BLOCKED\n"),
+            ("FAIL + BLOCKED", "- Verdict: FAIL\n- Verdict: BLOCKED\n"),
+            ("PASS + FAIL + BLOCKED", "- Verdict: PASS\n- Verdict: FAIL\n- Verdict: BLOCKED\n"),
+        ]
+        for label, lines in conflict_verdict_lines:
+            for s_status in ("PASS", "FAIL", "BLOCKED"):
+                with self.subTest(label=label, state_status=s_status):
+                    project, _b, _c = self.build_project(status=s_status, verdict="PASS")
+                    verdict_file = project / ".project-review" / "verdict.md"
+                    verdict_file.write_text(
+                        f"# Verdict\n- Charter revision: 1\n- Profile: generic\n- Round: 1\n{lines}",
+                        encoding="utf-8",
+                    )
+                    result = self.route(project)
+                    self.assertEqual(result["status"], "NEED-INPUT", result)
+                    self.assertEqual(result["projectStage"], "acceptance-unknown", result)
 
     def test_unknown_and_non_canonical_status_fail_closed(self) -> None:
         unknown_statuses = ("UNKNOWN", "NOT-PASS", "PASSING", "READY FOR PASS", "COMPLETE", "DONE")
@@ -2381,11 +2570,16 @@ class ReviewTransactionCoherenceTest(unittest.TestCase):
         result = self.route(project)
         self.assertEqual(result["projectStage"], "project-review")
 
-        # 6. Fresh evaluation completes: State PASS + fresh Verdict PASS -> accepted
+        # 6. Simulate transition to terminal State before new Verdict is available:
         state_file.write_text(
             "# State\n- Status: PASS\n- Charter revision: 1\n- Profile: generic\n- Round: 2\n",
             encoding="utf-8",
         )
+        # Old round-1 verdict remains -> fails closed as acceptance-unknown
+        result = self.route(project)
+        self.assertEqual(result["projectStage"], "acceptance-unknown")
+
+        # 7. Fresh evaluation completes: State PASS + fresh Verdict PASS -> accepted
         verdict_file = project / ".project-review" / "verdict.md"
         verdict_file.write_text(
             "# Verdict\n- Charter revision: 1\n- Profile: generic\n- Verdict: **PASS**\n- Round: round-02 (final)\n",
@@ -2460,6 +2654,14 @@ class ReviewTransactionCoherenceTest(unittest.TestCase):
         # Fresh PASS completes round 3
         (project / ".project-review" / "state.md").write_text(
             "# State\n- Status: PASS\n- Charter revision: 1\n- Profile: software\n- Round: 3\n",
+            encoding="utf-8",
+        )
+        # Before fresh round-3 verdict is written, old round-2 verdict fails closed as acceptance-unknown
+        self.assertEqual(self.route(project)["projectStage"], "acceptance-unknown")
+
+        (project / ".project-review" / "verdict.md").write_text(
+            f"# Verdict\n- Charter revision: 1\n- Profile: software\n- Verdict: **PASS**\n"
+            f"- Reviewed implementation revision: {c2_sha}\n- Round: round-03 (final)\n",
             encoding="utf-8",
         )
         self.assertEqual(self.route(project)["projectStage"], "accepted")

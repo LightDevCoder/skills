@@ -59,8 +59,11 @@ do not review it until confirmation is recorded.
 
 Canonical durable fields are singleton fields: `- Charter revision:`,
 `- Source:`, `- Source revision or identity:`, and `- Profile:` (plus the
-software-only `- Fixed point:` and `- Implementation scope:`) must each appear
-exactly once and remain coherent with `state.md` and `verdict.md`. A missing,
+software-only `- Fixed point:` and `- Implementation scope:`) in `charter.md`,
+`- Status:`, `- Charter revision:`, `- Profile:`, and `- Round:` in `state.md`,
+and `- Verdict:`, `- Charter revision:`, `- Profile:`, and `- Round:` (plus
+software `- Reviewed implementation revision:`) in `verdict.md` must each appear
+exactly once and remain mutually coherent across the entire transaction. A missing,
 duplicated (even identically), or ambiguous canonical field is invalid durable
 review state — consumers fail closed rather than choosing a value. A reviewed
 directory `Source:` is a complete baseline: files that appear inside it after

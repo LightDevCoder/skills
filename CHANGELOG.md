@@ -177,6 +177,16 @@ transaction:
   Charter update lifecycle, C1→repair→C2 lifecycle, and 24 manual smoke
   scenarios on real durable state.
 
+### Changed — Terminal review transaction identity binding (State & Verdict Round, mandatory Verdict identity, unique conclusion)
+
+Fixed a false-`accepted` defect at `d414a3b` where a terminal State (e.g. Round 2 PASS) could accept an old-round PASS verdict (Round 1) because `Round` was not bound, and Verdict-side Charter revision and Profile were optional. Finished the durable review transaction contract:
+
+- **Round binding (`state.md` + `verdict.md`):** `Round` is a mandatory canonical singleton field in `state.md` (`review-state-unknown` if missing/duplicate/malformed) and terminal `verdict.md` (`acceptance-unknown` if missing/duplicate/malformed/mismatched). Canonical producer syntax (`1`, `2`, `round-01`, `round-01 (final)`) is parsed into a normalized review round identity.
+- **Mandatory Verdict identity:** `Charter revision:` and `Profile:` are mandatory singleton fields on terminal `verdict.md`; missing, duplicate, or mismatched values fail closed as `acceptance-unknown`.
+- **Unique terminal verdict semantics:** terminal conclusion set (`PASS`, `FAIL`, `BLOCKED`) must resolve to exactly one unambiguous conclusion; multiple or conflicting conclusions (`PASS+FAIL`, `PASS+BLOCKED`, `FAIL+BLOCKED`, `PASS+FAIL+BLOCKED`) fail closed as `acceptance-unknown`.
+- **Safe closeout ordering:** producer documentation (`WORKFLOW.md`) explicitly specifies the fail-safe closeout sequence (`write current-round verdict → verify durable fields → set state terminal`) ensuring intermediate states fail closed.
+- **Tests & smoke:** 6 new test methods (306 total tests in pytest suite, 143 in ask-light suite) covering the complete transaction identity matrix, Round mismatch, Verdict identity requirements, terminal conclusion uniqueness, SPEC §14 reopen round lifecycle, and 24 manual smoke scenarios.
+
 ### No redesign verification
 
 18 `NO REWRITE/PORT` Skills were `git diff` checked (SPEC §26): `manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `eli5`, `release-workflow`, `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts` — only minimal handoff/attribution wiring where a real integration need existed. `recap` is the separately recorded user-approved exception above.

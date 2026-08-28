@@ -1167,6 +1167,177 @@ skills/project-review/references/evidence-protocol.md
 ## Remaining accepted limitations
 
 - Symlink target contents outside Git's tracked representation remain unverifiable by Git (carried forward unchanged).
+
+---
+
+# Terminal Transaction Identity Repair (SPEC: Final Terminal Transaction Identity Repair)
+
+## Baseline
+
+`d414a3b` (`fix: enforce project-review state coherence`)
+
+## Pre-fix reproductions (§12)
+
+Executed with real durable state on disk (`.scratch/light-skills-core-flow-repair/smoke/repro-prefix-d414a3b.{py,out}`):
+
+- **A (Round mismatch):** `State PASS Round 2` + `Verdict PASS Round 1` → returned `accepted` ❌ (false positive; round mismatch bypassed). Expected post-fix: `acceptance-unknown`.
+- **B (missing State Round):** `State PASS (no Round)` + `Verdict PASS Round 1` → returned `accepted` ❌ (false positive; missing State Round bypassed). Expected post-fix: `review-state-unknown`.
+- **C (duplicate State Round):** `State PASS (Round: 1, Round: 2)` + `Verdict PASS Round 1` → returned `accepted` ❌ (false positive; duplicate State Round bypassed). Expected post-fix: `review-state-unknown`.
+- **D (missing Verdict Round):** `State PASS Round 2` + `Verdict PASS (no Round)` → returned `accepted` ❌ (false positive; missing Verdict Round bypassed). Expected post-fix: `acceptance-unknown`.
+- **E (missing Verdict Charter revision):** `State PASS Round 1` + `Verdict PASS (no Charter revision)` → returned `accepted` ❌ (false positive; missing Verdict Charter revision bypassed). Expected post-fix: `acceptance-unknown`.
+- **F (missing Verdict Profile):** `State PASS Round 1` + `Verdict PASS (no Profile)` → returned `accepted` ❌ (false positive; missing Verdict Profile bypassed). Expected post-fix: `acceptance-unknown`.
+- **G1 (FAIL State, Verdict FAIL+BLOCKED):** returned `acceptance-not-passed` ❌ (incorrect non-conflict interpretation; multiple conflicting terminal conclusions were not treated as ambiguous). Expected post-fix: `acceptance-unknown`.
+- **G2 (BLOCKED State, Verdict BLOCKED+FAIL):** returned `acceptance-not-passed` ❌ (incorrect non-conflict interpretation). Expected post-fix: `acceptance-unknown`.
+
+## Root cause
+
+In `d414a3b`, while `state.md` was made authoritative for the review lifecycle, terminal `verdict.md` was not bound to the exact review identity dimensions:
+1. `Round` was not extracted or compared between `state.md` and `verdict.md`, allowing old-round verdicts to survive across reopened review rounds once State reached terminal status again.
+2. `Charter revision` and `Profile` were optional on `verdict.md` (checked only if present).
+3. Multiple terminal conclusion fields in `verdict.md` (e.g. `FAIL` + `BLOCKED`) were not enforced as unique, leading to invalid non-conflict classification.
+
+## State Round contract (§4)
+
+`state.md` now requires exactly 1 canonical `Round:` field line:
+- Missing Round → `review-state-unknown`.
+- Ambiguous / duplicate Round → `review-state-unknown`.
+- Malformed Round → `review-state-unknown`.
+- Never defaults to Round 1; never infers from files, timestamps, or Verdict.
+
+## Verdict identity contract (§5, §6, §7)
+
+A terminal `verdict.md` requires:
+- Exactly 1 `Verdict:` conclusion line.
+- Exactly 1 `Charter revision:` field matching `charter.md` and `state.md`.
+- Exactly 1 `Profile:` field matching `charter.md` and `state.md`.
+- Exactly 1 `Round:` field matching `state.md`.
+- For `software` Profile, exactly 1 `Reviewed implementation revision: <full 40-char commit SHA>`.
+
+Missing, duplicate, malformed, or mismatched Verdict identity fields fail closed as `acceptance-unknown`.
+
+## Round normalization and grammar (§3)
+
+Canonical producer grammar:
+- Non-negative integer (e.g. `1`, `2`, `01`, `02`) or standard round prefix/suffix formatting (`round-01`, `round-1`, `round-01 (final)`, `round-01 (closed)`).
+- Canonical integer value is extracted and compared between State and Verdict.
+- Arbitrary prose, non-numeric strings, or multi-field formats fail closed as malformed.
+
+## Terminal semantic uniqueness (§8)
+
+The terminal conclusion set `{PASS, FAIL, BLOCKED}` must resolve to exactly one unique meaning:
+- `PASS` only → `PASS`
+- `FAIL` only → `FAIL`
+- `BLOCKED` only → `BLOCKED`
+- Multiple / conflicting conclusions (`PASS+FAIL`, `PASS+BLOCKED`, `FAIL+BLOCKED`, `PASS+FAIL+BLOCKED`) → `acceptance-unknown`.
+
+## Reopen Round lifecycle (§14)
+
+1. Round 1: `State PASS` + `Verdict PASS (round 1)` → `accepted`.
+2. Reopen: `State READY (round 2)` + old `Verdict PASS (round 1)` → `project-review`.
+3. Progression: `CRITIC` → `REPAIR` → `EVALUATE` → `project-review`.
+4. Transition: `State PASS (round 2)` + old `Verdict PASS (round 1)` → `acceptance-unknown` (fails closed).
+5. Fresh evaluation: `State PASS (round 2)` + fresh `Verdict PASS (round 2)` → `accepted`.
+
+## Safe closeout behavior (§18)
+
+Producer documentation (`WORKFLOW.md`) explicitly specifies the fail-safe closeout sequence:
+1. Write current-round `verdict.md` with complete transaction identity (`Verdict`, `Charter revision`, `Profile`, `Round`, and software `Reviewed implementation revision`).
+2. Verify durable fields against active Charter and evaluated round.
+3. Transition `state.md` to terminal status (`PASS`, `FAIL`, `BLOCKED`) for the exact same `Round`.
+
+## Regression tests (§13, §14, §15, §16)
+
+Updated and extended `ReviewTransactionCoherenceTest` in `skills/ask-light/tests/test_ask_light_behavior.py`:
+- `test_missing_canonical_state_fields_fail_closed` (`Status`, `Charter revision`, `Profile`, `Round`)
+- `test_duplicate_canonical_state_fields_fail_closed` (`Status`, `Charter revision`, `Profile`, `Round`)
+- `test_state_round_malformed_fails_closed`
+- `test_verdict_round_missing_or_duplicate_or_malformed_fails_closed`
+- `test_round_mismatch_fails_closed` (`PASS`, `FAIL`, `BLOCKED`)
+- `test_verdict_charter_revision_missing_duplicate_mismatch_fails_closed`
+- `test_verdict_profile_missing_duplicate_mismatch_fails_closed`
+- `test_terminal_verdict_semantic_uniqueness` (all singletons and all 4 conflict combinations)
+- `test_reopen_lifecycle_full_sequence` (including intermediate closeout state)
+- `test_charter_revision_update_lifecycle`
+- `test_c1_repair_c2_with_reopen_lifecycle`
+
+All 306 tests across test suites pass cleanly.
+
+## Manual smoke results (§21)
+
+Executed full 24-scenario smoke matrix against real durable state on disk (`.scratch/light-skills-core-flow-repair/smoke/manual-matrix-terminal-identity.{py,out}`):
+
+```text
+#   | Scenario                                       | Observed Stage         | Expected Stage         | Match
+---------------------------------------------------------------------------------------------------------
+1   | coherent PASS same round                       | accepted               | accepted               | PASS
+2   | PASS State round2 + PASS Verdict round1        | acceptance-unknown     | acceptance-unknown     | PASS
+3   | FAIL State round2 + FAIL Verdict round1        | acceptance-unknown     | acceptance-unknown     | PASS
+4   | BLOCKED State round2 + BLOCKED Verdict round1  | acceptance-unknown     | acceptance-unknown     | PASS
+5   | missing State Round                            | review-state-unknown   | review-state-unknown   | PASS
+6   | duplicate State Round                          | review-state-unknown   | review-state-unknown   | PASS
+7   | missing Verdict Round                          | acceptance-unknown     | acceptance-unknown     | PASS
+8   | duplicate Verdict Round                        | acceptance-unknown     | acceptance-unknown     | PASS
+9   | missing Verdict Charter revision               | acceptance-unknown     | acceptance-unknown     | PASS
+10  | missing Verdict Profile                        | acceptance-unknown     | acceptance-unknown     | PASS
+11  | Verdict revision mismatch                      | acceptance-unknown     | acceptance-unknown     | PASS
+12  | Verdict profile mismatch                       | acceptance-unknown     | acceptance-unknown     | PASS
+13  | State FAIL + Verdict FAIL/BLOCKED              | acceptance-unknown     | acceptance-unknown     | PASS
+14  | State BLOCKED + Verdict BLOCKED/FAIL           | acceptance-unknown     | acceptance-unknown     | PASS
+15  | Round1 PASS                                    | accepted               | accepted               | PASS
+16  | reopen Round2 READY + old PASS                 | project-review         | project-review         | PASS
+17  | Round2 EVALUATE + old PASS                     | project-review         | project-review         | PASS
+18  | Round2 PASS + old Round1 PASS                  | acceptance-unknown     | acceptance-unknown     | PASS
+19  | fresh Round2 PASS Verdict                      | accepted               | accepted               | PASS
+20  | C1->C2 current-round PASS                      | accepted               | accepted               | PASS
+21  | post-C2 in-scope drift                         | review-stale           | review-stale           | PASS
+22  | out-of-scope README                            | accepted               | accepted               | PASS
+23  | ignored in-scope file                          | review-stale           | review-stale           | PASS
+24  | ignored Source child                           | review-stale           | review-stale           | PASS
+---------------------------------------------------------------------------------------------------------
+Overall Result: ALL 24 PASSED
+```
+
+## Specialist review findings (§20)
+
+- **Reviewer A (Transaction Identity):** Verified Charter revision, Profile, Round binding, and terminal conclusion uniqueness. Old-round verdicts can never become authoritative in a new round; all required Verdict identity fields must be present as singletons; duplicates fail closed; conflicting conclusions fail closed as `acceptance-unknown`.
+- **Reviewer B (Lifecycle Preservation):** Verified active review routing, reopen lifecycle, terminal closeout, C1→C2 software repairs, and Source/software freshness. Active states route to `project-review`; intermediate closeout states fail closed; fresh current-round PASS reaches `accepted`; all existing freshness guarantees remain green.
+
+## Full validation (§22)
+
+```text
+python3 -m pytest -q                        → 306 passed in 41.14s
+python3 -m unittest discover -s tests       → OK (COLLECTION 245 + HOOKS 7 assertions)
+python3 -m compileall -q skills tests       → OK
+git diff --check                            → OK (no whitespace or formatting issues)
+git status --short                          → only intended changes
+
+Local skill suites:
+- ask-light (143 tests)                     → OK
+- project-review (10 tests)                 → OK
+- socratic (21 tests)                       → OK
+- clarify (5 tests)                         → OK
+- project-clarify (11 tests)                → OK
+- project-init (32 tests)                   → OK
+- review-loop (19 tests)                    → OK
+```
+
+## Files changed
+
+- `skills/ask-light/scripts/ask_light.py`
+- `skills/ask-light/tests/test_ask_light_behavior.py`
+- `skills/project-review/references/WORKFLOW.md`
+- `skills/project-review/references/acceptance-charter.md`
+- `skills/project-review/references/evidence-protocol.md`
+- `.scratch/light-skills-core-flow-repair/results.md`
+- `.scratch/light-skills-core-flow-repair/smoke/manual-matrix-terminal-identity.py`
+- `.scratch/light-skills-core-flow-repair/smoke/manual-matrix-terminal-identity.out`
+- `.scratch/light-skills-core-flow-repair/smoke/repro-prefix-d414a3b.py`
+- `.scratch/light-skills-core-flow-repair/smoke/repro-prefix-d414a3b.out`
+
+## Remaining limitations
+
+None within the scope of review transaction identity. The durable 3-part transaction contract (`charter.md` + `state.md` + `verdict.md`) is now fully bound across revision, profile, round, and unique verdict conclusion.
+
 - >64 KB durable-record truncation fails closed (carried forward unchanged).
 - Scope-choice quality remains a producer responsibility (carried forward unchanged).
 - Git assume-unchanged / skip-worktree can hide tracked modifications from `git diff` (git-domain limit, carried forward unchanged).

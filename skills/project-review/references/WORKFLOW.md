@@ -66,11 +66,17 @@ transaction:
 - `verdict.md` is authoritative only for a coherent terminal State (`PASS`,
   `FAIL`, `BLOCKED`). When a review is active or reopened (`INIT`, `READY`,
   `CRITIC`, `REPAIR`, `EVALUATE`), old verdicts do not remain authoritative.
-- For terminal acceptance, `state.md` and `verdict.md` must agree, and `Charter
-  revision` and `Profile` across `charter.md`, `state.md`, and `verdict.md`
-  must be mutually coherent.
-- Canonical fields in `state.md` (`Status:`, `Charter revision:`, `Profile:`)
-  are singleton fields; missing, ambiguous, or duplicate fields fail closed.
+- For terminal acceptance, `state.md` and `verdict.md` must agree on the same
+  review transaction identity: `Charter revision`, `Profile`, and `Round`
+  across `charter.md`, `state.md`, and `verdict.md` must be mutually coherent
+  and match exactly.
+- Canonical fields in `state.md` (`Status:`, `Charter revision:`, `Profile:`,
+  `Round:`) and terminal `verdict.md` (`Verdict:`, `Charter revision:`,
+  `Profile:`, `Round:`, plus software `Reviewed implementation revision:`)
+  are authoritative singleton fields; missing, ambiguous, or duplicate fields
+  fail closed.
+- Terminal Verdict semantics must be unique: exactly one conclusion (`PASS`,
+  `FAIL`, or `BLOCKED`) must be recorded without conflicting verdict fields.
 `findings.md` is the canonical finding registry. Round files preserve
 observations and evidence. Keep facts in authoritative record and link rather
 than duplicate.
@@ -133,10 +139,27 @@ available round, and a writable new round directory.
    baseline, Profile, findings, dispositions, repairs, and evidence. An
    unavailable required independent context is `BLOCKED`, not degraded
    acceptance.
-7. **Close the round.** Record the Evaluator judgment, update state and the
+142	7. **Close the round.** Record the Evaluator judgment, update state and the
    canonical finding registry via `review-loop` (`re-run reviewer` semantics),
    then apply the verdict and stopping rules in
    [stopping-rules.md](stopping-rules.md).
+
+### Safe closeout ordering
+
+To prevent intermediate or transient records from exposing stale verdicts as
+authoritative, closeout must follow a fail-safe write sequence:
+
+1. **Write current-round `verdict.md`:** record the complete transaction
+   identity (`- Charter revision:`, `- Profile:`, `- Round:`, `- Verdict:`, and
+   for software `- Reviewed implementation revision:`).
+2. **Verify durable fields:** confirm all required singleton identity fields
+   match the active Charter and evaluated round.
+3. **Set `state.md` to terminal:** transition `Status:` to `PASS`, `FAIL`, or
+   `BLOCKED` for the exact same `Round`.
+
+This sequence ensures that while review is active or transitioning, `state.md`
+remains in an active status (or Round mismatch during transition), failing
+closed rather than prematurely accepting an incomplete or prior-round verdict.
 
 ### Software specialist boundary
 

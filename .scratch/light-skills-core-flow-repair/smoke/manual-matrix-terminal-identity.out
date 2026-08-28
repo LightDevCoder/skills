@@ -1,0 +1,28 @@
+#   | Scenario                                       | Observed Stage         | Expected Stage         | Match
+---------------------------------------------------------------------------------------------------------
+1   | coherent PASS same round                       | accepted               | accepted               | PASS
+2   | PASS State round2 + PASS Verdict round1        | acceptance-unknown     | acceptance-unknown     | PASS
+3   | FAIL State round2 + FAIL Verdict round1        | acceptance-unknown     | acceptance-unknown     | PASS
+4   | BLOCKED State round2 + BLOCKED Verdict round1  | acceptance-unknown     | acceptance-unknown     | PASS
+5   | missing State Round                            | review-state-unknown   | review-state-unknown   | PASS
+6   | duplicate State Round                          | review-state-unknown   | review-state-unknown   | PASS
+7   | missing Verdict Round                          | acceptance-unknown     | acceptance-unknown     | PASS
+8   | duplicate Verdict Round                        | acceptance-unknown     | acceptance-unknown     | PASS
+9   | missing Verdict Charter revision               | acceptance-unknown     | acceptance-unknown     | PASS
+10  | missing Verdict Profile                        | acceptance-unknown     | acceptance-unknown     | PASS
+11  | Verdict revision mismatch                      | acceptance-unknown     | acceptance-unknown     | PASS
+12  | Verdict profile mismatch                       | acceptance-unknown     | acceptance-unknown     | PASS
+13  | State FAIL + Verdict FAIL/BLOCKED              | acceptance-unknown     | acceptance-unknown     | PASS
+14  | State BLOCKED + Verdict BLOCKED/FAIL           | acceptance-unknown     | acceptance-unknown     | PASS
+15  | Round1 PASS                                    | accepted               | accepted               | PASS
+16  | reopen Round2 READY + old PASS                 | project-review         | project-review         | PASS
+17  | Round2 EVALUATE + old PASS                     | project-review         | project-review         | PASS
+18  | Round2 PASS + old Round1 PASS                  | acceptance-unknown     | acceptance-unknown     | PASS
+19  | fresh Round2 PASS Verdict                      | accepted               | accepted               | PASS
+20  | C1->C2 current-round PASS                      | accepted               | accepted               | PASS
+21  | post-C2 in-scope drift                         | review-stale           | review-stale           | PASS
+22  | out-of-scope README                            | accepted               | accepted               | PASS
+23  | ignored in-scope file                          | review-stale           | review-stale           | PASS
+24  | ignored Source child                           | review-stale           | review-stale           | PASS
+---------------------------------------------------------------------------------------------------------
+Overall Result: ALL 24 PASSED
