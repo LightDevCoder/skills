@@ -414,10 +414,11 @@ The transition itself is host-aware:
 - A **user-invoked** accepted Skill begins itself only where genuine trusted host
   channel evidence proves explicit approved transitions are supported. The user's explicit approval
   constitutes the required authorization for that exact target, without auto-chaining past it.
-  Model-built context JSON claiming `source: host-runtime` without a verified host channel cannot grant transition authority.
+  Ordinary caller- or model-supplied context data (including fields like `trustedHostChannel`,
+  `_trusted_host_channel`, or `hostCapabilities`) and unproven environment variables cannot grant transition authority.
 - Otherwise `ask-light` renders the exact invocation (`$<skill>` on Codex, `/<skill>` on Claude
   Code) and asks the user to start it. It does **not** fake execution, does not assume every host
-  supports recursive Skill invocation, and never treats user prose or model inference as proof of host capability.
+  supports recursive Skill invocation, and never treats user prose, context flags, or model inference as proof of host capability.
 
 `ask-light` does not auto-execute before consent and does not auto-chain past
 the accepted Skill.

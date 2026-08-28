@@ -2543,31 +2543,14 @@ def _known_skill(skill_map: dict[str, Any], name: str) -> dict[str, Any] | None:
 def _is_trusted_host_transition_supported(context: dict[str, Any]) -> bool:
     """Verify whether host capability evidence verifiably permits approved transition.
 
-    Ordinary model- or caller-supplied context JSON cannot grant transition authority
-    merely by containing string labels such as `source: host-runtime`. Only genuine
-    host-owned capability channels (such as runtime-injected harness metadata or
-    verified host capability fixtures with explicit host channel provenance) are trusted.
-    When unverified, ask-light fails safe and returns host-transition-required to have the
-    user invoke the target directly.
+    Ordinary model- or caller-supplied context data (including fields such as
+    `trustedHostChannel`, `_trusted_host_channel`, or `hostCapabilities`) and
+    process environment variables cannot grant transition authority, because any
+    caller or model capable of supplying capability claims can also supply trust flags.
+    Without an out-of-band privileged host interface whose provenance exists outside
+    ordinary caller/model-controlled context, ask-light conservatively fails safe and
+    returns False, requiring host-transition-required for user-invoked targets.
     """
-    if not isinstance(context, dict):
-        return False
-    has_trusted_channel = bool(
-        context.get("_trusted_host_channel")
-        or context.get("trustedHostChannel")
-        or os.environ.get("LIGHT_TRUSTED_HOST_CHANNEL") == "1"
-    )
-    if not has_trusted_channel:
-        return False
-    capabilities = context.get("hostCapabilities")
-    if not isinstance(capabilities, dict):
-        return False
-    cap = capabilities.get("approvedUserInvokedTransition")
-    if isinstance(cap, dict):
-        state = str(cap.get("state", "")).strip().lower()
-        source = str(cap.get("source", "")).strip().lower()
-        if state == "available" and source in ("host-runtime", "host-environment", "host", "runtime", "platform"):
-            return True
     return False
 
 
@@ -2784,11 +2767,11 @@ def approval_transition(
     the current tree. The transition itself is host-aware: a model-invoked
     target may begin in the conversation where the host supports that; a
     user-invoked target begins only when the host verifiably permits an
-    explicit approved transition (declared in
-    `context["hostCapabilities"]["approvedUserInvokedTransition"]` with host
-    evidence) — otherwise ask-light renders the exact invocation and has the
-    user start it. It never fakes execution and never assumes a capability
-    that was not observed.
+    explicit approved transition through a genuine host-owned capability
+    channel — otherwise ask-light renders the exact invocation and has the
+    user start it. Ordinary model- or caller-supplied context data and
+    environment variables do not establish host provenance. It never fakes
+    execution and never assumes a capability that was not observed.
     """
     skill_map = skill_map or load_map()
     context = context or {}
