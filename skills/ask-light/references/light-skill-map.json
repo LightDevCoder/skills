@@ -1,6 +1,14 @@
 {
   "schemaVersion": 1,
   "collection": "LightDevCoder/skills",
+  "routingAuthority": {
+    "semanticRouting": "model-owned",
+    "note": "This map describes the collection; it never makes the final semantic routing decision. The model understands the request and evidence, shortlists candidates, reads the relevant SKILL.md contracts, and selects; ask_light.py validates the selection afterwards.",
+    "patterns": "candidate hints only; never the final semantic selector",
+    "precedencePatterns": "candidate hints only",
+    "taskKindRoutes": "candidate hints only",
+    "workflows": "canonical recipe references; the model selects the relevant recipe and anchors its entry point at the actual current state"
+  },
   "taskKindRoutes": {
     "bug": "diagnosing-bugs",
     "debugging": "diagnosing-bugs",

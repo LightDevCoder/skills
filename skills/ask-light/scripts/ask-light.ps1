@@ -3,7 +3,9 @@ param(
     [string]$RootsJson = '[]',
     [Parameter(Mandatory = $true)][string]$ContextJson,
     [string]$HostName = 'codex',
-    [ValidateSet('next', 'workflow', 'navigate')][string]$Mode = 'next'
+    [ValidateSet('next', 'workflow', 'navigate', 'validate')][string]$Mode = 'next',
+    [string]$Skill = '',
+    [ValidateSet('current-workflow', 'independent', 'standalone')][string]$Scope = 'current-workflow'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -25,6 +27,7 @@ foreach ($commandName in @('python3', 'python')) {
 if ($null -eq $python) {
     $blocked = [ordered]@{
         mode = $Mode
+        routingState = 'needs-model-judgment'
         status = 'BLOCKED'
         skill = ''
         source = ''
@@ -38,16 +41,8 @@ if ($null -eq $python) {
         next = 'awaiting-approval'
         execution = 'recommendation phase was read-only; execution begins only after explicit user approval'
     }
-    if ($Mode -eq 'workflow') {
-        $blocked.workflow = ''
-        $blocked.entryCondition = ''
-        $blocked.steps = @()
-        $blocked.stoppingBoundary = ''
-        $blocked.missingDependency = ''
-        $blocked.finalAuthority = ''
-    }
     $blocked | ConvertTo-Json -Depth 4
     exit 2
 }
-& $python.Source (Join-Path $PSScriptRoot 'ask_light.py') --roots-json $RootsJson --context-json $ContextJson --host-name $HostName --mode $Mode
+& $python.Source (Join-Path $PSScriptRoot 'ask_light.py') --roots-json $RootsJson --context-json $ContextJson --host-name $HostName --mode $Mode --skill $Skill --scope $Scope
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

@@ -1,9 +1,21 @@
 #!/usr/bin/env python3
-"""Deterministic Light router: project evidence first, semantic map second,
-host availability third.
+"""Deterministic Light evidence service for ask-light.
 
-This helper is read-only during the recommendation phase. The Skill itself
-reports the host-supported transition after user approval.
+Architecture (owned by SKILL.md):
+
+    Code establishes trustworthy facts.
+    Model understands the situation.
+    Model chooses the workflow action.
+    Code validates that choice.
+
+This helper is the CODE layer. It collects project evidence, publishes the
+Skill catalog and workflow recipes, and validates the model-selected Skill
+after the fact. It never owns semantic routing: it returns facts and scoped
+hard constraints, not recommendations. The only user-visible RECOMMEND results
+are assembled by the ask-light model contract after `validate_recommendation`
+accepts the model's choice.
+
+Read-only during the recommendation phase.
 """
 
 from __future__ import annotations
@@ -26,15 +38,15 @@ HOST_SKILL_ROOTS = (
     Path.home() / ".config" / "skills",
 )
 
-# Project-state questions are a small intent class: interrogatives about the
-# current stage, next work, missing/completed work, or what remains. The
-# presence of a projectRoot plus this intent switches ask-light to evidence
-# reasoning instead of generic token overlap.
-PROJECT_STATE_INTENT_PATTERN = re.compile(
-    r"(?i)"
-    r"\b(?:what|where)\b[^?.]*\b(?:next|now|stage|status|missing|left|finished|done|complete|completed|remaining|progress|current)\b"
-    r"|\bwhat\b[^?.]*\b(?:should|can|do)\b[^?.]*\b(?:next|now)\b"
-)
+EVIDENCE_SCHEMA = "ask-light-evidence/1"
+ROUTING_NEEDS_MODEL = "needs-model-judgment"
+
+# Request scopes for post-model selection validation. Only
+# "current-workflow" binds the evidence packet's hard constraints; independent
+# tasks, new efforts, and standalone requests are validated for availability
+# and provenance only.
+CONSTRAINT_SCOPES = ("current-workflow", "independent", "standalone")
+CONSTRAINT_SCOPE_DEFAULT = "current-workflow"
 
 # Light repo convention: a SPEC is active unless it explicitly says it was
 # superseded/obsoleted/archived (or lives in an obvious archive/old segment).
@@ -49,17 +61,13 @@ INACTIVE_SPEC_PATH_SEGMENTS = {
 
 # Ticket completion is fail-closed: only explicit resolved vocabulary counts.
 TICKET_RESOLVED_STATES = {"resolved", "done", "closed", "complete", "completed", "accepted"}
-TICKET_UNRESOLVED_STATES = {
-    "open", "ready", "ready-for-agent", "claimed", "in-progress", "in_progress",
-    "todo", "blocked", "awaiting", "awaiting-confirmation", "needs-work",
-}
-
-# Acceptance is fail-closed: only explicit PASS-style verdicts count as
-# successful. Generic lifecycle states such as complete/done are not verdicts.
-ACCEPTANCE_PASS_STATES = {"pass", "passed"}
-ACCEPTANCE_FAIL_STATES = {
-    "fail", "failed", "blocked", "rejected", "incomplete", "pending", "needs-work",
-}
+# Known unresolved vocabulary (producer contract: `ready-for-agent` or `open`
+# for map-style scans; `claimed` while worked; `blocked`/waiting states are
+# unresolved but not implementable). Anything outside both sets is unknown.
+TICKET_READY_STATES = {"open", "ready", "ready-for-agent", "todo"}
+TICKET_CLAIMED_STATES = {"claimed", "in-progress", "in_progress"}
+TICKET_WAITING_STATES = {"blocked", "awaiting", "awaiting-confirmation", "needs-work"}
+TICKET_UNRESOLVED_STATES = TICKET_READY_STATES | TICKET_CLAIMED_STATES | TICKET_WAITING_STATES
 
 # Canonical review evidence is the `project-review` durable state produced by
 # skills/project-review (see its references/WORKFLOW.md). The `.review-loop/`
@@ -91,6 +99,10 @@ COMPARISON_PATTERN = re.compile(
     re.I,
 )
 
+# Bounded scan bounds for artifact signal classification.
+SIGNAL_SCAN_FILE_LIMIT = 40
+SIGNAL_SCAN_MAX_BYTES = 64 * 1024
+
 
 def load_map(path: Path = MAP_PATH) -> dict[str, Any]:
     data = json.loads(path.read_text(encoding="utf-8"))
@@ -116,39 +128,12 @@ def load_map(path: Path = MAP_PATH) -> dict[str, Any]:
     return data
 
 
-def context_text(context: dict[str, Any]) -> str:
-    values: list[str] = []
-    for key in ("goal", "blockers", "projectType", "taskKind"):
-        value = context.get(key, "")
-        if value:
-            values.append(str(value))
-    artifacts = context.get("artifacts", [])
-    values.extend(str(value) for value in (artifacts if isinstance(artifacts, list) else [artifacts]))
-    return " ".join(values).lower()
+# ---------------------------------------------------------------------------
+# Canonical durable-field parsing (producer owner: skills/project-review).
+# These helpers are shared fail-closed grammar; they never salvage values.
+# ---------------------------------------------------------------------------
 
-
-def logical_ranking(skill_map: dict[str, Any], context: dict[str, Any]) -> list[dict[str, Any]]:
-    text = context_text(context)
-    task_kind = str(context.get("taskKind", "")).lower()
-    task_kind_route = skill_map.get("taskKindRoutes", {}).get(task_kind, task_kind)
-    ranked: list[dict[str, Any]] = []
-    for entry in skill_map["skills"]:
-        matches = [pattern for pattern in entry.get("patterns", []) if re.search(pattern, text, re.I)]
-        precedence = [pattern for pattern in entry.get("precedencePatterns", []) if re.search(pattern, text, re.I)]
-        task_match = entry["name"] == task_kind_route
-        applied_precedence = precedence if matches or task_match else []
-        score = 100 * len(matches) + 25 * len(applied_precedence) + (250 if task_match else 0)
-        ranked.append({
-            **entry,
-            "logicalScore": score,
-            "matchedPatterns": matches,
-            "matchedPrecedence": applied_precedence,
-            "matchedTaskKind": task_kind if task_match else "",
-        })
-    return sorted(ranked, key=lambda item: (-item["logicalScore"], item["name"]))
-
-
-def _small_text(path: Path, max_bytes: int = 64 * 1024) -> str:
+def _small_text(path: Path, max_bytes: int = SIGNAL_SCAN_MAX_BYTES) -> str:
     try:
         if path.is_file() and path.stat().st_size <= max_bytes:
             return path.read_text(encoding="utf-8", errors="replace")
@@ -831,6 +816,36 @@ def _singleton_round_field(text: str, field: str = "Round") -> tuple[int | None,
     return round_no, raw, ""
 
 
+def _review_record(
+    stage: str,
+    reason: str,
+    *,
+    status: str | None = None,
+    verdict: str | None = None,
+    freshness: str | None = None,
+    profile: str | None = None,
+    accepted: bool = False,
+    paths: list[str] | None = None,
+    gaps: list[str] | None = None,
+    completed: list[str] | None = None,
+    missing: list[str] | None = None,
+) -> dict[str, Any]:
+    """One classified durable-review record (facts only; no Skill field)."""
+    return {
+        "stage": stage,
+        "status": status,
+        "verdict": verdict,
+        "freshness": freshness,
+        "profile": profile,
+        "accepted": accepted,
+        "reason": reason,
+        "gaps": list(gaps or []),
+        "paths": list(paths or []),
+        "completed": list(completed if completed is not None else ["Light project contract", "active SPEC", "tickets resolved"]),
+        "missing": list(missing or []),
+    }
+
+
 def _classify_review_transaction(
     root: Path,
     review_dir: Path,
@@ -841,12 +856,16 @@ def _classify_review_transaction(
     A review verdict is authoritative only when Charter, State, and Verdict form
     one mutually coherent durable transaction. State is authoritative for the
     current review lifecycle state: an active review (INIT, READY, CRITIC,
-    REPAIR, EVALUATE) overrides any previous verdict and routes to
-    `project-review`. A terminal state (PASS, FAIL, BLOCKED) requires an
-    agreeing verdict on the exact same Charter revision, Profile, and Round,
-    plus current Source freshness and software implementation freshness.
-    Canonical fields are singletons; missing, ambiguous, or conflicting records
-    fail closed.
+    REPAIR, EVALUATE) overrides any previous verdict. A terminal state
+    (PASS, FAIL, BLOCKED) requires an agreeing verdict on the exact same Charter
+    revision, Profile, and Round, plus current Source freshness and software
+    implementation freshness. Canonical fields are singletons; missing,
+    ambiguous, or conflicting records fail closed.
+
+    Returns a review record: facts about the transaction (stage, status,
+    verdict, freshness, profile, accepted, reason, gaps, paths). Which Skill
+    should act on these facts is decided by the model, guided by the scoped
+    hard constraints the evidence packet derives from the stage.
     """
     charter_path = review_dir / "charter.md"
     charter_text = _small_text(charter_path)
@@ -858,38 +877,14 @@ def _classify_review_transaction(
             f"`{dir_name}/charter.md` records no canonical `Charter revision:` field line; "
             "ask-light cannot verify review revision coherence and fails closed."
         )
-        return {
-            "stage": "review-state-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"canonical Charter revision in {dir_name}/charter.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": False,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [],
-        }
+        return _review_record("review-state-unknown", reason, missing=[f"canonical Charter revision in {dir_name}/charter.md"])
     if charter_rev_fail == "ambiguous":
         reason = (
             f"`{dir_name}/charter.md` records more than one canonical `Charter revision:` "
             "field line; duplicate canonical fields violate the producer singleton contract "
             "and ask-light fails closed."
         )
-        return {
-            "stage": "review-state-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"unambiguous singleton Charter revision in {dir_name}/charter.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": False,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [],
-        }
+        return _review_record("review-state-unknown", reason, missing=[f"unambiguous singleton Charter revision in {dir_name}/charter.md"])
 
     charter_profile, charter_prof_fail = _reviewed_profile_field(charter_text)
     if charter_prof_fail:
@@ -898,19 +893,7 @@ def _classify_review_transaction(
             f"The Charter's `Profile:` field is {charter_prof_fail} ({detail}), so the review "
             "Profile that selects the freshness contract cannot be established; ask-light fails closed."
         )
-        return {
-            "stage": "review-freshness-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"canonical Profile in {dir_name}/charter.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": False,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [],
-        }
+        return _review_record("review-freshness-unknown", reason, missing=[f"canonical Profile in {dir_name}/charter.md"])
 
     state_path = review_dir / "state.md"
     if not state_path.is_file():
@@ -919,198 +902,66 @@ def _classify_review_transaction(
             "is missing or unreadable; ask-light cannot establish the current review "
             "lifecycle state and fails closed."
         )
-        return {
-            "stage": "review-state-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"valid {dir_name}/state.md recording current review state"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": False,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [],
-        }
+        return _review_record("review-state-unknown", reason, missing=[f"valid {dir_name}/state.md recording current review state"])
 
     state_text = _small_text(state_path)
     if not state_text.strip():
         reason = f"`{dir_name}/state.md` is empty or unreadable; ask-light requires valid review state and fails closed."
-        return {
-            "stage": "review-state-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"valid {dir_name}/state.md recording current review state"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": False,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [],
-        }
+        return _review_record("review-state-unknown", reason, missing=[f"valid {dir_name}/state.md recording current review state"])
 
     state_status_raw, status_fail = _singleton_field_value(state_text, "Status")
     if status_fail == "missing":
         reason = f"`{dir_name}/state.md` records no canonical `Status:` field line; ask-light fails closed."
-        return {
-            "stage": "review-state-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"canonical Status in {dir_name}/state.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": False,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [],
-        }
+        return _review_record("review-state-unknown", reason, missing=[f"canonical Status in {dir_name}/state.md"])
     if status_fail == "ambiguous":
         reason = (
             f"`{dir_name}/state.md` records more than one canonical `Status:` field line; "
             "duplicate canonical fields violate the producer singleton contract and ask-light "
             "fails closed."
         )
-        return {
-            "stage": "review-state-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"unambiguous singleton Status in {dir_name}/state.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": False,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [],
-        }
+        return _review_record("review-state-unknown", reason, missing=[f"unambiguous singleton Status in {dir_name}/state.md"])
 
     state_rev, state_rev_fail = _singleton_field_value(state_text, "Charter revision")
     if state_rev_fail == "missing":
         reason = f"`{dir_name}/state.md` records no canonical `Charter revision:` field line; ask-light fails closed."
-        return {
-            "stage": "review-state-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"canonical Charter revision in {dir_name}/state.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": False,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [],
-        }
+        return _review_record("review-state-unknown", reason, missing=[f"canonical Charter revision in {dir_name}/state.md"])
     if state_rev_fail == "ambiguous":
         reason = (
             f"`{dir_name}/state.md` records more than one canonical `Charter revision:` field line; "
             "duplicate canonical fields violate the producer singleton contract and ask-light "
             "fails closed."
         )
-        return {
-            "stage": "review-state-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"unambiguous singleton Charter revision in {dir_name}/state.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": False,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [],
-        }
+        return _review_record("review-state-unknown", reason, missing=[f"unambiguous singleton Charter revision in {dir_name}/state.md"])
 
     state_prof_raw, state_prof_fail = _singleton_field_value(state_text, "Profile")
     if state_prof_fail == "missing":
         reason = f"`{dir_name}/state.md` records no canonical `Profile:` field line; ask-light fails closed."
-        return {
-            "stage": "review-state-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"canonical Profile in {dir_name}/state.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": False,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [],
-        }
+        return _review_record("review-state-unknown", reason, missing=[f"canonical Profile in {dir_name}/state.md"])
     if state_prof_fail == "ambiguous":
         reason = (
             f"`{dir_name}/state.md` records more than one canonical `Profile:` field line; "
             "duplicate canonical fields violate the producer singleton contract and ask-light "
             "fails closed."
         )
-        return {
-            "stage": "review-state-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"unambiguous singleton Profile in {dir_name}/state.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": False,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [],
-        }
+        return _review_record("review-state-unknown", reason, missing=[f"unambiguous singleton Profile in {dir_name}/state.md"])
 
     state_round, state_round_raw, state_round_fail = _singleton_round_field(state_text, "Round")
     if state_round_fail == "missing":
         reason = f"`{dir_name}/state.md` records no canonical `Round:` field line; ask-light fails closed."
-        return {
-            "stage": "review-state-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"canonical Round in {dir_name}/state.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": False,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [],
-        }
+        return _review_record("review-state-unknown", reason, missing=[f"canonical Round in {dir_name}/state.md"])
     if state_round_fail == "ambiguous":
         reason = (
             f"`{dir_name}/state.md` records more than one canonical `Round:` field line; "
             "duplicate canonical fields violate the producer singleton contract and ask-light "
             "fails closed."
         )
-        return {
-            "stage": "review-state-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"unambiguous singleton Round in {dir_name}/state.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": False,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [],
-        }
+        return _review_record("review-state-unknown", reason, missing=[f"unambiguous singleton Round in {dir_name}/state.md"])
     if state_round_fail == "malformed":
         reason = (
             f"`{dir_name}/state.md` records an unknown or malformed Round ('{state_round_raw}'); "
             "ask-light requires a canonical review round (e.g. `Round: 1` or `Round: round-01`) and fails closed."
         )
-        return {
-            "stage": "review-state-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"valid canonical Round in {dir_name}/state.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": False,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [],
-        }
+        return _review_record("review-state-unknown", reason, missing=[f"valid canonical Round in {dir_name}/state.md"])
 
     if state_rev.strip().strip("`*_ \t") != charter_rev.strip().strip("`*_ \t"):
         reason = (
@@ -1118,19 +969,7 @@ def _classify_review_transaction(
             f"Charter revision ('{charter_rev}'); the durable review state belongs to a "
             "different Charter revision and is not current."
         )
-        return {
-            "stage": "review-state-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": ["synchronized review state matching the current Charter revision"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": False,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [],
-        }
+        return _review_record("review-state-unknown", reason, missing=["synchronized review state matching the current Charter revision"])
 
     state_prof_norm = re.split(r"[;,]", state_prof_raw, maxsplit=1)[0].strip().lower().split()[0].strip("():-*_")
     if state_prof_norm != charter_profile.lower():
@@ -1139,19 +978,7 @@ def _classify_review_transaction(
             f"Profile ('{charter_profile}'); ask-light cannot determine the authoritative review "
             "profile and fails closed."
         )
-        return {
-            "stage": "review-state-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": ["synchronized review state matching the Charter profile"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": False,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [],
-        }
+        return _review_record("review-state-unknown", reason, missing=["synchronized review state matching the Charter profile"])
 
     clean_status = state_status_raw.strip().strip("`*_ \t")
     status_token = clean_status.upper()
@@ -1161,75 +988,34 @@ def _classify_review_transaction(
             "ask-light requires a canonical project-review Status (INIT, READY, CRITIC, REPAIR, "
             "EVALUATE, PASS, FAIL, BLOCKED) and fails closed."
         )
-        return {
-            "stage": "review-state-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"valid canonical Status in {dir_name}/state.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": False,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [],
-        }
+        return _review_record("review-state-unknown", reason, missing=[f"valid canonical Status in {dir_name}/state.md"])
 
     if status_token in ACTIVE_REVIEW_STATUSES:
-        return {
-            "stage": "project-review",
-            "skill": "project-review",
-            "reason": (
+        return _review_record(
+            "project-review",
+            (
                 f"A project-review is currently in progress (Status: {status_token}). "
                 "`project-review` owns advancing the active review round to completion."
             ),
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": ["completed project-review verdict"],
-            "gaps": [],
-            "hasAcceptanceEvidence": False,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": False,
-            "acceptancePaths": [],
-        }
+            status=status_token,
+            profile=charter_profile,
+            missing=["completed project-review verdict"],
+        )
 
     # Terminal review status: PASS, FAIL, BLOCKED
     verdict_path = review_dir / "verdict.md"
+    verdict_rel = str(verdict_path.relative_to(root))
     if not verdict_path.is_file():
         reason = (
             f"The review state is terminal ({status_token}) but `{dir_name}/verdict.md` is "
             "missing or unreadable; ask-light requires a coherent verdict and fails closed."
         )
-        return {
-            "stage": "review-state-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"valid {dir_name}/verdict.md matching terminal review state"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": False,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [],
-        }
+        return _review_record("review-state-unknown", reason, status=status_token, profile=charter_profile, missing=[f"valid {dir_name}/verdict.md matching terminal review state"])
 
     verdict_text = _small_text(verdict_path)
     if not verdict_text.strip():
         reason = f"The review state is terminal ({status_token}) but `{dir_name}/verdict.md` is empty; ask-light fails closed."
-        return {
-            "stage": "review-state-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"valid {dir_name}/verdict.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": False,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [],
-        }
+        return _review_record("review-state-unknown", reason, status=status_token, profile=charter_profile, missing=[f"valid {dir_name}/verdict.md"])
 
     v_verdict_raw, v_verdict_fail = _singleton_field_value(verdict_text, "Verdict")
     if v_verdict_fail == "missing":
@@ -1237,38 +1023,14 @@ def _classify_review_transaction(
             f"`{dir_name}/verdict.md` records no canonical `Verdict:` field line; "
             "ask-light requires terminal acceptance verdict identity and fails closed."
         )
-        return {
-            "stage": "acceptance-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"canonical Verdict in {dir_name}/verdict.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": True,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [str(verdict_path.relative_to(root))],
-        }
+        return _review_record("acceptance-unknown", reason, status=status_token, profile=charter_profile, paths=[verdict_rel], missing=[f"canonical Verdict in {dir_name}/verdict.md"])
     if v_verdict_fail == "ambiguous":
         reason = (
             f"`{dir_name}/verdict.md` records more than one canonical `Verdict:` field line; "
             "duplicate canonical fields violate the producer singleton contract and ask-light "
             "fails closed."
         )
-        return {
-            "stage": "acceptance-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"unambiguous singleton Verdict in {dir_name}/verdict.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": True,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [str(verdict_path.relative_to(root))],
-        }
+        return _review_record("acceptance-unknown", reason, status=status_token, profile=charter_profile, paths=[verdict_rel], missing=[f"unambiguous singleton Verdict in {dir_name}/verdict.md"])
 
     verdict_conclusion, v_verdict_parse_err = _parse_canonical_terminal_verdict(v_verdict_raw)
     if v_verdict_parse_err:
@@ -1276,19 +1038,7 @@ def _classify_review_transaction(
             f"`{dir_name}/verdict.md` records an unknown or non-canonical terminal acceptance Verdict ('{v_verdict_raw}'); "
             "ask-light requires a strict canonical terminal conclusion (PASS, FAIL, or BLOCKED) and fails closed."
         )
-        return {
-            "stage": "acceptance-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"valid canonical terminal Verdict (PASS, FAIL, or BLOCKED) in {dir_name}/verdict.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": True,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [str(verdict_path.relative_to(root))],
-        }
+        return _review_record("acceptance-unknown", reason, status=status_token, profile=charter_profile, paths=[verdict_rel], missing=[f"valid canonical terminal Verdict (PASS, FAIL, or BLOCKED) in {dir_name}/verdict.md"])
 
     v_rev_raw, v_rev_fail = _singleton_field_value(verdict_text, "Charter revision")
     if v_rev_fail == "missing":
@@ -1296,57 +1046,21 @@ def _classify_review_transaction(
             f"`{dir_name}/verdict.md` records no canonical `Charter revision:` field line; "
             "ask-light requires terminal verdict transaction identity and fails closed."
         )
-        return {
-            "stage": "acceptance-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"canonical Charter revision in {dir_name}/verdict.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": True,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [str(verdict_path.relative_to(root))],
-        }
+        return _review_record("acceptance-unknown", reason, status=status_token, profile=charter_profile, paths=[verdict_rel], missing=[f"canonical Charter revision in {dir_name}/verdict.md"])
     if v_rev_fail == "ambiguous":
         reason = (
             f"`{dir_name}/verdict.md` records more than one canonical `Charter revision:` field "
             "line; duplicate canonical fields violate the producer singleton contract and ask-light "
             "fails closed."
         )
-        return {
-            "stage": "acceptance-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"unambiguous singleton Charter revision in {dir_name}/verdict.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": True,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [str(verdict_path.relative_to(root))],
-        }
+        return _review_record("acceptance-unknown", reason, status=status_token, profile=charter_profile, paths=[verdict_rel], missing=[f"unambiguous singleton Charter revision in {dir_name}/verdict.md"])
     if v_rev_raw.strip().strip("`*_ \t") != charter_rev.strip().strip("`*_ \t"):
         reason = (
             f"The verdict's Charter revision ('{v_rev_raw}') does not match the current Charter "
             f"revision ('{charter_rev}'); the verdict belongs to a different Charter revision and "
             "is not current."
         )
-        return {
-            "stage": "acceptance-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": ["synchronized verdict matching current Charter revision"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": True,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [str(verdict_path.relative_to(root))],
-        }
+        return _review_record("acceptance-unknown", reason, status=status_token, profile=charter_profile, paths=[verdict_rel], missing=["synchronized verdict matching current Charter revision"])
 
     v_prof_raw, v_prof_fail = _singleton_field_value(verdict_text, "Profile")
     if v_prof_fail == "missing":
@@ -1354,57 +1068,21 @@ def _classify_review_transaction(
             f"`{dir_name}/verdict.md` records no canonical `Profile:` field line; "
             "ask-light requires terminal verdict transaction identity and fails closed."
         )
-        return {
-            "stage": "acceptance-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"canonical Profile in {dir_name}/verdict.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": True,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [str(verdict_path.relative_to(root))],
-        }
+        return _review_record("acceptance-unknown", reason, status=status_token, profile=charter_profile, paths=[verdict_rel], missing=[f"canonical Profile in {dir_name}/verdict.md"])
     if v_prof_fail == "ambiguous":
         reason = (
             f"`{dir_name}/verdict.md` records more than one canonical `Profile:` field line; "
             "duplicate canonical fields violate the producer singleton contract and ask-light "
             "fails closed."
         )
-        return {
-            "stage": "acceptance-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"unambiguous singleton Profile in {dir_name}/verdict.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": True,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [str(verdict_path.relative_to(root))],
-        }
+        return _review_record("acceptance-unknown", reason, status=status_token, profile=charter_profile, paths=[verdict_rel], missing=[f"unambiguous singleton Profile in {dir_name}/verdict.md"])
     v_prof_norm = re.split(r"[;,]", v_prof_raw, maxsplit=1)[0].strip().lower().split()[0].strip("():-*_")
     if v_prof_norm != charter_profile.lower():
         reason = (
             f"The verdict's Profile ('{v_prof_raw}') does not match the Charter's Profile "
             f"('{charter_profile}'); ask-light fails closed."
         )
-        return {
-            "stage": "acceptance-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": ["synchronized verdict matching Charter profile"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": True,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [str(verdict_path.relative_to(root))],
-        }
+        return _review_record("acceptance-unknown", reason, status=status_token, profile=charter_profile, paths=[verdict_rel], missing=["synchronized verdict matching Charter profile"])
 
     v_round, v_round_raw, v_round_fail = _singleton_round_field(verdict_text, "Round")
     if v_round_fail == "missing":
@@ -1412,93 +1090,33 @@ def _classify_review_transaction(
             f"`{dir_name}/verdict.md` records no canonical `Round:` field line; "
             "ask-light requires terminal verdict round identity and fails closed."
         )
-        return {
-            "stage": "acceptance-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"canonical Round in {dir_name}/verdict.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": True,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [str(verdict_path.relative_to(root))],
-        }
+        return _review_record("acceptance-unknown", reason, status=status_token, profile=charter_profile, paths=[verdict_rel], missing=[f"canonical Round in {dir_name}/verdict.md"])
     if v_round_fail == "ambiguous":
         reason = (
             f"`{dir_name}/verdict.md` records more than one canonical `Round:` field line; "
             "duplicate canonical fields violate the producer singleton contract and ask-light "
             "fails closed."
         )
-        return {
-            "stage": "acceptance-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"unambiguous singleton Round in {dir_name}/verdict.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": True,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [str(verdict_path.relative_to(root))],
-        }
+        return _review_record("acceptance-unknown", reason, status=status_token, profile=charter_profile, paths=[verdict_rel], missing=[f"unambiguous singleton Round in {dir_name}/verdict.md"])
     if v_round_fail == "malformed":
         reason = (
             f"`{dir_name}/verdict.md` records an unknown or malformed Round ('{v_round_raw}'); "
             "ask-light requires a canonical review round and fails closed."
         )
-        return {
-            "stage": "acceptance-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": [f"valid canonical Round in {dir_name}/verdict.md"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": True,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [str(verdict_path.relative_to(root))],
-        }
+        return _review_record("acceptance-unknown", reason, status=status_token, profile=charter_profile, paths=[verdict_rel], missing=[f"valid canonical Round in {dir_name}/verdict.md"])
     if v_round != state_round:
         reason = (
             f"The verdict's Round ({v_round}) does not match the current State Round ({state_round}); "
             "the verdict belongs to a different review round and is not current."
         )
-        return {
-            "stage": "acceptance-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": ["synchronized verdict matching current State round"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": True,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [str(verdict_path.relative_to(root))],
-        }
+        return _review_record("acceptance-unknown", reason, status=status_token, profile=charter_profile, paths=[verdict_rel], missing=["synchronized verdict matching current State round"])
 
     if status_token != verdict_conclusion:
         reason = (
             f"Durable review state and acceptance verdict conflict: state.md records Status: {status_token} while "
             f"verdict.md records {verdict_conclusion}. ask-light does not resolve conflicting records and fails closed."
         )
-        return {
-            "stage": "acceptance-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": ["coherent review state and verdict records"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": True,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [str(verdict_path.relative_to(root))],
-        }
+        return _review_record("acceptance-unknown", reason, status=status_token, verdict=verdict_conclusion, profile=charter_profile, paths=[verdict_rel], missing=["coherent review state and verdict records"])
 
     # Freshness verification
     review_freshness, freshness_gaps, _baseline = _classify_review_freshness(root, charter_text)
@@ -1517,19 +1135,18 @@ def _classify_review_transaction(
             "The previous verdict no longer proves the current state is accepted; run a "
             f"fresh `project-review` for the current baseline. {detail}"
         )
-        return {
-            "stage": "review-stale",
-            "skill": "project-review",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved", "recorded project-review baseline exists"],
-            "missing": ["a fresh project-review verdict for the changed baseline"],
-            "gaps": freshness_gaps,
-            "hasAcceptanceEvidence": True,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": False,
-            "acceptancePaths": [str(verdict_path.relative_to(root))],
-        }
+        return _review_record(
+            "review-stale",
+            reason,
+            status=status_token,
+            verdict=verdict_conclusion,
+            freshness="stale",
+            profile=charter_profile,
+            paths=[verdict_rel],
+            gaps=freshness_gaps,
+            missing=["a fresh project-review verdict for the changed baseline"],
+            completed=["Light project contract", "active SPEC", "tickets resolved", "recorded project-review baseline exists"],
+        )
 
     if review_freshness == "unknown":
         reason = (
@@ -1541,58 +1158,51 @@ def _classify_review_transaction(
             "verdict as current. Fail closed: re-freeze a verifiable baseline with "
             "`project-review`."
         )
-        return {
-            "stage": "review-freshness-unknown",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": ["a verifiable frozen baseline behind the recorded review"],
-            "gaps": freshness_gaps or [reason],
-            "hasAcceptanceEvidence": True,
-            "acceptancePassed": False,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": True,
-            "acceptancePaths": [str(verdict_path.relative_to(root))],
-        }
+        return _review_record(
+            "review-freshness-unknown",
+            reason,
+            status=status_token,
+            verdict=verdict_conclusion,
+            freshness="unknown",
+            profile=charter_profile,
+            paths=[verdict_rel],
+            gaps=freshness_gaps or [reason],
+            missing=["a verifiable frozen baseline behind the recorded review"],
+        )
 
     if status_token == "PASS":
-        return {
-            "stage": "accepted",
-            "skill": "",
-            "reason": "The current Light workflow is complete: the project is initialized, has an active SPEC, all implementation tickets are explicitly resolved, and acceptance evidence explicitly passes.",
-            "completed": [
+        return _review_record(
+            "accepted",
+            "The current Light workflow is complete: the project is initialized, has an active SPEC, all implementation tickets are explicitly resolved, and acceptance evidence explicitly passes.",
+            status=status_token,
+            verdict=verdict_conclusion,
+            freshness="current",
+            profile=charter_profile,
+            accepted=True,
+            paths=[verdict_rel],
+            completed=[
                 "project initialized",
                 "SPEC completed",
                 "tickets resolved",
                 "implementation completed",
                 "acceptance passed",
             ],
-            "missing": [],
-            "gaps": [],
-            "hasAcceptanceEvidence": True,
-            "acceptancePassed": True,
-            "acceptanceFailed": False,
-            "acceptanceUnknown": False,
-            "acceptancePaths": [str(verdict_path.relative_to(root))],
-        }
-    else:
-        reason = (
-            f"Acceptance evidence exists for the current baseline but reports a {status_token} "
-            "verdict. This is not a successful acceptance, so `ask-light` does not mark the workflow complete."
+            missing=[],
         )
-        return {
-            "stage": "acceptance-not-passed",
-            "skill": "",
-            "reason": reason,
-            "completed": ["Light project contract", "active SPEC", "tickets resolved"],
-            "missing": ["successful acceptance verdict"],
-            "gaps": [reason],
-            "hasAcceptanceEvidence": True,
-            "acceptancePassed": False,
-            "acceptanceFailed": True,
-            "acceptanceUnknown": False,
-            "acceptancePaths": [str(verdict_path.relative_to(root))],
-        }
+    reason = (
+        f"Acceptance evidence exists for the current baseline but reports a {status_token} "
+        "verdict. This is not a successful acceptance, so `ask-light` does not mark the workflow complete."
+    )
+    return _review_record(
+        "acceptance-not-passed",
+        reason,
+        status=status_token,
+        verdict=verdict_conclusion,
+        freshness="current",
+        profile=charter_profile,
+        paths=[verdict_rel],
+        missing=["successful acceptance verdict"],
+    )
 
 
 def _classify_review_ownership(
@@ -1648,19 +1258,6 @@ def _classify_review_ownership(
     if review_dir.name == LEGACY_PROJECT_REVIEW_DIRNAME:
         gaps[0] = gaps[0].replace(PROJECT_REVIEW_DIRNAME, LEGACY_PROJECT_REVIEW_DIRNAME)
     return "unresolvable", gaps
-
-
-def _acceptance_verdicts(text: str) -> list[str]:
-    """Extract acceptance values, preferring verdict/result/outcome fields.
-
-    Generic lifecycle `Status`/`State` values are only used when no explicit
-    verdict field exists, so a `Status: complete` line cannot downgrade an
-    explicit `Verdict: PASS`.
-    """
-    explicit = _field_values(text, ("Verdict", "Result", "Outcome", "Acceptance"))
-    if explicit:
-        return explicit
-    return _field_values(text, ("Status", "State"))
 
 
 def _spec_status(text: str) -> str:
@@ -1849,7 +1446,11 @@ def _resolve_current_effort(root: Path) -> tuple[str | None, str, list[str]]:
 
 
 def _find_research_artifacts(root: Path) -> list[str]:
-    """Return repository-relative paths for research documents."""
+    """Return repository-relative paths for research document candidates.
+
+    Presence proves only that an artifact exists — never that it is relevant,
+    complete, or that requirements were clarified. These are reasoning inputs.
+    """
     research_dir = root / "docs" / "research"
     artifacts: list[str] = []
     if research_dir.is_dir():
@@ -1862,104 +1463,363 @@ def _find_research_artifacts(root: Path) -> list[str]:
     return artifacts
 
 
-def _find_clarification_artifacts(root: Path, current_effort: str | None) -> list[str]:
-    """Return repository-relative paths for clarification readiness records."""
-    artifacts: list[str] = []
-    candidates: list[Path] = []
-    agents_dir = root / "docs" / "agents"
-    if agents_dir.is_dir():
-        try:
-            candidates.extend(
-                path for path in agents_dir.iterdir()
-                if path.is_file() and "clarif" in path.name.lower()
-            )
-        except OSError:
-            pass
+# Clarification handoff classification (producer owner: skills/project-clarify).
+# A persisted handoff counts as readiness evidence only when its CONTENT
+# resembles the producer contract — never because a filename contains
+# "clarif". The producer handoff shape carries the title marker plus
+# `Status:` and `Recommended next explicit invocation:` fields.
+CLARIFICATION_HANDOFF_MARKER = "project clarification handoff"
+CLARIFICATION_STATUS_STATES = {
+    "ready-for-next-stage": "ready",
+    "waiting-for-user": "waiting",
+    "blocked": "blocked",
+}
+CLARIFICATION_RECOMMENDED_FIELD = "Recommended next explicit invocation"
+
+
+def _clarification_candidate_files(root: Path, current_effort: str | None) -> list[Path]:
+    """Bounded candidate scan for persisted clarification handoffs."""
+    directories = [root / "docs" / "agents"]
     if current_effort:
-        effort_dir = root / ".scratch" / current_effort
-        if effort_dir.is_dir():
-            try:
-                candidates.extend(
-                    path for path in effort_dir.iterdir()
-                    if path.is_file() and "clarif" in path.name.lower()
-                )
-            except OSError:
-                pass
+        directories.append(root / ".scratch" / current_effort)
+    candidates: list[Path] = []
+    for directory in directories:
+        if not directory.is_dir():
+            continue
+        try:
+            files = [
+                path for path in sorted(directory.iterdir())
+                if path.is_file() and path.suffix.lower() in (".md", ".txt")
+            ]
+        except OSError:
+            continue
+        candidates.extend(files[:SIGNAL_SCAN_FILE_LIMIT])
+    unique: list[Path] = []
+    seen: set[Path] = set()
     for path in sorted(candidates):
-        if path.suffix.lower() in (".md", ".txt"):
-            artifacts.append(str(path.relative_to(root)))
-    return artifacts
+        resolved = path.resolve()
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        unique.append(path)
+    return unique[: SIGNAL_SCAN_FILE_LIMIT * 2]
 
 
-def inspect_project_state(project_root: Path) -> dict[str, Any]:
-    """Inspect a bounded set of real project evidence, not the whole repository.
+def _classify_clarification_signals(root: Path, current_effort: str | None) -> list[dict[str, Any]]:
+    """Classify persisted clarification-handoff records by producer content.
 
-    Returns a stage and structured evidence. For hard deterministic states
-    (uninitialized, ambiguous effort, active review, etc.) a ``skill`` is
-    included. For semantic workflow choices (initialized but no SPEC) the
-    ``skill`` field is empty and the caller — typically the model — owns the
-    final recommendation using the returned evidence plus conversation context.
+    Returns records for files whose content resembles the project-clarify
+    handoff contract: the `Project clarification handoff` marker, or a
+    recognized handoff `Status` together with a `Recommended next explicit
+    invocation` field. A filename containing "clarif" alone is NOT evidence;
+    unrecognized or missing statuses classify as "unknown" (fail-closed —
+    never ready).
     """
-    root = project_root.resolve()
-    evidence: dict[str, Any] = {
-        "projectRoot": str(root),
+    records: list[dict[str, Any]] = []
+    for path in _clarification_candidate_files(root, current_effort):
+        text = _small_text(path)
+        if not text.strip():
+            continue
+        marker = CLARIFICATION_HANDOFF_MARKER in text.lower()
+        statuses = _field_values(text, ("Status",))
+        recognized = [status for status in statuses if status in CLARIFICATION_STATUS_STATES]
+        recommended = _field_values(text, (CLARIFICATION_RECOMMENDED_FIELD,))
+        if not marker and not (recognized and recommended):
+            continue
+        raw_status = recognized[0] if recognized else ""
+        state = CLARIFICATION_STATUS_STATES.get(raw_status, "unknown")
+        records.append({
+            "path": str(path.relative_to(root)),
+            "marker": marker,
+            "status": raw_status or "unknown",
+            "state": state,
+            "recommendedNext": recommended[0] if recommended else "",
+            "ready": state == "ready",
+        })
+    return records
+
+
+def _parse_ticket_blocked_by(text: str) -> tuple[list[str], bool]:
+    """Parse a ticket's `Blocked by` edges into normalized ticket numbers.
+
+    Returns (references, parse_ok). `None`-style values produce no references.
+    Every other comma-separated part must carry a leading ticket number
+    (producer contract: `Blocked by: NN, NN`); a part without one is a
+    reference that cannot be proven resolved, so the whole field fails closed
+    with parse_ok=False.
+    """
+    values = _raw_field_occurrences(text, "Blocked by")
+    if not values:
+        return [], True
+    references: list[str] = []
+    for value in values:
+        if value.strip().lower().startswith("none"):
+            continue
+        for part in re.split(r"[,;]", value):
+            part = part.strip().strip("*`_")
+            if not part:
+                continue
+            match = re.match(r"^(\d{1,4})\b", part)
+            if not match:
+                return [], False
+            number = str(int(match.group(1)))
+            if number not in references:
+                references.append(number)
+    return references, True
+
+
+def _classify_ticket_frontier(ticket_paths: list[Path], root: Path) -> dict[str, Any]:
+    """Classify tickets into the frontier contract buckets (fail-closed).
+
+    Buckets: ready (unblocked implementable frontier), blocked (declared
+    blockers outstanding or waiting statuses), claimed/in-progress, resolved,
+    unknown (missing/unknown Status vocabulary or unresolvable `Blocked by`
+    grammar). A ready frontier exists only when at least one ticket is ready;
+    unresolved-but-all-blocked tickets never prove implementation can proceed.
+    """
+    entries: list[dict[str, Any]] = []
+    for path in ticket_paths:
+        text = _small_text(path)
+        statuses = _field_values(text, ("Status", "State"))
+        blocked_by, parse_ok = _parse_ticket_blocked_by(text)
+        stem_match = re.match(r"^(\d{1,4})", path.stem)
+        entries.append({
+            "path": path,
+            "statuses": statuses,
+            "blockedBy": blocked_by,
+            "blockedByParseOk": parse_ok,
+            "number": str(int(stem_match.group(1))) if stem_match else "",
+        })
+    resolved_numbers = {
+        entry["number"]
+        for entry in entries
+        if entry["number"] and entry["statuses"]
+        and all(status in TICKET_RESOLVED_STATES for status in entry["statuses"])
+    }
+    buckets: dict[str, list[dict[str, Any]]] = {
+        "ready": [], "blocked": [], "claimed": [], "resolved": [], "unknown": [],
+    }
+    for entry in entries:
+        record: dict[str, Any] = {
+            "path": str(entry["path"].relative_to(root)),
+            "status": entry["statuses"][0] if entry["statuses"] else "",
+            "blockedBy": entry["blockedBy"],
+        }
+        known_statuses = bool(entry["statuses"]) and all(
+            status in TICKET_RESOLVED_STATES or status in TICKET_UNRESOLVED_STATES
+            for status in entry["statuses"]
+        )
+        if not known_statuses:
+            record["detail"] = (
+                "no canonical Status field"
+                if not entry["statuses"]
+                else f"unknown ticket status '{entry['statuses'][0]}'"
+            )
+            buckets["unknown"].append(record)
+            continue
+        if not entry["blockedByParseOk"]:
+            record["detail"] = "'Blocked by' references cannot be resolved to numbered sibling tickets"
+            buckets["unknown"].append(record)
+            continue
+        if any(status in TICKET_CLAIMED_STATES for status in entry["statuses"]):
+            buckets["claimed"].append(record)
+            continue
+        if all(status in TICKET_RESOLVED_STATES for status in entry["statuses"]):
+            buckets["resolved"].append(record)
+            continue
+        outstanding = [ref for ref in entry["blockedBy"] if ref not in resolved_numbers]
+        record["outstandingBlockers"] = outstanding
+        ready_statuses = all(status in TICKET_READY_STATES for status in entry["statuses"])
+        if ready_statuses and not outstanding:
+            buckets["ready"].append(record)
+        else:
+            record["detail"] = (
+                "declared blockers outstanding"
+                if outstanding
+                else f"unresolved waiting state ('{entry['statuses'][0]}')"
+            )
+            buckets["blocked"].append(record)
+    for bucket in buckets.values():
+        bucket.sort(key=lambda item: item["path"])
+    return {
+        "exists": bool(ticket_paths),
+        "ready": buckets["ready"],
+        "blocked": buckets["blocked"],
+        "claimed": buckets["claimed"],
+        "resolved": buckets["resolved"],
+        "unknown": buckets["unknown"],
+        "readyTicketPaths": [record["path"] for record in buckets["ready"]],
+        "blockedTicketPaths": [record["path"] for record in buckets["blocked"]],
+        "claimedTicketPaths": [record["path"] for record in buckets["claimed"]],
+        "resolvedTicketPaths": [record["path"] for record in buckets["resolved"]],
+        "unknownTicketPaths": [record["path"] for record in buckets["unknown"]],
+        "frontierReady": bool(buckets["ready"]),
+        "allResolved": bool(ticket_paths) and not buckets["unknown"] and len(buckets["resolved"]) == len(ticket_paths),
+    }
+
+
+def _constraint(constraint_type: str, owner_skill: str = "", blocking: bool = True, *, detail: str = "") -> dict[str, Any]:
+    """One scoped hard fact. Constraints apply to current-workflow
+    reasoning only; they never hijack independent tasks or standalone requests."""
+    return {
+        "type": constraint_type,
+        "appliesTo": "current-workflow",
+        "ownerSkill": owner_skill,
+        "blocking": blocking,
+        "detail": detail,
+    }
+
+
+_STAGE_CONSTRAINTS = {
+    "uninitialized": ("uninitialized-project", "project-init", True),
+    "ambiguous-current-effort": ("ambiguous-current-effort", "", True),
+    "contradictory-current-effort": ("contradictory-current-effort", "", True),
+    "project-review": ("active-review", "project-review", True),
+    "review-stale": ("stale-review", "project-review", True),
+    "review-freshness-unknown": ("review-freshness-unknown", "project-review", True),
+    "review-state-unknown": ("review-state-unknown", "project-review", True),
+    "review-ownership-unknown": ("review-ownership-unknown", "project-review", True),
+    "acceptance-unknown": ("acceptance-unknown", "project-review", True),
+    "acceptance-not-passed": ("review-verdict-not-passed", "project-review", True),
+    "tickets-unknown": ("ticket-state-unknown", "", True),
+    "implementation-complete": ("acceptance-pending", "project-review", True),
+    "accepted": ("current-effort-accepted", "", False),
+}
+
+
+def _empty_tickets() -> dict[str, Any]:
+    return {
+        "exists": False,
+        "ready": [], "blocked": [], "claimed": [], "resolved": [], "unknown": [],
+        "readyTicketPaths": [], "blockedTicketPaths": [], "claimedTicketPaths": [],
+        "resolvedTicketPaths": [], "unknownTicketPaths": [],
+        "frontierReady": False,
+        "allResolved": False,
+    }
+
+
+def _empty_review() -> dict[str, Any]:
+    return {
+        "exists": False,
+        "directory": None,
+        "ownership": None,
+        "status": None,
+        "verdict": None,
+        "freshness": None,
+        "profile": None,
+        "accepted": False,
+        "paths": [],
+        "gaps": [],
+    }
+
+
+def _empty_evidence(note: str = "no project root was resolved; standalone and semantic routing proceed from the Skill catalog") -> dict[str, Any]:
+    return {
+        "schema": EVIDENCE_SCHEMA,
+        "projectReadable": False,
+        "projectRoot": "",
         "initialized": False,
-        "hasSpec": False,
-        "hasTickets": False,
-        "unresolvedTickets": False,
-        "allTicketsResolved": False,
-        "unknownTicketState": False,
-        "hasAcceptanceEvidence": False,
-        "acceptancePassed": False,
-        "acceptanceFailed": False,
-        "acceptanceUnknown": False,
-        "specPaths": [],
-        "ticketPaths": [],
-        "acceptancePaths": [],
-        "currentEffort": "",
-        "ambiguousCurrentEffort": False,
-        "stage": "",
-        "skill": "",
-        "reason": "",
+        "projectContract": {},
+        "currentEffort": {"name": None, "resolution": "none", "gaps": []},
+        "spec": {"exists": False, "active": False, "paths": []},
+        "tickets": _empty_tickets(),
+        "review": _empty_review(),
+        "artifactSignals": {"research": [], "clarification": []},
+        "hardConstraints": [],
+        "stage": "none",
+        "reason": note,
         "completed": [],
         "missing": [],
         "gaps": [],
     }
+
+
+def _inspect_review_evidence(root: Path, current_effort: str | None) -> dict[str, Any]:
+    """Inspect the durable review state at EVERY project stage (fail-closed).
+
+    The canonical software workflow runs project-spec → project-review →
+    project-tickets, so a review transaction can be the live workflow state
+    before any ticket exists. The record reports ownership, lifecycle status,
+    verdict, freshness, and profile as facts; the model determines what the
+    review applies to using the producer-owned review contract.
+    """
+    review_dir = _project_review_dir(root)
+    record = _empty_review()
+    if review_dir is None:
+        return record
+    record["exists"] = True
+    record["directory"] = review_dir.name
+    record["paths"] = [
+        str(path.relative_to(root))
+        for path in sorted(review_dir.glob("*.md"))
+    ]
+    ownership, ownership_gaps = _classify_review_ownership(review_dir, root, current_effort)
+    record["ownership"] = ownership
+    record["gaps"] = list(ownership_gaps)
+    if ownership != "current":
+        # Without proven ownership the transaction cannot be evaluated for the
+        # current effort; the ownership fact and gaps are the evidence.
+        return record
+    transaction = _classify_review_transaction(root, review_dir, current_effort or "")
+    record.update({
+        "status": transaction.get("status"),
+        "verdict": transaction.get("verdict"),
+        "freshness": transaction.get("freshness"),
+        "profile": transaction.get("profile"),
+        "accepted": transaction.get("accepted", False),
+        "reason": transaction.get("reason", ""),
+        "gaps": record["gaps"] + list(transaction.get("gaps", [])),
+        "stage": transaction.get("stage", ""),
+        "completed": transaction.get("completed", []),
+        "missing": transaction.get("missing", []),
+    })
+    return record
+
+
+def inspect_project_evidence(project_root: Path) -> dict[str, Any]:
+    """Inspect a bounded set of real project evidence — facts, not routing.
+
+    Returns an evidence packet: project contract, current effort resolution,
+    SPEC activity, ticket frontier, durable review state (at every stage),
+    artifact signals, and scoped hard constraints. The packet never names a
+    recommended Skill: semantic workflow choice belongs to the model, guided
+    by `hardConstraints` (which bind only current-workflow reasoning)
+    and validated afterwards by `validate_recommendation`.
+    """
+    root = Path(project_root).resolve()
+    evidence = _empty_evidence()
+    evidence["projectRoot"] = str(root)
     if not root.is_dir():
         evidence["stage"] = "unknown"
         evidence["reason"] = "project root is not readable"
         evidence["gaps"] = ["project root is not readable"]
         return evidence
+    evidence["projectReadable"] = True
 
     project_contract = root / "docs/agents/light-project.md"
     evidence["initialized"] = project_contract.is_file()
-
     if not evidence["initialized"]:
         evidence["stage"] = "uninitialized"
-        evidence["skill"] = "project-init"
         evidence["reason"] = "No docs/agents/light-project.md exists; the repository has not been initialized for Light Project workflows."
         evidence["completed"] = []
         evidence["missing"] = ["Light project configuration and tracker contract"]
-        evidence["gaps"] = []
+        evidence["review"] = _inspect_review_evidence(root, None)
+        evidence["hardConstraints"] = [_constraint(*_STAGE_CONSTRAINTS["uninitialized"], detail=evidence["reason"])]
         return evidence
 
     # Resolve the current/active effort before reading effort-owned evidence so
     # historical .scratch efforts cannot contaminate the current workflow state.
     current_effort, effort_failure, effort_gaps = _resolve_current_effort(root)
-    evidence["currentEffort"] = current_effort or ""
-    evidence["ambiguousCurrentEffort"] = bool(effort_failure)
-    if effort_failure:
-        evidence["stage"] = effort_failure
-        evidence["skill"] = ""
-        evidence["reason"] = (
-            effort_gaps[0]
-            if effort_gaps
-            else "The current Light effort cannot be established reliably from repository evidence."
-        )
-        evidence["completed"] = ["Light project contract present"]
-        evidence["missing"] = ["resolve which Light effort is current"]
-        evidence["gaps"] = effort_gaps
-        return evidence
+    evidence["currentEffort"] = {
+        "name": current_effort,
+        "resolution": (
+            "current" if current_effort
+            else ("ambiguous" if effort_failure == "ambiguous-current-effort"
+                  else "contradictory" if effort_failure == "contradictory-current-effort"
+                  else "none")
+        ),
+        "gaps": list(effort_gaps),
+    }
 
     # Active SPEC: a few conventional locations plus the resolved effort root.
     # Inactive/superseded/archived specs are not project evidence.
@@ -1974,8 +1834,18 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
             scratch_specs = [scratch_spec]
     all_spec_candidates = [*spec_candidates, *scratch_specs]
     spec_paths = [path for path in all_spec_candidates if _is_active_spec(path, root)]
-    evidence["hasSpec"] = bool(spec_paths)
-    evidence["specPaths"] = [str(path.relative_to(root)) for path in spec_paths[:10]]
+    evidence["spec"] = {
+        "exists": bool(spec_paths),
+        "active": bool(spec_paths),
+        "paths": [str(path.relative_to(root)) for path in spec_paths[:10]],
+    }
+
+    # Durable review state is inspected at EVERY stage (SPEC review happens
+    # before tickets exist in the canonical workflow).
+    review_record = _inspect_review_evidence(root, current_effort)
+    evidence["review"] = review_record
+    if review_record.get("gaps"):
+        evidence["gaps"].extend(review_record["gaps"])
 
     # Tickets: local-markdown issue files only, bounded to the current effort.
     if current_effort:
@@ -1984,89 +1854,71 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
     else:
         ticket_paths = []
     ticket_paths = [path for path in ticket_paths if path.is_file()]
-    evidence["hasTickets"] = bool(ticket_paths)
-    evidence["ticketPaths"] = [str(path.relative_to(root)) for path in ticket_paths[:20]]
+    evidence["tickets"] = _classify_ticket_frontier(ticket_paths, root)
 
-    # Ticket completion is fail-closed. A missing status or a status outside the
-    # known resolved/unresolved vocabulary is unknown, not resolved.
-    statuses: list[str] = []
-    unknown_ticket = False
-    for ticket in ticket_paths:
-        ticket_statuses = _field_values(_small_text(ticket), ("Status", "State"))
-        if not ticket_statuses or any(
-            status not in TICKET_RESOLVED_STATES and status not in TICKET_UNRESOLVED_STATES
-            for status in ticket_statuses
-        ):
-            unknown_ticket = True
-        statuses.extend(ticket_statuses)
-    evidence["unknownTicketState"] = unknown_ticket
-    evidence["unresolvedTickets"] = any(status in TICKET_UNRESOLVED_STATES for status in statuses)
-    evidence["allTicketsResolved"] = (
-        bool(ticket_paths)
-        and not unknown_ticket
-        and bool(statuses)
-        and all(status in TICKET_RESOLVED_STATES for status in statuses)
-        and not evidence["unresolvedTickets"]
-    )
+    # Artifact signals: candidates, not conclusions.
+    evidence["artifactSignals"] = {
+        "research": _find_research_artifacts(root),
+        "clarification": _classify_clarification_signals(root, current_effort),
+    }
 
-    # Acceptance/review evidence: the canonical `project-review` durable state.
-    # The record is authoritative only when the Charter's Source proves it
-    # reviewed the resolved current effort AND the 3-part durable review
-    # transaction (charter.md + state.md + verdict.md) is coherent and fresh.
-    review_dir = _project_review_dir(root)
-    review_ownership = ""
-    review_gaps: list[str] = []
-    if review_dir is not None:
-        review_ownership, review_gaps = _classify_review_ownership(review_dir, root, current_effort)
-        if review_gaps:
-            evidence["gaps"].extend(review_gaps)
+    # Effort-level fail-closed facts dominate the stage when present.
+    if effort_failure:
+        evidence["stage"] = effort_failure
+        evidence["reason"] = (
+            effort_gaps[0]
+            if effort_gaps
+            else "The current Light effort cannot be established reliably from repository evidence."
+        )
+        evidence["completed"] = ["Light project contract present"]
+        evidence["missing"] = ["resolve which Light effort is current"]
+        evidence["gaps"].extend(effort_gaps)
+        evidence["hardConstraints"] = [_constraint(*_STAGE_CONSTRAINTS[effort_failure], detail=evidence["reason"])]
+        return evidence
 
-    if not evidence["hasSpec"]:
+    # An owned review in a live/unknown transaction state owns the current
+    # workflow at every ticket stage: an active round must complete, a stale
+    # or incoherent verdict must be re-established before anything else.
+    review_transaction_stages = {
+        "project-review", "review-stale", "review-freshness-unknown",
+        "review-state-unknown", "acceptance-unknown",
+    }
+    if review_record.get("exists") and review_record.get("stage") in review_transaction_stages:
+        stage = review_record["stage"]
+        evidence["stage"] = stage
+        evidence["reason"] = review_record.get("reason", "")
+        completed = ["Light project contract"]
+        if evidence["spec"]["active"]:
+            completed.append("active SPEC")
+        if evidence["tickets"]["allResolved"]:
+            completed.append("tickets resolved")
+        evidence["completed"] = completed
+        evidence["missing"] = review_record.get("missing", [])
+        evidence["hardConstraints"] = [
+            _constraint(*_STAGE_CONSTRAINTS[stage], detail=review_record.get("reason", ""))
+        ]
+        return evidence
+
+    if not evidence["spec"]["active"]:
         contract_text = _small_text(project_contract)
         has_goal = bool(re.search(r"(?im)^-\s*Goal:\s*(?!\?|\(none recorded\)|$)\S", contract_text))
         has_outputs = bool(re.search(r"(?im)^-\s*Outputs:\s*(?!\(none recorded\)|$)\S", contract_text))
         has_constraints = bool(re.search(r"(?im)^-\s*Constraints:\s*(?!\?|\(none recorded\)|$)\S", contract_text))
-
-        research_artifacts = _find_research_artifacts(root)
-        clarification_artifacts = _find_clarification_artifacts(root, current_effort)
-
         evidence["stage"] = "initialized"
-        evidence["skill"] = ""
         evidence["reason"] = ""
         evidence["completed"] = ["Light project contract present"]
         evidence["missing"] = ["active SPEC"]
-        evidence["gaps"] = []
         evidence["projectContract"] = {
             "path": str(project_contract.relative_to(root)),
             "goalRecorded": has_goal,
             "outputsRecorded": has_outputs,
             "constraintsRecorded": has_constraints,
         }
-        evidence["researchArtifacts"] = research_artifacts
-        evidence["clarificationArtifacts"] = clarification_artifacts
         return evidence
 
-    if not evidence["hasTickets"]:
-        evidence["stage"] = "spec-no-tickets"
-        evidence["skill"] = "project-tickets"
-        evidence["reason"] = "A stable SPEC exists but no implementation tickets are present. `project-tickets` owns slicing the SPEC into dependency-ordered, unblocked work items."
-        evidence["completed"] = ["Light project contract", "active SPEC"]
-        evidence["missing"] = ["implementation tickets and unblocked frontier"]
-        evidence["gaps"] = []
-        return evidence
-
-    if evidence["unresolvedTickets"]:
-        evidence["stage"] = "work-in-progress"
-        evidence["skill"] = "implement"
-        evidence["reason"] = "Implementation tickets exist and at least one remains unresolved. `implement` owns executing the next ready, unblocked ticket."
-        evidence["completed"] = ["Light project contract", "active SPEC", "ticket graph"]
-        evidence["missing"] = ["completion of the unresolved ticket(s)"]
-        evidence["gaps"] = []
-        return evidence
-
-    if evidence["unknownTicketState"]:
+    tickets = evidence["tickets"]
+    if tickets["unknown"]:
         evidence["stage"] = "tickets-unknown"
-        evidence["skill"] = ""
         evidence["reason"] = (
             "Ticket files exist but their completion state cannot be established from repository evidence. "
             "At least one ticket has no Status field or uses a status outside the known resolved/unresolved "
@@ -2074,64 +1926,96 @@ def inspect_project_state(project_root: Path) -> dict[str, Any]:
         )
         evidence["completed"] = ["Light project contract", "active SPEC", "ticket files present"]
         evidence["missing"] = ["reliable ticket completion state"]
-        evidence["gaps"] = [evidence["reason"]]
+        evidence["gaps"].append(evidence["reason"])
+        evidence["hardConstraints"] = [
+            _constraint(*_STAGE_CONSTRAINTS["tickets-unknown"], detail=evidence["reason"])
+        ]
         return evidence
 
-    # Review durable transaction: evaluate charter.md + state.md + verdict.md.
-    if review_dir is None:
+    if not tickets["allResolved"]:
+        evidence["stage"] = "work-in-progress"
+        evidence["reason"] = (
+            "Implementation tickets exist and at least one remains unresolved."
+            if tickets["frontierReady"]
+            else "Implementation tickets exist and remain unresolved, but no ready unblocked frontier item is present."
+        )
+        evidence["completed"] = ["Light project contract", "active SPEC", "ticket graph"]
+        evidence["missing"] = ["completion of the unresolved ticket(s)"]
+        return evidence
+
+    if not tickets["exists"]:
+        evidence["stage"] = "spec-no-tickets"
+        evidence["reason"] = ""
+        evidence["completed"] = ["Light project contract", "active SPEC"]
+        evidence["missing"] = ["implementation tickets and unblocked frontier"]
+        return evidence
+
+    # All tickets explicitly resolved: acceptance evidence decides the stage.
+    if not review_record.get("exists"):
         evidence["stage"] = "implementation-complete"
-        evidence["skill"] = "project-review"
         evidence["reason"] = (
             "Implementation tickets are resolved but no acceptance/review verdict evidence is present. "
             "`project-review` owns final acceptance against the frozen baseline."
         )
         evidence["completed"] = ["Light project contract", "active SPEC", "tickets resolved"]
         evidence["missing"] = ["final acceptance/review verdict evidence"]
-        evidence["gaps"] = []
+        evidence["hardConstraints"] = [
+            _constraint(*_STAGE_CONSTRAINTS["implementation-complete"], detail=evidence["reason"])
+        ]
         return evidence
-
-    if review_ownership == "unresolvable":
+    if review_record.get("ownership") == "historical":
+        evidence["stage"] = "implementation-complete"
+        evidence["reason"] = (
+            f"Durable review evidence exists but belongs to a historical effort ({review_record['gaps'][0] if review_record['gaps'] else 'another effort'}), "
+            "not the current effort. `project-review` owns final acceptance for the current effort."
+        )
+        evidence["completed"] = ["Light project contract", "active SPEC", "tickets resolved"]
+        evidence["missing"] = ["final acceptance/review verdict evidence for the current effort"]
+        evidence["hardConstraints"] = [
+            _constraint(*_STAGE_CONSTRAINTS["implementation-complete"], detail=evidence["reason"])
+        ]
+        return evidence
+    if review_record.get("ownership") == "unresolvable":
         reason = (
-            f"A `{review_dir.name}` durable record exists but its ownership cannot be established from the "
+            f"A `{review_record.get('directory', PROJECT_REVIEW_DIRNAME)}` durable record exists but its ownership cannot be established from the "
             "Charter's `Source:` line, so `ask-light` cannot prove the verdict belongs to the current effort. "
             "Fail closed: link the review by recording the reviewed SPEC path "
             f"(`.scratch/{current_effort or '<effort>'}/spec.md`) in the Charter `Source:`."
         )
         evidence["stage"] = "review-ownership-unknown"
-        evidence["skill"] = ""
         evidence["reason"] = reason
         evidence["completed"] = ["Light project contract", "active SPEC", "tickets resolved"]
         evidence["missing"] = ["review ownership proven for the current effort"]
-        evidence["gaps"] = [*evidence["gaps"], reason]
+        evidence["gaps"].append(reason)
+        evidence["hardConstraints"] = [
+            _constraint(*_STAGE_CONSTRAINTS["review-ownership-unknown"], detail=reason)
+        ]
         return evidence
 
-    if review_ownership == "historical":
-        evidence["stage"] = "implementation-complete"
-        evidence["skill"] = "project-review"
-        evidence["reason"] = (
-            f"Durable review evidence exists but belongs to a historical effort ({review_gaps[0] if review_gaps else 'another effort'}), "
-            "not the current effort. `project-review` owns final acceptance for the current effort."
-        )
-        evidence["completed"] = ["Light project contract", "active SPEC", "tickets resolved"]
-        evidence["missing"] = ["final acceptance/review verdict evidence for the current effort"]
-        evidence["gaps"] = []
+    # Proven ownership with a coherent terminal verdict.
+    if review_record.get("stage") == "accepted":
+        evidence["stage"] = "accepted"
+        evidence["reason"] = review_record.get("reason", "")
+        evidence["completed"] = review_record.get("completed", [])
+        evidence["missing"] = []
+        evidence["hardConstraints"] = [
+            _constraint(*_STAGE_CONSTRAINTS["accepted"], detail=evidence["reason"])
+        ]
         return evidence
-
-    # Review ownership is current: evaluate the 3-part transaction.
-    transaction = _classify_review_transaction(root, review_dir, current_effort or "")
-    evidence["stage"] = transaction["stage"]
-    evidence["skill"] = transaction.get("skill", "")
-    evidence["reason"] = transaction.get("reason", "")
-    evidence["completed"] = transaction.get("completed", [])
-    evidence["missing"] = transaction.get("missing", [])
-    evidence["gaps"] = transaction.get("gaps", [])
-    evidence["hasAcceptanceEvidence"] = transaction.get("hasAcceptanceEvidence", False)
-    evidence["acceptancePassed"] = transaction.get("acceptancePassed", False)
-    evidence["acceptanceFailed"] = transaction.get("acceptanceFailed", False)
-    evidence["acceptanceUnknown"] = transaction.get("acceptanceUnknown", False)
-    evidence["acceptancePaths"] = transaction.get("acceptancePaths", [])
+    stage = review_record.get("stage") or "acceptance-not-passed"
+    evidence["stage"] = stage
+    evidence["reason"] = review_record.get("reason", "")
+    evidence["completed"] = review_record.get("completed", [])
+    evidence["missing"] = review_record.get("missing", [])
+    evidence["hardConstraints"] = [
+        _constraint(*_STAGE_CONSTRAINTS.get(stage, ("acceptance-unknown", "project-review", True)), detail=evidence["reason"])
+    ]
     return evidence
 
+
+# ---------------------------------------------------------------------------
+# Skill catalog, availability, and provenance (deterministic).
+# ---------------------------------------------------------------------------
 
 def read_frontmatter(path: Path) -> tuple[dict[str, str], str]:
     try:
@@ -2359,46 +2243,133 @@ def invocation_compatible(invocation_type: str, control: str) -> bool:
     return control in {"explicit-only", "either"} or invocation_type == "model-invoked"
 
 
-def base_result(mode: str, status: str, gaps: list[str]) -> dict[str, Any]:
+def _build_catalog(candidates: list[dict[str, Any]], skill_map: dict[str, Any]) -> list[dict[str, Any]]:
+    """Compact catalog metadata for model candidate selection (§17).
+
+    Frontmatter stays authoritative for name/description/invocation type; the
+    Light Skill Map stays authoritative for collection membership, families,
+    and workflow relationships.
+    """
+    families = skill_map.get("skillFamilies", {})
+    catalog: list[dict[str, Any]] = []
+    for candidate in sorted(candidates, key=lambda item: item["name"]):
+        catalog.append({
+            "name": candidate["name"],
+            "description": candidate["description"],
+            "family": families.get(candidate["name"], ""),
+            "invocationType": candidate["invocationType"],
+            "availability": candidate["availabilityStatus"],
+            "packagePath": candidate["packagePath"],
+            "sourceCategory": candidate["sourceCategory"],
+        })
+    return catalog
+
+
+# ---------------------------------------------------------------------------
+# Mode packets: next (evidence), workflow (recipes), navigate (deterministic).
+# Every packet is an evidence/decision input for the model — never a final
+# semantic recommendation.
+# ---------------------------------------------------------------------------
+
+def next_evidence(roots: list[dict[str, Any]] | None, context: dict[str, Any], host: str = "codex", skill_map: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Next-mode packet: project evidence + Skill catalog for model judgment."""
+    skill_map = skill_map or load_map()
+    if roots is None or not roots:
+        roots = discover_roots()
+    policy = availability_policy(context, host)
+    candidates, gaps, metadata_reads = discover(roots, skill_map, policy)
+    project_root_value = context.get("projectRoot") or context.get("cwd")
+    if project_root_value and str(project_root_value).strip():
+        evidence = inspect_project_evidence(Path(str(project_root_value)))
+    else:
+        evidence = _empty_evidence()
+    catalog = _build_catalog(candidates, skill_map)
+    available_names = sorted(item["name"] for item in catalog if item["availability"] == "available")
     return {
-        "mode": mode,
-        "status": status,
-        "skill": "",
-        "source": "",
-        "reason": "",
-        "invocation": "",
-        "confidence": "low",
-        "alternative": None,
+        "mode": "next",
+        "routingState": ROUTING_NEEDS_MODEL,
+        "host": policy["host"],
+        "evidence": evidence,
+        "catalog": catalog,
+        "availableSkills": available_names,
         "gaps": gaps,
-        "reads": {"metadata": 0, "bodies": 0, "references": 0},
-        "candidates": [],
+        "reads": {"metadata": metadata_reads, "bodies": 0, "references": 0},
         "next": "awaiting-approval",
         "execution": "recommendation phase was read-only; execution begins only after explicit user approval",
-        "projectStage": "",
-        "completed": [],
-        "missing": [],
     }
 
 
-def workflow_base_result(status: str, gaps: list[str]) -> dict[str, Any]:
-    result = base_result("workflow", status, gaps)
-    result.update({
-        "workflow": "",
-        "entryCondition": "",
-        "steps": [],
-        "stoppingBoundary": "",
-        "missingDependency": "",
-        "finalAuthority": "",
-    })
-    return result
+def recipes_result(roots: list[dict[str, Any]] | None, context: dict[str, Any], host: str = "codex", skill_map: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Workflow-mode packet: canonical recipes + step availability.
 
-
-def _known_skill(skill_map: dict[str, Any], name: str) -> dict[str, Any] | None:
-    return next((entry for entry in skill_map["skills"] if entry["name"].lower() == name.lower()), None)
+    The helper publishes every recipe with per-step availability and handoff
+    contracts; it never selects the winning recipe. The model inspects the
+    current context, selects the relevant workflow semantically, anchors the
+    entry point at the user's actual current state, and preserves each step's
+    stopping boundary.
+    """
+    skill_map = skill_map or load_map()
+    if roots is None or not roots:
+        roots = discover_roots()
+    policy = availability_policy(context, host)
+    candidates, gaps, metadata_reads = discover(roots, skill_map, policy)
+    available_groups: dict[str, list[dict[str, Any]]] = {}
+    for candidate in candidates:
+        if candidate["availabilityStatus"] == "available":
+            available_groups.setdefault(candidate["name"], []).append(candidate)
+    recipes: list[dict[str, Any]] = []
+    for recipe in skill_map["workflows"]:
+        steps: list[dict[str, Any]] = []
+        for step in recipe["steps"]:
+            group = available_groups.get(step["skill"], [])
+            available = len(group) == 1
+            ambiguous = len(group) > 1
+            steps.append({
+                "skill": step["skill"],
+                "expectedInput": step["expectedInput"],
+                "expectedOutput": step["expectedOutput"],
+                "handoffArtifact": step["handoffArtifact"],
+                "stopCondition": step["stopCondition"],
+                "optional": step.get("optional", False),
+                "availability": "ambiguous" if ambiguous else ("available" if available else "unavailable"),
+                "invocationType": group[0]["invocationType"] if available else "unknown",
+                "invocation": invocation(step["skill"], policy["host"]),
+                "missingDependency": step["skill"] if (ambiguous or not available) else "",
+            })
+        recipes.append({
+            "id": recipe["id"],
+            "projectTypes": recipe["projectTypes"],
+            "taskKinds": recipe["taskKinds"],
+            "entryCondition": f"{'/'.join(recipe['projectTypes'])} + {'/'.join(recipe['taskKinds'])}",
+            "steps": steps,
+            "stoppingBoundary": recipe["stoppingBoundary"],
+            "finalAuthority": recipe["finalAuthority"],
+        })
+    project_root_value = context.get("projectRoot") or context.get("cwd")
+    if project_root_value and str(project_root_value).strip():
+        evidence = inspect_project_evidence(Path(str(project_root_value)))
+    else:
+        evidence = _empty_evidence()
+    return {
+        "mode": "workflow",
+        "routingState": ROUTING_NEEDS_MODEL,
+        "host": policy["host"],
+        "evidence": evidence,
+        "recipes": recipes,
+        "availableSkills": sorted(available_groups),
+        "gaps": gaps,
+        "reads": {"metadata": metadata_reads, "bodies": 0, "references": 0},
+        "next": "awaiting-approval",
+        "execution": "recommendation phase was read-only; execution begins only after explicit user approval",
+    }
 
 
 def navigate_result(skill_map: dict[str, Any], query: str, host: str = "codex") -> dict[str, Any]:
     """Resolve collection-navigation intent with explicit family/skill parsing.
+
+    Deterministic taxonomy lookup stays code-owned (§29): natural-language
+    family browsing, diagnostic capability lookup, and exact named comparisons
+    resolve without model judgment; the explanation is model-generated.
 
     Natural-language examples:
       "What project skills do I have?"      -> project family only
@@ -2521,345 +2492,256 @@ def navigate_result(skill_map: dict[str, Any], query: str, host: str = "codex") 
     })
     return result
 
-def next_result(roots: list[dict[str, Any]], context: dict[str, Any], host: str, skill_map: dict[str, Any]) -> dict[str, Any]:
-    project_root_value = context.get("projectRoot") or context.get("cwd")
-    project_state: dict[str, Any] = {}
-    if project_root_value:
-        project_state = inspect_project_state(Path(str(project_root_value)))
 
-    goal = str(context.get("goal") or "")
-    task_kind = str(context.get("taskKind") or "")
-    # Terminating and evidence-blocked project stages are valid conclusions even
-    # when no next Skill is recommended. Do not let them fall through into a
-    # generic NEED-INPUT or unrelated logical route. (`review-stale` is NOT
-    # listed: its next step is clearly another project-review run.)
-    if project_state.get("stage") in {
-        "accepted", "tickets-unknown", "acceptance-not-passed", "acceptance-unknown",
-        "ambiguous-current-effort", "contradictory-current-effort",
-        "review-ownership-unknown", "review-freshness-unknown", "review-state-unknown",
-    }:
-        status = "RECOMMEND" if project_state.get("stage") == "accepted" else "NEED-INPUT"
-        result = base_result("next", status, project_state.get("gaps", []))
-        result.update({
-            "skill": "",
-            "reason": project_state.get("reason", ""),
-            "invocation": "",
-            "projectStage": project_state.get("stage", ""),
-            "completed": project_state.get("completed", []),
-            "missing": project_state.get("missing", []),
-        })
-        result["next"] = "no-execution"
+def _known_skill(skill_map: dict[str, Any], name: str) -> dict[str, Any] | None:
+    return next((entry for entry in skill_map["skills"] if entry["name"].lower() == name.lower()), None)
+
+
+# ---------------------------------------------------------------------------
+# Post-model selection validation (deterministic; §30).
+# ---------------------------------------------------------------------------
+
+def validate_recommendation(
+    selected_skill: str,
+    *,
+    evidence: dict[str, Any] | None = None,
+    roots: list[dict[str, Any]] | None = None,
+    host: str = "codex",
+    skill_map: dict[str, Any] | None = None,
+    invocation_control: str = "explicit-only",
+    scope: str = CONSTRAINT_SCOPE_DEFAULT,
+    context: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Validate the model-selected Skill after the choice is made.
+
+    Checks: the Skill is in the Light map, exactly one first-party available
+    copy exists, SKILL.md is readable with valid frontmatter, host availability
+    permits it, invocation metadata is compatible, package provenance is
+    first-party, local pointers resolve, and — for current-workflow scopes —
+    that no blocking hard constraint is silently violated.
+
+    The validator NEVER substitutes another Skill. A blocked selection keeps
+    its logical recommendation and reports why it cannot proceed.
+    """
+    skill_map = skill_map or load_map()
+    if roots is None or not roots:
+        roots = discover_roots()
+    context = context or {}
+    scope = scope or CONSTRAINT_SCOPE_DEFAULT
+    selected = str(selected_skill or "").strip().lower()
+    result: dict[str, Any] = {
+        "mode": "validate",
+        "scope": scope,
+        "selectedSkill": selected,
+        "status": "VALIDATED",
+        "logicalRecommendation": selected,
+        "source": "",
+        "invocation": "",
+        "invocationType": "",
+        "provenance": "",
+        "checks": {
+            "noSkillSelected": False,
+            "inLightMap": False,
+            "available": False,
+            "uniqueCopy": False,
+            "metadataReadable": False,
+            "hostPermits": False,
+            "invocationCompatible": False,
+            "provenanceFirstParty": False,
+            "localPointersResolve": False,
+            "hardConstraintsRespected": False,
+        },
+        "constraints": list(evidence.get("hardConstraints", [])) if evidence else [],
+        "reason": "",
+        "gaps": [],
+        "reads": {"metadata": 0, "bodies": 0, "references": 0},
+        "execution": "validation is read-only; execution begins only after explicit user approval",
+    }
+
+    def blocked(reason: str) -> dict[str, Any]:
+        result["status"] = "BLOCKED"
+        result["reason"] = reason
+        result["gaps"].append(reason)
         return result
 
-    project_state_intent = bool(goal and PROJECT_STATE_INTENT_PATTERN.search(goal))
-    state_driven = bool(
-        project_state.get("stage")
-        and project_state.get("skill")
-        and not task_kind
-        and (not goal or project_state_intent)
-    )
-    # Semantic project state: the inspector identified the stage but the
-    # workflow choice is not deterministic (e.g. initialized, no SPEC).
-    # Return the structured evidence so the model owns the recommendation.
-    state_semantic = bool(
-        project_state.get("stage")
-        and not project_state.get("skill")
-        and project_state.get("stage") not in {
-            "accepted", "tickets-unknown", "acceptance-not-passed",
-            "acceptance-unknown", "ambiguous-current-effort",
-            "contradictory-current-effort", "review-ownership-unknown",
-            "review-freshness-unknown", "review-state-unknown", "unknown",
-        }
-        and not task_kind
-        and (not goal or project_state_intent)
-    )
-    if not goal and not task_kind and not state_driven and not state_semantic:
-        return base_result("next", "NEED-INPUT", ["Provide goal, taskKind, or a projectRoot with enough evidence to derive the current stage."])
-    control = str(context.get("invocationControl", ""))
+    if not selected or selected == "none":
+        result["selectedSkill"] = ""
+        result["logicalRecommendation"] = ""
+        result["checks"]["noSkillSelected"] = True
+        result["checks"]["hardConstraintsRespected"] = True
+        result["reason"] = "no Skill selected; the recommendation is a terminal or needs-input answer"
+        return result
+
+    if not any(entry["name"].lower() == selected for entry in skill_map["skills"]):
+        return blocked(
+            f"logical recommendation '{selected}' is not a Light Skill in the Light Skill Map; "
+            "ask-light does not substitute another Skill."
+        )
+    result["checks"]["inLightMap"] = True
+
+    control = str(context.get("invocationControl", "") or invocation_control)
     if control not in INVOCATION_CONTROLS:
-        return base_result("next", "NEED-INPUT", ["invocationControl must be explicit-only, model-callable, or either."])
-
-    if state_driven:
-        logical_name = project_state["skill"]
-        logical = next((entry for entry in skill_map["skills"] if entry["name"] == logical_name), None)
-        if logical is None:
-            return base_result("next", "BLOCKED", [f"Derived project stage names an unknown Light Skill: {logical_name}"])
-        reason = project_state.get("reason", "Derived from real project evidence.")
-        evidence = [f"project-state:{project_state['stage']}->{logical_name}"]
-    elif state_semantic:
-        policy = availability_policy(context, host)
-        candidates, gaps, metadata_reads = discover(roots, skill_map, policy)
-        available_names = sorted({
-            item["name"] for item in candidates
-            if item["availabilityStatus"] == "available"
-        })
-        result = {
-            "mode": "next",
-            "status": "RECOMMEND",
-            "skill": "",
-            "source": "",
-            "reason": "",
-            "invocation": "",
-            "confidence": "",
-            "alternative": None,
-            "gaps": gaps,
-            "reads": {"metadata": metadata_reads, "bodies": 0, "references": 0},
-            "candidates": candidates,
-            "next": "awaiting-approval",
-            "execution": "recommendation phase was read-only; execution begins only after explicit user approval",
-            "projectStage": project_state.get("stage", ""),
-            "completed": project_state.get("completed", []),
-            "missing": project_state.get("missing", []),
-            "projectEvidence": {
-                "projectContract": project_state.get("projectContract", {}),
-                "currentEffort": {
-                    "name": project_state.get("currentEffort") or None,
-                    "status": "active" if project_state.get("currentEffort") else "none",
-                    "gaps": [],
-                },
-                "spec": {
-                    "exists": project_state.get("hasSpec", False),
-                    "active": project_state.get("hasSpec", False),
-                    "paths": project_state.get("specPaths", []),
-                },
-                "tickets": {
-                    "exists": project_state.get("hasTickets", False),
-                    "allResolved": project_state.get("allTicketsResolved", False),
-                    "unknownState": project_state.get("unknownTicketState", False),
-                    "paths": project_state.get("ticketPaths", []),
-                },
-                "review": {
-                    "exists": project_state.get("hasAcceptanceEvidence", False),
-                    "accepted": project_state.get("acceptancePassed", False),
-                    "gaps": [],
-                },
-                "researchArtifacts": project_state.get("researchArtifacts", []),
-                "clarificationArtifacts": project_state.get("clarificationArtifacts", []),
-                "availableSkills": available_names,
-                "hardBlockers": [],
-            },
-        }
-        return result
-    else:
-        ranking = logical_ranking(skill_map, context)
-        if not ranking or ranking[0]["logicalScore"] <= 0:
-            return base_result("next", "NEED-INPUT", ["No reliable Light route matches the supplied intent."])
-        tied = [item["name"] for item in ranking if item["logicalScore"] == ranking[0]["logicalScore"]]
-        if len(tied) > 1:
-            return base_result("next", "NEED-INPUT", [f"Material Light route tie: {', '.join(tied)}. Provide the intended outcome or project stage."])
-        logical = ranking[0]
-        reason = f"Light Skill Map matched: {', '.join(logical['matchedPatterns'] + logical['matchedPrecedence'])}"
-        if logical["matchedTaskKind"]:
-            reason += f"; taskKind:{logical['matchedTaskKind']}->{logical['name']}"
-        evidence = logical["matchedPatterns"] + logical["matchedPrecedence"]
-        if logical["matchedTaskKind"]:
-            evidence.append(f"taskKind:{logical['matchedTaskKind']}->{logical['name']}")
+        return blocked(f"invocationControl must be explicit-only, model-callable, or either (got '{control}').")
 
     policy = availability_policy(context, host)
     candidates, gaps, metadata_reads = discover(roots, skill_map, policy)
-    selected_name = logical["name"]
-    installed = sorted(
-        [item for item in candidates if item["name"] == selected_name and item["availabilityStatus"] == "available"],
-        key=lambda item: item["packagePath"],
-    )
+    result["gaps"].extend(gaps)
+    result["reads"]["metadata"] = metadata_reads
+    installed = [
+        candidate for candidate in candidates
+        if candidate["name"] == selected and candidate["availabilityStatus"] == "available"
+    ]
+    result["checks"]["available"] = bool(installed)
+    result["checks"]["uniqueCopy"] = len(installed) == 1
     if not installed:
-        result = base_result("next", "BLOCKED", gaps + [f"{selected_name}: known Light Skill is not available on this host."])
-        result.update({
-            "skill": selected_name,
-            "reads": {"metadata": metadata_reads, "bodies": 0, "references": 0},
-            "candidates": candidates,
-            "projectStage": project_state.get("stage", ""),
-            "completed": project_state.get("completed", []),
-            "missing": project_state.get("missing", []),
-        })
-        return result
-    if len(installed) > 1:
-        result = base_result("next", "BLOCKED", gaps + [f"{selected_name}: multiple available first-party copies require host precedence evidence."])
-        result.update({
-            "skill": selected_name,
-            "reads": {"metadata": metadata_reads, "bodies": 0, "references": 0},
-            "candidates": candidates,
-            "projectStage": project_state.get("stage", ""),
-            "completed": project_state.get("completed", []),
-            "missing": project_state.get("missing", []),
-        })
-        return result
-    selected = installed[0]
-    if not invocation_compatible(selected["invocationType"], control):
-        result = base_result(
-            "next",
-            "BLOCKED",
-            gaps + [f"{selected_name}: {selected['invocationType']} is incompatible with invocationControl={control}."],
+        return blocked(
+            f"logical recommendation: {selected}; status: BLOCKED; the selected Skill is unavailable "
+            "on this host. ask-light does not substitute another Skill."
         )
-        result.update({
-            "skill": selected_name,
-            "reads": {"metadata": metadata_reads, "bodies": 0, "references": 0},
-            "candidates": candidates,
-            "projectStage": project_state.get("stage", ""),
-            "completed": project_state.get("completed", []),
-            "missing": project_state.get("missing", []),
-        })
-        return result
-    body_reads, reference_reads, read_error = validate_selected(selected)
-    selected["readStatus"] = "unavailable" if read_error else "available"
+    if len(installed) > 1:
+        return blocked(
+            f"logical recommendation: {selected}; status: BLOCKED; multiple available first-party copies "
+            "require host precedence evidence. ask-light does not substitute another Skill."
+        )
+    candidate = installed[0]
+    result["checks"]["metadataReadable"] = bool(candidate["metadataReadable"])
+    result["checks"]["hostPermits"] = candidate["availabilityStatus"] == "available"
+    result["checks"]["provenanceFirstParty"] = candidate.get("sourceCategory") == "first-party"
+    result["checks"]["invocationCompatible"] = invocation_compatible(candidate["invocationType"], control)
+    if not candidate["metadataReadable"]:
+        return blocked(f"{selected}: {candidate.get('metadataError', 'metadata unreadable')}; restore the first-party package.")
+    if not result["checks"]["provenanceFirstParty"]:
+        return blocked(f"{selected}: package provenance is not first-party; ask-light does not substitute another Skill.")
+    if not result["checks"]["invocationCompatible"]:
+        return blocked(
+            f"{selected}: {candidate['invocationType']} is incompatible with invocationControl={control}."
+        )
+
+    body_reads, reference_reads, read_error = validate_selected(candidate)
+    result["reads"]["bodies"] = body_reads
+    result["reads"]["references"] = reference_reads
+    result["checks"]["localPointersResolve"] = not bool(read_error)
     if read_error:
-        result = base_result("next", "BLOCKED", gaps + [f"{selected_name}: {read_error}; restore the first-party package."])
-        result.update({
-            "skill": selected_name,
-            "reads": {"metadata": metadata_reads, "bodies": body_reads, "references": reference_reads},
-            "candidates": candidates,
-            "projectStage": project_state.get("stage", ""),
-            "completed": project_state.get("completed", []),
-            "missing": project_state.get("missing", []),
-        })
-        return result
+        return blocked(f"{selected}: {read_error}; restore the first-party package.")
 
-    result = {
-        "mode": "next",
-        "status": "RECOMMEND",
-        "skill": selected_name,
-        "source": f"first-party: {selected['packagePath']}",
-        "reason": reason,
-        "invocation": invocation(selected_name, policy["host"]),
-        "confidence": "high",
-        "alternative": None,
-        "gaps": gaps,
-        "reads": {"metadata": metadata_reads, "bodies": body_reads, "references": reference_reads},
-        "candidates": candidates,
-        "next": "awaiting-approval",
-        "execution": "recommendation phase was read-only; execution begins only after explicit user approval",
-        "projectStage": project_state.get("stage", ""),
-        "completed": project_state.get("completed", []),
-        "missing": project_state.get("missing", []),
-    }
+    if scope == "current-workflow" and evidence:
+        violated: dict[str, Any] | None = None
+        for constraint in evidence.get("hardConstraints", []):
+            if not constraint.get("blocking"):
+                continue
+            owner = str(constraint.get("ownerSkill", ""))
+            if owner and owner == selected:
+                continue
+            violated = constraint
+            break
+        result["checks"]["hardConstraintsRespected"] = violated is None
+        if violated is not None:
+            owner_text = f" and is owned by `{violated['ownerSkill']}`" if violated.get("ownerSkill") else ""
+            return blocked(
+                f"current-workflow hard constraint '{violated['type']}' applies{owner_text}; "
+                f"selecting '{selected}' would silently violate it. ask-light does not substitute another Skill."
+            )
+    else:
+        result["checks"]["hardConstraintsRespected"] = True
+
+    result.update({
+        "status": "VALIDATED",
+        "source": f"first-party: {candidate['packagePath']}",
+        "invocation": invocation(selected, policy["host"]),
+        "invocationType": candidate["invocationType"],
+        "provenance": "first-party",
+        "reason": (
+            f"selected Skill '{selected}' validated: one available first-party copy, readable contract, "
+            f"invocation compatible with control '{control}'"
+            + ("; current-workflow hard constraints respected" if scope == "current-workflow" else "")
+        ),
+    })
     return result
-def approval_transition(result: dict[str, Any], skill_map: dict[str, Any]) -> dict[str, Any]:
-    """Compute the honest post-approval state for a recommendation result.
 
-    Repository policy is authoritative: a user-invoked Skill (frontmatter
-    `disable-model-invocation: true`) must not be auto-invoked by another
-    Skill. `ask-light` is user-invoked, so after approval it cannot begin a
-    user-invoked target itself; it renders the exact invocation and asks the
-    user to start it. A model-invoked target may begin in the current
-    conversation when the host supports it.
+
+# ---------------------------------------------------------------------------
+# Approval transition (host-aware; revalidated).
+# ---------------------------------------------------------------------------
+
+def approval_transition(
+    recommendation: dict[str, Any],
+    skill_map: dict[str, Any] | None = None,
+    *,
+    host: str = "codex",
+    context: dict[str, Any] | None = None,
+    roots: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Compute the honest post-approval state for a final recommendation.
+
+    Revalidation first (stale advice is never executed): the accepted Skill's
+    availability and any material project hard state are re-checked against
+    the current tree. The transition itself is host-aware: a model-invoked
+    target may begin in the conversation where the host supports that; a
+    user-invoked target begins only when the host verifiably permits an
+    explicit approved transition (declared in
+    `context["hostCapabilities"]["approvedUserInvokedTransition"]` with host
+    evidence) — otherwise ask-light renders the exact invocation and has the
+    user start it. It never fakes execution and never assumes a capability
+    that was not observed.
     """
-    if result.get("status") != "RECOMMEND" or not result.get("skill"):
-        updated = dict(result)
+    skill_map = skill_map or load_map()
+    context = context or {}
+    updated = dict(recommendation or {})
+    selected = str((recommendation or {}).get("skill", "") or "").strip().lower()
+    if (recommendation or {}).get("status") != "RECOMMEND" or not selected:
         updated["next"] = "no-execution"
         return updated
-    skill_name = result["skill"]
-    candidate = next((item for item in result.get("candidates", []) if item["name"] == skill_name), None)
-    invocation_type = candidate.get("invocationType", "unknown") if candidate else "unknown"
-    updated = dict(result)
-    if invocation_type == "model-invoked":
-        updated["next"] = f"beginning-{skill_name}"
-        updated["execution"] = "user approved; the model-invoked target may begin in this conversation."
-    else:
-        updated["next"] = "host-transition-required"
+    scope = str((recommendation or {}).get("scope", "") or CONSTRAINT_SCOPE_DEFAULT)
+    project_root_value = context.get("projectRoot") or context.get("cwd")
+    evidence = None
+    if project_root_value and str(project_root_value).strip():
+        evidence = inspect_project_evidence(Path(str(project_root_value)))
+    validation = validate_recommendation(
+        selected,
+        evidence=evidence,
+        roots=roots,
+        host=host,
+        skill_map=skill_map,
+        invocation_control=str(context.get("invocationControl", "") or "explicit-only"),
+        scope=scope,
+        context=context,
+    )
+    updated["revalidation"] = {
+        "status": validation["status"],
+        "reason": validation.get("reason", ""),
+        "source": validation.get("source", ""),
+        "invocation": validation.get("invocation", ""),
+        "invocationType": validation.get("invocationType", ""),
+    }
+    if validation["status"] != "VALIDATED":
+        updated["next"] = "revalidation-blocked"
         updated["execution"] = (
-            "User approved, but repository policy forbids a user-invoked Skill from auto-invoking another "
-            "user-invoked Skill. `ask-light` cannot begin the target itself; render the exact invocation "
-            "and have the user start it."
+            "User approval cannot be executed against the current state: "
+            f"{validation.get('reason', 'the recommendation became stale')}. "
+            "Do not execute stale advice; recompute or explain the changed state."
         )
+        return updated
+    if validation["invocationType"] == "model-invoked":
+        updated["next"] = f"beginning-{selected}"
+        updated["execution"] = "User approved; the model-invoked target may begin in this conversation."
+        return updated
+    capabilities = context.get("hostCapabilities") or {}
+    if capabilities.get("approvedUserInvokedTransition") is True:
+        updated["next"] = f"beginning-{selected}"
+        updated["execution"] = (
+            "User approved; this host verifiably permits an explicit approved transition into a "
+            "user-invoked Skill, so the user's approval constitutes the required authorization. "
+            "Record the observed host capability with the transition."
+        )
+        return updated
+    updated["next"] = "host-transition-required"
+    updated["execution"] = (
+        "User approved, but repository policy forbids a user-invoked Skill from auto-invoking another "
+        "user-invoked Skill and this host exposes no verified approved-transition capability. Render the "
+        f"exact invocation ({validation.get('invocation', '')}) and have the user start it. Do not claim a "
+        "direct transition without host evidence."
+    )
     return updated
-
-
-
-def workflow_result(roots: list[dict[str, Any]], context: dict[str, Any], host: str, skill_map: dict[str, Any]) -> dict[str, Any]:
-    required = [
-        key
-        for key in ("goal", "artifacts", "blockers", "projectType", "taskKind", "availability", "invocationControl")
-        if key not in context
-        or context.get(key) is None
-        or (key != "blockers" and context.get(key) in ("", {}))
-    ]
-    if required:
-        return workflow_base_result("NEED-INPUT", [f"Provide reliable workflow context: {', '.join(required)}."])
-    control = str(context.get("invocationControl", ""))
-    if control not in INVOCATION_CONTROLS:
-        return workflow_base_result("NEED-INPUT", ["invocationControl must be explicit-only, model-callable, or either."])
-    text = context_text(context)
-    project_type, task_kind = str(context["projectType"]).lower(), str(context["taskKind"]).lower()
-    recipes = [item for item in skill_map["workflows"] if project_type in item["projectTypes"] and task_kind in item["taskKinds"] and any(re.search(pattern, text, re.I) for pattern in item["patterns"])]
-    if not recipes:
-        return workflow_base_result("NEED-INPUT", ["No reliable workflow recipe matches the supplied context."])
-    recipes.sort(key=lambda item: (len(item["projectTypes"]), item["id"]))
-    if len(recipes) > 1 and len(recipes[0]["projectTypes"]) == len(recipes[1]["projectTypes"]):
-        return workflow_base_result("NEED-INPUT", [f"Material workflow tie: {recipes[0]['id']}, {recipes[1]['id']}. Provide the intended stopping boundary."])
-    policy = availability_policy(context, host)
-    candidates, gaps, metadata_reads = discover(roots, skill_map, policy)
-    available_groups: dict[str, list[dict[str, Any]]] = {}
-    for candidate in candidates:
-        if candidate["availabilityStatus"] == "available":
-            available_groups.setdefault(candidate["name"], []).append(candidate)
-    recipe = recipes[0]
-    step_names = [step["skill"] for step in recipe["steps"]]
-    duplicates = sorted({name for name in step_names if len(available_groups.get(name, [])) > 1})
-    body_reads = 0
-    reference_reads = 0
-    for name in sorted(set(step_names).difference(duplicates)):
-        group = available_groups.get(name, [])
-        if len(group) != 1:
-            continue
-        candidate = group[0]
-        body_count, reference_count, read_error = validate_selected(candidate)
-        body_reads += body_count
-        reference_reads += reference_count
-        candidate["readStatus"] = "unavailable" if read_error else "available"
-        if read_error:
-            candidate["availabilityStatus"] = "unavailable"
-            candidate["availabilityError"] = read_error
-            gaps.append(f"{name}: {read_error}")
-            del available_groups[name]
-    missing = sorted({name for name in step_names if name not in available_groups})
-    incompatible = sorted({
-        name for name in step_names
-        if len(available_groups.get(name, [])) == 1
-        and not invocation_compatible(available_groups[name][0]["invocationType"], control)
-    })
-    steps = [{
-        "skill": step["skill"],
-        "sourceCategory": "first-party",
-        "invocationType": (
-            available_groups[step["skill"]][0]["invocationType"]
-            if len(available_groups.get(step["skill"], [])) == 1 else "unknown"
-        ),
-        "invocation": invocation(step["skill"], policy["host"]),
-        "availability": "ambiguous" if step["skill"] in duplicates else ("incompatible" if step["skill"] in incompatible else ("available" if step["skill"] in available_groups else "unavailable")),
-        "expectedInput": step["expectedInput"],
-        "expectedOutput": step["expectedOutput"],
-        "handoffArtifact": step["handoffArtifact"],
-        "stopCondition": step["stopCondition"],
-        "optional": step.get("optional", False),
-        "missingDependency": step["skill"] if step["skill"] in missing or step["skill"] in duplicates else "",
-    } for step in recipe["steps"]]
-    blocked = bool(missing or duplicates or incompatible)
-    workflow_gaps = gaps
-    if missing:
-        workflow_gaps += [f"Missing Light Skills: {', '.join(missing)}"]
-    if duplicates:
-        workflow_gaps += [f"Duplicate first-party workflow steps require host precedence evidence: {', '.join(duplicates)}"]
-    if incompatible:
-        workflow_gaps += [f"Invocation control {control} is incompatible with user-invoked workflow steps: {', '.join(incompatible)}"]
-    first_group = available_groups.get(step_names[0], [])
-    top_missing = (missing or duplicates or incompatible or [""])[0]
-    result = base_result("workflow", "BLOCKED" if blocked else "RECOMMEND", workflow_gaps)
-    result.update({
-        "skill": step_names[0] if not blocked else "",
-        "source": f"first-party: {first_group[0]['packagePath']}" if len(first_group) == 1 else "",
-        "reason": f"Light workflow map matched: {recipe['id']}",
-        "invocation": invocation(step_names[0], policy["host"]) if len(first_group) == 1 else "",
-        "confidence": "low" if blocked else "high",
-        "workflow": recipe["id"],
-        "entryCondition": f"{project_type}/{task_kind}",
-        "steps": steps,
-        "stoppingBoundary": recipe["stoppingBoundary"],
-        "missingDependency": top_missing,
-        "finalAuthority": recipe["finalAuthority"],
-        "reads": {"metadata": metadata_reads, "bodies": body_reads, "references": reference_reads},
-        "candidates": candidates,
-    })
-    return result
 
 
 def route(roots: list[dict[str, Any]] | None, context: dict[str, Any], host: str = "codex", mode: str = "next") -> dict[str, Any]:
@@ -2867,10 +2749,10 @@ def route(roots: list[dict[str, Any]] | None, context: dict[str, Any], host: str
     if roots is None or not roots:
         roots = discover_roots()
     if mode == "workflow":
-        return workflow_result(roots, context, host, skill_map)
+        return recipes_result(roots, context, host, skill_map)
     if mode == "navigate":
         return navigate_result(skill_map, str(context.get("goal", "")), host)
-    return next_result(roots, context, host, skill_map)
+    return next_evidence(roots, context, host, skill_map)
 
 
 def main() -> int:
@@ -2878,9 +2760,38 @@ def main() -> int:
     parser.add_argument("--roots-json", default="[]")
     parser.add_argument("--context-json", required=True)
     parser.add_argument("--host-name", default="codex")
-    parser.add_argument("--mode", choices=("next", "workflow", "navigate"), default="next")
+    # Public modes: choices=("next", "workflow", "navigate") + internal validate
+    parser.add_argument("--mode", choices=("next", "workflow", "navigate", "validate"), default="next")
+    parser.add_argument("--skill", default="")
+    parser.add_argument(
+        "--scope",
+        default=CONSTRAINT_SCOPE_DEFAULT,
+        choices=CONSTRAINT_SCOPES,
+    )
     args = parser.parse_args()
-    print(json.dumps(route(json.loads(args.roots_json), json.loads(args.context_json), args.host_name, args.mode), ensure_ascii=False, indent=2))
+    context = json.loads(args.context_json)
+    skill_map = load_map()
+    roots = json.loads(args.roots_json)
+    if not roots:
+        roots = discover_roots()
+    if args.mode == "validate":
+        project_root_value = context.get("projectRoot") or context.get("cwd")
+        evidence = None
+        if project_root_value and str(project_root_value).strip():
+            evidence = inspect_project_evidence(Path(str(project_root_value)))
+        result = validate_recommendation(
+            args.skill,
+            evidence=evidence,
+            roots=roots,
+            host=args.host_name,
+            skill_map=skill_map,
+            invocation_control=str(context.get("invocationControl", "") or "explicit-only"),
+            scope=args.scope,
+            context=context,
+        )
+    else:
+        result = route(roots, context, args.host_name, args.mode)
+    print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 
 
