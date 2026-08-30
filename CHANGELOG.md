@@ -4,24 +4,6 @@
 
 All notable changes are recorded here. A release entry must be tied to an actual version or tag and must not be created merely because a document was drafted.
 
-## Unreleased
-
-### Changed
-
-- **Host-agnostic agent-config:** Refactored `agent-config` to distinguish current executable model availability from model selectability (`model_selection` / `per_agent_model_selection`). Harnesses with one executable model but without model selectors or subagents now safely select single-model multi-agent or single-model single-agent routes without returning `BOUNDARY`.
-- **User-optional agent-config in implement:** Refactored `implement` so it never invokes `agent-config` automatically. When orchestration could materially help (role splitting, parallelism, reviewer isolation), `implement` offers `agent-config` as an explicit user choice; declining or running without model selection never blocks normal bounded execution. Simple solo tasks proceed directly without prompts.
-- **ask-light model-led hybrid advisor refactor:** Refactored `ask-light` into a model-led workflow advisor following the five-stage architecture: (1) Request interpretation (MODEL), (2) Project/host evidence collection (CODE), (3) Candidate Skill understanding (MODEL + catalog metadata), (4) Final workflow judgment (MODEL), (5) Selection validation & transition (CODE + host capability).
-- **Canonical project flow alignment:** Restored the canonical flow `project-clarify → project-spec → project-tickets → implement → project-review` across `ask-light`, recipes, maps, and documentation without inserting a SPEC-review gate before `project-tickets`.
-- **Strict scope and validation safety:** Added strict scope vocabulary enforcement (`current-workflow`, `independent`, `standalone`), explicit `Skill: none` validation permitting terminal `none` only on genuinely accepted efforts, and durable scope preservation across explicit user approval with fail-closed behavior on missing or invalid scope.
-- **Trusted host capability evidence:** Defined trusted host evidence policy requiring genuine host-owned capability channels for approved user-invoked transitions, rejecting model/context JSON string spoofing and unverified booleans, and defaulting safely to exact invocation rendering (`host-transition-required`).
-- **Content-validated clarification readiness:** Tightened clarification readiness to require producer-contract identity and target (`readyFor: project-spec`).
-- **ask_light.py evidence service:** The Python helper is now purely an evidence, catalog, recipe, and validation service (`ask-light-evidence/1`). Returns structured facts (projectContract, currentEffort, spec, tickets, review, artifactSignals) and scoped hard constraints without any deterministic Skill recommendation.
-- **Workflow mode:** Refactored `recipes_result` (`--mode workflow`) to publish canonical recipes with step availability and handoffs without deterministic regex winner selection; the model selects and anchors the recipe at the current state.
-
-### Added
-
-- **Comprehensive regression test suite:** Full matrix regression coverage for review transaction coherence, source/implementation freshness, software three-field baseline validation, current-effort resolution, discovery/provenance checks, strict scope validation, and `agent-config`/`implement` relationship tests.
-
 ## 0.2.0 — 2026-08-28
 
 ### Added — 33-package Light workflow architecture
@@ -36,9 +18,26 @@ All notable changes are recorded here. A release entry must be tied to an actual
 - **Router (1):** `ask-light` refactored last as the Light Workflow Router across 33 Skills.
 - **Specialized Workflows (8):** `manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `recap`, `eli5`, `release-workflow` — verified standalone + composition with only minimal handoff patches.
 
-Total **33** first-party Skills under `skills/` (see [CATALOG.md](CATALOG.md)).
+Total **34** first-party Skills under `skills/` — the 33-package architecture below plus `humanizer` (see [CATALOG.md](CATALOG.md)).
 
 Approved Matt PORTs (11) each carry `ATTRIBUTION.md` and have no upstream runtime dependency: `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts`. Port preserves upstream behavior; Light changes are limited to runtime decoupling and handoff wiring.
+
+### Added — humanizer skill (34th package)
+
+- **humanizer skill:** New first-party model-invoked Skill that rewrites AI-sounding English or Chinese text so it reads naturally without changing what it says. Adapted from blader/humanizer `e2e92e7` (version 2.11.2) with the pattern book preserved verbatim; adds a Language routing section and a thin Chinese adaptation layer in `references/zh-adaptation.md` (rule overrides for dashes/title case/curly quotes/hyphenated pairs, Chinese pattern mappings and AI vocabulary, an anti-fabrication rule, and Chinese false-positive exemptions). Chinese vocabulary informed by the MIT-licensed op7418/Humanizer-zh (`91f3d39`). Admitted via full-path `review-loop agent-skill` acceptance — `PASS` in round 01 with one minor attribution-wording finding repaired; evidence at [docs/evidence/admissions/humanizer/](docs/evidence/admissions/humanizer/README.md).
+
+### Changed — post-release hardening (agent-config / implement / ask-light)
+
+- **Host-agnostic agent-config:** Refactored `agent-config` to distinguish current executable model availability from model selectability (`model_selection` / `per_agent_model_selection`). Harnesses with one executable model but without model selectors or subagents now safely select single-model multi-agent or single-model single-agent routes without returning `BOUNDARY`.
+- **User-optional agent-config in implement:** Refactored `implement` so it never invokes `agent-config` automatically. When orchestration could materially help (role splitting, parallelism, reviewer isolation), `implement` offers `agent-config` as an explicit user choice; declining or running without model selection never blocks normal bounded execution. Simple solo tasks proceed directly without prompts.
+- **ask-light model-led hybrid advisor refactor:** Refactored `ask-light` into a model-led workflow advisor following the five-stage architecture: (1) Request interpretation (MODEL), (2) Project/host evidence collection (CODE), (3) Candidate Skill understanding (MODEL + catalog metadata), (4) Final workflow judgment (MODEL), (5) Selection validation & transition (CODE + host capability).
+- **Canonical project flow alignment:** Restored the canonical flow `project-clarify → project-spec → project-tickets → implement → project-review` across `ask-light`, recipes, maps, and documentation without inserting a SPEC-review gate before `project-tickets`.
+- **Strict scope and validation safety:** Added strict scope vocabulary enforcement (`current-workflow`, `independent`, `standalone`), explicit `Skill: none` validation permitting terminal `none` only on genuinely accepted efforts, and durable scope preservation across explicit user approval with fail-closed behavior on missing or invalid scope.
+- **Trusted host capability evidence:** Defined trusted host evidence policy requiring genuine host-owned capability channels for approved user-invoked transitions, rejecting model/context JSON string spoofing and unverified booleans, and defaulting safely to exact invocation rendering (`host-transition-required`).
+- **Content-validated clarification readiness:** Tightened clarification readiness to require producer-contract identity and target (`readyFor: project-spec`).
+- **ask_light.py evidence service:** The Python helper is now purely an evidence, catalog, recipe, and validation service (`ask-light-evidence/1`). Returns structured facts (projectContract, currentEffort, spec, tickets, review, artifactSignals) and scoped hard constraints without any deterministic Skill recommendation.
+- **Workflow mode:** Refactored `recipes_result` (`--mode workflow`) to publish canonical recipes with step availability and handoffs without deterministic regex winner selection; the model selects and anchors the recipe at the current state.
+- **Comprehensive regression test suite:** Full matrix regression coverage for review transaction coherence, source/implementation freshness, software three-field baseline validation, current-effort resolution, discovery/provenance checks, strict scope validation, and `agent-config`/`implement` relationship tests.
 
 ### Changed
 
@@ -212,6 +211,7 @@ Fixed a false-`accepted` defect at `d414a3b` where a terminal State (e.g. Round 
 ### Release evidence
 
 - No version, tag, or GitHub Release created for this refactor.
+- The `humanizer` admission and the post-release hardening above extend the `v0.2.0` release line; fresh released-repository install verification for the re-published tag is a release follow-up.
 - Discovery/composition/link/hero/bilingual and package-contract checks: see `tests/` and `python -m unittest discover`.
 
 ## 0.1.6 — 2026-08-19

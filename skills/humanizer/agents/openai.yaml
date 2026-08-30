@@ -1,0 +1,7 @@
+interface:
+  display_name: "Humanizer"
+  short_description: "Remove AI-writing tells from English or Chinese text"
+  default_prompt: "Humanize this text: remove AI-generated writing patterns while keeping every claim."
+
+policy:
+  allow_implicit_invocation: true

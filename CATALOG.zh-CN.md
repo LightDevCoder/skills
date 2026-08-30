@@ -2,21 +2,21 @@
 
 [English catalog](CATALOG.md)
 
-本目录从 `skills/` 下 33 个已准入包同步生成，是可读 inventory，不是静态 workflow router，也不代表某个 Agent host 当前已安装哪些 Skill。包的 `SKILL.md` 仍是行为权威。
+本目录从 `skills/` 下 34 个已准入包同步生成，是可读 inventory，不是静态 workflow router，也不代表某个 Agent host 当前已安装哪些 Skill。包的 `SKILL.md` 仍是行为权威。
 
 ## 集合状态
 
 | 字段 | 值 |
 | --- | --- |
 | 集合 | Light Skills — Composable Agent Workflows |
-| 包数量 | 33 个已准入第一方 Skill |
-| 当前状态 | 已发布 [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0)（包含 33 个第一方包） |
-| 稳定版本 | [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0)（33 个包；上一稳定版为 9 个包的 v0.1.6） |
+| 包数量 | 34 个已准入第一方 Skill |
+| 当前状态 | 已发布 [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0)（包含 34 个第一方包） |
+| 稳定版本 | [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0)（34 个包；上一稳定版为 9 个包的 v0.1.6） |
 | 安装权威 | [docs/INSTALLATION.zh-CN.md](docs/INSTALLATION.zh-CN.md) |
 | 发现检查 | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
 | 证据 | [v0.2.0 发布证据](docs/evidence/releases/v0.2.0/RELEASE_RECEIPT.zh-CN.md) |
 
-`v0.1.1` 发布五个包；`v0.1.2` 增加 `recap` 与 `language-learning`（七个）；`v0.1.3` 迁移测试工具链；`v0.1.4` 增加 `kanban-worker`；`v0.1.5` 收紧看板调度与身份；`v0.1.6` 增加 `kb-init`（九个）。`v0.2.0` 正式发布涵盖项目工作流、澄清、执行、审阅与专项工具的完整 33 包架构（见 [CHANGELOG.zh-CN.md](CHANGELOG.zh-CN.md)）。
+`v0.1.1` 发布五个包；`v0.1.2` 增加 `recap` 与 `language-learning`（七个）；`v0.1.3` 迁移测试工具链；`v0.1.4` 增加 `kanban-worker`；`v0.1.5` 收紧看板调度与身份；`v0.1.6` 增加 `kb-init`（九个）。`v0.2.0` 正式发布涵盖项目工作流、澄清、执行、审阅与专项工具的完整 33 包架构，随后 v0.2.0 发布线扩展了 `humanizer` 准入（34 个包；见 [CHANGELOG.zh-CN.md](CHANGELOG.zh-CN.md)）。
 
 本表无未修改的上游复制。获批的 Matt PORT 均带 `ATTRIBUTION.md` 且无需上游运行时依赖。
 
@@ -102,6 +102,15 @@
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
 - **证据：** [SKILL.md](skills/handoff/SKILL.md)。
 - **安装路径：** host 认可的 Skills root 下的 `skills/handoff/`。
+
+### humanizer
+
+- **作用：** 将带有 AI 痕迹的中英文文本改写为自然行文，且不改变原意。
+- **调用：** Model-invoked。
+- **包：** [skills/humanizer/](skills/humanizer/)
+- **状态：** 第一方已准入，full-path `PASS`；v0.2.0 线发布；ADAPT 自 blader/humanizer（2.11.2）+ 薄中文适配，MIT 归属保留。
+- **证据：** [SKILL.md](skills/humanizer/SKILL.md)、[准入记录](docs/evidence/admissions/humanizer/README.zh-CN.md)。
+- **安装路径：** host 认可的 Skills root 下的 `skills/humanizer/`。
 
 ### implement
 

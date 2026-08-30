@@ -12,7 +12,7 @@ class AskLightContractTest(unittest.TestCase):
     def test_router_has_one_machine_readable_light_map(self) -> None:
         data = json.loads((ROOT / "references" / "light-skill-map.json").read_text(encoding="utf-8"))
         names = [entry["name"] for entry in data["skills"]]
-        self.assertEqual(len(names), 33)
+        self.assertEqual(len(names), 34)
         self.assertEqual(len(names), len(set(names)))
         self.assertEqual(set(data["skillFamilies"]), set(names))
         for name in ("eli5", "recap", "project-init", "project-review", "socratic", "ask-light"):

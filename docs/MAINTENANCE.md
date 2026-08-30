@@ -20,7 +20,7 @@ Keep each fact in one authoritative location and link elsewhere:
 
 ## Current synchronization baseline
 
-The admitted collection contains **33 first-party Skills** under `skills/` (see [CATALOG.md](../CATALOG.md)). Current stable release is `v0.2.0` with all 33 first-party packages (see [CHANGELOG.md](../CHANGELOG.md)); previous stable was `v0.1.6` (9 packages).
+The admitted collection contains **34 first-party Skills** under `skills/` (see [CATALOG.md](../CATALOG.md)). Current stable release is `v0.2.0`, whose line now carries all 34 first-party packages — 33 at the original publication plus the `humanizer` admission (see [CHANGELOG.md](../CHANGELOG.md)); previous stable was `v0.1.6` (9 packages).
 
 History markers: `v0.1.1` (five), `v0.1.2` (seven), `v0.1.3` toolchain migration, `v0.1.4` (`kanban-worker` as `light-kanban-worker`), `v0.1.5` scheduling + identity hardening, `v0.1.6` (`kb-init`). Structural/discovery checks live in [tests/test_collection_discovery.py](../tests/test_collection_discovery.py) and [tests/test_composition.py](../tests/test_composition.py); they are structural evidence, not fresh-install proof.
 
@@ -71,4 +71,4 @@ If a release candidate fails verification, stop promotion and repair through the
 
 ## Closeout record
 
-At closeout, record final repository location, released versions/tags, verified commands, first-party catalog (33), approved Ports vs direct upstream vs modified third-party distinctions, evidence, limitations, and migration/archive guidance. Do not label structural or simulated evidence as runtime proof. Historical evidence (`docs/evidence/`) stays immutable.
+At closeout, record final repository location, released versions/tags, verified commands, first-party catalog (34), approved Ports vs direct upstream vs modified third-party distinctions, evidence, limitations, and migration/archive guidance. Do not label structural or simulated evidence as runtime proof. Historical evidence (`docs/evidence/`) stays immutable.

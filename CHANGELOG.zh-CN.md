@@ -4,24 +4,6 @@
 
 所有变更都必须记录在实际版本/tag 对应的条目中，不能因为文档已起草就提前宣称 release。
 
-## 未发布
-
-### 变更
-
-- **agent-config 宿主中立化重构：** 将 `agent-config` 重构为区分当前可执行模型与模型可选择性（`model_selection` / `per_agent_model_selection`）。对于具备当前可执行模型但缺少模型选择器或子代理的宿主环境，安全降级至单模型多代理或单模型单代理路径，不再返回 `BOUNDARY`。
-- **implement 中 agent-config 用户显式自选：** 重构 `implement` 使其绝不自动调用 `agent-config`。当编排（角色拆分、并行、评审隔离）有实质帮助时，向用户提供显式选择；用户拒绝或在无模型选择能力的宿主上运行时绝不阻塞正常实现。简单的独立任务直接执行，不打扰用户。
-- **ask-light 模型主导混合顾问重构：** 将 `ask-light` 重构为模型主导的工作流顾问，采用五阶段架构：（1）请求意图解析（模型），（2）项目/宿主事实收集（代码），（3）候选 Skill 理解（模型 + 紧凑目录元数据），（4）最终工作流判断（模型），（5）选择验证与转换（代码 + 宿主能力）。
-- **规范项目流对齐：** 在 `ask-light`、配方、地图与文档中恢复 `project-clarify → project-spec → project-tickets → implement → project-review` 规范链路，移除了在 `project-tickets` 前插入 SPEC-review 门禁的逻辑。
-- **严格作用域与验证安全：** 增加严格作用域词汇校验（`current-workflow`、`independent`、`standalone`）、显式 `Skill: none` 仅在真实 accepted 阶段允许通过的验证，以及显式批准跨轮次的作用域保留与缺失/非法作用域 fail-closed 机制。
-- **受信任宿主能力证据：** 明确已批准用户调用转换的受信任宿主能力通道要求，拒绝模型/上下文 JSON 伪造与未验证布尔值，在缺少真实宿主通道时安全降级为渲染精确调用（`host-transition-required`）。
-- **内容验证的澄清就绪性：** 增强澄清就绪性判定，要求具备生产者契约标识与目标（`readyFor: project-spec`）。
-- **ask_light.py 证据服务：** Python 辅助程序现纯粹作为事实证据、目录、配方与验证服务（`ask-light-evidence/1`）。移除了 `PROJECT_STATE_INTENT_PATTERN` 及所有基于正则/taskKind/评分的语义路由权威。返回结构化事实（projectContract、currentEffort、spec、tickets、review、artifactSignals）与作用域硬约束，不返回任何确定性 Skill 推荐。
-- **工作流模式：** 重构 `recipes_result`（`--mode workflow`），发布带有步骤可用性与 handoff 的规范配方，移除了确定性正则胜者选择；由模型进行语义选择并锚定至当前实际状态。
-
-### 新增
-
-- **全方位回归测试套件：** 覆盖评审事务一致性、源码/实现新鲜度、软件三字段基线验证、当前 effort 解析、发现与来源检查、严格作用域验证及 `agent-config`/`implement` 关系测试的完整矩阵。
-
 ## 0.2.0 — 2026-08-28
 
 ### 新增 — 33 包 Light 工作流架构
@@ -36,9 +18,26 @@
 - **Router（1）：** `ask-light` 最后重构为跨 33 Skill 的 Light Workflow Router。
 - **Specialized Workflows（8）：** `manuscript-ops`、`kb-init`、`learn-anything`、`language-learning`、`kanban-worker`、`recap`、`eli5`、`release-workflow`——已做 standalone + composition 验证，仅在真实缺口处加最小 handoff。
 
-合计 **33** 个第一方 Skill（见 [CATALOG.zh-CN.md](CATALOG.zh-CN.md)）。
+合计 **34** 个第一方 Skill（见 [CATALOG.zh-CN.md](CATALOG.zh-CN.md)）——下文的 33 包架构之外新增 `humanizer`。
 
 已批准的 Matt PORT（11 个）各带 `ATTRIBUTION.md` 且无上游运行时依赖：`research`、`prototype`、`tdd`、`handoff`、`diagnosing-bugs`、`wizard`、`teach`、`wait-what`、`to-questionnaire`、`writing-for-agents`、`resolving-merge-conflicts`。保留上游行为；Light 变更限于运行时解耦与 handoff 串联。
+
+### 新增 — humanizer skill（第 34 个包）
+
+- **humanizer skill：** 新的第一方 model-invoked Skill，将带有 AI 痕迹的中英文文本改写为自然行文，且不改变原意。改编自 blader/humanizer `e2e92e7`（版本 2.11.2），模式册逐字保留；新增 Language routing 节与 `references/zh-adaptation.md` 薄中文适配层（破折号/标题大写/弯引号/连字符合成词的中文覆盖规则、其余模式的中文映射与中文 AI 高频词表、反编造守则、中文误报豁免）。中文词汇参考 MIT 许可的 op7418/Humanizer-zh（`91f3d39`）。经 full-path `review-loop agent-skill` 验收准入——第 1 轮 `PASS`，一个 minor 归属措辞 finding 已修复；证据见 [docs/evidence/admissions/humanizer/](docs/evidence/admissions/humanizer/README.zh-CN.md)。
+
+### 变更 — 发布后加固（agent-config / implement / ask-light）
+
+- **agent-config 宿主中立化重构：** 将 `agent-config` 重构为区分当前可执行模型与模型可选择性（`model_selection` / `per_agent_model_selection`）。对于具备当前可执行模型但缺少模型选择器或子代理的宿主环境，安全降级至单模型多代理或单模型单代理路径，不再返回 `BOUNDARY`。
+- **implement 中 agent-config 用户显式自选：** 重构 `implement` 使其绝不自动调用 `agent-config`。当编排（角色拆分、并行、评审隔离）有实质帮助时，向用户提供显式选择；用户拒绝或在无模型选择能力的宿主上运行时绝不阻塞正常实现。简单的独立任务直接执行，不打扰用户。
+- **ask-light 模型主导混合顾问重构：** 将 `ask-light` 重构为模型主导的工作流顾问，采用五阶段架构：（1）请求意图解析（模型），（2）项目/宿主事实收集（代码），（3）候选 Skill 理解（模型 + 紧凑目录元数据），（4）最终工作流判断（模型），（5）选择验证与转换（代码 + 宿主能力）。
+- **规范项目流对齐：** 在 `ask-light`、配方、地图与文档中恢复 `project-clarify → project-spec → project-tickets → implement → project-review` 规范链路，移除了在 `project-tickets` 前插入 SPEC-review 门禁的逻辑。
+- **严格作用域与验证安全：** 增加严格作用域词汇校验（`current-workflow`、`independent`、`standalone`）、显式 `Skill: none` 仅在真实 accepted 阶段允许通过的验证，以及显式批准跨轮次的作用域保留与缺失/非法作用域 fail-closed 机制。
+- **受信任宿主能力证据：** 明确已批准用户调用转换的受信任宿主能力通道要求，拒绝模型/上下文 JSON 伪造与未验证布尔值，在缺少真实宿主通道时安全降级为渲染精确调用（`host-transition-required`）。
+- **内容验证的澄清就绪性：** 增强澄清就绪性判定，要求具备生产者契约标识与目标（`readyFor: project-spec`）。
+- **ask_light.py 证据服务：** Python 辅助程序现纯粹作为事实证据、目录、配方与验证服务（`ask-light-evidence/1`）。移除了 `PROJECT_STATE_INTENT_PATTERN` 及所有基于正则/taskKind/评分的语义路由权威。返回结构化事实（projectContract、currentEffort、spec、tickets、review、artifactSignals）与作用域硬约束，不返回任何确定性 Skill 推荐。
+- **工作流模式：** 重构 `recipes_result`（`--mode workflow`），发布带有步骤可用性与 handoff 的规范配方，移除了确定性正则胜者选择；由模型进行语义选择并锚定至当前实际状态。
+- **全方位回归测试套件：** 覆盖评审事务一致性、源码/实现新鲜度、软件三字段基线验证、当前 effort 解析、发现与来源检查、严格作用域验证及 `agent-config`/`implement` 关系测试的完整矩阵。
 
 ### 变更
 
@@ -75,6 +74,7 @@
 ### 发布证据
 
 - 本重构未创建新版本、tag 或 GitHub Release。
+- 上文的 `humanizer` 准入与发布后加固内容扩展了 `v0.2.0` 发布线；重新发布 tag 后的 fresh released-repository 安装验证是发布后续事项。
 - Discovery/composition/link/hero/双语与包契约检查：见 `tests/` 与 `python -m unittest discover`。
 
 ## 0.1.6 — 2026-08-19

@@ -34,6 +34,7 @@ EXPECTED = sorted(
         "eli5",
         "generic-review",
         "handoff",
+        "humanizer",
         "implement",
         "kanban-worker",
         "kb-init",
@@ -66,7 +67,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c = Checks()
     skill_root = root / "skills"
     actual = sorted(d.name for d in skill_root.iterdir() if d.is_dir() and d.name != "docs")
-    c.check(actual == EXPECTED, f"skills/ must contain exactly the 33 admitted package directories. got {actual}")
+    c.check(actual == EXPECTED, f"skills/ must contain exactly the 34 admitted package directories. got {actual}")
 
     readme = read(root, "README.md")
     catalog = read(root, "CATALOG.md")
@@ -125,9 +126,9 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         "Manual fallback must use valid shell variables.",
     )
     c.check(bool(re.search(r"(?is)v0\.2\.0.{0,160}is published from", readme)), "README must present v0.2.0 as the published release.")
-    c.check("33" in catalog and "admitted" in catalog, "Catalog must present the 33-package collection.")
+    c.check("33" in catalog and "admitted" in catalog, "Catalog must present the 34-package collection (historical 33 at the original v0.2.0 publication).")
     c.check("v0.2.0" in catalog, "Catalog must mention v0.2.0.")
-    c.check("33" in readme, "README must mention 33 Skills.")
+    c.check("34" in readme, "README must mention 34 Skills.")
     c.check(bool(re.search(r"ask-light", readme, re.IGNORECASE)), "README must mention ask-light entry.")
     c.check(bool(re.search(r"project-init.*project-clarify.*project-spec.*project-tickets.*implement.*project-review.*release-workflow", readme, re.DOTALL | re.IGNORECASE)), "README must present the main workflow project-init → project-clarify → project-spec → project-tickets → implement → project-review → release-workflow.")
 
@@ -271,9 +272,9 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
             c.check(en.split("/")[-1] in zh_text, f"{zh} does not link its English counterpart.")
 
     parity_matrix = [
-        ("README.md", "README.zh-CN.md", ["ask-light", "33", "skills/"]),
-        ("CATALOG.md", "CATALOG.zh-CN.md", ["review-loop", "33", "skills/"]),
-        ("CHANGELOG.md", "CHANGELOG.zh-CN.md", ["33", "ATTRIBUTION", "review-loop"]),
+        ("README.md", "README.zh-CN.md", ["ask-light", "34", "skills/"]),
+        ("CATALOG.md", "CATALOG.zh-CN.md", ["review-loop", "34", "skills/"]),
+        ("CHANGELOG.md", "CHANGELOG.zh-CN.md", ["34", "ATTRIBUTION", "review-loop"]),
         ("docs/INSTALLATION.md", "docs/INSTALLATION.zh-CN.md", ["npx skills add", "fresh-install", "SKILL.md"]),
         ("docs/MAINTENANCE.md", "docs/MAINTENANCE.zh-CN.md", ["ATTRIBUTION", "review-loop", "Port"]),
         ("docs/REVIEW_POLICY.md", "docs/REVIEW_POLICY.zh-CN.md", ["review-loop", "PASS", "BLOCKED", "project-review"]),

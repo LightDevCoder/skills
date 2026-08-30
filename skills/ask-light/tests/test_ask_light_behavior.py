@@ -428,7 +428,7 @@ class DeterministicEvidenceTest(unittest.TestCase):
     def test_skill_catalog_generation(self) -> None:
         packet = ASK_LIGHT.next_evidence(self.roots, {}, host="codex")
         catalog = packet["catalog"]
-        self.assertEqual(len(catalog), 33)
+        self.assertEqual(len(catalog), 34)
         names = {item["name"] for item in catalog}
         self.assertIn("project-clarify", names)
         self.assertIn("project-spec", names)

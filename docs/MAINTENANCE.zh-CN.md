@@ -10,7 +10,7 @@
 
 ## 当前同步基线
 
-准入集合包含 `skills/` 下 **33 个第一方 Skill**（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)）。当前稳定版本为包含 33 个第一方包的 `v0.2.0`（见 [CHANGELOG.zh-CN.md](../CHANGELOG.zh-CN.md)）；上一稳定版本为 9 个包的 `v0.1.6`。
+准入集合包含 `skills/` 下 **34 个第一方 Skill**（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)）。当前稳定版本为 `v0.2.0`，其发布线现承载全部 34 个第一方包——原始发布 33 个，另加 `humanizer` 准入（见 [CHANGELOG.zh-CN.md](../CHANGELOG.zh-CN.md)）；上一稳定版本为 9 个包的 `v0.1.6`。
 
 历史：`v0.1.1` 五个、`v0.1.2` 七个、`v0.1.3` 工具链迁移、`v0.1.4`（`light-kanban-worker`）、`v0.1.5` 调度与身份加固、`v0.1.6`（`kb-init`）。结构发现检查在 [tests/test_collection_discovery.py](../tests/test_collection_discovery.py) 与 [tests/test_composition.py](../tests/test_composition.py)，仅为结构证据，不是 fresh-install 证明。
 
@@ -61,4 +61,4 @@
 
 ## Closeout 记录
 
-收尾时记录最终仓库位置、已发版本/tag、已验证命令、第一方目录（33）、已批准 Port / direct upstream / modified third-party 区分、证据、限制与迁移/归档指引。不得把结构或模拟证据写成 runtime proof。Historical closeout must be recorded with exact identifiers and limitations — closeout is not structural proof. 历史证据（`docs/evidence/`）保持不变。
+收尾时记录最终仓库位置、已发版本/tag、已验证命令、第一方目录（34）、已批准 Port / direct upstream / modified third-party 区分、证据、限制与迁移/归档指引。不得把结构或模拟证据写成 runtime proof。Historical closeout must be recorded with exact identifiers and limitations — closeout is not structural proof. 历史证据（`docs/evidence/`）保持不变。

@@ -4,9 +4,9 @@
 
 # Light Skills — Composable Agent Workflows
 
-`LightDevCoder/skills` provides 33 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<name>/` and defines its own behavior in `SKILL.md`.
+`LightDevCoder/skills` provides 34 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<name>/` and defines its own behavior in `SKILL.md`.
 
-> **Release:** [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) is published from commit `9c2572b` (tag `v0.2.0`) and is the current stable release with 33 first-party Skills.
+> **Release:** [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) is published from commit `9c2572b` (tag `v0.2.0`) and is the current stable release with 34 first-party Skills.
 
 ## Overview
 
@@ -119,7 +119,7 @@ See [ask-light](skills/ask-light/SKILL.md) and [docs/workflows/](docs/workflows/
 | **Execution** | `implement`, `agent-config`, `tdd`, `diagnosing-bugs`, `resolving-merge-conflicts` | [execution](docs/workflows/execution.md) |
 | **Review** | `review-loop` (engine), `generic-review`, `code-review`, `project-review` (acceptance) | [review-system](docs/workflows/review-system.md) |
 | **Specialized** | `manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `eli5`, `recap` | [specialized-workflows](docs/workflows/specialized-workflows.md) |
-| **Productivity** | `handoff`, `wizard`, `wait-what`, `writing-for-agents` | [CATALOG.md](CATALOG.md) |
+| **Productivity** | `handoff`, `humanizer`, `wizard`, `wait-what`, `writing-for-agents` | [CATALOG.md](CATALOG.md) |
 
 See [CATALOG.md](CATALOG.md) for full descriptions, invocation modes, and package paths.
 
@@ -134,6 +134,8 @@ See [CATALOG.md](CATALOG.md) for full descriptions, invocation modes, and packag
 | Retired standalone | Consolidated into collection | Documented with migration history in release records. |
 
 Approved Matt Ports (11 packages): `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts`. Each package contains `ATTRIBUTION.md` and runs without external runtime dependencies.
+
+Adapted origin (1 package): `humanizer` is a substantially transformed first-party capability based on blader/humanizer (2.11.2) with a thin Chinese adaptation layer informed by op7418/Humanizer-zh; both MIT licenses are preserved in its [ATTRIBUTION.md](skills/humanizer/ATTRIBUTION.md).
 
 ## Documentation
 

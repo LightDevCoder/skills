@@ -14,6 +14,7 @@ EXPECTED = {
     "eli5",
     "generic-review",
     "handoff",
+    "humanizer",
     "implement",
     "kanban-worker",
     "kb-init",
@@ -102,7 +103,7 @@ class CollectionContractTests(unittest.TestCase):
         self.check("default revision" in installation and "#ref" in installation, "installation revision semantics")
         self.check("LightDevCoder/skills" in readme, "homepage about copy")
         self.check(re.search(r"v0\.2\.0.{0,160}is published from", readme, re.I | re.S) is not None, "README published v0.2.0 release")
-        self.check("33" in catalog and "admitted" in catalog, "catalog 33-package boundary")
+        self.check("33" in catalog and "34" in catalog and "admitted" in catalog, "catalog package-count boundary (34 now, historical 33 at original v0.2.0 publication)")
         self.check("v0.2.0" in catalog, "catalog mentions v0.2.0")
         for label, text in (("admission", admission), ("admission zh-CN", admission_zh),
                             ("review policy", review_policy), ("review policy zh-CN", review_policy_zh)):

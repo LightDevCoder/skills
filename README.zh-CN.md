@@ -4,9 +4,9 @@
 
 # Light Skills — 可组合的 Agent 工作流
 
-`LightDevCoder/skills` 包含 33 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<name>/`，由包内的 `SKILL.md` 统领具体行为。
+`LightDevCoder/skills` 包含 34 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<name>/`，由包内的 `SKILL.md` 统领具体行为。
 
-> **发布版本：** [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) 发布自 commit `9c2572b`（tag `v0.2.0`），是当前包含 33 个第一方 Skill 的最新稳定版本。
+> **发布版本：** [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) 发布自 commit `9c2572b`（tag `v0.2.0`），是当前包含 34 个第一方 Skill 的最新稳定版本。
 
 ## 概述
 
@@ -119,7 +119,7 @@ $ask-light workflow
 | **任务执行** | `implement`、`agent-config`、`tdd`、`diagnosing-bugs`、`resolving-merge-conflicts` | [execution](docs/zh-CN/workflows/execution.md) |
 | **质量审阅** | `review-loop`（引擎）、`generic-review`、`code-review`、`project-review`（验收） | [review-system](docs/zh-CN/workflows/review-system.md) |
 | **专项工具** | `manuscript-ops`、`kb-init`、`learn-anything`、`language-learning`、`kanban-worker`、`eli5`、`recap` | [specialized-workflows](docs/zh-CN/workflows/specialized-workflows.md) |
-| **协作效率** | `handoff`、`wizard`、`wait-what`、`writing-for-agents` | [CATALOG.zh-CN.md](CATALOG.zh-CN.md) |
+| **协作效率** | `handoff`、`humanizer`、`wizard`、`wait-what`、`writing-for-agents` | [CATALOG.zh-CN.md](CATALOG.zh-CN.md) |
 
 每个 Skill 的完整功能、使用时机与调用方式见 [CATALOG.zh-CN.md](CATALOG.zh-CN.md)。
 
@@ -134,6 +134,8 @@ $ask-light workflow
 | 历史独立迁移 | 整合并入主集合 | 在发布记录中记载迁移历史与退役状态。 |
 
 经批准的 Matt Port（共 11 个）：`research`、`prototype`、`tdd`、`handoff`、`diagnosing-bugs`、`wizard`、`teach`、`wait-what`、`to-questionnaire`、`writing-for-agents`、`resolving-merge-conflicts`。各包均含 `ATTRIBUTION.md`，无需在运行时安装上游包。
+
+改编来源（1 个包）：`humanizer` 是基于 blader/humanizer（2.11.2）实质性转换的第一方能力，外加参考 op7418/Humanizer-zh 的薄中文适配层；两份 MIT 许可均在其 [ATTRIBUTION.md](skills/humanizer/ATTRIBUTION.md) 中保留。
 
 ## 治理与参考文档
 

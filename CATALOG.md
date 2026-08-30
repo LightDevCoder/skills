@@ -2,21 +2,21 @@
 
 [中文目录](CATALOG.zh-CN.md)
 
-This catalog is synchronized from the 33 admitted package directories under `skills/`. It is an inventory — not a static workflow router and not a record of what is installed on a particular Agent host. The package's `SKILL.md` remains the behavior authority.
+This catalog is synchronized from the 34 admitted package directories under `skills/`. It is an inventory — not a static workflow router and not a record of what is installed on a particular Agent host. The package's `SKILL.md` remains the behavior authority.
 
 ## Collection status
 
 | Field | Value |
 | --- | --- |
 | Collection | Light Skills — Composable Agent Workflows |
-| Package count | 33 admitted first-party Skills |
-| Current state | Released [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) with 33 first-party packages |
-| Stable release | [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) (33 packages; previous stable was v0.1.6 with 9 packages) |
+| Package count | 34 admitted first-party Skills |
+| Current state | Released [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) with 34 first-party packages |
+| Stable release | [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) (34 packages; previous stable was v0.1.6 with 9 packages) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
 | Evidence | [v0.2.0 release evidence](docs/evidence/releases/v0.2.0/) |
 
-`v0.1.1` shipped five packages; `v0.1.2` added `recap` and `language-learning` (seven); `v0.1.3` migrated the test toolchain; `v0.1.4` added `kanban-worker`; `v0.1.5` tightened kanban scheduling and identity; `v0.1.6` added `kb-init` (nine). `v0.2.0` released the full 33-package architecture across project workflow, clarification, execution, review, and specialized tools (see [CHANGELOG.md](CHANGELOG.md)).
+`v0.1.1` shipped five packages; `v0.1.2` added `recap` and `language-learning` (seven); `v0.1.3` migrated the test toolchain; `v0.1.4` added `kanban-worker`; `v0.1.5` tightened kanban scheduling and identity; `v0.1.6` added `kb-init` (nine). `v0.2.0` released the full 33-package architecture across project workflow, clarification, execution, review, and specialized tools, and the v0.2.0 line was extended with the `humanizer` admission (34 packages; see [CHANGELOG.md](CHANGELOG.md)).
 
 No package in this table is an unmodified upstream copy. Approved Matt PORTs carry `ATTRIBUTION.md` and no upstream runtime dependency.
 
@@ -111,6 +111,16 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Status:** Admitted first-party; PORT — NO REDESIGN (Matt `handoff`).
 - **Evidence:** [SKILL.md](skills/handoff/SKILL.md), [ATTRIBUTION.md](skills/handoff/ATTRIBUTION.md).
 - **Installation path:** `skills/handoff/` in a host-recognized Skills root.
+
+### humanizer
+
+- **Purpose:** Rewrite AI-sounding English or Chinese text so it reads naturally without changing what it says.
+- **When to use:** Editing or reviewing prose with inflated claims, sales language, vague sources, stock AI words, filler, or chatbot artifacts.
+- **Invocation:** Model-invoked.
+- **Package:** [skills/humanizer/](skills/humanizer/)
+- **Status:** Admitted first-party via full-path `PASS`; released on the v0.2.0 line; ADAPT of blader/humanizer (2.11.2) plus a thin zh adaptation, MIT attribution preserved.
+- **Evidence:** [SKILL.md](skills/humanizer/SKILL.md), [ATTRIBUTION.md](skills/humanizer/ATTRIBUTION.md), [admission record](docs/evidence/admissions/humanizer/README.md).
+- **Installation path:** `skills/humanizer/` in a host-recognized Skills root.
 
 ### implement
 
