@@ -211,7 +211,7 @@ Fixed a false-`accepted` defect at `d414a3b` where a terminal State (e.g. Round 
 ### Release evidence
 
 - No version, tag, or GitHub Release created for this refactor.
-- The `humanizer` admission and the post-release hardening above extend the `v0.2.0` release line; fresh released-repository install verification for the re-published tag is a release follow-up.
+- The `humanizer` admission and the post-release hardening above extend the `v0.2.0` release line; the tag was re-pointed to commit `e063753` and fresh released-repository installation verification passed (CLI `1.5.23`; whole collection — 34 packages, 257 files byte-identical — and per-Skill `humanizer`) — see [INSTALLATION_VERIFICATION_ADDENDUM.md](docs/evidence/releases/v0.2.0/INSTALLATION_VERIFICATION_ADDENDUM.md).
 - Discovery/composition/link/hero/bilingual and package-contract checks: see `tests/` and `python -m unittest discover`.
 
 ## 0.1.6 — 2026-08-19

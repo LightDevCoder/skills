@@ -74,7 +74,7 @@
 ### 发布证据
 
 - 本重构未创建新版本、tag 或 GitHub Release。
-- 上文的 `humanizer` 准入与发布后加固内容扩展了 `v0.2.0` 发布线；重新发布 tag 后的 fresh released-repository 安装验证是发布后续事项。
+- 上文的 `humanizer` 准入与发布后加固内容扩展了 `v0.2.0` 发布线；tag 已重指至 commit `e063753`，且对已发布仓库的全新安装验证通过（CLI `1.5.23`；整集合——34 个包、257 个文件逐字节一致——及单包 `humanizer`）——见 [INSTALLATION_VERIFICATION_ADDENDUM.zh-CN.md](docs/evidence/releases/v0.2.0/INSTALLATION_VERIFICATION_ADDENDUM.zh-CN.md)。
 - Discovery/composition/link/hero/双语与包契约检查：见 `tests/` 与 `python -m unittest discover`。
 
 ## 0.1.6 — 2026-08-19
