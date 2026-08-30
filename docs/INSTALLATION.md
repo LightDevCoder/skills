@@ -2,7 +2,7 @@
 
 [中文安装说明](INSTALLATION.zh-CN.md)
 
-The public first-party collection's current stable release is [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0), published from commit `9c2572bc0361e1e2c34cb4b6c02fdaa4ed349d47`. It provides **34 admitted first-party Skills** (33 at the original v0.2.0 publication; the v0.2.0 line was extended with the `humanizer` admission, and the previous stable was `v0.1.6` with 9 packages). Package contracts remain inside `skills/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
+The public first-party collection's current stable release is [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0), published at tag `v0.2.0` (exact commit recorded in the [release receipt](evidence/releases/v0.2.0/RELEASE_RECEIPT.md)). It provides **34 admitted first-party Skills** (33 at the original v0.2.0 publication; the v0.2.0 line was extended with the `humanizer` admission, and the previous stable was `v0.1.6` with 9 packages). Package contracts remain inside `skills/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
 
 The standard install command is the generic `latest` form: it follows the repository's default revision, so `npx skills add LightDevCoder/skills` is the recommended interactive entry point to select the desired Skills and Agent hosts. Pinned release commands select published tags for reproducible installs. Historical verification commands (which tested full-collection installations across all supported agents) are documented below alongside historical evidence.
 

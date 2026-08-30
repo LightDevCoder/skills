@@ -6,7 +6,7 @@
 
 `LightDevCoder/skills` provides 34 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<name>/` and defines its own behavior in `SKILL.md`.
 
-> **Release:** [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) is published from commit `9c2572b` (tag `v0.2.0`) and is the current stable release with 34 first-party Skills.
+> **Release:** [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) is published from the `v0.2.0` tag — the release line carries the full 34 first-party Skills (the 33-package architecture plus `humanizer`) — and is the current stable release. The exact commit is recorded in the [release receipt](docs/evidence/releases/v0.2.0/RELEASE_RECEIPT.md).
 
 ## Overview
 

@@ -6,7 +6,7 @@
 
 `LightDevCoder/skills` 包含 34 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<name>/`，由包内的 `SKILL.md` 统领具体行为。
 
-> **发布版本：** [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) 发布自 commit `9c2572b`（tag `v0.2.0`），是当前包含 34 个第一方 Skill 的最新稳定版本。
+> **发布版本：** [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) 发布自 `v0.2.0` tag——发布线承载全部 34 个第一方 Skill（33 包架构 + `humanizer`），为当前最新稳定版本。确切 commit 见[发布收据](docs/evidence/releases/v0.2.0/RELEASE_RECEIPT.zh-CN.md)。
 
 ## 概述
 
