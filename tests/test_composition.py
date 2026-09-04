@@ -60,6 +60,19 @@ class CompositionTests(unittest.TestCase):
         self.assertIn("review-loop", wf)
         # agent-config is optional routing
         self.assertIn("agent-config", text, "implement should reference agent-config as optional routing")
+        self.assertIn("offer the user a choice", text, "implement must offer optional agent-config choice")
+
+    def test_agent_config_composition_boundaries(self):
+        ac_text = read_skill("agent-config")
+        # agent-config does not steal formal decomposition from project-tickets
+        self.assertIn("needs-project-tickets", ac_text, "decomposed tasks without tickets hand off to project-tickets")
+        self.assertNotIn("publish to the issue tracker", ac_text.lower())
+        # agent-config does not bypass review-loop or project-review
+        self.assertIn("review-loop", ac_text)
+        self.assertIn("project-review", ac_text)
+        # 4 execution modes presence
+        for mode in ("Tiered Multi-model + Single-pass", "Tiered Multi-model + Decomposed", "Fixed Single-model + Single-pass", "Fixed Single-model + Decomposed"):
+            self.assertIn(mode, ac_text)
 
     def test_review_loop_to_reviewers(self):
         text = read_skill("review-loop")

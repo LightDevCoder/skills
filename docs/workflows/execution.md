@@ -7,7 +7,7 @@ This document explains the **Execution** composition: entry, routing, and handof
 ## Skills in this group
 
 - [`implement`](../../skills/implement/SKILL.md) — user-invoked general-purpose bounded executor
-- [`agent-config`](../../skills/agent-config/SKILL.md) — model-invoked host-capability mapper
+- [`agent-config`](../../skills/agent-config/SKILL.md) — model-invoked host-aware model and execution configurator
 - [`tdd`](../../skills/tdd/SKILL.md) — model-invoked test-driven loop
 - [`diagnosing-bugs`](../../skills/diagnosing-bugs/SKILL.md) — model-invoked diagnosis loop
 - [`resolving-merge-conflicts`](../../skills/resolving-merge-conflicts/SKILL.md) — model-invoked merge/rebase resolver
@@ -19,7 +19,7 @@ All are first-party and self-contained; no install of `mattpocock/skills` or `so
 | Situation | Entry | Typical path | Handoff / Stop |
 | --- | --- | --- | --- |
 | One clear ticket / SPEC slice | [`implement`](../../skills/implement/SKILL.md) — user-invoked | `implement` → inspect context → *optional* `agent-config` offer (when routing/review/independence materially helps) → execute → verify → hand to `review-loop` with the right reviewer | bounded diff + focused tests + verification evidence; stop at ticket scope |
-| Need to decide execution topology | [`agent-config`](../../skills/agent-config/SKILL.md) — model-invoked | requires: bounded task + acceptance authority + change units with ownership + current host evidence; returns `multi-model/multi-agent` / `single-model/multi-agent` / `single-model/single-agent` / `BOUNDARY` | execution plan, not execution; Controller still performs work per plan |
+| Need to configure model, effort, or execution topology | [`agent-config`](../../skills/agent-config/SKILL.md) — model-invoked | requires: bounded task or ticket graph + acceptance authority + current host evidence; determines provider mode and task shape, right-sizes model tier & effort across four execution modes | adaptive execution plan, not execution; Controller performs work per plan |
 | Code feature/fix should be test-first | [`tdd`](../../skills/tdd/SKILL.md) — model-invoked | `red → green → refactor` with real tests | tests + implementation slice |
 | Hard bug / regression | [`diagnosing-bugs`](../../skills/diagnosing-bugs/SKILL.md) — model-invoked | build a tight `pass/fail` signal → reproduce → hypothesize → instrument → fix → cleanup | fix with feedback loop evidence |
 | Merge/rebase conflict | [`resolving-merge-conflicts`](../../skills/resolving-merge-conflicts/SKILL.md) — model-invoked | resolve conflicted files per git guidance | clean working tree ready for verification |

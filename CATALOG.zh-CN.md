@@ -24,11 +24,11 @@
 
 ### agent-config
 
-- **作用：** 将可检查的 Agent Host 证据（模型、agent、并行、worktree）映射为一条安全的执行计划。
+- **作用：** 宿主感知的模型与执行配置器：检查当前宿主实际支持的模型、推理 effort 与执行能力，结合任务形态对模型等级与执行拓扑做最合适配置，提供安全的固定单模型回退。
 - **调用：** Model-invoked。
 - **包：** [skills/agent-config/](skills/agent-config/)
-- **状态：** 第一方已准入；NEW 架构（参照 Sol Advisor，以 host-agnostic 为原则）。
-- **证据：** [host-evidence-schema.md](skills/agent-config/references/host-evidence-schema.md)。
+- **状态：** 第一方已准入；REFACTOR（参照 Sol Advisor 设计理念，宿主感知模型路由）。
+- **证据：** [host-evidence-schema.md](skills/agent-config/references/host-evidence-schema.md)、[plan-schema.md](skills/agent-config/references/plan-schema.md)、[task-assessment.md](skills/agent-config/references/task-assessment.md)、[provider-adapter-contract.md](skills/agent-config/references/provider-adapter-contract.md)。
 - **安装路径：** host 认可的 Skills root 下的 `skills/agent-config/`。
 
 ### ask-light

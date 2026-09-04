@@ -17,12 +17,12 @@ hands it to review.
 2. **Inspect relevant context.** When `docs/agents/light-project.md` exists,
    read its tracker, domain-context, and review-profile fields. Then skim only
    the named glossary, ADRs, and files the item touches; record source locations.
-3. **Offer execution routing when materially useful.** When role splitting,
-   multi-model routing, parallel execution, or reviewer isolation would
-   materially help, offer the user a choice to invoke `agent-config` or
-   proceed directly. If the user explicitly requested routing, invoke
-   `agent-config` directly; if the user declined or disabled routing, or for
-   bounded solo work, proceed directly without blocking.
+3. **Offer execution routing when materially useful.** When model right-sizing,
+   reasoning effort tuning, delegated implementation with stronger review,
+   or execution topology would materially help, offer the user a choice to
+   invoke `agent-config` or proceed directly. If the user explicitly requested
+   routing, invoke `agent-config` directly; if the user declined or disabled
+   routing, or for bounded solo work, proceed directly without blocking.
 4. **Execute the bounded slice, then verify.** Use `tdd` for code when
    appropriate; produce non-code artifacts per their contract. Verify locally
    (tests, render, schema, or domain check).

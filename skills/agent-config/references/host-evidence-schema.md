@@ -6,31 +6,130 @@ these fields.
 
 ```json
 {
-  "schema_version": "1",
-  "host": {"id": "opaque-current-host", "observed_at": "2026-08-24T00:00:00Z"},
+  "schema_version": "2",
+  "host": {
+    "id": "opaque-current-host",
+    "observed_at": "2026-08-24T00:00:00Z"
+  },
   "models": {
     "current": {
       "id": "opaque-model-id",
       "state": "available",
-      "evidence": {"kind": "host-runtime", "locator": "current session model", "observed_at": "2026-08-24T00:00:00Z"}
+      "routing_rank": 2,
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "current session model",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
     },
     "selectable": [
       {
-        "id": "opaque-model-id",
+        "id": "opaque-model-alpha",
         "state": "available",
-        "evidence": {"kind": "host-runtime", "locator": "host model selector", "observed_at": "2026-08-24T00:00:00Z"}
+        "routing_rank": 1,
+        "evidence": {
+          "kind": "host-runtime",
+          "locator": "host model selector",
+          "observed_at": "2026-08-24T00:00:00Z"
+        }
+      },
+      {
+        "id": "opaque-model-beta",
+        "state": "available",
+        "routing_rank": 2,
+        "evidence": {
+          "kind": "host-runtime",
+          "locator": "host model selector",
+          "observed_at": "2026-08-24T00:00:00Z"
+        }
+      },
+      {
+        "id": "opaque-model-gamma",
+        "state": "available",
+        "routing_rank": 3,
+        "evidence": {
+          "kind": "host-runtime",
+          "locator": "host model selector",
+          "observed_at": "2026-08-24T00:00:00Z"
+        }
       }
     ]
   },
   "capabilities": {
-    "model_selection": {"state": "unknown", "evidence": null},
-    "subagents": {"state": "unknown", "evidence": null},
-    "per_agent_model_selection": {"state": "unknown", "evidence": null},
-    "parallelism": {"state": "unknown", "evidence": null},
-    "reasoning_control": {"state": "unknown", "evidence": null},
-    "session_threads": {"state": "unknown", "evidence": null},
-    "worktrees": {"state": "unknown", "evidence": null},
-    "concurrency_cap": {"state": "unknown", "limit": null, "evidence": null}
+    "model_selection": {
+      "state": "available",
+      "scope": ["current-session", "new-session", "per-agent"],
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "cli --model switch and subagent config",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    },
+    "subagents": {
+      "state": "available",
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "task tool / subagent runner",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    },
+    "per_agent_model_selection": {
+      "state": "available",
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "subagent launch parameter subagent_model",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    },
+    "parallelism": {
+      "state": "available",
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "concurrent task execution",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    },
+    "reasoning_control": {
+      "state": "available",
+      "levels": ["low", "medium", "high"],
+      "assignment_scope": ["current-session", "new-session", "per-agent"],
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "effort parameter / configuration",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    },
+    "session_threads": {
+      "state": "available",
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "fresh session context tool",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    },
+    "worktrees": {
+      "state": "unknown",
+      "evidence": null
+    },
+    "concurrency_cap": {
+      "state": "available",
+      "limit": 4,
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "host pool limit",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    }
+  },
+  "adapter": {
+    "identity": "optional-adapter-id",
+    "version": "1.0.0",
+    "project_config_support": "available",
+    "evidence": {
+      "kind": "host-runtime",
+      "locator": "adapter manifest",
+      "observed_at": "2026-08-24T00:00:00Z"
+    }
   }
 }
 ```
@@ -40,23 +139,48 @@ these fields.
 - `state` is exactly `available`, `unavailable`, or `unknown`.
 - An `available` or `unavailable` claim has evidence from the current Host:
   `kind`, `locator`, and `observed_at`. `host-runtime` is the preferred kind
-  for a model or scheduling capability.
+  for a model, reasoning, or scheduling capability.
 - `models.current` records the executable model of the active session.
 - `models.selectable` records models that the Host can actively select or switch.
-- `capabilities.model_selection` and `capabilities.per_agent_model_selection`
-  record whether model switching and per-agent model assignment are supported.
+- `routing_rank` is a provider-neutral relative integer where a larger value
+  indicates higher general reasoning and problem-solving capability. It must
+  originate from verified host runtime, provider manifest, or explicitly verified
+  project provider configuration — never from static model name guesswork.
+- If `routing_rank` is missing or untrusted for multiple models, tier routing is
+  marked unavailable, triggering safe fixed/single-model behavior.
+- `reasoning_control` records whether reasoning effort is tunable:
+  - `levels` is an ordered list from lower effort to higher effort (e.g. `["low", "medium", "high"]` or `["standard", "deep"]`).
+  - `assignment_scope` records where effort can be applied: `current-session`, `new-session`, or `per-agent`.
+  - When `reasoning_control` is `unavailable` or `unknown`, execution proceeds with default reasoning behavior without returning `BOUNDARY`.
+- `capabilities.model_selection` records model switching support and its scope:
+  `current-session`, `new-session`, `per-agent`.
+- `capabilities.per_agent_model_selection` records whether subagents can each be
+  launched with independently assigned models.
 - An executable model (`models.current` available) does not require or imply
   that `model_selection` or `per_agent_model_selection` is available.
 - `unknown` has `evidence: null`; it is not an error and must not be filled
-  from model memory, a static role file, or an unverified user assertion.
+  from model memory, static heuristics, or unverified user assertion.
 - A `concurrency_cap` is available only when `limit` is a positive integer and
   the evidence verifies that limit. Do not derive it from a count of models or
-  a documentation maximum.
+  documentation marketing numbers.
 - `session_threads` means the Host can create a fresh execution context. It
   does not alone prove an independent Reviewer; reviewer independence also
-  requires a distinct, read-only assignment and no implementation ownership.
+  requires a distinct, fresh context and no implementation ownership.
 - `worktrees` means the Host can create and use isolated worktrees for the
   task. A generic filesystem or source-control tool does not prove this claim.
+- `adapter` records optional provider adapter metadata. If absent or unavailable,
+  agent-config continues in `plan-only` mode without error.
+
+## Backward compatibility (Schema v1 → v2)
+
+Schema v1 evidence payloads (where `schema_version` is `"1"` or omitted, and
+`routing_rank` or `reasoning_control.levels` are absent) are valid input:
+- Missing `routing_rank` across selectable models normalizes to `tier routing unavailable`,
+  causing conservative fallback to `fixed-single-model` mode using `models.current`.
+- Missing `reasoning_control` fields normalize to `state: unknown`, continuing with
+  current/default host reasoning.
+- Missing `adapter` field normalizes to `project_config_support: unavailable` (plan-only).
+- No schema v1 input produces a parsing error or unhandled exception.
 
 Reject a false inventory claim by normalizing it to `unknown` and recording
 why: missing evidence, malformed evidence, stale evidence, contradictory

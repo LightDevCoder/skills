@@ -7,7 +7,7 @@
 ## 本组 Skill
 
 - [`implement`](../../../skills/implement/SKILL.md) — user-invoked 通用有边界执行器
-- [`agent-config`](../../../skills/agent-config/SKILL.md) — model-invoked host 能力映射
+- [`agent-config`](../../../skills/agent-config/SKILL.md) — model-invoked 宿主感知的模型与执行配置器
 - [`tdd`](../../../skills/tdd/SKILL.md) — model-invoked 测试驱动环
 - [`diagnosing-bugs`](../../../skills/diagnosing-bugs/SKILL.md) — model-invoked 诊断环
 - [`resolving-merge-conflicts`](../../../skills/resolving-merge-conflicts/SKILL.md) — model-invoked 合并冲突解决
@@ -19,7 +19,7 @@
 | 场景 | 入口 | 典型路径 | Handoff / 停止 |
 | --- | --- | --- | --- |
 | 单个清晰 ticket/SPEC 切片 | [`implement`](../../../skills/implement/SKILL.md) — user-invoked | `implement` → 查上下文 → 当路由/独立性重要时提供可选 `agent-config` → 执行 → 验证 → 交 `review-loop` 配对应 reviewer | 有界 diff + 聚焦测试 + 验证证据；止于 ticket 范围 |
-| 需决定执行拓扑 | [`agent-config`](../../../skills/agent-config/SKILL.md) — model-invoked | 需：有界任务 + 验收权威 + 带 ownership 的 change units + 当前 host 证据；返回 `multi-model/multi-agent` / `single-model/multi-agent` / `single-model/single-agent` / `BOUNDARY` | 产出执行计划，不直接执行 |
+| 需配置模型、effort 或执行拓扑 | [`agent-config`](../../../skills/agent-config/SKILL.md) — model-invoked | 需：有界任务或 ticket 图 + 验收权威 + 当前宿主证据；判断 Provider 模式与任务形态，在四种执行模式下精准适配模型层级与 effort | 产出自适应执行计划，不直接执行；Controller 依计划实施 |
 | 代码功能应测试先行 | [`tdd`](../../../skills/tdd/SKILL.md) — model-invoked | `red → green → refactor` 真测试循环 | 测试 + 实现切片 |
 | 难 bug / 回退 | [`diagnosing-bugs`](../../../skills/diagnosing-bugs/SKILL.md) — model-invoked | 建紧 `pass/fail` 信号 → 复现 → 假设 → 埋点 → 修复 → 清理 | 带反馈环的修复 |
 | 合并/变基冲突 | [`resolving-merge-conflicts`](../../../skills/resolving-merge-conflicts/SKILL.md) — model-invoked | 按 git 指引解决冲突文件 | 干净工作区待验证 |

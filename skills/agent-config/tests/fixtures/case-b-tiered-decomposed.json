@@ -1,0 +1,27 @@
+{
+  "schema_version": "2",
+  "host": {"id": "fixture-host", "observed_at": "2026-08-24T00:00:00Z"},
+  "models": {
+    "current": {
+      "id": "model-gamma",
+      "state": "available",
+      "routing_rank": 3,
+      "evidence": {"kind": "host-runtime", "locator": "session model", "observed_at": "2026-08-24T00:00:00Z"}
+    },
+    "selectable": [
+      {"id": "model-alpha", "state": "available", "routing_rank": 1, "evidence": {"kind": "host-runtime", "locator": "selector", "observed_at": "2026-08-24T00:00:00Z"}},
+      {"id": "model-beta", "state": "available", "routing_rank": 2, "evidence": {"kind": "host-runtime", "locator": "selector", "observed_at": "2026-08-24T00:00:00Z"}},
+      {"id": "model-gamma", "state": "available", "routing_rank": 3, "evidence": {"kind": "host-runtime", "locator": "selector", "observed_at": "2026-08-24T00:00:00Z"}}
+    ]
+  },
+  "capabilities": {
+    "model_selection": {"state": "available", "scope": ["current-session", "new-session", "per-agent"], "evidence": {"kind": "host-runtime", "locator": "agent API", "observed_at": "2026-08-24T00:00:00Z"}},
+    "subagents": {"state": "available", "evidence": {"kind": "host-runtime", "locator": "agent API", "observed_at": "2026-08-24T00:00:00Z"}},
+    "per_agent_model_selection": {"state": "available", "evidence": {"kind": "host-runtime", "locator": "agent API", "observed_at": "2026-08-24T00:00:00Z"}},
+    "parallelism": {"state": "available", "evidence": {"kind": "host-runtime", "locator": "agent API", "observed_at": "2026-08-24T00:00:00Z"}},
+    "reasoning_control": {"state": "available", "levels": ["low", "medium", "high"], "assignment_scope": ["current-session", "new-session", "per-agent"], "evidence": {"kind": "host-runtime", "locator": "agent API", "observed_at": "2026-08-24T00:00:00Z"}},
+    "session_threads": {"state": "available", "evidence": {"kind": "host-runtime", "locator": "agent API", "observed_at": "2026-08-24T00:00:00Z"}},
+    "worktrees": {"state": "available", "evidence": {"kind": "host-runtime", "locator": "agent API", "observed_at": "2026-08-24T00:00:00Z"}},
+    "concurrency_cap": {"state": "available", "limit": 3, "evidence": {"kind": "host-runtime", "locator": "agent API", "observed_at": "2026-08-24T00:00:00Z"}}
+  }
+}

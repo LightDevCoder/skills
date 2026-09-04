@@ -1,7 +1,7 @@
 """Contract checks for the model-invoked agent-config package.
 
-These are deterministic package checks.  They do not claim that a live Agent
-Host was queried or that a host executed the returned plan.
+These are deterministic package checks validating the behavioral contracts,
+schema specifications, and invariants of agent-config.
 """
 
 from __future__ import annotations
@@ -16,76 +16,107 @@ SKILL = (ROOT / "SKILL.md").read_text(encoding="utf-8")
 METADATA = (ROOT / "agents" / "openai.yaml").read_text(encoding="utf-8")
 HOST_SCHEMA = (ROOT / "references" / "host-evidence-schema.md").read_text(encoding="utf-8")
 PLAN_SCHEMA = (ROOT / "references" / "plan-schema.md").read_text(encoding="utf-8")
+TASK_ASSESSMENT = (ROOT / "references" / "task-assessment.md").read_text(encoding="utf-8")
+ADAPTER_CONTRACT = (ROOT / "references" / "provider-adapter-contract.md").read_text(encoding="utf-8")
 
 
 class AgentConfigContractTest(unittest.TestCase):
-    def test_package_shape_and_model_invocation_are_explicit(self) -> None:
+    def test_package_shape_and_supporting_files_exist(self) -> None:
         self.assertTrue((ROOT / "SKILL.md").is_file())
         self.assertTrue((ROOT / "agents" / "openai.yaml").is_file())
         self.assertTrue((ROOT / "references" / "host-evidence-schema.md").is_file())
         self.assertTrue((ROOT / "references" / "plan-schema.md").is_file())
+        self.assertTrue((ROOT / "references" / "task-assessment.md").is_file())
+        self.assertTrue((ROOT / "references" / "provider-adapter-contract.md").is_file())
         self.assertRegex(SKILL, r"(?m)^name:\s*agent-config\s*$")
         self.assertRegex(SKILL, r"(?m)^description:\s*.+")
         self.assertNotRegex(SKILL, r"(?m)^disable-model-invocation:")
         self.assertRegex(METADATA, r"(?m)^\s*allow_implicit_invocation:\s*true\s*$")
 
-    def test_current_evidence_not_memory_controls_availability(self) -> None:
-        self.assertRegex(SKILL, r"current,\s+inspectable Agent Host evidence")
-        self.assertIn("unknown", SKILL)
-        self.assertRegex(SKILL, r"concurrency\s+cap")
-        self.assertRegex(SKILL, r"subagents do\s+not prove parallelism")
-        self.assertRegex(SKILL, r"parallelism does not prove\s+isolated worktrees")
-        self.assertRegex(SKILL, r"executable current model does not prove\s+selectable")
-        # The host-evidence schema enforces the same rule machine-readably.
+    def test_host_evidence_schema_v2_and_backward_compatibility(self) -> None:
         for marker in (
+            '"schema_version": "2"',
+            "routing_rank",
+            "reasoning_control",
+            "levels",
+            "assignment_scope",
             "available",
             "unavailable",
             "unknown",
             "host-runtime",
-            "positive integer",
-            "Reject a false inventory claim",
             "models.current",
             "models.selectable",
             "model_selection",
             "per_agent_model_selection",
+            "tier routing unavailable",
+            "Reject a false inventory claim",
         ):
             self.assertIn(marker, HOST_SCHEMA)
 
-    def test_all_three_safe_route_shapes_are_defined(self) -> None:
+    def test_task_assessment_criteria_and_anti_wordcount_invariant(self) -> None:
         for marker in (
-            "Multi-model, multi-agent",
-            "Single-model / fixed-model, multi-agent",
-            "Single-model / fixed-model, single-agent",
-            "per-agent model selection",
-            "session/thread",
-            "fresh",
-            "self-check",
-            "no current executable model or selectable model",
+            "single-pass",
+            "decomposed",
+            "routine",
+            "moderate",
+            "demanding",
+            "critical",
+            "Anti-wordcount rule",
+            "never use word count",
+            "Monotonicity invariant",
         ):
-            self.assertIn(marker, SKILL)
+            self.assertIn(marker.lower(), TASK_ASSESSMENT.lower())
 
-    def test_role_independence_ownership_and_merge_rules_are_bounded(self) -> None:
-        for marker in ("Controller", "Explorer", "Implementer", "Reviewer", "Merger"):
-            self.assertIn(marker, SKILL)
-        self.assertIn("exact file ownership", SKILL)
-        self.assertIn("read-only", SKILL)
-        self.assertIn("one active unit per file", SKILL)
-        self.assertIn("one named Merger", SKILL)
-        self.assertIn("or explicit `BLOCKED`", SKILL)
-
-    def test_output_schema_has_no_hidden_assignments_or_unbounded_workers(self) -> None:
+    def test_adaptive_plan_schema_defines_headers_and_conditional_layouts(self) -> None:
         for marker in (
             "Status: READY | NEED-INPUT | BOUNDARY",
-            "## Evidence ledger",
-            "## Role assignment",
-            "## Ownership matrix",
-            "## Execution waves",
-            "## Review and merge gates",
-            "every active Explorer, Implementer,\nReviewer, and Merger appears",
-            "more concurrent workers than the evidenced cap",
-            "does not show as available",
+            "Provider mode: tiered-multi-model | fixed-single-model",
+            "Task shape: single-pass | decomposed",
+            "Execution readiness: executable | needs-project-tickets | waiting-on-frontier | blocked-gate",
+            "Apply mode: plan-only | adapter-available-awaiting-approval | applied",
+            "## Host summary",
+            "## Task assessment",
+            "## Execution config",
+            "## Review strategy",
+            "## Limitations / unknowns",
+            "Controller Review",
+            "Self-check",
+            "Independent Review",
         ):
             self.assertIn(marker, PLAN_SCHEMA)
+
+    def test_plan_schema_does_not_force_universal_waves_or_ownership_on_single_pass(self) -> None:
+        # In the adaptive schema, single-pass tasks emit a streamlined table,
+        # while ownership and waves are conditional sections for decomposed tasks.
+        self.assertIn("Single-pass layout (Adaptive)", PLAN_SCHEMA)
+        self.assertIn("Do not force an\nownership matrix, execution waves, or separate Explorer/Merger roles", PLAN_SCHEMA)
+        self.assertIn("Conditional sections for decomposed tasks", PLAN_SCHEMA)
+
+    def test_core_skill_defines_four_execution_modes_and_2x2_grid(self) -> None:
+        for marker in (
+            "tiered-multi-model",
+            "fixed-single-model",
+            "single-pass",
+            "decomposed",
+            "Mode 1 — Tiered Multi-model + Single-pass",
+            "Mode 2 — Tiered Multi-model + Decomposed",
+            "Mode 3 — Fixed Single-model + Single-pass",
+            "Mode 4 — Fixed Single-model + Decomposed",
+            "minimum sufficient model rank",
+            "needs-project-tickets",
+            "Roles are conditional",
+        ):
+            self.assertIn(marker, SKILL)
+
+    def test_provider_adapter_contract_boundaries(self) -> None:
+        for marker in (
+            "Read-only by default",
+            "Explicit user approval required",
+            "Graceful adapter absence",
+            "Non-blocking adapter failure",
+            "Apply request contract",
+        ):
+            self.assertIn(marker, ADAPTER_CONTRACT)
 
     def test_invocation_mutation_is_rejected(self) -> None:
         self.assertRegex(METADATA, r"(?m)^\s*allow_implicit_invocation:\s*true\s*$")
@@ -97,12 +128,12 @@ class AgentConfigContractTest(unittest.TestCase):
         self.assertRegex(mutated_skill, r"(?m)^disable-model-invocation:\s*true\s*$")
 
     def test_live_package_is_self_contained_and_provider_neutral(self) -> None:
-        package_text = "\n".join((SKILL, METADATA, HOST_SCHEMA, PLAN_SCHEMA))
+        package_text = "\n".join((SKILL, METADATA, HOST_SCHEMA, PLAN_SCHEMA, TASK_ASSESSMENT, ADAPTER_CONTRACT))
         self.assertNotRegex(
             package_text,
             r"(?i)sol-advisor|\bsol\b|\bterra\b|\bluna\b|mattpocock|github\.com",
         )
-        self.assertNotRegex(package_text, r"https?://|/Users/|\\.codex")
+        self.assertNotRegex(package_text, r"https?://|/Users/|\.codex")
         self.assertIn("no external Skill", SKILL)
 
 

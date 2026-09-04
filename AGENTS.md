@@ -37,7 +37,7 @@ Repository-level responsibilities are owned by these documents:
 Long-lived rules for every Agent maintaining this repository:
 
 1. **Matt Pocock Skills** is the primary Skill-writing reference (concise entry, supporting-file progressive disclosure, composition).
-2. **Sol Advisor** is the primary design reference for `agent-config` (inspect host first, host-agnostic routing, abstract role fallback).
+2. **Sol Advisor** is the primary design reference for `agent-config` (inspect Host first; remain provider-neutral; route by evidenced model capability, effort control, and execution topology; degrade safely on fixed-model Hosts).
 3. Inspect the relevant upstream/reference Skill before modifying a derived Skill.
 4. Do not rewrite mature Light Skills (`manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `recap`, `eli5`, `release-workflow`) unless their actual responsibility must change.
 5. Do not redesign direct Matt PORT Skills (`research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts`) — Port, then only minimal Light-handoff adaptation.

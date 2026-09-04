@@ -1,6 +1,6 @@
 interface:
   display_name: "Agent Config"
-  short_description: "Map verified host capabilities to a safe execution plan"
-  default_prompt: "Use agent-config to map current host evidence and exact work ownership to a safe Controller, Explorer, Implementer, Reviewer, and Merger plan."
+  short_description: "Configure model tier, reasoning effort, and execution topology"
+  default_prompt: "Use agent-config to inspect host capabilities, classify provider mode and task shape, right-size model tier and reasoning effort, and choose a safe execution topology."
 policy:
   allow_implicit_invocation: true

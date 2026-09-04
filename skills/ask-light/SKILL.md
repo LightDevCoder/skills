@@ -145,8 +145,9 @@ Boundary reasoning that matters most:
   current project has a ready implementation item, current-workflow next
   routes to `implement` (even for complex tasks; `implement` decides whether
   to offer `agent-config` and the user decides whether to accept). Route
-  directly to `agent-config` only when execution planning itself is the
-  user's explicit goal (“帮我规划这个任务怎么拆 Agent”, “不同模型怎么分工”).
+  directly to `agent-config` only when execution planning or model/effort
+  configuration itself is the user's explicit goal (“帮我规划这个任务怎么拆 Agent”,
+  “不同模型怎么分工”, “哪个模型执行/给多少 effort”).
   `implement` remains valid even when `agent-config`, model selectors, or
   multi-agent capabilities are unavailable or declined.
 

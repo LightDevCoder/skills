@@ -4,6 +4,17 @@
 
 All notable changes are recorded here. A release entry must be tied to an actual version or tag and must not be created merely because a document was drafted.
 
+## Unreleased
+
+### Refactored — agent-config model-aware execution routing
+
+- **Restored core model-aware configurator responsibility:** Refactored `skills/agent-config` around a 2x2 decision grid: Provider mode (`tiered-multi-model` vs `fixed-single-model`) × Task shape (`single-pass` vs `decomposed`), eliminating rigid orchestration overhead.
+- **Model right-sizing & reasoning effort:** In tiered multi-model environments, selects minimum sufficient model rank for implementation and reserves higher tiers/effort for review. Tunable reasoning control is dynamically configured across difficulty levels.
+- **Task assessment & anti-wordcount invariant:** Established `references/task-assessment.md` defining single-pass vs decomposed tasks semantically; word count is strictly prohibited as a proxy for complexity.
+- **Adaptive plan schema & conditional roles:** Streamlined single-pass plans with no mandatory ownership matrices, execution waves, or separate Explorer/Merger roles. Decomposed tasks include work-item routing and coordination.
+- **Schema v2 & provider adapter contract:** Upgraded `host-evidence-schema.md` to schema version 2 with backward-compatibility for v1. Established `provider-adapter-contract.md` preserving strict provider-neutrality, read-only defaults, and non-blocking failure fallbacks.
+- **Downstream workflow compatibility:** Updated `implement` triggers for model right-sizing and effort tuning; updated `ask-light` discovery patterns while preserving canonical workflow ownership and single-ticket boundaries.
+
 ## 0.2.0 — 2026-08-28
 
 ### Added — 33-package Light workflow architecture

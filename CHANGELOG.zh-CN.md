@@ -4,6 +4,17 @@
 
 所有变更都必须记录在实际版本/tag 对应的条目中，不能因为文档已起草就提前宣称 release。
 
+## Unreleased
+
+### 重构 — agent-config 模型感知执行路由
+
+- **回归核心模型配置器职责：** 将 `skills/agent-config` 重新围绕 Provider 模式（`tiered-multi-model` vs `fixed-single-model`）× 任务形态（`single-pass` vs `decomposed`）的 2x2 决策矩阵重构，彻底剔除僵化的多 Agent 官僚化分配。
+- **模型分级适配与推理 Effort：** 在多模型环境下，为实现任务匹配最低足够智力模型，并在支持的环境中为评审配置更高模型等级与更高 effort。可调推理 effort 依难度等级动态指定。
+- **任务形态评估与严禁字数代理：** 新增 `references/task-assessment.md`，基于独立交付切片与依赖关系在语义层面界定单次 vs 拆票任务，严禁以 SPEC 字数作为判断依据。
+- **自适应 Plan Schema 与条件角色：** 单次任务输出精炼配置表，不再强加所有权矩阵、执行波次或独立的 Explorer/Merger 角色；多工单任务提供工单路由与协调说明。
+- **证据 Schema v2 与 Provider Adapter 契约：** 升级 `host-evidence-schema.md` 为 v2 并保持对 v1 的向后兼容；制定 `provider-adapter-contract.md` 规范，严格保证提供方中立、默认只读以及无阻塞安全降级。
+- **下游工作流平滑兼容：** 更新 `implement` 触发准则并更新 `ask-light` 发现模式，严格保持正规工作流的所有权与单工单执行边界。
+
 ## 0.2.0 — 2026-08-28
 
 ### 新增 — 33 包 Light 工作流架构

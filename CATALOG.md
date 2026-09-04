@@ -24,12 +24,12 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### agent-config
 
-- **Purpose:** Map inspectable Agent Host evidence (models, agents, parallelism, worktree) to one safe execution plan with role-clear fallbacks.
-- **When to use:** Complex work where reviewer independence, isolation, or parallelism affects structure.
+- **Purpose:** Host-aware model and execution configurator: inspect current Host capabilities and task shape, then right-size model tier, reasoning effort, and agent/thread execution topology with safe fixed-model fallback.
+- **When to use:** Complex work where model tier, reasoning effort, or execution topology affects the result.
 - **Invocation:** Model-invoked.
 - **Package:** [skills/agent-config/](skills/agent-config/)
-- **Status:** Admitted first-party; NEW architecture (Sol Advisor design reference, host-agnostic).
-- **Evidence:** [references/host-evidence-schema.md](skills/agent-config/references/host-evidence-schema.md), [plan-schema.md](skills/agent-config/references/plan-schema.md).
+- **Status:** Admitted first-party; REFACTOR (Sol Advisor design reference, host-aware model routing).
+- **Evidence:** [references/host-evidence-schema.md](skills/agent-config/references/host-evidence-schema.md), [plan-schema.md](skills/agent-config/references/plan-schema.md), [task-assessment.md](skills/agent-config/references/task-assessment.md), [provider-adapter-contract.md](skills/agent-config/references/provider-adapter-contract.md).
 - **Installation path:** `skills/agent-config/` in a host-recognized Skills root.
 
 ### ask-light

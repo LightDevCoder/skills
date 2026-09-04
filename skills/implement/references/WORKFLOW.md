@@ -92,12 +92,11 @@ requested routing.
 
 Assess whether the task would benefit from:
 
-- role splitting across distinct models or agent specializations;
-- multi-model routing;
-- parallel execution across disjoint change units;
-- explicit file ownership and concurrency planning;
-- reviewer isolation (fresh read-only execution context);
-- isolated worktrees.
+- right-sizing model tier (routine vs demanding tasks on tiered hosts);
+- tuning reasoning effort for high-uncertainty or critical logic;
+- delegated implementation combined with a higher-tier or fresh independent review;
+- subagent or thread topology for isolated exploration or parallel validation;
+- frontier scheduling across multiple ready items.
 
 For clearly bounded solo work (e.g., modifying one function, fixing a typo,
 updating a configuration file, adding an isolated test, or updating documentation),
@@ -108,7 +107,7 @@ skip the offer and proceed directly with single-agent execution.
 When routing could materially help:
 
 1. Present the choice explicitly to the user:
-   - Option A: Use `agent-config` to map host capabilities and plan execution roles.
+   - Option A: Use `agent-config` to configure model tier, reasoning effort, and execution topology.
    - Option B: Continue directly with single-agent execution using the current model.
 2. If the user accepts: invoke `agent-config` (model-invoked), present the plan,
    and execute according to the resulting plan.
