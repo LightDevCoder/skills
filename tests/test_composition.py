@@ -70,6 +70,14 @@ class CompositionTests(unittest.TestCase):
         # agent-config does not bypass review-loop or project-review
         self.assertIn("review-loop", ac_text)
         self.assertIn("project-review", ac_text)
+        # Setup Gate and references presence
+        self.assertIn("Setup Gate", ac_text)
+        self.assertIn("references/setup.md", ac_text)
+        self.assertIn("references/profile-schema.md", ac_text)
+        self.assertIn("references/companion-contract.md", ac_text)
+        # Invariants: profile-driven, no intelligence guessing, single-model is first-class peer
+        self.assertIn("No intelligence guessing", ac_text)
+        self.assertIn("Single-model is first-class", ac_text)
         # 4 execution modes presence
         for mode in ("Tiered Multi-model + Single-pass", "Tiered Multi-model + Decomposed", "Fixed Single-model + Single-pass", "Fixed Single-model + Decomposed"):
             self.assertIn(mode, ac_text)

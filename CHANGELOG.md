@@ -6,14 +6,17 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
-### Refactored — agent-config model-aware execution routing
+### Refactored — agent-config profile-driven execution & companion MCP (Phase 2)
 
-- **Restored core model-aware configurator responsibility:** Refactored `skills/agent-config` around a 2x2 decision grid: Provider mode (`tiered-multi-model` vs `fixed-single-model`) × Task shape (`single-pass` vs `decomposed`), eliminating rigid orchestration overhead.
-- **Model right-sizing & reasoning effort:** In tiered multi-model environments, selects minimum sufficient model rank for implementation and reserves higher tiers/effort for review. Tunable reasoning control is dynamically configured across difficulty levels.
-- **Task assessment & anti-wordcount invariant:** Established `references/task-assessment.md` defining single-pass vs decomposed tasks semantically; word count is strictly prohibited as a proxy for complexity.
-- **Adaptive plan schema & conditional roles:** Streamlined single-pass plans with no mandatory ownership matrices, execution waves, or separate Explorer/Merger roles. Decomposed tasks include work-item routing and coordination.
-- **Schema v2 & provider adapter contract:** Upgraded `host-evidence-schema.md` to schema version 2 with backward-compatibility for v1. Established `provider-adapter-contract.md` preserving strict provider-neutrality, read-only defaults, and non-blocking failure fallbacks.
-- **Downstream workflow compatibility:** Updated `implement` triggers for model right-sizing and effort tuning; updated `ask-light` discovery patterns while preserving canonical workflow ownership and single-ticket boundaries.
+- **Profile-driven cross-harness execution configurator:** Refactored `skills/agent-config` to map verified host capabilities and user-confirmed profiles to a right-sized execution topology, model tier, and effort. Treats single-model and multi-model execution as first-class peer modes across a 2x2 matrix (Single-model / Multi-model × Single-pass / Decomposed; Cases A, B, C, D).
+- **User-confirmed tier mapping over intelligence guessing:** Completely eliminated heuristic model ranking (`routing_rank`). Model tier bindings (`fast`, `standard`, `heavy`, `reasoning`) and effort policies (`low`, `medium`, `high`, `o3-effort-high`) are user-confirmed in profile configuration rather than guessed by the model.
+- **Effort resolution:** Abstract task effort policies now resolve directly to verified host-supported values, preventing invalid effort parameters and wordcount-based heuristics.
+- **Companion MCP integration:** Defined optional companion MCP contract for host-scoped profile persistence, stale detection, and preview-before-apply configuration mutation, while ensuring `agent-config` remains fully functional in plan-only mode without the companion.
+- **Setup Gate:** Added weak setup gate in `agent-config` supporting explicit setup intent (`agent-config setup`) and interactive profile configuration without blocking portable execution.
+- **Downstream workflow synchronization:**
+  - `implement`: trigger guidelines updated for profile-driven execution topology, ticket graph coordination, and effort resolution; legacy fixed roles and mandatory waves eliminated; preserves strict single-ticket bounded scope (`Scope: current-item`) and optional opt-in behavior.
+  - `ask-light`: routing patterns and catalog metadata updated to route setup intent (`agent-config setup`, host model configuration) and execution configuration queries to `agent-config`, while strictly keeping ready unblocked tickets routed to `implement` and spec splitting routed to `project-tickets`.
+  - Governance & catalog docs synchronized across `AGENTS.md`, `CATALOG.md`, `README.md`, and `docs/workflows/execution.md`.
 
 ## 0.2.0 — 2026-08-28
 

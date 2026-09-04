@@ -24,11 +24,11 @@
 
 ### agent-config
 
-- **作用：** 宿主感知的模型与执行配置器：检查当前宿主实际支持的模型、推理 effort 与执行能力，结合任务形态对模型等级与执行拓扑做最合适配置，提供安全的固定单模型回退。
+- **作用：** Profile 驱动的跨 Harness 执行配置器：检查当前宿主真实执行能力，匹配用户确认的模型档位 Profile 与任务形态，精准配置执行拓扑、模型等级与 effort，支持可选 companion MCP 并提供安全的单模型对等模式回退。
 - **调用：** Model-invoked。
 - **包：** [skills/agent-config/](skills/agent-config/)
-- **状态：** 第一方已准入；REFACTOR（参照 Sol Advisor 设计理念，宿主感知模型路由）。
-- **证据：** [host-evidence-schema.md](skills/agent-config/references/host-evidence-schema.md)、[plan-schema.md](skills/agent-config/references/plan-schema.md)、[task-assessment.md](skills/agent-config/references/task-assessment.md)、[provider-adapter-contract.md](skills/agent-config/references/provider-adapter-contract.md)。
+- **状态：** 第一方已准入；REFACTOR（参照 Sol Advisor 设计理念，Profile 驱动跨 Harness 执行配置器）。
+- **证据：** [host-evidence-schema.md](skills/agent-config/references/host-evidence-schema.md)、[plan-schema.md](skills/agent-config/references/plan-schema.md)、[task-assessment.md](skills/agent-config/references/task-assessment.md)、[profile-schema.md](skills/agent-config/references/profile-schema.md)、[companion-contract.md](skills/agent-config/references/companion-contract.md)、[provider-adapter-contract.md](skills/agent-config/references/provider-adapter-contract.md)。
 - **安装路径：** host 认可的 Skills root 下的 `skills/agent-config/`。
 
 ### ask-light

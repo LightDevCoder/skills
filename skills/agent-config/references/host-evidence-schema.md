@@ -15,7 +15,6 @@ these fields.
     "current": {
       "id": "opaque-model-id",
       "state": "available",
-      "routing_rank": 2,
       "evidence": {
         "kind": "host-runtime",
         "locator": "current session model",
@@ -26,7 +25,6 @@ these fields.
       {
         "id": "opaque-model-alpha",
         "state": "available",
-        "routing_rank": 1,
         "evidence": {
           "kind": "host-runtime",
           "locator": "host model selector",
@@ -36,7 +34,6 @@ these fields.
       {
         "id": "opaque-model-beta",
         "state": "available",
-        "routing_rank": 2,
         "evidence": {
           "kind": "host-runtime",
           "locator": "host model selector",
@@ -46,7 +43,6 @@ these fields.
       {
         "id": "opaque-model-gamma",
         "state": "available",
-        "routing_rank": 3,
         "evidence": {
           "kind": "host-runtime",
           "locator": "host model selector",
@@ -142,12 +138,13 @@ these fields.
   for a model, reasoning, or scheduling capability.
 - `models.current` records the executable model of the active session.
 - `models.selectable` records models that the Host can actively select or switch.
-- `routing_rank` is a provider-neutral relative integer where a larger value
-  indicates higher general reasoning and problem-solving capability. It must
-  originate from verified host runtime, provider manifest, or explicitly verified
-  project provider configuration — never from static model name guesswork.
-- If `routing_rank` is missing or untrusted for multiple models, tier routing is
-  marked unavailable, triggering safe fixed/single-model behavior.
+- **Strict separation of availability from tier mapping:** Host evidence records ONLY
+  what models and capabilities are available from the host runtime. It does not
+  record intelligence rankings, tier assignments, or capability scores. Tier assignments
+  are defined exclusively in user-confirmed profiles (see `profile-schema.md`).
+- **No intelligence ranking fields:** Models record presence only (`id`, `state`, `evidence`).
+  Fields attempting to rank models (such as legacy `routing_rank`) are prohibited.
+  Automated guessing of model intelligence is forbidden.
 - `reasoning_control` records whether reasoning effort is tunable:
   - `levels` is an ordered list from lower effort to higher effort (e.g. `["low", "medium", "high"]` or `["standard", "deep"]`).
   - `assignment_scope` records where effort can be applied: `current-session`, `new-session`, or `per-agent`.
@@ -175,8 +172,8 @@ these fields.
 
 Schema v1 evidence payloads (where `schema_version` is `"1"` or omitted, and
 `routing_rank` or `reasoning_control.levels` are absent) are valid input:
-- Missing `routing_rank` across selectable models normalizes to `tier routing unavailable`,
-  causing conservative fallback to `fixed-single-model` mode using `models.current`.
+- Missing or ignored `routing_rank` across selectable models normalizes to `tier routing unavailable`
+  when no user profile exists, causing conservative fallback to `fixed-single-model` mode using `models.current`.
 - Missing `reasoning_control` fields normalize to `state: unknown`, continuing with
   current/default host reasoning.
 - Missing `adapter` field normalizes to `project_config_support: unavailable` (plan-only).

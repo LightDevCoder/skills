@@ -49,7 +49,7 @@ Every plan includes the following standard sections:
 ```markdown
 ## Host summary
 - Current model: <model id and status>
-- Selectable models / ranks: <model ids with routing ranks, or "fixed single model">
+- Selectable models / tiers: <model ids with user-confirmed tiers, or "fixed single model">
 - Reasoning control: <available levels and scopes, or "unavailable">
 - Context & execution: <threads, subagents, parallelism, concurrency cap>
 - Adapter: <adapter id or "none (plan-only)">
@@ -76,7 +76,9 @@ Every plan includes the following standard sections:
 ## 3. Single-pass layout (Adaptive)
 
 For `Task shape: single-pass`, output a streamlined phase table. Do not force an
-ownership matrix, execution waves, or separate Explorer/Merger roles.
+ownership matrix, execution waves, or separate Explorer/Merger roles:
+- **Single-model (Case A):** Direct execution in current session using the single model with resolved effort policy.
+- **Multi-model (Case C):** Uses the model and resolved effort mapped from the task difficulty tier in the user profile.
 
 ```markdown
 ## Execution config
@@ -93,6 +95,8 @@ ownership matrix, execution waves, or separate Explorer/Merger roles.
 
 For `Task shape: decomposed` with existing tickets, include ticket-level work-item
 routing and coordination:
+- **Single-model (Case B):** Controller in main session delegates each ticket to a fresh worker context (thread/subagent) using the same model with resolved effort. No synthetic tier names.
+- **Multi-model (Case D):** Controller coordinates workers launched with each ticket's designated tier model and resolved effort.
 
 ```markdown
 ## Execution config

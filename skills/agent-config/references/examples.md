@@ -7,7 +7,7 @@ modes defined by `agent-config`.
 
 ## Example 1: Tiered Multi-model + Single-pass (Multi + Small)
 
-**Context:** Host provides 3 model ranks (`model-alpha`: 1, `model-beta`: 2, `model-gamma`: 3)
+**Context:** Host profile maps confirmed tiers (`routine`: `model-alpha`, `standard`: `model-beta`, `high`/`review`: `model-gamma`)
 with tunable reasoning control. Task is a moderate single-pass bug fix in a parser.
 
 ```markdown
@@ -18,11 +18,11 @@ Task shape: single-pass
 Execution readiness: executable
 Apply mode: plan-only
 
-Reason: Tiered multi-model host available; task is a bounded single-pass fix. Right-sizing implementation to sufficient model tier (rank 2) while reserving highest tier (rank 3) for review.
+Reason: Tiered multi-model profile available; task is a bounded single-pass fix. Right-sizing implementation to sufficient model tier (standard) while reserving review tier (review) for verification.
 
 ## Host summary
-- Current model: model-beta (available, routing_rank: 2)
-- Selectable models / ranks: model-alpha (1), model-beta (2), model-gamma (3)
+- Current model: model-beta (available)
+- Selectable models / tiers: model-alpha (routine), model-beta (standard), model-gamma (high, review)
 - Reasoning control: available (levels: low, medium, high; scopes: current-session, per-agent)
 - Context & execution: subagents available, session_threads available, parallelism available (cap: 3)
 - Adapter: none (plan-only)
@@ -36,11 +36,11 @@ Reason: Tiered multi-model host available; task is a bounded single-pass fix. Ri
 
 | Phase | Model / tier | Effort | Context | Purpose |
 |---|---|---|---|---|
-| Implementation | model-beta (rank 2) | medium | current-session | Implement AST parser edge-case fix and unit tests |
+| Implementation | model-beta (standard) | medium | current-session | Implement AST parser edge-case fix and unit tests |
 
 ## Review strategy
 - Review type: Independent Review
-- Review model & effort: model-gamma (rank 3), effort: high, context: fresh session_thread
+- Review model & effort: model-gamma (review), effort: high, context: fresh session_thread
 - Review handoff: Hand verified diff to review-loop with code-review
 
 ## Limitations / unknowns
@@ -51,7 +51,7 @@ Reason: Tiered multi-model host available; task is a bounded single-pass fix. Ri
 
 ## Example 2: Tiered Multi-model + Decomposed (Multi + Large)
 
-**Context:** Host provides 3 model ranks with concurrency cap 3. The task has 4 tickets
+**Context:** Host profile maps confirmed tiers with concurrency cap 3. The task has 4 tickets
 on the local tracker (01 routine, 02 moderate, 03 demanding, 04 critical).
 
 ```markdown
@@ -62,11 +62,11 @@ Task shape: decomposed
 Execution readiness: executable
 Apply mode: plan-only
 
-Reason: Tiered host with active tickets. Monotonically scaling model ranks and effort with ticket difficulty; Controller runs on highest tier; parallelizing unblocked tickets within cap.
+Reason: Tiered host with active tickets. Monotonically scaling model tiers and effort with ticket difficulty; Controller runs on high/review tier; parallelizing unblocked tickets within cap.
 
 ## Host summary
-- Current model: model-gamma (available, routing_rank: 3)
-- Selectable models / ranks: model-alpha (1), model-beta (2), model-gamma (3)
+- Current model: model-gamma (available)
+- Selectable models / tiers: model-alpha (routine), model-beta (standard), model-gamma (high, review)
 - Reasoning control: available (low, medium, high)
 - Context & execution: subagents available, session_threads available, parallelism available (cap: 3)
 - Adapter: none (plan-only)
@@ -82,21 +82,21 @@ Reason: Tiered host with active tickets. Monotonically scaling model ranks and e
 
 | Ticket | Difficulty | Model / tier | Effort | Context | Dependencies | Review |
 |---|---|---|---|---|---|---|
-| 01-schema-types | routine | model-alpha (rank 1) | low | subagent-1 | None (Ready) | Controller Review |
-| 02-api-endpoint | moderate | model-beta (rank 2) | medium | subagent-2 | None (Ready) | Controller Review |
-| 03-auth-policy | demanding | model-gamma (rank 3) | high | subagent-3 | None (Ready) | Controller Review |
-| 04-audit-cutover | critical | model-gamma (rank 3) | high | serial | Blocked by 01, 02, 03 | Independent Review |
+| 01-schema-types | routine | model-alpha (routine) | low | subagent-1 | None (Ready) | Controller Review |
+| 02-api-endpoint | moderate | model-beta (standard) | medium | subagent-2 | None (Ready) | Controller Review |
+| 03-auth-policy | demanding | model-gamma (high) | high | subagent-3 | None (Ready) | Controller Review |
+| 04-audit-cutover | critical | model-gamma (high) | high | serial | Blocked by 01, 02, 03 | Independent Review |
 
 ### Coordination
 
-- Controller: model-gamma (rank 3), effort: high, context: current-session
+- Controller: model-gamma (high), effort: high, context: current-session
 - Concurrency cap: 3 concurrent workers (tickets 01, 02, 03 execute in parallel)
 - Frontier: tickets 01, 02, 03 are unblocked ready work
 - Integration: Workers return to Controller; Controller conducts integration review; final acceptance handed to project-review
 
 ## Review strategy
 - Review type: Controller Review for worker integration; final project-review upon ticket graph completion
-- Review model & effort: model-gamma (rank 3), effort: high
+- Review model & effort: model-gamma (review), effort: high
 - Review handoff: review-loop / project-review
 
 ## Limitations / unknowns
@@ -117,11 +117,11 @@ Task shape: single-pass
 Execution readiness: executable
 Apply mode: plan-only
 
-Reason: Single-model host; single-pass solo task. Direct execution with current model at maximum supported effort without artificial multi-agent bureaucracy.
+Reason: Single-model host; single-pass solo task. Direct execution with current model at resolved effort (high) without artificial multi-agent bureaucracy.
 
 ## Host summary
 - Current model: model-alpha (available)
-- Selectable models / ranks: fixed single model
+- Selectable models / tiers: fixed single model
 - Reasoning control: available (levels: standard, high)
 - Context & execution: subagents unavailable, session_threads unavailable
 - Adapter: none (plan-only)
@@ -160,11 +160,11 @@ Task shape: decomposed
 Execution readiness: executable
 Apply mode: plan-only
 
-Reason: Fixed single-model host with multi-ticket workload. All contexts utilize the single model at maximum effort; execution coordinates ticket dependencies and thread scheduling.
+Reason: Fixed single-model host with multi-ticket workload. All contexts utilize the single model with confirmed effort policy; execution coordinates ticket dependencies and thread scheduling.
 
 ## Host summary
 - Current model: model-alpha (available)
-- Selectable models / ranks: fixed single model
+- Selectable models / tiers: fixed single model
 - Reasoning control: unavailable (host default)
 - Context & execution: subagents available, session_threads available, parallelism available (cap: 2)
 - Adapter: none (plan-only)

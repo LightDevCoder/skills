@@ -5,13 +5,12 @@
     "current": {
       "id": "model-gamma",
       "state": "available",
-      "routing_rank": 3,
       "evidence": {"kind": "host-runtime", "locator": "session model", "observed_at": "2026-08-24T00:00:00Z"}
     },
     "selectable": [
-      {"id": "model-alpha", "state": "available", "routing_rank": 1, "evidence": {"kind": "host-runtime", "locator": "selector", "observed_at": "2026-08-24T00:00:00Z"}},
-      {"id": "model-beta", "state": "available", "routing_rank": 2, "evidence": {"kind": "host-runtime", "locator": "selector", "observed_at": "2026-08-24T00:00:00Z"}},
-      {"id": "model-gamma", "state": "available", "routing_rank": 3, "evidence": {"kind": "host-runtime", "locator": "selector", "observed_at": "2026-08-24T00:00:00Z"}}
+      {"id": "model-alpha", "state": "available", "evidence": {"kind": "host-runtime", "locator": "selector", "observed_at": "2026-08-24T00:00:00Z"}},
+      {"id": "model-beta", "state": "available", "evidence": {"kind": "host-runtime", "locator": "selector", "observed_at": "2026-08-24T00:00:00Z"}},
+      {"id": "model-gamma", "state": "available", "evidence": {"kind": "host-runtime", "locator": "selector", "observed_at": "2026-08-24T00:00:00Z"}}
     ]
   },
   "capabilities": {

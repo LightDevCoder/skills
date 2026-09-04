@@ -14,7 +14,7 @@ The repository organizes capabilities into focused areas:
 
 - **Project Workflow:** end-to-end delivery from project bootstrap to release.
 - **Clarification & Research:** structured questions and primary-source investigation before building.
-- **Execution:** bounded implementation tasks with host-aware execution planning.
+- **Execution:** bounded implementation tasks with profile-driven execution configuration.
 - **Review:** read-only specialist checks and final project acceptance.
 - **Specialized Workflows:** dedicated tooling for manuscripts, knowledge bases, language learning, and kanban boards.
 - **Router:** `ask-light` inspects workspace state to suggest next steps.

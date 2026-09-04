@@ -92,11 +92,14 @@ requested routing.
 
 Assess whether the task would benefit from:
 
-- right-sizing model tier (routine vs demanding tasks on tiered hosts);
-- tuning reasoning effort for high-uncertainty or critical logic;
-- delegated implementation combined with a higher-tier or fresh independent review;
-- subagent or thread topology for isolated exploration or parallel validation;
-- frontier scheduling across multiple ready items.
+- profile-driven execution topology (evaluating single-pass vs decomposed task shape on the current Host);
+- ticket graph coordination (frontier scheduling across ready dependency items without embedding runtime config into tickets);
+- effort resolution (mapping abstract task uncertainty to host-supported reasoning effort);
+- model tier routing (matching routine vs demanding slices to user-confirmed profile tiers);
+- delegated execution with fresh worker contexts or concurrency;
+- stronger independent review context.
+
+Do not invoke `agent-config` for legacy fixed roles (Controller, Explorer, Merger) or mandatory waves; execution topology adapts dynamically to current host capabilities and user-confirmed profiles.
 
 For clearly bounded solo work (e.g., modifying one function, fixing a typo,
 updating a configuration file, adding an isolated test, or updating documentation),
@@ -107,9 +110,9 @@ skip the offer and proceed directly with single-agent execution.
 When routing could materially help:
 
 1. Present the choice explicitly to the user:
-   - Option A: Use `agent-config` to configure model tier, reasoning effort, and execution topology.
+   - Option A: Use `agent-config` to configure profile-driven model tier, reasoning effort, and execution topology (`Scope: current-item`).
    - Option B: Continue directly with single-agent execution using the current model.
-2. If the user accepts: invoke `agent-config` (model-invoked), present the plan,
+2. If the user accepts: invoke `agent-config` (model-invoked, `Scope: current-item`), present the plan,
    and execute according to the resulting plan.
 3. If the user declines: continue implementation directly without blocking.
 

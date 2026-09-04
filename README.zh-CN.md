@@ -14,7 +14,7 @@
 
 - **项目工作流（Project Workflow）：** 覆盖从项目初始化到最终发布的全流程。
 - **澄清与调研（Clarification & Research）：** 在编码前理清需求、查阅一手资料。
-- **执行（Execution）：** 结合环境特征执行边界清晰的开发任务。
+- **执行（Execution）：** 结合 Profile 与宿主特征配置并执行边界清晰的开发任务。
 - **审阅（Review）：** 包含只读专家检查与项目最终验收。
 - **专项工作流（Specialized Workflows）：** 针对文稿、知识库、语言学习与看板任务的专属工具。
 - **路由导航（Router）：** `ask-light` 检查工作区状态并推荐下一步。

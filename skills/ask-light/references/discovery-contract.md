@@ -373,7 +373,10 @@ constraints bind current-workflow reasoning only).
 
 - `implement` = bounded executor; `agent-config` = optional execution-planning enhancement.
 - When the current project has a ready implementation item, `$ask-light next` routes to `implement` (even for complex tasks; `implement` decides whether to offer `agent-config`, and the user decides whether to accept).
-- Route directly to `agent-config` only when execution planning or model/effort configuration itself is the user's explicit goal (“帮我规划这个任务怎么拆 Agent”, “不同模型怎么分工”, “这个任务选什么模型/给多少 effort”).
+- Route directly to `agent-config` only when execution configuration or setup intent itself is the user's explicit goal:
+  - setup intent: `agent-config setup`, "配置当前 Harness 模型", "配置模型档位", "重新配置 Agent Config";
+  - execution queries: "这个任务用哪个模型", "这些工单怎么分 Agent", "这个 Harness 怎么跑这批 tickets", "哪个模型执行/给多少 effort", "execution topology / model tier routing".
+- Ready unblocked tickets strictly route to `implement`; breaking an active SPEC into tickets strictly routes to `project-tickets`.
 - `implement` remains usable when `agent-config`, model selectors, or multi-agent routing are unavailable or declined. Selection validation never blocks `implement` for lack of routing enhancements.
 
 ## Model candidate selection procedure

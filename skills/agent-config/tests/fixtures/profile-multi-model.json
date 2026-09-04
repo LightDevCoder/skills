@@ -1,0 +1,39 @@
+{
+  "profile_version": 1,
+  "host": {
+    "id": "fixture-host",
+    "adapter": "test-adapter"
+  },
+  "scope": {
+    "type": "project",
+    "workspace": "/path/to/project"
+  },
+  "model_mode": "multi",
+  "models": {
+    "available": ["model-alpha", "model-beta", "model-gamma"]
+  },
+  "tiers": {
+    "routine": {
+      "model": "model-alpha",
+      "effort": "low"
+    },
+    "standard": {
+      "model": "model-beta",
+      "effort": "medium"
+    },
+    "high": {
+      "model": "model-gamma",
+      "effort": "highest-supported"
+    },
+    "review": {
+      "model": "model-gamma",
+      "effort": "highest-supported"
+    }
+  },
+  "capabilities": {
+    "subagents": true,
+    "session_threads": true,
+    "parallelism": true,
+    "concurrency_cap": 3
+  }
+}

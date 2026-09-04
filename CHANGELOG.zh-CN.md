@@ -6,14 +6,17 @@
 
 ## Unreleased
 
-### 重构 — agent-config 模型感知执行路由
+### 重构 — agent-config Profile 驱动执行与 Companion MCP（二阶段）
 
-- **回归核心模型配置器职责：** 将 `skills/agent-config` 重新围绕 Provider 模式（`tiered-multi-model` vs `fixed-single-model`）× 任务形态（`single-pass` vs `decomposed`）的 2x2 决策矩阵重构，彻底剔除僵化的多 Agent 官僚化分配。
-- **模型分级适配与推理 Effort：** 在多模型环境下，为实现任务匹配最低足够智力模型，并在支持的环境中为评审配置更高模型等级与更高 effort。可调推理 effort 依难度等级动态指定。
-- **任务形态评估与严禁字数代理：** 新增 `references/task-assessment.md`，基于独立交付切片与依赖关系在语义层面界定单次 vs 拆票任务，严禁以 SPEC 字数作为判断依据。
-- **自适应 Plan Schema 与条件角色：** 单次任务输出精炼配置表，不再强加所有权矩阵、执行波次或独立的 Explorer/Merger 角色；多工单任务提供工单路由与协调说明。
-- **证据 Schema v2 与 Provider Adapter 契约：** 升级 `host-evidence-schema.md` 为 v2 并保持对 v1 的向后兼容；制定 `provider-adapter-contract.md` 规范，严格保证提供方中立、默认只读以及无阻塞安全降级。
-- **下游工作流平滑兼容：** 更新 `implement` 触发准则并更新 `ask-light` 发现模式，严格保持正规工作流的所有权与单工单执行边界。
+- **Profile 驱动跨 Harness 执行配置器：** 将 `skills/agent-config` 重构为基于真实宿主能力检查与用户确认 Profile 的执行配置器。将单模型（Single-model）与多模型（Multi-model）作为对等的一等执行模式，贯穿 2x2 决策矩阵（单模型/多模型 × 单次/拆票；Case A、B、C、D）。
+- **用户确认档位映射，严禁猜测模型强弱：** 彻底剔除启发式模型打分（`routing_rank`）。模型档位（`fast`、`standard`、`heavy`、`reasoning`）与 effort 策略（`low`、`medium`、`high` 等）由用户在 Profile 中确认，模型不代为猜测。
+- **Effort 精准解析：** 抽象任务 effort 策略直接解析为宿主真实支持的具体参数值，防止无效 effort 与基于字数的粗暴推断。
+- **Companion MCP 协同契约：** 制定可选 Companion MCP 契约，支持宿主作用域 Profile 持久化、冲突陈旧检测与先预览后应用的变更控制；在没有 MCP companion 时保持纯计划模式正常可用。
+- **Setup Gate：** 在 `agent-config` 内置弱 Setup Gate，支持显式 setup 意图（`agent-config setup`）与交互式 Profile 配置，不阻塞便携执行。
+- **下游工作流协同兼容：**
+  - `implement`：触发准则更新为 Profile 驱动执行拓扑、工单图协调与 effort 解析；消除遗留固定角色（Controller、Explorer、Merger）与强制波次；保持单工单有界范围（`Scope: current-item`）与用户自选机制。
+  - `ask-light`：路由模式与元数据更新，处理 setup 意图（`agent-config setup`、配置当前宿主模型）与执行配置查询，同时严格保持就绪工单路由至 `implement`、SPEC 拆分路由至 `project-tickets`。
+  - 治理与目录文档全量同步：更新 `AGENTS.md`、`CATALOG.md`、`README.md` 与 `docs/workflows/execution.md`。
 
 ## 0.2.0 — 2026-08-28
 

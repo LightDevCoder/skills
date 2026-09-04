@@ -1,141 +1,55 @@
 ---
 name: agent-config
-description: Map the current Agent Host's evidenced models, reasoning effort, and execution capabilities to a right-sized model and execution configuration. Use before complex work when model tier, reasoning effort, or execution topology affects the result.
+description: Map the current Agent Host's evidenced capabilities and confirmed profile to a right-sized execution topology, model tier, and effort.
 ---
 
 # Agent Config
 
-`agent-config` is a model-invoked host-aware model and execution configurator.
-It turns current, inspectable Agent Host evidence and task characteristics into
-a right-sized model, effort, and execution plan.
+`agent-config` maps verified Agent Host capabilities and user-confirmed profile tiers to a right-sized execution topology, model, and effort. It never guesses model intelligence, never mutates host config silently, and treats single-model as a first-class peer topology. It has no required companion capability, no external Skill, and no external service requirements.
 
-It does not install agents, automatically mutate host/project configuration, spawn
-unapproved background work, or merge changes; execution remains with the Controller
-after the plan is accepted. It has no required companion capability, no external Skill,
-and no external service requirements.
+## When to use
+- Before complex multi-agent or partitioned work where topology, model tier, or effort matters.
+- Explicit setup intent (`agent-config setup`) to configure or reconfigure host models and tiers.
+- When invoked or offered by `implement` or `ask-light`.
 
-## Inputs and boundaries
+## Inputs
+- Bounded task, SPEC, or ticket graph.
+- Evidenced host capabilities and confirmed profile (via companion MCP or session input).
 
-Require:
-- a bounded task or ticket graph and its acceptance authority;
-- current host evidence per [`references/host-evidence-schema.md`](references/host-evidence-schema.md);
-- task assessment per [`references/task-assessment.md`](references/task-assessment.md);
-- optional provider adapter metadata per [`references/provider-adapter-contract.md`](references/provider-adapter-contract.md).
+## Setup Gate
+- **Explicit setup:** If invoked with setup intent (`agent-config setup`), immediately open [`references/setup.md`](references/setup.md).
+- **Normal invocation:** Check setup status via companion `get_setup_status`. If unconfigured or stale, prompt user to run setup. If companion is absent, offer companion setup or continue with in-memory session-only plan-only mode. Never auto-install MCP tools or mutate host files without explicit user confirmation.
 
-### Capability invariants
+## Core flow
+1. **Setup check:** Verify confirmed profile via companion MCP or session fallback.
+2. **Inspect host:** Read active models, supported effort values, and concurrency limits.
+3. **Determine task shape:** Classify as `single-pass` or `decomposed` (never by word count).
+4. **Decomposition gate:** If decomposed and formal tickets do not exist, output `Execution readiness: needs-project-tickets` and hand off to `project-tickets`.
+5. **Difficulty & tier:** For multi-model, map work difficulty (`routine`..`critical`) to user-confirmed profile tiers (`routine`, `standard`, `high`, `review`).
+6. **Resolve effort:** Resolve abstract policies (e.g. `highest-supported`) strictly to verified host-supported strings (e.g. `high`), never emitting unverified literal `max`.
+7. **Select execution mode:**
+   - **Case A (Fixed Single-model + Single-pass):** Direct execution in main session, single model, resolved effort, no fake roles.
+   - **Case B (Fixed Single-model + Decomposed, P0):** Controller main session coordinates fresh worker contexts, same model, actual effort.
+   - **Case C (Tiered Multi-model + Single-pass):** User-configured tier mapped from task difficulty, minimal topology.
+   - **Case D (Tiered Multi-model + Decomposed, P0):** Ticket difficulty mapped to user profile tiers, resolved effort, Controller integration.
+8. **Emit plan & apply:** Output plan conforming to [`references/plan-schema.md`](references/plan-schema.md). Host config mutations require preview approval (`preview_configuration` → user approval → `apply_configuration` → `validate_configuration`).
 
-- A capability is **available** only when current host evidence directly verifies it.
-  Omitted, stale, or contradictory claims are **unknown**; never promote unknown to available.
-- `models.current` (active executable model) is distinct from `models.selectable`.
-- `routing_rank` must originate from verified host runtime or provider manifest metadata.
-  If multiple models lack trusted ranking, do not guess relative intelligence; fall back
-  to fixed-model execution mode.
-- Subagents do not prove parallelism, parallelism does not prove isolated worktrees,
-  and a model selector does not prove per-agent model assignment.
-- Concurrency limits require a positive integer evidenced by host runtime. Without evidence,
-  run serially or within verified limits.
-- When `reasoning_control` is unavailable or unknown, proceed with default reasoning behavior
-  without returning `BOUNDARY`.
+## Invariants
+- **No intelligence guessing:** Never infer model strength from names or metadata; model tiers are strictly user-confirmed.
+- **Single-model is first-class:** Single-model is a peer topology, not a degraded fallback. Case B and Case D are both P0 paths.
+- **No silent mutation:** No automatic package installations, background daemons, or host file edits without explicit consent.
+- **Anti-wordcount rule:** Semantic complexity and dependencies determine task shape, never prose length.
 
-## Decision grid: Provider mode × Task shape
+## Handoff
+- If tickets needed: hand off to `project-tickets`.
+- When ready: Controller proceeds to `implement`. Code review converges via `review-loop`; final acceptance belongs to `project-review`.
 
-Select the operating mode across two primary dimensions:
-
-```text
-                   Task Shape
-              Single-pass     Decomposed
-             ┌──────────────┬──────────────┐
-Tiered       │ Mode 1:      │ Mode 2:      │
-Multi-model  │ Multi +      │ Multi +      │
-             │ Single-pass  │ Decomposed   │
-             ├──────────────┼──────────────┤
-Fixed        │ Mode 3:      │ Mode 4:      │
-Single-model │ Single +     │ Single +     │
-             │ Single-pass  │ Decomposed   │
-             └──────────────┴──────────────┘
-```
-
-1. **Provider mode:**
-   - `tiered-multi-model`: At least two available selectable models with trusted relative
-     `routing_rank`, an active selection mechanism, and supported execution context.
-   - `fixed-single-model`: One executable model, unranked models, or absence of per-context
-     model selection.
-2. **Task shape:**
-   - `single-pass`: Bounded cohesive unit safe in one continuous context window.
-   - `decomposed`: Multiple independent or dependency-ordered work units/tickets.
-   - *Never use word count or SPEC length as a proxy for task shape.*
-
----
-
-## Four execution modes
-
-### Mode 1 — Tiered Multi-model + Single-pass
-- Right-size implementation to the minimum sufficient model rank and appropriate effort.
-- Default to single-session execution; do not create helper subagents unless focused research
-  or isolated exploration materially reduces controller burden.
-- Review strategy: Recommend a higher model rank and higher effort when supported (fresh
-  thread if available, else self-check).
-- Do not output execution waves, ownership matrices, or separate Explorer/Merger roles.
-
-### Mode 2 — Tiered Multi-model + Decomposed
-- If tickets do not exist yet: return `Execution readiness: needs-project-tickets` and hand
-  off to `project-tickets`. Never persist tickets directly.
-- When tickets exist:
-  - Controller runs on the highest evidenced model rank with high/max effort.
-  - Worker assignments scale monotonically with difficulty: demanding/critical tickets
-    receive higher tier and effort; routine tickets receive economical tiers.
-  - Parallelism is scheduled only for ready, disjoint tickets within evidenced concurrency caps.
-  - Each ticket executes via an independent `$implement <ticket>` run; never batch sibling tickets.
-  - Controller performs integration review; formal convergence is handed to `review-loop`.
-
-### Mode 3 — Fixed Single-model + Single-pass
-- Direct execution using the current model at maximum supported effort in the current session.
-- No artificial role matrices (no identical Controller, Implementer, Reviewer entries).
-- Subagents are used only for bounded exploration, research, or isolated testing.
-- Missing reasoning controls continue with host defaults without returning `BOUNDARY`.
-
-### Mode 4 — Fixed Single-model + Decomposed
-- All execution contexts, Controller, and workers use the same model at maximum supported effort.
-- Value focuses on ticket scheduling, session/thread distribution, dependencies, and concurrency.
-- Controller oversees the frontier and conducts integration review.
-- If subagents or threads are unavailable, execution degrades safely to serial execution.
-
----
-
-## Roles and review semantics
-
-- **Roles are conditional:**
-  - Controller: Defaults to current session; coordinates decomposed execution.
-  - Implementer: Active implementer of a specific work item.
-  - Explorer: Included only when research or exploration is specifically delegated.
-  - Reviewer: Included only when a distinct, fresh review context is established.
-  - Merger: Included only when worktree or integration topology requires an isolated role.
-- **Review semantics:**
-  - `Controller Review`: Controller inspecting outputs from delegated workers.
-  - `Self-check`: Executor checking its own diff; never called independent review.
-  - `Independent Review`: Read-only review in a fresh session/thread, ideally at equal
-    or higher model rank and effort.
-  - Formal convergence belongs to `review-loop`; project acceptance belongs to `project-review`.
-
----
-
-## Adapter and mutation boundaries
-
-- **Read-only by default:** Invocations return `Apply mode: plan-only`. The engine never
-  mutates configuration files automatically.
-- **Explicit user approval:** Calling an adapter to apply project-level agent configuration
-  requires explicit user consent (`Apply mode: applied`).
-- **Graceful adapter absence/failure:** If no adapter exists or an adapter fails, record
-  the limitation and continue with the plan in manual Controller mode. Never return `BOUNDARY`
-  for missing adapter tooling.
-
----
-
-## Output contract and status
-
-Output conforms to [`references/plan-schema.md`](references/plan-schema.md).
-
-- `Status: READY`: At least one usable executable model and a safe path defined.
-- `Status: NEED-INPUT`: Missing choice that fundamentally alters scope, spend, or risk.
-- `Status: BOUNDARY`: No executable model available or an unfulfillable hard constraint.
-  Mark isolated blocked gates specifically; do not block unblocked serial work.
+## References
+- [`references/setup.md`](references/setup.md) — Setup questionnaire and tier binding flow
+- [`references/routing.md`](references/routing.md) — 4 peer execution modes and topology selection
+- [`references/task-assessment.md`](references/task-assessment.md) — Task shape and difficulty criteria
+- [`references/companion-contract.md`](references/companion-contract.md) — Companion MCP tool protocol (8 tools)
+- [`references/profile-schema.md`](references/profile-schema.md) — Host-scoped profile schema
+- [`references/plan-schema.md`](references/plan-schema.md) — Execution plan format and review semantics
+- [`references/host-evidence-schema.md`](references/host-evidence-schema.md) — Host evidence schema v2
+- [`references/provider-adapter-contract.md`](references/provider-adapter-contract.md) — Adapter boundaries and preview-apply

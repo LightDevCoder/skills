@@ -22,7 +22,7 @@
     "final-review": "project-review"
   },
   "skills": [
-    {"name":"agent-config","patterns":["which model.*implement|how should I configure agents|what effort.*ticket|distribute.*across models|single-model.*plan|multi-model routing|agent model configuration|route .*agent|agent configuration|configur.*agents|parallel .*agent"]},
+    {"name":"agent-config","patterns":["agent-config setup|配置.*(?:harness|模型|档位)|重新配置.*agent-config|which model.*(?:implement|task)|how should I configure agents|what effort.*ticket|distribute.*across models|single-model.*plan|multi-model routing|agent model configuration|route .*agent|agent configuration|configur.*agents|parallel .*agent|execution topology|model tier|harness.*model"]},
     {"name":"ask-light","patterns":["which skill|what skill|don.t know which skill|choose .*skill"]},
     {"name":"clarify","patterns":["clarif.*(idea|requirement|plan)|fuzzy .*idea|vague .*idea|ambiguous .*idea"]},
     {"name":"code-review","patterns":["review .*diff|review .*branch|code review|review .*code changes|review .*working tree|review .*work-in-progress"]},

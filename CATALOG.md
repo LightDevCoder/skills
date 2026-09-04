@@ -24,12 +24,12 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### agent-config
 
-- **Purpose:** Host-aware model and execution configurator: inspect current Host capabilities and task shape, then right-size model tier, reasoning effort, and agent/thread execution topology with safe fixed-model fallback.
-- **When to use:** Complex work where model tier, reasoning effort, or execution topology affects the result.
+- **Purpose:** Profile-driven cross-harness execution configurator: inspect current Host capabilities, match user-confirmed model-tier profiles and task shape, and right-size execution topology, model tier, and effort with optional companion MCP support and safe single-model peer fallback.
+- **When to use:** Execution configuration or setup intent where model tier, reasoning effort, or execution topology affects the result.
 - **Invocation:** Model-invoked.
 - **Package:** [skills/agent-config/](skills/agent-config/)
-- **Status:** Admitted first-party; REFACTOR (Sol Advisor design reference, host-aware model routing).
-- **Evidence:** [references/host-evidence-schema.md](skills/agent-config/references/host-evidence-schema.md), [plan-schema.md](skills/agent-config/references/plan-schema.md), [task-assessment.md](skills/agent-config/references/task-assessment.md), [provider-adapter-contract.md](skills/agent-config/references/provider-adapter-contract.md).
+- **Status:** Admitted first-party; REFACTOR (Sol Advisor design reference, profile-driven cross-harness execution configurator).
+- **Evidence:** [references/host-evidence-schema.md](skills/agent-config/references/host-evidence-schema.md), [plan-schema.md](skills/agent-config/references/plan-schema.md), [task-assessment.md](skills/agent-config/references/task-assessment.md), [profile-schema.md](skills/agent-config/references/profile-schema.md), [companion-contract.md](skills/agent-config/references/companion-contract.md), [provider-adapter-contract.md](skills/agent-config/references/provider-adapter-contract.md).
 - **Installation path:** `skills/agent-config/` in a host-recognized Skills root.
 
 ### ask-light

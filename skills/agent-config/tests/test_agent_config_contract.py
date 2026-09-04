@@ -18,6 +18,10 @@ HOST_SCHEMA = (ROOT / "references" / "host-evidence-schema.md").read_text(encodi
 PLAN_SCHEMA = (ROOT / "references" / "plan-schema.md").read_text(encoding="utf-8")
 TASK_ASSESSMENT = (ROOT / "references" / "task-assessment.md").read_text(encoding="utf-8")
 ADAPTER_CONTRACT = (ROOT / "references" / "provider-adapter-contract.md").read_text(encoding="utf-8")
+COMPANION_CONTRACT = (ROOT / "references" / "companion-contract.md").read_text(encoding="utf-8")
+PROFILE_SCHEMA = (ROOT / "references" / "profile-schema.md").read_text(encoding="utf-8")
+SETUP = (ROOT / "references" / "setup.md").read_text(encoding="utf-8")
+ROUTING = (ROOT / "references" / "routing.md").read_text(encoding="utf-8")
 
 
 class AgentConfigContractTest(unittest.TestCase):
@@ -28,6 +32,12 @@ class AgentConfigContractTest(unittest.TestCase):
         self.assertTrue((ROOT / "references" / "plan-schema.md").is_file())
         self.assertTrue((ROOT / "references" / "task-assessment.md").is_file())
         self.assertTrue((ROOT / "references" / "provider-adapter-contract.md").is_file())
+        self.assertTrue((ROOT / "references" / "setup.md").is_file())
+        self.assertTrue((ROOT / "references" / "routing.md").is_file())
+        self.assertTrue((ROOT / "references" / "companion-contract.md").is_file())
+        self.assertTrue((ROOT / "references" / "profile-schema.md").is_file())
+        self.assertLess(len(SKILL.splitlines()), 100)
+        self.assertGreaterEqual(len(SKILL.splitlines()), 40)
         self.assertRegex(SKILL, r"(?m)^name:\s*agent-config\s*$")
         self.assertRegex(SKILL, r"(?m)^description:\s*.+")
         self.assertNotRegex(SKILL, r"(?m)^disable-model-invocation:")
@@ -92,19 +102,20 @@ class AgentConfigContractTest(unittest.TestCase):
         self.assertIn("Do not force an\nownership matrix, execution waves, or separate Explorer/Merger roles", PLAN_SCHEMA)
         self.assertIn("Conditional sections for decomposed tasks", PLAN_SCHEMA)
 
-    def test_core_skill_defines_four_execution_modes_and_2x2_grid(self) -> None:
+    def test_core_skill_defines_four_execution_modes_and_setup_gate(self) -> None:
         for marker in (
-            "tiered-multi-model",
-            "fixed-single-model",
+            "Setup Gate",
+            "references/setup.md",
             "single-pass",
             "decomposed",
-            "Mode 1 — Tiered Multi-model + Single-pass",
-            "Mode 2 — Tiered Multi-model + Decomposed",
-            "Mode 3 — Fixed Single-model + Single-pass",
-            "Mode 4 — Fixed Single-model + Decomposed",
-            "minimum sufficient model rank",
+            "Case A (Fixed Single-model + Single-pass)",
+            "Case B (Fixed Single-model + Decomposed",
+            "Case C (Tiered Multi-model + Single-pass)",
+            "Case D (Tiered Multi-model + Decomposed",
+            "highest-supported",
             "needs-project-tickets",
-            "Roles are conditional",
+            "Single-model is first-class",
+            "No intelligence guessing",
         ):
             self.assertIn(marker, SKILL)
 
@@ -127,8 +138,93 @@ class AgentConfigContractTest(unittest.TestCase):
         mutated_skill = SKILL.replace("name: agent-config\n", "name: agent-config\ndisable-model-invocation: true\n", 1)
         self.assertRegex(mutated_skill, r"(?m)^disable-model-invocation:\s*true\s*$")
 
+    def test_companion_contract_tools_and_invariants(self) -> None:
+        self.assertIn("protocol_version: 1", COMPANION_CONTRACT)
+        self.assertIn("profile_version: 1", COMPANION_CONTRACT)
+        for tool_name in (
+            "get_setup_status",
+            "inspect_host",
+            "get_profile",
+            "save_profile",
+            "preview_configuration",
+            "apply_configuration",
+            "validate_configuration",
+            "reset_profile",
+        ):
+            self.assertIn(f"`{tool_name}`", COMPANION_CONTRACT)
+        for marker in (
+            "explicit user inspection & confirmation",
+            "blind apply forbidden",
+            "non-blocking companion-absent fallback",
+            "plan-only",
+            "atomic write",
+        ):
+            self.assertIn(marker.lower(), COMPANION_CONTRACT.lower())
+
+    def test_profile_schema_specifications_and_invariants(self) -> None:
+        for marker in (
+            "profile_version",
+            "host.id",
+            "host.adapter",
+            "scope.workspace",
+            "model_mode",
+            "single_model",
+            "tiers",
+            "routine",
+            "standard",
+            "high",
+            "review",
+            "capabilities",
+            "subagents",
+            "session_threads",
+            "parallelism",
+            "concurrency_cap",
+            "highest-supported",
+            "Strictly user-confirmed",
+            "No automatic model ranking",
+            "No silent substitution",
+            "Configured model missing",
+            "Host identity mismatch",
+            "Adapter incompatibility",
+            "Capability regression",
+            "Elapsed time is not a stale trigger",
+        ):
+            self.assertIn(marker.lower(), PROFILE_SCHEMA.lower())
+
+    def test_setup_gate_and_routing_specifications(self) -> None:
+        for marker in (
+            "agent-config setup",
+            "setup gate",
+            "inspect_host",
+            "Single model",
+            "Multiple selectable models",
+            "Tier binding",
+        ):
+            self.assertIn(marker.lower(), SETUP.lower())
+
+        for marker in (
+            "Case A: Single-model + Single-pass",
+            "Case B: Single-model + Decomposed (P0)",
+            "Case C: Multi-model + Single-pass",
+            "Case D: Multi-model + Decomposed (P0)",
+            "Single-model mode is an equal, first-class execution topology",
+            "needs-project-tickets",
+        ):
+            self.assertIn(marker.lower(), ROUTING.lower())
+
     def test_live_package_is_self_contained_and_provider_neutral(self) -> None:
-        package_text = "\n".join((SKILL, METADATA, HOST_SCHEMA, PLAN_SCHEMA, TASK_ASSESSMENT, ADAPTER_CONTRACT))
+        package_text = "\n".join((
+            SKILL,
+            METADATA,
+            HOST_SCHEMA,
+            PLAN_SCHEMA,
+            TASK_ASSESSMENT,
+            ADAPTER_CONTRACT,
+            COMPANION_CONTRACT,
+            PROFILE_SCHEMA,
+            SETUP,
+            ROUTING,
+        ))
         self.assertNotRegex(
             package_text,
             r"(?i)sol-advisor|\bsol\b|\bterra\b|\bluna\b|mattpocock|github\.com",

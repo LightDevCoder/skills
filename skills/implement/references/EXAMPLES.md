@@ -39,11 +39,11 @@ driver layer, memory backend, file backend, and test harness across 6 files).
    could run in parallel with distinct ownership.
 2. `implement` recognizes that routing would materially help and offers the user
    a choice:
-   - A. Use `agent-config` to right-size model tier, reasoning effort, and execution topology.
+   - A. Use `agent-config` to configure profile-driven model tier, reasoning effort, and execution topology (`Scope: current-item`).
    - B. Continue directly with single-agent execution using current settings.
 3. User chooses option A (accepts).
 4. `implement` invokes `agent-config` with the bounded item and host evidence (`Scope: current-item`).
-   `agent-config` returns an adaptive plan with right-sized model and effort.
+   `agent-config` returns a profile-driven execution plan with right-sized model tier, resolved effort, and topology.
 5. `implement` executes according to the plan, verifies each unit, and hands
    off to `review-loop`.
 

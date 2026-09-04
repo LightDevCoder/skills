@@ -11,9 +11,8 @@ vendor model identifiers, configuration file formats, or proprietary CLI flags.
 1. **Host capability inspection:** Query the runtime host or verified manifest
    to observe active models, selectable alternatives, session/thread capabilities,
    subagents, parallelism, and concurrency limits with timestamps.
-2. **Metadata normalization:** Map provider-specific model variants to neutral
-   relative `routing_rank` values (higher integer = higher reasoning capability)
-   and normalize reasoning effort settings into ordered levels and scopes.
+2. **Metadata normalization:** Normalize model identifiers and reasoning effort settings
+   into ordered levels and scopes without synthetic capability ranks.
 3. **Optional project configuration application:** When supported, receive a
    declarative project-level execution configuration request and apply it to
    project files only after explicit user confirmation.
@@ -27,7 +26,7 @@ An adapter outputs or populates the structured host evidence conforming to
 - `adapter.identity` & `adapter.version`: adapter implementation info
 - `observed_at`: ISO-8601 timestamp of host inspection
 - `models.current`: executable model in active session
-- `models.selectable`: list of selectable models with normalized `routing_rank`
+- `models.selectable`: list of selectable models without synthetic ranks
 - `capabilities`: normalized capabilities (model selection, subagents,
   parallelism, reasoning control, threads, worktrees, concurrency cap)
 - `adapter.project_config_support`: `available | unavailable | unknown`
@@ -41,23 +40,20 @@ When the host adapter supports applying project-level agent configurations,
 apply_request:
   project_root: "/path/to/project"
   controller:
-    model: "highest-ranked-model-id"
+    model: "model-gamma"
     effort: "high"
   workers:
     routine:
-      model: "rank-1-model-id"
+      model: "model-alpha"
       effort: "low"
-    moderate:
-      model: "rank-2-model-id"
+    standard:
+      model: "model-beta"
       effort: "medium"
-    demanding:
-      model: "rank-3-model-id"
-      effort: "high"
-    critical:
-      model: "rank-3-model-id"
+    high:
+      model: "model-gamma"
       effort: "high"
   review:
-    model: "rank-3-model-id"
+    model: "model-gamma"
     effort: "high"
 ```
 

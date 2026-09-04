@@ -28,15 +28,15 @@ Word count or SPEC length is strictly prohibited as a proxy for task shape (neve
 
 ## 2. Work-item difficulty and risk
 
-Each work item is evaluated to determine the minimum sufficient intelligence tier
-needed to execute it safely.
+Each work item is evaluated to determine the appropriate user-configured execution tier
+and reasoning effort needed to execute it safely.
 
 | Difficulty | Semantic description | Example work | Model & effort guidance |
 |---|---|---|---|
-| `routine` | Low uncertainty, mechanical transformation, local edits, clear patterns, trivial verification. | Typos, documentation wording, boilerplate tests, config additions, small refactors. | Lower sufficient model tier; economical/medium reasoning effort. |
-| `moderate` | Standard feature slice, established architecture, clear interfaces, moderate reasoning depth. | New API endpoint, schema extension, standard UI component, unit & integration tests. | Middle model tier; medium/high reasoning effort. |
-| `demanding` | High ambiguity, architectural seams, non-trivial concurrency, cross-cutting invariants, difficult debugging. | Core protocol changes, complex state machines, performance optimizations, multi-agent synchronization. | High model tier; high reasoning effort. |
-| `critical` | Core security boundaries, irreversible data migrations, existential system invariants, zero-tolerance failure modes. | Cryptographic protocols, auth kernel, database schema rewrites, multi-system cutovers. | Highest available model tier; maximum supported reasoning effort. |
+| `routine` | Low uncertainty, mechanical transformation, local edits, clear patterns, trivial verification. | Typos, documentation wording, boilerplate tests, config additions, small refactors. | User-configured `routine` tier; low/medium reasoning effort policy. |
+| `moderate` | Standard feature slice, established architecture, clear interfaces, moderate reasoning depth. | New API endpoint, schema extension, standard UI component, unit & integration tests. | User-configured `standard` tier; medium/high reasoning effort policy. |
+| `demanding` | High ambiguity, architectural seams, non-trivial concurrency, cross-cutting invariants, difficult debugging. | Core protocol changes, complex state machines, performance optimizations, multi-agent synchronization. | User-configured `high` tier; high reasoning effort policy. |
+| `critical` | Core security boundaries, irreversible data migrations, existential system invariants, zero-tolerance failure modes. | Cryptographic protocols, auth kernel, database schema rewrites, multi-system cutovers. | User-configured `high` tier; `highest-supported` effort policy resolved to host capabilities. |
 
 ### Evaluation dimensions
 

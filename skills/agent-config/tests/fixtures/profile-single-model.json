@@ -1,0 +1,30 @@
+{
+  "profile_version": 1,
+  "host": {
+    "id": "fixture-host",
+    "adapter": "test-adapter"
+  },
+  "scope": {
+    "type": "project",
+    "workspace": "/path/to/project"
+  },
+  "model_mode": "single",
+  "models": {
+    "available": ["model-alpha"]
+  },
+  "single_model": {
+    "model": "model-alpha",
+    "execution_effort": {
+      "policy": "highest-supported"
+    },
+    "review_effort": {
+      "policy": "highest-supported"
+    }
+  },
+  "capabilities": {
+    "subagents": true,
+    "session_threads": true,
+    "parallelism": true,
+    "concurrency_cap": 2
+  }
+}

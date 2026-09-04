@@ -1,6 +1,6 @@
 interface:
   display_name: "Agent Config"
-  short_description: "Configure model tier, reasoning effort, and execution topology"
-  default_prompt: "Use agent-config to inspect host capabilities, classify provider mode and task shape, right-size model tier and reasoning effort, and choose a safe execution topology."
+  short_description: "Map host capabilities and confirmed profile to execution topology, tier, and effort"
+  default_prompt: "Use agent-config to inspect current host capabilities, read confirmed profile tiers, assess task shape, right-size execution tier and actual effort, and choose a safe execution topology."
 policy:
   allow_implicit_invocation: true
