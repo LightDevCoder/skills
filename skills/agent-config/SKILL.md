@@ -17,11 +17,11 @@ description: Map the current Agent Host's evidenced capabilities and confirmed p
 - Evidenced host capabilities and confirmed profile (via companion MCP or session input).
 
 ## Setup Gate
-- **Explicit setup:** If invoked with setup intent (`agent-config setup`), immediately open [`references/setup.md`](references/setup.md).
-- **Normal invocation:** Check setup status via companion `get_setup_status`. If unconfigured or stale, prompt user to run setup. If companion is absent, offer companion setup or continue with in-memory session-only plan-only mode. Never auto-install MCP tools or mutate host files without explicit user confirmation.
+- **Explicit setup:** If invoked with setup intent (`agent-config setup`), run setup mode to prepare or repair the runtime environment and Profile (see [`references/setup.md`](references/setup.md)). Setup never plans execution for the current task.
+- **Normal invocation:** `agent-config` is the only mode that plans execution topology and routing for current work. Check setup status via companion `get_setup_status`. If companion is absent, offer setup or continue plan-only. If Profile is missing or stale, offer setup or continue session-local where safely possible. Never silently enter setup, auto-install MCP tools, or mutate host files.
 
 ## Core flow
-1. **Setup check:** Verify confirmed profile via companion MCP or session fallback.
+1. **Setup check:** Verify confirmed profile via companion MCP or session input (never guess single-model without profile).
 2. **Inspect host:** Read active models, supported effort values, and concurrency limits.
 3. **Determine task shape:** Classify as `single-pass` or `decomposed` (never by word count).
 4. **Decomposition gate:** If decomposed and formal tickets do not exist, output `Execution readiness: needs-project-tickets` and hand off to `project-tickets`.

@@ -24,7 +24,7 @@
 
 ### agent-config
 
-- **作用：** Profile 驱动的跨 Harness 执行配置器：检查当前宿主真实执行能力，匹配用户确认的模型档位 Profile 与任务形态，精准配置执行拓扑、模型等级与 effort，支持可选 companion MCP 并提供安全的单模型对等模式回退。
+- **作用：** Profile 驱动的跨 Harness 执行配置器：检查当前宿主真实执行能力，匹配用户确认的模型档位 Profile 与任务形态，精准配置执行拓扑、模型等级与 effort，支持可选 companion MCP 并提供单模型对等一等模式。
 - **调用：** Model-invoked。
 - **包：** [skills/agent-config/](skills/agent-config/)
 - **状态：** 第一方已准入；REFACTOR（参照 Sol Advisor 设计理念，Profile 驱动跨 Harness 执行配置器）。

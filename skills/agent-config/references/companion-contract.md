@@ -156,7 +156,7 @@ Host configuration mutations must strictly follow a two-phase gated lifecycle:
 
 ---
 
-## 4. Non-blocking companion-absent fallback
+## 4. Non-blocking companion-absent operation / fallback
 
 When `agent-config` is invoked in an environment where companion MCP tools are not registered or reachable:
 
@@ -165,8 +165,8 @@ When `agent-config` is invoked in an environment where companion MCP tools are n
    ```text
    Agent Config companion MCP is not detected.
    Options:
-     A. Set up / register companion MCP for persistent host configuration.
-     B. Continue with session-only manual configuration (plan-only mode).
+     A. Run agent-config setup to set up / register companion MCP.
+     B. Continue session-local / plan-only.
    ```
 3. **Session-only manual mode:**
    - If the user chooses to continue without MCP:
@@ -175,4 +175,4 @@ When `agent-config` is invoked in an environment where companion MCP tools are n
      - Never pretend persistence succeeded; clearly note `Status: READY`, `Apply mode: plan-only (companion absent)`.
 4. **Zero downstream disruption:**
    - Absence of the companion MCP never blocks downstream skills (`implement`, `ask-light`, `project-tickets`, `review-loop`).
-   - Portable Skill reasoning remains 100% functional even without companion MCP runtime.
+   - Non-blocking companion-absent fallback ensures portable Skill reasoning remains 100% functional even without companion MCP runtime.

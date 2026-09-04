@@ -1,16 +1,18 @@
 # Setup questionnaire
 
 This reference defines the questionnaire flow for configuring host-scoped execution profiles.
-Setup runs either via explicit invocation (`agent-config setup`) or automatically when the
-Setup Gate detects an unconfigured or stale environment.
+`agent-config setup` prepares or repairs the runtime environment and Profile. It does not plan execution for the current task.
+
+Setup runs either via explicit invocation (`agent-config setup`) or when the user explicitly chooses to enter setup after normal `agent-config` reports an unconfigured or stale environment via the Setup Gate. It is never silently entered.
 
 ---
 
 ## 1. Setup entry and host inspection
 
-1. **Host discovery:**
+1. **Companion & Host discovery:**
+   - Detect companion MCP availability.
+   - If companion is absent, ask user whether to install/register. If declined, stop setup (portable Skill remains usable in session-local / plan-only mode). Never auto-install.
    - Call companion tool `inspect_host`.
-   - If companion is absent, ask user to supply active model ID and supported effort values, or offer companion installation (see `companion-contract.md`).
 2. **Display environment context:**
    Present the detected environment concisely:
    ```text
@@ -46,6 +48,8 @@ When the user selects **Single model**:
 4. **Summary & confirmation:**
    Present structured profile preview to user.
    Upon explicit user confirmation, call `save_profile`.
+5. **Setup completion boundary:**
+   Setup completes and ends. Do not automatically plan current tickets or route execution.
 
 ---
 
@@ -71,6 +75,8 @@ When the user selects **Multiple selectable models**:
 5. **Summary & confirmation:**
    Present structured profile preview matching `profile-schema.md`.
    Upon explicit user confirmation, call `save_profile`.
+6. **Setup completion boundary:**
+   Setup completes and ends. Do not automatically plan current tickets or route execution.
 
 ---
 

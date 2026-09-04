@@ -24,7 +24,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### agent-config
 
-- **Purpose:** Profile-driven cross-harness execution configurator: inspect current Host capabilities, match user-confirmed model-tier profiles and task shape, and right-size execution topology, model tier, and effort with optional companion MCP support and safe single-model peer fallback.
+- **Purpose:** Profile-driven cross-harness execution configurator: inspect current Host capabilities, match user-confirmed model-tier profiles and task shape, and right-size execution topology, model tier, and effort with optional companion MCP support and safe single-model peer mode.
 - **When to use:** Execution configuration or setup intent where model tier, reasoning effort, or execution topology affects the result.
 - **Invocation:** Model-invoked.
 - **Package:** [skills/agent-config/](skills/agent-config/)

@@ -105,14 +105,14 @@ Reason: Tiered host with active tickets. Monotonically scaling model tiers and e
 
 ---
 
-## Example 3: Fixed Single-model + Single-pass (Single + Small)
+## Example 3: Single-model + Single-pass (Single + Small)
 
 **Context:** Host provides only a single executable model (`model-alpha`). Task is a small typo/refactor.
 
 ```markdown
 Status: READY
 Scope: current-item
-Provider mode: fixed-single-model
+Provider mode: single-model
 Task shape: single-pass
 Execution readiness: executable
 Apply mode: plan-only
@@ -121,7 +121,7 @@ Reason: Single-model host; single-pass solo task. Direct execution with current 
 
 ## Host summary
 - Current model: model-alpha (available)
-- Selectable models / tiers: fixed single model
+- Selectable models / tiers: single model
 - Reasoning control: available (levels: standard, high)
 - Context & execution: subagents unavailable, session_threads unavailable
 - Adapter: none (plan-only)
@@ -148,14 +148,14 @@ Reason: Single-model host; single-pass solo task. Direct execution with current 
 
 ---
 
-## Example 4: Fixed Single-model + Decomposed (Single + Large)
+## Example 4: Single-model + Decomposed (Single + Large)
 
 **Context:** Host provides a single model (`model-alpha`), but supports subagent threads and parallelism (cap: 2). Task consists of multiple tickets.
 
 ```markdown
 Status: READY
 Scope: ticket-graph
-Provider mode: fixed-single-model
+Provider mode: single-model
 Task shape: decomposed
 Execution readiness: executable
 Apply mode: plan-only

@@ -173,7 +173,7 @@ these fields.
 Schema v1 evidence payloads (where `schema_version` is `"1"` or omitted, and
 `routing_rank` or `reasoning_control.levels` are absent) are valid input:
 - Missing or ignored `routing_rank` across selectable models normalizes to `tier routing unavailable`
-  when no user profile exists, causing conservative fallback to `fixed-single-model` mode using `models.current`.
+  when no user profile exists. In absence of a user-confirmed Profile, `agent-config` does not guess single-model mode; it offers setup or continues session-local when explicit input is provided.
 - Missing `reasoning_control` fields normalize to `state: unknown`, continuing with
   current/default host reasoning.
 - Missing `adapter` field normalizes to `project_config_support: unavailable` (plan-only).
