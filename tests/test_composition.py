@@ -65,7 +65,7 @@ class CompositionTests(unittest.TestCase):
     def test_agent_config_composition_boundaries(self):
         ac_text = read_skill("agent-config")
         # agent-config does not steal formal decomposition from project-tickets
-        self.assertIn("needs-project-tickets", ac_text, "decomposed tasks without tickets hand off to project-tickets")
+        self.assertIn("NEED_PROJECT_TICKETS", ac_text, "decomposed tasks without tickets hand off to project-tickets")
         self.assertNotIn("publish to the issue tracker", ac_text.lower())
         # agent-config does not bypass review-loop or project-review
         self.assertIn("review-loop", ac_text)

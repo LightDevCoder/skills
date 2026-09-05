@@ -109,7 +109,7 @@ def classify_provider_mode(evidence: dict[str, Any], profile: dict[str, Any] | N
     sel = selectable_models(evidence)
 
     if not curr and not sel:
-        return "BOUNDARY"
+        return "unsupported"
 
     if profile and isinstance(profile, dict):
         mode = profile.get("model_mode")
@@ -243,13 +243,37 @@ def route_execution(
     task_shape = classify_task_shape(task)
     tickets = task.get("tickets")
 
+    # Host unsupported check (§7): no executable or selectable models evidenced
+    curr = current_model(host_evidence)
+    sel = selectable_models(host_evidence)
+    if not curr and not sel:
+        return {
+            "readiness": "UNSUPPORTED",
+            "mode": "plan-only",
+            "setup_state": {
+                "companion": "missing",
+                "profile": "missing",
+            },
+            "handoff": None,
+            "execution_config": None,
+            "task_shape": task_shape,
+            "execution_state": "blocked",
+            "reason": "Host environment evidences no executable or selectable models.",
+        }
+
     # Ticket integration boundary (§59): decomposed task with no tickets
     if task_shape == "decomposed" and not tickets:
         return {
-            "status": "READY",
-            "task_shape": "decomposed",
-            "readiness": "needs-project-tickets",
+            "readiness": "NEED_PROJECT_TICKETS",
+            "mode": "plan-only",
+            "setup_state": {
+                "companion": "ready" if profile else "missing",
+                "profile": "persisted" if profile else "missing",
+            },
             "handoff": "project-tickets",
+            "execution_config": None,
+            "task_shape": "decomposed",
+            "execution_state": "blocked",
             "reason": "Decomposed task requires formal ticket breakdown before execution scheduling.",
         }
 
@@ -257,13 +281,46 @@ def route_execution(
     # halt resource routing and direct to agent-config setup. Never assume or guess "fixed-single-model".
     if not profile or not isinstance(profile, dict):
         return {
-            "status": "NEED-INPUT",
+            "readiness": "NEED_INPUT",
+            "mode": "plan-only",
+            "setup_state": {
+                "companion": "missing",
+                "profile": "missing",
+            },
+            "handoff": "setup",
+            "execution_config": None,
             "action": "setup-required",
             "target": "agent-config setup",
             "provider_mode": "unprofiled",
             "task_shape": task_shape,
-            "readiness": "blocked-gate",
+            "execution_state": "blocked",
             "message": "No confirmed profile found. Resource routing halted; direct to agent-config setup or supply session-local profile.",
+        }
+
+    # Model authorization check (§7, §11)
+    authorized_models = set()
+    if profile.get("model_mode") == "single":
+        single_m_auth = profile.get("single_model", {}).get("model")
+        if single_m_auth:
+            authorized_models.add(single_m_auth)
+    elif profile.get("model_mode") == "multi":
+        for t_cfg in profile.get("tiers", {}).values():
+            if t_cfg.get("model"):
+                authorized_models.add(t_cfg.get("model"))
+    requested_model = task.get("requested_model")
+    if requested_model and requested_model not in authorized_models:
+        return {
+            "readiness": "BLOCKED",
+            "mode": "plan-only",
+            "setup_state": {
+                "companion": "ready",
+                "profile": "persisted",
+            },
+            "handoff": None,
+            "execution_config": None,
+            "task_shape": task_shape,
+            "execution_state": "blocked",
+            "reason": f"Requested model '{requested_model}' is not authorized in user profile.",
         }
 
     model_mode = profile.get("model_mode", "single")
@@ -323,12 +380,18 @@ def route_execution(
                 },
             }
             return {
-                "status": "READY",
-                "readiness_state": "READY",
-                "mode": "Case A (Fixed Single-model + Single-pass)",
+                "readiness": "READY",
+                "mode": "plan-only",
+                "setup_state": {
+                    "companion": "ready",
+                    "profile": "persisted",
+                },
+                "handoff": "implement",
+                "execution_config": canonical_exec_cfg,
+                "execution_state": "executable",
+                "mode_title": "Case A (Fixed Single-model + Single-pass)",
                 "provider_mode": "fixed-single-model",
                 "task_shape": "single-pass",
-                "readiness": "executable",
                 "controller": None,
                 "execution": {
                     "model": single_m,
@@ -342,7 +405,6 @@ def route_execution(
                     "effort": resolved_effort,
                 },
                 "fake_roles": False,
-                "execution_config": canonical_exec_cfg,
             }
         else:
             # Case B: Fixed Single-model + Decomposed (P0, §57)
@@ -391,12 +453,18 @@ def route_execution(
                 },
             }
             return {
-                "status": "READY",
-                "readiness_state": "READY",
-                "mode": "Case B (Fixed Single-model + Decomposed)",
+                "readiness": "READY",
+                "mode": "plan-only",
+                "setup_state": {
+                    "companion": "ready",
+                    "profile": "persisted",
+                },
+                "handoff": "implement",
+                "execution_config": canonical_exec_cfg,
+                "execution_state": "executable",
+                "mode_title": "Case B (Fixed Single-model + Decomposed)",
                 "provider_mode": "fixed-single-model",
                 "task_shape": "decomposed",
-                "readiness": "executable",
                 "controller": {
                     "model": single_m,
                     "effort": resolved_effort,
@@ -411,7 +479,6 @@ def route_execution(
                     "effort": resolved_effort,
                 },
                 "model_tier_assignment": False,
-                "execution_config": canonical_exec_cfg,
             }
     else:
         # Multi-model
@@ -466,12 +533,18 @@ def route_execution(
             }
 
             return {
-                "status": "READY",
-                "readiness_state": "READY",
-                "mode": "Case C (Tiered Multi-model + Single-pass)",
+                "readiness": "READY",
+                "mode": "plan-only",
+                "setup_state": {
+                    "companion": "ready",
+                    "profile": "persisted",
+                },
+                "handoff": "implement",
+                "execution_config": canonical_exec_cfg,
+                "execution_state": "executable",
+                "mode_title": "Case C (Tiered Multi-model + Single-pass)",
                 "provider_mode": "tiered-multi-model",
                 "task_shape": "single-pass",
-                "readiness": "executable",
                 "execution": {
                     "tier": tier_name,
                     "model": model_id,
@@ -486,7 +559,6 @@ def route_execution(
                     "model": review_model,
                     "effort": review_effort,
                 },
-                "execution_config": canonical_exec_cfg,
             }
         else:
             # Case D: Tiered Multi-model + Decomposed (P0, §58)
@@ -563,12 +635,18 @@ def route_execution(
             }
 
             return {
-                "status": "READY",
-                "readiness_state": "READY",
-                "mode": "Case D (Tiered Multi-model + Decomposed)",
+                "readiness": "READY",
+                "mode": "plan-only",
+                "setup_state": {
+                    "companion": "ready",
+                    "profile": "persisted",
+                },
+                "handoff": "implement",
+                "execution_config": canonical_exec_cfg,
+                "execution_state": "executable",
+                "mode_title": "Case D (Tiered Multi-model + Decomposed)",
                 "provider_mode": "tiered-multi-model",
                 "task_shape": "decomposed",
-                "readiness": "executable",
                 "controller": {
                     "tier": "high",
                     "model": controller_model,
@@ -584,7 +662,6 @@ def route_execution(
                     "model": review_cfg.get("model", controller_model),
                     "effort": resolve_effort(reasoning_levels, "highest-supported"),
                 },
-                "execution_config": canonical_exec_cfg,
             }
 
 
@@ -677,11 +754,13 @@ class AgentConfigBehaviorTest(unittest.TestCase):
         self.assertEqual(classify_task_shape(task), "single-pass")
         plan = route_execution(profile, task, evidence)
 
-        self.assertEqual(plan["status"], "READY")
-        self.assertEqual(plan["mode"], "Case A (Fixed Single-model + Single-pass)")
+        self.assertEqual(plan["readiness"], "READY")
+        self.assertEqual(plan["handoff"], "implement")
+        self.assertIsNotNone(plan["execution_config"])
+        self.assertEqual(plan["execution_state"], "executable")
+        self.assertEqual(plan["mode_title"], "Case A (Fixed Single-model + Single-pass)")
         self.assertEqual(plan["provider_mode"], "fixed-single-model")
         self.assertEqual(plan["task_shape"], "single-pass")
-        self.assertEqual(plan["readiness"], "executable")
         self.assertIsNone(plan["controller"])
         self.assertEqual(plan["execution"]["model"], "model-alpha")
         self.assertEqual(plan["execution"]["effort"], "high")
@@ -703,11 +782,13 @@ class AgentConfigBehaviorTest(unittest.TestCase):
         self.assertEqual(classify_task_shape(task), "decomposed")
         plan = route_execution(profile, task, evidence)
 
-        self.assertEqual(plan["status"], "READY")
-        self.assertEqual(plan["mode"], "Case B (Fixed Single-model + Decomposed)")
+        self.assertEqual(plan["readiness"], "READY")
+        self.assertEqual(plan["handoff"], "implement")
+        self.assertIsNotNone(plan["execution_config"])
+        self.assertEqual(plan["execution_state"], "executable")
+        self.assertEqual(plan["mode_title"], "Case B (Fixed Single-model + Decomposed)")
         self.assertEqual(plan["provider_mode"], "fixed-single-model")
         self.assertEqual(plan["task_shape"], "decomposed")
-        self.assertEqual(plan["readiness"], "executable")
 
         # Controller is in main session with single model
         self.assertEqual(plan["controller"]["model"], "model-alpha")
@@ -735,8 +816,11 @@ class AgentConfigBehaviorTest(unittest.TestCase):
 
         plan = route_execution(profile, task, evidence)
 
-        self.assertEqual(plan["status"], "READY")
-        self.assertEqual(plan["mode"], "Case C (Tiered Multi-model + Single-pass)")
+        self.assertEqual(plan["readiness"], "READY")
+        self.assertEqual(plan["handoff"], "implement")
+        self.assertIsNotNone(plan["execution_config"])
+        self.assertEqual(plan["execution_state"], "executable")
+        self.assertEqual(plan["mode_title"], "Case C (Tiered Multi-model + Single-pass)")
         self.assertEqual(plan["provider_mode"], "tiered-multi-model")
         self.assertEqual(plan["task_shape"], "single-pass")
         self.assertEqual(plan["execution"]["tier"], "standard")
@@ -761,8 +845,11 @@ class AgentConfigBehaviorTest(unittest.TestCase):
 
         plan = route_execution(profile, task, evidence)
 
-        self.assertEqual(plan["status"], "READY")
-        self.assertEqual(plan["mode"], "Case D (Tiered Multi-model + Decomposed)")
+        self.assertEqual(plan["readiness"], "READY")
+        self.assertEqual(plan["handoff"], "implement")
+        self.assertIsNotNone(plan["execution_config"])
+        self.assertEqual(plan["execution_state"], "executable")
+        self.assertEqual(plan["mode_title"], "Case D (Tiered Multi-model + Decomposed)")
         self.assertEqual(plan["provider_mode"], "tiered-multi-model")
         self.assertEqual(plan["task_shape"], "decomposed")
 
@@ -834,16 +921,16 @@ class AgentConfigBehaviorTest(unittest.TestCase):
     # -------------------------------------------------------------------------
 
     def test_ticket_integration_missing_tickets_hands_off_to_project_tickets(self) -> None:
-        """Decomposed task without formal tickets yields needs-project-tickets handoff (§59)."""
+        """Decomposed task without formal tickets yields NEED_PROJECT_TICKETS handoff (§59, Repair 3)."""
         profile = load("profile-single-model.json")
         evidence = load("case-d-fixed-decomposed.json")
         task = {"requires_ticket_decomposition": True, "tickets": []}
 
         plan = route_execution(profile, task, evidence)
-        self.assertEqual(plan["status"], "READY")
+        self.assertEqual(plan["readiness"], "NEED_PROJECT_TICKETS")
         self.assertEqual(plan["task_shape"], "decomposed")
-        self.assertEqual(plan["readiness"], "needs-project-tickets")
         self.assertEqual(plan["handoff"], "project-tickets")
+        self.assertIsNone(plan["execution_config"])
 
     def test_unranked_multiple_models_fall_back_without_guessing(self) -> None:
         """Do not guess intelligence by model name (model-pro vs model-mini vs model-ultra)."""
@@ -857,19 +944,19 @@ class AgentConfigBehaviorTest(unittest.TestCase):
         self.assertEqual(classify_provider_mode(evidence, profile=profile), "fixed-single-model")
 
     def test_missing_reasoning_control_continues_safely(self) -> None:
-        """Unavailable reasoning control proceeds with host default without returning BOUNDARY."""
+        """Unavailable reasoning control proceeds with host default without returning unsupported."""
         evidence = load("missing-reasoning-control.json")
         self.assertEqual(capability(evidence, "reasoning_control"), "unavailable")
         provider_mode = classify_provider_mode(evidence)
-        self.assertNotEqual(provider_mode, "BOUNDARY")
+        self.assertNotEqual(provider_mode, "unsupported")
 
-    def test_false_inventory_and_missing_model_return_boundary(self) -> None:
-        """No executable or selectable models produces BOUNDARY."""
+    def test_false_inventory_and_missing_model_return_unsupported(self) -> None:
+        """No executable or selectable models produces unsupported."""
         false_inv = load("false-inventory.json")
-        self.assertEqual(classify_provider_mode(false_inv), "BOUNDARY")
+        self.assertEqual(classify_provider_mode(false_inv), "unsupported")
 
         missing_mod = load("missing-model-evidence.json")
-        self.assertEqual(classify_provider_mode(missing_mod), "BOUNDARY")
+        self.assertEqual(classify_provider_mode(missing_mod), "unsupported")
 
     def test_adapter_apply_requires_explicit_user_approval(self) -> None:
         """Adapter presence emits plan-only by default; explicit approval is required to mutate."""
@@ -918,7 +1005,9 @@ class AgentConfigBehaviorTest(unittest.TestCase):
         # Missing profile halts resource routing rather than silently generating/rewriting a profile
         evidence = load("unranked-multiple-models.json")
         plan_no_profile = route_execution(profile=None, task={"difficulty": "routine"}, host_evidence=evidence)
-        self.assertEqual(plan_no_profile["status"], "NEED-INPUT")
+        self.assertEqual(plan_no_profile["readiness"], "NEED_INPUT")
+        self.assertEqual(plan_no_profile["handoff"], "setup")
+        self.assertIsNone(plan_no_profile["execution_config"])
         self.assertEqual(plan_no_profile["action"], "setup-required")
         self.assertNotIn("saved_profile", plan_no_profile)
 
@@ -931,10 +1020,31 @@ class AgentConfigBehaviorTest(unittest.TestCase):
 
         task = {"difficulty": "demanding"}
         plan = route_execution(profile=None, task=task, host_evidence=evidence)
-        self.assertEqual(plan["status"], "NEED-INPUT")
+        self.assertEqual(plan["readiness"], "NEED_INPUT")
+        self.assertEqual(plan["handoff"], "setup")
+        self.assertIsNone(plan["execution_config"])
         self.assertNotEqual(plan.get("provider_mode"), "fixed-single-model")
         self.assertEqual(plan.get("action"), "setup-required")
         self.assertEqual(plan.get("target"), "agent-config setup")
+
+    def test_unauthorized_model_returns_canonical_blocked(self) -> None:
+        """Task requesting model not authorized in user profile returns canonical BLOCKED (§7, §11)."""
+        profile = load("profile-single-model.json")
+        evidence = load("case-c-fixed-single-pass.json")
+        task = {"difficulty": "routine", "requested_model": "unauthorized-external-model"}
+        plan = route_execution(profile, task, evidence)
+        self.assertEqual(plan["readiness"], "BLOCKED")
+        self.assertIsNone(plan["execution_config"])
+        self.assertIn("not authorized", plan["reason"])
+
+    def test_unsupported_host_returns_canonical_unsupported(self) -> None:
+        """Host evidencing no executable or selectable models returns canonical UNSUPPORTED (§7, §11)."""
+        profile = load("profile-single-model.json")
+        evidence = load("missing-model-evidence.json")
+        task = {"difficulty": "routine"}
+        plan = route_execution(profile, task, evidence)
+        self.assertEqual(plan["readiness"], "UNSUPPORTED")
+        self.assertIsNone(plan["execution_config"])
 
     @unittest.skipIf(os.environ.get("AGENT_CONFIG_INSTALLED_COPY") == "1", "already running in isolated copy")
     def test_isolated_installed_copy_runs_the_full_package_suite(self) -> None:

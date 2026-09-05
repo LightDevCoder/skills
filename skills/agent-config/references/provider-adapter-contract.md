@@ -67,7 +67,7 @@ apply_request:
   user declines, the plan remains valid for manual Controller execution.
 - **Graceful adapter absence:** When no adapter exists, `agent-config` operates
   in `Apply mode: plan-only` and notes `Limitation: no project-config adapter available`.
-  It never emits a `BOUNDARY` status due to absent adapter tooling.
+  It never emits an `UNSUPPORTED` readiness due to absent adapter tooling.
 - **Non-blocking adapter failure:** If an adapter fails to apply configuration,
   the failure is reported with specifics, the plan remains valid, and execution
   proceeds manually without blocking work items.

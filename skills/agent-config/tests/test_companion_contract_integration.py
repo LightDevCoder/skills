@@ -138,9 +138,11 @@ class BehavioralAcceptanceMatrixTest(unittest.TestCase):
         task = {"difficulty": "routine", "word_count": 500}
         plan = route_execution(self.multi_profile, task, self.host_case_c)
 
-        self.assertEqual(plan["status"], "READY")
+        self.assertEqual(plan["readiness"], "READY")
+        self.assertEqual(plan["handoff"], "implement")
+        self.assertIsNotNone(plan["execution_config"])
         self.assertEqual(plan["task_shape"], "single-pass")
-        self.assertEqual(plan["mode"], "Case C (Tiered Multi-model + Single-pass)")
+        self.assertEqual(plan["mode_title"], "Case C (Tiered Multi-model + Single-pass)")
         self.assertEqual(plan["topology"], "minimal")
         self.assertEqual(plan["execution"]["tier"], "routine")
         self.assertEqual(plan["execution"]["model"], "model-alpha")
@@ -157,7 +159,9 @@ class BehavioralAcceptanceMatrixTest(unittest.TestCase):
         task = {"difficulty": "demanding", "word_count": 800}
         plan = route_execution(self.multi_profile, task, self.host_case_c)
 
-        self.assertEqual(plan["status"], "READY")
+        self.assertEqual(plan["readiness"], "READY")
+        self.assertEqual(plan["handoff"], "implement")
+        self.assertIsNotNone(plan["execution_config"])
         self.assertEqual(plan["task_shape"], "single-pass")
         self.assertEqual(plan["execution"]["tier"], "high")
         self.assertEqual(plan["execution"]["model"], "model-gamma")
@@ -179,9 +183,11 @@ class BehavioralAcceptanceMatrixTest(unittest.TestCase):
         task = {"tickets": tickets}
         plan = route_execution(self.multi_profile, task, self.host_case_d)
 
-        self.assertEqual(plan["status"], "READY")
+        self.assertEqual(plan["readiness"], "READY")
+        self.assertEqual(plan["handoff"], "implement")
+        self.assertIsNotNone(plan["execution_config"])
         self.assertEqual(plan["task_shape"], "decomposed")
-        self.assertEqual(plan["mode"], "Case D (Tiered Multi-model + Decomposed)")
+        self.assertEqual(plan["mode_title"], "Case D (Tiered Multi-model + Decomposed)")
         self.assertEqual(plan["concurrency_cap"], 3)
         self.assertEqual(plan["controller"]["model"], "model-gamma")
 
@@ -205,8 +211,9 @@ class BehavioralAcceptanceMatrixTest(unittest.TestCase):
         self.assertEqual(classify_task_shape(task), "decomposed")
 
         plan = route_execution(self.multi_profile, task, self.host_case_d)
-        self.assertEqual(plan["readiness"], "needs-project-tickets")
+        self.assertEqual(plan["readiness"], "NEED_PROJECT_TICKETS")
         self.assertEqual(plan["handoff"], "project-tickets")
+        self.assertIsNone(plan["execution_config"])
         self.assertIn("formal ticket breakdown", plan["reason"])
 
     def test_scenario_05_single_model_small(self) -> None:
@@ -214,8 +221,10 @@ class BehavioralAcceptanceMatrixTest(unittest.TestCase):
         task = {"difficulty": "routine", "word_count": 300}
         plan = route_execution(self.single_profile, task, self.host_case_a)
 
-        self.assertEqual(plan["status"], "READY")
-        self.assertEqual(plan["mode"], "Case A (Fixed Single-model + Single-pass)")
+        self.assertEqual(plan["readiness"], "READY")
+        self.assertEqual(plan["handoff"], "implement")
+        self.assertIsNotNone(plan["execution_config"])
+        self.assertEqual(plan["mode_title"], "Case A (Fixed Single-model + Single-pass)")
         self.assertEqual(plan["execution"]["model"], "model-alpha")
         self.assertEqual(plan["review"]["model"], "model-alpha")
         self.assertEqual(plan["review"]["strategy"], "self-check")
@@ -230,8 +239,10 @@ class BehavioralAcceptanceMatrixTest(unittest.TestCase):
         task = {"tickets": tickets}
         plan = route_execution(self.single_profile, task, self.host_case_b)
 
-        self.assertEqual(plan["status"], "READY")
-        self.assertEqual(plan["mode"], "Case B (Fixed Single-model + Decomposed)")
+        self.assertEqual(plan["readiness"], "READY")
+        self.assertEqual(plan["handoff"], "implement")
+        self.assertIsNotNone(plan["execution_config"])
+        self.assertEqual(plan["mode_title"], "Case B (Fixed Single-model + Decomposed)")
         self.assertEqual(plan["controller"]["model"], "model-alpha")
         self.assertEqual(plan["concurrency_cap"], 2)
 

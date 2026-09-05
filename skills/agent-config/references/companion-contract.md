@@ -219,7 +219,7 @@ When `agent-config` is invoked in an environment where companion MCP tools are n
    - If the user chooses to continue without MCP:
      - Prompt for manual confirmation: single model vs selectable models, and preferred effort policy.
      - Build an in-memory plan conforming to `plan-schema.md` with `Apply mode: plan-only`.
-     - Never pretend persistence succeeded; clearly note `Status: READY`, `Apply mode: plan-only (companion absent)`.
+     - Never pretend persistence succeeded; clearly note `readiness: READY`, `Apply mode: plan-only (companion absent)`.
 5. **Zero downstream disruption:**
    - Absence of the companion MCP never blocks downstream skills (`implement`, `ask-light`, `project-tickets`, `review-loop`).
    - Non-blocking companion-absent fallback ensures portable Skill reasoning remains 100% functional even without companion MCP runtime.

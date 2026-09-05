@@ -210,7 +210,7 @@ class AgentConfigContractTest(unittest.TestCase):
             "Case C: Multi-model + Single-pass",
             "Case D: Multi-model + Decomposed (P0)",
             "Single-model mode is an equal, first-class execution topology",
-            "needs-project-tickets",
+            "need_project_tickets",
         ):
             self.assertIn(marker.lower(), ROUTING.lower())
 

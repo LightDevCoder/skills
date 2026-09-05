@@ -34,7 +34,7 @@ Both Case B and Case D are high-frequency P0 paths.
 
 ### Case B: Single-model + Decomposed (P0)
 - **Trigger:** Multi-ticket or partitioned workload in a single-model environment.
-- **Prerequisite:** Formal ticket graph already exists. If not, mark `Execution readiness: needs-project-tickets` and hand off to `project-tickets`.
+- **Prerequisite:** Formal ticket graph already exists. If not, emit `readiness: NEED_PROJECT_TICKETS`, `handoff: "project-tickets"`, and `execution_config: null`.
 - **Topology:**
   - **Main session:** Acts as Controller (orchestrates, reviews diffs, manages git state).
   - **Worker contexts:** Each ticket is executed in a fresh context (thread or subagent) to maintain context freshness and prevent token pollution.

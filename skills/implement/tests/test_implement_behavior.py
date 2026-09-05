@@ -307,7 +307,8 @@ class ImplementBehaviorTest(unittest.TestCase):
             "setup_state": {"companion": "ready", "profile": "persisted"},
             "handoff": "implement",
             "execution_config": {
-                "status": "READY",
+                "task_shape": "single-pass",
+                "model_mode": "single",
                 "topology": {"type": "single-pass", "mode": "single-model"},
                 "execution": {
                     "model": "claude-sonnet-4",
