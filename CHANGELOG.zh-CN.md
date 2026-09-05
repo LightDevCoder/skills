@@ -11,7 +11,7 @@
 - **Profile 驱动跨 Harness 执行配置器：** 将 `skills/agent-config` 重构为基于真实宿主能力检查与用户确认 Profile 的执行配置器。将单模型（Single-model）与多模型（Multi-model）作为对等的一等执行模式，贯穿 2x2 决策矩阵（单模型/多模型 × 单次/拆票；Case A、B、C、D）。
 - **用户确认档位映射，严禁猜测模型强弱：** 彻底剔除启发式模型打分（`routing_rank`）。模型档位（`fast`、`standard`、`heavy`、`reasoning`）与 effort 策略（`low`、`medium`、`high` 等）由用户在 Profile 中确认，模型不代为猜测。
 - **Effort 精准解析：** 抽象任务 effort 策略直接解析为宿主真实支持的具体参数值，防止无效 effort 与基于字数的粗暴推断。
-- **Companion MCP 协同契约：** 制定可选 Companion MCP 契约，支持宿主作用域 Profile 持久化、冲突陈旧检测与先预览后应用的变更控制；在没有 MCP companion 时保持纯计划模式正常可用。
+- **Companion MCP 协同契约与主流 Harness 原生适配：** 制定可选 Companion MCP 契约，支持宿主作用域 Profile 持久化、冲突陈旧检测与先预览后应用的变更控制；全面覆盖 10 种 P0 主流原生 Harness（Codex CLI、Claude Code、OpenCode、Gemini CLI、GitHub Copilot CLI、Cursor、Kiro、Zed、DeepSeek Harness、Grok Build）并提供通用只读回退机制，沉淀于 `references/harness-support.md`。在没有 MCP companion 时保持纯计划模式正常可用。
 - **Setup Gate：** 在 `agent-config` 内置弱 Setup Gate，支持显式 setup 意图（`agent-config setup`）与交互式 Profile 配置，不阻塞便携执行。
 - **下游工作流协同兼容：**
   - `implement`：触发准则更新为 Profile 驱动执行拓扑、工单图协调与 effort 解析；消除遗留固定角色（Controller、Explorer、Merger）与强制波次；保持单工单有界范围（`Scope: current-item`）与用户自选机制。
