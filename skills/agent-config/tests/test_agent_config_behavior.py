@@ -48,6 +48,11 @@ def observed_state(claim: dict[str, Any]) -> str:
 
 
 def current_model(evidence: dict[str, Any]) -> str | None:
+    avail = evidence.get("available_models")
+    if isinstance(avail, list) and avail:
+        for m in avail:
+            if isinstance(m, dict) and m.get("state") == "available" and isinstance(m.get("id"), str):
+                return m["id"]
     models_data = evidence.get("models")
     if isinstance(models_data, dict):
         current = models_data.get("current")
@@ -68,6 +73,9 @@ def current_model(evidence: dict[str, Any]) -> str | None:
 
 
 def selectable_models(evidence: dict[str, Any]) -> list[dict[str, Any]]:
+    avail = evidence.get("available_models")
+    if isinstance(avail, list) and avail:
+        return [m for m in avail if isinstance(m, dict) and m.get("state") == "available"]
     models_data = evidence.get("models")
     results: list[dict[str, Any]] = []
     if isinstance(models_data, dict):
@@ -79,7 +87,19 @@ def selectable_models(evidence: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def capability(evidence: dict[str, Any], name: str) -> str:
-    claim = evidence.get("capabilities", {}).get(name, {})
+    claim = evidence.get("capabilities", {}).get(name)
+    if claim is None and name == "reasoning_control":
+        claim = evidence.get("capabilities", {}).get("reasoning")
+    elif claim is None and name == "reasoning":
+        claim = evidence.get("capabilities", {}).get("reasoning_control")
+    elif claim is None and name == "session_threads":
+        claim = evidence.get("capabilities", {}).get("threads")
+    elif claim is None and name == "threads":
+        claim = evidence.get("capabilities", {}).get("session_threads")
+    elif claim is None and name == "concurrency_cap":
+        claim = evidence.get("capabilities", {}).get("concurrency")
+    elif claim is None and name == "concurrency":
+        claim = evidence.get("capabilities", {}).get("concurrency_cap")
     return observed_state(claim) if isinstance(claim, dict) else "unknown"
 
 
@@ -248,24 +268,63 @@ def route_execution(
 
     model_mode = profile.get("model_mode", "single")
     reasoning_levels = (
-        host_evidence.get("capabilities", {})
-        .get("reasoning_control", {})
-        .get("levels", [])
+        host_evidence.get("supported_effort_values")
+        if host_evidence.get("supported_effort_values") is not None
+        else host_evidence.get("capabilities", {}).get("reasoning_control", {}).get("levels", [])
     )
-    cap_claim = host_evidence.get("capabilities", {}).get("concurrency_cap", {})
-    concurrency_cap = cap_claim.get("limit", 1) if isinstance(cap_claim, dict) and cap_claim.get("limit") else 1
+    cap_claim = (
+        host_evidence.get("capabilities", {}).get("concurrency")
+        or host_evidence.get("capabilities", {}).get("concurrency_cap", {})
+    )
+    if isinstance(cap_claim, dict):
+        concurrency_cap = cap_claim.get("max_concurrency") or cap_claim.get("limit") or 1
+    else:
+        concurrency_cap = 1
+
     has_subagents = capability(host_evidence, "subagents") == "available"
-    has_threads = capability(host_evidence, "session_threads") == "available"
+    has_threads = (
+        capability(host_evidence, "threads") == "available"
+        or capability(host_evidence, "session_threads") == "available"
+    )
 
     if model_mode == "single":
         single_m = profile.get("single_model", {}).get("model", "default")
-        exec_policy = profile.get("single_model", {}).get("execution_effort", {}).get("policy", "highest-supported")
+        exec_effort_cfg = profile.get("single_model", {}).get("execution_effort", {})
+        if isinstance(exec_effort_cfg, dict):
+            exec_policy = exec_effort_cfg.get("value") or exec_effort_cfg.get("policy", "highest-supported")
+        elif isinstance(exec_effort_cfg, str):
+            exec_policy = exec_effort_cfg
+        else:
+            exec_policy = "highest-supported"
+
         resolved_effort = resolve_effort(reasoning_levels, exec_policy)
 
         if task_shape == "single-pass":
             # Case A: Fixed Single-model + Single-pass (§57)
+            canonical_exec_cfg = {
+                "task_shape": "single-pass",
+                "model_mode": "single",
+                "readiness": "executable",
+                "reason": "Single model direct execution for bounded single-pass task",
+                "topology": {
+                    "type": "single-session",
+                    "concurrency": 1,
+                },
+                "execution": {
+                    "model": single_m,
+                    "effort": resolved_effort,
+                    "context": "current-session",
+                },
+                "review": {
+                    "strategy": "self-check",
+                    "model": single_m,
+                    "effort": resolved_effort,
+                    "context": "current-session",
+                },
+            }
             return {
                 "status": "READY",
+                "readiness_state": "READY",
                 "mode": "Case A (Fixed Single-model + Single-pass)",
                 "provider_mode": "fixed-single-model",
                 "task_shape": "single-pass",
@@ -278,25 +337,62 @@ def route_execution(
                 },
                 "review": {
                     "type": "Self-check",
+                    "strategy": "self-check",
                     "model": single_m,
                     "effort": resolved_effort,
                 },
                 "fake_roles": False,
+                "execution_config": canonical_exec_cfg,
             }
         else:
             # Case B: Fixed Single-model + Decomposed (P0, §57)
             worker_context = "subagent" if has_subagents else ("session_thread" if has_threads else "serial-main-session")
             workers = []
+            work_items = []
             for t in (tickets or []):
+                t_id = t.get("id", "item")
                 workers.append({
-                    "ticket": t.get("id"),
+                    "ticket": t_id,
                     "model": single_m,
                     "effort": resolved_effort,
                     "context": worker_context,
                     "blocked_by": t.get("blocked_by", []),
                 })
+                work_items.append({
+                    "ticket_id": str(t_id),
+                    "difficulty": t.get("difficulty", "moderate"),
+                    "model": single_m,
+                    "effort": resolved_effort,
+                    "context": worker_context,
+                    "review_strategy": "controller-review",
+                })
+            canonical_exec_cfg = {
+                "task_shape": "decomposed",
+                "model_mode": "single",
+                "readiness": "executable",
+                "reason": "Single model decomposed execution with Controller coordinating fresh contexts",
+                "topology": {
+                    "type": "serial-tickets" if not has_subagents and not has_threads else "controller-workers",
+                    "concurrency": concurrency_cap,
+                    "fresh_contexts": has_threads or has_subagents,
+                    "subagent_contexts": has_subagents,
+                },
+                "controller": {
+                    "model": single_m,
+                    "effort": resolved_effort,
+                    "context": "current-session",
+                },
+                "work_items": work_items,
+                "review": {
+                    "strategy": "controller-review",
+                    "model": single_m,
+                    "effort": resolved_effort,
+                    "context": "current-session",
+                },
+            }
             return {
                 "status": "READY",
+                "readiness_state": "READY",
                 "mode": "Case B (Fixed Single-model + Decomposed)",
                 "provider_mode": "fixed-single-model",
                 "task_shape": "decomposed",
@@ -310,10 +406,12 @@ def route_execution(
                 "concurrency_cap": concurrency_cap,
                 "review": {
                     "type": "Controller Review",
+                    "strategy": "controller-review",
                     "model": single_m,
                     "effort": resolved_effort,
                 },
                 "model_tier_assignment": False,
+                "execution_config": canonical_exec_cfg,
             }
     else:
         # Multi-model
@@ -324,14 +422,52 @@ def route_execution(
             tier_name = map_difficulty_to_tier(diff)
             tier_cfg = tiers.get(tier_name, {})
             model_id = tier_cfg.get("model")
-            effort = resolve_effort(reasoning_levels, tier_cfg.get("effort", "default"))
+            tier_effort_cfg = tier_cfg.get("effort")
+            if isinstance(tier_effort_cfg, dict):
+                tier_effort_val = tier_effort_cfg.get("value") or tier_effort_cfg.get("policy", "default")
+            elif isinstance(tier_effort_cfg, str):
+                tier_effort_val = tier_effort_cfg
+            else:
+                tier_effort_val = "default"
+            effort = resolve_effort(reasoning_levels, tier_effort_val)
 
             review_cfg = tiers.get("review", {})
             review_model = review_cfg.get("model", model_id)
-            review_effort = resolve_effort(reasoning_levels, review_cfg.get("effort", "highest-supported"))
+            review_effort_cfg = review_cfg.get("effort")
+            if isinstance(review_effort_cfg, dict):
+                review_effort_val = review_effort_cfg.get("value") or review_effort_cfg.get("policy", "highest-supported")
+            elif isinstance(review_effort_cfg, str):
+                review_effort_val = review_effort_cfg
+            else:
+                review_effort_val = "highest-supported"
+            review_effort = resolve_effort(reasoning_levels, review_effort_val)
+
+            canonical_exec_cfg = {
+                "task_shape": "single-pass",
+                "model_mode": "multi",
+                "readiness": "executable",
+                "reason": "Tiered multi-model execution right-sized to task difficulty",
+                "topology": {
+                    "type": "single-session",
+                    "concurrency": 1,
+                },
+                "execution": {
+                    "model": model_id,
+                    "effort": effort,
+                    "context": "current-session",
+                },
+                "review": {
+                    "strategy": "independent-review",
+                    "tier": "review",
+                    "model": review_model,
+                    "effort": review_effort,
+                    "context": "fresh-thread",
+                },
+            }
 
             return {
                 "status": "READY",
+                "readiness_state": "READY",
                 "mode": "Case C (Tiered Multi-model + Single-pass)",
                 "provider_mode": "tiered-multi-model",
                 "task_shape": "single-pass",
@@ -342,58 +478,113 @@ def route_execution(
                     "effort": effort,
                     "context": "current-session",
                 },
+                "topology": "minimal",
                 "review": {
                     "type": "Independent Review",
+                    "strategy": "independent-review",
                     "tier": "review",
                     "model": review_model,
                     "effort": review_effort,
-                    "context": "fresh session_thread",
                 },
-                "topology": "minimal",
+                "execution_config": canonical_exec_cfg,
             }
         else:
             # Case D: Tiered Multi-model + Decomposed (P0, §58)
-            ctrl_tier = "review" if "review" in tiers else "high"
-            ctrl_cfg = tiers.get(ctrl_tier, {})
-            ctrl_model = ctrl_cfg.get("model")
-            ctrl_effort = resolve_effort(reasoning_levels, ctrl_cfg.get("effort", "highest-supported"))
+            review_cfg = tiers.get("review", {})
+            controller_cfg = tiers.get("high", review_cfg)
+            controller_model = controller_cfg.get("model")
+            controller_effort_cfg = controller_cfg.get("effort")
+            if isinstance(controller_effort_cfg, dict):
+                ctrl_effort_val = controller_effort_cfg.get("value") or controller_effort_cfg.get("policy", "highest-supported")
+            elif isinstance(controller_effort_cfg, str):
+                ctrl_effort_val = controller_effort_cfg
+            else:
+                ctrl_effort_val = "highest-supported"
+            controller_effort = resolve_effort(reasoning_levels, ctrl_effort_val)
 
+            worker_context = "subagent" if has_subagents else ("session_thread" if has_threads else "serial-main-session")
             workers = []
+            work_items = []
             for t in (tickets or []):
-                diff = t.get("difficulty", "routine")
-                tier_name = map_difficulty_to_tier(diff)
-                tier_cfg = tiers.get(tier_name, {})
-                w_model = tier_cfg.get("model")
-                policy = "highest-supported" if diff == "critical" else tier_cfg.get("effort", "default")
-                w_effort = resolve_effort(reasoning_levels, policy)
+                diff = t.get("difficulty", "moderate")
+                t_tier = map_difficulty_to_tier(diff)
+                t_cfg = tiers.get(t_tier, {})
+                t_effort_cfg = t_cfg.get("effort")
+                if isinstance(t_effort_cfg, dict):
+                    t_effort_val = t_effort_cfg.get("value") or t_effort_cfg.get("policy", "default")
+                elif isinstance(t_effort_cfg, str):
+                    t_effort_val = t_effort_cfg
+                else:
+                    t_effort_val = "default"
+                t_effort = resolve_effort(reasoning_levels, t_effort_val)
                 workers.append({
                     "ticket": t.get("id"),
                     "difficulty": diff,
-                    "tier": tier_name,
-                    "model": w_model,
-                    "effort": w_effort,
+                    "tier": t_tier,
+                    "model": t_cfg.get("model"),
+                    "effort": t_effort,
+                    "context": worker_context,
                     "blocked_by": t.get("blocked_by", []),
                 })
+                work_items.append({
+                    "ticket_id": str(t.get("id", "item")),
+                    "difficulty": diff if diff in {"routine", "moderate", "demanding", "critical"} else "moderate",
+                    "tier": t_tier,
+                    "model": t_cfg.get("model"),
+                    "effort": t_effort,
+                    "context": worker_context,
+                    "review_strategy": "controller-review" if diff != "critical" else "independent-review",
+                })
+
+            canonical_exec_cfg = {
+                "task_shape": "decomposed",
+                "model_mode": "multi",
+                "readiness": "executable",
+                "reason": "Tiered multi-model decomposed execution with per-ticket tier routing",
+                "topology": {
+                    "type": "controller-workers",
+                    "concurrency": concurrency_cap,
+                    "fresh_contexts": has_threads or has_subagents,
+                    "subagent_contexts": has_subagents,
+                },
+                "controller": {
+                    "model": controller_model,
+                    "effort": controller_effort,
+                    "context": "current-session",
+                },
+                "work_items": work_items,
+                "review": {
+                    "strategy": "controller-review",
+                    "tier": "review",
+                    "model": review_cfg.get("model", controller_model),
+                    "effort": resolve_effort(reasoning_levels, "highest-supported"),
+                    "context": "current-session",
+                },
+            }
+
             return {
                 "status": "READY",
+                "readiness_state": "READY",
                 "mode": "Case D (Tiered Multi-model + Decomposed)",
                 "provider_mode": "tiered-multi-model",
                 "task_shape": "decomposed",
                 "readiness": "executable",
                 "controller": {
-                    "tier": ctrl_tier,
-                    "model": ctrl_model,
-                    "effort": ctrl_effort,
+                    "tier": "high",
+                    "model": controller_model,
+                    "effort": controller_effort,
                     "context": "current-session",
                 },
                 "workers": workers,
                 "concurrency_cap": concurrency_cap,
                 "review": {
                     "type": "Controller Review",
+                    "strategy": "controller-review",
                     "tier": "review",
-                    "model": tiers.get("review", {}).get("model", ctrl_model),
-                    "effort": resolve_effort(reasoning_levels, tiers.get("review", {}).get("effort", "highest-supported")),
+                    "model": review_cfg.get("model", controller_model),
+                    "effort": resolve_effort(reasoning_levels, "highest-supported"),
                 },
+                "execution_config": canonical_exec_cfg,
             }
 
 

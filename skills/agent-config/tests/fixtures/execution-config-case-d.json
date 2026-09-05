@@ -1,0 +1,53 @@
+{
+  "task_shape": "decomposed",
+  "model_mode": "multi",
+  "readiness": "executable",
+  "reason": "Tiered multi-model decomposed execution with per-ticket tier routing",
+  "topology": {
+    "type": "controller-workers",
+    "concurrency": 3,
+    "fresh_contexts": true,
+    "subagent_contexts": true
+  },
+  "controller": {
+    "model": "model-gamma",
+    "effort": "high",
+    "context": "current-session"
+  },
+  "work_items": [
+    {
+      "ticket_id": "01",
+      "difficulty": "routine",
+      "tier": "routine",
+      "model": "model-alpha",
+      "effort": "low",
+      "context": "subagent-1",
+      "review_strategy": "controller-review"
+    },
+    {
+      "ticket_id": "02",
+      "difficulty": "moderate",
+      "tier": "standard",
+      "model": "model-beta",
+      "effort": "medium",
+      "context": "subagent-2",
+      "review_strategy": "controller-review"
+    },
+    {
+      "ticket_id": "03",
+      "difficulty": "demanding",
+      "tier": "high",
+      "model": "model-gamma",
+      "effort": "high",
+      "context": "subagent-3",
+      "review_strategy": "independent-review"
+    }
+  ],
+  "review": {
+    "strategy": "independent-review",
+    "tier": "review",
+    "model": "model-gamma",
+    "effort": "high",
+    "context": "fresh-thread"
+  }
+}

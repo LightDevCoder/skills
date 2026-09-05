@@ -9,31 +9,40 @@
     "workspace": "/path/to/project"
   },
   "model_mode": "multi",
-  "models": {
-    "available": ["model-alpha", "model-beta", "model-gamma"]
-  },
   "tiers": {
     "routine": {
       "model": "model-alpha",
-      "effort": "low"
+      "source": "user-confirmed",
+      "effort": {
+        "value": "low"
+      }
     },
     "standard": {
       "model": "model-beta",
-      "effort": "medium"
+      "source": "user-confirmed",
+      "effort": {
+        "value": "medium"
+      }
     },
     "high": {
       "model": "model-gamma",
-      "effort": "highest-supported"
+      "source": "user-confirmed",
+      "effort": {
+        "policy": "highest-supported"
+      }
     },
     "review": {
       "model": "model-gamma",
-      "effort": "highest-supported"
+      "source": "user-confirmed",
+      "effort": {
+        "policy": "highest-supported"
+      }
     }
   },
   "capabilities": {
-    "subagents": true,
-    "session_threads": true,
-    "parallelism": true,
-    "concurrency_cap": 3
+    "subagents": "available",
+    "threads": "available",
+    "parallelism": "available",
+    "concurrency": 3
   }
 }

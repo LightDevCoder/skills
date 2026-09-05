@@ -1,22 +1,62 @@
 {
-  "schema_version": "2",
-  "host": {"id": "fixture-host", "observed_at": "2026-08-24T00:00:00Z"},
-  "models": {
-    "current": {
+  "host_id": "fixture-host",
+  "adapter_id": "test-adapter",
+  "observed_at": "2026-08-24T00:00:00Z",
+  "available_models": [
+    {
       "id": "model-alpha",
       "state": "available",
-      "evidence": {"kind": "host-runtime", "locator": "session model", "observed_at": "2026-08-24T00:00:00Z"}
-    },
-    "selectable": []
-  },
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "session model",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    }
+  ],
+  "supported_effort_values": ["low", "high"],
   "capabilities": {
-    "model_selection": {"state": "unavailable", "evidence": {"kind": "host-runtime", "locator": "agent API", "observed_at": "2026-08-24T00:00:00Z"}},
-    "subagents": {"state": "unavailable", "evidence": {"kind": "host-runtime", "locator": "agent API", "observed_at": "2026-08-24T00:00:00Z"}},
-    "per_agent_model_selection": {"state": "unavailable", "evidence": {"kind": "host-runtime", "locator": "agent API", "observed_at": "2026-08-24T00:00:00Z"}},
-    "parallelism": {"state": "unavailable", "evidence": {"kind": "host-runtime", "locator": "agent API", "observed_at": "2026-08-24T00:00:00Z"}},
-    "reasoning_control": {"state": "available", "levels": ["low", "high"], "assignment_scope": ["current-session"], "evidence": {"kind": "host-runtime", "locator": "agent API", "observed_at": "2026-08-24T00:00:00Z"}},
-    "session_threads": {"state": "unavailable", "evidence": {"kind": "host-runtime", "locator": "agent API", "observed_at": "2026-08-24T00:00:00Z"}},
-    "worktrees": {"state": "unavailable", "evidence": {"kind": "host-runtime", "locator": "agent API", "observed_at": "2026-08-24T00:00:00Z"}},
-    "concurrency_cap": {"state": "unavailable", "limit": null, "evidence": {"kind": "host-runtime", "locator": "agent API", "observed_at": "2026-08-24T00:00:00Z"}}
+    "model_selection": {
+      "state": "unavailable",
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "agent API",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    },
+    "subagents": {
+      "state": "unavailable",
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "agent API",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    },
+    "threads": {
+      "state": "unavailable",
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "agent API",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    },
+    "parallelism": {
+      "state": "unavailable",
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "agent API",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    },
+    "concurrency": {
+      "state": "unavailable"
+    },
+    "reasoning": {
+      "state": "available",
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "agent API",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    }
   }
 }

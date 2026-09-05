@@ -1,0 +1,22 @@
+{
+  "task_shape": "single-pass",
+  "model_mode": "multi",
+  "readiness": "executable",
+  "reason": "Tiered multi-model execution right-sized to task difficulty",
+  "topology": {
+    "type": "single-session",
+    "concurrency": 1
+  },
+  "execution": {
+    "model": "model-beta",
+    "effort": "medium",
+    "context": "current-session"
+  },
+  "review": {
+    "strategy": "independent-review",
+    "tier": "review",
+    "model": "model-gamma",
+    "effort": "high",
+    "context": "fresh-thread"
+  }
+}

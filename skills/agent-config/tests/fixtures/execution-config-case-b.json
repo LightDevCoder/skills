@@ -1,0 +1,41 @@
+{
+  "task_shape": "decomposed",
+  "model_mode": "single",
+  "readiness": "executable",
+  "reason": "Single model decomposed execution with Controller coordinating fresh contexts",
+  "topology": {
+    "type": "serial-tickets",
+    "concurrency": 2,
+    "fresh_contexts": true,
+    "subagent_contexts": true
+  },
+  "controller": {
+    "model": "model-alpha",
+    "effort": "high",
+    "context": "current-session"
+  },
+  "work_items": [
+    {
+      "ticket_id": "01",
+      "difficulty": "routine",
+      "model": "model-alpha",
+      "effort": "high",
+      "context": "subagent",
+      "review_strategy": "controller-review"
+    },
+    {
+      "ticket_id": "02",
+      "difficulty": "moderate",
+      "model": "model-alpha",
+      "effort": "high",
+      "context": "subagent",
+      "review_strategy": "controller-review"
+    }
+  ],
+  "review": {
+    "strategy": "controller-review",
+    "model": "model-alpha",
+    "effort": "high",
+    "context": "current-session"
+  }
+}

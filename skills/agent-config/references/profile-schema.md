@@ -28,6 +28,8 @@ profile_version: 1
 host:
   id: "opaque-host-id"
   adapter: "host-adapter-id"
+  # provider: "optional-provider"
+  # platform: "darwin-arm64"
 
 scope:
   type: "project"               # "project" | "global"
@@ -35,16 +37,11 @@ scope:
 
 model_mode: "single"            # "single" | "multi"
 
-models:
-  available:                    # Snapshot of models verified during setup
-    - "model-alpha"
-    - "model-beta"
-
 # Configured when model_mode == "single"
 single_model:
   model: "model-alpha"
   execution_effort:
-    policy: "highest-supported" # Abstract policy or specific host enum
+    policy: "highest-supported" # Abstract policy: highest-supported | default | lowest-supported | custom
   review_effort:
     policy: "highest-supported"
 
@@ -52,22 +49,30 @@ single_model:
 tiers:
   routine:
     model: "model-alpha"
-    effort: "medium"
+    effort:
+      value: "low"              # Explicit discrete host value
+    source: "user-confirmed"     # Strictly user-confirmed
   standard:
     model: "model-alpha"
-    effort: "high"
+    effort:
+      value: "medium"
+    source: "user-confirmed"
   high:
     model: "model-beta"
-    effort: "highest-supported"
+    effort:
+      policy: "highest-supported"
+    source: "user-confirmed"
   review:
     model: "model-beta"
-    effort: "highest-supported"
+    effort:
+      policy: "highest-supported"
+    source: "user-confirmed"
 
 capabilities:
-  subagents: true
-  session_threads: true
-  parallelism: true
-  concurrency_cap: 4
+  subagents: "available"        # "available" | "unavailable" | "unknown"
+  threads: "available"          # "available" | "unavailable" | "unknown"
+  parallelism: "available"      # "available" | "unavailable" | "unknown"
+  concurrency: 4                # integer >= 1
 ```
 
 ---
@@ -87,8 +92,8 @@ capabilities:
   - `"multi"`: Work-item difficulties map to user-assigned tiers. Multiple tiers may map to the same model.
 - `single_model` (required if `model_mode == "single"`):
   - `model`: Model identifier to use for all execution.
-  - `execution_effort.policy`: Effort policy for implementation (e.g. `"highest-supported"`, `"default"`, or explicit value).
-  - `review_effort.policy`: Effort policy for review passes.
+  - `execution_effort`: Optional effort policy object (`policy: "highest-supported" | "default" | "lowest-supported" | "custom"` or `value: "<string>"`).
+  - `review_effort`: Optional effort policy object for review passes.
 - `tiers` (required if `model_mode == "multi"`):
   - `routine`: Work with clear templates, low ambiguity, and minimal verification.
   - `standard`: Normal feature work, bug fixes, standard components.
@@ -96,13 +101,14 @@ capabilities:
   - `review`: Independent verification, integration review, security check.
   - Each tier specifies:
     - `model`: Explicit model ID chosen by user from host availability.
-    - `effort`: Abstract effort policy (`"highest-supported"`, `"default"`) or explicit host enum.
+    - `source`: Strictly `"user-confirmed"` provenance tag.
+    - `effort`: Optional effort policy object (`policy: "highest-supported" | ...` or `value: "<string>"`).
 
 ### Host execution capabilities
-- `capabilities.subagents`: True if host can launch isolated subagents.
-- `capabilities.session_threads`: True if host supports distinct fresh session contexts.
-- `capabilities.parallelism`: True if host supports simultaneous concurrent workers.
-- `capabilities.concurrency_cap`: Maximum concurrent execution contexts (integer ≥ 1).
+- `capabilities.subagents`: `"available"` | `"unavailable"` | `"unknown"`.
+- `capabilities.threads`: `"available"` | `"unavailable"` | `"unknown"`.
+- `capabilities.parallelism`: `"available"` | `"unavailable"` | `"unknown"`.
+- `capabilities.concurrency`: Maximum concurrent execution contexts (integer ≥ 1).
 
 ---
 
@@ -123,6 +129,6 @@ A profile is flagged as `stale: true` when runtime facts conflict with saved con
 1. **Configured model missing:** A model mapped to `single_model` or any active tier in `tiers` is no longer present in host `available_models`.
 2. **Host identity mismatch:** Profile was created for a different `host_id`.
 3. **Adapter incompatibility:** Adapter contract or major version has changed.
-4. **Capability regression:** Host no longer supports a capability required by the profile mode (e.g. `concurrency_cap` dropped to 0).
+4. **Capability regression:** Host no longer supports a capability required by the profile mode (e.g. host subagents or concurrency becomes unavailable).
 
 **Elapsed time is not a stale trigger:** A profile does not expire merely because N days have elapsed. As long as host capabilities and model availability remain consistent, the profile remains valid. When stale, the Skill directs into the Setup Gate for repair.

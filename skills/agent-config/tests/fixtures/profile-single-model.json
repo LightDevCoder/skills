@@ -9,9 +9,6 @@
     "workspace": "/path/to/project"
   },
   "model_mode": "single",
-  "models": {
-    "available": ["model-alpha"]
-  },
   "single_model": {
     "model": "model-alpha",
     "execution_effort": {
@@ -22,9 +19,9 @@
     }
   },
   "capabilities": {
-    "subagents": true,
-    "session_threads": true,
-    "parallelism": true,
-    "concurrency_cap": 2
+    "subagents": "available",
+    "threads": "available",
+    "parallelism": "available",
+    "concurrency": 2
   }
 }

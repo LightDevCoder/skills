@@ -1,60 +1,56 @@
 # Host evidence schema
 
-Supply a current, structured observation rather than a remembered inventory.
-This is a bounded input contract, not a claim that every Agent Host exposes
-these fields.
+Supply a current, structured observation from the host runtime rather than a remembered inventory.
+This represents the output of Companion `inspect_host` and conforms strictly to `host-capabilities.schema.json`.
 
 ```json
 {
-  "schema_version": "2",
-  "host": {
-    "id": "opaque-current-host",
-    "observed_at": "2026-08-24T00:00:00Z"
-  },
-  "models": {
-    "current": {
-      "id": "opaque-model-id",
+  "host_id": "opaque-current-host",
+  "adapter_id": "host-adapter-id",
+  "workspace": "/path/to/project",
+  "observed_at": "2026-08-24T00:00:00Z",
+  "platform": "darwin-arm64",
+  "available_models": [
+    {
+      "id": "model-alpha",
+      "label": "Model Alpha",
       "state": "available",
+      "features": ["tools", "chat"],
       "evidence": {
         "kind": "host-runtime",
-        "locator": "current session model",
+        "locator": "host runtime model registry",
         "observed_at": "2026-08-24T00:00:00Z"
       }
     },
-    "selectable": [
-      {
-        "id": "opaque-model-alpha",
-        "state": "available",
-        "evidence": {
-          "kind": "host-runtime",
-          "locator": "host model selector",
-          "observed_at": "2026-08-24T00:00:00Z"
-        }
-      },
-      {
-        "id": "opaque-model-beta",
-        "state": "available",
-        "evidence": {
-          "kind": "host-runtime",
-          "locator": "host model selector",
-          "observed_at": "2026-08-24T00:00:00Z"
-        }
-      },
-      {
-        "id": "opaque-model-gamma",
-        "state": "available",
-        "evidence": {
-          "kind": "host-runtime",
-          "locator": "host model selector",
-          "observed_at": "2026-08-24T00:00:00Z"
-        }
+    {
+      "id": "model-beta",
+      "label": "Model Beta",
+      "state": "available",
+      "features": ["tools", "reasoning"],
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "host runtime model registry",
+        "observed_at": "2026-08-24T00:00:00Z"
       }
-    ]
-  },
+    },
+    {
+      "id": "model-gamma",
+      "label": "Model Gamma",
+      "state": "available",
+      "features": ["tools", "reasoning"],
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "host runtime model registry",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    }
+  ],
+  "supported_effort_values": ["low", "medium", "high"],
+  "default_effort_value": "medium",
   "capabilities": {
     "model_selection": {
       "state": "available",
-      "scope": ["current-session", "new-session", "per-agent"],
+      "scopes": ["current-session", "new-session", "per-agent"],
       "evidence": {
         "kind": "host-runtime",
         "locator": "cli --model switch and subagent config",
@@ -69,11 +65,11 @@ these fields.
         "observed_at": "2026-08-24T00:00:00Z"
       }
     },
-    "per_agent_model_selection": {
+    "threads": {
       "state": "available",
       "evidence": {
         "kind": "host-runtime",
-        "locator": "subagent launch parameter subagent_model",
+        "locator": "fresh session context tool",
         "observed_at": "2026-08-24T00:00:00Z"
       }
     },
@@ -85,46 +81,39 @@ these fields.
         "observed_at": "2026-08-24T00:00:00Z"
       }
     },
-    "reasoning_control": {
+    "concurrency": {
       "state": "available",
-      "levels": ["low", "medium", "high"],
-      "assignment_scope": ["current-session", "new-session", "per-agent"],
+      "max_concurrency": 4,
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "host pool limit",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    },
+    "reasoning": {
+      "state": "available",
       "evidence": {
         "kind": "host-runtime",
         "locator": "effort parameter / configuration",
         "observed_at": "2026-08-24T00:00:00Z"
       }
     },
-    "session_threads": {
+    "per_agent_model_selection": {
       "state": "available",
       "evidence": {
         "kind": "host-runtime",
-        "locator": "fresh session context tool",
+        "locator": "subagent launch parameter subagent_model",
         "observed_at": "2026-08-24T00:00:00Z"
       }
     },
-    "worktrees": {
-      "state": "unknown",
-      "evidence": null
-    },
-    "concurrency_cap": {
+    "configuration_mutation": {
       "state": "available",
-      "limit": 4,
+      "supports_native_files": true,
+      "supports_session_mutation": false,
       "evidence": {
-        "kind": "host-runtime",
-        "locator": "host pool limit",
-        "observed_at": "2026-08-24T00:00:00Z"
+        "kind": "host-config",
+        "locator": "host config file"
       }
-    }
-  },
-  "adapter": {
-    "identity": "optional-adapter-id",
-    "version": "1.0.0",
-    "project_config_support": "available",
-    "evidence": {
-      "kind": "host-runtime",
-      "locator": "adapter manifest",
-      "observed_at": "2026-08-24T00:00:00Z"
     }
   }
 }
@@ -134,16 +123,15 @@ these fields.
 
 - `state` is exactly `available`, `unavailable`, or `unknown`.
 - An `available` or `unavailable` claim has evidence from the current Host:
-  `kind`, `locator`, and `observed_at`.
+  `kind`, `locator`, and optional `observed_at`.
 - **Verified evidence sources only:** `kind` must strictly be a verified evidence source:
   `host-runtime`, `host-config`, `host-schema`, `adapter-probe`, or `user-confirmed`.
   `host-runtime` is the preferred kind for a model, reasoning, or scheduling capability.
 - **Elimination of `fallback-default`:** Synthetic or guessed evidence kinds (including
   legacy `fallback-default`, `fallback`, or `default`) are strictly prohibited.
-  Unobserved capabilities must be recorded as `state: "unknown"` with `evidence: null`.
-  Fallback or default behavior is not evidence.
-- `models.current` records the executable model of the active session.
-- `models.selectable` records models that the Host can actively select or switch.
+  Unobserved capabilities must be recorded as `state: "unknown"` with no fabricated evidence.
+- `available_models` lists the factual inventory of models verified from the host runtime or config.
+  Each entry includes `id`, `state`, optional `label`, `features`, and `evidence`.
 - **Strict separation of availability from tier mapping:** Host evidence records ONLY
   what models and capabilities are available from the host runtime. It does not
   record intelligence rankings, tier assignments, or capability scores. Tier assignments
@@ -151,41 +139,16 @@ these fields.
 - **No intelligence ranking fields:** Models record presence only (`id`, `state`, `evidence`).
   Fields attempting to rank models (such as legacy `routing_rank`) are prohibited.
   Automated guessing of model intelligence is forbidden.
-- `reasoning_control` records whether reasoning effort is tunable:
-  - `levels` is an ordered list from lower effort to higher effort (e.g. `["low", "medium", "high"]` or `["standard", "deep"]`).
-  - `assignment_scope` records where effort can be applied: `current-session`, `new-session`, or `per-agent`.
-  - When `reasoning_control` is `unavailable` or `unknown`, execution proceeds with default reasoning behavior without returning `BOUNDARY`.
-- `capabilities.model_selection` records model switching support and its scope:
+- `supported_effort_values` lists the exact discrete strings supported by the host runtime
+  for reasoning effort (e.g. `["low", "medium", "high"]` or `["standard", "deep"]`).
+  `default_effort_value` indicates the default when none is specified.
+- `capabilities.reasoning` indicates whether the host supports reasoning effort configuration.
+  When `reasoning` is `unavailable` or `unknown`, execution proceeds with default reasoning behavior.
+- `capabilities.model_selection` records model switching support and its scopes:
   `current-session`, `new-session`, `per-agent`.
-- `capabilities.per_agent_model_selection` records whether subagents can each be
-  launched with independently assigned models.
-- An executable model (`models.current` available) does not require or imply
-  that `model_selection` or `per_agent_model_selection` is available.
-- `unknown` has `evidence: null`; it is not an error and must not be filled
-  from model memory, static heuristics, or unverified user assertion.
-- A `concurrency_cap` is available only when `limit` is a positive integer and
-  the evidence verifies that limit. Do not derive it from a count of models or
-  documentation marketing numbers.
-- `session_threads` means the Host can create a fresh execution context. It
-  does not alone prove an independent Reviewer; reviewer independence also
-  requires a distinct, fresh context and no implementation ownership.
-- `worktrees` means the Host can create and use isolated worktrees for the
-  task. A generic filesystem or source-control tool does not prove this claim.
-- `adapter` records optional provider adapter metadata. If absent or unavailable,
-  agent-config continues in `plan-only` mode without error.
-
-## Backward compatibility (Schema v1 → v2)
-
-Schema v1 evidence payloads (where `schema_version` is `"1"` or omitted, and
-`routing_rank` or `reasoning_control.levels` are absent) are valid input:
-- Missing or ignored `routing_rank` across selectable models normalizes to `tier routing unavailable`
-  when no user profile exists. In absence of a user-confirmed Profile, `agent-config` does not guess single-model mode; it offers setup or continues session-local when explicit input is provided.
-- Missing `reasoning_control` fields normalize to `state: unknown`, continuing with
-  current/default host reasoning.
-- Missing `adapter` field normalizes to `project_config_support: unavailable` (plan-only).
-- No schema v1 input produces a parsing error or unhandled exception.
-
-Reject a false inventory claim by normalizing it to `unknown` and recording
-why: missing evidence, malformed evidence, stale evidence, contradictory
-evidence, or a non-host source. Do not delete the rejected claim from the
-evidence ledger.
+- `capabilities.subagents` records whether the host can launch isolated subagents.
+- `capabilities.threads` records whether the host supports distinct session contexts.
+- `capabilities.parallelism` records whether the host can execute workers simultaneously.
+- `capabilities.concurrency` records maximum concurrency when supported (`max_concurrency: int >= 1`).
+- `capabilities.per_agent_model_selection` records whether subagents can each be launched with independently assigned models.
+- `capabilities.configuration_mutation` records whether host configuration files or session parameters can be mutated with user consent.
