@@ -23,29 +23,48 @@
 
 ## 安装
 
-使用 Skills CLI 交互式安装 Light Skills：
+### 当前 main / latest（包含更新后的 Agent Config）
+
+从默认分支 `main` 安装最新集合：
 
 ```bash
 npx skills add LightDevCoder/skills
 ```
 
-安装单个 Skill：
+从 `main` 安装指定单个 Skill（例如更新后的 `agent-config` Skill）：
 
 ```bash
+npx skills add LightDevCoder/skills --skill agent-config
 npx skills add LightDevCoder/skills --skill project-review
 npx skills add LightDevCoder/skills --skill research
 ```
 
-指定 v0.2.0 稳定版本安装：
+> **说明：** 不带 fragment 的仓库源（`LightDevCoder/skills`）将跟随默认分支 `main`，获取最新的已准入特性与集成。
+
+### 稳定版本快照（v0.2.0）
+
+若需安装可复现的历史稳定发布快照，请锁定 `#v0.2.0` tag：
 
 ```bash
 npx skills add LightDevCoder/skills#v0.2.0
+npx skills add LightDevCoder/skills#v0.2.0 --skill project-review
 ```
 
-直接指定目标 Agent：
+> **说明：** `#v0.2.0` tag 保持为 v0.2.0 发布线的不可变可复现快照，不会被 `main` 上的后续工作修改。
+
+### 直接指定目标 Agent
 
 ```bash
 npx skills add LightDevCoder/skills --agent claude-code
+```
+
+### Companion MCP 运行时
+
+`agent-config` Skill 使用可选的 Companion MCP 服务进行宿主探测与 Profile 持久化，该运行时维护于独立仓库 [LightDevCoder/agent-config](https://github.com/LightDevCoder/agent-config)：
+
+```bash
+npm install -g github:LightDevCoder/agent-config
+agent-config setup --check
 ```
 
 详细安装选项（指定 Agent、独立复制模式、非交互式 CI 安装）、手动复制方式与验证记录见[安装指南](docs/INSTALLATION.zh-CN.md)。

@@ -29,7 +29,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Invocation:** Model-invoked.
 - **Package:** [skills/agent-config/](skills/agent-config/)
 - **Status:** Admitted first-party; REFACTOR (Sol Advisor design reference, profile-driven cross-harness execution configurator covering primary coding-agent harnesses [9 native adapters + 1 generic fallback]).
-- **Evidence:** [references/host-evidence-schema.md](skills/agent-config/references/host-evidence-schema.md), [plan-schema.md](skills/agent-config/references/plan-schema.md), [task-assessment.md](skills/agent-config/references/task-assessment.md), [profile-schema.md](skills/agent-config/references/profile-schema.md), [companion-contract.md](skills/agent-config/references/companion-contract.md), [harness-support.md](skills/agent-config/references/harness-support.md), [provider-adapter-contract.md](skills/agent-config/references/provider-adapter-contract.md).
+- **Evidence:** [references/host-evidence-schema.md](skills/agent-config/references/host-evidence-schema.md), [plan-schema.md](skills/agent-config/references/plan-schema.md), [task-assessment.md](skills/agent-config/references/task-assessment.md), [profile-schema.md](skills/agent-config/references/profile-schema.md), [companion-contract.md](skills/agent-config/references/companion-contract.md), [harness-support.md](skills/agent-config/references/harness-support.md), [provider-adapter-contract.md](skills/agent-config/references/provider-adapter-contract.md); companion runtime maintained at [LightDevCoder/agent-config](https://github.com/LightDevCoder/agent-config).
 - **Installation path:** `skills/agent-config/` in a host-recognized Skills root.
 
 ### ask-light
@@ -248,7 +248,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **When to use:** User explicitly invokes `$recap`.
 - **Invocation:** User-invoked only; `$recap` is the sole entry.
 - **Package:** [skills/recap/](skills/recap/)
-- **Status:** Admitted first-party; v0.1.2 released the prior form; the manual-only amendment is unreleased pending current-candidate acceptance.
+- **Status:** Admitted first-party; manual-only form released on the v0.2.0 stable line; current main tracks active collection updates.
 - **Evidence:** Current amendment tests in [tests/test_functional_closure.py](tests/test_functional_closure.py); frozen historical tests remain under [skills/recap/tests/](skills/recap/tests/); [user guide](docs/skills/recap.md).
 - **Installation path:** `skills/recap/` in a host-recognized Skills root.
 

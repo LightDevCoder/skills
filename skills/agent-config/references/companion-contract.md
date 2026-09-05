@@ -2,7 +2,8 @@
 
 This document specifies the companion MCP tool contract for `agent-config`.
 The companion MCP provides host inspection, profile persistence, configuration preview,
-and host-native application.
+and host-native application. The companion MCP runtime is maintained in the dedicated
+repository `LightDevCoder/agent-config`.
 
 ---
 

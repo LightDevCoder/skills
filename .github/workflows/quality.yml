@@ -32,6 +32,8 @@ jobs:
             skills/kanban-worker/tests/test_kanban_worker_behavior.py \
             skills/review-loop/tests/test_review_loop_contract.py \
             skills/review-loop/tests/test_review_loop_behavior.py \
+            skills/agent-config/tests/test_agent_config_contract.py \
+            skills/agent-config/tests/test_agent_config_behavior.py \
           ; do
             python "$f"
           done
@@ -40,6 +42,18 @@ jobs:
         run: |
           set -euo pipefail
           python skills/ask-light/tests/test_ask_light_behavior.py
+      - name: Set up Node.js for companion checks
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Cross-repo Agent Config compatibility check
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/LightDevCoder/agent-config.git /tmp/agent-config-companion
+          (cd /tmp/agent-config-companion && npm ci)
+          export AGENT_CONFIG_COMPANION_PATH="/tmp/agent-config-companion"
+          python -m unittest skills/agent-config/tests/test_companion_contract_integration.py
       - name: Retired package boundary
         shell: bash
         run: |

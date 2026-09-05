@@ -6,17 +6,14 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
-### Refactored — agent-config profile-driven execution & companion MCP (Phase 2)
+### Refactored — agent-config profile authority, execution configuration & companion runtime
 
-- **Profile-driven cross-harness execution configurator:** Refactored `skills/agent-config` to map verified host capabilities and user-confirmed profiles to a right-sized execution topology, model tier, and effort. Treats single-model and multi-model execution as first-class peer modes across a 2x2 matrix (Single-model / Multi-model × Single-pass / Decomposed; Cases A, B, C, D).
-- **User-confirmed tier mapping over intelligence guessing:** Completely eliminated heuristic model ranking (`routing_rank`). Model tier bindings (`fast`, `standard`, `heavy`, `reasoning`) and effort policies (`low`, `medium`, `high`, `o3-effort-high`) are user-confirmed in profile configuration rather than guessed by the model.
-- **Effort resolution:** Abstract task effort policies now resolve directly to verified host-supported values, preventing invalid effort parameters and wordcount-based heuristics.
-- **Companion MCP integration & mainstream harness coverage:** Defined optional companion MCP contract for host-scoped profile persistence, stale detection, and preview-before-apply configuration mutation across 10 P0 mainstream native harnesses (Codex CLI, Claude Code, OpenCode, Gemini CLI, GitHub Copilot CLI, Cursor, Kiro, Zed, DeepSeek Harness, Grok Build) with generic plan-only fallback, documented in `references/harness-support.md`. Ensures `agent-config` remains fully functional in plan-only mode without the companion.
-- **Setup Gate:** Added weak setup gate in `agent-config` supporting explicit setup intent (`agent-config setup`) and interactive profile configuration without blocking portable execution.
-- **Downstream workflow synchronization:**
-  - `implement`: trigger guidelines updated for profile-driven execution topology, ticket graph coordination, and effort resolution; legacy fixed roles and mandatory waves eliminated; preserves strict single-ticket bounded scope (`Scope: current-item`) and optional opt-in behavior.
-  - `ask-light`: routing patterns and catalog metadata updated to route setup intent (`agent-config setup`, host model configuration) and execution configuration queries to `agent-config`, while strictly keeping ready unblocked tickets routed to `implement` and spec splitting routed to `project-tickets`.
-  - Governance & catalog docs synchronized across `AGENTS.md`, `CATALOG.md`, `README.md`, and `docs/workflows/execution.md`.
+- **Profile-authorized execution configurator:** Refactored `skills/agent-config` to map verified host capability evidence and user-confirmed profile tiers (`routine`, `standard`, `high`, `review`) to right-sized execution plans (`single-pass` or `decomposed` across `single-model` or `multi-model` topologies; Cases A, B, C, D). Returns canonical `AgentConfigResult` (`READY`, `NEED_INPUT`, `NEED_PROJECT_TICKETS`, `BLOCKED`, `UNSUPPORTED`).
+- **Profile authority over model intelligence inference:** Eliminated heuristic model ranking (`routing_rank`) and guessing model capability from names. Tier assignments and reasoning requirements are authorized solely through user-confirmed profile configuration against evidenced host models.
+- **Host-neutral reasoning & effort resolution:** Abstract reasoning policies resolve to authentic host-supported values (`supported_reasoning_efforts` or `reasoning_effort_hierarchy`), failing closed without inventing unsupported values.
+- **Companion MCP runtime & native adapter coverage:** Integrated optional companion MCP runtime protocol (`protocol_version: 1`, 8 canonical MCP tools: `get_setup_status`, `inspect_host`, `get_profile`, `save_profile`, `preview_configuration`, `apply_configuration`, `validate_configuration`, `reset_profile`) with 9 native adapters (Codex, Claude Code, Antigravity / agy, DeepSeek Harness / DSH, OpenCode, ZCode, Cursor, Grok Build, Hermes) plus generic plan-only fallback (Pi deferred). Companion runtime is maintained in `LightDevCoder/agent-config`. Maintains full session-local plan-only execution without the companion.
+- **Companion health & setup gate:** Added companion health probe semantics (`agent-config setup --check`, live MCP protocol version, canonical tool schema validation) and a non-blocking setup gate (`agent-config setup`, `NEED_INPUT` / `UNSUPPORTED`) supporting explicit host inspection and safe mutation preview before apply.
+- **Skill ↔ Companion integration:** Downstream workflows consume normalized `AgentConfigResult`; `implement` offers optional agent-config without blocking execution; `ask-light` routes setup intent to `agent-config setup` while strictly keeping ready unblocked tickets routed to `implement` and complex decomposition routed to `project-tickets`.
 
 ## 0.2.0 — 2026-08-28
 

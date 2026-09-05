@@ -23,29 +23,48 @@ Skills follow the progressive disclosure patterns of Matt Pocock Skills and the 
 
 ## Installation
 
-Install Light Skills using the interactive Skills CLI:
+### Current main / latest (includes updated Agent Config)
+
+Install the latest collection from the default branch `main`:
 
 ```bash
 npx skills add LightDevCoder/skills
 ```
 
-Install a single Skill:
+Install a single Skill from `main` (for example, the updated `agent-config` Skill):
 
 ```bash
+npx skills add LightDevCoder/skills --skill agent-config
 npx skills add LightDevCoder/skills --skill project-review
 npx skills add LightDevCoder/skills --skill research
 ```
 
-Pin to the v0.2.0 release:
+> **Note:** An unqualified repository source (`LightDevCoder/skills`) follows the default branch `main`, delivering the latest admitted features and integrations.
+
+### Stable release snapshot (v0.2.0)
+
+To install the reproducible historical stable release snapshot, pin the `#v0.2.0` tag:
 
 ```bash
 npx skills add LightDevCoder/skills#v0.2.0
+npx skills add LightDevCoder/skills#v0.2.0 --skill project-review
 ```
 
-Target a specific Agent directly:
+> **Note:** The `#v0.2.0` tag remains an immutable, reproducible snapshot of the v0.2.0 release line and is not modified by subsequent work on `main`.
+
+### Target a specific Agent directly
 
 ```bash
 npx skills add LightDevCoder/skills --agent claude-code
+```
+
+### Companion MCP runtime
+
+The `agent-config` Skill uses an optional companion MCP server for host inspection and profile persistence, maintained in [LightDevCoder/agent-config](https://github.com/LightDevCoder/agent-config):
+
+```bash
+npm install -g github:LightDevCoder/agent-config
+agent-config setup --check
 ```
 
 See [Installation](docs/INSTALLATION.md) for advanced options (explicit agent targets, copy mode, non-interactive CI flags), manual file copying, and verification notes.

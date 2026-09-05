@@ -21,6 +21,7 @@ npx skills add LightDevCoder/skills
 若只需安装指定 Skill，无需在全量集合中选择：
 
 ```bash
+npx skills add LightDevCoder/skills --skill agent-config
 npx skills add LightDevCoder/skills --skill project-review
 npx skills add LightDevCoder/skills --skill research
 npx skills add LightDevCoder/skills --skill humanizer
@@ -55,7 +56,8 @@ npx skills add LightDevCoder/skills --agent claude-code
 
 官方 Skills CLI 支持 GitHub source 的 `#ref` fragment，并将其作为 Git revision；没有 fragment 的仓库简写使用仓库默认 revision。可查看 [官方 source parser](https://raw.githubusercontent.com/vercel-labs/skills/main/src/source-parser.ts) 和 [Git helper](https://raw.githubusercontent.com/vercel-labs/skills/main/src/git.ts)。
 
-下面的通用 `latest` 命令不带 fragment，因此跟随仓库默认 revision：它从默认分支安装，是推荐的通用入口。pinned `#v0.2.0` 形式选择已发布的 tag，用于可复现安装与 release 验证。两者都不是对未来默认 revision 的声明；对 fresh destination 重新运行 discovery，以获取解析后的实际内容。
+- **默认分支 `main`（`latest`）：** 不带 fragment 的仓库来源（`npx skills add LightDevCoder/skills` 或 `npx skills add LightDevCoder/skills --skill agent-config`）跟随仓库默认分支 `main`，安装最新的已准入特性，包括更新后的 `agent-config` Skill。
+- **稳定版本快照（`#v0.2.0`）：** 显式指定 tag 的命令（`npx skills add LightDevCoder/skills#v0.2.0`）锁定已发布的 `v0.2.0` 稳定标签。该 tag 保持为不可变、可复现的历史快照，绝不会被静默更新为当前 `main` 内容。
 
 ## 历史 Release 验证记录
 
@@ -158,7 +160,7 @@ npx skills add LightDevCoder/skills --skill review-loop
 
 该历史记录是整理摘要，不是当前重跑；原始 receipt 未记录的 boundary/missing-dependency smoke 和重复安装行为会明确标为 `NOT RECORDED`。
 
-这份历史验证不改变 CLI 的 revision 语义：无 fragment source 遵循仓库默认 revision，并不是永久 pin。上面的历史命令使用通用 `latest` 形式或显式 `#v0.1.5` tag。
+这份历史验证不改变 CLI 的 revision 语义：无 fragment source 遵循仓库默认 revision，并不是永久 pin。上面的历史命令使用通用 `latest` 形式或显式 `#v0.2.0` tag。
 
 ## 准备的 `recap` 与 `language-learning` 包
 

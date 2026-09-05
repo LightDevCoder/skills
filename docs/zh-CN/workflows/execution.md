@@ -24,6 +24,14 @@
 | 难 bug / 回退 | [`diagnosing-bugs`](../../../skills/diagnosing-bugs/SKILL.md) — model-invoked | 建紧 `pass/fail` 信号 → 复现 → 假设 → 埋点 → 修复 → 清理 | 带反馈环的修复 |
 | 合并/变基冲突 | [`resolving-merge-conflicts`](../../../skills/resolving-merge-conflicts/SKILL.md) — model-invoked | 按 git 指引解决冲突文件 | 干净工作区待验证 |
 
+## 双仓架构：Skill 与 Companion
+
+执行配置系统严格将策略推理与宿主持久化/变更解耦：
+
+- **Skill（`skills/agent-config`）：** 从本仓库（[LightDevCoder/skills](https://github.com/LightDevCoder/skills)）安装。负责任务难度评估、档位选择与执行拓扑规划，在 Agent 会话中纯策略运行。
+- **Companion MCP 运行时：** 维护于独立公开仓库 [LightDevCoder/agent-config](https://github.com/LightDevCoder/agent-config)。提供 9 种原生宿主适配器（Codex、Claude Code、Antigravity / agy、DeepSeek Harness / DSH、OpenCode、ZCode、Cursor、Grok Build、Hermes）以及通用回退。
+- **可选 Companion：** 未注册 Companion MCP 服务时，`agent-config` 仍能在纯会话级、纯计划（plan-only）模式下正常完整运行，不改动宿主配置。安装并注册 Companion 后，可解锁真实宿主能力探测、Profile 持久化、先预览后应用的变更控制以及健康度验证。
+
 ## 与 Review 的组合
 
 `implement` 不复制 reviewer 指令。代码：

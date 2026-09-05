@@ -31,6 +31,10 @@ def find_companion_repo() -> Path | None:
     return None
 
 
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 from test_agent_config_behavior import (
     load,
     route_execution,

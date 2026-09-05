@@ -29,9 +29,10 @@ for the prior long-form contract and are not part of the active suite.
 Fresh-copy and independent review evidence is recorded in the
 [admission record](../evidence/admissions/recap/README.md).
 
-The prior `recap` form is released in v0.1.2; this manual-only amendment remains
-unreleased in the current candidate. Install the current stable release form with
-`npx skills add LightDevCoder/skills#v0.1.6 --skill recap`,
+The manual-only `recap` form is part of the v0.2.0 stable release line. The
+current `main` branch contains unreleased collection updates while the stable
+release snapshot remains `v0.2.0`. Install the stable release form with
+`npx skills add LightDevCoder/skills#v0.2.0 --skill recap`,
 refresh, and confirm discovery without the source checkout under
 [the installation policy](../INSTALLATION.md).
 

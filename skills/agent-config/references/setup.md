@@ -136,8 +136,8 @@ Normal MCP usage available (inspect_host, get_profile, save_profile, preview_con
 
 ### Companion packaging and CLI discovery
 
-- **Source & packaging:** The companion resides in the `agent-config` repository (Node.js/TypeScript). Built via `npm install && npm run build`.
-- **Binary & PATH:** The binary entry point `agent-config` (`dist/server/index.js`) is installed globally via `npm link` or `npm install -g .`, making `agent-config` available in `$PATH`.
+- **Source & packaging:** The companion MCP runtime is maintained in the dedicated repository `LightDevCoder/agent-config` (Node.js/TypeScript). Install globally via `npm install -g LightDevCoder/agent-config` or build from source via git clone `LightDevCoder/agent-config` and `npm ci && npm run build && npm install -g .`.
+- **Binary & PATH:** The binary entry point `agent-config` (`dist/server/index.js`) is installed globally, making `agent-config` available in `$PATH`.
 - **CLI Subcommand:** Running `agent-config setup` runs the setup CLI runner. Running `agent-config` or `agent-config serve` starts the MCP stdio server.
 - **CLI Commands:**
   - `agent-config setup --check`: Live probe verifying companion registration, process reachability, and contract health (compatible MCP transport protocol, Agent Config Companion contract `protocol_version === 1`, 8 canonical tools, compatible input & output schemas). **Strict exit semantics:** Returns exit code `0` only when the Companion is healthy and ready; returns non-zero (`1`) if unregistered, unreachable, or unhealthy. Registration alone does not imply reachability or health (`registration != reachability != health`).

@@ -28,7 +28,7 @@
 - **调用：** Model-invoked。
 - **包：** [skills/agent-config/](skills/agent-config/)
 - **状态：** 第一方已准入；REFACTOR（参照 Sol Advisor 设计理念，Profile 驱动跨 Harness 执行配置器，覆盖主要编码 Agent Harness [9 种原生适配器 + 1 种通用回退]）。
-- **证据：** [host-evidence-schema.md](skills/agent-config/references/host-evidence-schema.md)、[plan-schema.md](skills/agent-config/references/plan-schema.md)、[task-assessment.md](skills/agent-config/references/task-assessment.md)、[profile-schema.md](skills/agent-config/references/profile-schema.md)、[companion-contract.md](skills/agent-config/references/companion-contract.md)、[harness-support.md](skills/agent-config/references/harness-support.md)、[provider-adapter-contract.md](skills/agent-config/references/provider-adapter-contract.md)。
+- **证据：** [host-evidence-schema.md](skills/agent-config/references/host-evidence-schema.md)、[plan-schema.md](skills/agent-config/references/plan-schema.md)、[task-assessment.md](skills/agent-config/references/task-assessment.md)、[profile-schema.md](skills/agent-config/references/profile-schema.md)、[companion-contract.md](skills/agent-config/references/companion-contract.md)、[harness-support.md](skills/agent-config/references/harness-support.md)、[provider-adapter-contract.md](skills/agent-config/references/provider-adapter-contract.md)；Companion 运行时维护于 [LightDevCoder/agent-config](https://github.com/LightDevCoder/agent-config)。
 - **安装路径：** host 认可的 Skills root 下的 `skills/agent-config/`。
 
 ### ask-light
@@ -225,7 +225,7 @@
 - **作用：** 用一句简洁文本展示当前 session，不替换或压缩对话历史。
 - **调用：** 仅 user-invoked；唯一入口为 `$recap`。
 - **包：** [skills/recap/](skills/recap/)
-- **状态：** 第一方已准入；v0.1.2 发布的是旧版；仅手动触发的修订仍待当前候选验收，尚未发布。
+- **状态：** 第一方已准入；仅手动触发的稳定形式随 v0.2.0 发布；当前 main 分支跟踪集合更新。
 - **证据：** 当前修订由 [tests/test_functional_closure.py](tests/test_functional_closure.py) 验证；冻结历史测试保留在 [skills/recap/tests/](skills/recap/tests/)。
 - **安装路径：** host 认可的 Skills root 下的 `skills/recap/`。
 

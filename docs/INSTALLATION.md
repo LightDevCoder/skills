@@ -21,6 +21,7 @@ npx skills add LightDevCoder/skills
 To install a specific Skill without selecting from the entire collection:
 
 ```bash
+npx skills add LightDevCoder/skills --skill agent-config
 npx skills add LightDevCoder/skills --skill project-review
 npx skills add LightDevCoder/skills --skill research
 npx skills add LightDevCoder/skills --skill humanizer
@@ -55,7 +56,8 @@ npx skills add LightDevCoder/skills --agent claude-code
 
 The official Skills CLI accepts a `#ref` fragment in a GitHub source. The fragment is passed as the Git revision; a source without a fragment uses the repository's default revision. The parser and clone behavior are documented in the [official Skills CLI source parser](https://raw.githubusercontent.com/vercel-labs/skills/main/src/source-parser.ts) and [Git helper](https://raw.githubusercontent.com/vercel-labs/skills/main/src/git.ts).
 
-The generic `latest` command uses no fragment and therefore follows the repository's default revision: it installs from the current default branch. The pinned `#v0.2.0` form selects the published tag and is retained for reproducible installs and release verification. Neither form is a claim about a future default revision; re-run discovery against the fresh destination for the resolved content.
+- **Default branch `main` (`latest`):** An unqualified repository source (`npx skills add LightDevCoder/skills` or `npx skills add LightDevCoder/skills --skill agent-config`) tracks the current default branch `main`. This installs the latest admitted collection work, including the updated `agent-config` Skill.
+- **Stable release snapshot (`#v0.2.0`):** Pinned source commands (`npx skills add LightDevCoder/skills#v0.2.0`) select the published `v0.2.0` release tag. This tag remains a fixed, reproducible historical snapshot and is not silently updated to track `main`.
 
 ## Historical release verification records
 
@@ -158,7 +160,7 @@ npx skills add LightDevCoder/skills --skill review-loop
 
 That historical record is a summary, not a current rerun; it explicitly marks boundary/missing-dependency smoke and repeat-install behavior when the original receipt did not record them.
 
-That historical verification does not change the CLI revision semantics: an unqualified source follows the repository's default revision and is not a permanent pin. The current release commands above use the generic `latest` form or the explicit `#v0.1.5` tag.
+That historical verification does not change the CLI revision semantics: an unqualified source follows the repository's default revision and is not a permanent pin. The current release commands above use the generic `latest` form or the explicit `#v0.2.0` tag.
 
 ## `recap` and `language-learning` packages
 
