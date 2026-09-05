@@ -95,11 +95,11 @@ def classify_provider_mode(evidence: dict[str, Any], profile: dict[str, Any] | N
         mode = profile.get("model_mode")
         if mode == "multi":
             return "tiered-multi-model"
-        return "fixed-single-model"
+        if mode == "single":
+            return "fixed-single-model"
 
-    # In absence of a profile, multiple selectable models without confirmed tiers
-    # cannot safely guess model intelligence; defaults to fixed-single-model
-    return "fixed-single-model"
+    # When no profile exists, never guess fixed-single-model or tiered-multi-model
+    return "unprofiled"
 
 
 def classify_task_shape(task: dict[str, Any]) -> str:
@@ -215,7 +215,7 @@ def evaluate_setup_gate(
 
 
 def route_execution(
-    profile: dict[str, Any],
+    profile: dict[str, Any] | None,
     task: dict[str, Any],
     host_evidence: dict[str, Any],
 ) -> dict[str, Any]:
@@ -231,6 +231,19 @@ def route_execution(
             "readiness": "needs-project-tickets",
             "handoff": "project-tickets",
             "reason": "Decomposed task requires formal ticket breakdown before execution scheduling.",
+        }
+
+    # When neither a persisted profile nor an explicit session-local profile is provided,
+    # halt resource routing and direct to agent-config setup. Never assume or guess "fixed-single-model".
+    if not profile or not isinstance(profile, dict):
+        return {
+            "status": "NEED-INPUT",
+            "action": "setup-required",
+            "target": "agent-config setup",
+            "provider_mode": "unprofiled",
+            "task_shape": task_shape,
+            "readiness": "blocked-gate",
+            "message": "No confirmed profile found. Resource routing halted; direct to agent-config setup or supply session-local profile.",
         }
 
     model_mode = profile.get("model_mode", "single")
@@ -645,9 +658,12 @@ class AgentConfigBehaviorTest(unittest.TestCase):
         """Do not guess intelligence by model name (model-pro vs model-mini vs model-ultra)."""
         evidence = load("unranked-multiple-models.json")
         provider_mode = classify_provider_mode(evidence, profile=None)
-        # Without user profile tiers, safe fallback to fixed-single-model
-        self.assertEqual(provider_mode, "fixed-single-model")
+        # Without user profile tiers, never default to fixed-single-model
+        self.assertEqual(provider_mode, "unprofiled")
         self.assertEqual(current_model(evidence), "model-pro")
+        # With confirmed profile, resolves according to profile mode
+        profile = {"model_mode": "single", "single_model": {"model": "model-pro"}}
+        self.assertEqual(classify_provider_mode(evidence, profile=profile), "fixed-single-model")
 
     def test_missing_reasoning_control_continues_safely(self) -> None:
         """Unavailable reasoning control proceeds with host default without returning BOUNDARY."""
@@ -682,9 +698,52 @@ class AgentConfigBehaviorTest(unittest.TestCase):
     def test_backward_compatibility_with_schema_v1(self) -> None:
         """Schema v1 evidence without routing_rank normalizes gracefully."""
         v1_evidence = load("single-model-multi-agent.json")
-        provider_mode = classify_provider_mode(v1_evidence)
+        self.assertEqual(classify_provider_mode(v1_evidence, profile=None), "unprofiled")
+        profile = {"model_mode": "single", "single_model": {"model": "model-alpha"}}
+        provider_mode = classify_provider_mode(v1_evidence, profile=profile)
         self.assertEqual(provider_mode, "fixed-single-model")
         self.assertEqual(current_model(v1_evidence), "model-alpha")
+
+    def test_setup_never_assesses_ticket_difficulty_emits_topology_or_routes_workers(self) -> None:
+        """agent-config setup prepares/repairs environment/profile, never assessing difficulty or routing (§13, §18)."""
+        setup_gate_res = evaluate_setup_gate("agent-config setup", companion_status=None, profile=None)
+        self.assertEqual(setup_gate_res["action"], "open-setup")
+        # Setup mode must never emit execution topologies, ticket difficulties, or worker routing
+        self.assertNotIn("topology", setup_gate_res)
+        self.assertNotIn("workers", setup_gate_res)
+        self.assertNotIn("difficulty", setup_gate_res)
+        self.assertNotIn("controller", setup_gate_res)
+        self.assertNotIn("execution", setup_gate_res)
+        self.assertEqual(setup_gate_res["target"], "references/setup.md")
+
+    def test_normal_agent_config_never_silently_installs_mcp_or_rewrites_profiles(self) -> None:
+        """Normal agent-config runtime planning never silently installs MCP or rewrites profiles (§15, §16, §18)."""
+        res_no_companion = evaluate_setup_gate("plan", companion_status=None, profile=None)
+        # Never silently mutates host or auto-installs MCP
+        self.assertIn(res_no_companion["action"], {"plan-only-fallback", "setup-questionnaire"})
+        self.assertNotIn("installed_mcp", res_no_companion)
+        self.assertNotIn("mutated_profile", res_no_companion)
+
+        # Missing profile halts resource routing rather than silently generating/rewriting a profile
+        evidence = load("unranked-multiple-models.json")
+        plan_no_profile = route_execution(profile=None, task={"difficulty": "routine"}, host_evidence=evidence)
+        self.assertEqual(plan_no_profile["status"], "NEED-INPUT")
+        self.assertEqual(plan_no_profile["action"], "setup-required")
+        self.assertNotIn("saved_profile", plan_no_profile)
+
+    def test_unprofiled_host_halts_resource_routing_and_never_defaults_to_fixed_single_model(self) -> None:
+        """When no profile exists, provider_mode does not default to fixed-single-model and routing halts (§17)."""
+        evidence = load("unranked-multiple-models.json")
+        provider_mode = classify_provider_mode(evidence, profile=None)
+        self.assertNotEqual(provider_mode, "fixed-single-model")
+        self.assertEqual(provider_mode, "unprofiled")
+
+        task = {"difficulty": "demanding"}
+        plan = route_execution(profile=None, task=task, host_evidence=evidence)
+        self.assertEqual(plan["status"], "NEED-INPUT")
+        self.assertNotEqual(plan.get("provider_mode"), "fixed-single-model")
+        self.assertEqual(plan.get("action"), "setup-required")
+        self.assertEqual(plan.get("target"), "agent-config setup")
 
     @unittest.skipIf(os.environ.get("AGENT_CONFIG_INSTALLED_COPY") == "1", "already running in isolated copy")
     def test_isolated_installed_copy_runs_the_full_package_suite(self) -> None:
@@ -696,6 +755,7 @@ class AgentConfigBehaviorTest(unittest.TestCase):
             self.assertTrue((destination / "references" / "plan-schema.md").is_file())
             self.assertTrue((destination / "references" / "task-assessment.md").is_file())
             self.assertTrue((destination / "references" / "provider-adapter-contract.md").is_file())
+            self.assertTrue((destination / "references" / "harness-support.md").is_file())
             environment = dict(os.environ, AGENT_CONFIG_INSTALLED_COPY="1")
             result = subprocess.run(
                 [sys.executable, "-m", "unittest", "discover", "-s", str(destination / "tests"), "-p", "test_*.py"],

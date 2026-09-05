@@ -73,12 +73,14 @@ Reads the persisted user-confirmed profile for the current host and workspace.
 - **Parameters:**
   - `scope` (string, optional): `"project"` (default) or `"global"`.
   - `workspace` (string, optional): Target workspace path.
+  - `host_id` (string, optional): Host identifier.
 - **Returns:** User-confirmed profile object matching `profile-schema.md`, or `null` if unconfigured.
 
 ### `save_profile`
 Persists a user-confirmed profile after rigorous validation.
 - **Parameters:**
   - `profile` (object, required): Full profile object matching `profile-schema.md`.
+  - `workspace` (string, optional): Optional workspace path override.
 - **Validation requirements:**
   - Validates profile schema (`profile_version: 1`).
   - Verifies configured model IDs exist in host `available_models`.
@@ -89,16 +91,18 @@ Persists a user-confirmed profile after rigorous validation.
 ### `preview_configuration`
 Generates a deterministic change preview and diff before mutating any host configuration.
 - **Parameters:**
-  - `intent` (object, required): Execution plan intent containing target tiers, resolved effort values, and ticket assignments.
+  - `config` (object, required): Canonical execution configuration object conforming to `execution-config.schema.json`.
+  - `workspace` (string, optional): Target workspace path.
+  - `host_id` (string, optional): Host identifier.
 - **Returns:**
   ```json
   {
     "preview_id": "prev-8f3e2b1c",
     "preview_hash": "sha256-...",
     "diff": "--- current\n+++ proposed\n...",
-    "changes": [
-      { "target": "execution-config", "action": "update", "description": "Set worker tier to standard" }
-    ],
+    "target": "execution-config",
+    "baseline_hash": "sha256-...",
+    "mutation_targets": ["execution-config"],
     "expires_at": "2026-09-04T12:15:00Z"
   }
   ```
@@ -107,6 +111,7 @@ Generates a deterministic change preview and diff before mutating any host confi
 Applies a previously generated and user-approved preview.
 - **Parameters:**
   - `preview_id` (string, required): Active, unexpired preview identifier.
+  - `workspace` (string, optional): Target workspace path.
 - **Behavior:**
   - Validates `preview_id` exists and has not expired.
   - Verifies host target configuration has not drifted since preview creation.
@@ -116,19 +121,23 @@ Applies a previously generated and user-approved preview.
 ### `validate_configuration`
 Validates that the host configuration on disk or in runtime reflects expected settings.
 - **Parameters:**
+  - `expected_config` (object, optional): Expected execution configuration to validate against.
   - `preview_id` (string, optional): Preview identifier to validate against.
+  - `workspace` (string, optional): Target workspace path.
+  - `host_id` (string, optional): Host identifier.
 - **Behavior:**
   - Inspects real runtime or file system state.
   - Compares expected vs actual configuration.
   - Never assumes write success without reading back post-apply state.
-- **Returns:** `{ "valid": true, "mismatches": [] }`
+- **Returns:** `{ "valid": true, "message": "Host configuration matches expected state." }`
 
 ### `reset_profile`
 Clears persisted profile for the given host and workspace scope.
 - **Parameters:**
   - `scope` (string, optional): `"project"` (default) or `"global"`.
   - `workspace` (string, optional): Target workspace path.
-- **Returns:** `{ "reset": true, "host_id": "current-host", "scope": "project" }`
+  - `host_id` (string, optional): Host identifier.
+- **Returns:** `{ "success": true, "cleared": true, "reset": true, "host_id": "current-host", "scope": "project" }`
 
 ---
 
@@ -139,7 +148,7 @@ Host configuration mutations must strictly follow a two-phase gated lifecycle:
 ```text
 1. inspect_host / get_profile
         ↓
-2. preview_configuration (intent)
+2. preview_configuration (config)
         ↓
    Returns preview_id, hash, diff
         ↓

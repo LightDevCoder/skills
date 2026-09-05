@@ -22,6 +22,7 @@ COMPANION_CONTRACT = (ROOT / "references" / "companion-contract.md").read_text(e
 PROFILE_SCHEMA = (ROOT / "references" / "profile-schema.md").read_text(encoding="utf-8")
 SETUP = (ROOT / "references" / "setup.md").read_text(encoding="utf-8")
 ROUTING = (ROOT / "references" / "routing.md").read_text(encoding="utf-8")
+HARNESS_SUPPORT = (ROOT / "references" / "harness-support.md").read_text(encoding="utf-8")
 
 
 class AgentConfigContractTest(unittest.TestCase):
@@ -36,6 +37,7 @@ class AgentConfigContractTest(unittest.TestCase):
         self.assertTrue((ROOT / "references" / "routing.md").is_file())
         self.assertTrue((ROOT / "references" / "companion-contract.md").is_file())
         self.assertTrue((ROOT / "references" / "profile-schema.md").is_file())
+        self.assertTrue((ROOT / "references" / "harness-support.md").is_file())
         self.assertLess(len(SKILL.splitlines()), 100)
         self.assertGreaterEqual(len(SKILL.splitlines()), 40)
         self.assertRegex(SKILL, r"(?m)^name:\s*agent-config\s*$")
@@ -212,6 +214,34 @@ class AgentConfigContractTest(unittest.TestCase):
         ):
             self.assertIn(marker.lower(), ROUTING.lower())
 
+    def test_harness_support_and_companion_matrix(self) -> None:
+        for harness in (
+            "Codex CLI",
+            "Claude Code",
+            "OpenCode",
+            "Gemini CLI",
+            "GitHub Copilot CLI",
+            "Cursor",
+            "Kiro",
+            "Zed",
+            "DeepSeek Harness (DSH)",
+            "Grok Build",
+        ):
+            self.assertIn(harness, HARNESS_SUPPORT)
+
+        for marker in (
+            "Registration Detection",
+            "preview_configuration",
+            "User Approval Required",
+            "apply_configuration",
+            "validate_configuration",
+            "Generic Fallback Adapter",
+            "Plan-Only Mode",
+            "No Silent Mutation",
+            "does not count toward",
+        ):
+            self.assertIn(marker.lower(), HARNESS_SUPPORT.lower())
+
     def test_live_package_is_self_contained_and_provider_neutral(self) -> None:
         package_text = "\n".join((
             SKILL,
@@ -224,6 +254,7 @@ class AgentConfigContractTest(unittest.TestCase):
             PROFILE_SCHEMA,
             SETUP,
             ROUTING,
+            HARNESS_SUPPORT,
         ))
         self.assertNotRegex(
             package_text,

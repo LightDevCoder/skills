@@ -49,6 +49,7 @@ description: Map the current Agent Host's evidenced capabilities and confirmed p
 - [`references/routing.md`](references/routing.md) — 4 peer execution modes and topology selection
 - [`references/task-assessment.md`](references/task-assessment.md) — Task shape and difficulty criteria
 - [`references/companion-contract.md`](references/companion-contract.md) — Companion MCP tool protocol (8 tools)
+- [`references/harness-support.md`](references/harness-support.md) — 10 P0 native harnesses and generic fallback
 - [`references/profile-schema.md`](references/profile-schema.md) — Host-scoped profile schema
 - [`references/plan-schema.md`](references/plan-schema.md) — Execution plan format and review semantics
 - [`references/host-evidence-schema.md`](references/host-evidence-schema.md) — Host evidence schema v2
