@@ -63,7 +63,8 @@ npx skills add LightDevCoder/skills --agent claude-code
 The `agent-config` Skill uses an optional companion MCP server for host inspection and profile persistence, maintained in [LightDevCoder/agent-config](https://github.com/LightDevCoder/agent-config):
 
 ```bash
-npm install -g github:LightDevCoder/agent-config
+git clone https://github.com/LightDevCoder/agent-config.git
+cd agent-config && npm ci && npm run build && npm install -g .
 agent-config setup --check
 ```
 

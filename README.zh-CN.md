@@ -63,7 +63,8 @@ npx skills add LightDevCoder/skills --agent claude-code
 `agent-config` Skill 使用可选的 Companion MCP 服务进行宿主探测与 Profile 持久化，该运行时维护于独立仓库 [LightDevCoder/agent-config](https://github.com/LightDevCoder/agent-config)：
 
 ```bash
-npm install -g github:LightDevCoder/agent-config
+git clone https://github.com/LightDevCoder/agent-config.git
+cd agent-config && npm ci && npm run build && npm install -g .
 agent-config setup --check
 ```
 
