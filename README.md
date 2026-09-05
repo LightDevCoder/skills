@@ -116,7 +116,7 @@ See [ask-light](skills/ask-light/SKILL.md) and [docs/workflows/](docs/workflows/
 | --- | --- | --- |
 | **Project** | `project-init`, `project-clarify`, `project-spec`, `project-tickets`, `implement`, `project-review`, `release-workflow` | [CATALOG.md](CATALOG.md) |
 | **Clarification & Research** | `socratic` (engine), `clarify`, `project-clarify`, `decision-map`, `research`, `prototype`, `to-questionnaire` | [clarification-system](docs/workflows/clarification-system.md) |
-| **Execution** | `implement`, `agent-config` (10 P0 native harnesses + fallback), `tdd`, `diagnosing-bugs`, `resolving-merge-conflicts` | [execution](docs/workflows/execution.md) |
+| **Execution** | `implement`, `agent-config` (primary harnesses: 9 native adapters + fallback), `tdd`, `diagnosing-bugs`, `resolving-merge-conflicts` | [execution](docs/workflows/execution.md) |
 | **Review** | `review-loop` (engine), `generic-review`, `code-review`, `project-review` (acceptance) | [review-system](docs/workflows/review-system.md) |
 | **Specialized** | `manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `eli5`, `recap` | [specialized-workflows](docs/workflows/specialized-workflows.md) |
 | **Productivity** | `handoff`, `humanizer`, `wizard`, `wait-what`, `writing-for-agents` | [CATALOG.md](CATALOG.md) |

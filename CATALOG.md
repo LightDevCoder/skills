@@ -24,11 +24,11 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### agent-config
 
-- **Purpose:** Profile-driven cross-harness execution configurator: inspect current Host capabilities, match user-confirmed model-tier profiles and task shape, and right-size execution topology, model tier, and effort with optional companion MCP support across 10 P0 mainstream native harnesses and safe single-model peer mode.
+- **Purpose:** Profile-driven cross-harness execution configurator: inspect current Host capabilities, match user-confirmed model-tier profiles and task shape, and right-size execution topology, model tier, and effort with optional companion MCP support across primary coding-agent harnesses (9 native adapters + 1 generic fallback) and safe single-model peer mode.
 - **When to use:** Execution configuration or setup intent where model tier, reasoning effort, or execution topology affects the result.
 - **Invocation:** Model-invoked.
 - **Package:** [skills/agent-config/](skills/agent-config/)
-- **Status:** Admitted first-party; REFACTOR (Sol Advisor design reference, profile-driven cross-harness execution configurator covering 10 P0 mainstream native harnesses with generic fallback).
+- **Status:** Admitted first-party; REFACTOR (Sol Advisor design reference, profile-driven cross-harness execution configurator covering primary coding-agent harnesses [9 native adapters + 1 generic fallback]).
 - **Evidence:** [references/host-evidence-schema.md](skills/agent-config/references/host-evidence-schema.md), [plan-schema.md](skills/agent-config/references/plan-schema.md), [task-assessment.md](skills/agent-config/references/task-assessment.md), [profile-schema.md](skills/agent-config/references/profile-schema.md), [companion-contract.md](skills/agent-config/references/companion-contract.md), [harness-support.md](skills/agent-config/references/harness-support.md), [provider-adapter-contract.md](skills/agent-config/references/provider-adapter-contract.md).
 - **Installation path:** `skills/agent-config/` in a host-recognized Skills root.
 

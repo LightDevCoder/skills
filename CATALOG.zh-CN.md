@@ -24,10 +24,10 @@
 
 ### agent-config
 
-- **作用：** Profile 驱动的跨 Harness 执行配置器：检查当前宿主真实执行能力，匹配用户确认的模型档位 Profile 与任务形态，精准配置执行拓扑、模型等级与 effort，支持可选 companion MCP（原生支持 10 种 P0 主流 Harness 与通用回退机制）并提供单模型对等一等模式。
+- **作用：** Profile 驱动的跨 Harness 执行配置器：检查当前宿主真实执行能力，匹配用户确认的模型档位 Profile 与任务形态，精准配置执行拓扑、模型等级与 effort，支持可选 companion MCP（原生支持 primary coding-agent harnesses [9 native adapters + 1 generic fallback]）并提供单模型对等一等模式。
 - **调用：** Model-invoked。
 - **包：** [skills/agent-config/](skills/agent-config/)
-- **状态：** 第一方已准入；REFACTOR（参照 Sol Advisor 设计理念，Profile 驱动跨 Harness 执行配置器，覆盖 10 种 P0 主流原生 Harness 与通用回退）。
+- **状态：** 第一方已准入；REFACTOR（参照 Sol Advisor 设计理念，Profile 驱动跨 Harness 执行配置器，覆盖主要编码 Agent Harness [9 种原生适配器 + 1 种通用回退]）。
 - **证据：** [host-evidence-schema.md](skills/agent-config/references/host-evidence-schema.md)、[plan-schema.md](skills/agent-config/references/plan-schema.md)、[task-assessment.md](skills/agent-config/references/task-assessment.md)、[profile-schema.md](skills/agent-config/references/profile-schema.md)、[companion-contract.md](skills/agent-config/references/companion-contract.md)、[harness-support.md](skills/agent-config/references/harness-support.md)、[provider-adapter-contract.md](skills/agent-config/references/provider-adapter-contract.md)。
 - **安装路径：** host 认可的 Skills root 下的 `skills/agent-config/`。
 
