@@ -11,7 +11,7 @@ Setup runs either via explicit invocation (`agent-config setup`) or when the use
 
 1. **Companion & Host discovery:**
    - Detect companion MCP availability with real reachability checks (tool ping / live handshake; never assume reachability from static configuration or file existence).
-   - Companion health evaluation: healthy requires `protocol_version === 1`, all 8 canonical MCP tools present with input/output schemas matching `CANONICAL_TOOL_CONTRACTS`, and responsive process. Missing tools or schema mismatch marks companion as `stale` or `unsupported`, not healthy.
+   - Companion health evaluation: healthy requires compatible MCP transport protocol, Agent Config Companion contract version `protocol_version === 1`, all 8 canonical MCP tools present with input/output schemas matching `CANONICAL_TOOL_CONTRACTS`, and responsive process. Missing tools or schema mismatch marks companion as `stale` or `unsupported`, not healthy.
    - When setup is needed, emit `AgentConfigResult` with `readiness: "NEED_INPUT"`, `setup_state` (`companion: ready | missing | stale`, `profile: persisted | session-local | missing`), `handoff: "setup"`, and `execution_config: null`.
    - If companion is absent, ask user whether to install/register. If declined, stop setup (portable Skill remains usable in session-local / plan-only mode). Never auto-install.
    - Call companion tool `inspect_host`.
@@ -140,7 +140,7 @@ Normal MCP usage available (inspect_host, get_profile, save_profile, preview_con
 - **Binary & PATH:** The binary entry point `agent-config` (`dist/server/index.js`) is installed globally via `npm link` or `npm install -g .`, making `agent-config` available in `$PATH`.
 - **CLI Subcommand:** Running `agent-config setup` runs the setup CLI runner. Running `agent-config` or `agent-config serve` starts the MCP stdio server.
 - **CLI Commands:**
-  - `agent-config setup --check`: Live probe verifying companion registration, process reachability, and contract health (`protocol_version === 1`, 8 canonical tools, compatible input & output schemas). **Strict exit semantics:** Returns exit code `0` only when the Companion is healthy and ready; returns non-zero (`1`) if unregistered, unreachable, or unhealthy. Registration alone does not imply reachability or health (`registration != reachability != health`).
+  - `agent-config setup --check`: Live probe verifying companion registration, process reachability, and contract health (compatible MCP transport protocol, Agent Config Companion contract `protocol_version === 1`, 8 canonical tools, compatible input & output schemas). **Strict exit semantics:** Returns exit code `0` only when the Companion is healthy and ready; returns non-zero (`1`) if unregistered, unreachable, or unhealthy. Registration alone does not imply reachability or health (`registration != reachability != health`).
   - `agent-config setup --preview`: Read-only inspection producing a unified diff of proposed host configuration changes (e.g. injecting MCP server entry into host config) and mutation ownership targets.
   - `agent-config setup --apply --yes`: Applies host configuration mutations. **Safety gate:** Running `--apply` without `--yes` / `-y` / `--approve` strictly refuses to mutate files, displays the preview, and exits with code `1`.
   - Additional options: `--workspace <path>`, `--host <host_id>`, `--scope <project|global>`, `--json`.

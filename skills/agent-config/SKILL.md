@@ -18,7 +18,7 @@ description: Map the current Agent Host's evidenced capabilities and confirmed p
 
 ## Setup Gate
 - **Explicit setup:** If invoked with setup intent (`agent-config setup`), run setup mode to prepare or repair the runtime environment and Profile (see [`references/setup.md`](references/setup.md)). Setup never plans execution for the current task.
-- **Normal invocation:** `agent-config` is the only mode that plans execution topology and routing for current work. Check setup status via companion `get_setup_status`. Companion health requires `protocol_version === 1`, all 8 canonical tools present with matching schemas, and reachable responsive process; missing tools or schema mismatch is classified as `stale` or `unsupported`, not healthy. If companion is missing/stale, offer setup or continue plan-only. If Profile is missing or stale, offer setup or continue session-local where safely possible. Never silently enter setup, auto-install MCP tools, or mutate host files.
+- **Normal invocation:** `agent-config` is the only mode that plans execution topology and routing for current work. Check setup status via companion `get_setup_status`. Companion health requires compatible MCP transport protocol, Agent Config Companion contract `protocol_version === 1`, all 8 canonical tools present with matching schemas, and reachable responsive process; missing tools or schema mismatch is classified as `stale` or `unsupported`, not healthy. If companion is missing/stale, offer setup or continue plan-only. If Profile is missing or stale, offer setup or continue session-local where safely possible. Never silently enter setup, auto-install MCP tools, or mutate host files.
 
 ## Output Contract: AgentConfigResult
 `agent-config` yields a canonical `AgentConfigResult` envelope:
@@ -29,7 +29,7 @@ description: Map the current Agent Host's evidenced capabilities and confirmed p
 - `execution_config`: `ExecutionConfig | null` (strictly present when `readiness === "READY"`; strictly `null` for all non-ready states).
 
 ## Core flow
-1. **Setup check:** Verify confirmed profile via companion MCP or session input (never guess single-model without profile). Companion health requires `protocol_version === 1`, all 8 canonical tools, and responsiveness.
+1. **Setup check:** Verify confirmed profile via companion MCP or session input (never guess single-model without profile). Companion health requires compatible MCP transport protocol, Agent Config contract `protocol_version === 1`, all 8 canonical tools, and responsiveness.
 2. **Inspect host:** Read active models, supported effort values, and concurrency limits.
 3. **Determine task shape:** Classify as `single-pass` or `decomposed` (never by word count).
 4. **Decomposition gate:** If decomposed and formal tickets do not exist, emit `readiness: NEED_PROJECT_TICKETS`, `handoff: "project-tickets"`, `execution_config: null`, and hand off to `project-tickets`.

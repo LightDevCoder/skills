@@ -10,18 +10,18 @@ and host-native application.
 
 Both the companion MCP server and the `agent-config` Skill share a versioned interface:
 
-- `protocol_version: 1`: Current tool interface version.
+- `protocol_version: 1`: Current tool interface version (Agent Config Companion contract version).
 - `profile_version: 1`: User-confirmed profile schema version.
 - `adapter_id`: Identifier of the host adapter (e.g. `generic`, host-specific adapter).
 - `host_id`: Opaque identifier of the current execution host environment.
 
 ### Companion health semantics
 Companion `healthy` / `ready` status strictly requires all of the following:
-1. **Protocol compatibility:** `protocol_version === 1`.
+1. **Protocol compatibility:** Both the underlying MCP transport protocol must be compatible (supported by the MCP SDK runtime), and the Agent Config Companion contract version must match (`protocol_version === 1`).
 2. **Tool contract completeness & compatibility:** All eight canonical MCP tools (`get_setup_status`, `inspect_host`, `get_profile`, `save_profile`, `preview_configuration`, `apply_configuration`, `validate_configuration`, `reset_profile`) are registered and exposed with parameter and return schemas matching canonical contracts (`CANONICAL_TOOL_CONTRACTS`).
 3. **Reachability & responsiveness:** Process is reachable and responsive to status/ping handshakes without timing out or throwing connection errors.
 
-If any canonical tool is missing, if input/output schemas mismatch canonical contracts, or if protocol version is incompatible, the companion is classified as `stale` or `unsupported`, never `ready` or `healthy`.
+If any canonical tool is missing, if input/output schemas mismatch canonical contracts, or if either MCP transport or Agent Config contract protocol version is incompatible, the companion is classified as `stale` or `unsupported`, never `ready` or `healthy`.
 
 The Skill depends only on the public tool contract, never on companion internal file layout.
 
