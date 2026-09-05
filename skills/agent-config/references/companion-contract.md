@@ -6,7 +6,7 @@ and host-native application.
 
 ---
 
-## 1. Protocol versioning
+## 1. Protocol versioning and health semantics
 
 Both the companion MCP server and the `agent-config` Skill share a versioned interface:
 
@@ -14,6 +14,14 @@ Both the companion MCP server and the `agent-config` Skill share a versioned int
 - `profile_version: 1`: User-confirmed profile schema version.
 - `adapter_id`: Identifier of the host adapter (e.g. `generic`, host-specific adapter).
 - `host_id`: Opaque identifier of the current execution host environment.
+
+### Companion health semantics
+Companion `healthy` / `ready` status strictly requires all of the following:
+1. **Protocol compatibility:** `protocol_version === 1`.
+2. **Tool contract completeness & compatibility:** All eight canonical MCP tools (`get_setup_status`, `inspect_host`, `get_profile`, `save_profile`, `preview_configuration`, `apply_configuration`, `validate_configuration`, `reset_profile`) are registered and exposed with parameter and return schemas matching canonical contracts (`CANONICAL_TOOL_CONTRACTS`).
+3. **Reachability & responsiveness:** Process is reachable and responsive to status/ping handshakes without timing out or throwing connection errors.
+
+If any canonical tool is missing, if input/output schemas mismatch canonical contracts, or if protocol version is incompatible, the companion is classified as `stale` or `unsupported`, never `ready` or `healthy`.
 
 The Skill depends only on the public tool contract, never on companion internal file layout.
 
@@ -215,3 +223,17 @@ When `agent-config` is invoked in an environment where companion MCP tools are n
 5. **Zero downstream disruption:**
    - Absence of the companion MCP never blocks downstream skills (`implement`, `ask-light`, `project-tickets`, `review-loop`).
    - Non-blocking companion-absent fallback ensures portable Skill reasoning remains 100% functional even without companion MCP runtime.
+
+---
+
+## 5. Result envelope integration (`AgentConfigResult`)
+
+Companion status and profile readiness feed into the canonical `AgentConfigResult` envelope:
+- `readiness`: `READY | NEED_INPUT | NEED_PROJECT_TICKETS | BLOCKED | UNSUPPORTED` (authoritative).
+- `mode`: `persisted | session-local | plan-only` (derived from profile persistence and companion state).
+- `setup_state`:
+  - `companion`: `ready | missing | stale` (evaluated per health semantics above).
+  - `profile`: `persisted | session-local | missing`.
+- `handoff`: `"project-tickets" | "setup" | "implement" | null`.
+- `execution_config`: `ExecutionConfig | null` (strictly non-null when `readiness === "READY"`; strictly `null` otherwise).
+

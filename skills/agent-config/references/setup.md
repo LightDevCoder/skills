@@ -11,6 +11,8 @@ Setup runs either via explicit invocation (`agent-config setup`) or when the use
 
 1. **Companion & Host discovery:**
    - Detect companion MCP availability with real reachability checks (tool ping / live handshake; never assume reachability from static configuration or file existence).
+   - Companion health evaluation: healthy requires `protocol_version === 1`, all 8 canonical MCP tools present with input/output schemas matching `CANONICAL_TOOL_CONTRACTS`, and responsive process. Missing tools or schema mismatch marks companion as `stale` or `unsupported`, not healthy.
+   - When setup is needed, emit `AgentConfigResult` with `readiness: "NEED_INPUT"`, `setup_state` (`companion: ready | missing | stale`, `profile: persisted | session-local | missing`), `handoff: "setup"`, and `execution_config: null`.
    - If companion is absent, ask user whether to install/register. If declined, stop setup (portable Skill remains usable in session-local / plan-only mode). Never auto-install.
    - Call companion tool `inspect_host`.
 2. **Display environment context:**

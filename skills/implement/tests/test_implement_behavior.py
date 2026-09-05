@@ -34,12 +34,81 @@ class ImplementDecisionEngine:
         )
 
     @classmethod
+    def consume_agent_config_result(
+        cls,
+        agent_config_result: dict[str, Any],
+        user_setup_response: str | None = None,
+    ) -> dict[str, Any]:
+        """Consumes AgentConfigResult according to implement consumption rules."""
+        readiness = agent_config_result.get("readiness")
+
+        if readiness == "READY":
+            exec_cfg = agent_config_result.get("execution_config")
+            if exec_cfg is None:
+                return {
+                    "action": "BLOCKED",
+                    "halted": True,
+                    "reason": "invariant violation: execution_config must not be null when readiness is READY",
+                }
+            return {
+                "action": "execute_with_agent_config",
+                "execution_config": exec_cfg,
+                "handoff": agent_config_result.get("handoff", "implement"),
+                "reason": "consumed execution_config and executing bounded slice",
+            }
+
+        if readiness == "NEED_INPUT":
+            setup_state = agent_config_result.get("setup_state", {})
+            profile_state = setup_state.get("profile")
+            if user_setup_response == "decline":
+                return {
+                    "action": "execute_direct",
+                    "reason": "user declined setup; fallback safely to direct single-agent execution",
+                }
+            if user_setup_response == "accept":
+                return {
+                    "action": "handoff_to_setup",
+                    "handoff": "setup",
+                    "reason": "user accepted setup; handing off to setup",
+                }
+            return {
+                "action": "offer_setup",
+                "handoff": agent_config_result.get("handoff", "setup"),
+                "profile_state": profile_state,
+                "reason": "profile missing or setup needed; offer setup or fallback",
+            }
+
+        if readiness == "NEED_PROJECT_TICKETS":
+            return {
+                "action": "handoff_to_project_tickets",
+                "handoff": "project-tickets",
+                "halted": True,
+                "reason": "decomposed task without tickets requires formal tickets; halting implementation",
+            }
+
+        if readiness in {"BLOCKED", "UNSUPPORTED"}:
+            return {
+                "action": readiness,
+                "halted": True,
+                "reason": agent_config_result.get("reason", f"core rejection: {readiness}"),
+                "diagnostics": agent_config_result.get("diagnostics", []),
+            }
+
+        return {
+            "action": "BLOCKED",
+            "halted": True,
+            "reason": f"unknown readiness state: {readiness}",
+        }
+
+    @classmethod
     def decide_action(
         cls,
         task: dict[str, Any],
         user_intent: str | None = None,
         user_choice_response: str | None = None,
         host_capabilities: dict[str, Any] | None = None,
+        agent_config_result: dict[str, Any] | None = None,
+        user_setup_response: str | None = None,
     ) -> dict[str, Any]:
         """Simulates implement's decision process for a given task and environment."""
         host_caps = host_capabilities or {}
@@ -56,6 +125,15 @@ class ImplementDecisionEngine:
 
         # Case E & F: Explicit user intent overrides
         if user_intent == "explicit_enable":
+            if agent_config_result is not None:
+                consumption = cls.consume_agent_config_result(
+                    agent_config_result, user_setup_response=user_setup_response
+                )
+                return {
+                    **consumption,
+                    "offered_agent_config": False,
+                    "invoked_agent_config": True,
+                }
             return {
                 "action": "execute_with_agent_config",
                 "offered_agent_config": False,
@@ -92,6 +170,15 @@ class ImplementDecisionEngine:
 
         # Case C: User accepts
         if user_choice_response == "accept":
+            if agent_config_result is not None:
+                consumption = cls.consume_agent_config_result(
+                    agent_config_result, user_setup_response=user_setup_response
+                )
+                return {
+                    **consumption,
+                    "offered_agent_config": True,
+                    "invoked_agent_config": True,
+                }
             return {
                 "action": "execute_with_agent_config",
                 "offered_agent_config": True,
@@ -205,6 +292,182 @@ class ImplementBehaviorTest(unittest.TestCase):
         )
         self.assertEqual(result["action"], "execute_direct")
         self.assertNotEqual(result["action"], "BLOCKED")
+
+    def test_happy_path_ticket_offer_accept_ready_consumes(self) -> None:
+        """Happy path: Ticket item -> offer -> accept -> agent-config returns READY with execution_config -> implement consumes."""
+        task = {
+            "name": "implement user authentication token",
+            "files": ["auth.ts", "session.ts", "token.ts", "test_auth.ts"],
+            "change_units": ["auth", "token"],
+            "ticket": ".scratch/auth-feature/issues/01-auth-token.md",
+        }
+        agent_config_result = {
+            "readiness": "READY",
+            "mode": "persisted",
+            "setup_state": {"companion": "ready", "profile": "persisted"},
+            "handoff": "implement",
+            "execution_config": {
+                "status": "READY",
+                "topology": {"type": "single-pass", "mode": "single-model"},
+                "execution": {
+                    "model": "claude-sonnet-4",
+                    "effort": "high",
+                    "reasoning": {
+                        "state": "supported",
+                        "policy": "highest-supported",
+                        "resolved": {"host_field": "effort", "host_value": "high"},
+                    },
+                    "context": "current-session",
+                },
+                "review": {
+                    "type": "Self-check",
+                    "model": "claude-sonnet-4",
+                },
+            },
+            "reason": "Single-pass execution ready with persisted profile",
+        }
+
+        # User accepts offer
+        result = ImplementDecisionEngine.decide_action(
+            task,
+            user_choice_response="accept",
+            agent_config_result=agent_config_result,
+        )
+
+        self.assertEqual(result["action"], "execute_with_agent_config")
+        self.assertTrue(result["offered_agent_config"])
+        self.assertTrue(result["invoked_agent_config"])
+        self.assertIsNotNone(result.get("execution_config"))
+        self.assertEqual(
+            result["execution_config"]["execution"]["model"],
+            "claude-sonnet-4",
+        )
+        self.assertEqual(
+            result["execution_config"]["execution"]["reasoning"]["resolved"]["host_value"],
+            "high",
+        )
+        self.assertEqual(result.get("handoff"), "implement")
+
+    def test_failure_path_missing_profile_need_input_setup_offer_and_fallback(self) -> None:
+        """Failure path 1: Missing profile -> agent-config returns NEED_INPUT (profile missing, handoff setup) -> implement offers setup / fallback."""
+        task = {
+            "name": "large refactor",
+            "files": ["a.ts", "b.ts", "c.ts", "d.ts"],
+            "change_units": ["a", "b", "c"],
+        }
+        agent_config_result = {
+            "readiness": "NEED_INPUT",
+            "mode": "plan-only",
+            "setup_state": {"companion": "ready", "profile": "missing"},
+            "handoff": "setup",
+            "execution_config": None,
+            "reason": "Host environment has no user-confirmed profile configured",
+        }
+
+        # Step 1: When user accepted routing, agent-config returns NEED_INPUT -> implement offers setup
+        result = ImplementDecisionEngine.decide_action(
+            task,
+            user_choice_response="accept",
+            agent_config_result=agent_config_result,
+        )
+        self.assertEqual(result["action"], "offer_setup")
+        self.assertEqual(result["handoff"], "setup")
+        self.assertEqual(result.get("profile_state"), "missing")
+
+        # Step 2: User accepts setup -> handoff to setup
+        result_accept_setup = ImplementDecisionEngine.decide_action(
+            task,
+            user_choice_response="accept",
+            agent_config_result=agent_config_result,
+            user_setup_response="accept",
+        )
+        self.assertEqual(result_accept_setup["action"], "handoff_to_setup")
+        self.assertEqual(result_accept_setup["handoff"], "setup")
+
+        # Step 3: User declines setup -> safe fallback to direct single-agent execution without blocking
+        result_decline_setup = ImplementDecisionEngine.decide_action(
+            task,
+            user_choice_response="accept",
+            agent_config_result=agent_config_result,
+            user_setup_response="decline",
+        )
+        self.assertEqual(result_decline_setup["action"], "execute_direct")
+        self.assertNotEqual(result_decline_setup["action"], "BLOCKED")
+
+    def test_failure_path_decomposed_without_tickets_halts_and_hands_off(self) -> None:
+        """Failure path 2: Decomposed without tickets -> agent-config returns NEED_PROJECT_TICKETS -> implement halts and hands off."""
+        task = {
+            "name": "entire payment architecture overhaul",
+            "files": ["gateway.ts", "webhook.ts", "ledger.ts", "retry.ts", "crypto.ts"],
+            "change_units": ["gateway", "webhook", "ledger"],
+            "requires_ticket_decomposition": True,
+        }
+        agent_config_result = {
+            "readiness": "NEED_PROJECT_TICKETS",
+            "mode": "persisted",
+            "setup_state": {"companion": "ready", "profile": "persisted"},
+            "handoff": "project-tickets",
+            "execution_config": None,
+            "reason": "Decomposed task requires formal tickets before implementation can proceed",
+        }
+
+        result = ImplementDecisionEngine.decide_action(
+            task,
+            user_choice_response="accept",
+            agent_config_result=agent_config_result,
+        )
+
+        self.assertEqual(result["action"], "handoff_to_project_tickets")
+        self.assertEqual(result["handoff"], "project-tickets")
+        self.assertTrue(result["halted"])
+        self.assertIn("formal tickets", result["reason"])
+
+    def test_failure_path_unauthorized_model_or_unknown_capability_halts(self) -> None:
+        """Failure path 3: Unauthorized model / unknown capability -> agent-config returns BLOCKED / UNSUPPORTED -> implement halts."""
+        task = {
+            "name": "isolated algorithm implementation",
+            "files": ["algo.ts", "test_algo.ts"],
+            "change_units": ["algo"],
+        }
+        # BLOCKED case: unauthorized model
+        blocked_result = {
+            "readiness": "BLOCKED",
+            "mode": "persisted",
+            "setup_state": {"companion": "ready", "profile": "persisted"},
+            "handoff": None,
+            "execution_config": None,
+            "reason": "Selected model 'unauthorized-gpt-5' is not authorized in user profile",
+            "diagnostics": ["Model not in single_model or tiers"],
+        }
+        result_blocked = ImplementDecisionEngine.decide_action(
+            task,
+            user_intent="explicit_enable",
+            agent_config_result=blocked_result,
+        )
+        self.assertEqual(result_blocked["action"], "BLOCKED")
+        self.assertTrue(result_blocked["halted"])
+        self.assertIn("not authorized", result_blocked["reason"])
+        self.assertIn("Model not in single_model or tiers", result_blocked["diagnostics"])
+
+        # UNSUPPORTED case: unknown capability
+        unsupported_result = {
+            "readiness": "UNSUPPORTED",
+            "mode": "persisted",
+            "setup_state": {"companion": "ready", "profile": "persisted"},
+            "handoff": None,
+            "execution_config": None,
+            "reason": "Host runtime does not support required capability 'subagents'",
+            "diagnostics": ["capabilities.subagents is false or unknown"],
+        }
+        result_unsupported = ImplementDecisionEngine.decide_action(
+            task,
+            user_intent="explicit_enable",
+            agent_config_result=unsupported_result,
+        )
+        self.assertEqual(result_unsupported["action"], "UNSUPPORTED")
+        self.assertTrue(result_unsupported["halted"])
+        self.assertIn("capability 'subagents'", result_unsupported["reason"])
+
 
 
 if __name__ == "__main__":

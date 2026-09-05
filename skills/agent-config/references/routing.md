@@ -93,3 +93,30 @@ Both Case B and Case D are high-frequency P0 paths.
 - **Context freshness:** Decomposing work into fresh worker contexts isolates error states, prevents context saturation, and improves implementation quality.
 - **Concurrency control:** Concurrent workers must operate on disjoint files or well-defined boundaries to avoid merge conflicts.
 - **Host cap adherence:** Active concurrent workers must never exceed the host's evidenced `concurrency_cap`. If the cap is 1 or unknown, workers execute serially.
+
+---
+
+## 4. Routing output envelope (`AgentConfigResult`)
+
+Topology and routing decisions are emitted within the canonical `AgentConfigResult` envelope:
+
+- **Ready execution (Cases A, B, C, D):**
+  - `readiness`: `"READY"`
+  - `mode`: `"persisted"` | `"session-local"` | `"plan-only"`
+  - `setup_state`: `{ companion: "ready" | "missing" | "stale", profile: "persisted" | "session-local" }`
+  - `handoff`: `"implement"`
+  - `execution_config`: Non-null structured `ExecutionConfig` matching `execution-config.schema.json`.
+- **Missing profile / setup required:**
+  - `readiness`: `"NEED_INPUT"`
+  - `setup_state`: `{ companion: "ready" | "missing" | "stale", profile: "missing" }`
+  - `handoff`: `"setup"`
+  - `execution_config`: `null`
+- **Decomposed task without tickets:**
+  - `readiness`: `"NEED_PROJECT_TICKETS"`
+  - `handoff`: `"project-tickets"`
+  - `execution_config`: `null`
+- **Blocked or unsupported constraints:**
+  - `readiness`: `"BLOCKED"` | `"UNSUPPORTED"`
+  - `handoff`: `null`
+  - `execution_config`: `null`
+

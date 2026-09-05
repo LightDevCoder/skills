@@ -23,6 +23,11 @@ hands it to review.
    invoke `agent-config` or proceed directly. If the user explicitly requested
    routing, invoke `agent-config` directly; if the user declined or disabled
    routing, or for bounded solo work, proceed directly without blocking.
+   When `agent-config` is invoked, consume the `AgentConfigResult`:
+   - `readiness === "READY"`: consume `execution_config` and execute bounded slice.
+   - `readiness === "NEED_INPUT"`: profile missing / setup needed. Offer setup or fallback safely to single-agent execution if declined.
+   - `readiness === "NEED_PROJECT_TICKETS"`: decomposed task without tickets -> handoff to `project-tickets` and halt implementation (never batch-execute un-ticketed tasks).
+   - `readiness === "BLOCKED"` or `"UNSUPPORTED"`: core rejection (e.g. unauthorized model, unevidenced model, or unknown capability) -> halt implementation with diagnostic reason.
 4. **Execute the bounded slice, then verify.** Use `tdd` for code when
    appropriate; produce non-code artifacts per their contract. Verify locally
    (tests, render, schema, or domain check).
@@ -40,7 +45,7 @@ inspect bounded task
 would routing materially help?
    ├─ no  → execute directly
    └─ yes → offer agent-config
-              ├─ accept  → agent-config → execute
+              ├─ accept  → agent-config → consume AgentConfigResult (READY / NEED_INPUT / NEED_PROJECT_TICKETS / BLOCKED / UNSUPPORTED)
               └─ decline → execute directly
    ↓
 tdd when appropriate

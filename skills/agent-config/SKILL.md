@@ -18,13 +18,21 @@ description: Map the current Agent Host's evidenced capabilities and confirmed p
 
 ## Setup Gate
 - **Explicit setup:** If invoked with setup intent (`agent-config setup`), run setup mode to prepare or repair the runtime environment and Profile (see [`references/setup.md`](references/setup.md)). Setup never plans execution for the current task.
-- **Normal invocation:** `agent-config` is the only mode that plans execution topology and routing for current work. Check setup status via companion `get_setup_status`. If companion is absent, offer setup or continue plan-only. If Profile is missing or stale, offer setup or continue session-local where safely possible. Never silently enter setup, auto-install MCP tools, or mutate host files.
+- **Normal invocation:** `agent-config` is the only mode that plans execution topology and routing for current work. Check setup status via companion `get_setup_status`. Companion health requires `protocol_version === 1`, all 8 canonical tools present with matching schemas, and reachable responsive process; missing tools or schema mismatch is classified as `stale` or `unsupported`, not healthy. If companion is missing/stale, offer setup or continue plan-only. If Profile is missing or stale, offer setup or continue session-local where safely possible. Never silently enter setup, auto-install MCP tools, or mutate host files.
+
+## Output Contract: AgentConfigResult
+`agent-config` yields a canonical `AgentConfigResult` envelope:
+- `readiness`: `READY | NEED_INPUT | NEED_PROJECT_TICKETS | BLOCKED | UNSUPPORTED` (authoritative execution-readiness; redundant status removed).
+- `mode`: `persisted | session-local | plan-only`
+- `setup_state`: `companion` (`ready | missing | stale`), `profile` (`persisted | session-local | missing`).
+- `handoff`: `"project-tickets" | "setup" | "implement" | null`
+- `execution_config`: `ExecutionConfig | null` (strictly present when `readiness === "READY"`; strictly `null` for all non-ready states).
 
 ## Core flow
-1. **Setup check:** Verify confirmed profile via companion MCP or session input (never guess single-model without profile).
+1. **Setup check:** Verify confirmed profile via companion MCP or session input (never guess single-model without profile). Companion health requires `protocol_version === 1`, all 8 canonical tools, and responsiveness.
 2. **Inspect host:** Read active models, supported effort values, and concurrency limits.
 3. **Determine task shape:** Classify as `single-pass` or `decomposed` (never by word count).
-4. **Decomposition gate:** If decomposed and formal tickets do not exist, output `Execution readiness: needs-project-tickets` and hand off to `project-tickets`.
+4. **Decomposition gate:** If decomposed and formal tickets do not exist, emit `readiness: NEED_PROJECT_TICKETS` (`Execution readiness: needs-project-tickets`), `handoff: "project-tickets"`, `execution_config: null`, and hand off to `project-tickets`.
 5. **Difficulty & tier:** For multi-model, map work difficulty (`routine`..`critical`) to user-confirmed profile tiers (`routine`, `standard`, `high`, `review`).
 6. **Resolve effort:** Resolve abstract policies (e.g. `highest-supported`) strictly to verified host-supported strings (e.g. `high`), never emitting unverified literal `max`.
 7. **Select execution mode:**
@@ -32,7 +40,7 @@ description: Map the current Agent Host's evidenced capabilities and confirmed p
    - **Case B (Fixed Single-model + Decomposed, P0):** Controller main session coordinates fresh worker contexts, same model, actual effort.
    - **Case C (Tiered Multi-model + Single-pass):** User-configured tier mapped from task difficulty, minimal topology.
    - **Case D (Tiered Multi-model + Decomposed, P0):** Ticket difficulty mapped to user profile tiers, resolved effort, Controller integration.
-8. **Emit plan & apply:** Output plan conforming to [`references/plan-schema.md`](references/plan-schema.md). Host config mutations require preview approval (`preview_configuration` → user approval → `apply_configuration` → `validate_configuration`).
+8. **Emit plan & apply:** Output plan conforming to [`references/plan-schema.md`](references/plan-schema.md) and `AgentConfigResult`. Host config mutations require preview approval (`preview_configuration` → user approval → `apply_configuration` → `validate_configuration`).
 
 ## Invariants
 - **No intelligence guessing:** Never infer model strength from names or metadata; model tiers are strictly user-confirmed.
@@ -41,8 +49,8 @@ description: Map the current Agent Host's evidenced capabilities and confirmed p
 - **Anti-wordcount rule:** Semantic complexity and dependencies determine task shape, never prose length.
 
 ## Handoff
-- If tickets needed: hand off to `project-tickets`.
-- When ready: Controller proceeds to `implement`. Code review converges via `review-loop`; final acceptance belongs to `project-review`.
+- If tickets needed: emit `readiness: NEED_PROJECT_TICKETS` (`handoff: "project-tickets"`) and hand off to `project-tickets`.
+- When ready: Controller proceeds to `implement` (`handoff: "implement"`). Code review converges via `review-loop`; final acceptance belongs to `project-review`.
 
 ## References
 - [`references/setup.md`](references/setup.md) — Setup questionnaire and tier binding flow

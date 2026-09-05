@@ -1,9 +1,39 @@
 # Execution plan schema
 
-`agent-config` outputs an adaptive, Markdown-formatted execution plan.
+`agent-config` outputs an adaptive, Markdown-formatted execution plan and returns an authoritative `AgentConfigResult` structured envelope.
 Formatting scales with task shape: single-pass tasks emit a concise configuration
 without bureaucratic role matrices, while decomposed tasks include routing,
 coordination, and conditional dependencies.
+
+---
+
+## 0. Two-layer result architecture (`AgentConfigResult`)
+
+`agent-config` returns a canonical result envelope:
+
+```typescript
+interface AgentConfigResult {
+  readiness: "READY" | "NEED_INPUT" | "NEED_PROJECT_TICKETS" | "BLOCKED" | "UNSUPPORTED";
+  mode: "persisted" | "session-local" | "plan-only";
+  setup_state: {
+    companion: "ready" | "missing" | "stale";
+    profile: "persisted" | "session-local" | "missing";
+  };
+  handoff: "project-tickets" | "setup" | "implement" | null;
+  execution_config: ExecutionConfig | null;
+  reason?: string;
+  diagnostics?: string[];
+}
+```
+
+### Readiness and execution_config invariant
+- `readiness` is the single authoritative execution-readiness field (`READY | NEED_INPUT | NEED_PROJECT_TICKETS | BLOCKED | UNSUPPORTED`). Redundant status is removed.
+- `execution_config` exists **only** when `readiness === "READY"`. For any non-ready state, `execution_config` is strictly `null`.
+- `handoff` explicitly directs caller orchestration:
+  - `"implement"` when `readiness === "READY"`.
+  - `"setup"` when `readiness === "NEED_INPUT"`.
+  - `"project-tickets"` when `readiness === "NEED_PROJECT_TICKETS"`.
+  - `null` when `readiness === "BLOCKED"` or `"UNSUPPORTED"`.
 
 ---
 

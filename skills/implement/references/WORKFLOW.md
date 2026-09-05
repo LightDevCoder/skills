@@ -133,6 +133,15 @@ selector, unavailable `agent-config`, or user decline must never convert into a
 unresolvable constraint, continue safely under serial execution with the current
 model.
 
+#### E. AgentConfigResult consumption rules
+
+When `agent-config` is invoked, `implement` inspects the canonical `AgentConfigResult` envelope:
+
+- **`readiness === "READY"`**: Consume `execution_config` (model, resolved reasoning effort, worker context, review context) and proceed to execute the bounded slice.
+- **`readiness === "NEED_INPUT"`**: Profile is missing or setup is required (`setup_state.profile === "missing"`). Prompt the user to run setup (`handoff: "setup"`); if the user declines setup, fall back safely to direct single-agent execution using the current model without blocking.
+- **`readiness === "NEED_PROJECT_TICKETS"`**: Task is classified as decomposed without formal tickets (`handoff: "project-tickets"`). Halt implementation immediately and hand off to `project-tickets`. Never batch-execute un-ticketed tasks inside a single implement run.
+- **`readiness === "BLOCKED"` or `"UNSUPPORTED"`**: Core validation rejected the configuration (e.g., unauthorized model, unevidenced model, or unsupported capability). Halt implementation immediately and report the diagnostic reason to the caller.
+
 ### 4. Execute the bounded slice
 
 Branch by artifact type. One item produces one slice through every relevant
