@@ -134,8 +134,14 @@ these fields.
 
 - `state` is exactly `available`, `unavailable`, or `unknown`.
 - An `available` or `unavailable` claim has evidence from the current Host:
-  `kind`, `locator`, and `observed_at`. `host-runtime` is the preferred kind
-  for a model, reasoning, or scheduling capability.
+  `kind`, `locator`, and `observed_at`.
+- **Verified evidence sources only:** `kind` must strictly be a verified evidence source:
+  `host-runtime`, `host-config`, `host-schema`, `adapter-probe`, or `user-confirmed`.
+  `host-runtime` is the preferred kind for a model, reasoning, or scheduling capability.
+- **Elimination of `fallback-default`:** Synthetic or guessed evidence kinds (including
+  legacy `fallback-default`, `fallback`, or `default`) are strictly prohibited.
+  Unobserved capabilities must be recorded as `state: "unknown"` with `evidence: null`.
+  Fallback or default behavior is not evidence.
 - `models.current` records the executable model of the active session.
 - `models.selectable` records models that the Host can actively select or switch.
 - **Strict separation of availability from tier mapping:** Host evidence records ONLY

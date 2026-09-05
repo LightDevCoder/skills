@@ -10,7 +10,7 @@ Setup runs either via explicit invocation (`agent-config setup`) or when the use
 ## 1. Setup entry and host inspection
 
 1. **Companion & Host discovery:**
-   - Detect companion MCP availability.
+   - Detect companion MCP availability with real reachability checks (tool ping / live handshake; never assume reachability from static configuration or file existence).
    - If companion is absent, ask user whether to install/register. If declined, stop setup (portable Skill remains usable in session-local / plan-only mode). Never auto-install.
    - Call companion tool `inspect_host`.
 2. **Display environment context:**
@@ -103,3 +103,19 @@ Inspect the host's `supported_effort_values` list (ordered from lowest to highes
 An execution plan must **never** output literal `"max"` unless the current host runtime
 explicitly lists `"max"` in its verified `supported_effort_values`. If the host's highest
 level is `"high"`, the resolved value is `"high"`.
+
+---
+
+## 5. Configuration mutation & preview semantics
+
+When setup registers the companion MCP or mutates host configuration:
+
+1. **FrozenMutationPreview generation:**
+   - Call `preview_configuration` to produce a `FrozenMutationPreview`.
+   - The preview freezes target path, mutation contents, scope (`project` or `global`), baseline hash, and expiration timestamp.
+2. **Target & scope immutability:**
+   - Once generated, target paths and scope are immutable. Apply cannot re-derive targets, switch scope, or touch un-previewed files.
+3. **Stale preview checks:**
+   - Before applying, `apply_configuration` verifies that the preview has not expired, has not already been applied, and that the on-disk target baseline matches `baseline_hash` exactly. Any baseline drift triggers immediate fail-closed abort.
+4. **Post-apply validation:**
+   - `validate_configuration` reads back real host state (runtime and/or filesystem) to confirm the changes took effect.

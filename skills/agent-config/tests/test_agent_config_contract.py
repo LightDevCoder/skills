@@ -56,6 +56,7 @@ class AgentConfigContractTest(unittest.TestCase):
             "unavailable",
             "unknown",
             "host-runtime",
+            "fallback-default",
             "models.current",
             "models.selectable",
             "model_selection",
@@ -218,18 +219,20 @@ class AgentConfigContractTest(unittest.TestCase):
         for harness in (
             "Codex CLI",
             "Claude Code",
-            "OpenCode",
-            "Gemini CLI",
-            "GitHub Copilot CLI",
-            "Cursor",
-            "Kiro",
-            "Zed",
+            "Antigravity",
             "DeepSeek Harness (DSH)",
+            "OpenCode",
+            "ZCode",
+            "Cursor",
             "Grok Build",
+            "Hermes",
         ):
             self.assertIn(harness, HARNESS_SUPPORT)
 
         for marker in (
+            "Pi",
+            "Generic/manual",
+            "Frozen Mutation Preview",
             "Registration Detection",
             "preview_configuration",
             "User Approval Required",

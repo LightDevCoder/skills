@@ -26,7 +26,9 @@ The companion MCP server provides exactly eight focused tools:
 ### `get_setup_status`
 Queries whether the current host environment has a valid user-confirmed profile.
 - **Parameters:**
+  - `scope` (string, optional): `"project"` (default) or `"global"`.
   - `workspace` (string, optional): Path to project workspace. Defaults to active directory.
+  - `host_id` (string, optional): Host identifier.
 - **Returns:**
   ```json
   {
@@ -37,13 +39,17 @@ Queries whether the current host environment has a valid user-confirmed profile.
     "adapter_id": "host-adapter",
     "scope": "project",
     "stale": false,
-    "stale_reasons": []
+    "stale_reasons": [],
+    "companion_registered": true,
+    "companion_status": "active"
   }
   ```
 
 ### `inspect_host`
 Queries host runtime for active model, available models, supported effort values, and execution capabilities.
-- **Parameters:** None.
+- **Parameters:**
+  - `workspace` (string, optional): Path to project workspace.
+  - `host_id` (string, optional): Host identifier.
 - **Returns:**
   ```json
   {
@@ -89,23 +95,31 @@ Persists a user-confirmed profile after rigorous validation.
 - **Behavior:** Atomic write. Rejects malformed or mismatched profiles without partial writes.
 
 ### `preview_configuration`
-Generates a deterministic change preview and diff before mutating any host configuration.
+Generates a deterministic change preview and diff before mutating any host configuration, returning a canonical `FrozenMutationPreview`.
 - **Parameters:**
   - `config` (object, required): Canonical execution configuration object conforming to `execution-config.schema.json`.
   - `workspace` (string, optional): Target workspace path.
   - `host_id` (string, optional): Host identifier.
-- **Returns:**
+- **Returns (`FrozenMutationPreview`):**
   ```json
   {
     "preview_id": "prev-8f3e2b1c",
     "preview_hash": "sha256-...",
-    "diff": "--- current\n+++ proposed\n...",
+    "adapter_id": "codex",
+    "host_identity": "codex",
+    "scope": "project",
     "target": "execution-config",
     "baseline_hash": "sha256-...",
-    "mutation_targets": ["execution-config"],
-    "expires_at": "2026-09-04T12:15:00Z"
+    "mutation": {
+      "diff": "--- current\n+++ proposed\n...",
+      "patch": "...",
+      "files": [{ "path": "...", "content": "..." }]
+    },
+    "created_at": "2026-09-05T00:00:00Z",
+    "expires_at": "2026-09-05T00:15:00Z"
   }
   ```
+- **Immutability Contract:** Target paths, mutation payload, and scope are frozen upon generation. Apply cannot alter targets, widen scope, or re-derive diffs.
 
 ### `apply_configuration`
 Applies a previously generated and user-approved preview.
@@ -113,10 +127,20 @@ Applies a previously generated and user-approved preview.
   - `preview_id` (string, required): Active, unexpired preview identifier.
   - `workspace` (string, optional): Target workspace path.
 - **Behavior:**
-  - Validates `preview_id` exists and has not expired.
-  - Verifies host target configuration has not drifted since preview creation.
-  - If drift is detected, refuses application and requires fresh preview.
-  - Mutates host-native configuration files atomically.
+  - Validates `preview_id` exists, has not expired, and has not already been applied.
+  - Verifies target files on disk match the frozen `baseline_hash`. If drift is detected, aborts immediately (`STALE_PREVIEW` fail-closed).
+  - Applies the exact frozen mutation without re-derivation or scope expansion.
+- **Returns:**
+  ```json
+  {
+    "success": true,
+    "preview_id": "prev-8f3e2b1c",
+    "applied_targets": ["execution-config"],
+    "target": "execution-config",
+    "baseline_hash": "sha256-...",
+    "message": "Configuration successfully applied."
+  }
+  ```
 
 ### `validate_configuration`
 Validates that the host configuration on disk or in runtime reflects expected settings.
@@ -129,7 +153,7 @@ Validates that the host configuration on disk or in runtime reflects expected se
   - Inspects real runtime or file system state.
   - Compares expected vs actual configuration.
   - Never assumes write success without reading back post-apply state.
-- **Returns:** `{ "valid": true, "message": "Host configuration matches expected state." }`
+- **Returns:** `{ "valid": true, "workspace": "/path/to/workspace", "message": "Host configuration matches expected state." }`
 
 ### `reset_profile`
 Clears persisted profile for the given host and workspace scope.
@@ -150,17 +174,22 @@ Host configuration mutations must strictly follow a two-phase gated lifecycle:
         ↓
 2. preview_configuration (config)
         ↓
-   Returns preview_id, hash, diff
+   Returns FrozenMutationPreview (preview_id, preview_hash, baseline_hash, diff, target, scope)
         ↓
 3. Explicit user inspection & confirmation
         ↓
 4. apply_configuration (preview_id)
         ↓
+   Verifies unexpired, not-applied, baseline match; executes frozen mutation
+        ↓
 5. validate_configuration
+        ↓
+   Reads back real runtime/disk state to confirm match
 ```
 
 - **Blind apply forbidden:** An agent must never call `apply_configuration` without first generating a preview and receiving affirmative user approval.
-- **Expiration & drift check:** Previews expire after a bounded duration (typically 10-15 minutes). If target files or environment change between preview and apply, apply is aborted.
+- **Target and scope immutability:** The preview freezes the mutation targets and scope (`project` or `global`). `apply_configuration` cannot re-derive the target list, broaden scope, or switch files.
+- **Expiration & drift check (Fail-Closed):** Previews expire after a bounded duration (typically 10-15 minutes). If target files or baseline hash change between preview and apply, apply is aborted fail-closed (`STALE_PREVIEW`).
 - **Post-apply validation:** Every apply step must be followed by `validate_configuration` to ensure the host runtime accurately reflects the intended configuration.
 
 ---
@@ -169,19 +198,20 @@ Host configuration mutations must strictly follow a two-phase gated lifecycle:
 
 When `agent-config` is invoked in an environment where companion MCP tools are not registered or reachable:
 
-1. **No silent installation:** The Skill must never run automatic shell commands (e.g. `npm install`, background daemons, or host configuration mutations) without user knowledge.
-2. **User notification:** Inform the user cleanly:
+1. **Real reachability verification:** Tool availability must be checked via real reachability (live tool handshake / ping), never inferred from dormant configuration files.
+2. **No silent installation:** The Skill must never run automatic shell commands (e.g. `npm install`, background daemons, or host configuration mutations) without user knowledge.
+3. **User notification:** Inform the user cleanly:
    ```text
    Agent Config companion MCP is not detected.
    Options:
      A. Run agent-config setup to set up / register companion MCP.
      B. Continue session-local / plan-only.
    ```
-3. **Session-only manual mode:**
+4. **Session-only manual mode:**
    - If the user chooses to continue without MCP:
      - Prompt for manual confirmation: single model vs selectable models, and preferred effort policy.
      - Build an in-memory plan conforming to `plan-schema.md` with `Apply mode: plan-only`.
      - Never pretend persistence succeeded; clearly note `Status: READY`, `Apply mode: plan-only (companion absent)`.
-4. **Zero downstream disruption:**
+5. **Zero downstream disruption:**
    - Absence of the companion MCP never blocks downstream skills (`implement`, `ask-light`, `project-tickets`, `review-loop`).
    - Non-blocking companion-absent fallback ensures portable Skill reasoning remains 100% functional even without companion MCP runtime.
