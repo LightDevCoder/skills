@@ -108,16 +108,59 @@ level is `"high"`, the resolved value is `"high"`.
 
 ---
 
-## 5. Configuration mutation & preview semantics
+## 5. Companion bootstrap & configuration mutation
 
-When setup registers the companion MCP or mutates host configuration:
+When the Companion MCP is absent, it cannot be called to install itself. Bootstrap uses the standalone CLI path, separating initial host MCP registration from subsequent runtime `ExecutionConfig` previews.
+
+### Companion bootstrap workflow (Companion absent)
+
+```text
+agent-config Skill
+  ↓
+Detect Companion missing (not registered or not reachable)
+  ↓
+Offer setup to user (never auto-install or silently mutate host files)
+  ↓
+Inspect via CLI: agent-config setup --check
+  ↓
+Preview registration diff: agent-config setup --preview
+  ↓
+Request explicit user approval for host file modification
+  ↓
+Apply registration: agent-config setup --apply --yes
+  ↓
+Validate registration health: agent-config setup --check
+  ↓
+Normal MCP usage available (inspect_host, get_profile, save_profile, preview_configuration)
+```
+
+### Companion packaging and CLI discovery
+
+- **Source & packaging:** The companion resides in the `agent-config` repository (Node.js/TypeScript). Built via `npm install && npm run build`.
+- **Binary & PATH:** The binary entry point `agent-config` (`dist/server/index.js`) is installed globally via `npm link` or `npm install -g .`, making `agent-config` available in `$PATH`.
+- **CLI Subcommand:** Running `agent-config setup` runs the setup CLI runner. Running `agent-config` or `agent-config serve` starts the MCP stdio server.
+- **CLI Commands:**
+  - `agent-config setup --check`: Read-only probe checking if the current host harness has the companion MCP registered. Returns exit code `0` if registered, `1` if unregistered.
+  - `agent-config setup --preview`: Read-only inspection producing a unified diff of proposed host configuration changes (e.g. injecting MCP server entry into host config) and mutation ownership targets.
+  - `agent-config setup --apply --yes`: Applies host configuration mutations. **Safety gate:** Running `--apply` without `--yes` / `-y` / `--approve` strictly refuses to mutate files, displays the preview, and exits with code `1`.
+  - Additional options: `--workspace <path>`, `--host <host_id>`, `--scope <project|global>`, `--json`.
+
+### Behavior states
+
+- **Companion already installed & registered:** `agent-config setup --check` reports registered. Skill proceeds directly to profile configuration via MCP tools (`inspect_host`, `get_profile`).
+- **Companion absent / unregistered:** Skill informs user and offers bootstrap. If user declines, Skill operates in plan-only / session-local fallback mode without mutating host configuration.
+- **Setup failure / unsupported host:** If host adapter is unsupported or apply fails, setup reports actionable diagnostics and gracefully falls back to generic / manual configuration without corrupting host files.
+
+### Runtime preview & apply (Companion present)
+
+Once the companion MCP is registered and running, `preview_configuration` and `apply_configuration` are used for **runtime execution configurations** (`ExecutionConfig`) and profile updates:
 
 1. **FrozenMutationPreview generation:**
-   - Call `preview_configuration` to produce a `FrozenMutationPreview`.
-   - The preview freezes target path, mutation contents, scope (`project` or `global`), baseline hash, and expiration timestamp.
+   - Call MCP tool `preview_configuration` with the canonical `ExecutionConfig`.
+   - Produces a `FrozenMutationPreview` with frozen target paths, unified diff, baseline SHA-256 hashes, and expiration timestamp.
 2. **Target & scope immutability:**
-   - Once generated, target paths and scope are immutable. Apply cannot re-derive targets, switch scope, or touch un-previewed files.
-3. **Stale preview checks:**
+   - Target paths and scope are fixed at preview time. Apply cannot touch un-previewed files or re-derive targets.
+3. **Stale preview verification:**
    - Before applying, `apply_configuration` verifies that the preview has not expired, has not already been applied, and that the on-disk target baseline matches `baseline_hash` exactly. Any baseline drift triggers immediate fail-closed abort.
 4. **Post-apply validation:**
    - `validate_configuration` reads back real host state (runtime and/or filesystem) to confirm the changes took effect.

@@ -42,33 +42,33 @@ interface AgentConfigResult {
 Every plan begins with this structured header:
 
 ```text
-Status: READY | NEED-INPUT | BOUNDARY
+Readiness: READY | NEED_INPUT | NEED_PROJECT_TICKETS | BLOCKED | UNSUPPORTED
 Scope: current-item | spec-assessment | ticket-frontier | ticket-graph
 Provider mode: tiered-multi-model | fixed-single-model
 Task shape: single-pass | decomposed
-Execution readiness: executable | needs-project-tickets | waiting-on-frontier | blocked-gate
+Execution status: executable | waiting-on-dependencies | blocked-gate
 Apply mode: plan-only | adapter-available-awaiting-approval | applied
 
 Reason: <concise explanation of mode, sizing, and topology choices>
 ```
 
-### Status semantics
+### Readiness semantics
 
-- `READY`: Host has at least one usable executable model and a safe execution path
-  is defined (including single-model serial execution).
-- `NEED-INPUT`: Missing information that fundamentally changes execution scope,
-  model spend, security boundaries, or task constraints.
-- `BOUNDARY`: Host cannot safely provide an execution path (e.g. no usable current
-  model, or a hard requirement cannot be fulfilled by the host runtime).
+`Readiness` in the header mirrors the authoritative `AgentConfigResult.readiness`:
 
-### Execution readiness semantics
+- `READY`: Host has at least one usable executable model, profile authorization is satisfied, and a safe execution path is defined. `execution_config` is present.
+- `NEED_INPUT`: Missing profile, unconfirmed tier mapping, or ambiguous configuration. Hands off to `setup`.
+- `NEED_PROJECT_TICKETS`: Decomposed task requires formal ticket breakdown before execution can be scheduled. Hands off to `project-tickets`.
+- `BLOCKED`: Required capability or model unavailable; execution cannot safely proceed.
+- `UNSUPPORTED`: Host environment or requested topology cannot be satisfied.
+
+### Execution status semantics (Internal Execution Topology)
+
+Within an executable plan, `Execution status` indicates the dispatch condition of the immediate work items:
 
 - `executable`: The plan is ready for immediate implementation.
-- `needs-project-tickets`: A decomposed task requires formal tickets before execution
-  can be scheduled; hands off to `project-tickets`.
-- `waiting-on-frontier`: Tickets exist but current unblocked frontier is blocked by
-  external gates or dependencies.
-- `blocked-gate`: An isolated gate is blocked; unblocked work may still be executable.
+- `waiting-on-dependencies`: Work items exist but unblocked frontier depends on in-progress predecessors.
+- `blocked-gate`: An isolated gate is blocked; other unblocked work may still be executable.
 
 ---
 

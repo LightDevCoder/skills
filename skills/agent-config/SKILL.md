@@ -32,7 +32,7 @@ description: Map the current Agent Host's evidenced capabilities and confirmed p
 1. **Setup check:** Verify confirmed profile via companion MCP or session input (never guess single-model without profile). Companion health requires `protocol_version === 1`, all 8 canonical tools, and responsiveness.
 2. **Inspect host:** Read active models, supported effort values, and concurrency limits.
 3. **Determine task shape:** Classify as `single-pass` or `decomposed` (never by word count).
-4. **Decomposition gate:** If decomposed and formal tickets do not exist, emit `readiness: NEED_PROJECT_TICKETS` (`Execution readiness: needs-project-tickets`), `handoff: "project-tickets"`, `execution_config: null`, and hand off to `project-tickets`.
+4. **Decomposition gate:** If decomposed and formal tickets do not exist, emit `readiness: NEED_PROJECT_TICKETS` (`needs-project-tickets`), `handoff: "project-tickets"`, `execution_config: null`, and hand off to `project-tickets`.
 5. **Difficulty & tier:** For multi-model, map work difficulty (`routine`..`critical`) to user-confirmed profile tiers (`routine`, `standard`, `high`, `review`).
 6. **Resolve effort:** Resolve abstract policies (e.g. `highest-supported`) strictly to verified host-supported strings (e.g. `high`), never emitting unverified literal `max`.
 7. **Select execution mode:**

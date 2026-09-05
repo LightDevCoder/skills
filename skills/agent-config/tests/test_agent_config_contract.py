@@ -47,22 +47,21 @@ class AgentConfigContractTest(unittest.TestCase):
 
     def test_host_evidence_schema_v2_and_backward_compatibility(self) -> None:
         for marker in (
-            '"schema_version": "2"',
-            "routing_rank",
-            "reasoning_control",
-            "levels",
-            "assignment_scope",
+            "host_id",
+            "adapter_id",
+            "available_models",
+            "supported_effort_values",
+            "capabilities",
+            "subagents",
+            "threads",
+            "parallelism",
+            "model_selection",
             "available",
             "unavailable",
             "unknown",
             "host-runtime",
             "fallback-default",
-            "models.current",
-            "models.selectable",
-            "model_selection",
-            "per_agent_model_selection",
-            "tier routing unavailable",
-            "Reject a false inventory claim",
+            "routing_rank",
         ):
             self.assertIn(marker, HOST_SCHEMA)
 
@@ -82,10 +81,10 @@ class AgentConfigContractTest(unittest.TestCase):
 
     def test_adaptive_plan_schema_defines_headers_and_conditional_layouts(self) -> None:
         for marker in (
-            "Status: READY | NEED-INPUT | BOUNDARY",
+            "Readiness: READY | NEED_INPUT | NEED_PROJECT_TICKETS | BLOCKED | UNSUPPORTED",
             "Provider mode: tiered-multi-model | fixed-single-model",
             "Task shape: single-pass | decomposed",
-            "Execution readiness: executable | needs-project-tickets | waiting-on-frontier | blocked-gate",
+            "Execution status: executable | waiting-on-dependencies | blocked-gate",
             "Apply mode: plan-only | adapter-available-awaiting-approval | applied",
             "## Host summary",
             "## Task assessment",
@@ -116,7 +115,7 @@ class AgentConfigContractTest(unittest.TestCase):
             "Case C (Tiered Multi-model + Single-pass)",
             "Case D (Tiered Multi-model + Decomposed",
             "highest-supported",
-            "needs-project-tickets",
+            "NEED_PROJECT_TICKETS",
             "Single-model is first-class",
             "No intelligence guessing",
         ):
@@ -179,9 +178,9 @@ class AgentConfigContractTest(unittest.TestCase):
             "review",
             "capabilities",
             "subagents",
-            "session_threads",
+            "threads",
             "parallelism",
-            "concurrency_cap",
+            "concurrency",
             "highest-supported",
             "Strictly user-confirmed",
             "No automatic model ranking",
