@@ -2,9 +2,9 @@
 
 This reference documents host harness coverage, companion MCP registration mechanisms, and generic fallback semantics for `agent-config`.
 
-## Primary Coding-Agent Native Harnesses (9)
+## Primary Coding-Agent Native Harnesses (10)
 
-The companion runtime provides native host adapters for 9 primary coding-agent harnesses:
+The companion runtime provides native host adapters for 10 primary coding-agent harnesses:
 
 1. **Codex CLI**: Native host identification, model inventory inspection, configuration preview, apply, and validation via project and global config.
 2. **Claude Code**: Native host identification, model inventory inspection, headless configuration, and companion registration inspection.
@@ -15,6 +15,7 @@ The companion runtime provides native host adapters for 9 primary coding-agent h
 7. **Cursor**: Native workspace/editor identification, model selection, reasoning effort, and subagent inspection.
 8. **Grok Build**: Native harness identification, build/agent capability detection, and reasoning effort controls.
 9. **Hermes**: Native agent harness identification, execution parameters, and model configuration.
+10. **Pi**: Native project settings with provider/model and thinking evidence. MCP registration requires installed, enabled `pi-mcp-adapter` and restart/reload; project settings require Pi trust. Extension dispatch remains unknown.
 
 ### Native Adapter Acceptance Criteria
 
@@ -28,10 +29,9 @@ An adapter is classified as **Native** only if it genuinely implements applicabl
 
 Where a harness lacks a specific capability (e.g. per-agent model selection or runtime reasoning control), the adapter reports `unavailable` or `unknown` rather than fabricating support.
 
-## Deferred Adapters & Generic Fallback
+## Generic Fallback and Pi limitations
 
-### Deferred Native Adapters
-- **Pi**: Documented as `Generic/manual` (deferred native adapter pending v1 stabilization). Native adapter integration is deferred to a future iteration; currently supported via safe generic/manual planning.
+Pi uses **Generic/manual** planning when its model/provider evidence, supported version, project trust, or required MCP extension cannot be confirmed. Runtime previews write project settings only; they never fall back to global writes. An installed extension and configuration files do not prove session activation; the shared setup lifecycle performs the live companion health probe.
 
 ### Generic / Manual Fallback
 For other hosts, unsupported environments, or future agent harnesses where no native adapter is active:
@@ -39,7 +39,7 @@ For other hosts, unsupported environments, or future agent harnesses where no na
 - **Plan-Only Mode**: Operates in read-only / plan-only mode by default. Generates execution plans and guidance without attempting host-specific file or configuration mutations.
 - **No Silent Mutation**: Forbids unverified writes or speculative configuration changes.
 - **Manual Application**: Users review the generated execution plan and apply configuration changes to their host manually.
-- **Acceptance Invariant**: Generic fallback does not count toward the required 9 native adapters acceptance target.
+- **Acceptance Invariant**: Generic fallback does not count toward the required 10 native adapters acceptance target.
 
 ## Companion MCP Registration Mechanism & Approval Semantics
 

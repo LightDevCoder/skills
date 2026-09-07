@@ -29,7 +29,7 @@ interface AgentConfigResult {
 ### Readiness and execution_config invariant
 - `readiness` is the single authoritative execution-readiness field (`READY | NEED_INPUT | NEED_PROJECT_TICKETS | BLOCKED | UNSUPPORTED`). Redundant status is removed.
 - `execution_config` exists **only** when `readiness === "READY"`. For any non-ready state, `execution_config` is strictly `null`.
-- `handoff` explicitly directs caller orchestration:
+- `handoff` identifies the recommended next stage; it does not authorize invocation. Return to an already active caller within its authorized scope. Standalone calls recommend the explicit next invocation and stop; the invocation boundary in `SKILL.md` applies:
   - `"implement"` when `readiness === "READY"`.
   - `"setup"` when `readiness === "NEED_INPUT"`.
   - `"project-tickets"` when `readiness === "NEED_PROJECT_TICKETS"`.

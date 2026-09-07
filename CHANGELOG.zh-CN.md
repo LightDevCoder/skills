@@ -6,12 +6,15 @@
 
 ## Unreleased
 
+- **Pi 集成与 MCP 修复：** 纳入 Pi 适配器，明确扩展、版本、项目信任、provider/model 和 effort 证据边界；Companion 仓库修复 Codex TOML 顶层字段保护、最高 effort 解析、无效 preview 验证和测试环境隔离。
+- **调用边界修复：** `agent-config` 将路由建议返回调用方；已有 `implement` 可继续获授权的工作项，独立规划则在启动下一个用户调用阶段前停止。
+
 ### 重构 — agent-config Profile 权威、执行配置与 Companion 运行时
 
 - **Profile 权威驱动的执行配置器：** 将 `skills/agent-config` 重构为基于真实宿主能力证据与用户确认 Profile 档位（`routine`、`standard`、`high`、`review`）的执行配置器，映射为适配的执行拓扑（单模型/多模型 × 单次/拆票；Case A、B、C、D）。返回规范的 `AgentConfigResult`（`READY`、`NEED_INPUT`、`NEED_PROJECT_TICKETS`、`BLOCKED`、`UNSUPPORTED`）。
 - **Profile 权威优于模型强弱猜测：** 彻底剔除启发式模型打分（`routing_rank`）与从模型名称猜测智能。档位绑定与推理需求完全由用户在 Profile 中确认，并对照宿主真实呈现的模型进行校验。
 - **宿主中立推理与 Effort 精准解析：** 抽象推理策略直接解析为宿主真实支持的具体参数值（`supported_reasoning_efforts` 或 `reasoning_effort_hierarchy`），严禁凭空捏造未支持值。
-- **Companion MCP 运行时与 9 个原生适配器：** 制定可选 Companion MCP 运行时契约（`protocol_version: 1`，8 个规范 MCP 工具：`get_setup_status`、`inspect_host`、`get_profile`、`save_profile`、`preview_configuration`、`apply_configuration`、`validate_configuration`、`reset_profile`），覆盖 9 种原生 Harness（Codex、Claude Code、Antigravity / agy、DeepSeek Harness / DSH、OpenCode、ZCode、Cursor、Grok Build、Hermes）以及通用 plan-only 回退（Pi 暂缓/deferred）。Companion 运行时维护于 `LightDevCoder/agent-config`。在无 Companion 时保持纯计划模式正常可用。
+- **Companion MCP 运行时与 10 个原生适配器：** 制定可选 Companion MCP 运行时契约（`protocol_version: 1`，8 个规范 MCP 工具：`get_setup_status`、`inspect_host`、`get_profile`、`save_profile`、`preview_configuration`、`apply_configuration`、`validate_configuration`、`reset_profile`），覆盖 10 种原生 Harness（Codex、Claude Code、Antigravity / agy、DeepSeek Harness / DSH、OpenCode、ZCode、Cursor、Grok Build、Hermes、Pi）以及通用 plan-only 回退（Pi MCP 需单独安装扩展）。Companion 运行时维护于 `LightDevCoder/agent-config`。在无 Companion 时保持纯计划模式正常可用。
 - **Companion 健康度与 Setup Gate：** 增加 Companion 健康探测语义（`agent-config setup --check`、实时 MCP 传输协议版本、规范工具 schema 校验）与非阻塞 Setup Gate（`agent-config setup`、`NEED_INPUT` / `UNSUPPORTED`），支持显式宿主探测与先预览后应用的变更控制。
 - **Skill ↔ Companion 集成闭环：** 下游工作流消费规范化 `AgentConfigResult`；`implement` 保持 agent-config 为可选增强而不阻塞独立执行；`ask-light` 将 setup 意图路由至 `agent-config setup`，同时严格保持就绪工单路由至 `implement`、复杂拆分路由至 `project-tickets`。
 

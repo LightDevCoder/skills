@@ -29,7 +29,7 @@ All are first-party and self-contained; no install of `mattpocock/skills` or `so
 The execution configuration system cleanly separates policy reasoning from host persistence and mutation:
 
 - **Skill (`skills/agent-config`):** Installed from this repository ([LightDevCoder/skills](https://github.com/LightDevCoder/skills)). Performs task difficulty assessment, tier selection, and execution topology planning. Runs locally in the agent conversation.
-- **Companion MCP Runtime:** Maintained in the independent repository [LightDevCoder/agent-config](https://github.com/LightDevCoder/agent-config). Provides 9 native host adapters (Codex, Claude Code, Antigravity / agy, DeepSeek Harness / DSH, OpenCode, ZCode, Cursor, Grok Build, Hermes) plus generic fallback.
+- **Companion MCP Runtime:** Maintained in the independent repository [LightDevCoder/agent-config](https://github.com/LightDevCoder/agent-config). Provides 10 native host adapters (Codex, Claude Code, Antigravity / agy, DeepSeek Harness / DSH, OpenCode, ZCode, Cursor, Grok Build, Hermes, Pi) plus generic fallback.
 - **Optional Companion:** Without the companion MCP server registered, `agent-config` remains fully operational in session-local, plan-only mode without mutating host configuration. With the companion installed and registered, it enables authentic host capability inspection, profile persistence, configuration preview before apply, and health validation.
 
 ## Composition with review

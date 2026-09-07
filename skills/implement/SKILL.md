@@ -26,7 +26,7 @@ hands it to review.
    When `agent-config` is invoked, consume the `AgentConfigResult`:
    - `readiness === "READY"`: consume `execution_config` and execute bounded slice.
    - `readiness === "NEED_INPUT"`: profile missing / setup needed. Offer setup or fallback safely to single-agent execution if declined.
-   - `readiness === "NEED_PROJECT_TICKETS"`: decomposed task without tickets -> handoff to `project-tickets` and halt implementation (never batch-execute un-ticketed tasks).
+   - `readiness === "NEED_PROJECT_TICKETS"`: decomposed task without tickets -> recommend explicit `$project-tickets` and halt implementation (never batch-execute un-ticketed tasks).
    - `readiness === "BLOCKED"` or `"UNSUPPORTED"`: core rejection (e.g. unauthorized model, unevidenced model, or unknown capability) -> halt implementation with diagnostic reason.
 4. **Execute the bounded slice, then verify.** Use `tdd` for code when
    appropriate; produce non-code artifacts per their contract. Verify locally

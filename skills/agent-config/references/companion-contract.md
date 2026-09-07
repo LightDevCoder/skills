@@ -159,6 +159,7 @@ Validates that the host configuration on disk or in runtime reflects expected se
   - `workspace` (string, optional): Target workspace path.
   - `host_id` (string, optional): Host identifier.
 - **Behavior:**
+  - Requires a canonical `expected_config` or an existing `preview_id`. Unknown preview IDs and workspace/host mismatches are rejected, including when an explicit expected configuration is also supplied.
   - Inspects real runtime or file system state.
   - Compares expected vs actual configuration.
   - Never assumes write success without reading back post-apply state.
