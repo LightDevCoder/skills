@@ -6,6 +6,7 @@
 
 ## Unreleased
 
+- **维护验证：** [独立审查及最终测试、安装证据](docs/evidence/maintenance/2026-09-08-agent-config.md)。仅提交 main，不创建新 tag 或 release。
 - **Pi 集成与 MCP 修复：** 纳入 Pi 适配器，明确扩展、版本、项目信任、provider/model 和 effort 证据边界；Companion 仓库修复 Codex TOML 顶层字段保护、最高 effort 解析、无效 preview 验证和测试环境隔离。
 - **调用边界修复：** `agent-config` 将路由建议返回调用方；已有 `implement` 可继续获授权的工作项，独立规划则在启动下一个用户调用阶段前停止。
 
