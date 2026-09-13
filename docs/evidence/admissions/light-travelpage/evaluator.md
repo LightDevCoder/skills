@@ -1,0 +1,46 @@
+# Fresh independent admission evaluation
+
+- Date: 2026-09-13.
+- Evidence label: `review`.
+- Context: `/root/admission_evaluator`, fresh context separate from Producer and Standards/Spec critics; target read-only. Only this report was written. No tests, browser interactions, cloud mutations, repairs, or fourth convergence review were performed by this Evaluator.
+- Core independence: `full`; Agent-Skill normalized independence: `full` (fresh independent read-only evaluation). Shared filesystem access exists; the role did not modify candidate files.
+- Charter revision: 1; Profile: `agent-skill`, full path.
+- Candidate: `d13b229164dcc54244e0f27ac8716ea5ed095912`; baseline: `58303d92303d4ba872e83113dd77f42ca5841e5b`.
+- Recommendation to Core: **BLOCKED**. This is advisory evaluation; `project-review` Core owns the final verdict.
+
+## Basis and eligibility
+
+Read `REQUIREMENTS.md`, `.project-review/charter.md`, current state, all three rounds' findings and repairs, candidate SKILL/metadata/attribution/references, generation/update/build resources, test scenario inventory, installation logs, remote checking script/results, and browser evidence. Governing destination records are `AGENTS.md`, `docs/SKILL_ADMISSION.md`, `docs/REVIEW_POLICY.md`, and `docs/MAINTENANCE.md` in `/Users/light/Documents/Projects/Configurations/skills`.
+
+The candidate is eligible for the full evidence path: the source is pinned, MIT attribution is preserved, and the protected sharing, D1 concurrency/retry, update/build tooling and reusable workflow constitute a substantial owned transformation. `UPSTREAM-REVIEW.md` supplies the reuse rationale. This is not eligibility for admission itself. Executable files, networking and state mutation exclude the prompt-only fast track.
+
+Triggers and non-use cases are explicit. Model-invoked behavior agrees with `allow_implicit_invocation: true`; the package does not require another user-invoked Skill or a canonical orchestration route. Inputs, pending facts, preservation requirements, single-group scope, deployment prerequisites and failure boundaries are stated. The package includes its upstream runtime assets and declares npm/Cloudflare prerequisites. Concise entry and linked supporting resources are appropriate. These are source/structural judgments; observed invocation and full reusable use still require their separate evidence.
+
+## Frozen requirements
+
+| Requirement | Judgment | Evidence and remaining limit |
+| --- | --- | --- |
+| 1. Source-driven generation/update, identity and data preservation | Partial evidence | SKILL, data contract, update contract and helper explicitly preserve identity and runtime separation and leave unknown facts pending (`source`/`structural`). Independent forward-use report is pending at this evaluation snapshot. The helper validates a complete next file; unrelated-record preservation also depends on the agent preparing that file correctly. |
+| 2. GitHub + Cloudflare default, fictional demo | Substantially evidenced | Deployment contract explicitly requires private GitHub and protected Pages/Functions/D1. `remote-results.json` proves the live protected URL and D1 API execution (`runtime`). Core additionally reports private GitHub verification and synchronized `38f60ed` demo HEAD/origin; that fact is not independently rechecked here and is not a candidate revision change. Local mobile observation is not relabelled as hosted browser evidence. |
+| 3. Shared collections, visible recovery, polling and drafts | Partial; acceptance blocked | Actual remote requests cover todos, travelers, settings, bills and tickets, two separately authenticated cookie sessions, same-body retry, simultaneous CAS with one winner, stale conflict and atomic rejection (`runtime`). 23 Producer tests cover failure and form recovery, including final confirmed-snapshot fixes (`behavioral`, Node/Happy DOM simulation). Real-browser polling/draft preservation remains unobserved. STD-05/SPEC-R3-01 have no clean independent final repair confirmation. |
+| 4. Single group, authentication and protected assets | Supported within recorded coverage | Remote unauthenticated HTML/JSON/PDF redirect and API 401, authenticated 200 responses, cross-trip denial and HttpOnly cookie assertion are direct hosted checks (`runtime`). Auth/code-rotation/origin checks also have local automated coverage (`behavioral`). Source describes high-entropy code and equal access. No per-member or multi-group support is claimed. |
+| 5. Date/time/reference/assets validation and stable schematic maps | Partial evidence | Test inventory includes valid/null dates, invalid dates/spans/references, ticket traversal and invalid coordinates; contract defines schematic maps and selection preservation (`behavioral` reports plus `structural`). Independent generated/update map-stability observations are pending with forward use. External map navigation was not completed in real browser. |
+| 6. Allowlisted dist, runtime backups, recoverable source updates | Partial evidence | Build allowlist and referenced asset copying, private backups and identity-preserving update exist (`structural`). Damaged backup rejection and revision protections have automated evidence (`behavioral`). Independent successful generated-build/update preservation observations are pending. No completed actual-browser backup export/import observation is supplied; the report does not infer it from negative tests. |
+| 7. Real mobile interaction, deployed routes, two-session sync/recovery | Partial; acceptance blocked | Native Chrome responsive 390×844 against local Wrangler observed login, itinerary, ticket fallback to loaded PDF, member addition, one 23.45 CNY bill and reload persistence (`runtime`, local actual browser). Inline PDF was blocked; fallback worked. No physical device or two hosted-browser sessions were observed. Remote API sessions prove backend synchronization, not frontend cross-session polling. Browser navigation and draft polling stopped after the Mac locked again. |
+| 8. Package evidence, independent review, admission and synchronization | Unmet | Structural validator and isolated package/scope CLI install/list evidence exist. CLI discovery is not automatic host loading. Independent forward use is pending. Three separate Standards/Spec review rounds exist, but the last round had a confirmed P1 defect; Producer repair and 23 passing tests do not provide clean independent code-review acceptance. This fresh evaluation supplies the Evaluator item only. Destination synchronization correctly remains deferred until admission PASS; no catalog entry/tag/release is justified. |
+
+## Evidence classes and review dispositions
+
+- `source`: frozen requirements/charter, candidate contract and pinned provenance. Upstream review is rationale, not proof of final behavior.
+- `structural`: package inventory and `quick_validate.py` result in `installation.md`, plus inspected linked resources. These cannot establish runtime behavior.
+- `installation`: both isolated package and scope copy/install commands and CLI list output. No published-release install claim and no automatic Codex host discovery claim are accepted.
+- `behavioral`: round repair reports and assertion-bearing Node/Happy DOM tests. Reported final result is 23 tests (17 core, 6 DOM). This Evaluator did not rerun them and does not promote their simulation scope.
+- `runtime`: `remote-results.json` at `2026-09-12T18:18:50.694Z` and `remote-check.mjs` demonstrate actual hosted API/auth/D1 tests. Four deployed runtime files match the final local build; this check does not claim a hash of every deployed file. `browser.md` separately records actual local Chrome interaction. Screenshots/AX observations remain in the tool transcript rather than standalone image artifacts.
+- `invocation`: contract/metadata are consistent; independent positive/non-trigger observation is pending with `forward-use.md`.
+- `review`: rounds 1–3 and this fresh evaluation. STD-01/02 and SPEC-01/02 were independently reported resolved in round 2. Round 2 findings have Producer repairs and subsequent review, but no explicit clean all-findings set exists. STD-05 and SPEC-R3-01 name the same final confirmed-snapshot handoff defect and remain **producer-repaired, independent closure pending**, not a newly confirmed failure of current code.
+
+No user-approved exception waiving a frozen requirement is supplied. Missing evidence is not treated as proof that the implementation is defective, nor as permission to admit it.
+
+## Required next state
+
+Core should record BLOCKED and preserve the three-round stop. Independent forward-use evidence can be incorporated when available; it cannot close the code-review or real-browser gaps by itself. Remaining actual-browser checks require restored browser access and correctly scoped observations. A later independent code-review closure requires an explicitly recorded reopened review path; do not relabel this evaluation or further Producer tests as a fourth clean convergence round. Keep the candidate outside the destination collection until the full admission requirements are met, then complete affected documentation/catalog/tests/changelog synchronization before claiming collection completion.

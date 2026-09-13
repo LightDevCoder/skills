@@ -1,0 +1,40 @@
+
+│
+●   codex  Agent detected — installing non-interactively
+[?25l│
+◇  Source: /Users/light/Documents/Projects/Personal/Light-TravelPage/.scratch/install-source/light-travelpage
+[?25h[?25l│
+◇  Local path validated
+[?25h[?25l│
+◇  Found 1 skill
+[?25h│
+●  Selected 1 skill: light-travelpage
+
+│
+◇  Installation Summary ───────────────────────────────────────────────────────╮
+│                                                                              │
+│  ~/Documents/Projects/Personal/Light-TravelPage/.scratch/install-final-pack  │
+│  age/.agents/skills/light-travelpage                                         │
+│    copy → Codex                                                              │
+│                                                                              │
+├──────────────────────────────────────────────────────────────────────────────╯
+[?25l│
+◇  Installation complete
+[?25h
+│
+◇  Installed 1 skill ──────────────────────────────────────────────────────────╮
+│                                                                              │
+│  ✓ light-travelpage (copied)                                                 │
+│    → ~/Documents/Projects/Personal/Light-TravelPage/.scratch/install-final-  │
+│  package/.agents/skills/light-travelpage                                     │
+│                                                                              │
+├──────────────────────────────────────────────────────────────────────────────╯
+
+│
+└  Done!  Review skills before use; they run with full agent permissions.
+
+[1mProject Skills[0m
+
+[36mlight-travelpage[0m [38;5;102m~/Documents/Projects/Personal/Light-TravelPage/.scratch/install-final-package/.agents/skills/light-travelpage[0m
+  [38;5;102mAgents:[0m Codex  [38;5;102mSource:[0m /Users/light/Documents/Projects/Personal/Light-TravelPage/.scratch/install-source/light-travelpage
+

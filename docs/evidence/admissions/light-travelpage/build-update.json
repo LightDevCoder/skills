@@ -1,0 +1,7 @@
+{
+  "timestamp": "2026-09-13T17:22:44.991Z",
+  "mapSelectionStable": true,
+  "privateAndToolingExcluded": true,
+  "declaredTicketIncluded": true,
+  "output": "Built trip-data.json with 1 destination map region(s): 杭州=compact-basin.\nBuilt protected site at /Users/light/Documents/Projects/Personal/Light-TravelPage/demo/dist\n"
+}

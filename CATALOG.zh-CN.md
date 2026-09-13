@@ -2,15 +2,15 @@
 
 [English catalog](CATALOG.md)
 
-本目录从 `skills/` 下 34 个已准入包同步生成，是可读 inventory，不是静态 workflow router，也不代表某个 Agent host 当前已安装哪些 Skill。包的 `SKILL.md` 仍是行为权威。
+本目录从 `skills/` 下 35 个已准入包同步生成，是可读 inventory，不是静态 workflow router，也不代表某个 Agent host 当前已安装哪些 Skill。包的 `SKILL.md` 仍是行为权威。
 
 ## 集合状态
 
 | 字段 | 值 |
 | --- | --- |
 | 集合 | Light Skills — Composable Agent Workflows |
-| 包数量 | 34 个已准入第一方 Skill |
-| 当前状态 | 已发布 [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0)（包含 34 个第一方包） |
+| 包数量 | 35 个已准入第一方 Skill |
+| 当前状态 | main 包含 35 个包；light-travelpage 尚未发布版本标签 |
 | 稳定版本 | [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0)（34 个包；上一稳定版为 9 个包的 v0.1.6） |
 | 安装权威 | [docs/INSTALLATION.zh-CN.md](docs/INSTALLATION.zh-CN.md) |
 | 发现检查 | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
@@ -156,6 +156,16 @@
 - **状态：** 第一方已准入；PRESERVE — NO REWRITE。
 - **证据：** [package contract](skills/learn-anything/SKILL.md)。
 - **安装路径：** host 认可的 Skills root 下的 `skills/learn-anything/`。
+
+### light-travelpage
+
+- **作用：** 从资料生成或更新手机旅行网页，共享同行人、账单、币种设置、待办与门票状态。
+- **时机：** 创建或维护旅行网页；普通旅行咨询和预订购买不触发。
+- **调用：** Model-invoked。
+- **包：** [skills/light-travelpage/](skills/light-travelpage/)
+- **安装路径：** 宿主可识别 Skills 根目录下的 `skills/light-travelpage/`。
+- **状态：** 实质性转换的第一方能力，已准入 main、尚未发布版本标签；默认 GitHub + Cloudflare Pages、Functions、D1，每个部署一个同权限小组。
+- **证据：** [准入](docs/evidence/admissions/light-travelpage/README.md) · [来源](skills/light-travelpage/ATTRIBUTION.md)。
 
 ### manuscript-ops
 

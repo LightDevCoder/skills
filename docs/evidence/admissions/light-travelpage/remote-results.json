@@ -1,0 +1,50 @@
+{
+  "url": "https://light-travelpage.pages.dev",
+  "timestamp": "2026-09-13T17:19:07.239Z",
+  "report": [
+    {
+      "check": "unauthenticated /",
+      "status": 303
+    },
+    {
+      "check": "unauthenticated /trip-data.json",
+      "status": 303
+    },
+    {
+      "check": "unauthenticated /assets/tickets/demo.pdf",
+      "status": 303
+    },
+    {
+      "check": "unauthenticated /api/trip/light-travelpage-demo",
+      "status": 401
+    },
+    {
+      "check": "deployed runtime files match final local build",
+      "status": "passed"
+    },
+    {
+      "check": "authenticated /",
+      "status": 200
+    },
+    {
+      "check": "authenticated /trip-data.json",
+      "status": 200
+    },
+    {
+      "check": "authenticated /assets/tickets/demo.pdf",
+      "status": 200
+    },
+    {
+      "check": "independent sessions, cross-trip denial, same-request retry, stale conflict, cleanup",
+      "status": "passed"
+    },
+    {
+      "check": "shared members/settings/bills/tickets, idempotent bill, simultaneous writes one winner, invalid write atomicity, original state restored",
+      "status": "passed"
+    },
+    {
+      "check": "actual runtime export and restore against remote D1 preserves original collections",
+      "status": "passed"
+    }
+  ]
+}

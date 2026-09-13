@@ -6,6 +6,8 @@
 
 标准安装命令是通用 `latest` 形式：它跟随仓库默认 revision，因此 `npx skills add LightDevCoder/skills` 是推荐的交互式安装入口，可按需选择 Skill 与目标 Agent。pinned release 命令选择已发布的 tag，用于可复现安装。历史验证命令（曾用于在隔离环境中跨所有受支持 Agent 测试完整集合）与历史证据一同记录在下方。
 
+当前 main 新增 `light-travelpage`（共 35 个已准入包），既有稳定 tag 不含此新增包。准入已验证隔离本地来源的包/集合安装及 CLI 发现；见[证据](evidence/admissions/light-travelpage/README.md)。新增远端安装命令的验证结果以推送后的检查记录为准。
+
 ## 推荐安装方式
 
 ### 交互式安装（推荐）
@@ -25,6 +27,7 @@ npx skills add LightDevCoder/skills --skill agent-config
 npx skills add LightDevCoder/skills --skill project-review
 npx skills add LightDevCoder/skills --skill research
 npx skills add LightDevCoder/skills --skill humanizer
+npx skills add LightDevCoder/skills --skill light-travelpage
 ```
 
 ### 指定稳定版本安装（Pinned Release）

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0.0",
+  "canvas": { "width": 1448, "height": 1086 },
+  "defaultTemplate": "inland-alpine",
+  "disclaimer": "本图为模板化行程示意图，仅表达地点的相对方位与路线顺序，不代表真实比例或精确地理边界。如需使用真实国家或城市地图，可在生成后自行调整。",
+  "templates": [
+    { "id": "inland-alpine", "file": "assets/maps/templates/template-01-inland.webp", "selectionRole": "balanced-or-east-west-route", "safeArea": { "x": 420, "y": 155, "width": 850, "height": 745 } },
+    { "id": "island-archipelago", "file": "assets/maps/templates/template-02-archipelago.webp", "selectionRole": "separated-clusters-or-long-jump", "safeArea": { "x": 455, "y": 130, "width": 835, "height": 790 } },
+    { "id": "coastal-region", "file": "assets/maps/templates/template-03-coastal.webp", "selectionRole": "north-south-route", "safeArea": { "x": 625, "y": 115, "width": 700, "height": 805 } },
+    { "id": "urban-radial", "file": "assets/maps/templates/template-04-urban.webp", "selectionRole": "compact-or-dense-route", "safeArea": { "x": 420, "y": 145, "width": 850, "height": 765 } },
+    { "id": "river-highland", "file": "assets/maps/templates/template-05-river-highland.webp", "selectionRole": "balanced-or-separated-route", "safeArea": { "x": 480, "y": 175, "width": 790, "height": 710 } },
+    { "id": "upland-basin", "file": "assets/maps/templates/template-06-upland-basin.webp", "selectionRole": "compact-or-balanced-route", "safeArea": { "x": 440, "y": 160, "width": 820, "height": 720 } },
+    { "id": "compact-basin", "file": "assets/maps/templates/template-07-compact-basin.webp", "selectionRole": "compact-or-dense-route", "safeArea": { "x": 220, "y": 165, "width": 1000, "height": 720 } },
+    { "id": "wide-valley", "file": "assets/maps/templates/template-08-wide-valley.webp", "selectionRole": "east-west-route", "safeArea": { "x": 170, "y": 250, "width": 1110, "height": 560 } },
+    { "id": "radial-watershed", "file": "assets/maps/templates/template-09-radial-watershed.webp", "selectionRole": "north-south-or-radial-route", "safeArea": { "x": 230, "y": 170, "width": 970, "height": 730 } },
+    { "id": "broad-riverland", "file": "assets/maps/templates/template-10-broad-riverland.webp", "selectionRole": "wide-or-multi-stop-route", "safeArea": { "x": 180, "y": 150, "width": 1080, "height": 760 } }
+  ]
+}

@@ -6,6 +6,13 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
+### Added — Light-TravelPage
+
+- Admit model-invoked `light-travelpage` as the 35th first-party package: travel-page generation/update with protected Cloudflare D1 collaboration and GitHub source.
+- Preserve upstream MIT assets and pinned ATTRIBUTION; add conflict/idempotency recovery, strict validation and focused tests.
+- Synchronize catalog, installation/discovery and admission evidence. No new tag or release.
+
+
 - **Maintenance verification:** [Independent review and final test/install evidence](docs/evidence/maintenance/2026-09-08-agent-config.md). Main-only delivery; no new tag or release.
 - **Pi integration and MCP correctness:** Included the Pi adapter with extension, version, project-trust, provider/model, and effort-evidence boundaries. Fixed Codex TOML root-field preservation, ordered highest-effort resolution, invalid-preview validation, and Codex test environment isolation in the companion repository.
 - **Invocation boundary repair:** `agent-config` returns routing recommendations to its caller; an active `implement` may resume its authorized item, while standalone planning stops before starting another user-invoked stage.

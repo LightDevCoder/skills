@@ -2,15 +2,15 @@
 
 [中文目录](CATALOG.zh-CN.md)
 
-This catalog is synchronized from the 34 admitted package directories under `skills/`. It is an inventory — not a static workflow router and not a record of what is installed on a particular Agent host. The package's `SKILL.md` remains the behavior authority.
+This catalog is synchronized from the 35 admitted package directories under `skills/`. It is an inventory — not a static workflow router and not a record of what is installed on a particular Agent host. The package's `SKILL.md` remains the behavior authority.
 
 ## Collection status
 
 | Field | Value |
 | --- | --- |
 | Collection | Light Skills — Composable Agent Workflows |
-| Package count | 34 admitted first-party Skills |
-| Current state | Released [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) with 34 first-party packages |
+| Package count | 35 admitted first-party Skills |
+| Current state | 35 packages on main; light-travelpage is an unreleased addition |
 | Stable release | [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) (34 packages; previous stable was v0.1.6 with 9 packages) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
@@ -171,6 +171,16 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Status:** Admitted first-party; PRESERVE — NO REWRITE.
 - **Evidence:** [package contract](skills/learn-anything/SKILL.md), [user guide](docs/skills/learn-anything.md).
 - **Installation path:** `skills/learn-anything/` in a host-recognized Skills root.
+
+### light-travelpage
+
+- **Purpose:** Generate or update a mobile travel page with shared members, expenses, currency settings, tasks and ticket status.
+- **When to use:** Create or maintain a travel webpage from supplied materials; not ordinary travel advice or booking purchases.
+- **Invocation:** Model-invoked.
+- **Package:** [skills/light-travelpage/](skills/light-travelpage/)
+- **Installation path:** `skills/light-travelpage/` in a host-recognized Skills root.
+- **Status:** Admitted first-party transformation; unreleased on main. Default deployment: GitHub + Cloudflare Pages, Functions and D1; one equal-access group per deployment.
+- **Evidence:** [Admission](docs/evidence/admissions/light-travelpage/README.md) · [Attribution](skills/light-travelpage/ATTRIBUTION.md).
 
 ### manuscript-ops
 

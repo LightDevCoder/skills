@@ -1,0 +1,9 @@
+# Update and publication
+
+The update helper accepts an existing project and a complete reviewed next JSON. It enforces the same trip ID, validates against existing assets and stores a private backup before atomic replacement. The agent preserves unchanged record IDs, map selections and unrelated fields when preparing this JSON. An omitted record is a deletion in the source, not an automatic intention inferred from a partial user message. Compare the before/after content before applying. Runtime D1 state is never reset by this helper or ordinary redeployment.
+
+`npm run build` validates data, builds schematic maps and copies only declared runtime files plus referenced map/ticket assets into `dist/`. Private source documents, source indices, history, node_modules and credentials are excluded. Old dist directories are retained under `.build-backups/` for recovery; dispose of obsolete backups with the user's trash mechanism after confirming they are no longer useful.
+
+Generated Git ignore rules exclude trip data, tickets, source/private directories and local credentials. Keep the code repository private unless the user chooses otherwise. If authorized to store specific trip data in that repository, add only those explicit files; otherwise deploy locally built protected artifacts with Wrangler. GitHub automatic build integration requires an authorized, reproducible source for trip data, and must not be claimed merely because a repository exists.
+
+Default sharing is the protected group site. A separately requested public showcase needs a separate data projection that excludes private fields and PDFs, followed by inspection of the actual output files; removing a visible card alone does not remove its JSON/asset. Do not broaden the audience of the existing group deployment as a shortcut.

@@ -4,7 +4,7 @@
 
 # Light Skills — 可组合的 Agent 工作流
 
-`LightDevCoder/skills` 包含 34 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<name>/`，由包内的 `SKILL.md` 统领具体行为。
+`LightDevCoder/skills` 包含 35 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<name>/`，由包内的 `SKILL.md` 统领具体行为。
 
 > **发布版本：** [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) 发布自 `v0.2.0` tag——发布线承载全部 34 个第一方 Skill（33 包架构 + `humanizer`），为当前最新稳定版本。确切 commit 见[发布收据](docs/evidence/releases/v0.2.0/RELEASE_RECEIPT.zh-CN.md)。
 
@@ -143,6 +143,8 @@ $ask-light workflow
 
 每个 Skill 的完整功能、使用时机与调用方式见 [CATALOG.zh-CN.md](CATALOG.zh-CN.md)。
 
+`light-travelpage` 已收录到 `main`，尚未包含在版本标签中：从旅行资料生成和维护手机网页，通过 GitHub 与 Cloudflare Pages/D1 共享账单、成员、待办和票券状态。见 [Skill 入口](skills/light-travelpage/SKILL.md)和[准入证据](docs/evidence/admissions/light-travelpage/README.md)。
+
 ## 溯源与归属
 
 | 来源分类 | 管理策略 | 仓库内处理方式 |
@@ -155,7 +157,9 @@ $ask-light workflow
 
 经批准的 Matt Port（共 11 个）：`research`、`prototype`、`tdd`、`handoff`、`diagnosing-bugs`、`wizard`、`teach`、`wait-what`、`to-questionnaire`、`writing-for-agents`、`resolving-merge-conflicts`。各包均含 `ATTRIBUTION.md`，无需在运行时安装上游包。
 
-改编来源（1 个包）：`humanizer` 是基于 blader/humanizer（2.11.2）实质性转换的第一方能力，外加参考 op7418/Humanizer-zh 的薄中文适配层；两份 MIT 许可均在其 [ATTRIBUTION.md](skills/humanizer/ATTRIBUTION.md) 中保留。
+改编来源（2 个包）：`humanizer` 是基于 blader/humanizer（2.11.2）实质性转换的第一方能力，外加参考 op7418/Humanizer-zh 的薄中文适配层；两份 MIT 许可均在其 [ATTRIBUTION.md](skills/humanizer/ATTRIBUTION.md) 中保留。
+
+`light-travelpage` 基于 do-tongxue/Travel-Plan-Page 实质性转换，增加受保护的 D1 协作、校验、恢复和生成更新工具；MIT 来源记录见 [ATTRIBUTION.md](skills/light-travelpage/ATTRIBUTION.md)。
 
 ## 治理与参考文档
 

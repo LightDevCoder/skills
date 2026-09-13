@@ -1,0 +1,16 @@
+# Travel data contract
+
+Read the generated `trip-data.json` for the complete container shape and `scripts/validate.mjs` for executable constraints. Keep empty containers; do not import legacy upstream canonical schemas.
+
+- `metadata.tripId`: unique `[A-Za-z0-9_-]` identifier, max 100 characters, unchanged for the life of a trip. `metadata.title` is the page title; optional `metadata.timeZone` is a known IANA timezone for Today highlighting.
+- `trip`: `status: draft`, `startDate`, `endDate` as real `YYYY-MM-DD` dates, `dayCount`; countries as `{code,nameZh,nameEn}` plus `primaryDestinationCountries`, `citiesAndAreas` and `routeSummary`. Domestic trips use `primaryDestinationName`. An undated draft uses null start/end and null day dates, never fictional dates.
+- `days`: sequential `{day,date,title,locations:[],schedule:[]}`. Schedule items have stable `id`, `time` (`HH:MM` or `待确认`), `type`, `text`; use `placeId`/`placeIds` and `ticketIds` only for existing records.
+- `places`: `{id,name,nameZh?}`. `ticketPlanning.items`: `{id,day,name,requirement,document?}`; PDF document is `{url:"assets/tickets/<file>.pdf",type:"application/pdf",label}`. Tickets are displayed inside the itinerary. Do not rewrite the source PDF or invent a PDF.
+- `flightJourneys`: `{id}`; `flights`: `{id,journeyId,sequence,airline:{name},flightNumber,departure,arrival}`. Each endpoint has `airportCode,city,date,time,utcOffset` (`±HH:MM`). Use actual local times and date-specific UTC offsets; arrival must follow departure in UTC. For missing flight details use a journey with `placeholder:true,status:"pending",missingFields:[]` and no invented segment.
+- `groundTransport.rentalCar`: company, vehicle `{example,class}`, price `{currency,payAtCounter}`, rentalPeriodDays, insurance array, pickup/dropoff `{date,time,utcOffset,location,address}` and appropriate return instructions. Keep rentalChecklist, drivingNotes and drivingReferenceLinks arrays. If required details are not supplied, keep rental disabled and record the gap rather than fabricate an active rental.
+- `preTrip.packingItems`: explicit user tasks `{id,text,completed}`. In D1 these seed a new trip once; later source changes do not overwrite travelers' live checks. Apply later task changes through the shared UI/API.
+- `config.modules`: six booleans `flights,overview,itinerary,todo,driving,ledger`. `config.persistence` is `{mode:"d1",apiBase:"/api/trip",sharedCollections:["todos","tickets","ledger"]}`.
+
+For enabled maps, fill `map.region` or `map.regions` with region IDs and country codes; `map.places` has `{id,name,geo:{lat,lng},countryCode}`; `routes` and `dailyRoutes` have `{day,placeIds:[...]}`. Only use confirmed coordinates. If pending, retain the itinerary and report why the map remains unavailable. `mapMode` stays `template-auto`. The builder owns `routeMap` and `metadata.assets.routeMaps`. Preserve those derived fields during updates so previous regional template choices can be reused.
+
+Maintain a private, small source index (source filename/page or user correction → affected field/record) for material ambiguity. A resolved correction replaces the relevant fact; it does not justify overwriting unrelated records or importing private extraction notes into the site.

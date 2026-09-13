@@ -1,0 +1,101 @@
+{
+  "schemaVersion": "2.0-lite",
+  "config": {
+    "schemaVersion": "1.0.0",
+    "modules": {
+      "flights": false,
+      "overview": false,
+      "itinerary": false,
+      "todo": false,
+      "driving": false,
+      "ledger": false
+    },
+    "language": "zh-CN",
+    "persistence": {
+      "mode": "d1",
+      "apiBase": "/api/trip",
+      "sharedCollections": [
+        "todos",
+        "tickets",
+        "ledger"
+      ]
+    }
+  },
+  "metadata": {
+    "tripId": "unconfigured",
+    "title": "旅行计划",
+    "language": "zh-CN",
+    "assets": {}
+  },
+  "trip": {
+    "status": "uninitialized",
+    "startDate": null,
+    "endDate": null,
+    "dayCount": 0,
+    "nightCountAway": 0,
+    "countries": [],
+    "primaryDestinationCountries": [],
+    "citiesAndAreas": [],
+    "routeSummary": "",
+    "groupSize": null
+  },
+  "flightJourneys": [],
+  "flights": [],
+  "accommodations": [],
+  "groundTransport": {
+    "rentalCar": null,
+    "rentalChecklist": [],
+    "drivingNotes": [],
+    "drivingReferenceLinks": [],
+    "plannedRoadLegs": [],
+    "publicTransitAndRail": []
+  },
+  "days": [],
+  "places": [],
+  "restaurants": [],
+  "bookingsAndTickets": [],
+  "ticketPlanning": {
+    "statusStorage": "d1",
+    "statusStorageNote": "Shared with your travel group",
+    "items": []
+  },
+  "preTrip": {
+    "packingItems": [],
+    "preparationsExplicitlyMentioned": [],
+    "missingNote": ""
+  },
+  "mapLinks": {
+    "providedGoogleMapsLinks": [],
+    "note": "",
+    "cityLevelNavigationDisabled": false,
+    "navigationPolicy": {
+      "noNavigationTypes": [
+        "flight",
+        "note",
+        "rest"
+      ],
+      "selfNavigationTypes": [
+        "drive",
+        "return",
+        "transfer",
+        "check-in",
+        "check-out",
+        "restaurant",
+        "attraction",
+        "walk",
+        "hike"
+      ]
+    },
+    "navigationPlaces": []
+  },
+  "issuesAndUncertainties": [],
+  "map": {
+    "schemaVersion": "1.0-lite",
+    "mapMode": "template-auto",
+    "templateId": "auto",
+    "disclaimer": "本图仅表达地点的相对方位与路线顺序，不代表真实比例或精确地理边界。",
+    "places": [],
+    "routes": [],
+    "dailyRoutes": []
+  }
+}

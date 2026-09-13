@@ -4,7 +4,7 @@
 
 # Light Skills — Composable Agent Workflows
 
-`LightDevCoder/skills` provides 34 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<name>/` and defines its own behavior in `SKILL.md`.
+`LightDevCoder/skills` provides 35 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<name>/` and defines its own behavior in `SKILL.md`.
 
 > **Release:** [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) is published from the `v0.2.0` tag — the release line carries the full 34 first-party Skills (the 33-package architecture plus `humanizer`) — and is the current stable release. The exact commit is recorded in the [release receipt](docs/evidence/releases/v0.2.0/RELEASE_RECEIPT.md).
 
@@ -143,6 +143,8 @@ See [ask-light](skills/ask-light/SKILL.md) and [docs/workflows/](docs/workflows/
 
 See [CATALOG.md](CATALOG.md) for full descriptions, invocation modes, and package paths.
 
+`light-travelpage` is available on `main` as an unreleased addition. It generates and maintains shared mobile travel pages with GitHub and Cloudflare Pages/D1. See the [package](skills/light-travelpage/SKILL.md) and [admission evidence](docs/evidence/admissions/light-travelpage/README.md).
+
 ## Provenance and Attribution
 
 | Origin | Policy | Repository Treatment |
@@ -155,7 +157,9 @@ See [CATALOG.md](CATALOG.md) for full descriptions, invocation modes, and packag
 
 Approved Matt Ports (11 packages): `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts`. Each package contains `ATTRIBUTION.md` and runs without external runtime dependencies.
 
-Adapted origin (1 package): `humanizer` is a substantially transformed first-party capability based on blader/humanizer (2.11.2) with a thin Chinese adaptation layer informed by op7418/Humanizer-zh; both MIT licenses are preserved in its [ATTRIBUTION.md](skills/humanizer/ATTRIBUTION.md).
+Adapted origin (2 packages): `humanizer` is a substantially transformed first-party capability based on blader/humanizer (2.11.2) with a thin Chinese adaptation layer informed by op7418/Humanizer-zh; both MIT licenses are preserved in its [ATTRIBUTION.md](skills/humanizer/ATTRIBUTION.md).
+
+`light-travelpage` substantially transforms do-tongxue/Travel-Plan-Page with protected D1 collaboration, validation, recovery and generation/update tooling; its MIT provenance is in [ATTRIBUTION.md](skills/light-travelpage/ATTRIBUTION.md).
 
 ## Documentation
 

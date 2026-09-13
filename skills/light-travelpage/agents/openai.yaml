@@ -1,0 +1,6 @@
+interface:
+  display_name: "Light-TravelPage"
+  short_description: "生成和更新手机旅行网页，共享行程、记账、待办与门票状态并部署上线"
+  default_prompt: "使用 $light-travelpage 把这些旅行资料生成多人共享网页，并通过 GitHub 和 Cloudflare 部署。"
+policy:
+  allow_implicit_invocation: true
