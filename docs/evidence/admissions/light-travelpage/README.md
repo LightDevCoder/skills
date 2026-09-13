@@ -13,3 +13,5 @@ Original three-round review ended with a finding. The user explicitly requested 
 A repeated [build/update check](build-update.json) confirmed an unchanged region retains its selected map template, raw/private inputs and tooling are absent from dist, and the explicitly referenced ticket is included.
 
 Complete acceptance history: [frozen requirements](REQUIREMENTS.md), [Charter](project-review/charter.md), [authorized continuation](project-review/resume-01.md), [Core verdict](project-review/verdict.md), [initial evaluation](evaluator.md), [final evaluation](evaluator-final.md). All three original rounds and repair records are preserved in `project-review/rounds/`; final installation logs are retained beside [installation evidence](installation.md).
+
+Published main admission commit: `26a9f8d`. Fresh GitHub package installation and CLI discovery succeeded; all 47 installed files equal the reviewed candidate. See [published installation receipt](installation.md#published-main-verification--2026-09-14). Actual collection verification: 28 tests; ask-light: 85 tests.

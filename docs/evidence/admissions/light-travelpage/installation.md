@@ -12,3 +12,7 @@ Both commands succeeded and listed light-travelpage under the isolated `.agents/
 `python3 /Users/light/.codex/skills/.system/skill-creator/scripts/quick_validate.py candidate/light-travelpage` returned `Skill is valid!`.
 
 Final revision refresh (6bee388): repeated both source forms in fresh `.scratch/admitted-package-check` and `.scratch/admitted-scope-check` directories. Logs: install-final-package.log and install-final-scope.log. Both list the Skill for Codex. A byte-for-byte comparison of every candidate source/resource file (excluding dependencies/build outputs and Finder metadata) confirmed both installed copies match the final candidate.
+
+## Published main verification — 2026-09-14
+
+After admission commit `26a9f8d` was pushed to `LightDevCoder/skills` main, a fresh `.scratch/published-install` project successfully ran `npx --yes skills add LightDevCoder/skills --skill light-travelpage --agent codex --yes --copy`, followed by `npx --yes skills list --agent codex`. All 47 installed files matched the final candidate byte for byte. Raw log: [install-remote.log](install-remote.log). This verifies the published main source and CLI discovery, not a new release tag or automatic loading in an existing host. No global skill directory was modified.

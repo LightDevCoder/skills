@@ -13,3 +13,5 @@ Verification:
 Initial checks correctly detected missing catalog installation field and old inventory/count expectations; repaired those specific synchronization omissions and reran the affected suites. No test was disabled.
 
 Admission README and supporting evidence are under `docs/evidence/admissions/light-travelpage/`. The integration is a proposal until final Evaluator/Core acceptance, not a premature mutation of the actual collection.
+
+Final application: Core PASS issued; exact package applied to the actual collection and rechecked byte for byte (47 files). Both actual-workspace suites passed (28 and 85). Published main admission commit: 26a9f8d. Fresh remote installation passed; see installation.md.

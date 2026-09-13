@@ -6,7 +6,7 @@ The public first-party collection's current stable release is [v0.2.0](https://g
 
 The standard install command is the generic `latest` form: it follows the repository's default revision, so `npx skills add LightDevCoder/skills` is the recommended interactive entry point to select the desired Skills and Agent hosts. Pinned release commands select published tags for reproducible installs. Historical verification commands (which tested full-collection installations across all supported agents) are documented below alongside historical evidence.
 
-The current main branch adds `light-travelpage` (35 admitted packages); it is not included in the existing stable tag. Its admission used fresh local-source package and scope installations with CLI discovery; see [evidence](evidence/admissions/light-travelpage/README.md). The new remote install command is not claimed verified until its post-push check is recorded.
+The current main branch adds `light-travelpage` (35 admitted packages); it is not included in the existing stable tag. Its admission used fresh local-source package and scope installations with CLI discovery; see [evidence](evidence/admissions/light-travelpage/README.md). A fresh GitHub package installation and CLI discovery succeeded after main commit `26a9f8d`; all 47 installed files matched the reviewed candidate. This verifies main, not a new tag or automatic host loading.
 
 ## Recommended installation
 
