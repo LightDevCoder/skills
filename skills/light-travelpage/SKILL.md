@@ -9,7 +9,7 @@ Turn travel materials into a maintained page for a travel group. This is a model
 
 ## Prepare
 
-Read supplied materials and any existing trip once. Extract confirmed itinerary, dates, places, bookings, tickets and explicit tasks; collect actual conflicts. Honor choices already made. Ask only questions needed to resolve a material ambiguity; leave unknown facts visibly pending. Do not invent bookings, coordinates or travel advice to fill the template.
+Read supplied materials and any existing trip once. Extract confirmed itinerary, dates, places, flights, accommodation bookings, tickets and explicit tasks; collect actual conflicts. Prepare Chinese and English display translations without changing facts; retain local place names and original addresses. For navigation, record each place's country/region and any verified provider links or coordinate system/source. Honor choices already made. Ask only questions needed to resolve a material ambiguity; leave unknown facts visibly pending. Do not invent bookings, coordinates or travel advice to fill the template.
 
 Use [data-contract.md](references/data-contract.md) when preparing or validating data. Keep a small private source index for conflicting or easily misread dates, times, locations and booking details; do not publish raw documents, extraction notes or local paths.
 
@@ -20,6 +20,8 @@ Use [data-contract.md](references/data-contract.md) when preparing or validating
 
 Run `npm ci`, `npm run build` and `npm test` in the generated project. Fix invalid facts/references or report the precise unresolved input; do not weaken the validator to produce a green result. Dates may remain null in an explicitly undated draft. Explain that maps are schematic; use place navigation links for actual navigation. Retain the builder's chosen template for existing regions.
 
+Use [display-and-navigation.md](references/display-and-navigation.md) when preparing bilingual content, flight/stay cards, regional maps or demo fixtures. The UI includes a local Chinese/English preference and fine serif typography for both languages. Map defaults follow each place: mainland China → Amap, Korea → Kakao, Russia → Yandex, other known regions → Google, with Apple Maps alternatives. Unknown regions require a service choice. Test actual links; a generated URL alone does not establish successful navigation.
+
 ## Share and deploy
 
 Read [cloud-sync.md](references/cloud-sync.md) for the single-group access and shared-state contract, then follow [deployment.md](references/deployment.md). Reuse existing authorized GitHub/Cloudflare login and scoped resources. Deployment authorization does not permit unrelated account changes. When a login or an essential deployment choice is unavailable, complete the local package and report that exact remaining step; do not call localhost a deployed page.
@@ -28,6 +30,6 @@ Private material belongs only in the user's authorized trip and hosting destinat
 
 ## Verify and deliver
 
-Verify the actual hosted URL, authentication on the page, JSON, ticket assets and API, then two independent sessions: shared member/settings/bill/task/ticket changes, conflict response, failed-save recovery and idempotent retry. In a narrow mobile viewport check the itinerary, ticket opening/fallback, navigation and saved expense after refresh. Polling must not erase a form draft. Run focused changed-feature tests during updates rather than repeat unrelated checks.
+Verify the actual hosted URL, authentication on the page, JSON, ticket assets and API, then two independent sessions: shared member/settings/bill/task/ticket changes, conflict response, failed-save recovery and idempotent retry. In a narrow mobile viewport check both languages, complete/pending flight and stay cards, itinerary, ticket opening/fallback, regional navigation and saved expense after refresh. Switching language and polling must not erase a form draft. Run focused changed-feature tests during updates rather than repeat unrelated checks.
 
 Deliver the live link, repository location, implemented sharing scope, concise verification evidence and any remaining limitations. Provide access material through a protected local file or the user's chosen secure channel. Do not claim deployment, independent review, or synchronization from a build log or mock alone. No booking, payment, new release/tag, or unrelated Skill invocation is implied.

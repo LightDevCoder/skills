@@ -6,6 +6,8 @@
 
 ## Unreleased
 
+- 更新 `light-travelpage`：中英切换、航班/住宿卡片、地区地图、细衬线字体及锚定导航按钮的下拉菜单。保留旅程身份、鉴权与共享状态；34 项运行测试通过。仅更新 main，不创建标签或 release。
+
 ### 新增 — Light-TravelPage
 
 - 收录第 35 个第一方包 `light-travelpage`（模型调用）：生成和更新旅行网页，默认 GitHub 源码 + 受保护的 Cloudflare D1 多人同步。

@@ -11,6 +11,8 @@ const initial = () => ({version:1, settings:{baseCurrency:'CNY',commonCurrencies
 async function setup(t) {
   const window = new Window({url:'http://localhost/'});
   t.after(() => window.happyDOM.abort());
+  window.confirm=()=>false;
+  window.eval(await readFile(new URL('../i18n.js',import.meta.url),'utf8'));
   window.testCurrencies = CURRENCY_CATALOG;
   window.document.body.innerHTML = '<div id="ledger-root"></div>';
   let remote = initial(), fail = null, calls = 0;
@@ -130,4 +132,20 @@ test('save rejected by pending guard cannot replace the original recovery draft 
   await h.window.TravelLedger.recoverSavedMutation([{adapter:h.adapter,snapshot:h.remote}]);
   assert.equal(h.$('[name="originalAmount"]').value,'25');
   assert.equal(h.window.TravelLedger.getSnapshot().bills[0].id,'confirmed');
+});
+
+test('bilingual ledger keeps the real form draft through switching and forced refresh', async t => {
+ const h=await setup(t);
+ h.input('[name="originalAmount"]','123.45');
+ h.input('[data-ledger-form="bill"] [name="note"]','交通');
+ h.window.TravelI18n.setLanguage('en');
+ assert.equal(h.$('[name="originalAmount"]').value,'123.45');
+ assert.equal(h.$('[name="note"]').value,'交通');
+ assert.ok(h.$('#ledger-root').textContent.includes('Save bill'));
+ await h.window.TravelLedger.refresh(true);
+ h.window.TravelI18n.apply();
+ assert.equal(h.$('[name="originalAmount"]').value,'123.45');
+ assert.equal(h.$('[name="note"]').value,'交通');
+ h.window.TravelI18n.setLanguage('zh-CN');
+ assert.ok(h.$('#ledger-root').textContent.includes('保存账单'));
 });

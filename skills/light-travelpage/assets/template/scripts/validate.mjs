@@ -65,7 +65,7 @@ export function validateTrip(data, root, { allowEmpty = false } = {}) {
     ];
   check(
     moduleNames.every((x) => typeof modules[x] === "boolean") &&
-      Object.keys(modules).every((x) => moduleNames.includes(x)),
+      Object.keys(modules).every((x) => moduleNames.includes(x) || x === "accommodations") && (modules.accommodations === undefined || typeof modules.accommodations === "boolean"),
     "Six module switches must be booleans",
   );
   check(data.config?.persistence?.mode === "d1", "Shared D1 mode is required");
@@ -126,6 +126,40 @@ export function validateTrip(data, root, { allowEmpty = false } = {}) {
   const places = unique(data.places, "places"),
     tickets = unique(data.ticketPlanning?.items, "tickets"),
     journeys = unique(data.flightJourneys, "journeys");
+  const stays = unique(data.accommodations || [], "accommodations");
+  const providers = ["amap", "apple", "google", "kakao", "yandex"];
+  check(data.config.language === undefined || ["zh-CN", "en"].includes(data.config.language), "Unsupported default language");
+  if (data.translations !== undefined) {
+    check(data.translations && typeof data.translations === "object" && !Array.isArray(data.translations), "Translations must be an object");
+    for (const entry of Object.values(data.translations || {})) check(entry && typeof entry === "object" && Object.keys(entry).every(k => ["en", "zh-CN"].includes(k) && typeof entry[k] === "string" && entry[k].trim().length > 0), "Invalid translation entry");
+  }
+  for (const place of data.places || []) {
+    check(place.countryCode === undefined || /^[A-Z]{2}$/.test(place.countryCode), "Invalid place country code");
+    if (place.geo) {
+      check(Number.isFinite(place.geo.lat) && Math.abs(place.geo.lat) <= 90 && Number.isFinite(place.geo.lng) && Math.abs(place.geo.lng) <= 180, "Invalid place coordinates");
+      check(place.geo.coordinateSystem === undefined || ["WGS84", "GCJ02", "unknown"].includes(place.geo.coordinateSystem), "Unsupported coordinate system");
+      if (place.geo.coordinateSystem && place.geo.coordinateSystem !== "unknown") check(typeof place.geo.source === "string" && Boolean(place.geo.source.trim()), "Coordinate source required");
+    }
+    if (place.navigation?.provider) check(providers.includes(place.navigation.provider), "Unknown navigation provider");
+    for (const [provider, service] of Object.entries(place.navigation?.services || {})) {
+      check(providers.includes(provider) && service && typeof service === "object", "Invalid navigation service");
+      if (service?.url) check(typeof service.url === "string" && service.url.startsWith("https://"), "Map URL must use HTTPS");
+      if (service?.placeId) check(typeof service.placeId === "string" && /^[\w-]+$/.test(service.placeId), "Invalid map place ID");
+    }
+  }
+  for (const stay of data.accommodations || []) {
+    const status = stay.status || "pending";
+    check(["pending", "confirmed", "unconfirmed"].includes(status), "Invalid accommodation status");
+    for (const field of ["checkIn", "checkOut"]) check(stay[field] == null && status === "pending" || validDate(stay[field]), "Invalid accommodation date");
+    if (validDate(stay.checkIn) && validDate(stay.checkOut)) check(stay.checkOut > stay.checkIn, "Accommodation checkout must follow checkin");
+    for (const field of ["checkInTime", "checkOutTime"]) if(stay[field]!=null) check(validTime(stay[field]), "Invalid accommodation time");
+    if(stay.placeId) check(places.has(stay.placeId), "Unknown accommodation place");
+    if(status !== "pending") check(Boolean(stay.name && stay.placeId && stay.roomType), "Complete accommodation details required");
+    if(stay.price) check(/^[A-Z]{3}$/.test(stay.price.currency) && Number.isFinite(stay.price.amount) && stay.price.amount>=0, "Invalid accommodation price");
+    for(const id of stay.ticketIds || []) check(tickets.has(id), "Unknown accommodation ticket");
+  }
+  for (const journey of data.flightJourneys || []) for(const id of journey.ticketIds || []) check(tickets.has(id), "Unknown flight ticket");
+  for(const id of data.demoNavigationPlaceIds || []) check(data.config.demo === true && places.has(id), "Demo navigation requires demo mode and existing place");
   unique(data.flights, "flights");
   unique(data.preTrip?.packingItems, "todos");
   const schedules = new Set();
@@ -151,6 +185,7 @@ export function validateTrip(data, root, { allowEmpty = false } = {}) {
         "Schedule IDs must be unique",
       );
       schedules.add(item.id);
+      if(item.accommodationId) check(stays.has(item.accommodationId), "Unknown accommodation reference");
       check(
         validTime(item.time) ||
           item.time === "待确认" ||
@@ -193,6 +228,7 @@ export function validateTrip(data, root, { allowEmpty = false } = {}) {
   for (const flight of data.flights || []) {
     check(journeys.has(flight.journeyId), "Flight references unknown journey");
     if (flight.placeholder) continue;
+    for(const point of [flight.departure,flight.arrival]) if(point?.placeId) check(places.has(point.placeId), "Unknown airport place");
     for (const point of [flight.departure, flight.arrival])
       check(
         validDate(point?.date) &&
@@ -226,6 +262,9 @@ export function validateTrip(data, root, { allowEmpty = false } = {}) {
           validOffset(point?.utcOffset),
         "Rental date/time/UTC offset invalid",
       );
+    for (const point of [car?.pickup, car?.dropoff]) {
+      if (point?.placeId) check((data.places || []).some(place => place.id === point.placeId), "Unknown rental placeId");
+    }
     if (car?.pickup && car.dropoff)
       check(
         Date.parse(

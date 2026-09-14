@@ -18,6 +18,7 @@ function normalizeTripConfig(raw = {}) {
     if (typeof raw.modules[name] !== "boolean") throw new Error(`trip-data.json config.modules.${name} must be boolean`);
     return [name, raw.modules[name]];
   }));
+  modules.accommodations = raw.modules.accommodations ?? Boolean(state.data?.accommodations?.length);
   const mode = raw?.persistence?.mode;
   if (mode !== "local" && mode !== "d1") throw new Error("trip-data.json config.persistence.mode must be local or d1");
   const sharedCollections = mode === "d1" ? [...new Set(raw.persistence.sharedCollections || [])] : [];
@@ -53,7 +54,7 @@ function applyModuleConfig() {
   document.documentElement.dataset.persistence = state.config.persistence.mode;
 
   const hashModules = {
-    "#flights": "flights", "#route": "overview", "#itinerary": "itinerary",
+    "#stays": "accommodations", "#flights": "flights", "#route": "overview", "#itinerary": "itinerary",
     "#drive": "driving", "#prep": "todo", "#ledger": "ledger", "#ledger-stats": "ledger"
   };
   const requestedModule = hashModules[location.hash];
@@ -237,7 +238,7 @@ function flightStopMarkup(stop, position, journeyStartDate) {
   return `
     <div class="flight-stop${position > 0 && position < stop.totalStops - 1 ? " is-transfer" : ""}">
       <span class="flight-stop__code">${escapeHtml(stop.airport.airportCode)}</span>
-      <span class="flight-stop__city">${escapeHtml(airportCity(stop.airport))}</span>
+      <span class="flight-stop__city">${escapeHtml(airportCity(stop.airport))}</span>${stop.airport.placeId ? window.TravelMaps.button(stop.airport.placeId, "机场地图") : ""}
       <span class="flight-stop__dot" aria-hidden="true"></span>
       <div class="flight-stop__timing">${timing}</div>
     </div>
@@ -268,7 +269,7 @@ function flightPlaceholderCard(journey, index) {
       <div class="flight-placeholder">
         <span class="flight-placeholder__eyebrow">资料待补充</span>
         <h3>${escapeHtml(journey.title || "航班信息待补充")}</h3>
-        <p>已按第二轮确认继续生成标准预览；系统没有猜测或伪造缺失的航班事实。</p>
+        <p>缺少以下资料，补充后显示完整航班。</p>
         ${missingFields.length ? `<ul>${missingFields.map((field) => `<li>${escapeHtml(field)}</li>`).join("")}</ul>` : ""}
       </div>
       <div class="flight-card__countdown-row">
@@ -316,6 +317,7 @@ function flightCard(journey, index) {
       <div class="flight-card__top">
         <span>FLIGHT ${String(index + 1).padStart(2, "0")} / ${String(state.data.flightJourneys.length).padStart(2, "0")}</span>
       </div>
+      ${journey.demo ? `<p>演示资料</p>` : ""}${(journey.ticketIds || []).map(id => `<button type="button" data-ticket-open="${escapeHtml(id)}">查看票据</button>`).join("")}
       <div class="flight-card__airlines">${escapeHtml([...new Set(flights.map((flight) => flight.airline.nameZh || flight.airline.name))].join(" · "))}</div>
       <div class="flight-flow" style="--route-columns: ${stops.map((_, stopIndex) => stopIndex < stops.length - 1 ? "minmax(0,1fr) minmax(34px,.5fr)" : "minmax(0,1fr)").join(" ")}">
         ${routeItems.join("")}
@@ -451,9 +453,7 @@ function dayCard(day) {
   const expanded = state.expandedDay === day.day;
   const schedule = day.schedule.map((item) => {
     const destinations = navigationDestinations(item);
-    const mapLinks = destinations.map((destination) => `
-      <button type="button" class="schedule-map-link" data-map-query="${escapeHtml(destination.query)}" data-map-url="${escapeHtml(destination.url || "")}" data-map-label="${escapeHtml(destination.label)}" aria-haspopup="dialog" aria-controls="place-map" aria-label="查看 ${escapeHtml(destination.label)} 的地图">📍 ${escapeHtml(destination.label)}</button>
-    `).join("");
+    const mapLinks = destinations.map(d => window.TravelMaps.button(d.id, d.label, {id:d.id,name:d.label,address:d.query,googleMapsUrl:d.url})).join("");
     const scheduleTickets = ticketsForSchedule(day, item).map(inlineTicketMarkup).join("");
     return `
       <li class="schedule-item">
@@ -461,6 +461,7 @@ function dayCard(day) {
         <div class="schedule-content">
           <div class="schedule-text">${escapeHtml(item.text)}</div>
           ${scheduleTickets}
+          ${item.accommodationId ? `<a href="#stay-${escapeHtml(item.accommodationId)}">查看住宿</a>` : ""}
           ${mapLinks ? `<div class="schedule-map-links">${mapLinks}</div>` : ""}
         </div>
       </li>
@@ -572,11 +573,6 @@ function renderTimeline() {
   $("#day-count").textContent = `${state.data.days.length} DAYS`;
   $("#timeline").innerHTML = state.data.days.map(dayCard).join("");
   $("#timeline").onclick = (event) => {
-    const ticketButton = event.target.closest("[data-ticket-open]");
-    if (ticketButton) {
-      openTicketDialog(ticketButton.dataset.ticketOpen, ticketButton);
-      return;
-    }
     const toggle = event.target.closest(".day-toggle");
     if (!toggle) return;
     const card = toggle.closest(".day-card");
@@ -643,6 +639,15 @@ function rentalStatus(rental) {
   return { label: "已超过预约还车时间", target: dropoff, complete: true };
 }
 
+function rentalNavigation(point, role) {
+  const id = point.placeId || `rental-${role}`;
+  const label = point.location || point.vehicleReturnPoint || point.address;
+  if (!label && !point.placeId) return "";
+  return window.TravelMaps?.button(id, "地图导航", point.placeId ? undefined : {
+    id, name: label, address: point.address, countryCode: point.countryCode
+  }) || "";
+}
+
 function renderRental() {
   const transport = state.data.groundTransport;
   const rental = transport.rentalCar;
@@ -672,11 +677,11 @@ function renderRental() {
         <div class="rental-stops">
           <div class="rental-stop">
             <span class="rental-stop__label">PICK UP</span>
-            <div><b>${formatCompactDate(rental.pickup.date)} ${escapeHtml(rental.pickup.time)}</b><span>${escapeHtml(rental.pickup.location)}<br>${escapeHtml(rental.pickup.address)}</span></div>
+            <div><b>${formatCompactDate(rental.pickup.date)} ${escapeHtml(rental.pickup.time)}</b><span>${escapeHtml(rental.pickup.location)}<br>${escapeHtml(rental.pickup.address)}</span>${rentalNavigation(rental.pickup, "pickup")}</div>
           </div>
           <div class="rental-stop">
             <span class="rental-stop__label">RETURN</span>
-            <div><b>${formatCompactDate(rental.dropoff.date)} ${escapeHtml(rental.dropoff.time)}</b><span>${escapeHtml(rental.dropoff.vehicleReturnPoint)}<br>建议 ${escapeHtml(rental.dropoff.recommendedArrivalTime)} 抵达机场区域</span></div>
+            <div><b>${formatCompactDate(rental.dropoff.date)} ${escapeHtml(rental.dropoff.time)}</b><span>${escapeHtml(rental.dropoff.vehicleReturnPoint)}<br>建议 ${escapeHtml(rental.dropoff.recommendedArrivalTime)} 抵达机场区域</span>${rentalNavigation(rental.dropoff, "dropoff")}</div>
           </div>
         </div>
         <div class="rental-price"><span>柜台支付 · ${rental.rentalPeriodDays} 天</span><strong>${escapeHtml(price.currency)} ${Number(price.payAtCounter).toFixed(2)}</strong></div>
@@ -792,7 +797,7 @@ function renderTodoList() {
       <label>
         <input type="checkbox" ${todo.completed ? "checked" : ""} aria-label="完成：${escapeHtml(todo.text)}">
         <span class="todo-check" aria-hidden="true">✓</span>
-        <span class="todo-text">${escapeHtml(todo.text)}</span>
+        <span class="todo-text" data-no-translate>${escapeHtml(todo.text)}</span>
       </label>
       <button type="button" class="todo-delete" aria-label="删除：${escapeHtml(todo.text)}">删除</button>
     </div>`).join("") : `<p class="todo-empty">还没有准备事项，添加第一项吧。</p>`;
@@ -889,6 +894,10 @@ function openTicketDialog(ticketId, opener) {
 }
 
 function setupTicketDialog() {
+  document.addEventListener("click", event => {
+    const button = event.target.closest("[data-ticket-open]");
+    if (button) openTicketDialog(button.dataset.ticketOpen, button);
+  });
   const dialog = $("#ticket-dialog");
   if (!dialog) return;
   const close = () => {
@@ -902,44 +911,6 @@ function setupTicketDialog() {
     if (!body.querySelector(".ticket-dialog__preview--pdf")) body.replaceChildren();
     ticketDialogOpener?.focus({ preventScroll: true });
     ticketDialogOpener = null;
-  });
-}
-
-function setupPlaceMap() {
-  const panel = $("#place-map");
-  const frame = $("#place-map-frame");
-  let opener;
-  let previousOverflow = "";
-  const close = () => {
-    panel.hidden = true;
-    frame.src = "about:blank";
-    document.body.style.overflow = previousOverflow;
-    opener?.focus();
-  };
-  document.addEventListener("click", (event) => {
-    const link = event.target.closest("button[data-map-query]");
-    if (!link) return;
-    event.preventDefault();
-    opener = link;
-    $("#place-map-title").textContent = link.dataset.mapLabel;
-    $("#place-map-external").href = safeExternalUrl(link.dataset.mapUrl) || mapsSearch(link.dataset.mapQuery);
-    frame.title = `${link.dataset.mapLabel} Google Maps`;
-    frame.src = `https://maps.google.com/maps?q=${encodeURIComponent(link.dataset.mapQuery)}&output=embed`;
-    previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    panel.hidden = false;
-    $("#place-map-close").focus();
-  });
-  $("#place-map-close").onclick = close;
-  panel.addEventListener("click", (event) => { if (event.target === panel) close(); });
-  panel.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") close();
-    if (event.key === "Tab") {
-      const first = $("#place-map-close");
-      const last = $("#place-map-external");
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
-    }
   });
 }
 
@@ -978,10 +949,7 @@ async function init() {
     renderHero();
     if (moduleEnabled("flights")) renderFlights();
     if (moduleEnabled("overview")) setupRouteExplorer();
-    if (moduleEnabled("itinerary")) {
-      setupPlaceMap();
-      setupTicketDialog();
-    }
+    setupTicketDialog();
     if (moduleEnabled("todo") || moduleEnabled("itinerary")) {
       createRuntimeAdapters();
       try {
@@ -998,6 +966,7 @@ async function init() {
       await window.TravelLedger?.init?.({ tripId: state.data.metadata.tripId, config: state.config });
     }
     startCountdowns();
+    window.TravelI18n?.apply();
   } catch (error) {
     console.error("Travel data could not be loaded", error);
     $("#loading-error").hidden = false;

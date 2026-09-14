@@ -10,6 +10,9 @@
   <title>Light-TravelPage</title>
   <link rel="stylesheet" href="styles.css?v=20260910-3">
   <link rel="stylesheet" href="ledger.css?v=20260910-2">
+  <script src="i18n.js" defer></script>
+  <script src="map-navigation.js" defer></script>
+  <script src="travel-cards.js" defer></script>
   <script src="runtime-storage.js?v=20260910-2" defer></script>
   <script src="overview-map.js?v=20260910-2" defer></script>
   <script src="route-ui.js?v=20260910-2" defer></script>
@@ -23,11 +26,13 @@
   <a class="skip-link" id="skip-link" href="#main">跳到主要内容</a>
   <header class="topbar" id="topbar">
     <a class="wordmark" id="wordmark" href="#top" aria-label="返回顶部"></a>
+    <button type="button" id="language-toggle" data-no-translate aria-label="中文 / English">中文 / EN</button>
     <nav class="primary-navigation" aria-label="主要模块">
       <details class="travel-navigation" id="travel-navigation" hidden>
         <summary id="travel-navigation-trigger">旅行信息</summary>
         <div class="travel-navigation-menu" role="menu" aria-label="旅行信息栏目">
           <a href="#flights" role="menuitem" data-module="flights" hidden>航班</a>
+          <a href="#stays" role="menuitem" data-module="accommodations" hidden>住宿</a>
           <a href="#route" role="menuitem" data-module="overview" hidden>路线</a>
           <a href="#itinerary" role="menuitem" data-module="itinerary" hidden>行程</a>
           <a href="#drive" role="menuitem" data-module="driving" hidden>自驾</a>
@@ -58,6 +63,8 @@
       <div class="carousel-dots" id="flight-dots" aria-hidden="true"></div>
     </section>
 
+    <section class="section" id="stays" data-module="accommodations" hidden><div class="section-heading"><div><p class="section-kicker">STAY</p><h2>住宿安排</h2></div></div><div id="accommodation-cards"></div></section>
+
     <section class="section route-section" id="route" aria-labelledby="route-title" data-module="overview" hidden>
       <div class="section-heading">
         <div>
@@ -67,7 +74,7 @@
         <span class="soft-label" id="route-day-count"></span>
       </div>
       <div id="route-explorer"></div>
-      <p class="route-caption">路线为行程示意，实际驾驶和步行请使用当天的 Google Maps 导航。</p>
+      <p class="route-caption">路线为行程示意；点击地点，使用当地地图导航。</p>
     </section>
 
     <section class="section itinerary-section" id="itinerary" aria-labelledby="itinerary-title" data-module="itinerary" hidden>
@@ -133,14 +140,6 @@
     </header>
     <div class="ticket-dialog__body" id="ticket-dialog-body"></div>
   </dialog>
-
-  <div class="place-map-overlay" id="place-map" hidden>
-    <section class="place-map-sheet" role="dialog" aria-modal="true" aria-labelledby="place-map-title">
-      <header><h2 id="place-map-title">地点地图</h2><button id="place-map-close" type="button" aria-label="关闭地点地图">关闭</button></header>
-      <iframe id="place-map-frame" title="地点地图" src="about:blank" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-      <footer><p>地图需要能够访问 Google 的网络。若一直空白，请在系统浏览器中打开。</p><a id="place-map-external" target="_blank" rel="noopener noreferrer">用 Google Maps 打开 ↗</a></footer>
-    </section>
-  </div>
 
   <div class="loading-error" id="loading-error" hidden>
     <strong>行程暂时无法载入</strong>

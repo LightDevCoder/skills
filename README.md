@@ -143,7 +143,7 @@ See [ask-light](skills/ask-light/SKILL.md) and [docs/workflows/](docs/workflows/
 
 See [CATALOG.md](CATALOG.md) for full descriptions, invocation modes, and package paths.
 
-`light-travelpage` is available on `main` as an unreleased addition. It generates and maintains shared mobile travel pages with GitHub and Cloudflare Pages/D1. See the [package](skills/light-travelpage/SKILL.md) and [admission evidence](docs/evidence/admissions/light-travelpage/README.md).
+`light-travelpage` is available on `main` as an unreleased addition. It generates and maintains shared mobile travel pages with GitHub and Cloudflare Pages/D1. See the [package](skills/light-travelpage/SKILL.md) and [admission evidence](docs/evidence/admissions/light-travelpage/README.md). It supports Chinese/English switching, flight and stay cards, fine serif typography, and destination-specific map services.
 
 ## Provenance and Attribution
 

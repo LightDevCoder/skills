@@ -1,5 +1,5 @@
 (() => {
-  const TRAVEL_HASHES = new Set(["", "#top", "#flights", "#route", "#itinerary", "#drive", "#prep"]);
+  const TRAVEL_HASHES = new Set(["", "#top", "#flights", "#stays", "#route", "#itinerary", "#drive", "#prep"]);
   const isLedgerHash = (hash) => hash === "#ledger" || hash.startsWith("#ledger-");
   const ledgerEnabled = () => !document.querySelector("#ledger-navigation-link")?.hidden;
   const viewForHash = (hash) => isLedgerHash(hash) && ledgerEnabled() ? "ledger" : "travel";

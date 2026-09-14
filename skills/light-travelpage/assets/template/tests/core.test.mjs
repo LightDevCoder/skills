@@ -39,6 +39,8 @@ function fixture() {
   d.flights = [];
   d.flightJourneys = [];
   d.places = [];
+  d.accommodations = [];
+  d.demoNavigationPlaceIds = [];
   return d;
 }
 function database() {
@@ -495,4 +497,13 @@ test('batch recovery delivers successful snapshots when another adapter still fa
     assert.equal(recovered[1].adapter,b);assert.match(recovered[1].error.message,/offline/);
     assert.equal(a.pending,false);assert.equal(b.pending,true);
   } finally {globalThis.fetch=savedFetch;}
+});
+
+test('only the translation runtime is publicly readable for bilingual sign-in', async()=>{
+ const env={TRIP_ID:'fixture',SESSION_SECRET:'x'.repeat(40),ACCESS_CODE_HASH:await digest('test')};
+ assert.equal(await authenticate({env,request:new Request('https://example.test/i18n.js')}),null);
+ for(const route of ['/trip-data.json','/assets/tickets/demo.pdf','/map-navigation.js']) {
+  const denied=await authenticate({env,request:new Request('https://example.test'+route)});
+  assert.equal(denied.status,303);
+ }
 });

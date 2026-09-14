@@ -67,7 +67,7 @@ export function sameOrigin(request) {
   return request.headers.get("origin") === new URL(request.url).origin;
 }
 const loginPage = (error = "") =>
-  `<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Light-TravelPage · 同行入口</title><style>body{margin:0;background:#f3f6f2;color:#263a32;font:16px system-ui;display:grid;min-height:100svh;place-items:center}main{max-width:360px;padding:32px}h1{font-size:30px}input,button{box-sizing:border-box;width:100%;padding:14px;margin-top:16px;border:1px solid #a5b2a8;border-radius:12px;font:inherit}button{background:#36584a;color:white}p{line-height:1.7}.error{color:#a32424}</style><main><p>LIGHT / TRAVELPAGE</p><h1>和同行的人<br>一起出发</h1><p>输入旅行小组的访问码，查看行程、门票和共享账本。</p><form method="post" action="/auth/login"><label for="code">小组访问码</label><input id="code" name="code" type="password" autocomplete="current-password" required maxlength="256"><button>进入旅程</button></form><p role="alert" class="error">${error}</p></main></html>`;
+  `<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Light-TravelPage · 同行入口</title><script src="/i18n.js" defer></script><style>body{margin:0;background:#f3f6f2;color:#263a32;font:300 17px/1.7 Baskerville,"Songti SC","Noto Serif CJK SC",STSong,SimSun,serif;display:grid;min-height:100svh;place-items:center}main{max-width:360px;padding:32px}h1{font-size:34px;font-weight:300;line-height:1.4}input,button{box-sizing:border-box;width:100%;padding:14px;margin-top:16px;border:1px solid #a5b2a8;border-radius:12px;font:inherit}button{background:#36584a;color:white}p{line-height:1.7}.error{color:#a32424}</style><main><button type="button" id="language-toggle" data-no-translate>中文 / EN</button><p>LIGHT / TRAVELPAGE</p><h1>和同行的人<br>一起出发</h1><p>输入旅行小组的访问码，查看行程、门票和共享账本。</p><form method="post" action="/auth/login"><label for="code">小组访问码</label><input id="code" name="code" type="password" autocomplete="current-password" required maxlength="256"><button>进入旅程</button></form><p role="alert" class="error">${error}</p></main></html>`;
 export function secure(response) {
   const headers = new Headers(response.headers);
   headers.set("Cache-Control", "no-store");
@@ -86,6 +86,7 @@ export async function authenticate(context) {
     return secure(
       new Response("Travel group access is not configured.", { status: 503 }),
     );
+  if (url.pathname === "/i18n.js" && ["GET", "HEAD"].includes(request.method)) return null;
   if (url.pathname === "/login" && request.method === "GET")
     return secure(
       new Response(loginPage(), {

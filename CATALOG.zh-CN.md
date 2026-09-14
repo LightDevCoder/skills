@@ -159,13 +159,13 @@
 
 ### light-travelpage
 
-- **作用：** 从资料生成或更新手机旅行网页，共享同行人、账单、币种设置、待办与门票状态。
+- **作用：** 从资料生成或更新中英双语手机旅行网页，提供航班/住宿卡片、地区地图导航，共享同行人、账单、币种设置、待办与门票状态。
 - **时机：** 创建或维护旅行网页；普通旅行咨询和预订购买不触发。
 - **调用：** Model-invoked。
 - **包：** [skills/light-travelpage/](skills/light-travelpage/)
 - **安装路径：** 宿主可识别 Skills 根目录下的 `skills/light-travelpage/`。
 - **状态：** 实质性转换的第一方能力，已准入 main、尚未发布版本标签；默认 GitHub + Cloudflare Pages、Functions、D1，每个部署一个同权限小组。
-- **证据：** [准入](docs/evidence/admissions/light-travelpage/README.md) · [来源](skills/light-travelpage/ATTRIBUTION.md)。
+- **证据：** [准入](docs/evidence/admissions/light-travelpage/README.md) · [本次更新](docs/evidence/maintenance/2026-09-15-light-travelpage.md) · [来源](skills/light-travelpage/ATTRIBUTION.md)。
 
 ### manuscript-ops
 

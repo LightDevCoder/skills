@@ -6,6 +6,8 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
+- Update `light-travelpage` with Chinese/English switching, flight/stay cards, regional maps, fine serif typography and an anchored travel menu. Preserve trip identity, authentication and shared state; 34 runtime tests pass. Main-only update; no tag or release.
+
 ### Added — Light-TravelPage
 
 - Admit model-invoked `light-travelpage` as the 35th first-party package: travel-page generation/update with protected Cloudflare D1 collaboration and GitHub source.

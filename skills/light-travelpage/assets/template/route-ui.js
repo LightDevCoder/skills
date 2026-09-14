@@ -175,13 +175,8 @@ function setupRouteExplorer() {
     if (event.target.closest("[data-close-route-popover]")) { closePopover(true); return; }
     const placePin = event.target.closest("[data-place-id]");
     if (placePin) {
-      const source = travelMapSource(state.data?.routeMap, placePin.dataset.mapRegion);
-      const options = placeOptions(source, placePin.dataset.placeId);
-      const [label, query] = options[0];
-      showPopover(placePin, `<header><small>${escapeHtml(placePin.dataset.placeRole)}</small><strong data-popup-place-label>${escapeHtml(label)}</strong></header>
-        ${options.length > 1 ? `<div class="popup-place-options">${options.map(([name, value], index) => `<button type="button" data-popup-query="${escapeHtml(value)}" data-popup-label="${escapeHtml(name)}" aria-pressed="${index === 0}">${escapeHtml(name)}</button>`).join("")}</div>` : ""}
-        <iframe title="${escapeHtml(label)} Google Maps" src="https://maps.google.com/maps?q=${encodeURIComponent(query)}&output=embed" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-        <footer><a data-popup-external href="${mapsSearch(query)}" target="_blank" rel="noopener noreferrer">用 Google Maps 打开 ↗</a><small>页内地图供查看，实际导航以地图服务结果为准。</small></footer>`, true);
+      const place = state.data.places.find(p => p.id === placePin.dataset.placeId);
+      if (place) { closePopover(); window.TravelMaps.open(place, placePin); }
       return;
     }
     const pin = event.target.closest("[data-transport-day]");
@@ -190,16 +185,6 @@ function setupRouteExplorer() {
       const source = travelMapSource(state.data?.routeMap, pin.dataset.mapRegion);
       const group = dailyMapLayoutFor(source, day.day).transport[Number(pin.dataset.transportGroup)];
       showPopover(pin, scheduleItemsForPin(day, group).map((item) => `<div class="transport-leg"><strong>${escapeHtml(transportNames[item.type] || "交通")} · ${escapeHtml(item.time)}</strong><p>${escapeHtml(item.text)}</p></div>`).join(""));
-      return;
-    }
-    const option = event.target.closest("[data-popup-query]");
-    if (option && popover) {
-      const query = option.dataset.popupQuery;
-      const label = option.dataset.popupLabel;
-      $$("[data-popup-query]", popover).forEach((button) => button.setAttribute("aria-pressed", String(button === option)));
-      $("[data-popup-place-label]", popover).textContent = label;
-      const frame = $("iframe", popover); frame.title = `${label} Google Maps`; frame.src = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
-      $("[data-popup-external]", popover).href = mapsSearch(query);
       return;
     }
     if (event.target.closest(".route-popover")) return;

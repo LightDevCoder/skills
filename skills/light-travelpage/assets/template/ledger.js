@@ -1,6 +1,7 @@
 import { CURRENCY_CATALOG } from "./currencies.js";
 (() => {
   "use strict";
+  window.TravelI18n?.addTranslations(Object.fromEntries(CURRENCY_CATALOG.map(c => [c.nameZh, {en:c.nameEn}])));
 
   const STORAGE_VERSION = 1;
   const DEFAULT_SETTINGS = Object.freeze({
@@ -120,7 +121,7 @@ import { CURRENCY_CATALOG } from "./currencies.js";
   function formatMoney(cents, currencyCode) {
     const amount = Number(cents || 0) / 100;
     try {
-      return new Intl.NumberFormat("zh-CN", {
+      return new Intl.NumberFormat(window.TravelI18n?.language || "zh-CN", {
         style: "currency",
         currency: currencyCode,
         minimumFractionDigits: 2,
@@ -514,7 +515,7 @@ import { CURRENCY_CATALOG } from "./currencies.js";
           ${renderAvatar(traveler)}
           <span class="ledger-person-check" aria-hidden="true">✓</span>
         </span>
-        <span class="ledger-person-name">${escapeHtml(traveler.name)}</span>
+        <span class="ledger-person-name"><span data-no-translate>${escapeHtml(traveler.name)}</span></span>
       </label>`;
   }
 
@@ -625,7 +626,7 @@ import { CURRENCY_CATALOG } from "./currencies.js";
     if (!value) return "未填写时间";
     const parsed = new Date(value);
     if (Number.isNaN(parsed.getTime())) return value.replace("T", " ");
-    return new Intl.DateTimeFormat("zh-CN", {
+    return new Intl.DateTimeFormat(window.TravelI18n?.language || "zh-CN", {
       month: "numeric",
       day: "numeric",
       hour: "2-digit",
@@ -645,7 +646,7 @@ import { CURRENCY_CATALOG } from "./currencies.js";
         <button type="button" data-ledger-action="cancel-note-edit" aria-label="取消修改备注">×</button>
       </form>` : `
       <button class="ledger-bill-note-trigger" type="button" data-ledger-action="edit-bill-note" data-ledger-id="${escapeAttribute(bill.id)}" aria-label="编辑备注：${escapeAttribute(bill.note || "暂无")}">
-        <span>备注：</span><span>${escapeHtml(bill.note || "暂无")}</span>
+        <span>备注：</span><span ${bill.note ? "data-no-translate" : ""}>${escapeHtml(bill.note || "暂无")}</span>
       </button>`;
   }
 
@@ -753,7 +754,7 @@ import { CURRENCY_CATALOG } from "./currencies.js";
           <div class="ledger-bill-payer">
             <span>买单</span>
             ${renderAvatar(payer, "small")}
-            <b>${escapeHtml(payer?.name || "")}</b>
+            <b><span data-no-translate>${escapeHtml(payer?.name || "")}</span></b>
           </div>
           <div class="ledger-bill-participants" aria-label="参与分账：${escapeAttribute(participants.map((person) => person.name).join("、"))}">
             <span>分账</span>
@@ -803,7 +804,7 @@ import { CURRENCY_CATALOG } from "./currencies.js";
             <button class="ledger-text-button" type="button" data-ledger-action="open-members">管理</button>
           </div>
           <div class="ledger-members-inline">
-            ${ledgerData.travelers.map((traveler) => `<div class="ledger-person-static">${renderAvatar(traveler)}<span>${escapeHtml(traveler.name)}</span></div>`).join("")}
+            ${ledgerData.travelers.map((traveler) => `<div class="ledger-person-static">${renderAvatar(traveler)}<span><span data-no-translate>${escapeHtml(traveler.name)}</span></span></div>`).join("")}
             <button class="ledger-add-person" type="button" data-ledger-action="open-members" aria-label="添加同行人"><span aria-hidden="true">＋</span><small>添加</small></button>
           </div>
         </section>
@@ -854,7 +855,7 @@ import { CURRENCY_CATALOG } from "./currencies.js";
                   <div class="ledger-transfer-row">
                     <div class="ledger-transfer-person">
                       ${renderAvatar(from)}
-                      <span><strong>${escapeHtml(from?.name || "")}</strong><small>转给 ${escapeHtml(to?.name || "")}</small></span>
+                      <span><strong><span data-no-translate>${escapeHtml(from?.name || "")}</span></strong><small>转给 <span data-no-translate>${escapeHtml(to?.name || "")}</span></small></span>
                     </div>
                     <strong class="ledger-transfer-amount">${escapeHtml(formatMoney(transfer.amountCents, baseCurrency))}</strong>
                   </div>`;
@@ -875,7 +876,7 @@ import { CURRENCY_CATALOG } from "./currencies.js";
               ${stats.members.map((member) => `
                 <details class="ledger-member-stat" open>
                   <summary class="ledger-member-stat-summary">
-                    <span class="ledger-member-identity">${renderAvatar(member.traveler)}<strong>${escapeHtml(member.traveler.name)}</strong></span>
+                    <span class="ledger-member-identity">${renderAvatar(member.traveler)}<strong><span data-no-translate>${escapeHtml(member.traveler.name)}</span></strong></span>
                     <span class="ledger-member-chevron" aria-hidden="true">›</span>
                   </summary>
                   <div class="ledger-member-stat-body">
@@ -910,7 +911,7 @@ import { CURRENCY_CATALOG } from "./currencies.js";
     return `
       <div class="ledger-member-edit-row ledger-member-edit-row-static">
         ${renderAvatar(traveler)}
-        <strong>${escapeHtml(traveler.name)}</strong>
+        <strong><span data-no-translate>${escapeHtml(traveler.name)}</span></strong>
         <span class="ledger-member-edit-actions">
           <button class="ledger-text-button" type="button" data-ledger-action="edit-member" data-ledger-id="${escapeAttribute(traveler.id)}">编辑</button>
           <button class="ledger-icon-button ledger-danger-button" type="button" data-ledger-action="delete-member" data-ledger-id="${escapeAttribute(traveler.id)}" aria-label="删除 ${escapeAttribute(traveler.name)}">删除</button>

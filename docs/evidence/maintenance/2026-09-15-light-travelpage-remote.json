@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-09-14T20:18:09.938Z",
+  "url": "https://light-travelpage.pages.dev",
+  "demoCommit": "eae2bd2",
+  "deployment": "91f6254f",
+  "unauthenticatedProtection": "pass",
+  "authenticatedCardsTranslationsAssets": "pass",
+  "runtimeAssetByteComparison": "pass",
+  "sharedStateRead": "pass",
+  "protectedPdfRead": "pass",
+  "mutationsPerformed": false
+}

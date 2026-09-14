@@ -143,7 +143,7 @@ $ask-light workflow
 
 每个 Skill 的完整功能、使用时机与调用方式见 [CATALOG.zh-CN.md](CATALOG.zh-CN.md)。
 
-`light-travelpage` 已收录到 `main`，尚未包含在版本标签中：从旅行资料生成和维护手机网页，通过 GitHub 与 Cloudflare Pages/D1 共享账单、成员、待办和票券状态。见 [Skill 入口](skills/light-travelpage/SKILL.md)和[准入证据](docs/evidence/admissions/light-travelpage/README.md)。
+`light-travelpage` 已收录到 `main`，尚未包含在版本标签中：从旅行资料生成和维护手机网页，通过 GitHub 与 Cloudflare Pages/D1 共享账单、成员、待办和票券状态。见 [Skill 入口](skills/light-travelpage/SKILL.md)和[准入证据](docs/evidence/admissions/light-travelpage/README.md)。 支持中英切换、航班与住宿卡片、细衬线字体和按目的地选择地图服务。
 
 ## 溯源与归属
 

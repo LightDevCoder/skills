@@ -27,7 +27,7 @@ body {
     linear-gradient(rgba(40, 123, 144, 0.035) 1px, transparent 1px),
     var(--paper);
   background-size: 100% 32px;
-  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-family: "Baskerville", "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "STSong", "SimSun", serif;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
 }
@@ -63,8 +63,8 @@ img { display: block; max-width: 100%; }
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
 }
-.wordmark { min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; font-weight: 800; letter-spacing: 0.06em; font-size: 12px; }
-.wordmark span { color: var(--muted); font-weight: 600; }
+.wordmark { min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; font-weight: 400; letter-spacing: 0.06em; font-size: 12px; }
+.wordmark span { color: var(--muted); font-weight: 400; }
 .topbar nav { display: flex; gap: 2px; }
 .topbar nav a {
   min-width: 44px;
@@ -76,7 +76,7 @@ img { display: block; max-width: 100%; }
   color: var(--muted);
   text-decoration: none;
   font-size: 12px;
-  font-weight: 650;
+  font-weight: 400;
 }
 .topbar nav a:active { color: var(--lake); }
 
@@ -87,17 +87,17 @@ main { overflow: hidden; }
   margin: 0 0 10px;
   color: var(--lake);
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 400;
   letter-spacing: 0.16em;
 }
-.hero h1 { margin: 0; max-width: 620px; font-size: clamp(38px, 12vw, 64px); line-height: 0.98; letter-spacing: -0.06em; font-weight: 820; }
-.hero__date { margin: 14px 0 0; font: 650 14px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.03em; }
+.hero h1 { margin: 0; max-width: 620px; font-size: clamp(38px, 12vw, 64px); line-height: 0.98; letter-spacing: 0.005em; font-weight: 400; }
+.hero__date { margin: 14px 0 0; font: 400 14px/1.4 "Baskerville", "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "STSong", "SimSun", serif; letter-spacing: 0.03em; }
 
 .section { padding: 44px 18px; scroll-margin-top: 48px; }
 .flights-section { padding-top: 24px; padding-bottom: 34px; }
 .section-heading { margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
 .section-heading h2 { margin: 0; font-size: 30px; line-height: 1; letter-spacing: -0.04em; }
-.section-index, .soft-label { margin: 0; color: var(--muted); font: 700 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.08em; }
+.section-index, .soft-label { margin: 0; color: var(--muted); font: 400 11px/1 "Baskerville", "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "STSong", "SimSun", serif; letter-spacing: 0.08em; }
 
 .flight-carousel {
   display: flex;
@@ -121,27 +121,27 @@ main { overflow: hidden; }
   display: flex;
   flex-direction: column;
 }
-.flight-card__top { color: #a9c3c8; font: 700 11px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.08em; }
+.flight-card__top { color: #a9c3c8; font: 400 11px/1.3 "Baskerville", "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "STSong", "SimSun", serif; letter-spacing: 0.08em; }
 .flight-card__airlines { margin-top: 7px; color: #7599a0; font-size: 10px; }
 .flight-flow { margin-top: 17px; display: grid; grid-template-columns: var(--route-columns); align-items: start; }
 .flight-stop { min-width: 0; text-align: center; }
 .flight-stop:first-child { text-align: left; }
 .flight-stop:last-child { text-align: right; }
-.flight-stop__code { display: block; color: #fff; font: 760 clamp(25px, 8vw, 36px)/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: -.05em; }
+.flight-stop__code { display: block; color: #fff; font: 400 clamp(25px, 8vw, 36px)/1 "Baskerville", "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "STSong", "SimSun", serif; letter-spacing: 0; }
 .flight-stop__city { display: block; min-height: 30px; margin-top: 5px; color: #b8cccf; font-size: 11px; line-height: 1.25; }
 .flight-stop__dot { position: relative; z-index: 1; display: inline-block; width: 9px; height: 9px; margin: 8px 0 10px; border: 2px solid #8fc6d0; border-radius: 50%; background: var(--ink); }
 .flight-stop__timing { display: flex; flex-direction: column; gap: 3px; color: #9db7bc; font-size: 9px; line-height: 1.3; }
-.flight-stop__timing b { color: #eff8f8; font-size: 10px; font-weight: 720; }
+.flight-stop__timing b { color: #eff8f8; font-size: 10px; font-weight: 400; }
 .flight-stop__timing em { color: #e0a983; font-style: normal; font-size: 9px; }
 .flight-segment { min-width: 0; padding-top: 53px; color: #91b9c0; text-align: center; }
-.flight-segment span { display: block; overflow: hidden; font: 700 9px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; text-overflow: ellipsis; white-space: nowrap; }
+.flight-segment span { display: block; overflow: hidden; font: 400 9px/1.2 "Baskerville", "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "STSong", "SimSun", serif; text-overflow: ellipsis; white-space: nowrap; }
 .flight-segment i { display: block; height: 1px; margin-top: 9px; background: rgba(143,198,208,.5); color: #8fc6d0; font-style: normal; font-size: 13px; line-height: 1px; text-align: right; }
 .flight-card__countdown-row { margin-top: auto; padding-top: 18px; border-top: 1px solid rgba(255,255,255,.16); }
 .flight-countdown { text-align: left; }
 .flight-countdown span { display: block; color: #a9c3c8; font-size: 11px; }
-.flight-countdown strong { display: block; margin-top: 5px; color: #fff; font: 760 clamp(22px, 7vw, 30px)/1.1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.flight-countdown strong { display: block; margin-top: 5px; color: #fff; font: 400 clamp(22px, 7vw, 30px)/1.1 "Baskerville", "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "STSong", "SimSun", serif; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
 .flight-placeholder { margin: 34px 0 22px; }
-.flight-placeholder__eyebrow { color: #e0a983; font: 760 10px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .12em; }
+.flight-placeholder__eyebrow { color: #e0a983; font: 400 10px/1.3 "Baskerville", "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "STSong", "SimSun", serif; letter-spacing: .12em; }
 .flight-placeholder h3 { margin: 9px 0 0; color: #fff; font-size: clamp(24px, 7vw, 34px); line-height: 1.08; letter-spacing: -.035em; }
 .flight-placeholder p { max-width: 520px; margin: 12px 0 0; color: #b8cccf; font-size: 12px; line-height: 1.7; }
 .flight-placeholder ul { margin: 14px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 7px; list-style: none; }
@@ -152,7 +152,7 @@ main { overflow: hidden; }
 
 .route-map-button { position: relative; display: block; width: 100%; padding: 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow); cursor: zoom-in; }
 .route-map-button img { width: 100%; height: auto; }
-.route-map-button span { position: absolute; right: 12px; bottom: 12px; padding: 9px 12px; border-radius: 999px; color: white; background: rgba(19,38,47,.86); font-size: 11px; font-weight: 700; backdrop-filter: blur(8px); }
+.route-map-button span { position: absolute; right: 12px; bottom: 12px; padding: 9px 12px; border-radius: 999px; color: white; background: rgba(19,38,47,.86); font-size: 11px; font-weight: 400; backdrop-filter: blur(8px); }
 .route-caption { margin: 12px 4px 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
 
 .timeline { position: relative; }
@@ -162,10 +162,10 @@ main { overflow: hidden; }
 .day-dot { position: absolute; left: 12px; top: 25px; z-index: 1; width: 13px; height: 13px; border: 3px solid var(--paper); border-radius: 50%; background: #a5b1ae; box-shadow: 0 0 0 1px #a5b1ae; }
 .day-card.is-today .day-dot { background: var(--terracotta); box-shadow: 0 0 0 3px rgba(182,92,58,.18); }
 .day-toggle { width: 100%; min-height: 78px; padding: 15px 4px; border: 0; border-bottom: 1px solid var(--line); background: transparent; text-align: left; display: grid; grid-template-columns: 1fr auto; gap: 12px; cursor: pointer; }
-.day-meta { color: var(--lake); font: 750 11px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .05em; }
-.day-title { margin-top: 5px; font-size: 17px; font-weight: 740; line-height: 1.35; }
+.day-meta { color: var(--lake); font: 400 11px/1.3 "Baskerville", "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "STSong", "SimSun", serif; letter-spacing: .05em; }
+.day-title { margin-top: 5px; font-size: 17px; font-weight: 400; line-height: 1.35; }
 .day-locations { margin-top: 5px; color: var(--muted); font-size: 12px; line-height: 1.45; }
-.day-ticket-summary { display: inline-flex; min-height: 24px; margin-top: 9px; padding: 4px 8px; align-items: center; border-radius: 999px; font-size: 10px; font-weight: 760; }
+.day-ticket-summary { display: inline-flex; min-height: 24px; margin-top: 9px; padding: 4px 8px; align-items: center; border-radius: 999px; font-size: 10px; font-weight: 400; }
 .day-ticket-summary.has-pending { color: #8f492e; background: #f6e2d8; }
 .day-ticket-summary.is-complete { color: #43654a; background: #dfeade; }
 .day-chevron { width: 36px; height: 36px; align-self: center; border: 1px solid var(--line); border-radius: 50%; display: grid; place-items: center; color: var(--lake); transition: transform .2s ease; }
@@ -176,13 +176,13 @@ main { overflow: hidden; }
 .schedule-item { position: relative; padding: 0 0 21px 82px; min-height: 50px; }
 .schedule-item::before { content: ""; position: absolute; left: 70px; top: 6px; bottom: 0; width: 1px; background: #dce4e2; }
 .schedule-item:last-child::before { display: none; }
-.schedule-time { position: absolute; left: 0; top: 0; width: 62px; color: var(--muted); font: 700 11px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.schedule-time { position: absolute; left: 0; top: 0; width: 62px; color: var(--muted); font: 400 11px/1.45 "Baskerville", "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "STSong", "SimSun", serif; }
 .schedule-item::after { content: ""; position: absolute; left: 66px; top: 5px; width: 9px; height: 9px; border: 2px solid var(--lake); border-radius: 50%; background: var(--paper); }
 .schedule-text { font-size: 13px; line-height: 1.65; }
 .schedule-map-links { margin-top: 7px; display: flex; flex-wrap: wrap; gap: 6px; }
-.schedule-map-link { min-height: 32px; padding: 6px 9px; display: inline-flex; align-items: center; border: 1px solid #c8dadc; border-radius: 999px; color: #205e6b; background: #edf6f5; text-decoration: none; font-size: 11px; font-weight: 700; }
+.schedule-map-link { min-height: 32px; padding: 6px 9px; display: inline-flex; align-items: center; border: 1px solid #c8dadc; border-radius: 999px; color: #205e6b; background: #edf6f5; text-decoration: none; font-size: 11px; font-weight: 400; }
 .schedule-ticket { margin-top: 9px; border: 1px solid #e8c8b8; border-radius: 12px; background: #fff8f4; overflow: hidden; }
-.schedule-ticket summary { min-height: 38px; padding: 8px 10px; display: flex; align-items: center; gap: 6px; list-style: none; color: #8f492e; cursor: pointer; font-size: 10px; font-weight: 750; }
+.schedule-ticket summary { min-height: 38px; padding: 8px 10px; display: flex; align-items: center; gap: 6px; list-style: none; color: #8f492e; cursor: pointer; font-size: 10px; font-weight: 400; }
 .schedule-ticket summary::-webkit-details-marker { display: none; }
 .schedule-ticket summary b { margin-left: auto; color: var(--ink); font-size: 11px; }
 .schedule-ticket.is-purchased { border-color: #cbdcca; background: #f1f7f0; }
@@ -191,7 +191,7 @@ main { overflow: hidden; }
 .schedule-ticket__body { padding: 0 10px 11px 23px; }
 .schedule-ticket__body p { margin: 0; color: #614b42; font-size: 11px; line-height: 1.5; }
 .schedule-ticket__body span { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
-.schedule-ticket__body a { min-height: 34px; margin-top: 5px; display: inline-flex; align-items: center; color: var(--lake); font-size: 10px; font-weight: 750; }
+.schedule-ticket__body a { min-height: 34px; margin-top: 5px; display: inline-flex; align-items: center; color: var(--lake); font-size: 10px; font-weight: 400; }
 .detail-note { margin: 8px 0 0; padding: 12px 14px; border-left: 2px solid var(--terracotta); background: rgba(182,92,58,.06); color: #6d4c3e; font-size: 12px; line-height: 1.6; }
 .costs { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
 .cost-tag { padding: 7px 9px; border-radius: 8px; background: #e8eeeb; color: #53615e; font-size: 11px; }
@@ -199,23 +199,23 @@ main { overflow: hidden; }
 .tickets-section { padding-top: 40px; }
 .tickets-summary { margin: -5px 0 15px; color: var(--muted); font-size: 11px; line-height: 1.5; }
 .ticket-filters { display: flex; gap: 7px; margin-bottom: 14px; overflow-x: auto; }
-.ticket-filters button { min-height: 38px; padding: 0 14px; flex: 0 0 auto; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.7); color: var(--muted); cursor: pointer; font-size: 11px; font-weight: 720; }
+.ticket-filters button { min-height: 38px; padding: 0 14px; flex: 0 0 auto; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.7); color: var(--muted); cursor: pointer; font-size: 11px; font-weight: 400; }
 .ticket-filters button.is-active { border-color: var(--ink); color: white; background: var(--ink); }
 .ticket-list { display: grid; gap: 11px; }
 .ticket-card { padding: 17px; border: 1px solid var(--line); border-radius: var(--radius-md); background: rgba(255,255,255,.78); }
 .ticket-card.is-purchased { background: rgba(241,247,240,.82); }
-.ticket-card__date { color: var(--lake); font: 740 10px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .06em; }
+.ticket-card__date { color: var(--lake); font: 400 10px/1.2 "Baskerville", "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "STSong", "SimSun", serif; letter-spacing: .06em; }
 .ticket-card__head { margin-top: 9px; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
 .ticket-card__head h3 { margin: 0; font-size: 16px; line-height: 1.25; }
 .ticket-card__head p { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
-.ticket-badge { min-height: 25px; padding: 5px 8px; flex: 0 0 auto; border-radius: 999px; color: #8f492e; background: #f6e2d8; font-size: 9px; font-weight: 760; }
+.ticket-badge { min-height: 25px; padding: 5px 8px; flex: 0 0 auto; border-radius: 999px; color: #8f492e; background: #f6e2d8; font-size: 9px; font-weight: 400; }
 .ticket-badge.is-advance-recommended { color: #205e6b; background: #ddecf0; }
 .ticket-badge.is-purchased { color: #43654a; background: #dfeade; }
 .ticket-card__guidance { margin-top: 15px; padding-top: 13px; border-top: 1px solid var(--line); }
 .ticket-card__guidance span { display: block; color: var(--muted); font-size: 9px; letter-spacing: .08em; }
 .ticket-card__guidance strong { display: block; margin-top: 4px; font-size: 12px; line-height: 1.5; }
 .ticket-details { margin-top: 7px; }
-.ticket-details > summary { min-height: 38px; display: inline-flex; align-items: center; color: var(--lake); cursor: pointer; font-size: 11px; font-weight: 750; }
+.ticket-details > summary { min-height: 38px; display: inline-flex; align-items: center; color: var(--lake); cursor: pointer; font-size: 11px; font-weight: 400; }
 .ticket-details dl { margin: 4px 0 0; }
 .ticket-details dl div { padding: 8px 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 70px 1fr; gap: 8px; font-size: 11px; line-height: 1.5; }
 .ticket-details dt { color: var(--muted); }
@@ -223,7 +223,7 @@ main { overflow: hidden; }
 .ticket-uncertainties { margin-top: 8px; padding: 11px; border-radius: 10px; background: #f2f3ef; color: #52605d; font-size: 10px; }
 .ticket-uncertainties ul { margin: 5px 0 0; padding-left: 16px; }
 .ticket-actions { margin-top: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.ticket-actions a, .ticket-actions button { min-height: 40px; display: inline-flex; align-items: center; font-size: 10px; font-weight: 740; }
+.ticket-actions a, .ticket-actions button { min-height: 40px; display: inline-flex; align-items: center; font-size: 10px; font-weight: 400; }
 .ticket-actions a { color: var(--lake); }
 .ticket-actions span { color: var(--muted); font-size: 10px; }
 .ticket-actions button { padding: 0 12px; border: 0; border-radius: 10px; color: white; background: var(--lake); cursor: pointer; }
@@ -231,32 +231,32 @@ main { overflow: hidden; }
 
 .rental-panel { overflow: hidden; border-radius: var(--radius-lg); background: var(--ink); color: white; box-shadow: var(--shadow); }
 .return-deadline { padding: 22px; background: #fff0e5; color: #713d27; border-bottom: 3px solid #bd6941; }
-.return-deadline__label { display: block; font-size: 12px; font-weight: 800; }
+.return-deadline__label { display: block; font-size: 12px; font-weight: 400; }
 .return-deadline > strong { display: block; margin: 12px 0 6px; font-size: clamp(23px,7vw,34px); line-height: 1.3; }
 .return-deadline time { font-variant-numeric: tabular-nums; }
 .return-deadline > span:not(:first-child), .return-deadline small { font-size: 11px; line-height: 1.6; }
 .return-deadline p { margin: 10px 0; font-size: 12px; overflow-wrap: anywhere; }
-.return-deadline__timer { padding: 12px 0; border-block: 1px solid #e7c6ad; font-size: 16px; font-weight: 750; font-variant-numeric: tabular-nums; }
-.return-deadline__warning { font-weight: 750; }
+.return-deadline__timer { padding: 12px 0; border-block: 1px solid #e7c6ad; font-size: 16px; font-weight: 400; font-variant-numeric: tabular-nums; }
+.return-deadline__warning { font-weight: 400; }
 .return-deadline.is-urgent { background: #ffe1da; color: #8c291f; border-color: #b84635; }
 .rental-countdown { padding: 24px; background: var(--lake); }
-.rental-countdown span { display: block; color: #d6ebee; font-size: 11px; font-weight: 700; letter-spacing: .08em; }
-.rental-countdown strong { display: block; margin-top: 8px; font: 760 clamp(28px, 9vw, 44px)/1.05 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: -.05em; }
+.rental-countdown span { display: block; color: #d6ebee; font-size: 11px; font-weight: 400; letter-spacing: .08em; }
+.rental-countdown strong { display: block; margin-top: 8px; font: 400 clamp(28px, 9vw, 44px)/1.05 "Baskerville", "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "STSong", "SimSun", serif; letter-spacing: 0; }
 .rental-countdown small { display: block; margin-top: 10px; color: #d6ebee; line-height: 1.5; }
 .rental-details { padding: 22px; }
-.rental-car { font-size: 19px; font-weight: 750; }
+.rental-car { font-size: 19px; font-weight: 400; }
 .rental-sub { margin-top: 5px; color: #abc0c4; font-size: 12px; }
 .rental-stops { margin-top: 24px; display: grid; gap: 16px; }
 .rental-stop { display: grid; grid-template-columns: 58px 1fr; gap: 12px; }
-.rental-stop__label { color: #7fa8b0; font: 700 10px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.rental-stop__label { color: #7fa8b0; font: 400 10px/1.5 "Baskerville", "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "STSong", "SimSun", serif; }
 .rental-stop b { display: block; font-size: 14px; }
 .rental-stop span { display: block; margin-top: 4px; color: #abc0c4; font-size: 12px; line-height: 1.5; }
 .rental-price { margin-top: 20px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,.14); display: flex; justify-content: space-between; color: #abc0c4; font-size: 12px; }
-.rental-price strong { color: white; font: 720 15px/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.rental-price strong { color: white; font: 400 15px/1 "Baskerville", "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "STSong", "SimSun", serif; }
 
 .accordion-stack { margin-top: 14px; display: grid; gap: 10px; }
 .accordion { border: 1px solid var(--line); border-radius: var(--radius-md); background: rgba(255,255,255,.72); overflow: hidden; }
-.accordion summary { min-height: 54px; padding: 16px; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 740; }
+.accordion summary { min-height: 54px; padding: 16px; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 400; }
 .accordion summary::-webkit-details-marker { display: none; }
 .accordion summary::after { content: "+"; width: 28px; height: 28px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; color: var(--lake); }
 .accordion[open] summary::after { content: "−"; }
@@ -276,14 +276,14 @@ main { overflow: hidden; }
 .text-button { min-height: 44px; margin-top: 18px; padding: 0; border: 0; background: transparent; color: var(--muted); font-size: 12px; text-decoration: underline; cursor: pointer; }
 
 .footer { padding: 46px 20px calc(50px + var(--safe-bottom)); border-top: 1px solid var(--line); display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; }
-.footer p { margin: 0; font-weight: 750; letter-spacing: .08em; }
+.footer p { margin: 0; font-weight: 400; letter-spacing: .08em; }
 .footer a { min-height: 44px; margin-top: -15px; display: flex; align-items: center; text-decoration: none; }
 
 .map-dialog { width: 100%; max-width: 760px; height: 100%; max-height: none; margin: 0; padding: calc(56px + var(--safe-top)) 0 var(--safe-bottom); border: 0; background: #0e1b21; overflow: auto; }
 .map-dialog::backdrop { background: rgba(7,18,22,.88); }
 .map-dialog.is-fallback-open { position: fixed; inset: 0; z-index: 50; display: block; }
 .map-dialog img { width: 100%; height: auto; }
-.dialog-close { position: fixed; z-index: 2; top: calc(10px + var(--safe-top)); right: 12px; min-width: 54px; min-height: 40px; border: 0; border-radius: 999px; background: rgba(255,255,255,.92); color: var(--ink); font-size: 12px; font-weight: 700; }
+.dialog-close { position: fixed; z-index: 2; top: calc(10px + var(--safe-top)); right: 12px; min-width: 54px; min-height: 40px; border: 0; border-radius: 999px; background: rgba(255,255,255,.92); color: var(--ink); font-size: 12px; font-weight: 400; }
 .loading-error { position: fixed; left: 16px; right: 16px; bottom: calc(16px + var(--safe-bottom)); z-index: 30; padding: 16px; border-radius: 14px; color: white; background: var(--warning); box-shadow: var(--shadow); }
 .loading-error strong, .loading-error span { display: block; }
 .loading-error span { margin-top: 5px; font-size: 12px; line-height: 1.5; }
@@ -299,7 +299,7 @@ main { overflow: hidden; }
 .place-map-sheet iframe { width: 100%; flex: 1; min-height: 0; border: 0; background: #e8eeeb; }
 .place-map-sheet footer { padding: 10px 16px; }
 .place-map-sheet footer p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
-.place-map-sheet footer a { display: flex; min-height: 44px; align-items: center; color: var(--lake); font-size: 13px; font-weight: 700; }
+.place-map-sheet footer a { display: flex; min-height: 44px; align-items: center; color: var(--lake); font-size: 13px; font-weight: 400; }
 
 /* Compact ticket completion, driving notes and user-managed trip preparation */
 .schedule-ticket { min-height: 58px; padding: 9px 10px; background: #fff2ed; display: grid; grid-template-columns: 21px minmax(0,1fr) auto; align-items: flex-start; gap: 9px; }
@@ -307,10 +307,10 @@ main { overflow: hidden; }
 .schedule-ticket input { position: absolute; opacity: 0; pointer-events: none; }
 .schedule-ticket__check { width: 21px; height: 21px; margin-top: 1px; flex: 0 0 21px; border: 1.5px solid #ba765d; border-radius: 7px; color: transparent; display: grid; place-items: center; font-size: 12px; }
 .schedule-ticket__content { min-width: 0; display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 2px 7px; }
-.schedule-ticket__status { color: #995137; font-size: 9px; font-weight: 780; }
+.schedule-ticket__status { color: #995137; font-size: 9px; font-weight: 400; }
 .schedule-ticket__content strong { overflow: hidden; color: var(--ink); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .schedule-ticket__content small { grid-column: 1 / -1; color: #795c50; font-size: 9px; line-height: 1.45; }
-.schedule-ticket__open { align-self: center; min-width: 44px; min-height: 36px; padding: 0 8px; border: 0; border-left: 1px solid rgba(153,81,55,.18); background: transparent; color: #8f492e; cursor: pointer; font-size: 10px; font-weight: 760; }
+.schedule-ticket__open { align-self: center; min-width: 44px; min-height: 36px; padding: 0 8px; border: 0; border-left: 1px solid rgba(153,81,55,.18); background: transparent; color: #8f492e; cursor: pointer; font-size: 10px; font-weight: 400; }
 .schedule-ticket.is-purchased { border-color: #cbdcca; background: #eaf3e9; }
 .schedule-ticket.is-purchased .schedule-ticket__check { border-color: var(--forest); color: white; background: var(--forest); }
 .schedule-ticket.is-purchased .schedule-ticket__status { color: var(--forest); }
@@ -322,23 +322,23 @@ main { overflow: hidden; }
 .ticket-dialog[open] { display: flex; flex-direction: column; }
 .ticket-dialog::backdrop { background: rgba(7,18,22,.58); backdrop-filter: blur(3px); }
 .ticket-dialog > header { min-height: 76px; padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); }
-.ticket-dialog > header span { display: block; color: var(--lake); font-size: 10px; font-weight: 780; letter-spacing: .12em; }
+.ticket-dialog > header span { display: block; color: var(--lake); font-size: 10px; font-weight: 400; letter-spacing: .12em; }
 .ticket-dialog > header h2 { margin: 5px 0 0; font-size: 21px; letter-spacing: -.035em; }
-.ticket-dialog > header button { min-width: 52px; min-height: 40px; border: 0; border-radius: 999px; background: white; color: var(--lake); cursor: pointer; font-size: 12px; font-weight: 720; }
+.ticket-dialog > header button { min-width: 52px; min-height: 40px; border: 0; border-radius: 999px; background: white; color: var(--lake); cursor: pointer; font-size: 12px; font-weight: 400; }
 .ticket-dialog__body { min-height: 0; padding: 18px; overflow: auto; flex: 1 1 auto; }
-.ticket-dialog__status { margin: 0; color: var(--terracotta); font-size: 11px; font-weight: 780; }
+.ticket-dialog__status { margin: 0; color: var(--terracotta); font-size: 11px; font-weight: 400; }
 .ticket-dialog__guidance { margin: 8px 0 16px; color: #47575b; font-size: 13px; line-height: 1.65; }
 .ticket-dialog__preview { width: 100%; min-height: min(58dvh,520px); max-height: 62dvh; border: 1px solid var(--line); border-radius: 12px; background: white; object-fit: contain; }
 .ticket-dialog__preview--pdf { display: block; height: min(68dvh,680px); max-height: none; object-fit: initial; }
 .ticket-dialog__empty { margin: 18px 0; padding: 24px 16px; border: 1px dashed var(--line); border-radius: 12px; color: var(--muted); text-align: center; font-size: 12px; line-height: 1.6; }
 .ticket-dialog__links { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
-.ticket-dialog__links a { min-height: 42px; padding: 0 13px; display: inline-flex; align-items: center; border: 1px solid #c8dadc; border-radius: 999px; color: #205e6b; background: #edf6f5; text-decoration: none; font-size: 12px; font-weight: 720; }
+.ticket-dialog__links a { min-height: 42px; padding: 0 13px; display: inline-flex; align-items: center; border: 1px solid #c8dadc; border-radius: 999px; color: #205e6b; background: #edf6f5; text-decoration: none; font-size: 12px; font-weight: 400; }
 
 .accordion-stack { margin-top: 14px; display: block; }
 .drive-note-tabs { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--line); }
-.drive-note-tabs button { position: relative; min-width: 0; min-height: 48px; padding: 12px 4px; border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 650; }
+.drive-note-tabs button { position: relative; min-width: 0; min-height: 48px; padding: 12px 4px; border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 400; }
 .drive-note-tabs button::after { content: ""; position: absolute; bottom: -1px; left: 20%; right: 20%; height: 2px; border-radius: 2px; background: transparent; }
-.drive-note-tabs button[aria-expanded="true"] { color: var(--ink); font-weight: 780; }
+.drive-note-tabs button[aria-expanded="true"] { color: var(--ink); font-weight: 400; }
 .drive-note-tabs button[aria-expanded="true"]::after { background: var(--lake); }
 .drive-note-panel { padding: 8px 4px 4px; }
 .drive-note-panel[hidden] { display: none; }
@@ -350,7 +350,7 @@ main { overflow: hidden; }
 .todo-form { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
 .todo-form input { min-width: 0; min-height: 48px; padding: 0 14px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.8); font: inherit; font-size: 13px; outline: none; }
 .todo-form input:focus { border-color: var(--lake); box-shadow: 0 0 0 3px rgba(40,123,144,.1); }
-.todo-form button { min-width: 64px; min-height: 48px; border: 0; border-radius: 13px; color: white; background: var(--ink); cursor: pointer; font-size: 12px; font-weight: 750; }
+.todo-form button { min-width: 64px; min-height: 48px; border: 0; border-radius: 13px; color: white; background: var(--ink); cursor: pointer; font-size: 12px; font-weight: 400; }
 .todo-list { margin-top: 13px; }
 .todo-item { min-height: 54px; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; }
 .todo-item label { min-width: 0; min-height: 54px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
@@ -429,9 +429,9 @@ button:focus-visible,a:focus-visible {outline:2px solid var(--lake);outline-offs
 .ledger-confirm-dialog { width: min(100% - 40px, 380px); padding: 0; border: 1px solid rgba(19,38,47,.14); border-radius: 18px; background: var(--paper); color: var(--ink); box-shadow: 0 22px 70px rgba(19,38,47,.28); }
 .ledger-confirm-dialog::backdrop { background: rgba(7,18,22,.55); backdrop-filter: blur(3px); }
 .ledger-confirm-card { padding: 24px 22px 18px; }
-.ledger-confirm-card p { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.55; text-align: center; }
+.ledger-confirm-card p { margin: 0; font-size: 17px; font-weight: 400; line-height: 1.55; text-align: center; }
 .ledger-confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 24px; }
-.ledger-confirm-actions button { min-height: 46px; border: 1px solid var(--line); border-radius: 12px; background: white; color: var(--ink); font: inherit; font-size: 14px; font-weight: 720; cursor: pointer; }
+.ledger-confirm-actions button { min-height: 46px; border: 1px solid var(--line); border-radius: 12px; background: white; color: var(--ink); font: inherit; font-size: 14px; font-weight: 400; cursor: pointer; }
 .ledger-confirm-actions .ledger-confirm-danger { border-color: rgba(171,67,55,.28); background: #fff1ee; color: #a13f34; }
 .popup-place-options button[aria-pressed="true"] {background:var(--ink);color:white;}
 .transport-popover {width:min(320px,calc(100vw - 16px));padding-right:32px;font-size:14px;line-height:1.65;}
@@ -453,3 +453,37 @@ button:focus-visible,a:focus-visible {outline:2px solid var(--lake);outline-offs
 .sync-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; align-items: center; }
 .sync-actions button, .sync-actions label { padding: 8px 12px; border: 1px solid #cbd7ce; border-radius: 10px; background: #fff; color: #36584a; cursor: pointer; font: inherit; }
 .sync-actions form { margin: 0; }
+
+/* Bilingual controls and booking cards retain the template palette. */
+#language-toggle { flex-shrink:0; border:1px solid #a5b2a8; border-radius:20px; padding:7px 10px; background:transparent; font:400 12px "Baskerville", "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "STSong", "SimSun", serif; }
+.topbar {gap:8px;flex-wrap:wrap} .stay-card {padding:22px;margin:16px 0;border:1px solid #c9d4ca;border-radius:18px;background:#fff;overflow-wrap:anywhere}
+.stay-card h3 {font-size:24px;margin:14px 0} .stay-card dl {display:grid;grid-template-columns:1fr 1fr;gap:15px}.stay-card dd {margin:5px 0}.stay-card dt {color:#64736b;font-size:12px}
+.navigation-dialog {border:1px solid #c9d4ca;border-radius:18px;padding:24px;max-width:440px;width:calc(100% - 32px);box-sizing:border-box;max-height:85svh;overflow:auto;color:#263a32;background:#f3f6f2}
+.navigation-dialog header {display:flex;gap:12px;justify-content:space-between;align-items:start}.navigation-dialog h2 {margin:0;font-size:22px;overflow-wrap:anywhere}
+.navigation-dialog button,.navigation-dialog select {padding:10px;margin:6px 4px 6px 0;max-width:100%;font:inherit}.navigation-dialog p {overflow-wrap:anywhere;line-height:1.6}.navigation-open {display:block;background:#36584a;color:white;padding:14px;border-radius:10px;text-decoration:none}
+.navigation-dialog::backdrop {background:#0007}.demo-notice {padding:10px;border:1px solid #b87945;border-radius:8px;font-size:13px}.flight-stop .schedule-map-link {font-size:10px;color:#fff;padding:5px}.flight-card {overflow-wrap:anywhere}
+html[lang="en"] .primary-navigation {font-size:12px} html[lang="en"] .section-heading {gap:12px;flex-wrap:wrap} .ledger-person-name {overflow-wrap:anywhere}
+
+/* User-requested fine serif typography for both Chinese and English. */
+:root {--travel-serif:"Baskerville","Iowan Old Style","Songti SC","Noto Serif CJK SC","Source Han Serif SC","STSong","SimSun",serif}
+body {font-family:var(--travel-serif);font-weight:300;font-size:16px;line-height:1.65;font-synthesis:none}
+button,input,select,textarea {font-family:var(--travel-serif)}
+svg text {font-family:var(--travel-serif)!important;font-weight:400!important}
+h1,h2,h3,h4,strong,b {font-weight:400}
+.hero h1 {font-weight:300;letter-spacing:0.01em;line-height:1.2;font-size:clamp(36px,10vw,58px)}
+.hero__date {font-weight:400;font-size:15px}.section-heading h2 {font-weight:300;line-height:1.3;letter-spacing:.025em;font-size:29px}
+.section-kicker {font-weight:400;letter-spacing:.14em}.section {padding-top:30px;padding-bottom:30px}
+.flight-card {padding:24px 20px;border-radius:14px;background:#203d3a;box-shadow:none;gap:8px}
+.flight-card > p {font-size:12px;margin:4px 0;color:#c9d9d1}
+.flight-card button {background:transparent;border:1px solid #a7bdb3;color:#edf2eb;border-radius:6px;padding:7px 9px;font-size:12px;cursor:pointer}
+.flight-card > [data-ticket-open] {align-self:flex-start}
+.flight-stop .schedule-map-link {background:transparent;color:#edf2eb;border-color:#8ea69b;font-size:11px;padding:6px 4px;min-height:34px}
+.flight-stop__code {font-size:clamp(24px,7vw,34px);font-weight:400}.flight-stop__city {font-size:13px;color:#cbd9d1}
+.flight-stop__timing,.flight-stop__timing b,.flight-stop__timing em {font-size:12px;font-weight:400;line-height:1.7;color:#dde6df}
+.flight-segment span {font-size:10px;font-weight:400}.flight-countdown strong {font-size:27px;font-weight:400;line-height:1.5}
+.stay-card {border-radius:12px;padding:26px 22px;background:#fafbf7;box-shadow:none}.stay-card h3 {font-weight:300;font-size:26px;line-height:1.45;letter-spacing:.015em}.stay-card p {font-size:14px}.stay-card dd {font-size:16px;line-height:1.6}.stay-card dt {font-size:13px}
+.stay-card .schedule-ticket__open,.stay-card .schedule-map-link {padding:10px 12px;margin:6px 5px 0 0;background:transparent;color:#36584a;border:1px solid #bac9bf;border-radius:6px;font-size:13px}
+.sync-panel {font-size:13px}.sync-actions button,.sync-actions label {font-weight:400;background:transparent;border-radius:5px}
+.ledger-app {font-family:var(--travel-serif);font-size:15px}.ledger-app :is(button,input,select,textarea) {font-family:var(--travel-serif)}
+.ledger-app h1,.ledger-app h2 {font-weight:300;letter-spacing:.01em}.ledger-field-label,.ledger-person-name,.ledger-text-button {font-size:14px}
+#language-toggle {font-family:var(--travel-serif);font-weight:400}.navigation-dialog {font-family:var(--travel-serif)}
