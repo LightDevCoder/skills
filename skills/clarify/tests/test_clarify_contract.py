@@ -42,7 +42,8 @@ class ClarifyPublicContractTest(unittest.TestCase):
 
     def test_fact_gap_and_auto_chain_boundaries_remain(self) -> None:
         self.assertFalse(SESSION.POLICY["autoChainUserInvokedSkills"])
-        self.assertEqual(SESSION.POLICY["factWork"], "report-only")
+        self.assertEqual(SESSION.POLICY["factWork"], "requires-explicit-authorization")
+        self.assertTrue(SESSION.POLICY["reuseFactWorkAuthorization"])
 
     def test_frontier_is_presented_as_a_round_with_batch_replies(self) -> None:
         skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")

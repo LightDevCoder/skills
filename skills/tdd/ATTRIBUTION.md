@@ -8,7 +8,7 @@ This package is a Light first-party port of an upstream Skill.
 - **License:** MIT — Copyright (c) 2026 Matt Pocock — see upstream `LICENSE`. The MIT notice is preserved as required; no original authorship is claimed.
 - **Transformation summary:** PORT — NO REDESIGN (SPEC §14/§16). Preserved mature behavior verbatim; only the following Light integration changes were applied:
   1. Flattened path from upstream `skills/engineering/tdd` to Light `skills/tdd/`.
-  2. Kept `SKILL.md` verbatim (no bloat, no rewrite). Supporting files kept verbatim (`tests.md`, `mocking.md` remain reference-only supporting docs).
+  2. Initially kept `SKILL.md` verbatim. On 2026-09-16, clarified reuse of an explicitly approved test seam within the same task; new or materially changed seams still require confirmation. Supporting files remain verbatim (`tests.md`, `mocking.md` are reference-only supporting docs).
   3. Adapted `agents/openai.yaml` for Light host discovery: added `interface.default_prompt` and `policy.allow_implicit_invocation` (true for model-invoked capabilities, false for user-invoked handoff) while retaining upstream `display_name`/`short_description`. No behavioral instructions duplicated.
   4. Added this `ATTRIBUTION.md` as required by SPEC §22.
   5. No runtime dependency on `https://github.com/mattpocock/skills` remains; the package is self-contained and does not require `install Matt skills first`.

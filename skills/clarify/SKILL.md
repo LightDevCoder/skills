@@ -26,8 +26,12 @@ exit, or a switch to another workflow.
 
 If a fact-finding gap blocks the frontier, report the gap and the capability
 that would resolve it (`research`, `prototype`, or `to-questionnaire`); do not
-invent an answer or turn the gap into a user decision. If another user-invoked
-Skill is the better next step, recommend its explicit invocation and stop.
+invent an answer or turn the gap into a user decision. Reuse explicit fact-work
+authorization already given for this task and scope; otherwise request it before
+investigating. Invoke a capability only under its actual invocation policy. If
+another user-invoked Skill is needed, follow its explicit invocation boundary;
+this session does not silently activate it. See [WORKFLOW.md](references/WORKFLOW.md)
+for the fact-work and handoff boundaries.
 
 ## Completion gate
 

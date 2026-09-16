@@ -25,9 +25,9 @@ hands it to review.
    routing, or for bounded solo work, proceed directly without blocking.
    When `agent-config` is invoked, consume the `AgentConfigResult`:
    - `readiness === "READY"`: consume `execution_config` and execute bounded slice.
-   - `readiness === "NEED_INPUT"`: profile missing / setup needed. Offer setup or fallback safely to single-agent execution if declined.
+   - `readiness === "NEED_INPUT"`: profile missing / setup needed. Apply the optional-routing fallback below; setup still requires its own authorization.
    - `readiness === "NEED_PROJECT_TICKETS"`: decomposed task without tickets -> recommend explicit `$project-tickets` and halt implementation (never batch-execute un-ticketed tasks).
-   - `readiness === "BLOCKED"` or `"UNSUPPORTED"`: core rejection (e.g. unauthorized model, unevidenced model, or unknown capability) -> halt implementation with diagnostic reason.
+   - `readiness === "BLOCKED"` or `"UNSUPPORTED"`: stop the rejected route. Continue only if the optional-routing fallback below is evidenced; otherwise halt implementation with the diagnostic reason.
 4. **Execute the bounded slice, then verify.** Use `tdd` for code when
    appropriate; produce non-code artifacts per their contract. Verify locally
    (tests, render, schema, or domain check).
@@ -55,8 +55,15 @@ review-loop → code-review (code) / generic-review (non-code)
 
 `implement` composes these capabilities; it does not reimplement them.
 `agent-config` is an optional enhancement: declining it or running on a Host
-without model-routing capabilities does not block implementation. A missing or
-blocked prerequisite is a `BLOCKED` handoff gap — report the smallest
-unblock and stop. Full per-artifact procedures are in
+without model-routing capabilities does not block implementation. If a routing
+problem affects only an optional enhancement, the current session is evidenced
+as capable and authorized, and the user has not required that route, continue
+the bounded item directly and explain the fallback without another setup question.
+Never bypass a model restriction, configuration-preview approval, required
+independent review, or user-required execution method. An ambiguous rejection
+or missing task prerequisite remains a `BLOCKED` handoff gap: return its
+diagnostic and smallest unblock to the caller. Skill completion returns this
+item's status; it does not complete a larger request or authorize another item.
+Full per-artifact procedures are in
 [WORKFLOW.md](references/WORKFLOW.md); examples are in
 [EXAMPLES.md](references/EXAMPLES.md).

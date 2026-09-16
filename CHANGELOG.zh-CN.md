@@ -6,6 +6,8 @@
 
 ## Unreleased
 
+- 明确 `tdd`、`clarify`、`implement`、`review-loop`、`manuscript-ops` 的授权复用与阶段完成边界。保留明确批准、调用、审阅轮数和独立验收要求；仅允许有证据支持的可选路由回退。[范围与验证](docs/evidence/maintenance/2026-09-16-autonomy-boundaries.md)。仅更新 main，不创建 tag 或 release。
+
 - 更新 `light-travelpage`：中英切换、航班/住宿卡片、地区地图、细衬线字体及锚定导航按钮的下拉菜单。保留旅程身份、鉴权与共享状态；34 项运行测试通过。仅更新 main，不创建标签或 release。
 
 ### 新增 — Light-TravelPage

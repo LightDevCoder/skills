@@ -131,16 +131,21 @@ When routing could materially help:
 selector, unavailable `agent-config`, or user decline must never convert into a
 `BLOCKED` implementation by default. Unless the task itself carries a hard,
 unresolvable constraint, continue safely under serial execution with the current
-model.
+model. A fallback requires evidence that the problem affects only optional
+routing, that the current session is capable and authorized for this item,
+and that the user has not required the failed route. State the reason and
+continue without another setup question. Never bypass model restrictions,
+configuration-preview approval, required independent review, or a user-required
+execution method. If the rejection scope is unclear, stop and report it.
 
 #### E. AgentConfigResult consumption rules
 
 When `agent-config` is invoked, `implement` inspects the canonical `AgentConfigResult` envelope:
 
 - **`readiness === "READY"`**: Consume `execution_config` (model, resolved reasoning effort, worker context, review context) and proceed to execute the bounded slice.
-- **`readiness === "NEED_INPUT"`**: Profile is missing or setup is required (`setup_state.profile === "missing"`). Prompt the user to run setup (`handoff: "setup"`); if the user declines setup, fall back safely to direct single-agent execution using the current model without blocking.
+- **`readiness === "NEED_INPUT"`**: Profile is missing or setup is required (`setup_state.profile === "missing"`). If section D's fallback conditions are met, continue the item directly; do not wait for the user to decline setup. Otherwise report the needed setup and obtain its explicit authorization before starting it. A declined setup does not override a required route or task constraint.
 - **`readiness === "NEED_PROJECT_TICKETS"`**: Task is classified as decomposed without formal tickets (`handoff: "project-tickets"`). Halt implementation immediately, recommend explicit `$project-tickets`, and stop. Never batch-execute un-ticketed tasks inside a single implement run.
-- **`readiness === "BLOCKED"` or `"UNSUPPORTED"`**: Core validation rejected the configuration (e.g., unauthorized model, unevidenced model, or unsupported capability). Halt implementation immediately and report the diagnostic reason to the caller.
+- **`readiness === "BLOCKED"` or `"UNSUPPORTED"`**: Stop the rejected configuration and inspect the diagnostic. Continue directly only when section D's fallback conditions are evidenced. Otherwise halt implementation and report the diagnostic to the caller; a missing or ambiguous diagnostic is not permission to fall back.
 
 ### 4. Execute the bounded slice
 
@@ -150,9 +155,9 @@ layer (tracer-bullet), sized for the single context window.
 **Code artifact** (default branch when the item touches `src/`, tests, or a
 software Profile):
 
-1. Agree the seams. Read the Spec/slice for declared seams; if none are
-   declared, sketch one seam candidate and confirm briefly with the user
-   before writing tests.
+1. Read the Spec/slice and existing test approval. Follow `tdd`'s seam
+   confirmation rule, reusing approval for the same seam and confirming new
+   or materially changed boundaries before writing tests.
 2. Drive `tdd` (model-invoked) at those seams. One red→green cycle at a time:
    a named seam, a failing test in the correct harness location, then the
    minimal implementation that makes that test pass. Do not write tests bulk
@@ -225,8 +230,11 @@ file; call those Skills via their public protocols.
 
 ## Handoff options
 
-- On a verified diff/artifact, invoke `review-loop` and stop. The caller
-  decides the next frontier ticket via `$implement` on the next ready item.
+- On a verified diff/artifact, invoke `review-loop` and return this item's
+  status, evidence, and outstanding findings to the caller. The caller owns
+  any remaining authorized work; this handoff does not complete the larger
+  request. A new ticket still requires a fresh `$implement` invocation in a
+  fresh context, and review limits and approval gates still apply.
 - On a `BLOCKED` gap (missing Spec/ticket/authority/Spec-fidelity decision),
   report the gap with the smallest unblock and stop without branching into
   clarification or reticketing.

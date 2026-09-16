@@ -35,6 +35,17 @@ resume condition. Render it using the current host:
 
 The `$` and `/` prefixes are host syntax, not part of the portable contract.
 
+### Resume authorization
+
+After a handoff, wait for the user to explicitly request resumption of this
+`manuscript-ops` workflow. In the same session, an unambiguous instruction such
+as “continue with the approved Brief” is a resume request; the examples below
+show canonical syntax, not mandatory keywords. If the target workflow is
+ambiguous, clarify it; if the host requires explicit Skill syntax, provide that
+syntax instead of claiming activation. Resume only the next unfinished action.
+This request does not substitute for Brief, initialization, Review Charter,
+source-lock, or final approval, and never auto-chains another user-invoked Skill.
+
 ## Discovery
 
 Use exactly one route:
@@ -51,8 +62,9 @@ activate clarify with: resolve the open manuscript decisions recorded in <path>
 activate decision-map with: chart this manuscript effort in a local Markdown task graph; do not implement it
 ```
 
-After the dependency stops, ask the user to activate `manuscript-ops` with
-`resume`. In Codex, render that as `$manuscript-ops resume`.
+After the dependency stops, apply the resume authorization contract above.
+In Codex, the canonical rendering is `$manuscript-ops resume`; do not ask the
+user to repeat a same-session request that already satisfies that contract.
 
 ## Project initialization recommendation
 

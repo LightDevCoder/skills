@@ -6,6 +6,8 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
+- Clarify authorization reuse and stage-local completion in `tdd`, `clarify`, `implement`, `review-loop`, and `manuscript-ops`. Preserve explicit approval, invocation, review-limit, and independent-acceptance gates; permit evidenced fallback only for optional routing. [Scope and validation](docs/evidence/maintenance/2026-09-16-autonomy-boundaries.md). Main-only update; no tag or release.
+
 - Update `light-travelpage` with Chinese/English switching, flight/stay cards, regional maps, fine serif typography and an anchored travel menu. Preserve trip identity, authentication and shared state; 34 runtime tests pass. Main-only update; no tag or release.
 
 ### Added — Light-TravelPage

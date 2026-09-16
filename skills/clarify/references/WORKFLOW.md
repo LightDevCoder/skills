@@ -40,11 +40,18 @@ question per round.
 
 - No formal SPEC or tickets are produced.
 - No project files are written.
-- No automatic chaining to another user-invoked Skill. If `project-clarify`,
-  `research`, `prototype`, or `to-questionnaire` would be useful, recommend
-  the explicit invocation and stop.
-- Fact work is reported using `socratic`'s routing result and is not executed
-  unless the user separately authorizes it.
+- No automatic chaining to another user-invoked Skill. Check the target's actual
+  invocation policy: a model-invoked capability can serve an authorized fact
+  request, while a user-invoked entry requires its explicit invocation boundary.
+- Fact work is reported using `socratic`'s routing result. Reuse explicit
+  authorization for this task's investigation scope when already present;
+  otherwise request authorization for the concrete investigation before doing
+  it. Clarification alone authorizes neither new research nor experiments.
+  Keep this wrapper's no-project-write boundary; a capability needing writes
+  requires a separately authorized handoff covering those writes.
+- Returning a handoff ends this clarification stage, not all work in a larger
+  request. The caller owns remaining authorized work and preserves all target
+  invocation and approval gates.
 
 ## Handoff options
 

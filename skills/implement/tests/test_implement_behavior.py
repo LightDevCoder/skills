@@ -38,9 +38,20 @@ class ImplementDecisionEngine:
         cls,
         agent_config_result: dict[str, Any],
         user_setup_response: str | None = None,
+        fallback_evidence: dict[str, bool] | None = None,
     ) -> dict[str, Any]:
         """Consumes AgentConfigResult according to implement consumption rules."""
         readiness = agent_config_result.get("readiness")
+        # Test-local contract model, not a runtime executor. Missing evidence
+        # must not turn an ambiguous rejection into permission to continue.
+        evidence = fallback_evidence or {}
+        can_fallback = (
+            all(evidence.get(key) is True for key in (
+                "optional_route_only", "current_session_capable",
+                "current_session_authorized", "constraints_preserved",
+            ))
+            and evidence.get("route_required") is False
+        )
 
         if readiness == "READY":
             exec_cfg = agent_config_result.get("execution_config")
@@ -60,10 +71,10 @@ class ImplementDecisionEngine:
         if readiness == "NEED_INPUT":
             setup_state = agent_config_result.get("setup_state", {})
             profile_state = setup_state.get("profile")
-            if user_setup_response == "decline":
+            if can_fallback and user_setup_response != "accept":
                 return {
                     "action": "execute_direct",
-                    "reason": "user declined setup; fallback safely to direct single-agent execution",
+                    "reason": "evidenced optional-route failure; continue authorized current session",
                 }
             if user_setup_response == "accept":
                 return {
@@ -87,6 +98,11 @@ class ImplementDecisionEngine:
             }
 
         if readiness in {"BLOCKED", "UNSUPPORTED"}:
+            if can_fallback:
+                return {
+                    "action": "execute_direct",
+                    "reason": "rejected route is optional; authorized current session remains usable",
+                }
             return {
                 "action": readiness,
                 "halted": True,
@@ -349,7 +365,7 @@ class ImplementBehaviorTest(unittest.TestCase):
         )
         self.assertEqual(result.get("handoff"), "implement")
 
-    def test_failure_path_missing_profile_need_input_setup_offer_and_fallback(self) -> None:
+    def test_missing_profile_without_fallback_evidence_requires_setup(self) -> None:
         """Failure path 1: Missing profile -> agent-config returns NEED_INPUT (profile missing, handoff setup) -> implement offers setup / fallback."""
         task = {
             "name": "large refactor",
@@ -385,15 +401,40 @@ class ImplementBehaviorTest(unittest.TestCase):
         self.assertEqual(result_accept_setup["action"], "handoff_to_setup")
         self.assertEqual(result_accept_setup["handoff"], "setup")
 
-        # Step 3: User declines setup -> safe fallback to direct single-agent execution without blocking
+        # Declining setup alone cannot override missing fallback evidence.
         result_decline_setup = ImplementDecisionEngine.decide_action(
             task,
             user_choice_response="accept",
             agent_config_result=agent_config_result,
             user_setup_response="decline",
         )
-        self.assertEqual(result_decline_setup["action"], "execute_direct")
-        self.assertNotEqual(result_decline_setup["action"], "BLOCKED")
+        self.assertEqual(result_decline_setup["action"], "offer_setup")
+
+    def test_optional_failure_continues_without_waiting_for_setup_decline(self) -> None:
+        evidence = {
+            "optional_route_only": True, "current_session_capable": True,
+            "current_session_authorized": True, "constraints_preserved": True,
+            "route_required": False,
+        }
+        for readiness in ("NEED_INPUT", "BLOCKED", "UNSUPPORTED"):
+            with self.subTest(readiness=readiness):
+                result = ImplementDecisionEngine.consume_agent_config_result(
+                    {"readiness": readiness}, fallback_evidence=evidence,
+                )
+                self.assertEqual(result["action"], "execute_direct")
+        for key in evidence:
+            changed = {**evidence, key: not evidence[key]}
+            with self.subTest(blocker=key):
+                result = ImplementDecisionEngine.consume_agent_config_result(
+                    {"readiness": "BLOCKED"}, fallback_evidence=changed,
+                )
+                self.assertTrue(result["halted"])
+        # Neither ticket decomposition nor unknown statuses are optional routes.
+        for readiness in ("NEED_PROJECT_TICKETS", "UNKNOWN"):
+            result = ImplementDecisionEngine.consume_agent_config_result(
+                {"readiness": readiness}, fallback_evidence=evidence,
+            )
+            self.assertTrue(result["halted"])
 
     def test_failure_path_decomposed_without_tickets_halts_and_hands_off(self) -> None:
         """Failure path 2: Decomposed without tickets -> agent-config returns NEED_PROJECT_TICKETS -> implement halts and hands off."""

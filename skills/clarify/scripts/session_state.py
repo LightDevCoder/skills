@@ -7,7 +7,8 @@ POLICY = {
     "compositionTarget": "socratic",
     "ordinaryRepliesContinue": True,
     "autoChainUserInvokedSkills": False,
-    "factWork": "report-only",
+    "factWork": "requires-explicit-authorization",
+    "reuseFactWorkAuthorization": True,
     "completionRequiresConfirmation": True,
 }
 

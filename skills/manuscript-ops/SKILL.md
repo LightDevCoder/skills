@@ -54,8 +54,10 @@ and the selected route is justified by evidence.
    - multi-session fog: logically activate `decision-map` to chart the effort in a
      local Markdown task graph without implementing it.
    Render these calls using the current host's syntax.
-2. Stop. Continue only after the user explicitly activates `manuscript-ops`
-   with `resume`.
+2. Stop and wait for an explicit request to resume this `manuscript-ops`
+   workflow. In the same session, an unambiguous “continue with the approved
+   Brief” is sufficient if the host permits it; no special keyword is required.
+   Follow the resume contract in [handoffs.md](references/handoffs.md).
 3. Verify that the resulting `ManuscriptBrief` is approved and contains no
    unresolved scope, acceptance, or authority decisions.
 4. Read [project-init-boundary.md](references/project-init-boundary.md). Check

@@ -146,3 +146,16 @@ ticket or Spec slice.
 (`missing bounded Spec or ticket — route via $project-clarify or
 $project-spec first`) and stops. Typechoice or review is not attempted.
 
+
+
+## Optional routing failure
+
+The user authorized one bounded item and accepted optional routing, without
+requiring a particular model or topology. The routing profile is missing.
+The current session is evidenced as capable and authorized, and all task and
+review constraints remain satisfiable. Explain the fallback and execute the
+item directly without waiting for a setup refusal.
+
+If the user required that route, the current model is restricted, independent
+review is unavailable, or the rejection scope is unclear, report the blocker.
+A setup refusal alone does not establish safe fallback.

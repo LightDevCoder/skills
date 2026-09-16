@@ -68,3 +68,16 @@ After the user settles the final decisions:
 
 "Yes" completes the session. A correction updates the decision state and asks
 the next useful round without another `$clarify` invocation.
+
+## Existing investigation authorization
+
+The user starts `$clarify` and explicitly asks for a read-only check of official
+API pricing before discussing the choice. Reuse that scoped authorization for
+the fact check; do not ask again whether to investigate. Honor the selected
+capability's actual invocation policy and the wrapper's no-project-write
+boundary. If a capability requires writing an artifact, obtain a separately
+authorized handoff for that write instead of silently creating it.
+
+Without that investigation authorization, report the concrete fact gap and
+request it. Pricing evidence does not settle the user's product tradeoff or
+replace final shared-understanding confirmation.
