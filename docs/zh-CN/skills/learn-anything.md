@@ -2,7 +2,7 @@
 
 [英文指南](../../skills/learn-anything.md)
 
-唯一行为权威是 [skills/learn-anything/SKILL.md](../../../skills/learn-anything/SKILL.md)。
+唯一行为权威是 [skills/knowledge/learn-anything/SKILL.md](../../../skills/knowledge/learn-anything/SKILL.md)。
 
 ## 解决什么问题
 

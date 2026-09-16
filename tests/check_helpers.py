@@ -46,3 +46,25 @@ class Checks:
 
 def read(root: Path, path: str) -> str:
     return (root / path).read_text(encoding="utf-8")
+
+
+def package_dir(root: Path, name: str) -> Path:
+    """Resolve exactly one categorized package by its stable skill name."""
+    matches = list((root / "skills").glob(f"*/{name}/SKILL.md"))
+    if len(matches) != 1:
+        raise ValueError(f"expected one package for {name}, found {len(matches)}")
+    return matches[0].parent
+
+
+def relocated_path(root: Path, relative: str) -> Path:
+    """Resolve a legacy source path in immutable pre-migration evidence."""
+    path = root / relative
+    if path.exists():
+        return path
+    parts = Path(relative).parts
+    if len(parts) >= 2 and parts[0] == "skills":
+        try:
+            return package_dir(root, parts[1]).joinpath(*parts[2:])
+        except ValueError:
+            pass
+    return path

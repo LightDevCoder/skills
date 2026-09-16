@@ -2,7 +2,7 @@
 
 [中文指南](../zh-CN/skills/kanban-worker.md)
 
-The package contract at [skills/kanban-worker/SKILL.md](../../skills/kanban-worker/SKILL.md)
+The package contract at [skills/project/kanban-worker/SKILL.md](../../skills/project/kanban-worker/SKILL.md)
 is authoritative. This guide explains how to enter it without duplicating the
 contract.
 
@@ -124,7 +124,7 @@ fixes it — rework does not create a new task.
 
 `kanban-worker` accesses the network, reads workspace files, and
 mutates board state, so it follows the full admission path: contract and
-behavior tests under [skills/kanban-worker/tests/](../../skills/kanban-worker/tests/)
+behavior tests under [skills/project/kanban-worker/tests/](../../skills/project/kanban-worker/tests)
 plus `project-review` (via `review-loop`) acceptance; a `BLOCKED` verdict would
 keep it outside the catalog. See the [admission evidence](../evidence/admissions/light-kanban-worker/README.md)
 (recorded under the original `light-kanban-worker` name). The v0.1.5 contract

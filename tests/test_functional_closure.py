@@ -5,6 +5,7 @@ import json
 import re
 import unittest
 from pathlib import Path
+from check_helpers import package_dir, relocated_path
 
 ROOT = Path(__file__).resolve().parents[1]
 FULL = (
@@ -16,7 +17,7 @@ FULL = (
 
 class FunctionalClosureBoundaryTest(unittest.TestCase):
     def test_recap_description_matches_the_user_approved_minimal_entry(self) -> None:
-        skill = (ROOT / "skills/recap/SKILL.md").read_text(encoding="utf-8")
+        skill = (ROOT / "skills/productivity/recap/SKILL.md").read_text(encoding="utf-8")
         description = next(line for line in skill.splitlines() if line.startswith("description: "))
         self.assertEqual(
             description,
@@ -48,12 +49,12 @@ class FunctionalClosureBoundaryTest(unittest.TestCase):
             expected, relative = match.groups()
             if relative == "skills/recap/SKILL.md":
                 continue
-            actual = hashlib.sha256((ROOT / relative).read_bytes()).hexdigest()
+            actual = hashlib.sha256(relocated_path(ROOT, relative).read_bytes()).hexdigest()
             self.assertEqual(actual, expected, relative)
 
     def test_every_local_markdown_pointer_resolves_without_cross_skill_deep_links(self) -> None:
         for name in FULL:
-            package = ROOT / "skills" / name
+            package = package_dir(ROOT, name)
             for source in package.rglob("*.md"):
                 text = source.read_text(encoding="utf-8")
                 for raw in re.findall(r"\[[^\]]+\]\(([^)]+)\)", text):
@@ -66,26 +67,26 @@ class FunctionalClosureBoundaryTest(unittest.TestCase):
                         self.assertTrue(target.is_relative_to(package), f"cross-Skill deep reference: {source.relative_to(ROOT)} -> {raw}")
 
     def test_repaired_ownership_has_one_runtime_contract(self) -> None:
-        self.assertFalse((ROOT / "skills/clarify/references/ROUTING.md").exists())
-        self.assertTrue((ROOT / "skills/socratic/references/ROUTING.md").is_file())
-        self.assertFalse((ROOT / "skills/project-review/references/reviewer-contract.md").exists())
-        self.assertTrue((ROOT / "skills/review-loop/references/reviewer-contract.md").is_file())
+        self.assertFalse((ROOT / "skills/thinking/clarify/references/ROUTING.md").exists())
+        self.assertTrue((ROOT / "skills/thinking/socratic/references/ROUTING.md").is_file())
+        self.assertFalse((ROOT / "skills/review/project-review/references/reviewer-contract.md").exists())
+        self.assertTrue((ROOT / "skills/review/review-loop/references/reviewer-contract.md").is_file())
         docs_contract = (ROOT / "docs/REVIEWER_CONTRACT.md").read_text(encoding="utf-8")
-        self.assertIn("skills/review-loop/references/reviewer-contract.md", docs_contract)
+        self.assertIn("skills/review/review-loop/references/reviewer-contract.md", docs_contract)
         self.assertNotIn("## Input packet", docs_contract)
         zh_contract = (ROOT / "docs/REVIEWER_CONTRACT.zh-CN.md").read_text(encoding="utf-8")
-        self.assertIn("skills/review-loop/references/reviewer-contract.md", zh_contract)
+        self.assertIn("skills/review/review-loop/references/reviewer-contract.md", zh_contract)
         self.assertNotIn("## 输入包", zh_contract)
 
     def test_historical_material_is_explicitly_runtime_optional(self) -> None:
-        for path in (ROOT / "skills/review-loop/references/migration.md", ROOT / "skills/project-review/references/migration.md"):
+        for path in (ROOT / "skills/review/review-loop/references/migration.md", ROOT / "skills/review/project-review/references/migration.md"):
             text = path.read_text(encoding="utf-8")
             self.assertRegex(text, r"(?i)^# Historical migration")
             self.assertIn("not required for current", text)
 
     def test_light_skill_map_matches_the_actual_collection(self) -> None:
-        mapped = {entry["name"] for entry in json.loads((ROOT / "skills/ask-light/references/light-skill-map.json").read_text(encoding="utf-8"))["skills"]}
-        actual = {path.parent.name for path in (ROOT / "skills").glob("*/SKILL.md")}
+        mapped = {entry["name"] for entry in json.loads((ROOT / "skills/productivity/ask-light/references/light-skill-map.json").read_text(encoding="utf-8"))["skills"]}
+        actual = {path.parent.name for path in (ROOT / "skills").glob("*/*/SKILL.md")}
         self.assertEqual(mapped, actual)
 
 

@@ -33,7 +33,7 @@ Agent 已有 goal、artifacts、blockers、project type、task kind、availabili
 ## Evidence 与状态
 
 - 33 个包的 `SKILL.md`（见 [CATALOG.zh-CN.md](../../../CATALOG.zh-CN.md)）。
-- [ask-light discovery contract](../../../skills/ask-light/references/discovery-contract.md)。
+- [ask-light discovery contract](../../../skills/productivity/ask-light/references/discovery-contract.md)。
 - [collection discovery 测试](../../../tests/test_collection_discovery.py) 与 [composition](../../../tests/test_composition.py)。
 - `docs/evidence/` 下的 release 与 admission 证据。
 

@@ -4,9 +4,23 @@
 
 # Light Skills — 可组合的 Agent 工作流
 
-`LightDevCoder/skills` 包含 36 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<name>/`，由包内的 `SKILL.md` 统领具体行为。
+`LightDevCoder/skills` 包含 36 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<category>/<name>/`，由包内的 `SKILL.md` 统领具体行为。
 
 > **发布版本：** [v0.2.1](https://github.com/LightDevCoder/skills/releases/tag/v0.2.1) 发布自 `v0.2.1` tag——发布线承载全部 36 个第一方 Skill，为当前最新稳定版本。确切 commit 见[发布收据](docs/evidence/releases/v0.2.1/RELEASE_RECEIPT.zh-CN.md)。
+
+## 按分类浏览
+
+[全部分类与集合说明](skills/README.zh-CN.md)。36 个技能的源文件已按用途分类，名称和调用方式不变。
+
+- [项目执行](skills/project/README.zh-CN.md) — 8 个技能
+- [工程开发](skills/engineering/README.zh-CN.md) — 5 个技能
+- [审阅验收](skills/review/README.zh-CN.md) — 4 个技能
+- [澄清研究](skills/thinking/README.zh-CN.md) — 5 个技能
+- [学习知识](skills/knowledge/README.zh-CN.md) — 5 个技能
+- [写作编辑](skills/writing/README.zh-CN.md) — 3 个技能
+- [日常工具](skills/productivity/README.zh-CN.md) — 6 个技能
+
+[旧路径迁移说明](docs/CATEGORY_MIGRATION.zh-CN.md)
 
 ## 概述
 
@@ -127,7 +141,7 @@ release-workflow                 # 仅执行发布流程
 $ask-light                       # 任务不确定时获取路由建议
 ```
 
-完整组合说明见 [docs/zh-CN/workflows/](docs/zh-CN/workflows/)。
+完整组合说明见 [docs/zh-CN/workflows/](docs/zh-CN/workflows)。
 
 ## 任务路由建议
 
@@ -138,7 +152,7 @@ $ask-light workflow
 
 `ask-light` 是 Light 工作流顾问、导航器与路由入口。它检查真实项目与工作流状态，由模型判断最合适的下一 Skill，解释原因，并在用户批准后按 Skill 调用策略与 Host 能力完成安全转换（支持的环境下可直接开始 model-invoked 目标；缺少直接 Host 转换通道时安全降级为渲染精确调用）。
 
-详见 [ask-light](skills/ask-light/SKILL.md) 与 [docs/zh-CN/workflows/](docs/zh-CN/workflows/)。
+详见 [ask-light](skills/productivity/ask-light/SKILL.md) 与 [docs/zh-CN/workflows/](docs/zh-CN/workflows)。
 
 ## 能力概览
 
@@ -153,23 +167,23 @@ $ask-light workflow
 
 每个 Skill 的完整功能、使用时机与调用方式见 [CATALOG.zh-CN.md](CATALOG.zh-CN.md)。
 
-`light-travelpage` 已收录到 `main`，尚未包含在版本标签中：从旅行资料生成和维护手机网页，通过 GitHub 与 Cloudflare Pages/D1 共享账单、成员、待办和票券状态。见 [Skill 入口](skills/light-travelpage/SKILL.md)和[准入证据](docs/evidence/admissions/light-travelpage/README.md)。 支持中英切换、航班与住宿卡片、细衬线字体和按目的地选择地图服务。
+`light-travelpage` 已收录到 `main`，尚未包含在版本标签中：从旅行资料生成和维护手机网页，通过 GitHub 与 Cloudflare Pages/D1 共享账单、成员、待办和票券状态。见 [Skill 入口](skills/productivity/light-travelpage/SKILL.md)和[准入证据](docs/evidence/admissions/light-travelpage/README.md)。 支持中英切换、航班与住宿卡片、细衬线字体和按目的地选择地图服务。
 
 ## 溯源与归属
 
 | 来源分类 | 管理策略 | 仓库内处理方式 |
 | --- | --- | --- |
-| 第一方原生 | 集合所有者原创 | 维护于 `skills/<name>/`。 |
-| 经批准 Port（Matt Pocock） | 保留上游行为并附 `ATTRIBUTION.md` | 自包含于 `skills/<name>/`，无外部运行时依赖。 |
+| 第一方原生 | 集合所有者原创 | 维护于 `skills/<category>/<name>/`。 |
+| 经批准 Port（Matt Pocock） | 保留上游行为并附 `ATTRIBUTION.md` | 自包含于 `skills/<category>/<name>/`，无外部运行时依赖。 |
 | 第三方未修改 | 外部原作者维护 | 建议直接从上游安装，本仓库不冗余存放。 |
 | 第三方定制修改 | 私有仓库 `LightDevCoder/skills-3rdParty` 托管 | 记录完整补丁、许可证与同步状态。 |
 | 历史独立迁移 | 整合并入主集合 | 在发布记录中记载迁移历史与退役状态。 |
 
 经批准的 Matt Port（共 11 个）：`research`、`prototype`、`tdd`、`handoff`、`diagnosing-bugs`、`wizard`、`teach`、`wait-what`、`to-questionnaire`、`writing-for-agents`、`resolving-merge-conflicts`。各包均含 `ATTRIBUTION.md`，无需在运行时安装上游包。
 
-改编来源（2 个包）：`humanizer` 是基于 blader/humanizer（2.11.2）实质性转换的第一方能力，外加参考 op7418/Humanizer-zh 的薄中文适配层；两份 MIT 许可均在其 [ATTRIBUTION.md](skills/humanizer/ATTRIBUTION.md) 中保留。
+改编来源（2 个包）：`humanizer` 是基于 blader/humanizer（2.11.2）实质性转换的第一方能力，外加参考 op7418/Humanizer-zh 的薄中文适配层；两份 MIT 许可均在其 [ATTRIBUTION.md](skills/writing/humanizer/ATTRIBUTION.md) 中保留。
 
-`light-travelpage` 基于 do-tongxue/Travel-Plan-Page 实质性转换，增加受保护的 D1 协作、校验、恢复和生成更新工具；MIT 来源记录见 [ATTRIBUTION.md](skills/light-travelpage/ATTRIBUTION.md)。
+`light-travelpage` 基于 do-tongxue/Travel-Plan-Page 实质性转换，增加受保护的 D1 协作、校验、恢复和生成更新工具；MIT 来源记录见 [ATTRIBUTION.md](skills/productivity/light-travelpage/ATTRIBUTION.md)。
 
 ## 治理与参考文档
 
@@ -179,6 +193,6 @@ $ask-light workflow
 - [安装指南](docs/INSTALLATION.zh-CN.md)
 - [审阅策略](docs/REVIEW_POLICY.zh-CN.md) · [Reviewer 契约](docs/REVIEWER_CONTRACT.zh-CN.md)
 - [目录](CATALOG.zh-CN.md) · [变更记录](CHANGELOG.zh-CN.md)
-- [工作流指南](docs/zh-CN/workflows/)
+- [工作流指南](docs/zh-CN/workflows)
 - [发布收据](docs/evidence/releases/v0.2.0/RELEASE_RECEIPT.zh-CN.md)
 - [集合发现测试](tests/test_collection_discovery.py) · [组合测试](tests/test_composition.py)

@@ -1,7 +1,7 @@
 # Reviewer Contract（审查者契约）— 人类阅读摘要
 
 运行时审查者契约归 `review-loop` 所有，权威位置在
-[skills/review-loop/references/reviewer-contract.md](../skills/review-loop/references/reviewer-contract.md)。
+[skills/review/review-loop/references/reviewer-contract.md](../skills/review/review-loop/references/reviewer-contract.md)。
 
 本页仅供人类阅读并作为指针，**不是**第二份独立维护的运行时契约。
 

@@ -10,13 +10,13 @@ Keep each fact in one authoritative location and link elsewhere:
 
 | Fact | Authoritative location |
 | --- | --- |
-| Package behavior, triggers, invocation, inputs, outputs, resources | `skills/<skill-name>/SKILL.md` (and its supporting files) |
-| Provenance for a Port/transformed package | `skills/<skill-name>/ATTRIBUTION.md` |
+| Package behavior, triggers, invocation, inputs, outputs, resources | `skills/<category>/<skill-name>/SKILL.md` (and its supporting files) |
+| Provenance for a Port/transformed package | `skills/<category>/<skill-name>/ATTRIBUTION.md` |
 | Human-readable inventory | [CATALOG.md](../CATALOG.md), synchronized from package metadata |
 | Installation procedure and proof requirements | [docs/INSTALLATION.md](INSTALLATION.md) |
 | Review triggers, reviewer vs engine vs acceptance | [docs/REVIEW_POLICY.md](REVIEW_POLICY.md) · [docs/REVIEWER_CONTRACT.md](REVIEWER_CONTRACT.md) |
 | Repository change history | [CHANGELOG.md](../CHANGELOG.md) and the actual release record |
-| Composition validation assets | [docs/workflows/](workflows/) and linked evidence |
+| Composition validation assets | [docs/workflows/](workflows) and linked evidence |
 
 ## Current synchronization baseline
 

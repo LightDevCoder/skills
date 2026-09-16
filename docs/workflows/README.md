@@ -1,6 +1,6 @@
 # Validated Composition Examples
 
-[中文示例](../../docs/zh-CN/workflows/README.md)
+[中文示例](../zh-CN/workflows/README.md)
 
 This directory explains repository-level Skill composition. Each document shows `entry → handoff → stop → optional` for a group; it does not copy any Skill's internal workflow. `SKILL.md` remains the behavior authority.
 

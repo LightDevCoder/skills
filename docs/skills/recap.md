@@ -2,7 +2,7 @@
 
 [中文指南](../zh-CN/skills/recap.md)
 
-The behavior authority is [skills/recap/SKILL.md](../../skills/recap/SKILL.md).
+The behavior authority is [skills/productivity/recap/SKILL.md](../../skills/productivity/recap/SKILL.md).
 This page explains usage without creating a second contract.
 
 ## Purpose
@@ -24,7 +24,7 @@ The package frontmatter and host metadata keep this entry user-invoked.
 
 Run the current amendment checks in
 [tests/test_functional_closure.py](../../tests/test_functional_closure.py).
-The unchanged [package tests](../../skills/recap/tests/) are historical records
+The unchanged [package tests](../../skills/productivity/recap/tests) are historical records
 for the prior long-form contract and are not part of the active suite.
 Fresh-copy and independent review evidence is recorded in the
 [admission record](../evidence/admissions/recap/README.md).

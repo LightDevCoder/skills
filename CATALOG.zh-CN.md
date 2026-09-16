@@ -4,6 +4,8 @@
 
 本目录从 `skills/` 下 36 个已准入包同步生成，是可读 inventory，不是静态 workflow router，也不代表某个 Agent host 当前已安装哪些 Skill。包的 `SKILL.md` 仍是行为权威。
 
+[按分类浏览](skills/README.zh-CN.md) · [路径迁移](docs/CATEGORY_MIGRATION.zh-CN.md)
+
 ## 集合状态
 
 | 字段 | 值 |
@@ -26,326 +28,326 @@
 
 - **作用：** Profile 驱动的跨 Harness 执行配置器：检查当前宿主真实执行能力，匹配用户确认的模型档位 Profile 与任务形态，精准配置执行拓扑、模型等级与 effort，支持可选 companion MCP（原生支持 primary coding-agent harnesses [10 native adapters + 1 generic fallback]）并提供单模型对等一等模式。
 - **调用：** Model-invoked。
-- **包：** [skills/agent-config/](skills/agent-config/)
+- **包：** [skills/engineering/agent-config/](skills/engineering/agent-config)
 - **状态：** 第一方已准入；REFACTOR（参照 Sol Advisor 设计理念，Profile 驱动跨 Harness 执行配置器，覆盖主要编码 Agent Harness [10 种原生适配器 + 1 种通用回退]）。
-- **证据：** [host-evidence-schema.md](skills/agent-config/references/host-evidence-schema.md)、[plan-schema.md](skills/agent-config/references/plan-schema.md)、[task-assessment.md](skills/agent-config/references/task-assessment.md)、[profile-schema.md](skills/agent-config/references/profile-schema.md)、[companion-contract.md](skills/agent-config/references/companion-contract.md)、[harness-support.md](skills/agent-config/references/harness-support.md)、[provider-adapter-contract.md](skills/agent-config/references/provider-adapter-contract.md)；Companion 运行时维护于 [LightDevCoder/agent-config](https://github.com/LightDevCoder/agent-config)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/agent-config/`。
+- **证据：** [host-evidence-schema.md](skills/engineering/agent-config/references/host-evidence-schema.md)、[plan-schema.md](skills/engineering/agent-config/references/plan-schema.md)、[task-assessment.md](skills/engineering/agent-config/references/task-assessment.md)、[profile-schema.md](skills/engineering/agent-config/references/profile-schema.md)、[companion-contract.md](skills/engineering/agent-config/references/companion-contract.md)、[harness-support.md](skills/engineering/agent-config/references/harness-support.md)、[provider-adapter-contract.md](skills/engineering/agent-config/references/provider-adapter-contract.md)；Companion 运行时维护于 [LightDevCoder/agent-config](https://github.com/LightDevCoder/agent-config)。
+- **安装路径：** `<skills-root>/agent-config/`。
 
 ### ask-light
 
 - **作用：** 作为 Light 工作流顾问、导航器与路由入口：检查项目与工作流状态，推荐下一步 Skill 并给出理由，用户批准后安全转换。
 - **调用：** 仅 user-invoked；批准前只读。批准后支持的环境下可直接开始 model-invoked 目标，user-invoked 目标遵循 Host 转换策略并在缺少直接通道时渲染精确调用。
-- **包：** [skills/ask-light/](skills/ask-light/)
+- **包：** [skills/productivity/ask-light/](skills/productivity/ask-light)
 - **状态：** 第一方已准入；REFACTOR（在完整 Skill map 建好后最后构建）。
-- **证据：** [skills/ask-light/tests/](skills/ask-light/tests/) 与 [使用指南](docs/zh-CN/skills/ask-light.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/ask-light/`。
+- **证据：** [skills/productivity/ask-light/tests/](skills/productivity/ask-light/tests) 与 [使用指南](docs/zh-CN/skills/ask-light.md)。
+- **安装路径：** `<skills-root>/ask-light/`。
 
 ### clarify
 
 - **作用：** 一次调用启动面向模糊想法/需求/流程的连续澄清，不产生正式 SPEC。以一轮多问题形式询问当前 frontier，并接受批量回复。
 - **调用：** 仅 user-invoked。
-- **包：** [skills/clarify/](skills/clarify/)
+- **包：** [skills/thinking/clarify/](skills/thinking/clarify)
 - **状态：** 第一方已准入；ADAPT（Matt `grill-me` → Light，经 `socratic`）。
-- **证据：** [SKILL.md](skills/clarify/SKILL.md) 与 [ATTRIBUTION.md](skills/clarify/ATTRIBUTION.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/clarify/`。
+- **证据：** [SKILL.md](skills/thinking/clarify/SKILL.md) 与 [ATTRIBUTION.md](skills/thinking/clarify/ATTRIBUTION.md)。
+- **安装路径：** `<skills-root>/clarify/`。
 
 ### code-review
 
 - **作用：** 针对有界 `git diff` 的只读 specialist 审查（Standards + Spec 双轴）。
 - **调用：** Model-invoked；只读，不修复也不裁决。
-- **包：** [skills/code-review/](skills/code-review/)
+- **包：** [skills/review/code-review/](skills/review/code-review)
 - **状态：** 第一方已准入；ADAPT（保留 Matt `code-review` 的双轴方法）。
-- **证据：** [references/WORKFLOW.md](skills/code-review/references/WORKFLOW.md) 与 [ATTRIBUTION.md](skills/code-review/ATTRIBUTION.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/code-review/`。
+- **证据：** [references/WORKFLOW.md](skills/review/code-review/references/WORKFLOW.md) 与 [ATTRIBUTION.md](skills/review/code-review/ATTRIBUTION.md)。
+- **安装路径：** `<skills-root>/code-review/`。
 
 ### decision-map
 
 - **作用：** 将大型、模糊、跨会话的工作规划为可持久化的决策地图 tickets。
 - **调用：** 仅 user-invoked。
-- **包：** [skills/decision-map/](skills/decision-map/)
+- **包：** [skills/thinking/decision-map/](skills/thinking/decision-map)
 - **状态：** 第一方已准入；ADAPT（Matt `wayfinder`）。
-- **证据：** [references/MAP-CONTRACT.md](skills/decision-map/references/MAP-CONTRACT.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/decision-map/`。
+- **证据：** [references/MAP-CONTRACT.md](skills/thinking/decision-map/references/MAP-CONTRACT.md)。
+- **安装路径：** `<skills-root>/decision-map/`。
 
 ### diagnosing-bugs
 
 - **作用：** 针对难 bug 与性能回退的诊断环，需紧反馈信号。
 - **调用：** Model-invoked。
-- **包：** [skills/diagnosing-bugs/](skills/diagnosing-bugs/)
+- **包：** [skills/engineering/diagnosing-bugs/](skills/engineering/diagnosing-bugs)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/diagnosing-bugs/SKILL.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/diagnosing-bugs/`。
+- **证据：** [SKILL.md](skills/engineering/diagnosing-bugs/SKILL.md)。
+- **安装路径：** `<skills-root>/diagnosing-bugs/`。
 
 ### eli5
 
 - **作用：** 按指定受众水平解释任意主题、代码或错误。
 - **调用：** Model-invoked。
-- **包：** [skills/eli5/](skills/eli5/)
+- **包：** [skills/knowledge/eli5/](skills/knowledge/eli5)
 - **状态：** 第一方已准入；MIGRATE — NO REWRITE（源自上游 `DreambigOu/ELI5` @ `a766623`，经临时迁移 fork `LightDevCoder/ELI5`）。
-- **证据：** [SKILL.md](skills/eli5/SKILL.md)、[ATTRIBUTION.md](skills/eli5/ATTRIBUTION.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/eli5/`。
+- **证据：** [SKILL.md](skills/knowledge/eli5/SKILL.md)、[ATTRIBUTION.md](skills/knowledge/eli5/ATTRIBUTION.md)。
+- **安装路径：** `<skills-root>/eli5/`。
 
 ### generic-review
 
 - **作用：** 针对普通制品的只读默认 reviewer，找遗漏、错误、矛盾与可用性问题。
 - **调用：** Model-invoked；只读，不裁决。
-- **包：** [skills/generic-review/](skills/generic-review/)
+- **包：** [skills/review/generic-review/](skills/review/generic-review)
 - **状态：** 第一方已准入；NEW。
-- **证据：** [SKILL.md](skills/generic-review/SKILL.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/generic-review/`。
+- **证据：** [SKILL.md](skills/review/generic-review/SKILL.md)。
+- **安装路径：** `<skills-root>/generic-review/`。
 
 ### handoff
 
 - **作用：** 将当前会话压缩为下一 agent 的交接文档。
 - **调用：** 仅 user-invoked。
-- **包：** [skills/handoff/](skills/handoff/)
+- **包：** [skills/productivity/handoff/](skills/productivity/handoff)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/handoff/SKILL.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/handoff/`。
+- **证据：** [SKILL.md](skills/productivity/handoff/SKILL.md)。
+- **安装路径：** `<skills-root>/handoff/`。
 
 ### humanizer
 
 - **作用：** 将带有 AI 痕迹的中英文文本改写为自然行文，且不改变原意。
 - **调用：** Model-invoked。
-- **包：** [skills/humanizer/](skills/humanizer/)
+- **包：** [skills/writing/humanizer/](skills/writing/humanizer)
 - **状态：** 第一方已准入，full-path `PASS`；v0.2.0 线发布；ADAPT 自 blader/humanizer（2.11.2）+ 薄中文适配，MIT 归属保留。
-- **证据：** [SKILL.md](skills/humanizer/SKILL.md)、[准入记录](docs/evidence/admissions/humanizer/README.zh-CN.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/humanizer/`。
+- **证据：** [SKILL.md](skills/writing/humanizer/SKILL.md)、[准入记录](docs/evidence/admissions/humanizer/README.zh-CN.md)。
+- **安装路径：** `<skills-root>/humanizer/`。
 
 ### implement
 
 - **作用：** 执行一个已决策、有边界的工作项（代码、文档、配置、Skill）。
 - **调用：** 仅 user-invoked。
-- **包：** [skills/implement/](skills/implement/)
+- **包：** [skills/project/implement/](skills/project/implement)
 - **状态：** 第一方已准入；ADAPT（Matt `implement` → 通用执行器）。
-- **证据：** [references/WORKFLOW.md](skills/implement/references/WORKFLOW.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/implement/`。
+- **证据：** [references/WORKFLOW.md](skills/project/implement/references/WORKFLOW.md)。
+- **安装路径：** `<skills-root>/implement/`。
 
 ### kanban-worker
 
 - **作用：** 每次定时运行领取并执行一张 Light-Kanban 任务；先继续持有任务与 `reviewFeedback`。
 - **调用：** Model-invoked；支持手动入口。
-- **包：** [skills/kanban-worker/](skills/kanban-worker/)
+- **包：** [skills/project/kanban-worker/](skills/project/kanban-worker)
 - **状态：** 第一方已准入；经完整路径（`review-loop agent-skill` PASS）；v0.1.6 由 `light-kanban-worker` 改名。
-- **证据：** [skills/kanban-worker/tests/](skills/kanban-worker/tests/) 与 [使用指南](docs/zh-CN/skills/kanban-worker.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/kanban-worker/`。
+- **证据：** [skills/project/kanban-worker/tests/](skills/project/kanban-worker/tests) 与 [使用指南](docs/zh-CN/skills/kanban-worker.md)。
+- **安装路径：** `<skills-root>/kanban-worker/`。
 
 ### kb-init
 
 - **作用：** 通过专属访谈设计并初始化可维护知识库，获批后才实施。
 - **调用：** 仅 user-invoked。
-- **包：** [skills/kb-init/](skills/kb-init/)
+- **包：** [skills/knowledge/kb-init/](skills/knowledge/kb-init)
 - **状态：** 第一方已准入；完整路径 `PASS`，随 v0.1.6 发布。
-- **证据：** [skills/kb-init/tests/](skills/kb-init/tests/)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/kb-init/`。
+- **证据：** [skills/knowledge/kb-init/tests/](skills/knowledge/kb-init/tests)。
+- **安装路径：** `<skills-root>/kb-init/`。
 
 ### language-learning
 
 - **作用：** 通过六种模式辅导任意语言——课程、卡片、对话、语法、测验与沉浸。
 - **调用：** 仅 user-invoked。
-- **包：** [skills/language-learning/](skills/language-learning/)
+- **包：** [skills/knowledge/language-learning/](skills/knowledge/language-learning)
 - **状态：** 第一方已准入；纯提示型快速通道 `PASS`，v0.1.2 发布。
-- **证据：** [skills/language-learning/tests/](skills/language-learning/tests/)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/language-learning/`。
+- **证据：** [skills/knowledge/language-learning/tests/](skills/knowledge/language-learning/tests)。
+- **安装路径：** `<skills-root>/language-learning/`。
 
 ### learn-anything
 
 - **作用：** 将证据充分的对话/笔记/workflow 提炼为可复用 Agent Skill 方法。
 - **调用：** 仅 user-invoked。
-- **包：** [skills/learn-anything/](skills/learn-anything/)
+- **包：** [skills/knowledge/learn-anything/](skills/knowledge/learn-anything)
 - **状态：** 第一方已准入；PRESERVE — NO REWRITE。
-- **证据：** [package contract](skills/learn-anything/SKILL.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/learn-anything/`。
+- **证据：** [package contract](skills/knowledge/learn-anything/SKILL.md)。
+- **安装路径：** `<skills-root>/learn-anything/`。
 
 ### light-travelpage
 
 - **作用：** 从资料生成或更新中英双语手机旅行网页，提供航班/住宿卡片、地区地图导航，共享同行人、账单、币种设置、待办与门票状态。
 - **时机：** 创建或维护旅行网页；普通旅行咨询和预订购买不触发。
 - **调用：** Model-invoked。
-- **包：** [skills/light-travelpage/](skills/light-travelpage/)
-- **安装路径：** 宿主可识别 Skills 根目录下的 `skills/light-travelpage/`。
+- **包：** [skills/productivity/light-travelpage/](skills/productivity/light-travelpage)
+- **安装路径：** `<skills-root>/light-travelpage/`。
 - **状态：** 实质性转换的第一方能力，已准入 main、尚未发布版本标签；默认 GitHub + Cloudflare Pages、Functions、D1，每个部署一个同权限小组。
-- **证据：** [准入](docs/evidence/admissions/light-travelpage/README.md) · [本次更新](docs/evidence/maintenance/2026-09-15-light-travelpage.md) · [来源](skills/light-travelpage/ATTRIBUTION.md)。
+- **证据：** [准入](docs/evidence/admissions/light-travelpage/README.md) · [本次更新](docs/evidence/maintenance/2026-09-15-light-travelpage.md) · [来源](skills/productivity/light-travelpage/ATTRIBUTION.md)。
 
 ### manuscript-ops
 
 - **作用：** 从小笔记到多语言多格式交付的文稿工程治理。
 - **调用：** Model-invoked；支持手动入口。
-- **包：** [skills/manuscript-ops/](skills/manuscript-ops/)
+- **包：** [skills/writing/manuscript-ops/](skills/writing/manuscript-ops)
 - **状态：** 第一方已准入；PRESERVE — NO REWRITE。
-- **证据：** [package contract](skills/manuscript-ops/SKILL.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/manuscript-ops/`。
+- **证据：** [package contract](skills/writing/manuscript-ops/SKILL.md)。
+- **安装路径：** `<skills-root>/manuscript-ops/`。
 
 ### project-clarify
 
 - **作用：** 基于已检查的项目事实澄清真实未决决策，输出给 `project-spec` 的有界 handoff。采用与 `clarify` 相同的 frontier-round 交互，并注入项目证据。
 - **调用：** 仅 user-invoked。
-- **包：** [skills/project-clarify/](skills/project-clarify/)
+- **包：** [skills/project/project-clarify/](skills/project/project-clarify)
 - **状态：** 第一方已准入；ADAPT（Matt `grill-with-docs`）。
-- **证据：** [references/project-clarification-contract.md](skills/project-clarify/references/project-clarification-contract.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/project-clarify/`。
+- **证据：** [references/project-clarification-contract.md](skills/project/project-clarify/references/project-clarification-contract.md)。
+- **安装路径：** `<skills-root>/project-clarify/`。
 
 ### project-init
 
 - **作用：** 幂等建立下游 Project Skills 消费的稳定 Light 项目与 tracker 契约。
 - **调用：** 仅 user-invoked。
-- **包：** [skills/project-init/](skills/project-init/)
+- **包：** [skills/project/project-init/](skills/project/project-init)
 - **状态：** 第一方已准入；REFACTOR（仓库 bootstrap；完整澄清仍归 `project-clarify`）。
-- **证据：** [skills/project-init/tests/](skills/project-init/tests/)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/project-init/`。
+- **证据：** [skills/project/project-init/tests/](skills/project/project-init/tests)。
+- **安装路径：** `<skills-root>/project-init/`。
 
 ### project-review
 
 - **作用：** 项目级最终验收——冻结 baseline、组合 reviewer、签发 `PASS`/`FAIL`/`BLOCKED`。
 - **调用：** Model-invoked；支持手动入口。
-- **包：** [skills/project-review/](skills/project-review/)
+- **包：** [skills/review/project-review/](skills/review/project-review)
 - **状态：** 第一方已准入；NEW（从旧 `review-loop` 迁移 final-acceptance 逻辑）。
-- **证据：** [SKILL.md](skills/project-review/SKILL.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/project-review/`。
+- **证据：** [SKILL.md](skills/review/project-review/SKILL.md)。
+- **安装路径：** `<skills-root>/project-review/`。
 
 ### project-retro
 
 - **作用：** 对已完成的项目或编码会话进行复盘，识别环境、守护线、导航、工具经济性与工作流改进点。
 - **调用：** Model-invoked（工作流终点由 Agent 自主评估是否需要调用）；支持手动入口。
-- **包：** [skills/project-retro/](skills/project-retro/)
+- **包：** [skills/project/project-retro/](skills/project/project-retro)
 - **状态：** 第一方已准入；PORT 与 Light 工作流适配（Matt Pocock `retro`）。
-- **证据：** 契约与行为测试见 [skills/project-retro/tests/](skills/project-retro/tests/)；[SKILL.md](skills/project-retro/SKILL.md)，[ATTRIBUTION.md](skills/project-retro/ATTRIBUTION.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/project-retro/`。
+- **证据：** 契约与行为测试见 [skills/project/project-retro/tests/](skills/project/project-retro/tests)；[SKILL.md](skills/project/project-retro/SKILL.md)，[ATTRIBUTION.md](skills/project/project-retro/ATTRIBUTION.md)。
+- **安装路径：** `<skills-root>/project-retro/`。
 
 ### project-spec
 
 - **作用：** 将已澄清的输出整理为正式 SPEC，不再重做访谈。
 - **调用：** 仅 user-invoked。
-- **包：** [skills/project-spec/](skills/project-spec/)
+- **包：** [skills/project/project-spec/](skills/project/project-spec)
 - **状态：** 第一方已准入；ADAPT（Matt `to-spec`）。
-- **证据：** [references/](skills/project-spec/references/)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/project-spec/`。
+- **证据：** [references/](skills/project/project-spec/references)。
+- **安装路径：** `<skills-root>/project-spec/`。
 
 ### project-tickets
 
 - **作用：** 将已批准 SPEC 转为按依赖排序的 tracer-bullet ticket 图。
 - **调用：** 仅 user-invoked。
-- **包：** [skills/project-tickets/](skills/project-tickets/)
+- **包：** [skills/project/project-tickets/](skills/project/project-tickets)
 - **状态：** 第一方已准入；ADAPT（Matt `to-tickets`）。
-- **证据：** [references/](skills/project-tickets/references/)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/project-tickets/`。
+- **证据：** [references/](skills/project/project-tickets/references)。
+- **安装路径：** `<skills-root>/project-tickets/`。
 
 ### prototype
 
 - **作用：** 为设计问题构建一次性原型。
 - **调用：** Model-invoked。
-- **包：** [skills/prototype/](skills/prototype/)
+- **包：** [skills/engineering/prototype/](skills/engineering/prototype)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/prototype/SKILL.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/prototype/`。
+- **证据：** [SKILL.md](skills/engineering/prototype/SKILL.md)。
+- **安装路径：** `<skills-root>/prototype/`。
 
 ### recap
 
 - **作用：** 用一句简洁文本展示当前 session，不替换或压缩对话历史。
 - **调用：** 仅 user-invoked；唯一入口为 `$recap`。
-- **包：** [skills/recap/](skills/recap/)
+- **包：** [skills/productivity/recap/](skills/productivity/recap)
 - **状态：** 第一方已准入；仅手动触发的稳定形式随 v0.2.0 发布；当前 main 分支跟踪集合更新。
-- **证据：** 当前修订由 [tests/test_functional_closure.py](tests/test_functional_closure.py) 验证；冻结历史测试保留在 [skills/recap/tests/](skills/recap/tests/)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/recap/`。
+- **证据：** 当前修订由 [tests/test_functional_closure.py](tests/test_functional_closure.py) 验证；冻结历史测试保留在 [skills/productivity/recap/tests/](skills/productivity/recap/tests)。
+- **安装路径：** `<skills-root>/recap/`。
 
 ### release-workflow
 
 - **作用：** 发布已完成项目——同步文档、执行质量门、打 tag、发布。
 - **调用：** Model-invoked。
-- **包：** [skills/release-workflow/](skills/release-workflow/)
+- **包：** [skills/project/release-workflow/](skills/project/release-workflow)
 - **状态：** 第一方已准入；MIGRATE — NO REWRITE（来自 `LightDevCoder/release-workflow`）。
-- **证据：** [SKILL.md](skills/release-workflow/SKILL.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/release-workflow/`。
+- **证据：** [SKILL.md](skills/project/release-workflow/SKILL.md)。
+- **安装路径：** `<skills-root>/release-workflow/`。
 
 ### research
 
 - **作用：** 针对外部问题做高可信来源调研并沉淀结论。
 - **调用：** Model-invoked。
-- **包：** [skills/research/](skills/research/)
+- **包：** [skills/thinking/research/](skills/thinking/research)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/research/SKILL.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/research/`。
+- **证据：** [SKILL.md](skills/thinking/research/SKILL.md)。
+- **安装路径：** `<skills-root>/research/`。
 
 ### resolving-merge-conflicts
 
 - **作用：** 解决进行中的 `git` merge/rebase 冲突。
 - **调用：** Model-invoked。
-- **包：** [skills/resolving-merge-conflicts/](skills/resolving-merge-conflicts/)
+- **包：** [skills/engineering/resolving-merge-conflicts/](skills/engineering/resolving-merge-conflicts)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/resolving-merge-conflicts/SKILL.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/resolving-merge-conflicts/`。
+- **证据：** [SKILL.md](skills/engineering/resolving-merge-conflicts/SKILL.md)。
+- **安装路径：** `<skills-root>/resolving-merge-conflicts/`。
 
 ### review-loop
 
 - **作用：** 轻量 review/repair 引擎——解析 reviewer、调用、收 findings、回 Producer、重跑。
 - **调用：** Model-invoked；支持手动入口。
-- **包：** [skills/review-loop/](skills/review-loop/)
+- **包：** [skills/review/review-loop/](skills/review/review-loop)
 - **状态：** 第一方已准入；REFACTOR + SPLIT（final acceptance 已移至 `project-review`）。
-- **证据：** [SKILL.md](skills/review-loop/SKILL.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/review-loop/`。
+- **证据：** [SKILL.md](skills/review/review-loop/SKILL.md)。
+- **安装路径：** `<skills-root>/review-loop/`。
 
 ### socratic
 
 - **作用：** 核心澄清引擎——内部 decision frontier 以一轮多问题呈现，含选项、建议、批量回复与共同理解确认。
 - **调用：** Model-invoked（供其他 Skill 调用的引擎）。
-- **包：** [skills/socratic/](skills/socratic/)
+- **包：** [skills/thinking/socratic/](skills/thinking/socratic)
 - **状态：** 第一方已准入；ADAPT（Matt `grilling`）。
-- **证据：** [SKILL.md](skills/socratic/SKILL.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/socratic/`。
+- **证据：** [SKILL.md](skills/thinking/socratic/SKILL.md)。
+- **安装路径：** `<skills-root>/socratic/`。
 
 ### tdd
 
 - **作用：** 测试驱动开发—— red → green → refactor 真测试循环。
 - **调用：** Model-invoked。
-- **包：** [skills/tdd/](skills/tdd/)
+- **包：** [skills/engineering/tdd/](skills/engineering/tdd)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/tdd/SKILL.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/tdd/`。
+- **证据：** [SKILL.md](skills/engineering/tdd/SKILL.md)。
+- **安装路径：** `<skills-root>/tdd/`。
 
 ### teach
 
 - **作用：** 在当前 workspace 内教授新 Skill 或概念。
 - **调用：** 仅 user-invoked。
-- **包：** [skills/teach/](skills/teach/)
+- **包：** [skills/knowledge/teach/](skills/knowledge/teach)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/teach/SKILL.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/teach/`。
+- **证据：** [SKILL.md](skills/knowledge/teach/SKILL.md)。
+- **安装路径：** `<skills-root>/teach/`。
 
 ### to-questionnaire
 
 - **作用：** 将未决问题转为面向持信息人的问卷。
 - **调用：** 仅 user-invoked。
-- **包：** [skills/to-questionnaire/](skills/to-questionnaire/)
+- **包：** [skills/thinking/to-questionnaire/](skills/thinking/to-questionnaire)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/to-questionnaire/SKILL.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/to-questionnaire/`。
+- **证据：** [SKILL.md](skills/thinking/to-questionnaire/SKILL.md)。
+- **安装路径：** `<skills-root>/to-questionnaire/`。
 
 ### wait-what
 
 - **作用：** 重讲上一条未被理解的消息。
 - **调用：** 仅 user-invoked。
-- **包：** [skills/wait-what/](skills/wait-what/)
+- **包：** [skills/productivity/wait-what/](skills/productivity/wait-what)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/wait-what/SKILL.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/wait-what/`。
+- **证据：** [SKILL.md](skills/productivity/wait-what/SKILL.md)。
+- **安装路径：** `<skills-root>/wait-what/`。
 
 ### wizard
 
 - **作用：** 为只能人做的步骤生成交互式 bash 向导（置备、密钥、第三方控制台、割接）。
 - **调用：** Model-invoked。
-- **包：** [skills/wizard/](skills/wizard/)
+- **包：** [skills/productivity/wizard/](skills/productivity/wizard)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/wizard/SKILL.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/wizard/`。
+- **证据：** [SKILL.md](skills/productivity/wizard/SKILL.md)。
+- **安装路径：** `<skills-root>/wizard/`。
 
 ### writing-for-agents
 
 - **作用：** 为 agent 编写或改进面向模型的文档（Skills、AGENTS.md、CLAUDE.md）。
 - **调用：** Model-invoked。
-- **包：** [skills/writing-for-agents/](skills/writing-for-agents/)
+- **包：** [skills/writing/writing-for-agents/](skills/writing/writing-for-agents)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/writing-for-agents/SKILL.md)。
-- **安装路径：** host 认可的 Skills root 下的 `skills/writing-for-agents/`。
+- **证据：** [SKILL.md](skills/writing/writing-for-agents/SKILL.md)。
+- **安装路径：** `<skills-root>/writing-for-agents/`。
 
 ## 来源边界
 

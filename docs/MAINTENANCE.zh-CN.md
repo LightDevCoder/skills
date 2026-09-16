@@ -6,7 +6,7 @@
 
 ## 权威记录
 
-每个事实只保留一个权威位置，其他位置链接过去：包行为/触发/调用/输入/输出/资源以 `skills/<skill-name>/SKILL.md`（及 supporting files）为准；Port/变换包的来源在 `ATTRIBUTION.md`；可读目录是 [CATALOG.md](../CATALOG.md)；安装与验证是 [docs/INSTALLATION.md](INSTALLATION.md)；审查与 verdict 是 [docs/REVIEW_POLICY.md](REVIEW_POLICY.md) 与 [REVIEWER_CONTRACT.md](REVIEWER_CONTRACT.md)；历史是 [CHANGELOG.md](../CHANGELOG.md) 与真实 release；组合验证资产在 [docs/workflows/](workflows/)。
+每个事实只保留一个权威位置，其他位置链接过去：包行为/触发/调用/输入/输出/资源以 `skills/<category>/<skill-name>/SKILL.md`（及 supporting files）为准；Port/变换包的来源在 `ATTRIBUTION.md`；可读目录是 [CATALOG.md](../CATALOG.md)；安装与验证是 [docs/INSTALLATION.md](INSTALLATION.md)；审查与 verdict 是 [docs/REVIEW_POLICY.md](REVIEW_POLICY.md) 与 [REVIEWER_CONTRACT.md](REVIEWER_CONTRACT.md)；历史是 [CHANGELOG.md](../CHANGELOG.md) 与真实 release；组合验证资产在 [docs/workflows/](workflows)。
 
 ## 当前同步基线
 

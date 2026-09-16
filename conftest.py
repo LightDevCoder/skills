@@ -7,8 +7,14 @@ modules keeps ``pytest -q`` aligned with the active suite without modifying a
 Frozen test file.
 """
 
+import sys
+from pathlib import Path
+
+# Frozen package test files retain their original relative import assumptions.
+sys.path.insert(0, str(Path(__file__).resolve().parent / "tests"))
+
 collect_ignore = [
-    "skills/language-learning/tests/test_language_learning_contract.py",
-    "skills/recap/tests/test_recap_contract.py",
-    "skills/recap/tests/test_recap_output_contract.py",
+    "skills/knowledge/language-learning/tests/test_language_learning_contract.py",
+    "skills/productivity/recap/tests/test_recap_contract.py",
+    "skills/productivity/recap/tests/test_recap_output_contract.py",
 ]

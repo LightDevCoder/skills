@@ -2,7 +2,7 @@
 
 [英文指南](../../skills/ask-light.md)
 
-工作流顾问、router 与输出契约见 [skills/ask-light/SKILL.md](../../../skills/ask-light/SKILL.md) 和 [discovery contract](../../../skills/ask-light/references/discovery-contract.md)。
+工作流顾问、router 与输出契约见 [skills/productivity/ask-light/SKILL.md](../../../skills/productivity/ask-light/SKILL.md) 和 [discovery contract](../../../skills/productivity/ask-light/references/discovery-contract.md)。
 
 ## 解决什么问题
 
@@ -53,4 +53,4 @@ Execution: recommendation phase was read-only; execution begins only after expli
 
 ## 安装与发现验证
 
-验证时，将完整 `ask-light` 包复制到隔离的 host Skill 根，刷新后在不依赖 source checkout 的情况下检查 `SKILL.md`、`light-skill-map.json`、Python helper 与 PowerShell 兼容 launcher。在相应 release 通过发布安装门禁前，不把任何安装命令标记为已验证。运行 [contract test](../../../skills/ask-light/tests/test_ask_light_contract.py) 与 [behavior test](../../../skills/ask-light/tests/test_ask_light_behavior.py)，覆盖证据检查、选择验证、审查事务安全性、freshness 检查、根发现、来源、host 可用性与批准转换边界。
+验证时，将完整 `ask-light` 包复制到隔离的 host Skill 根，刷新后在不依赖 source checkout 的情况下检查 `SKILL.md`、`light-skill-map.json`、Python helper 与 PowerShell 兼容 launcher。在相应 release 通过发布安装门禁前，不把任何安装命令标记为已验证。运行 [contract test](../../../skills/productivity/ask-light/tests/test_ask_light_contract.py) 与 [behavior test](../../../skills/productivity/ask-light/tests/test_ask_light_behavior.py)，覆盖证据检查、选择验证、审查事务安全性、freshness 检查、根发现、来源、host 可用性与批准转换边界。

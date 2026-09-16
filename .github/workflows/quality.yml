@@ -9,6 +9,8 @@ on:
 jobs:
   quality:
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: tests
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,17 +25,17 @@ jobs:
           python -m unittest discover -s tests -p "test_*.py"
           python -m compileall -q skills tests
           for f in \
-            skills/ask-light/tests/test_ask_light_contract.py \
-            skills/kb-init/tests/test_kb_init_contract.py \
-            skills/project-init/tests/test_project_init_contract.py \
-            skills/project-init/tests/test_project_init_behavior.py \
-            skills/language-learning/tests/test_language_learning_contract.py \
-            skills/kanban-worker/tests/test_kanban_worker_contract.py \
-            skills/kanban-worker/tests/test_kanban_worker_behavior.py \
-            skills/review-loop/tests/test_review_loop_contract.py \
-            skills/review-loop/tests/test_review_loop_behavior.py \
-            skills/agent-config/tests/test_agent_config_contract.py \
-            skills/agent-config/tests/test_agent_config_behavior.py \
+            skills/productivity/ask-light/tests/test_ask_light_contract.py \
+            skills/knowledge/kb-init/tests/test_kb_init_contract.py \
+            skills/project/project-init/tests/test_project_init_contract.py \
+            skills/project/project-init/tests/test_project_init_behavior.py \
+            skills/knowledge/language-learning/tests/test_language_learning_contract.py \
+            skills/project/kanban-worker/tests/test_kanban_worker_contract.py \
+            skills/project/kanban-worker/tests/test_kanban_worker_behavior.py \
+            skills/review/review-loop/tests/test_review_loop_contract.py \
+            skills/review/review-loop/tests/test_review_loop_behavior.py \
+            skills/engineering/agent-config/tests/test_agent_config_contract.py \
+            skills/engineering/agent-config/tests/test_agent_config_behavior.py \
           ; do
             python "$f"
           done
@@ -41,7 +43,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python skills/ask-light/tests/test_ask_light_behavior.py
+          python skills/productivity/ask-light/tests/test_ask_light_behavior.py
       - name: Set up Node.js for companion checks
         uses: actions/setup-node@v4
         with:
@@ -53,7 +55,7 @@ jobs:
           git clone --depth 1 https://github.com/LightDevCoder/agent-config.git /tmp/agent-config-companion
           (cd /tmp/agent-config-companion && npm ci)
           export AGENT_CONFIG_COMPANION_PATH="/tmp/agent-config-companion"
-          python -m unittest skills/agent-config/tests/test_companion_contract_integration.py
+          python -m unittest skills/engineering/agent-config/tests/test_companion_contract_integration.py
       - name: Retired package boundary
         shell: bash
         run: |

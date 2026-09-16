@@ -20,15 +20,15 @@ This document explains the **Clarification & Research** composition: entry, hand
         research  prototype  to-questionnaire
 ```
 
-- [`socratic`](../../skills/socratic/SKILL.md) — core engine: dynamic, decision-owned questioning; no fixed questionnaire; distinguishes facts vs user decisions. Not a project workflow by itself. Other Skills *call* it; they do not reimplement it.
-- [`clarify`](../../skills/clarify/SKILL.md) — **user-invoked standalone entry** for vague ideas/brainstorms with no project context. One `$clarify` starts a continuous session; normal replies advance `socratic`. Turns stay conversational, include a recommendation when useful, and end only after shared-understanding confirmation, exit, or a workflow switch. No SPEC, no auto-chain.
+- [`socratic`](../../skills/thinking/socratic/SKILL.md) — core engine: dynamic, decision-owned questioning; no fixed questionnaire; distinguishes facts vs user decisions. Not a project workflow by itself. Other Skills *call* it; they do not reimplement it.
+- [`clarify`](../../skills/thinking/clarify/SKILL.md) — **user-invoked standalone entry** for vague ideas/brainstorms with no project context. One `$clarify` starts a continuous session; normal replies advance `socratic`. Turns stay conversational, include a recommendation when useful, and end only after shared-understanding confirmation, exit, or a workflow switch. No SPEC, no auto-chain.
 
 ## Project-aware clarification
 
 | Skill | Entry | How it uses `socratic` | Handoff | Stop |
 | --- | --- | --- | --- | --- |
-| [`project-clarify`](../../skills/project-clarify/SKILL.md) — user-invoked | Existing project with genuine unresolved decisions | **Inspects first:** `README`, `AGENTS.md`, `CLAUDE.md`, existing docs/specs/source. *Then* calls `socratic` for only the gaps that need user-owned decisions | bounded handoff for `project-spec` (or back to `decision-map` if still foggy) | stop without creating SPEC/tickets or auto-starting another user-invoked Skill |
-| [`decision-map`](../../skills/decision-map/SKILL.md) — user-invoked | Large, foggy, multi-session, many dependent decisions | Maintains a persistent map under `.scratch/<effort>/map.md` + child tickets; may call `socratic` and, per unknown routing, `research` / `prototype` / `to-questionnaire` | decision tickets resolved → hand to `project-spec` | stop at map updates; work stays on the tracker, not in execution |
+| [`project-clarify`](../../skills/project/project-clarify/SKILL.md) — user-invoked | Existing project with genuine unresolved decisions | **Inspects first:** `README`, `AGENTS.md`, `CLAUDE.md`, existing docs/specs/source. *Then* calls `socratic` for only the gaps that need user-owned decisions | bounded handoff for `project-spec` (or back to `decision-map` if still foggy) | stop without creating SPEC/tickets or auto-starting another user-invoked Skill |
+| [`decision-map`](../../skills/thinking/decision-map/SKILL.md) — user-invoked | Large, foggy, multi-session, many dependent decisions | Maintains a persistent map under `.scratch/<effort>/map.md` + child tickets; may call `socratic` and, per unknown routing, `research` / `prototype` / `to-questionnaire` | decision tickets resolved → hand to `project-spec` | stop at map updates; work stays on the tracker, not in execution |
 
 ## Unknown routing
 
@@ -50,4 +50,4 @@ Call the capability; never guess or copy its instructions into the caller. `rese
 - `project-clarify` hands to `project-spec`; if a blocking user decision remains, `project-spec` returns to `project-clarify`.
 - `decision-map` hands to `project-spec` once fog clears.
 
-See [project-workflow](project-workflow.md) for how clarification feeds planning, and [`ask-light`](../../skills/ask-light/SKILL.md) for routing when the entry is unclear.
+See [project-workflow](project-workflow.md) for how clarification feeds planning, and [`ask-light`](../../skills/productivity/ask-light/SKILL.md) for routing when the entry is unclear.

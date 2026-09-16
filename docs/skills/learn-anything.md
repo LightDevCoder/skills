@@ -2,7 +2,7 @@
 
 [中文指南](../zh-CN/skills/learn-anything.md)
 
-The package contract at [skills/learn-anything/SKILL.md](../../skills/learn-anything/SKILL.md)
+The package contract at [skills/knowledge/learn-anything/SKILL.md](../../skills/knowledge/learn-anything/SKILL.md)
 is the sole behavior authority.
 
 ## What it solves

@@ -12,12 +12,13 @@ from __future__ import annotations
 import re
 import unittest
 from pathlib import Path
+from check_helpers import package_dir, relocated_path
 
 ROOT = Path(__file__).resolve().parents[1]
 
 # Helper
 def read_skill(name: str) -> str:
-    return (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8", errors="replace")
+    return (package_dir(ROOT, name) / "SKILL.md").read_text(encoding="utf-8", errors="replace")
 
 def read_doc(path: str) -> str:
     return (ROOT / path).read_text(encoding="utf-8", errors="replace")
@@ -110,7 +111,7 @@ class CompositionTests(unittest.TestCase):
     def test_ask_light_routes_to_real_skills(self):
         text = read_skill("ask-light")
         import json
-        skill_map = json.loads(read_doc("skills/ask-light/references/light-skill-map.json"))
+        skill_map = json.loads(read_doc("skills/productivity/ask-light/references/light-skill-map.json"))
         names = {entry["name"] for entry in skill_map["skills"]}
         real_skills = {"project-init", "project-clarify", "project-spec", "project-tickets", "implement", "project-review", "clarify", "socratic", "research", "prototype", "review-loop"}
         self.assertTrue(real_skills.issubset(names))

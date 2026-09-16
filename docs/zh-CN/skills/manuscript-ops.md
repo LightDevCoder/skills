@@ -2,7 +2,7 @@
 
 [英文指南](../../skills/manuscript-ops.md)
 
-完整行为契约见 [skills/manuscript-ops/SKILL.md](../../../skills/manuscript-ops/SKILL.md)。
+完整行为契约见 [skills/writing/manuscript-ops/SKILL.md](../../../skills/writing/manuscript-ops/SKILL.md)。
 
 ## 解决什么问题
 

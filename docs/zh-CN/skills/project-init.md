@@ -2,7 +2,7 @@
 
 [英文指南](../../skills/project-init.md)
 
-行为权威是 [skills/project-init/SKILL.md](../../../skills/project-init/SKILL.md)。
+行为权威是 [skills/project/project-init/SKILL.md](../../../skills/project/project-init/SKILL.md)。
 
 ## 解决什么问题
 
@@ -36,4 +36,4 @@ $project-init
 
 ## 安装与发现验证
 
-使用 `npx skills add LightDevCoder/skills --skill project-init` 安装，刷新 host，在脱离 source checkout 的环境确认发现结果，并运行 [tests](../../../skills/project-init/tests/)。把 host 限制记录到 release evidence。
+使用 `npx skills add LightDevCoder/skills --skill project-init` 安装，刷新 host，在脱离 source checkout 的环境确认发现结果，并运行 [tests](../../../skills/project/project-init/tests)。把 host 限制记录到 release evidence。

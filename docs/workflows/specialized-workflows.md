@@ -6,14 +6,14 @@ This document explains the **Specialized Workflows**: their standalone nature an
 
 ## Skills in this group
 
-- [`manuscript-ops`](../../skills/manuscript-ops/SKILL.md) — manuscript engineering state machine
-- [`kb-init`](../../skills/kb-init/SKILL.md) — knowledge-base design via interview + approval-gated implementation
-- [`learn-anything`](../../skills/learn-anything/SKILL.md) — distill evidenced sources into reusable Skill methods
-- [`language-learning`](../../skills/language-learning/SKILL.md) — six-mode language tutor
-- [`kanban-worker`](../../skills/kanban-worker/SKILL.md) — one-task-per-wake Light-Kanban worker
-- [`recap`](../../skills/recap/SKILL.md) — one-line session summary (`$recap` only)
-- [`eli5`](../../skills/eli5/SKILL.md) — explain at a chosen audience level
-- [`release-workflow`](../../skills/release-workflow/SKILL.md) — publish after acceptance (also closes the project workflow)
+- [`manuscript-ops`](../../skills/writing/manuscript-ops/SKILL.md) — manuscript engineering state machine
+- [`kb-init`](../../skills/knowledge/kb-init/SKILL.md) — knowledge-base design via interview + approval-gated implementation
+- [`learn-anything`](../../skills/knowledge/learn-anything/SKILL.md) — distill evidenced sources into reusable Skill methods
+- [`language-learning`](../../skills/knowledge/language-learning/SKILL.md) — six-mode language tutor
+- [`kanban-worker`](../../skills/project/kanban-worker/SKILL.md) — one-task-per-wake Light-Kanban worker
+- [`recap`](../../skills/productivity/recap/SKILL.md) — one-line session summary (`$recap` only)
+- [`eli5`](../../skills/knowledge/eli5/SKILL.md) — explain at a chosen audience level
+- [`release-workflow`](../../skills/project/release-workflow/SKILL.md) — publish after acceptance (also closes the project workflow)
 
 ## Standalone vs composition
 
@@ -40,14 +40,14 @@ Adding a handoff line is not a redesign.
 
 | Skill | Typical standalone entry | Natural handoff (optional) | Stop |
 | --- | --- | --- | --- |
-| [`manuscript-ops`](../../skills/manuscript-ops/SKILL.md) | manuscript scope/risk/batches/formats | May call `clarify`/`decision-map` via user choice; may hand its approved brief/Charter to `project-review` (`manuscript` Profile) | stop at routing decision, Charter freeze, or QA'd deliverable |
-| [`kb-init`](../../skills/kb-init/SKILL.md) | ` $kb-init` | Interview → approved SPEC → implementation; may call `research` for external facts | stop at design or initialized KB |
-| [`learn-anything`](../../skills/learn-anything/SKILL.md) | source with possible repeated method | Internal Method Contract → deterministic package builder → `project-review` (via `review-loop`) → catalog/doc sync | stop at `method_contract` / `not_promoted` / `BLOCKED` |
-| [`language-learning`](../../skills/language-learning/SKILL.md) | language-learning request | Lessons/flashcards/conversation/grammar/quiz/translation each return their artifact | stop at lesson or quiz result |
-| [`kanban-worker`](../../skills/kanban-worker/SKILL.md) | scheduled wake | `complete` or `block` with reason; next wake picks `reviewFeedback` before new claims | stop after one task |
-| [`recap`](../../skills/recap/SKILL.md) | `$recap` | exactly one line of session summary; never continues work | stop |
-| [`eli5`](../../skills/eli5/SKILL.md) | explain request | audience-tailored explanation | stop |
-| [`release-workflow`](../../skills/release-workflow/SKILL.md) | ready to publish after `project-review PASS` | tag / GitHub Release / synchronized docs | stop at release record |
+| [`manuscript-ops`](../../skills/writing/manuscript-ops/SKILL.md) | manuscript scope/risk/batches/formats | May call `clarify`/`decision-map` via user choice; may hand its approved brief/Charter to `project-review` (`manuscript` Profile) | stop at routing decision, Charter freeze, or QA'd deliverable |
+| [`kb-init`](../../skills/knowledge/kb-init/SKILL.md) | ` $kb-init` | Interview → approved SPEC → implementation; may call `research` for external facts | stop at design or initialized KB |
+| [`learn-anything`](../../skills/knowledge/learn-anything/SKILL.md) | source with possible repeated method | Internal Method Contract → deterministic package builder → `project-review` (via `review-loop`) → catalog/doc sync | stop at `method_contract` / `not_promoted` / `BLOCKED` |
+| [`language-learning`](../../skills/knowledge/language-learning/SKILL.md) | language-learning request | Lessons/flashcards/conversation/grammar/quiz/translation each return their artifact | stop at lesson or quiz result |
+| [`kanban-worker`](../../skills/project/kanban-worker/SKILL.md) | scheduled wake | `complete` or `block` with reason; next wake picks `reviewFeedback` before new claims | stop after one task |
+| [`recap`](../../skills/productivity/recap/SKILL.md) | `$recap` | exactly one line of session summary; never continues work | stop |
+| [`eli5`](../../skills/knowledge/eli5/SKILL.md) | explain request | audience-tailored explanation | stop |
+| [`release-workflow`](../../skills/project/release-workflow/SKILL.md) | ready to publish after `project-review PASS` | tag / GitHub Release / synchronized docs | stop at release record |
 
 ## How they meet the main workflow
 
@@ -55,6 +55,6 @@ Adding a handoff line is not a redesign.
 - A reusable method from `learn-anything` may be admitted as a new Skill and then participate in future `implement` work.
 - `kanban-worker` decomposes larger work already created by `project-tickets` and reports `complete`/`block`.
 - `release-workflow` is both a specialized closer and the tail of the project workflow.
-- When unsure, [`ask-light`](../../skills/ask-light/SKILL.md) routes to the appropriate specialized Skill.
+- When unsure, [`ask-light`](../../skills/productivity/ask-light/SKILL.md) routes to the appropriate specialized Skill.
 
 No forced unification. Each package keeps its own shape (`references/`, `templates/`, `scripts/` as it actually needs).

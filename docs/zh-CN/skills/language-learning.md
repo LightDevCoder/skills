@@ -2,7 +2,7 @@
 
 [English guide](../../skills/language-learning.md)
 
-行为权威是 [skills/language-learning/SKILL.md](../../../skills/language-learning/SKILL.md)；本页只说明使用方式，不创建第二份契约。
+行为权威是 [skills/knowledge/language-learning/SKILL.md](../../../skills/knowledge/language-learning/SKILL.md)；本页只说明使用方式，不创建第二份契约。
 
 ## 作用
 
@@ -34,7 +34,7 @@ $language-learning Spanish, flashcards for: perro, gato, casa
 
 ## 验证与发布状态
 
-运行 [package tests](../../../skills/language-learning/tests/)，并检查 `agents/openai.yaml` 中的 `allow_implicit_invocation: false`。纯提示型快速通道 `PASS` 准入证据见[准入记录](../../evidence/admissions/language-learning/README.zh-CN.md)。
+运行 [package tests](../../../skills/knowledge/language-learning/tests)，并检查 `agents/openai.yaml` 中的 `allow_implicit_invocation: false`。纯提示型快速通道 `PASS` 准入证据见[准入记录](../../evidence/admissions/language-learning/README.zh-CN.md)。
 
 `language-learning` 已在 v0.1.2 中发布。使用 `npx skills add LightDevCoder/skills --skill language-learning` 安装，刷新 host，并在脱离 source checkout 的情况下确认 discovery；见[安装策略](../../INSTALLATION.zh-CN.md)。
 

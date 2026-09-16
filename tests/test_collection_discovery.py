@@ -15,10 +15,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-sys.path.insert(0, str(ROOT / "skills" / "language-learning" / "tests"))
-sys.path.insert(0, str(ROOT / "skills" / "kanban-worker" / "tests"))
+sys.path.insert(0, str(ROOT / "skills" / "knowledge" / "language-learning" / "tests"))
+sys.path.insert(0, str(ROOT / "skills" / "project" / "kanban-worker" / "tests"))
 
-from check_helpers import Checks, read  # noqa: E402
+from check_helpers import Checks, read, package_dir, relocated_path  # noqa: E402
 from test_language_learning_contract import run_checks as ll_checks  # noqa: E402
 from test_kanban_worker_contract import run_checks as worker_contract_checks  # noqa: E402
 from test_kanban_worker_behavior import run_checks as worker_behavior_checks  # noqa: E402
@@ -68,7 +68,7 @@ EXPECTED = sorted(
 def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c = Checks()
     skill_root = root / "skills"
-    actual = sorted(d.name for d in skill_root.iterdir() if d.is_dir() and d.name != "docs")
+    actual = sorted(p.parent.name for p in skill_root.glob("*/*/SKILL.md"))
     c.check(actual == EXPECTED, f"skills/ must contain exactly the 36 admitted package directories. got {actual}")
 
     readme = read(root, "README.md")
@@ -136,7 +136,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.check(bool(re.search(r"project-init.*project-clarify.*project-spec.*project-tickets.*implement.*project-review.*release-workflow", readme, re.DOTALL | re.IGNORECASE)), "README must present the main workflow project-init → project-clarify → project-spec → project-tickets → implement → project-review → release-workflow.")
 
     for package in EXPECTED:
-        package_root = skill_root / package
+        package_root = package_dir(root, package)
         skill_file = package_root / "SKILL.md"
         # eli5 intentionally has no agents/openai.yaml (migrated, uses frontmatter only) — check only if present
         metadata_file = package_root / "agents" / "openai.yaml"
@@ -164,7 +164,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
                 f"{package} invocation policy disagrees with SKILL.md.",
             )
 
-        c.check(f"skills/{package}/" in catalog, f"{package} is missing from CATALOG.md.")
+        c.check(package_root.relative_to(root).as_posix() + "/" in catalog, f"{package} is missing from CATALOG.md.")
         section_match = re.search(rf"(?ms)^### {re.escape(package)}\r?\n(?P<section>.*?)(?=^### |\Z)", catalog)
         section = section_match.group("section") if section_match else ""
         c.check(section_match is not None, f"{package} is missing a catalog section.")
@@ -204,6 +204,12 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
             # normalize
             try:
                 exists = resolved.exists()
+                if not exists and file.startswith("docs/evidence/"):
+                    try:
+                        legacy = resolved.resolve().relative_to(root.resolve()).as_posix()
+                        exists = relocated_path(root, legacy).exists()
+                    except ValueError:
+                        pass
             except Exception:
                 exists = False
             c.check(exists, f"{file} contains an unresolved Markdown link: {link}")
@@ -380,36 +386,36 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 
     c.check("LightDevCoder/skills" in readme, "README must mention repository identity.")
 
-    workflow_text = read(root, "skills/ask-light/SKILL.md") + read(root, "skills/ask-light/references/discovery-contract.md")
-    workflow_script = read(root, "skills/ask-light/scripts/ask_light.py")
-    workflow_map = read(root, "skills/ask-light/references/light-skill-map.json")
+    workflow_text = read(root, "skills/productivity/ask-light/SKILL.md") + read(root, "skills/productivity/ask-light/references/discovery-contract.md")
+    workflow_script = read(root, "skills/productivity/ask-light/scripts/ask_light.py")
+    workflow_map = read(root, "skills/productivity/ask-light/references/light-skill-map.json")
     c.check("$ask-light next" in workflow_text and "$ask-light workflow" in workflow_text, "ask-light must document both explicit modes.")
     c.check("entryCondition" in workflow_text and "missing dependency" in workflow_text and "finalAuthority" in workflow_text, "ask-light workflow output contract is incomplete.")
     c.check(bool(re.search(r'choices=\("next",\s*"workflow",\s*"navigate"', workflow_script)) and '"workflows"' in workflow_map and '"skillFamilies"' in workflow_map, "ask-light router lacks explicit workflow/navigation mode implementation.")
-    c.check(bool(re.search(r"allow_implicit_invocation:\s*false", read(root, "skills/learn-anything/agents/openai.yaml"))), "learn-anything must declare explicit-only metadata policy.")
-    c.check(bool(re.search(r"allow_implicit_invocation:\s*false", read(root, "skills/recap/agents/openai.yaml"))), "recap must declare explicit-only metadata policy.")
+    c.check(bool(re.search(r"allow_implicit_invocation:\s*false", read(root, "skills/knowledge/learn-anything/agents/openai.yaml"))), "learn-anything must declare explicit-only metadata policy.")
+    c.check(bool(re.search(r"allow_implicit_invocation:\s*false", read(root, "skills/productivity/recap/agents/openai.yaml"))), "recap must declare explicit-only metadata policy.")
 
     # Additional SPEC §24 checks: no Matt/sol runtime dependency, ATTRIBUTION, supporting refs resolve
     for skill in ("research", "prototype", "tdd", "handoff", "diagnosing-bugs", "wizard", "teach", "wait-what", "to-questionnaire", "writing-for-agents", "resolving-merge-conflicts"):
-        c.check((root / f"skills/{skill}/ATTRIBUTION.md").is_file(), f"PORT {skill} must have ATTRIBUTION.md.")
-        text = read(root, f"skills/{skill}/SKILL.md")
+        c.check((package_dir(root, skill) / "ATTRIBUTION.md").is_file(), f"PORT {skill} must have ATTRIBUTION.md.")
+        text = (package_dir(root, skill) / "SKILL.md").read_text(encoding="utf-8")
         # Ensure no hard requirement to install upstream at runtime
         c.check("install mattpocock/skills" not in text.lower() and "requires matt" not in text.lower(), f"{skill} must not require Matt runtime install.")
 
-    c.check("sol-advisor" not in read(root, "skills/agent-config/SKILL.md").lower() or "sol advisor" in read(root, "skills/agent-config/SKILL.md").lower(), "agent-config should reference Sol Advisor as design reference, not a runtime dependency claim.")
+    c.check("sol-advisor" not in read(root, "skills/engineering/agent-config/SKILL.md").lower() or "sol advisor" in read(root, "skills/engineering/agent-config/SKILL.md").lower(), "agent-config should reference Sol Advisor as design reference, not a runtime dependency claim.")
     # Ensure agent-config does not hardcode Sol/Terra/Luna topology
-    ac_text = read(root, "skills/agent-config/SKILL.md")
+    ac_text = read(root, "skills/engineering/agent-config/SKILL.md")
     c.check("Terra" not in ac_text and "Luna" not in ac_text, "agent-config must not hardcode Sol/Terra/Luna topology.")
 
     # Supporting-file reference resolution for a sample of new skills
     for pkg in ("clarify", "project-clarify", "decision-map", "project-spec", "project-tickets", "implement", "code-review", "socratic"):
-        skill_md = read(root, f"skills/{pkg}/SKILL.md")
+        skill_md = (package_dir(root, pkg) / "SKILL.md").read_text(encoding="utf-8")
         for m in re.finditer(r"\[([^\]]+)\]\(([^)]+)\)", skill_md):
             link = m.group(2).split("#")[0].strip()
             if link.startswith("http"):
                 continue
             if link.startswith("references/") or link.startswith("templates/") or link.startswith("scripts/"):
-                resolved = root / f"skills/{pkg}" / link.split("#")[0]
+                resolved = package_dir(root, pkg) / link.split("#")[0]
                 c.check(resolved.exists(), f"{pkg}/SKILL.md references missing file: {link}")
 
     # Workflow docs must reference real Skills
@@ -440,6 +446,12 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
                 resolved = root / link
             try:
                 exists = resolved.exists()
+                if not exists and file.startswith("docs/evidence/"):
+                    try:
+                        legacy = resolved.resolve().relative_to(root.resolve()).as_posix()
+                        exists = relocated_path(root, legacy).exists()
+                    except ValueError:
+                        pass
             except Exception:
                 exists = False
             c.check(exists, f"{file} contains an unresolved relative link: {link}")

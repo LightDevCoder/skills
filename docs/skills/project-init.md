@@ -2,7 +2,7 @@
 
 [中文指南](../zh-CN/skills/project-init.md)
 
-The behavior authority is [skills/project-init/SKILL.md](../../skills/project-init/SKILL.md).
+The behavior authority is [skills/project/project-init/SKILL.md](../../skills/project/project-init/SKILL.md).
 
 ## What it solves
 
@@ -64,5 +64,5 @@ discovery, specification, implementation, or final review.
 Install with `npx skills add LightDevCoder/skills --skill project-init`,
 refresh the host, and confirm the package is discovered without the source
 checkout. Run the contract and behavior tests in
-[skills/project-init/tests/](../../skills/project-init/tests/) and record any
+[skills/project/project-init/tests/](../../skills/project/project-init/tests) and record any
 host limitation in the release evidence.

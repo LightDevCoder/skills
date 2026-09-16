@@ -2,7 +2,7 @@
 
 [中文指南](../zh-CN/skills/kb-init.md)
 
-The behavior authority is [skills/kb-init/SKILL.md](../../skills/kb-init/SKILL.md).
+The behavior authority is [skills/knowledge/kb-init/SKILL.md](../../skills/knowledge/kb-init/SKILL.md).
 This page explains usage without creating a second contract.
 
 ## Purpose
@@ -43,7 +43,7 @@ external facts are needed. It never invokes another user-invoked Skill.
 
 ## Verification and release state
 
-Run [the package contract test](../../skills/kb-init/tests/) and inspect
+Run [the package contract test](../../skills/knowledge/kb-init/tests) and inspect
 `agents/openai.yaml` for `allow_implicit_invocation: false`. The full
 admission path used `project-review` (via `review-loop`); the final verdict
 is `PASS` with no unresolved `BLOCKED` condition. Evidence is recorded in the

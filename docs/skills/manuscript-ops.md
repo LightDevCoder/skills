@@ -2,7 +2,7 @@
 
 [中文指南](../zh-CN/skills/manuscript-ops.md)
 
-The full behavior contract is [skills/manuscript-ops/SKILL.md](../../skills/manuscript-ops/SKILL.md).
+The full behavior contract is [skills/writing/manuscript-ops/SKILL.md](../../skills/writing/manuscript-ops/SKILL.md).
 
 ## What it solves
 

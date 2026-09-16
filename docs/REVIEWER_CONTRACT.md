@@ -1,7 +1,7 @@
 # Reviewer Contract — Human-Facing Summary
 
 The runtime reviewer contract is owned by `review-loop` and lives at
-[skills/review-loop/references/reviewer-contract.md](../skills/review-loop/references/reviewer-contract.md).
+[skills/review/review-loop/references/reviewer-contract.md](../skills/review/review-loop/references/reviewer-contract.md).
 
 This page is a human-facing explanation and pointer only. It is **not** a
 second independently maintained runtime contract.

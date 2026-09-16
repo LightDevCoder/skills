@@ -20,15 +20,15 @@
         research  prototype  to-questionnaire
 ```
 
-- [`socratic`](../../../skills/socratic/SKILL.md) — 核心引擎：动态、decision-owned 的追问，无固定问卷，区分事实与用户决策；本身不是项目流程，被其他 Skill 调用。
-- [`clarify`](../../../skills/clarify/SKILL.md) — **user-invoked 单入口**，面向无项目上下文的模糊想法。一次 `$clarify` 启动连续会话，后续普通回复继续 `socratic`；每轮保持对话式，在有依据时给建议，并在共同理解确认、退出或切换 workflow 后结束。不产 SPEC，不自动串联。
+- [`socratic`](../../../skills/thinking/socratic/SKILL.md) — 核心引擎：动态、decision-owned 的追问，无固定问卷，区分事实与用户决策；本身不是项目流程，被其他 Skill 调用。
+- [`clarify`](../../../skills/thinking/clarify/SKILL.md) — **user-invoked 单入口**，面向无项目上下文的模糊想法。一次 `$clarify` 启动连续会话，后续普通回复继续 `socratic`；每轮保持对话式，在有依据时给建议，并在共同理解确认、退出或切换 workflow 后结束。不产 SPEC，不自动串联。
 
 ## 面向项目的澄清
 
 | Skill | 入口 | 如何用 `socratic` | Handoff | 停止点 |
 | --- | --- | --- | --- | --- |
-| [`project-clarify`](../../../skills/project-clarify/SKILL.md) — user-invoked | 现有项目仍有未决决策 | **先检查：** `README`、`AGENTS.md`、`CLAUDE.md`、既有文档/SPEC/源码；*再* 对仅需用户决策的缺口调 `socratic` | 供 `project-spec` 的有界 handoff（仍模糊则回 `decision-map`） | 止于澄清 summary，不建 SPEC/tickets |
-| [`decision-map`](../../../skills/decision-map/SKILL.md) — user-invoked | 大型、模糊、跨会话、依赖多 | 在 `.scratch/<effort>/map.md` 及子 tickets 上维护决策地图，可按 unknown 路由调 `socratic` 与 `research`/`prototype`/`to-questionnaire` | 决策收敛后交 `project-spec` | 止于地图更新；工作留痕于 tracker |
+| [`project-clarify`](../../../skills/project/project-clarify/SKILL.md) — user-invoked | 现有项目仍有未决决策 | **先检查：** `README`、`AGENTS.md`、`CLAUDE.md`、既有文档/SPEC/源码；*再* 对仅需用户决策的缺口调 `socratic` | 供 `project-spec` 的有界 handoff（仍模糊则回 `decision-map`） | 止于澄清 summary，不建 SPEC/tickets |
+| [`decision-map`](../../../skills/thinking/decision-map/SKILL.md) — user-invoked | 大型、模糊、跨会话、依赖多 | 在 `.scratch/<effort>/map.md` 及子 tickets 上维护决策地图，可按 unknown 路由调 `socratic` 与 `research`/`prototype`/`to-questionnaire` | 决策收敛后交 `project-spec` | 止于地图更新；工作留痕于 tracker |
 
 ## Unknown 路由
 
@@ -48,4 +48,4 @@ Unknown
 - `project-clarify` 交 `project-spec`；`project-spec` 若仍有阻塞决策则返回 `project-clarify`。
 - `decision-map` 清雾后交 `project-spec`。
 
-见 [project-workflow](project-workflow.md) 了解澄清如何进入规划；入口不清时用 [`ask-light`](../../../skills/ask-light/SKILL.md)。
+见 [project-workflow](project-workflow.md) 了解澄清如何进入规划；入口不清时用 [`ask-light`](../../../skills/productivity/ask-light/SKILL.md)。

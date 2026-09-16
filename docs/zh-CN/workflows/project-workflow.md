@@ -30,14 +30,14 @@ project-retro
 
 | 步骤 | 入口条件 | Skill 与调用 | 输出 / Handoff | 停止点 |
 | --- | --- | --- | --- | --- |
-| 1 | 新项目需要稳定且已确认的起点 | [`project-init`](../../../skills/project-init/SKILL.md) — user-invoked | `docs/agents/light-project.md` + tracker 契约 + instruction pointer | 停止，由用户选下一步 |
-| 2 | 真实项目存在未决决策，仓库事实不应重问 | [`project-clarify`](../../../skills/project-clarify/SKILL.md) — user-invoked → `socratic` 引擎 | 供 `project-spec` 的有界 handoff | 止于澄清 summary，不建 SPEC |
-| 3 | 决策已澄清，需要正式 SPEC | [`project-spec`](../../../skills/project-spec/SKILL.md) — user-invoked | 冻结 SPEC + 验收来源 | 止于待审批；阻塞则返回 `project-clarify` |
-| 4 | SPEC 已批准 | [`project-tickets`](../../../skills/project-tickets/SKILL.md) — user-invoked | 按依赖排序的 tracer-bullet ticket 图 | 停止，不自动起 `implement` |
-| 5 | 单个 ticket 已就绪且无歧义 | [`implement`](../../../skills/implement/SKILL.md) — user-invoked，必要时可选 `agent-config` / 内部调 `tdd` | 有界 diff + 测试 + 本地验证 | 止于 ticket 范围；合适时交 review |
-| 6 | 产物需最终验收 | [`project-review`](../../../skills/project-review/SKILL.md) — model-invoked（支持手动）经 `review-loop` | 冻结 Charter + reviewer findings + 最终 `PASS`/`FAIL`/`BLOCKED` | 止于 verdict |
-| 7 | 项目已通过验收 | [`release-workflow`](../../../skills/release-workflow/SKILL.md) — model-invoked | 同步文档/目录/测试、打 tag、发布 | 止于 release 记录 |
-| 8 | 工作流结束；Agent 自主评估是否发生摩擦 | [`project-retro`](../../../skills/project-retro/SKILL.md) — model-invoked（自主评估） | 按严重性排序的结构化复盘发现 | 止于输出发现；修改须经用户确认 |
+| 1 | 新项目需要稳定且已确认的起点 | [`project-init`](../../../skills/project/project-init/SKILL.md) — user-invoked | `docs/agents/light-project.md` + tracker 契约 + instruction pointer | 停止，由用户选下一步 |
+| 2 | 真实项目存在未决决策，仓库事实不应重问 | [`project-clarify`](../../../skills/project/project-clarify/SKILL.md) — user-invoked → `socratic` 引擎 | 供 `project-spec` 的有界 handoff | 止于澄清 summary，不建 SPEC |
+| 3 | 决策已澄清，需要正式 SPEC | [`project-spec`](../../../skills/project/project-spec/SKILL.md) — user-invoked | 冻结 SPEC + 验收来源 | 止于待审批；阻塞则返回 `project-clarify` |
+| 4 | SPEC 已批准 | [`project-tickets`](../../../skills/project/project-tickets/SKILL.md) — user-invoked | 按依赖排序的 tracer-bullet ticket 图 | 停止，不自动起 `implement` |
+| 5 | 单个 ticket 已就绪且无歧义 | [`implement`](../../../skills/project/implement/SKILL.md) — user-invoked，必要时可选 `agent-config` / 内部调 `tdd` | 有界 diff + 测试 + 本地验证 | 止于 ticket 范围；合适时交 review |
+| 6 | 产物需最终验收 | [`project-review`](../../../skills/review/project-review/SKILL.md) — model-invoked（支持手动）经 `review-loop` | 冻结 Charter + reviewer findings + 最终 `PASS`/`FAIL`/`BLOCKED` | 止于 verdict |
+| 7 | 项目已通过验收 | [`release-workflow`](../../../skills/project/release-workflow/SKILL.md) — model-invoked | 同步文档/目录/测试、打 tag、发布 | 止于 release 记录 |
+| 8 | 工作流结束；Agent 自主评估是否发生摩擦 | [`project-retro`](../../../skills/project/project-retro/SKILL.md) — model-invoked（自主评估） | 按严重性排序的结构化复盘发现 | 止于输出发现；修改须经用户确认 |
 
 ### 工作流终点 Agent 自主评估
 
@@ -55,8 +55,8 @@ project-retro
 
 ## 未知或专业入口
 
-- 无项目上下文的模糊想法 → [`clarify`](../../../skills/clarify/SKILL.md)（standalone，经 `socratic` 后停止）。
-- 不知入口 → [`ask-light`](../../../skills/ask-light/SKILL.md) `next` — 一个推荐，等待批准，随后按调用策略完成转换。
+- 无项目上下文的模糊想法 → [`clarify`](../../../skills/thinking/clarify/SKILL.md)（standalone，经 `socratic` 后停止）。
+- 不知入口 → [`ask-light`](../../../skills/productivity/ask-light/SKILL.md) `next` — 一个推荐，等待批准，随后按调用策略完成转换。
 - 文稿 / 知识库 / 看板 / 学习 → [specialized-workflows](specialized-workflows.md)。
 
 组合是显式的：顾问给出建议，用户批准，随后按目标 Skill 的调用策略与当前 Host 能力进行转换。`SKILL.md` 始终是契约。

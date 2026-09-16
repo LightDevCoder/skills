@@ -21,12 +21,12 @@
 
 | 角色 | Skill | 调用 | 保证 |
 | --- | --- | --- | --- |
-| Reviewer | [`generic-review`](../../../skills/generic-review/SKILL.md) | model-invoked 只读 | 归一化 `id`/`severity`/`location`/`problem`/`reason` findings；不修复不裁决 |
-| Reviewer | [`code-review`](../../../skills/code-review/SKILL.md) | model-invoked 只读 | 有界 `git diff` 的 Standards + Spec findings |
-| Engine | [`review-loop`](../../../skills/review-loop/SKILL.md) | model-invoked（支持手动） | 解析 reviewer → 调用 → 收 findings → 交 Producer → 重跑；干净或达上限即停 |
-| Acceptance | [`project-review`](../../../skills/project-review/SKILL.md) | model-invoked（支持手动） | 冻结 Charter/baseline、组合 reviewer、经 `review-loop` 驱动并签发最终 `PASS`/`FAIL`/`BLOCKED` |
+| Reviewer | [`generic-review`](../../../skills/review/generic-review/SKILL.md) | model-invoked 只读 | 归一化 `id`/`severity`/`location`/`problem`/`reason` findings；不修复不裁决 |
+| Reviewer | [`code-review`](../../../skills/review/code-review/SKILL.md) | model-invoked 只读 | 有界 `git diff` 的 Standards + Spec findings |
+| Engine | [`review-loop`](../../../skills/review/review-loop/SKILL.md) | model-invoked（支持手动） | 解析 reviewer → 调用 → 收 findings → 交 Producer → 重跑；干净或达上限即停 |
+| Acceptance | [`project-review`](../../../skills/review/project-review/SKILL.md) | model-invoked（支持手动） | 冻结 Charter/baseline、组合 reviewer、经 `review-loop` 驱动并签发最终 `PASS`/`FAIL`/`BLOCKED` |
 
-见 [运行时 reviewer 契约](../../../skills/review-loop/references/reviewer-contract.md)（人类摘要：[Reviewer 契约](../../../docs/REVIEWER_CONTRACT.zh-CN.md)）的归一化输入包（`Target`·`Requirements`·`Relevant context`·`Previous findings`）与结果（`Findings: []`）。
+见 [运行时 reviewer 契约](../../../skills/review/review-loop/references/reviewer-contract.md)（人类摘要：[Reviewer 契约](../../REVIEWER_CONTRACT.zh-CN.md)）的归一化输入包（`Target`·`Requirements`·`Relevant context`·`Previous findings`）与结果（`Findings: []`）。
 
 ## Entry → Handoff → Stop
 
@@ -34,7 +34,7 @@
 | --- | --- | --- | --- |
 | 普通制品（无 specialist） | `generic-review` 经 `review-loop` | `review-loop` → `generic-review` → findings → Producer 修复 → 复检 | `Findings: []` 或有界 `persists`；引擎不发最终 verdict |
 | 有界代码 diff | `code-review` 经 `review-loop` | `review-loop` → `code-review`（并行 Standards + Spec） → findings | 仅 findings，verdict 在他处 |
-| 项目需最终验收 | [`project-review`](../../../skills/project-review/SKILL.md) | `project-review init`（冻结 Charter/Profile） → `review`（组合 reviewer 经 `review-loop`） → `resume` → fresh Evaluator → `PASS`/`FAIL`/`BLOCKED` | 持久 verdict + 证据后停止 |
+| 项目需最终验收 | [`project-review`](../../../skills/review/project-review/SKILL.md) | `project-review init`（冻结 Charter/Profile） → `review`（组合 reviewer 经 `review-loop`） → `resume` → fresh Evaluator → `PASS`/`FAIL`/`BLOCKED` | 持久 verdict + 证据后停止 |
 
 ## 与 `implement` 的关系
 

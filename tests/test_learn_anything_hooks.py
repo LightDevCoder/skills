@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-HOOK = ROOT / "skills" / "learn-anything" / "hooks" / "skill_candidate_builder.py"
+HOOK = ROOT / "skills" / "knowledge" / "learn-anything" / "hooks" / "skill_candidate_builder.py"
 GOOD = ROOT / "tests" / "fixtures" / "learn-anything-method.md"
 BAD = ROOT / "tests" / "fixtures" / "learn-anything-incomplete.md"
 

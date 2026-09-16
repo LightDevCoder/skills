@@ -2,9 +2,15 @@
 
 [English installation guide](INSTALLATION.md)
 
-公开第一方集合当前稳定版本是 [v0.2.1](https://github.com/LightDevCoder/skills/releases/tag/v0.2.1)，发布于 `v0.2.1` tag（确切 commit 见[发布收据](evidence/releases/v0.2.1/RELEASE_RECEIPT.zh-CN.md)）。它提供 **36 个已准入的第一方 Skill**（v0.2.0 发布线的 34 个加上 `light-travelpage` 与 `project-retro`）。`skills/<name>/` 内的包契约仍是行为权威；本页规定安装方法与验证记录。
+公开第一方集合当前稳定版本是 [v0.2.1](https://github.com/LightDevCoder/skills/releases/tag/v0.2.1)，发布于 `v0.2.1` tag（确切 commit 见[发布收据](evidence/releases/v0.2.1/RELEASE_RECEIPT.zh-CN.md)）。它提供 **36 个已准入的第一方 Skill**（v0.2.0 发布线的 34 个加上 `light-travelpage` 与 `project-retro`）。`skills/<category>/<name>/` 内的包契约仍是行为权威；本页规定安装方法与验证记录。
 
 标准安装命令是通用 `latest` 形式：它跟随仓库默认 revision，因此 `npx skills add LightDevCoder/skills` 是推荐的交互式安装入口，可按需选择 Skill 与目标 Agent。pinned release 命令选择已发布的 tag，用于可复现安装。历史验证命令（曾用于在隔离环境中跨所有受支持 Agent 测试完整集合）与历史证据一同记录在下方。
+
+## 分类源码与安装目录
+
+当前 `main` 使用 `skills/<category>/<name>/`。宿主安装目录仍是 `<skills-root>/<name>/`，不要把分类目录整体当成一个 Skill。`--skill <name>` 的选择方式不变。已发布的 v0.2.1 及更早 tag 保留原平铺结构；使用这些 tag 手动复制时，将 `source_package` 设为 `skills/$skill_name`。
+
+[分类导航](../skills/README.zh-CN.md) · [逐项迁移表](CATEGORY_MIGRATION.zh-CN.md)。
 
 ## 推荐安装方式
 
@@ -188,7 +194,8 @@ installer 不可用时，在 target tag 发布后 checkout，并将完整包复�
 source_root="<current-release-checkout>"
 skill_name="<admitted-skill-name>"
 destination_root="<host-recognized-skills-root>"
-cp -R "$source_root/skills/$skill_name" "$destination_root/$skill_name"
+source_package="skills/<category>/$skill_name"
+cp -R "$source_root/$source_package" "$destination_root/$skill_name"
 ```
 
 手动复制本身不是 fresh-install proof。记录必须包含 release commit/tag、host、destination、refresh/restart、discovery、success/boundary/invocation/missing-dependency smoke。包引用资源时不能只复制 `SKILL.md`。

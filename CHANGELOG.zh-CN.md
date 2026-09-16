@@ -6,6 +6,8 @@
 
 ## Unreleased
 
+- 将 36 个 Skill 移入七个用途分类，增加每类中英文集合说明，并更新源码发现、安装指引、CI 与迁移表。保留技能名称和调用/批准边界；仅更新 main，不创建新 tag 或 release。
+
 ## 0.2.1 — 2026-09-16
 
 ### 新增 — project-retro 技能与工作流复盘集成（第 36 个包）
@@ -176,7 +178,7 @@
 - 结构与包级证据：[TEST_SUMMARY.zh-CN.md](docs/evidence/releases/v0.1.4/TEST_SUMMARY.zh-CN.md)。
 - 准入：[light-kanban-worker 证据](docs/evidence/admissions/light-kanban-worker/README.zh-CN.md)。
 - scanner code-review：[CODE_REVIEW.zh-CN.md](docs/evidence/releases/v0.1.4/CODE_REVIEW.zh-CN.md)。
-- 原有五个包的独立 `review-loop agent-skill` acceptance 仍为 `BLOCKED`；见 [发布收据](docs/evidence/releases/)。
+- 原有五个包的独立 `review-loop agent-skill` acceptance 仍为 `BLOCKED`；见 [发布收据](docs/evidence/releases)。
 
 ## 0.1.3 — 2026-08-10
 
@@ -189,7 +191,7 @@
 
 ### 证据
 
-- [docs/evidence/releases/v0.1.3/](docs/evidence/releases/v0.1.3/)
+- [docs/evidence/releases/v0.1.3/](docs/evidence/releases/v0.1.3)
 
 ## 0.1.2 — 2026-08-10
 
@@ -198,7 +200,7 @@
 - 为 v0.1.2 准备第一方、仅 user-invoked 的 `recap` Skill。用户显式调用 `$recap` 后只返回一行当前 session 总结；不会运行工具、继续任务、修改文件、压缩历史或调用其他 Skill。
 - 为 v0.1.2 准备第一方、仅 user-invoked 的 `language-learning` Skill。它通过六种学习模式辅导任意目标语言——每日课程、即时卡片、对话练习、语法解码、进度测验与沉浸翻译——并在多次调用之间复用会话上下文与已学词汇，而不是每次都重新询问。
 - 新增低风险纯提示型准入快速通道：仅适用于 owner-authored、manual-only、只输出文本、无工具/副作用/runtime executable/外部依赖的 Skill；只需一个 fresh Evaluator，不再要求额外 Critic 或 Standards/Spec review。
-- 发布通用 `latest` 安装命令（`npx skills add LightDevCoder/skills --yes --copy --agent '*'`）作为标准安装路径，并保留 pinned `#v0.1.2` 形式用于可复现安装。`recap` 与 `language-learning` 均由 fresh independent prompt-only fast-track Evaluator `PASS` 准入，见各自[准入证据](docs/evidence/admissions/)。
+- 发布通用 `latest` 安装命令（`npx skills add LightDevCoder/skills --yes --copy --agent '*'`）作为标准安装路径，并保留 pinned `#v0.1.2` 形式用于可复现安装。`recap` 与 `language-learning` 均由 fresh independent prompt-only fast-track Evaluator `PASS` 准入，见各自[准入证据](docs/evidence/admissions)。
 
 ### Release 证据
 

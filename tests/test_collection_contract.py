@@ -1,4 +1,5 @@
 from pathlib import Path
+from check_helpers import package_dir, relocated_path
 import re
 import unittest
 
@@ -52,10 +53,10 @@ class CollectionContractTests(unittest.TestCase):
         self.assertTrue(condition, message)
 
     def test_exact_packages_and_metadata_policy(self) -> None:
-        actual = {path.name for path in (ROOT / "skills").iterdir() if path.is_dir() and path.name != "docs"}
+        actual = {path.parent.name for path in (ROOT / "skills").glob("*/*/SKILL.md")}
         self.check(actual == EXPECTED, f"unexpected first-party package set: {sorted(actual)}")
         for name in sorted(EXPECTED):
-            skill = ROOT / "skills" / name
+            skill = package_dir(ROOT, name)
             body = (skill / "SKILL.md").read_text(encoding="utf-8")
             # eli5 has no agents/openai.yaml by design (migrated explain skill) — skip metadata check for it
             if name == "eli5":
@@ -121,6 +122,24 @@ class CollectionContractTests(unittest.TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         print(f"COLLECTION_PYTHON_ASSERTIONS={cls.assertions}")
+
+
+
+class CategoryLayoutTests(unittest.TestCase):
+    def test_categories_explain_every_package_without_becoming_skills(self) -> None:
+        skill_root = ROOT / "skills"
+        packages = list(skill_root.glob("*/*/SKILL.md"))
+        self.assertEqual(len(packages), len(EXPECTED))
+        self.assertEqual({p.parent.name for p in packages}, EXPECTED)
+        self.assertFalse(list(skill_root.glob("*/SKILL.md")))
+        categories = {p.parent.parent for p in packages}
+        self.assertEqual(len(categories), 7)
+        for category in categories:
+            for filename in ("README.md", "README.zh-CN.md"):
+                guide = (category / filename).read_text(encoding="utf-8")
+                for package in category.glob("*/SKILL.md"):
+                    self.assertIn(f"({package.parent.name}/SKILL.md)", guide)
+                self.assertIn("SKILL.md", guide)
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 
 [English guide](../../skills/recap.md)
 
-行为权威是 [skills/recap/SKILL.md](../../../skills/recap/SKILL.md)；本页只说明使用方式，不创建第二份契约。
+行为权威是 [skills/productivity/recap/SKILL.md](../../../skills/productivity/recap/SKILL.md)；本页只说明使用方式，不创建第二份契约。
 
 ## 作用
 
@@ -20,7 +20,7 @@ $recap
 
 ## 验证与发布状态
 
-当前修订由 [tests/test_functional_closure.py](../../../tests/test_functional_closure.py) 验证。未改动的 [package tests](../../../skills/recap/tests/) 是旧版长契约的历史记录，不属于当前主动套件。Fresh-copy 与独立审查证据见[准入记录](../../evidence/admissions/recap/README.zh-CN.md)。
+当前修订由 [tests/test_functional_closure.py](../../../tests/test_functional_closure.py) 验证。未改动的 [package tests](../../../skills/productivity/recap/tests) 是旧版长契约的历史记录，不属于当前主动套件。Fresh-copy 与独立审查证据见[准入记录](../../evidence/admissions/recap/README.zh-CN.md)。
 
 仅手动触发的 `recap` 形式属于 v0.2.0 稳定发布线。当前 `main` 分支包含未发布的集合更新，而稳定发布快照继续保持为 `v0.2.0`。可使用 `npx skills add LightDevCoder/skills#v0.2.0 --skill recap` 安装稳定版本，刷新 host，并在脱离 source checkout 的情况下确认 discovery；见[安装策略](../../INSTALLATION.zh-CN.md)。
 

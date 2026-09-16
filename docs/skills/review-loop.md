@@ -2,7 +2,7 @@
 
 [中文指南](../zh-CN/skills/review-loop.md)
 
-The package contract at [skills/review-loop/SKILL.md](../../skills/review-loop/SKILL.md)
+The package contract at [skills/review/review-loop/SKILL.md](../../skills/review/review-loop/SKILL.md)
 is authoritative. This guide explains how to enter it without duplicating the
 contract.
 
@@ -54,6 +54,6 @@ Install with
 `npx skills add LightDevCoder/skills --skill review-loop`, refresh the
 host, and inspect the discovered `SKILL.md` plus `agents/openai.yaml` without
 the source checkout. Run the tests under
-[skills/review-loop/tests/](../../skills/review-loop/tests/) and keep the
+[skills/review/review-loop/tests/](../../skills/review/review-loop/tests) and keep the
 fresh-install result in
 [INSTALLATION_VERIFICATION.md](../evidence/releases/v0.1.6/INSTALLATION_VERIFICATION.md).

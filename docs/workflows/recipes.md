@@ -1,6 +1,6 @@
 # Workflow recipes
 
-[中文 recipes](../../docs/zh-CN/workflows/recipes.md)
+[中文 recipes](../zh-CN/workflows/recipes.md)
 
 These recipes are bounded documentation and validation assets. They describe explicit handoffs; they do not create a canonical pipeline, permanent state machine, or automatic multi-Skill orchestrator. `SKILL.md` remains the behavior authority for every package.
 
@@ -73,7 +73,7 @@ Each row declares the handoff artifact and stop condition. `user-invoked` means 
 
 ## 5. Skill maintenance and release
 
-See [docs/MAINTENANCE.md](../../docs/MAINTENANCE.md) and [docs/REVIEW_POLICY.md](../../docs/REVIEW_POLICY.md): ownership/reuse gate → bounded implementation → tests + adversarial fixtures → `code-review` when scripts changed → `project-review` verdict → collection sync → fresh install/discovery → release/tag/closeout.
+See [docs/MAINTENANCE.md](../MAINTENANCE.md) and [docs/REVIEW_POLICY.md](../REVIEW_POLICY.md): ownership/reuse gate → bounded implementation → tests + adversarial fixtures → `code-review` when scripts changed → `project-review` verdict → collection sync → fresh install/discovery → release/tag/closeout.
 
 ## 6. Bug diagnosis and final review
 

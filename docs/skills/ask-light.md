@@ -3,8 +3,8 @@
 [中文指南](../zh-CN/skills/ask-light.md)
 
 The workflow advisor, router, and output contract are defined by
-[skills/ask-light/SKILL.md](../../skills/ask-light/SKILL.md) and
-[discovery-contract.md](../../skills/ask-light/references/discovery-contract.md).
+[skills/productivity/ask-light/SKILL.md](../../skills/productivity/ask-light/SKILL.md) and
+[discovery-contract.md](../../skills/productivity/ask-light/references/discovery-contract.md).
 
 ## What it solves
 
@@ -91,8 +91,8 @@ host-recognized Skill root, refresh, and inspect `SKILL.md`,
 `light-skill-map.json`, the Python helper, and the PowerShell compatibility
 launcher without relying on the source checkout. Do not publish an installer
 command as verified until it has succeeded against the actual released
-repository. Run [ask-light contract tests](../../skills/ask-light/tests/test_ask_light_contract.py)
-and [behavior tests](../../skills/ask-light/tests/test_ask_light_behavior.py),
+repository. Run [ask-light contract tests](../../skills/productivity/ask-light/tests/test_ask_light_contract.py)
+and [behavior tests](../../skills/productivity/ask-light/tests/test_ask_light_behavior.py),
 covering evidence inspection, selection validation, review transaction safety,
 freshness checks, root discovery, provenance, host availability, and
 approval-transition boundaries.

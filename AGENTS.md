@@ -19,9 +19,9 @@ Approved architecture-level PORTs (SPEC §14/§16 — `research`, `prototype`, `
 
 ## Repository shape and sources of truth
 
-Future admitted packages live at `skills/<skill-name>/`. Each package owns its `SKILL.md` behavior contract and may include only justified resources, scripts, templates, or assets. Do not create empty resource directories or placeholder content.
+Future admitted packages live at `skills/<category>/<skill-name>/`. Each package owns its `SKILL.md` behavior contract and may include only justified resources, scripts, templates, or assets. Do not create empty resource directories or placeholder content.
 
-For a substantially transformed Port, `skills/<skill-name>/ATTRIBUTION.md` is the single provenance record (source, path, pinned revision/tag, license/notice, Light-specific changes). Do not claim original authorship for unmodified material.
+For a substantially transformed Port, `skills/<category>/<skill-name>/ATTRIBUTION.md` is the single provenance record (source, path, pinned revision/tag, license/notice, Light-specific changes). Do not claim original authorship for unmodified material.
 
 Repository-level responsibilities are owned by these documents:
 

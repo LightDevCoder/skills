@@ -2,7 +2,7 @@
 
 [中文指南](../zh-CN/skills/language-learning.md)
 
-The behavior authority is [skills/language-learning/SKILL.md](../../skills/language-learning/SKILL.md).
+The behavior authority is [skills/knowledge/language-learning/SKILL.md](../../skills/knowledge/language-learning/SKILL.md).
 This page explains usage without creating a second contract.
 
 ## Purpose
@@ -49,7 +49,7 @@ admission does not change the package contract.
 
 ## Verification and release state
 
-Run [the package tests](../../skills/language-learning/tests/) and inspect
+Run [the package tests](../../skills/knowledge/language-learning/tests) and inspect
 `agents/openai.yaml` for `allow_implicit_invocation: false`. The prompt-only
 fast-track `PASS` admission evidence is recorded in the
 [admission record](../evidence/admissions/language-learning/README.md).

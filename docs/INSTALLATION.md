@@ -2,9 +2,15 @@
 
 [中文安装说明](INSTALLATION.zh-CN.md)
 
-The public first-party collection's current stable release is [v0.2.1](https://github.com/LightDevCoder/skills/releases/tag/v0.2.1), published at tag `v0.2.1` (exact commit recorded in the [release receipt](evidence/releases/v0.2.1/RELEASE_RECEIPT.md)). It provides **36 admitted first-party Skills** (the 34 from the v0.2.0 line plus `light-travelpage` and `project-retro`). Package contracts remain inside `skills/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
+The public first-party collection's current stable release is [v0.2.1](https://github.com/LightDevCoder/skills/releases/tag/v0.2.1), published at tag `v0.2.1` (exact commit recorded in the [release receipt](evidence/releases/v0.2.1/RELEASE_RECEIPT.md)). It provides **36 admitted first-party Skills** (the 34 from the v0.2.0 line plus `light-travelpage` and `project-retro`). Package contracts remain inside `skills/<category>/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
 
 The standard install command is the generic `latest` form: it follows the repository's default revision, so `npx skills add LightDevCoder/skills` is the recommended interactive entry point to select the desired Skills and Agent hosts. Pinned release commands select published tags for reproducible installs. Historical verification commands (which tested full-collection installations across all supported agents) are documented below alongside historical evidence.
+
+## Categorized sources and installed packages
+
+Current `main` uses `skills/<category>/<name>/`. Host installations remain `<skills-root>/<name>/`; do not install a category directory as one Skill. Selection with `--skill <name>` is unchanged. Published v0.2.1 and earlier tags retain their flat layout; when manually copying from those tags, set `source_package` to `skills/$skill_name`.
+
+[Category index](../skills/README.md) · [Path-by-path migration](CATEGORY_MIGRATION.md).
 
 ## Recommended installation
 
@@ -188,7 +194,8 @@ When the installer is unavailable or unsupported, check out the target tag after
 source_root="<current-release-checkout>"
 skill_name="<admitted-skill-name>"
 destination_root="<host-recognized-skills-root>"
-cp -R "$source_root/skills/$skill_name" "$destination_root/$skill_name"
+source_package="skills/<category>/$skill_name"
+cp -R "$source_root/$source_package" "$destination_root/$skill_name"
 ```
 
 This is a fallback procedure, not fresh-install proof by itself. The record must identify the released commit or tag, exact host, resolved destination, refresh/restart step, discovery result, and success, boundary, invocation, and missing-dependency smoke results. Copy the complete package; never copy only `SKILL.md` when the package references resources.

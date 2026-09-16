@@ -6,6 +6,8 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
+- Group all 36 Skills into seven purpose-based categories with bilingual collection guides. Update source discovery, installation guidance, CI, and the migration map while preserving names and invocation/approval boundaries. Main-only update; no new tag or release.
+
 ## 0.2.1 — 2026-09-16
 
 ### Added — project-retro skill & workflow retrospective integration (36th package)
@@ -314,7 +316,7 @@ Fixed a false-`accepted` defect at `d414a3b` where a terminal State (e.g. Round 
 - Structural and package evidence: [TEST_SUMMARY.md](docs/evidence/releases/v0.1.4/TEST_SUMMARY.md).
 - Admission: [light-kanban-worker evidence](docs/evidence/admissions/light-kanban-worker/README.md).
 - Scanner code-review: [CODE_REVIEW.md](docs/evidence/releases/v0.1.4/CODE_REVIEW.md).
-- Independent `review-loop agent-skill` acceptance for the original five packages remains `BLOCKED`; see the [release receipts](docs/evidence/releases/).
+- Independent `review-loop agent-skill` acceptance for the original five packages remains `BLOCKED`; see the [release receipts](docs/evidence/releases).
 
 ## 0.1.3 — 2026-08-10
 
@@ -327,7 +329,7 @@ Fixed a false-`accepted` defect at `d414a3b` where a terminal State (e.g. Round 
 
 ### Evidence
 
-- [docs/evidence/releases/v0.1.3/](docs/evidence/releases/v0.1.3/)
+- [docs/evidence/releases/v0.1.3/](docs/evidence/releases/v0.1.3)
 
 ## 0.1.2 — 2026-08-10
 
@@ -336,7 +338,7 @@ Fixed a false-`accepted` defect at `d414a3b` where a terminal State (e.g. Round 
 - Prepared the first-party, user-invoked `recap` Skill for v0.1.2. Explicit `$recap` invocation returns exactly one line about the current session, never runs tools, continues work, changes files, compacts history, or invokes another Skill.
 - Prepared the first-party, user-invoked `language-learning` Skill for v0.1.2. It tutors any target language through six study modes — daily lessons, flashcards, conversation practice, grammar decoding, progress quizzes, and immersion translation — reusing session context and previously learned vocabulary across invocations instead of re-asking.
 - Added a low-risk prompt-only admission fast track for owner-authored, manual-only, text-output Skills with no tools, side effects, runtime executables, or external dependencies. It uses one fresh Evaluator and does not require separate Critic or Standards/Spec review.
-- Published the generic `latest` install command (`npx skills add LightDevCoder/skills --yes --copy --agent '*'`) as the standard install path, with the pinned `#v0.1.2` form retained for reproducible installs. `recap` and `language-learning` were both admitted by a fresh independent prompt-only fast-track Evaluator `PASS`; see their [admission evidence](docs/evidence/admissions/).
+- Published the generic `latest` install command (`npx skills add LightDevCoder/skills --yes --copy --agent '*'`) as the standard install path, with the pinned `#v0.1.2` form retained for reproducible installs. `recap` and `language-learning` were both admitted by a fresh independent prompt-only fast-track Evaluator `PASS`; see their [admission evidence](docs/evidence/admissions).
 
 ### Release evidence
 

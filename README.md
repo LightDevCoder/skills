@@ -4,9 +4,23 @@
 
 # Light Skills — Composable Agent Workflows
 
-`LightDevCoder/skills` provides 36 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<name>/` and defines its own behavior in `SKILL.md`.
+`LightDevCoder/skills` provides 36 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<category>/<name>/` and defines its own behavior in `SKILL.md`.
 
 > **Release:** [v0.2.1](https://github.com/LightDevCoder/skills/releases/tag/v0.2.1) is published from the `v0.2.1` tag — the release line carries the full 36 first-party Skills — and is the current stable release. The exact commit is recorded in the [release receipt](docs/evidence/releases/v0.2.1/RELEASE_RECEIPT.md).
+
+## Browse by category
+
+[All categories and collection guides](skills/README.md). The 36 source packages are grouped by purpose; names and invocation modes are unchanged.
+
+- [project](skills/project/README.md) — 8 skills
+- [engineering](skills/engineering/README.md) — 5 skills
+- [review](skills/review/README.md) — 4 skills
+- [thinking](skills/thinking/README.md) — 5 skills
+- [knowledge](skills/knowledge/README.md) — 5 skills
+- [writing](skills/writing/README.md) — 3 skills
+- [productivity](skills/productivity/README.md) — 6 skills
+
+[Path migration guide](docs/CATEGORY_MIGRATION.md)
 
 ## Overview
 
@@ -127,7 +141,7 @@ release-workflow                 # Publish an approved release
 $ask-light                       # Route unclear tasks to the right Skill
 ```
 
-See [docs/workflows/](docs/workflows/) for full workflow guides.
+See [docs/workflows/](docs/workflows) for full workflow guides.
 
 ## Finding the Right Skill
 
@@ -138,7 +152,7 @@ $ask-light workflow
 
 `ask-light` is the Light workflow advisor, navigator, and router. It inspects project and workflow evidence, reasons about the best next Skill, explains why, and waits for approval before a validated host-aware transition (model-invoked targets may begin where supported; user-invoked targets fall back to rendering the exact invocation when direct Host transition is unavailable).
 
-See [ask-light](skills/ask-light/SKILL.md) and [docs/workflows/](docs/workflows/).
+See [ask-light](skills/productivity/ask-light/SKILL.md) and [docs/workflows/](docs/workflows).
 
 ## Skills Overview
 
@@ -153,23 +167,23 @@ See [ask-light](skills/ask-light/SKILL.md) and [docs/workflows/](docs/workflows/
 
 See [CATALOG.md](CATALOG.md) for full descriptions, invocation modes, and package paths.
 
-`light-travelpage` is available on `main` as an unreleased addition. It generates and maintains shared mobile travel pages with GitHub and Cloudflare Pages/D1. See the [package](skills/light-travelpage/SKILL.md) and [admission evidence](docs/evidence/admissions/light-travelpage/README.md). It supports Chinese/English switching, flight and stay cards, fine serif typography, and destination-specific map services.
+`light-travelpage` is available on `main` as an unreleased addition. It generates and maintains shared mobile travel pages with GitHub and Cloudflare Pages/D1. See the [package](skills/productivity/light-travelpage/SKILL.md) and [admission evidence](docs/evidence/admissions/light-travelpage/README.md). It supports Chinese/English switching, flight and stay cards, fine serif typography, and destination-specific map services.
 
 ## Provenance and Attribution
 
 | Origin | Policy | Repository Treatment |
 | --- | --- | --- |
-| First-party | Collection owner authored | Maintained in `skills/<name>/`. |
-| Approved Port (Matt Pocock) | Upstream behavior preserved with `ATTRIBUTION.md` | Self-contained in `skills/<name>/` without upstream runtime dependencies. |
+| First-party | Collection owner authored | Maintained in `skills/<category>/<name>/`. |
+| Approved Port (Matt Pocock) | Upstream behavior preserved with `ATTRIBUTION.md` | Self-contained in `skills/<category>/<name>/` without upstream runtime dependencies. |
 | Third-party unmodified | External upstream | Recommended for direct installation; not duplicated here. |
 | Modified third-party | Managed in private `LightDevCoder/skills-3rdParty` | Retains full patches, licenses, and sync locks. |
 | Retired standalone | Consolidated into collection | Documented with migration history in release records. |
 
 Approved Matt Ports (11 packages): `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts`. Each package contains `ATTRIBUTION.md` and runs without external runtime dependencies.
 
-Adapted origin (2 packages): `humanizer` is a substantially transformed first-party capability based on blader/humanizer (2.11.2) with a thin Chinese adaptation layer informed by op7418/Humanizer-zh; both MIT licenses are preserved in its [ATTRIBUTION.md](skills/humanizer/ATTRIBUTION.md).
+Adapted origin (2 packages): `humanizer` is a substantially transformed first-party capability based on blader/humanizer (2.11.2) with a thin Chinese adaptation layer informed by op7418/Humanizer-zh; both MIT licenses are preserved in its [ATTRIBUTION.md](skills/writing/humanizer/ATTRIBUTION.md).
 
-`light-travelpage` substantially transforms do-tongxue/Travel-Plan-Page with protected D1 collaboration, validation, recovery and generation/update tooling; its MIT provenance is in [ATTRIBUTION.md](skills/light-travelpage/ATTRIBUTION.md).
+`light-travelpage` substantially transforms do-tongxue/Travel-Plan-Page with protected D1 collaboration, validation, recovery and generation/update tooling; its MIT provenance is in [ATTRIBUTION.md](skills/productivity/light-travelpage/ATTRIBUTION.md).
 
 ## Documentation
 
@@ -179,6 +193,6 @@ Adapted origin (2 packages): `humanizer` is a substantially transformed first-pa
 - [Installation Guide](docs/INSTALLATION.md)
 - [Review Policy](docs/REVIEW_POLICY.md) · [Reviewer Contract](docs/REVIEWER_CONTRACT.md)
 - [Catalog](CATALOG.md) · [Changelog](CHANGELOG.md)
-- [Workflow Guides](docs/workflows/)
+- [Workflow Guides](docs/workflows)
 - [Release Receipt](docs/evidence/releases/v0.2.0/RELEASE_RECEIPT.md)
 - [Collection Discovery Tests](tests/test_collection_discovery.py) · [Composition Tests](tests/test_composition.py)

@@ -2,7 +2,7 @@
 
 [English guide](../../skills/kb-init.md)
 
-行为权威是 [skills/kb-init/SKILL.md](../../../skills/kb-init/SKILL.md)；本页只说明使用方式，不创建第二份契约。
+行为权威是 [skills/knowledge/kb-init/SKILL.md](../../../skills/knowledge/kb-init/SKILL.md)；本页只说明使用方式，不创建第二份契约。
 
 ## 作用
 
@@ -30,6 +30,6 @@ $kb-init
 
 ## 验证与发布状态
 
-运行 [package contract test](../../../skills/kb-init/tests/) 并检查 `agents/openai.yaml` 中的 `allow_implicit_invocation: false`。完整准入路径使用 `project-review`（经 `review-loop`）；最终 verdict 为 `PASS`，没有未解决的 `BLOCKED` 条件。证据见[准入记录](../../evidence/admissions/kb-init/README.zh-CN.md)。
+运行 [package contract test](../../../skills/knowledge/kb-init/tests) 并检查 `agents/openai.yaml` 中的 `allow_implicit_invocation: false`。完整准入路径使用 `project-review`（经 `review-loop`）；最终 verdict 为 `PASS`，没有未解决的 `BLOCKED` 条件。证据见[准入记录](../../evidence/admissions/kb-init/README.zh-CN.md)。
 
 `kb-init` 已随 v0.1.6 发布。使用 `npx skills add LightDevCoder/skills --skill kb-init` 安装，刷新 host，并在脱离 source checkout 的情况下确认 discovery；见[安装策略](../../INSTALLATION.zh-CN.md)。
