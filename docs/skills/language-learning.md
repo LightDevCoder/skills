@@ -63,3 +63,12 @@ refresh, and confirm discovery without the source checkout under
 
 This skill is an original first-party design. No upstream Skill code or prompt
 text is copied into this package.
+
+
+## Running tests from the categorized checkout
+
+Run from the repository root. `PYTHONPATH=tests` supplies the shared test helpers while preserving frozen test files unchanged:
+
+```bash
+PYTHONPATH=tests python3 skills/knowledge/language-learning/tests/test_language_learning_contract.py
+```

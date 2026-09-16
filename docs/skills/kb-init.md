@@ -53,3 +53,12 @@ is `PASS` with no unresolved `BLOCKED` condition. Evidence is recorded in the
 `npx skills add LightDevCoder/skills --skill kb-init`,
 refresh, and confirm discovery without the source checkout under
 the [installation policy](../INSTALLATION.md).
+
+
+## Running tests from the categorized checkout
+
+Run from the repository root. `PYTHONPATH=tests` supplies the shared test helpers while preserving frozen test files unchanged:
+
+```bash
+PYTHONPATH=tests python3 skills/knowledge/kb-init/tests/test_kb_init_contract.py
+```

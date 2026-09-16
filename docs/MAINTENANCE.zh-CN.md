@@ -62,3 +62,8 @@
 ## Closeout 记录
 
 收尾时记录最终仓库位置、已发版本/tag、已验证命令、第一方目录（34）、已批准 Port / direct upstream / modified third-party 区分、证据、限制与迁移/归档指引。不得把结构或模拟证据写成 runtime proof。Historical closeout must be recorded with exact identifiers and limitations — closeout is not structural proof. 历史证据（`docs/evidence/`）保持不变。
+
+
+## 分类目录的验证入口
+
+从仓库根目录运行 `python3 -m pytest -q`。单独运行冻结包中的测试脚本时，使用 `PYTHONPATH=tests python3 <test-path>`；CI 同样设置 `PYTHONPATH=tests`。这保留冻结文件内容，同时让增加分类层后的脚本找到共享辅助模块。

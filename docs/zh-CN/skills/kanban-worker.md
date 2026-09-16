@@ -91,3 +91,12 @@ npx skills add LightDevCoder/skills#v0.1.6 --skill kanban-worker
 ```
 
 v0.1.5 的 pinned `#v0.1.5 --skill light-kanban-worker` 命令安装在旧名下，保留在 v0.1.5 安装记录中。刷新 host 并在脱离 source checkout 的情况下确认 discovery。兼容 Light-Kanban v1.0.4+。
+
+
+## 在分类目录中运行测试
+
+从仓库根目录运行以下命令。`PYTHONPATH=tests` 提供公共测试辅助模块，保留冻结测试文件的原始内容：
+
+```bash
+PYTHONPATH=tests python3 skills/project/kanban-worker/tests/test_kanban_worker_contract.py
+```

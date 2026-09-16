@@ -41,3 +41,12 @@ $language-learning Spanish, flashcards for: perro, gato, casa
 ## 行为来源
 
 本 skill 为原创第一方设计。本包未复制任何上游 Skill 代码或 prompt 文本。
+
+
+## 在分类目录中运行测试
+
+从仓库根目录运行以下命令。`PYTHONPATH=tests` 提供公共测试辅助模块，保留冻结测试文件的原始内容：
+
+```bash
+PYTHONPATH=tests python3 skills/knowledge/language-learning/tests/test_language_learning_contract.py
+```

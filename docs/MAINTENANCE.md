@@ -72,3 +72,8 @@ If a release candidate fails verification, stop promotion and repair through the
 ## Closeout record
 
 At closeout, record final repository location, released versions/tags, verified commands, first-party catalog (34), approved Ports vs direct upstream vs modified third-party distinctions, evidence, limitations, and migration/archive guidance. Do not label structural or simulated evidence as runtime proof. Historical evidence (`docs/evidence/`) stays immutable.
+
+
+## Validation entry points after categorization
+
+From the repository root, run `python3 -m pytest -q`. For standalone frozen package test scripts, use `PYTHONPATH=tests python3 <test-path>`; CI sets the same `PYTHONPATH=tests`. This preserves frozen file bytes while resolving the shared helpers after adding a category level.

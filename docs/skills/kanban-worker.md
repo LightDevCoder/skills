@@ -145,3 +145,12 @@ The pinned `#v0.1.5` command installed the package under its old name
 `light-kanban-worker` and is retained in the v0.1.5 installation record.
 Refresh the agent host and confirm the Skill is discovered without relying
 on the source checkout. It is compatible with Light-Kanban v1.0.4+.
+
+
+## Running tests from the categorized checkout
+
+Run from the repository root. `PYTHONPATH=tests` supplies the shared test helpers while preserving frozen test files unchanged:
+
+```bash
+PYTHONPATH=tests python3 skills/project/kanban-worker/tests/test_kanban_worker_contract.py
+```

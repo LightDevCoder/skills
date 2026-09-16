@@ -7,15 +7,15 @@ This file records the provenance and mapping for the `review-loop` →
 
 ## Provenance
 
-- **Source package:** `skills/review/review-loop` at baseline commit `26110c9`
+- **Source package:** `skills/review-loop` at baseline commit `26110c9`
   (LightDevCoder/skills, main) and its heavy final-acceptance semantics
   (`init`/`review`/`resume`, frozen baseline/Charter, evidence protocol,
   finding registry, `PASS`/`FAIL`/`BLOCKED`, scope-change boundary, Profile
   selection, durable `.review-loop/` state, `code-review` specialist
   boundary).
-- **Target package:** `skills/review/project-review` — new Light capability
+- **Target package:** `skills/project-review` — new Light capability
   (`NEW / MIGRATE LOGIC` per SPEC §16).
-- **Retained package:** `skills/review/review-loop` — refactored to lightweight
+- **Retained package:** `skills/review-loop` — refactored to lightweight
   Review Engine (`REFACTOR + SPLIT` per SPEC §16).
 - **Reviewer contract:** `docs/REVIEWER_CONTRACT.md` introduced in
   Ticket 10 (baseline-check) as the lightweight packet/normalized-finding
@@ -52,33 +52,33 @@ Light review-loop (heavy, final-acceptance + loop)
 | Profiles (generic, software, manuscript, agent-skill, specification) | `references/profiles/*` | `references/profiles/*` | Identical |
 | Mission Center compatibility | `references/mission-center-compatibility.md` | `references/mission-center-compatibility.md` | Identical |
 | Code-review specialist boundary | `SKILL.md#Software specialist boundary` (direct invoke) | `SKILL.md` via `review-loop` engine → `code-review` | Indirection added; `code-review` remains read-only, no loop, no final verdict — boundary verifiable |
-| Generic reviewer | (none — ad-hoc Critic) | `skills/review/generic-review/` (default, 5 checks) | New; `code-review` was already read-only, generic path was implicit |
+| Generic reviewer | (none — ad-hoc Critic) | `skills/generic-review/` (default, 5 checks) | New; `code-review` was already read-only, generic path was implicit |
 | Convergence loop | Embedded in `review` workflow steps 2–7 | Delegated to `review-loop` engine: `resolve reviewer` → `invoke` → `receive findings` → `return repair` → `re-run` → `stop at limit` | Split responsibilities; `project-review` provides Charter & validation, `review-loop` provides convergence |
 
 ## Content fidelity
 
-All reference files under `skills/review/project-review/references/` were copied
-verbatim from `skills/review/review-loop/references/` at `26110c9` (or the
+All reference files under `skills/project-review/references/` were copied
+verbatim from `skills/review-loop/references/` at `26110c9` (or the
 equivalent baseline-check snapshot). No rule was rewritten; only the owning
-Skill path and composition wiring changed. `skills/review/review-loop` was then
-refactored to its lightweight engine contract (see `skills/review/review-loop/SKILL.md`
-legacy note). `skills/review/generic-review` was introduced as the default reviewer
-(see `skills/review/generic-review/references/output-schema.md`).
+Skill path and composition wiring changed. `skills/review-loop` was then
+refactored to its lightweight engine contract (see `skills/review-loop/SKILL.md`
+legacy note). `skills/generic-review` was introduced as the default reviewer
+(see `skills/generic-review/references/output-schema.md`).
 
 ## Verification
 
-- `skills/review/project-review/SKILL.md` frontmatter `name: project-review` resolves.
-- `skills/review/project-review/agents/openai.yaml` permits `allow_implicit_invocation: true`.
+- `skills/project-review/SKILL.md` frontmatter `name: project-review` resolves.
+- `skills/project-review/agents/openai.yaml` permits `allow_implicit_invocation: true`.
 - Every reference linked in `project-review/SKILL.md` resolves under
-  `skills/review/project-review/references/` or via `../../docs/REVIEWER_CONTRACT.md`.
-- `skills/review/generic-review/references/output-schema.md` defines `Findings: []`,
+  `skills/project-review/references/` or via `../../docs/REVIEWER_CONTRACT.md`.
+- `skills/generic-review/references/output-schema.md` defines `Findings: []`,
   `REVIEW-ERROR`, and the required finding fields (`id`, `severity`,
   `location`, `problem`, `reason`, `suggestion`, states `new`/`persists`/
   `fixed`/`duplicate`).
-- `skills/review/review-loop/SKILL.md` no longer claims `PASS`/`FAIL`/`BLOCKED` as
+- `skills/review-loop/SKILL.md` no longer claims `PASS`/`FAIL`/`BLOCKED` as
   its own verdict; it references `project-review` for final acceptance and
   links to `REVIEWER_CONTRACT.md` + `generic-review/output-schema.md`.
-- `skills/review/code-review/SKILL.md` still contains the read-only, no-loop,
+- `skills/code-review/SKILL.md` still contains the read-only, no-loop,
   no-final-verdict boundary and is invoked via `review-loop`/`project-review`
   (see its Composition and Stopping boundary sections).
 - `docs/REVIEWER_CONTRACT.md` exists and defines the 4-field input packet

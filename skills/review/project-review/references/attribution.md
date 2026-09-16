@@ -4,7 +4,7 @@
 
 The frozen-baseline, Profile, evidence, finding-registry, stopping-rules, and
 `PASS`/`FAIL`/`BLOCKED` final-acceptance protocol migrated here verbatim from
-`skills/review/review-loop` at baseline `26110c9` (and the `review-loop` heavy
+`skills/review-loop` at baseline `26110c9` (and the `review-loop` heavy
 implementation at `/tmp/skills-baseline`). `review-loop` is the original
 first-party author of that protocol; no external rewrite was performed. The
 review-loop engine was then refactored to its lightweight 5-step convergence
