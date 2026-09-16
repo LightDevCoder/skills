@@ -20,6 +20,8 @@ implement
 project-review
       ↓  （最终 PASS / FAIL / BLOCKED）
 release-workflow
+      ↓  （可选：Agent 自主评估摩擦信号 → project-retro 复盘）
+project-retro
 ```
 
 这是*推荐*流程，非强制流水线。中途任务可直接切入对应阶段；任一 Skill 不会自动调用下一个 user-invoked Skill。
@@ -35,6 +37,19 @@ release-workflow
 | 5 | 单个 ticket 已就绪且无歧义 | [`implement`](../../../skills/implement/SKILL.md) — user-invoked，必要时可选 `agent-config` / 内部调 `tdd` | 有界 diff + 测试 + 本地验证 | 止于 ticket 范围；合适时交 review |
 | 6 | 产物需最终验收 | [`project-review`](../../../skills/project-review/SKILL.md) — model-invoked（支持手动）经 `review-loop` | 冻结 Charter + reviewer findings + 最终 `PASS`/`FAIL`/`BLOCKED` | 止于 verdict |
 | 7 | 项目已通过验收 | [`release-workflow`](../../../skills/release-workflow/SKILL.md) — model-invoked | 同步文档/目录/测试、打 tag、发布 | 止于 release 记录 |
+| 8 | 工作流结束；Agent 自主评估是否发生摩擦 | [`project-retro`](../../../skills/project-retro/SKILL.md) — model-invoked（自主评估） | 按严重性排序的结构化复盘发现 | 止于输出发现；修改须经用户确认 |
+
+### 工作流终点 Agent 自主评估
+
+在工作流最后一步（`project-review` 或 `release-workflow` 完成后），Agent 独立判断是否需要调用 `project-retro`。检查执行中是否存在摩擦信号：
+- **导航困难：** 文件难以发现、未索引依赖导致耗时。
+- **缺失守护线：** 发生本可通过自动化检查（lint、类型检查、pre-commit 钩子、CI）确切捕获的语法/类型/测试错误。
+- **规范缺口：** 审查遗漏，或将机械检查规则错置于自然语言规范文档。
+- **引导膨胀：** `AGENTS.md` / `CLAUDE.md` 过于庞大、包含空操作（no-ops）或失效指令。
+- **工具经济：** 出现高开销或重复读取等 token 浪费现象。
+- **信息缺失：** 关键日志、错误堆栈或文档难以获取。
+
+若检测到上述摩擦，Agent 调用 `project-retro` 提出具体改进建议；若流程顺畅无摩擦，则干净跳过，不增加额外干扰。
 
 **可选 / 并行：** 大型模糊任务可用 `decision-map` 替代/增强 `project-clarify`，见 [clarification-system](clarification-system.md)。`implement` 可按需调用 `tdd`、`diagnosing-bugs`、`resolving-merge-conflicts`，见 [execution](execution.md)。Review 经 `generic-review`/`code-review`/领域 reviewer 走 `review-loop`，见 [review-system](review-system.md)。
 

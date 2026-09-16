@@ -6,29 +6,32 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
-- Clarify authorization reuse and stage-local completion in `tdd`, `clarify`, `implement`, `review-loop`, and `manuscript-ops`. Preserve explicit approval, invocation, review-limit, and independent-acceptance gates; permit evidenced fallback only for optional routing. [Scope and validation](docs/evidence/maintenance/2026-09-16-autonomy-boundaries.md). Main-only update; no tag or release.
+## 0.2.1 — 2026-09-16
 
-- Update `light-travelpage` with Chinese/English switching, flight/stay cards, regional maps, fine serif typography and an anchored travel menu. Preserve trip identity, authentication and shared state; 34 runtime tests pass. Main-only update; no tag or release.
+### Added — project-retro skill & workflow retrospective integration (36th package)
 
-### Added — Light-TravelPage
+- **project-retro skill:** New first-party model-invoked Skill that conducts retrospectives on completed projects or coding sessions, identifying actionable improvements to agent environment, automated guardrails, file navigation, tool economy, steering instructions, and telemetry. Ported and adapted from Matt Pocock's `retro` (`959a8e9f1edc3adbe2f7e3054bb6fbefa6696260`) with full attribution; decoupled from external runtime.
+- **Agent self-evaluation at workflow conclusion:** Integrated autonomous retrospective evaluation at the final step of the Project Workflow (after `project-review` or `release-workflow`). The Agent independently evaluates friction signals (navigation bottlenecks, missing automated checks, standards ambiguity, instruction bloat, tool inefficiency, telemetry gaps) and triggers `project-retro` when friction occurred, while cleanly skipping on smooth runs without token noise.
 
-- Admit model-invoked `light-travelpage` as the 35th first-party package: travel-page generation/update with protected Cloudflare D1 collaboration and GitHub source.
-- Preserve upstream MIT assets and pinned ATTRIBUTION; add conflict/idempotency recovery, strict validation and focused tests.
-- Synchronize catalog, installation/discovery and admission evidence. No new tag or release.
+### Added — Light-TravelPage (35th package)
 
-
-- **Maintenance verification:** [Independent review and final test/install evidence](docs/evidence/maintenance/2026-09-08-agent-config.md). Main-only delivery; no new tag or release.
-- **Pi integration and MCP correctness:** Included the Pi adapter with extension, version, project-trust, provider/model, and effort-evidence boundaries. Fixed Codex TOML root-field preservation, ordered highest-effort resolution, invalid-preview validation, and Codex test environment isolation in the companion repository.
-- **Invocation boundary repair:** `agent-config` returns routing recommendations to its caller; an active `implement` may resume its authorized item, while standalone planning stops before starting another user-invoked stage.
+- **Light-TravelPage:** Admitted model-invoked `light-travelpage` as the 35th first-party package: mobile-first travel page generator and showcase with bilingual support, flight/stay cards, regional map generation, offline-first expense ledger, and shared Cloudflare Pages/Functions/D1 database synchronization.
+- Upstream MIT assets preserved with pinned ATTRIBUTION; includes conflict/idempotency recovery, strict data validation, and 34 runtime tests.
+- Updated with Chinese/English switching, flight/stay cards, regional maps, fine serif typography, and anchored travel menu.
 
 ### Refactored — agent-config profile authority, execution configuration & companion runtime
 
 - **Profile-authorized execution configurator:** Refactored `skills/agent-config` to map verified host capability evidence and user-confirmed profile tiers (`routine`, `standard`, `high`, `review`) to right-sized execution plans (`single-pass` or `decomposed` across `single-model` or `multi-model` topologies; Cases A, B, C, D). Returns canonical `AgentConfigResult` (`READY`, `NEED_INPUT`, `NEED_PROJECT_TICKETS`, `BLOCKED`, `UNSUPPORTED`).
 - **Profile authority over model intelligence inference:** Eliminated heuristic model ranking (`routing_rank`) and guessing model capability from names. Tier assignments and reasoning requirements are authorized solely through user-confirmed profile configuration against evidenced host models.
 - **Host-neutral reasoning & effort resolution:** Abstract reasoning policies resolve to authentic host-supported values (`supported_reasoning_efforts` or `reasoning_effort_hierarchy`), failing closed without inventing unsupported values.
-- **Companion MCP runtime & native adapter coverage:** Integrated optional companion MCP runtime protocol (`protocol_version: 1`, 8 canonical MCP tools: `get_setup_status`, `inspect_host`, `get_profile`, `save_profile`, `preview_configuration`, `apply_configuration`, `validate_configuration`, `reset_profile`) with 10 native adapters (Codex, Claude Code, Antigravity / agy, DeepSeek Harness / DSH, OpenCode, ZCode, Cursor, Grok Build, Hermes, Pi) plus generic plan-only fallback (Pi MCP requires its separately installed extension). Companion runtime is maintained in `LightDevCoder/agent-config`. Maintains full session-local plan-only execution without the companion.
+- **Companion MCP runtime & native adapter coverage:** Integrated optional companion MCP runtime protocol (`protocol_version: 1`, 8 canonical MCP tools: `get_setup_status`, `inspect_host`, `get_profile`, `save_profile`, `preview_configuration`, `apply_configuration`, `validate_configuration`, `reset_profile`) with 10 native adapters (Codex, Claude Code, Antigravity / agy, DeepSeek Harness / DSH, OpenCode, ZCode, Cursor, Grok Build, Hermes, Pi [MCP extension required]) plus generic plan-only fallback. Companion runtime is maintained in `LightDevCoder/agent-config`. Maintains full session-local plan-only execution without the companion.
 - **Companion health & setup gate:** Added companion health probe semantics (`agent-config setup --check`, live MCP protocol version, canonical tool schema validation) and a non-blocking setup gate (`agent-config setup`, `NEED_INPUT` / `UNSUPPORTED`) supporting explicit host inspection and safe mutation preview before apply.
 - **Skill ↔ Companion integration:** Downstream workflows consume normalized `AgentConfigResult`; `implement` offers optional agent-config without blocking execution; `ask-light` routes setup intent to `agent-config setup` while strictly keeping ready unblocked tickets routed to `implement` and complex decomposition routed to `project-tickets`.
+- **Pi integration and MCP correctness:** Included the Pi adapter with extension, version, project-trust, provider/model, and effort-evidence boundaries.
+
+### Changed — Autonomy boundaries and workflow completion
+
+- Clarified authorization reuse and stage-local completion in `tdd`, `clarify`, `implement`, `review-loop`, and `manuscript-ops`. Preserved explicit approval, invocation, review-limit, and independent-acceptance gates; permitted evidenced fallback only for optional routing. [Scope and validation](docs/evidence/maintenance/2026-09-16-autonomy-boundaries.md).
 
 ## 0.2.0 — 2026-08-28
 

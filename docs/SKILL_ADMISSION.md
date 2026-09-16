@@ -27,7 +27,7 @@ A candidate is eligible only when one of these is true:
 
 Reject an unmodified third-party or upstream copy that is not SPEC-authorized. Point users to the original upstream installation path instead. A modified third-party package that remains principally a third-party capability belongs in `skills-3rdParty` when not SPEC-authorized; it must satisfy that repository's provenance and fork-necessity rules.
 
-**Approved Ports in this repository (SPEC §14):** `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts` — each is a self-contained first-party package with `ATTRIBUTION.md` and no required install of `mattpocock/skills`. Light-specific changes are limited to runtime decoupling, naming, and handoff wiring; substantive redesign is not permitted.
+**Approved Ports in this repository (SPEC §14):** `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts`, `project-retro` — each is a self-contained first-party package with `ATTRIBUTION.md` and no required install of `mattpocock/skills`. Light-specific changes are limited to runtime decoupling, naming, and handoff wiring; substantive redesign is not permitted.
 
 > **Port ≠ arbitrary copying.** An architecture-level import authorization does not waive attribution, license/notice preservation, or the requirement that the Port be self-contained without upstream runtime installation. Arbitrary upstream snapshots without SPEC authorization remain ineligible.
 

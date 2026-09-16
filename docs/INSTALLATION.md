@@ -2,11 +2,9 @@
 
 [中文安装说明](INSTALLATION.zh-CN.md)
 
-The public first-party collection's current stable release is [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0), published at tag `v0.2.0` (exact commit recorded in the [release receipt](evidence/releases/v0.2.0/RELEASE_RECEIPT.md)). It provides **34 admitted first-party Skills** (33 at the original v0.2.0 publication; the v0.2.0 line was extended with the `humanizer` admission, and the previous stable was `v0.1.6` with 9 packages). Package contracts remain inside `skills/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
+The public first-party collection's current stable release is [v0.2.1](https://github.com/LightDevCoder/skills/releases/tag/v0.2.1), published at tag `v0.2.1` (exact commit recorded in the [release receipt](evidence/releases/v0.2.1/RELEASE_RECEIPT.md)). It provides **36 admitted first-party Skills** (the 34 from the v0.2.0 line plus `light-travelpage` and `project-retro`). Package contracts remain inside `skills/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
 
 The standard install command is the generic `latest` form: it follows the repository's default revision, so `npx skills add LightDevCoder/skills` is the recommended interactive entry point to select the desired Skills and Agent hosts. Pinned release commands select published tags for reproducible installs. Historical verification commands (which tested full-collection installations across all supported agents) are documented below alongside historical evidence.
-
-The current main branch adds `light-travelpage` (35 admitted packages); it is not included in the existing stable tag. Its admission used fresh local-source package and scope installations with CLI discovery; see [evidence](evidence/admissions/light-travelpage/README.md). A fresh GitHub package installation and CLI discovery succeeded after main commit `26a9f8d`; all 47 installed files matched the reviewed candidate. This verifies main, not a new tag or automatic host loading.
 
 ## Recommended installation
 
@@ -28,6 +26,7 @@ npx skills add LightDevCoder/skills --skill project-review
 npx skills add LightDevCoder/skills --skill research
 npx skills add LightDevCoder/skills --skill humanizer
 npx skills add LightDevCoder/skills --skill light-travelpage
+npx skills add LightDevCoder/skills --skill project-retro
 ```
 
 ### Pinned release installation
@@ -35,6 +34,8 @@ npx skills add LightDevCoder/skills --skill light-travelpage
 To install from a specific published release tag:
 
 ```bash
+npx skills add LightDevCoder/skills#v0.2.1
+npx skills add LightDevCoder/skills#v0.2.1 --skill project-retro
 npx skills add LightDevCoder/skills#v0.2.0
 npx skills add LightDevCoder/skills#v0.2.0 --skill project-review
 ```

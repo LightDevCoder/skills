@@ -1,0 +1,7 @@
+interface:
+  display_name: "Project Retro"
+  short_description: "Conduct a retrospective on a completed project or session"
+  default_prompt: "Use $project-retro to analyze session friction, automated checks, and environment improvements."
+
+policy:
+  allow_implicit_invocation: true

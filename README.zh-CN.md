@@ -4,9 +4,9 @@
 
 # Light Skills — 可组合的 Agent 工作流
 
-`LightDevCoder/skills` 包含 35 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<name>/`，由包内的 `SKILL.md` 统领具体行为。
+`LightDevCoder/skills` 包含 36 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<name>/`，由包内的 `SKILL.md` 统领具体行为。
 
-> **发布版本：** [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) 发布自 `v0.2.0` tag——发布线承载全部 34 个第一方 Skill（33 包架构 + `humanizer`），为当前最新稳定版本。确切 commit 见[发布收据](docs/evidence/releases/v0.2.0/RELEASE_RECEIPT.zh-CN.md)。
+> **发布版本：** [v0.2.1](https://github.com/LightDevCoder/skills/releases/tag/v0.2.1) 发布自 `v0.2.1` tag——发布线承载全部 36 个第一方 Skill，为当前最新稳定版本。确切 commit 见[发布收据](docs/evidence/releases/v0.2.1/RELEASE_RECEIPT.zh-CN.md)。
 
 ## 概述
 
@@ -41,9 +41,16 @@ npx skills add LightDevCoder/skills --skill research
 
 > **说明：** 不带 fragment 的仓库源（`LightDevCoder/skills`）将跟随默认分支 `main`，获取最新的已准入特性与集成。
 
-### 稳定版本快照（v0.2.0）
+### 稳定版本快照（v0.2.1）
 
-若需安装可复现的历史稳定发布快照，请锁定 `#v0.2.0` tag：
+若需安装可复现的历史稳定发布快照，请锁定 `#v0.2.1` tag：
+
+```bash
+npx skills add LightDevCoder/skills#v0.2.1
+npx skills add LightDevCoder/skills#v0.2.1 --skill project-retro
+```
+
+历史版本（如 `#v0.2.0`）依然保留供复现：
 
 ```bash
 npx skills add LightDevCoder/skills#v0.2.0
@@ -99,6 +106,8 @@ implement
 project-review
       ↓
 release-workflow
+      ↓
+project-retro（Agent 评估摩擦信号）
 ```
 
 - `project-init`：创建任务契约与基础配置。
@@ -106,6 +115,7 @@ release-workflow
 - `implement`：逐个执行任务并运行自动化测试。
 - `project-review`：对照冻结基线验证质量；`review-loop` 负责多轮修复。
 - `release-workflow`：执行发布验证、打 tag 并完成发布。
+- `project-retro`：在流程终点由 Agent 自主评估执行摩擦（导航、守护线、规范、工具经济性）并输出改进建议。
 
 常用单项任务路径：
 

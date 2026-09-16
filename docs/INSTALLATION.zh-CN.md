@@ -2,11 +2,9 @@
 
 [English installation guide](INSTALLATION.md)
 
-公开第一方集合当前稳定版本是 [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0)，发布于 `v0.2.0` tag（确切 commit 见[发布收据](evidence/releases/v0.2.0/RELEASE_RECEIPT.zh-CN.md)）。它提供 **34 个已准入的第一方 Skill**（v0.2.0 原始发布为 33 个；v0.2.0 发布线随后扩展了 `humanizer` 准入；上一稳定版为 9 个包的 `v0.1.6`）。`skills/<name>/` 内的包契约仍是行为权威；本页规定安装方法与验证记录。
+公开第一方集合当前稳定版本是 [v0.2.1](https://github.com/LightDevCoder/skills/releases/tag/v0.2.1)，发布于 `v0.2.1` tag（确切 commit 见[发布收据](evidence/releases/v0.2.1/RELEASE_RECEIPT.zh-CN.md)）。它提供 **36 个已准入的第一方 Skill**（v0.2.0 发布线的 34 个加上 `light-travelpage` 与 `project-retro`）。`skills/<name>/` 内的包契约仍是行为权威；本页规定安装方法与验证记录。
 
 标准安装命令是通用 `latest` 形式：它跟随仓库默认 revision，因此 `npx skills add LightDevCoder/skills` 是推荐的交互式安装入口，可按需选择 Skill 与目标 Agent。pinned release 命令选择已发布的 tag，用于可复现安装。历史验证命令（曾用于在隔离环境中跨所有受支持 Agent 测试完整集合）与历史证据一同记录在下方。
-
-当前 main 新增 `light-travelpage`（共 35 个已准入包），既有稳定 tag 不含此新增包。准入已验证隔离本地来源的包/集合安装及 CLI 发现；见[证据](evidence/admissions/light-travelpage/README.md)。main 提交 `26a9f8d` 推送后，已完成全新 GitHub 包安装和 CLI 发现，47 个文件与验收候选逐字节一致；这不代表新 tag 发布或运行中宿主自动加载。
 
 ## 推荐安装方式
 
@@ -28,6 +26,7 @@ npx skills add LightDevCoder/skills --skill project-review
 npx skills add LightDevCoder/skills --skill research
 npx skills add LightDevCoder/skills --skill humanizer
 npx skills add LightDevCoder/skills --skill light-travelpage
+npx skills add LightDevCoder/skills --skill project-retro
 ```
 
 ### 指定稳定版本安装（Pinned Release）
@@ -35,6 +34,8 @@ npx skills add LightDevCoder/skills --skill light-travelpage
 通过指定发布的 Release Tag 进行确定性安装：
 
 ```bash
+npx skills add LightDevCoder/skills#v0.2.1
+npx skills add LightDevCoder/skills#v0.2.1 --skill project-retro
 npx skills add LightDevCoder/skills#v0.2.0
 npx skills add LightDevCoder/skills#v0.2.0 --skill project-review
 ```

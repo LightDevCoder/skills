@@ -4,9 +4,9 @@
 
 # Light Skills — Composable Agent Workflows
 
-`LightDevCoder/skills` provides 35 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<name>/` and defines its own behavior in `SKILL.md`.
+`LightDevCoder/skills` provides 36 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<name>/` and defines its own behavior in `SKILL.md`.
 
-> **Release:** [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) is published from the `v0.2.0` tag — the release line carries the full 34 first-party Skills (the 33-package architecture plus `humanizer`) — and is the current stable release. The exact commit is recorded in the [release receipt](docs/evidence/releases/v0.2.0/RELEASE_RECEIPT.md).
+> **Release:** [v0.2.1](https://github.com/LightDevCoder/skills/releases/tag/v0.2.1) is published from the `v0.2.1` tag — the release line carries the full 36 first-party Skills — and is the current stable release. The exact commit is recorded in the [release receipt](docs/evidence/releases/v0.2.1/RELEASE_RECEIPT.md).
 
 ## Overview
 
@@ -41,9 +41,16 @@ npx skills add LightDevCoder/skills --skill research
 
 > **Note:** An unqualified repository source (`LightDevCoder/skills`) follows the default branch `main`, delivering the latest admitted features and integrations.
 
-### Stable release snapshot (v0.2.0)
+### Stable release snapshot (v0.2.1)
 
-To install the reproducible historical stable release snapshot, pin the `#v0.2.0` tag:
+To install the reproducible historical stable release snapshot, pin the `#v0.2.1` tag:
+
+```bash
+npx skills add LightDevCoder/skills#v0.2.1
+npx skills add LightDevCoder/skills#v0.2.1 --skill project-retro
+```
+
+Previous releases (such as `#v0.2.0`) remain available for reproducible installs:
 
 ```bash
 npx skills add LightDevCoder/skills#v0.2.0
@@ -99,6 +106,8 @@ implement
 project-review
       ↓
 release-workflow
+      ↓
+project-retro (agent evaluates friction)
 ```
 
 - `project-init`: sets up tracker contracts and initial configuration.
@@ -106,6 +115,7 @@ release-workflow
 - `implement`: implements one ticket at a time with automated checks.
 - `project-review`: verifies quality against frozen baselines; `review-loop` handles iterative fixes.
 - `release-workflow`: runs release validation, tagging, and publication.
+- `project-retro`: evaluates session friction (navigation, guardrails, standards, tool economy) and proposes actionable improvements at the conclusion of the workflow.
 
 Direct paths for common tasks:
 

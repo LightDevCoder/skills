@@ -20,6 +20,8 @@ implement
 project-review
       ↓  (final PASS / FAIL / BLOCKED)
 release-workflow
+      ↓  (optional agent self-evaluation: friction-triggered retrospective)
+project-retro
 ```
 
 This is a *recommended* flow, not a required pipeline. Enter mid-stream when the task is already at that stage. No Skill auto-invokes the next user-invoked Skill.
@@ -35,6 +37,19 @@ This is a *recommended* flow, not a required pipeline. Enter mid-stream when the
 | 5 | One ticket is unblocked and unambiguous | [`implement`](../../skills/implement/SKILL.md) — user-invoked, may offer `agent-config` / call `tdd` internally | bounded diff + tests + local verification | stop at ticket scope; hand to review when appropriate |
 | 6 | Artifact needs final acceptance | [`project-review`](../../skills/project-review/SKILL.md) — model-invoked (or manual) via `review-loop` | frozen Charter + reviewer findings + final verdict `PASS`/`FAIL`/`BLOCKED` | stop at verdict |
 | 7 | Project passed acceptance | [`release-workflow`](../../skills/release-workflow/SKILL.md) — model-invoked | synchronized docs/catalog/tests, tag, release | stop |
+| 8 | Workflow concludes; agent evaluates whether friction occurred | [`project-retro`](../../skills/project-retro/SKILL.md) — model-invoked (agent self-evaluation) | structured retrospective findings ordered by severity | stop after presenting findings; require user approval before applying changes |
+
+### Agent self-evaluation at workflow conclusion
+
+At the final step of the workflow (after `project-review` or `release-workflow`), the Agent independently considers whether to invoke `project-retro`. The Agent checks whether any execution friction was encountered during the run:
+- **Navigation:** Files were hard to discover, unindexed dependencies caused delay.
+- **Missing guardrails:** Syntax, type, or test errors that an automated check (lint, typecheck, pre-commit hook, CI) could have caught deterministically.
+- **Standards gaps:** Reviewer missed an issue, or mechanical rules were misplaced in prose standards instead of automated checks.
+- **Steering bloat:** `AGENTS.md` / `CLAUDE.md` grew unwieldy, contains no-ops or stale rules.
+- **Tool economy:** Redundant or token-expensive tool calls occurred.
+- **Information access:** Critical logs, error output, or documentation were missing or hard to inspect.
+
+If friction was detected, the Agent invokes `project-retro` to surface actionable environment improvements. If the run was clean and smooth, the Agent skips `project-retro` cleanly without creating noise.
 
 **Optional / parallel:** `decision-map` may replace/augment `project-clarify` for large, foggy, multi-session work — see [clarification-system](clarification-system.md). `implement` may call `tdd`, `diagnosing-bugs`, `resolving-merge-conflicts` as needed — see [execution](execution.md). Review uses `generic-review`/`code-review`/domain reviewers via `review-loop` — see [review-system](review-system.md).
 

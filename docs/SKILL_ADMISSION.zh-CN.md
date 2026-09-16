@@ -16,7 +16,7 @@
 
 未获 SPEC 授权的未修改 upstream/third-party 复制必须拒绝，指向原仓库安装路径。仍以第三方为主且未获授权的修改版进入 `skills-3rdParty`。
 
-**本仓库已批准的 PORT（SPEC §14）：** `research`、`prototype`、`tdd`、`handoff`、`diagnosing-bugs`、`wizard`、`teach`、`wait-what`、`to-questionnaire`、`writing-for-agents`、`resolving-merge-conflicts`——均为带 `ATTRIBUTION.md` 的自包含第一方包，运行时不要求安装 `mattpocock/skills`。Light 变更限于运行时解耦、命名与 handoff 串联，不允许实质性重设计。
+**本仓库已批准的 PORT（SPEC §14）：** `research`、`prototype`、`tdd`、`handoff`、`diagnosing-bugs`、`wizard`、`teach`、`wait-what`、`to-questionnaire`、`writing-for-agents`、`resolving-merge-conflicts`、`project-retro`——均为带 `ATTRIBUTION.md` 的自包含第一方包，运行时不要求安装 `mattpocock/skills`。Light 变更限于运行时解耦、命名与 handoff 串联，不允许实质性重设计。
 
 > **Port ≠ 任意复制。** 架构层面的迁入授权不免除 attribution、license/notice 保留与自包含无上游运行时依赖的要求。未经 SPEC 授权的任意上游快照仍不合格。
 

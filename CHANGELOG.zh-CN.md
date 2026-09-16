@@ -6,20 +6,17 @@
 
 ## Unreleased
 
-- 明确 `tdd`、`clarify`、`implement`、`review-loop`、`manuscript-ops` 的授权复用与阶段完成边界。保留明确批准、调用、审阅轮数和独立验收要求；仅允许有证据支持的可选路由回退。[范围与验证](docs/evidence/maintenance/2026-09-16-autonomy-boundaries.md)。仅更新 main，不创建 tag 或 release。
+## 0.2.1 — 2026-09-16
 
-- 更新 `light-travelpage`：中英切换、航班/住宿卡片、地区地图、细衬线字体及锚定导航按钮的下拉菜单。保留旅程身份、鉴权与共享状态；34 项运行测试通过。仅更新 main，不创建标签或 release。
+### 新增 — project-retro 技能与工作流复盘集成（第 36 个包）
 
-### 新增 — Light-TravelPage
+- **project-retro 技能：** 新增第一方模型调用（model-invoked）Skill，用于对已完成的项目或编码会话进行复盘，识别智能体环境、自动化守护线、文件导航、工具经济性、引导指令及运行信息中的具体改进点。移植并适配自 Matt Pocock 的 `retro`（`959a8e9f1edc3adbe2f7e3054bb6fbefa6696260`），完整保留归属，运行时完全自包含无外部依赖。
+- **工作流终点自主复盘评估：** 在项目工作流终点（`project-review` 完成最终验收或 `release-workflow` 执行完成后），由 Agent 自主判断是否触发复盘。检查执行中是否存在摩擦信号（导航瓶颈、缺失自动化检查、规范歧义、引导指令膨胀、工具效率低、运行信息缺失），有摩擦时触发 `project-retro` 输出结构化建议，顺畅无阻时干净跳过，不产生任何干扰与 token 开销。
 
-- 收录第 35 个第一方包 `light-travelpage`（模型调用）：生成和更新旅行网页，默认 GitHub 源码 + 受保护的 Cloudflare D1 多人同步。
-- 保留上游 MIT 素材和固定版本 ATTRIBUTION；增加冲突/幂等恢复、严格校验和聚焦测试。
-- 同步目录、安装发现及准入证据；没有创建新 tag 或 release。
+### 新增 — Light-TravelPage（第 35 个包）
 
-
-- **维护验证：** [独立审查及最终测试、安装证据](docs/evidence/maintenance/2026-09-08-agent-config.md)。仅提交 main，不创建新 tag 或 release。
-- **Pi 集成与 MCP 修复：** 纳入 Pi 适配器，明确扩展、版本、项目信任、provider/model 和 effort 证据边界；Companion 仓库修复 Codex TOML 顶层字段保护、最高 effort 解析、无效 preview 验证和测试环境隔离。
-- **调用边界修复：** `agent-config` 将路由建议返回调用方；已有 `implement` 可继续获授权的工作项，独立规划则在启动下一个用户调用阶段前停止。
+- **Light-TravelPage：** 收录第 35 个第一方包 `light-travelpage`（模型调用）：移动优先旅行页面生成与展示，支持中英双语切换、航班/住宿卡片、区域地图生成、离线优先费用账本及 Cloudflare Pages/Functions/D1 协同多端同步。
+- 保留上游 MIT 素材和固定版本 ATTRIBUTION；增加冲突/幂等恢复、严格校验和 34 项测试。
 
 ### 重构 — agent-config Profile 权威、执行配置与 Companion 运行时
 
@@ -29,6 +26,11 @@
 - **Companion MCP 运行时与 10 个原生适配器：** 制定可选 Companion MCP 运行时契约（`protocol_version: 1`，8 个规范 MCP 工具：`get_setup_status`、`inspect_host`、`get_profile`、`save_profile`、`preview_configuration`、`apply_configuration`、`validate_configuration`、`reset_profile`），覆盖 10 种原生 Harness（Codex、Claude Code、Antigravity / agy、DeepSeek Harness / DSH、OpenCode、ZCode、Cursor、Grok Build、Hermes、Pi）以及通用 plan-only 回退（Pi MCP 需单独安装扩展）。Companion 运行时维护于 `LightDevCoder/agent-config`。在无 Companion 时保持纯计划模式正常可用。
 - **Companion 健康度与 Setup Gate：** 增加 Companion 健康探测语义（`agent-config setup --check`、实时 MCP 传输协议版本、规范工具 schema 校验）与非阻塞 Setup Gate（`agent-config setup`、`NEED_INPUT` / `UNSUPPORTED`），支持显式宿主探测与先预览后应用的变更控制。
 - **Skill ↔ Companion 集成闭环：** 下游工作流消费规范化 `AgentConfigResult`；`implement` 保持 agent-config 为可选增强而不阻塞独立执行；`ask-light` 将 setup 意图路由至 `agent-config setup`，同时严格保持就绪工单路由至 `implement`、复杂拆分路由至 `project-tickets`。
+- **Pi 集成与 MCP 修复：** 纳入 Pi 适配器，明确扩展、版本、项目信任、provider/model 和 effort 证据边界。
+
+### 变更 — 自主权边界与工作流完成度
+
+- 明确 `tdd`、`clarify`、`implement`、`review-loop`、`manuscript-ops` 的授权复用与阶段完成边界。保留明确批准、调用、审阅轮数和独立验收要求；仅允许有证据支持的可选路由回退。[范围与验证](docs/evidence/maintenance/2026-09-16-autonomy-boundaries.md)。
 
 ## 0.2.0 — 2026-08-28
 

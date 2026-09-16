@@ -44,6 +44,7 @@ EXPECTED = sorted(
         "manuscript-ops",
         "project-clarify",
         "project-init",
+        "project-retro",
         "project-review",
         "project-spec",
         "project-tickets",
@@ -68,7 +69,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c = Checks()
     skill_root = root / "skills"
     actual = sorted(d.name for d in skill_root.iterdir() if d.is_dir() and d.name != "docs")
-    c.check(actual == EXPECTED, f"skills/ must contain exactly the 35 admitted package directories. got {actual}")
+    c.check(actual == EXPECTED, f"skills/ must contain exactly the 36 admitted package directories. got {actual}")
 
     readme = read(root, "README.md")
     catalog = read(root, "CATALOG.md")
@@ -118,6 +119,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.1\.5", installation)), "Installation guide is missing the pinned v0.1.5 release command.")
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.1\.6", installation)), "Installation guide is missing the pinned v0.1.6 release command.")
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.2\.0", installation)), "Installation guide is missing the pinned v0.2.0 release command.")
+    c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.2\.1", installation)), "Installation guide is missing the pinned v0.2.1 release command.")
     c.check(bool(re.search(r"#ref|fragment|default revision", installation)), "Installation guide must explain revision semantics rather than overclaim shorthand immutability.")
     c.check("commands target the immutable v0.1.0 release" not in installation, "Installation guide must not claim the old shorthand is permanently immutable.")
     c.check(not re.search(r"not a verified command|<owner>/<repository>", installation), "Installation guide still contains unresolved pre-release command wording.")
@@ -126,10 +128,10 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         all(token in installation for token in ("source_root", "skill_name", "destination_root")),
         "Manual fallback must use valid shell variables.",
     )
-    c.check(bool(re.search(r"(?is)v0\.2\.0.{0,160}is published from", readme)), "README must present v0.2.0 as the published release.")
-    c.check("33" in catalog and "admitted" in catalog, "Catalog must present the 35-package collection (historical 33 at the original v0.2.0 publication).")
-    c.check("v0.2.0" in catalog, "Catalog must mention v0.2.0.")
-    c.check("35" in readme, "README must mention 35 Skills.")
+    c.check(bool(re.search(r"(?is)v0\.2\.1.{0,160}is published from", readme)), "README must present v0.2.1 as the published release.")
+    c.check("33" in catalog and "admitted" in catalog, "Catalog must present the 36-package collection (historical 33 at the original v0.2.0 publication).")
+    c.check("v0.2.1" in catalog, "Catalog must mention v0.2.1.")
+    c.check("36" in readme, "README must mention 36 Skills.")
     c.check(bool(re.search(r"ask-light", readme, re.IGNORECASE)), "README must mention ask-light entry.")
     c.check(bool(re.search(r"project-init.*project-clarify.*project-spec.*project-tickets.*implement.*project-review.*release-workflow", readme, re.DOTALL | re.IGNORECASE)), "README must present the main workflow project-init → project-clarify → project-spec → project-tickets → implement → project-review → release-workflow.")
 
@@ -245,6 +247,8 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         "docs/evidence/releases/v0.1.6/INSTALLATION_VERIFICATION.md",
         "docs/evidence/releases/v0.2.0/RELEASE_RECEIPT.md",
         "docs/evidence/releases/v0.2.0/INSTALLATION_VERIFICATION.md",
+        "docs/evidence/releases/v0.2.1/RELEASE_RECEIPT.md",
+        "docs/evidence/releases/v0.2.1/INSTALLATION_VERIFICATION.md",
         ".github/workflows/quality.yml",
     ]:
         c.check((root / required).is_file(), f"Required documentation path is missing: {required}")
@@ -273,8 +277,8 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
             c.check(en.split("/")[-1] in zh_text, f"{zh} does not link its English counterpart.")
 
     parity_matrix = [
-        ("README.md", "README.zh-CN.md", ["ask-light", "35", "skills/"]),
-        ("CATALOG.md", "CATALOG.zh-CN.md", ["review-loop", "35", "skills/"]),
+        ("README.md", "README.zh-CN.md", ["ask-light", "36", "skills/"]),
+        ("CATALOG.md", "CATALOG.zh-CN.md", ["review-loop", "36", "skills/"]),
         ("CHANGELOG.md", "CHANGELOG.zh-CN.md", ["34", "ATTRIBUTION", "review-loop"]),
         ("docs/INSTALLATION.md", "docs/INSTALLATION.zh-CN.md", ["npx skills add", "fresh-install", "SKILL.md"]),
         ("docs/MAINTENANCE.md", "docs/MAINTENANCE.zh-CN.md", ["ATTRIBUTION", "review-loop", "Port"]),

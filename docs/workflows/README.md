@@ -6,7 +6,7 @@ This directory explains repository-level Skill composition. Each document shows 
 
 ## Composition documents (SPEC §20)
 
-- [Project Workflow](project-workflow.md) — `project-init → project-clarify → project-spec → project-tickets → implement → project-review → release-workflow`
+- [Project Workflow](project-workflow.md) — `project-init → project-clarify → project-spec → project-tickets → implement → project-review → release-workflow` (with agent self-evaluation → `project-retro`)
 - [Clarification System](clarification-system.md) — `socratic` engine with `clarify` / `project-clarify` / `decision-map` + `research` / `prototype` / `to-questionnaire`
 - [Execution](execution.md) — `implement` + `agent-config` + `tdd` / `diagnosing-bugs` / `resolving-merge-conflicts`
 - [Review System](review-system.md) — `review-loop` (engine) + `generic-review` / `code-review` + `project-review` (acceptance owner)

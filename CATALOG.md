@@ -2,19 +2,19 @@
 
 [中文目录](CATALOG.zh-CN.md)
 
-This catalog is synchronized from the 35 admitted package directories under `skills/`. It is an inventory — not a static workflow router and not a record of what is installed on a particular Agent host. The package's `SKILL.md` remains the behavior authority.
+This catalog is synchronized from the 36 admitted package directories under `skills/`. It is an inventory — not a static workflow router and not a record of what is installed on a particular Agent host. The package's `SKILL.md` remains the behavior authority.
 
 ## Collection status
 
 | Field | Value |
 | --- | --- |
 | Collection | Light Skills — Composable Agent Workflows |
-| Package count | 35 admitted first-party Skills |
-| Current state | 35 packages on main; light-travelpage is an unreleased addition |
-| Stable release | [v0.2.0](https://github.com/LightDevCoder/skills/releases/tag/v0.2.0) (34 packages; previous stable was v0.1.6 with 9 packages) |
+| Package count | 36 admitted first-party Skills |
+| Current state | 36 packages on main; v0.2.1 is the current stable release |
+| Stable release | [v0.2.1](https://github.com/LightDevCoder/skills/releases/tag/v0.2.1) (36 packages; previous stable was v0.2.0 with 34 packages) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
-| Evidence | [v0.2.0 release evidence](docs/evidence/releases/v0.2.0/) |
+| Evidence | [v0.2.1 release evidence](docs/evidence/releases/v0.2.1/) |
 
 `v0.1.1` shipped five packages; `v0.1.2` added `recap` and `language-learning` (seven); `v0.1.3` migrated the test toolchain; `v0.1.4` added `kanban-worker`; `v0.1.5` tightened kanban scheduling and identity; `v0.1.6` added `kb-init` (nine). `v0.2.0` released the full 33-package architecture across project workflow, clarification, execution, review, and specialized tools, and the v0.2.0 line was extended with the `humanizer` admission (34 packages; see [CHANGELOG.md](CHANGELOG.md)).
 
@@ -221,6 +221,16 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Status:** Admitted first-party; NEW (migrated final-acceptance logic from old `review-loop`).
 - **Evidence:** [SKILL.md](skills/project-review/SKILL.md), [references/profiles/](skills/project-review/references/profiles/).
 - **Installation path:** `skills/project-review/` in a host-recognized Skills root.
+
+### project-retro
+
+- **Purpose:** Conduct a retrospective on a completed project or coding session, identifying environment, guardrail, navigation, tool economy, and workflow improvements.
+- **When to use:** Workflow final step (Agent self-evaluates whether friction occurred) or user-invoked for a session post-mortem.
+- **Invocation:** Model-invoked (Agent self-evaluation at workflow conclusion); manual entry supported.
+- **Package:** [skills/project-retro/](skills/project-retro/)
+- **Status:** Admitted first-party; PORT & LIGHT WORKFLOW ADAPTATION (Matt Pocock `retro`).
+- **Evidence:** Contract and behavior tests under [skills/project-retro/tests/](skills/project-retro/tests/); [SKILL.md](skills/project-retro/SKILL.md), [ATTRIBUTION.md](skills/project-retro/ATTRIBUTION.md).
+- **Installation path:** `skills/project-retro/` in a host-recognized Skills root.
 
 ### project-spec
 

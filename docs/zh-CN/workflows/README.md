@@ -6,7 +6,7 @@
 
 ## 组合文档（SPEC §20）
 
-- [Project Workflow](project-workflow.md) — `project-init → project-clarify → project-spec → project-tickets → implement → project-review → release-workflow`
+- [Project Workflow](project-workflow.md) — `project-init → project-clarify → project-spec → project-tickets → implement → project-review → release-workflow`（配合 Agent 自主评估 → `project-retro`）
 - [Clarification System](clarification-system.md) — `socratic` 引擎 + `clarify` / `project-clarify` / `decision-map` + `research` / `prototype` / `to-questionnaire`
 - [Execution](execution.md) — `implement` + `agent-config` + `tdd` / `diagnosing-bugs` / `resolving-merge-conflicts`
 - [Review System](review-system.md) — `review-loop`（引擎）+ `generic-review` / `code-review` + `project-review`（验收拥有者）
