@@ -30,7 +30,18 @@ capability and authority, preserved constraints, and absence of a required route
 
 ## Validation status
 
-Candidate review pending. Initial suite: 303 passed; one discovery check failed
-because this evidence link had been added before its target existed. The link
-is now present; final checks and independent review will be recorded below.
+Candidate `f75886c` was checked with `python3 -m pytest -q`: **304 passed**.
+`git diff f391643...f75886c --check` passed. The initial run had 303 passing
+checks and one missing-link failure while this evidence file was being drafted;
+that failure is resolved.
+
+Standards reviewer: `Findings: []`; independently ran 17 focused checks.
+Spec reviewer: no outstanding first-party findings. A fresh independent
+Evaluator reassessed the approved boundary changes and returned `Findings: []`.
+The parent inspected the diff and classified this as accepted prompt/contract
+maintenance; this is not runtime or fresh-install acceptance.
+
+Fourteen affected first-party installed files were byte-compared with the
+reviewed source. No host catalog reload was asserted. The subsequent user request
+to categorize the collection is a separate migration and needs its own checks.
 No release tag or GitHub Release is requested or produced.
