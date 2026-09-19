@@ -5,7 +5,7 @@ Combines host capabilities, task shape, and abstract profile into canonical Agen
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Union
 
 try:
     from .harness_adapter import (
@@ -39,18 +39,35 @@ def select_configuration(
     host: HostCapabilities,
     task: TaskCharacteristics,
     profile: AbstractTaskProfile,
-    approved_preview: bool = True,
+    approval: Optional[Union[str, bool]] = None,
+    approved_preview: Optional[bool] = None,
     setup_intent: bool = False,
     jev_confidence: Optional[float] = None,
     fallback_used: bool = False,
     fallback_reason: Optional[str] = None,
 ) -> AgentConfigResult:
-    """Combine host capabilities, task shape, and abstract profile into AgentConfigResult."""
+    """Combine host capabilities, task shape, and abstract profile into AgentConfigResult.
+
+    Enforces:
+      - Dimension-aware effort resolution (explicit policy > profile reasoning_need > host bounds).
+      - Strict candidate containment (selected_model must be in valid_candidates).
+      - Explicit approval tracking (unknown, approved, declined).
+      - Cost sensitivity does not downgrade capability tier.
+    """
+    # Normalize approval
+    if approval is not None:
+        norm_approval = ("approved" if approval else "declined") if isinstance(approval, bool) else str(approval).lower()
+    elif approved_preview is not None:
+        norm_approval = "approved" if approved_preview else "declined"
+    else:
+        norm_approval = "unknown"
+
     # Gate 1: Explicit setup intent
     if setup_intent:
         return AgentConfigResult(
             readiness="READY",
             mode="plan-only",
+            approval=norm_approval,
             setup_state={"companion": host.companion_status, "profile": host.profile_status},
             handoff="setup",
             execution_config=None,
@@ -63,6 +80,7 @@ def select_configuration(
         return AgentConfigResult(
             readiness="NEED_PROJECT_TICKETS",
             mode="plan-only",
+            approval=norm_approval,
             setup_state={"companion": host.companion_status, "profile": host.profile_status},
             handoff="project-tickets",
             execution_config=None,
@@ -73,10 +91,11 @@ def select_configuration(
     # Gate 3: Host without model selector
     if not host.has_model_selector:
         topology = "Case B" if task.shape == "decomposed" else "Case A"
-        effort = resolve_reasoning_effort(host, task.reasoning_policy)
+        effort = resolve_reasoning_effort(host, task.reasoning_policy, profile.reasoning_need)
         return AgentConfigResult(
             readiness="READY",
             mode="plan-only",
+            approval=norm_approval,
             setup_state={"companion": host.companion_status, "profile": host.profile_status},
             handoff="implement",
             execution_config=ExecutionConfig(
@@ -92,11 +111,12 @@ def select_configuration(
         )
 
     # Gate 4: User rejected configuration preview
-    if not approved_preview:
+    if norm_approval == "declined":
         topology = "Case B" if task.shape == "decomposed" else "Case A"
         return AgentConfigResult(
             readiness="READY",
             mode="plan-only",
+            approval="declined",
             setup_state={"companion": host.companion_status, "profile": host.profile_status},
             handoff="implement",
             execution_config=ExecutionConfig(
@@ -118,7 +138,7 @@ def select_configuration(
     # Resolve target model from profile tiers
     target_model = host.profile_tiers.get(tier)
 
-    # If target model is not in valid candidates or missing, pick from valid candidates
+    # Candidate safety invariant: selected_model must be in valid_candidates
     if not target_model or target_model not in valid_candidates:
         if host.active_model in valid_candidates:
             target_model = host.active_model
@@ -127,8 +147,8 @@ def select_configuration(
         else:
             target_model = host.active_model
 
-    # Resolve reasoning effort
-    effort = resolve_reasoning_effort(host, task.reasoning_policy)
+    # Resolve reasoning effort (explicit policy > Jev profile.reasoning_need > host bounds)
+    effort = resolve_reasoning_effort(host, task.reasoning_policy, profile.reasoning_need)
 
     # Determine topology
     if task.shape == "decomposed":
@@ -136,8 +156,12 @@ def select_configuration(
     else:
         topology = "Case C" if (target_model != host.active_model and host.has_model_selector) else "Case A"
 
+    cost_note = ""
+    if task.cost_sensitive:
+        cost_note = " (Cost sensitivity maintained: verified candidate selected without capability downgrade)"
+
     justification_msg = (
-        f"Selected {target_model} for {tier} tier (topology: {topology}, effort: {effort or 'default'})."
+        f"Selected {target_model} for {tier} tier (topology: {topology}, effort: {effort or 'default'}).{cost_note}"
     )
     if fallback_used:
         justification_msg += f" (Fallback: {fallback_reason})"
@@ -145,6 +169,7 @@ def select_configuration(
     return AgentConfigResult(
         readiness="READY",
         mode="plan-only",
+        approval=norm_approval,
         setup_state={"companion": host.companion_status, "profile": host.profile_status},
         handoff="implement",
         execution_config=ExecutionConfig(

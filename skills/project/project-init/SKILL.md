@@ -25,7 +25,7 @@ tickets, or run later workflow stages.
    Skills, issue tracker, domain-context locations, review profile/acceptance
    strategy, working area, and the active host's inspected instruction filename
    (`AGENTS.md` or `CLAUDE.md`). When confirmed by the user, optionally onboard
-   TypeSafe Jev System One semantic acceleration (`typesafe-ai`). Ask only
+   the TypeSafe Jev ecosystem (`typesafe-ai`). Ask only
    fields inspection did not settle, one short question at a time.
 4. **Bootstrap idempotently.** Use
    [bootstrap.py](scripts/bootstrap.py) to write or update

@@ -21,6 +21,7 @@ def ask_light_semantic_recommend(
     explicit_target: Optional[str] = None,
     client: Optional[Any] = None,
     use_jev: bool = True,
+    shadow_mode: bool = False,
 ) -> AskLightRecommendation:
     """Recommend the next workflow action combining deterministic pre-checks and bounded Jev reasoning."""
     if isinstance(state, dict):
@@ -37,7 +38,7 @@ def ask_light_semantic_recommend(
 
     if not use_jev:
         if legal_result.allowed_actions:
-            baseline_skill = legal_result.allowed_actions[0]
+            baseline_skill = legal_result.fallback_action or legal_result.allowed_actions[0]
             return AskLightRecommendation(
                 status=legal_result.status,
                 primary_skill=baseline_skill,
@@ -68,4 +69,5 @@ def ask_light_semantic_recommend(
         legal_result=legal_result,
         user_request=user_request,
         client=client,
+        shadow_mode=shadow_mode,
     )

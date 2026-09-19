@@ -32,7 +32,8 @@ except ImportError:
 def agent_config_recommend(
     host: Union[HostCapabilities, Dict[str, Any]],
     task: Union[TaskCharacteristics, Dict[str, Any]],
-    approved_preview: bool = True,
+    approval: Optional[Union[str, bool]] = None,
+    approved_preview: Optional[bool] = None,
     setup_intent: bool = False,
     client: Optional[Any] = None,
     use_jev: bool = True,
@@ -51,6 +52,7 @@ def agent_config_recommend(
         host=host_obj,
         task=task_obj,
         profile=profile,
+        approval=approval,
         approved_preview=approved_preview,
         setup_intent=setup_intent,
         jev_confidence=confidence,
@@ -64,6 +66,7 @@ def main() -> int:
     parser.add_argument("--host-json", default="{}", help="Host capabilities JSON")
     parser.add_argument("--task-json", default="{}", help="Task characteristics JSON")
     parser.add_argument("--setup", action="store_true", help="Explicit setup intent")
+    parser.add_argument("--approval", choices=["unknown", "approved", "declined"], default=None, help="Explicit preview approval state")
     parser.add_argument("--no-preview-approval", action="store_true", help="Simulate user declining preview")
     parser.add_argument("--no-jev", action="store_true", help="Disable Jev System One judgments")
 
@@ -71,10 +74,14 @@ def main() -> int:
     host_data = json.loads(args.host_json)
     task_data = json.loads(args.task_json)
 
+    approval_arg = args.approval
+    if approval_arg is None and args.no_preview_approval:
+        approval_arg = "declined"
+
     result = agent_config_recommend(
         host=host_data,
         task=task_data,
-        approved_preview=not args.no_preview_approval,
+        approval=approval_arg,
         setup_intent=args.setup,
         use_jev=not args.no_jev,
     )

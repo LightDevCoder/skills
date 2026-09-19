@@ -1,9 +1,9 @@
 """Bounded Jev multi-primitive semantic router for ask-light.
 
 Connects TypeSafe Jev System One judgments with deterministic fallbacks:
-  1. Choice: Constrained strictly to code-computed legal candidates.
-  2. Noul: Execution intent calibration (p >= 0.80) & ambiguity detection (p >= 0.65).
-  3. Score: Readiness score (0-3).
+  1. Choice: Constrained strictly to code-computed legal candidates when >1 candidate exists.
+  2. Noul: Execution intent calibration (advisory only; never grants transition authority) & ambiguity detection.
+  3. Conditional query planning: Skips Choice for singleton candidate sets; tracks query reasons.
   4. Defense-in-depth: Unauthorized selections rejected; fails closed on hard bounds.
   5. Soft dependency: Graceful fallback when typesafe-sdk is not installed or TYPESAFE_API_KEY is unset.
 """
@@ -12,17 +12,15 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
-# Load .env if present
+# Load .env safely only if present in explicit project root
 try:
     from dotenv import load_dotenv
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
     dotenv_path = project_root / ".env"
-    if dotenv_path.exists():
+    if dotenv_path.is_file():
         load_dotenv(dotenv_path)
-    else:
-        load_dotenv()
 except ImportError:
     pass
 
@@ -50,33 +48,45 @@ except ImportError:
 
 try:
     from .compact_state_builder import build_compact_jev_state
-    from .ask_light_models import AskLightRecommendation, LegalActionsResult, SemanticJudgments
+    from .ask_light_models import (
+        AskLightRecommendation,
+        JevPolicy,
+        LegalActionsResult,
+        SemanticJudgments,
+    )
 except ImportError:
     from compact_state_builder import build_compact_jev_state
-    from ask_light_models import AskLightRecommendation, LegalActionsResult, SemanticJudgments
+    from ask_light_models import (
+        AskLightRecommendation,
+        JevPolicy,
+        LegalActionsResult,
+        SemanticJudgments,
+    )
 
-# Calibrated uncertainty thresholds
-DEFAULT_CONFIDENCE_THRESHOLD = 0.55
-AMBIGUITY_THRESHOLD = 0.65
-EXECUTION_INTENT_THRESHOLD = 0.80
-ESCALATION_THRESHOLD = 0.60
+DEFAULT_POLICY = JevPolicy()
 
 
 def route_with_jev(
     legal_result: LegalActionsResult,
     user_request: str,
     client: Optional[Any] = None,
-    confidence_threshold: float = DEFAULT_CONFIDENCE_THRESHOLD,
+    confidence_threshold: Optional[float] = None,
+    policy: Optional[JevPolicy] = None,
     enable_expanded_judgments: bool = True,
+    shadow_mode: bool = False,
 ) -> AskLightRecommendation:
-    """Judge legal candidate actions using bounded Jev Choice/Noul/Score with calibrated fallback.
-    
+    """Judge legal candidate actions using bounded Jev semantic primitives with calibrated fallback.
+
     Invariants:
       1. Never called if legal_result is BLOCKED, NEED_INPUT, or EXPLAIN.
-      2. Choice is constrained strictly to legal_result.allowed_actions.
-      3. Degrades gracefully to deterministic baseline on error or missing credentials.
-      4. Calibrated uncertainty policy governs escalation and fallbacks.
+      2. Choice is invoked ONLY when len(allowed_actions) > 1. Singleton candidates skip Choice.
+      3. Jev output CANNOT grant transition authority (final_status remains legal_result.status).
+      4. Degrades gracefully to explicit fallback_action on error, low confidence, or missing credentials.
+      5. Calibrated uncertainty policy governs escalation and fallbacks.
     """
+    effective_policy = policy or DEFAULT_POLICY
+    min_choice_conf = confidence_threshold if confidence_threshold is not None else effective_policy.action_choice_min_confidence
+
     # Guard 1: Non-executable or blocked states return deterministic decision immediately
     if legal_result.status in ["BLOCKED", "NEED_INPUT", "EXPLAIN"]:
         return AskLightRecommendation(
@@ -117,8 +127,8 @@ def route_with_jev(
             justification="No legal workflow actions available for current project state.",
         )
 
-    # Baseline deterministic default action (first allowed action)
-    baseline_skill = legal_result.allowed_actions[0]
+    # Baseline deterministic action (explicit fallback_action preferred over list order)
+    baseline_skill = legal_result.fallback_action or legal_result.allowed_actions[0]
     baseline_justification = f"Deterministic baseline selected {baseline_skill} from legal candidates."
 
     # If TypeSafe is not installed or no API key, fall back immediately
@@ -140,17 +150,24 @@ def route_with_jev(
     # Build compact token-efficient state
     compact_state = build_compact_jev_state(legal_result, user_request)
 
-    criteria = {
-        action: legal_result.candidate_descriptions.get(action, f"Execute {action} workflow step")
-        for action in legal_result.allowed_actions
-    }
+    # Query planning: Only ask what is needed
+    questions: Dict[str, Any] = {}
+    questions_sent: List[str] = []
+    reasons_needed: Dict[str, str] = {}
 
-    questions: Dict[str, Any] = {
-        "next_action": Choice(
+    # Choice is sent ONLY when there are genuinely multiple legal alternatives
+    need_choice = len(legal_result.allowed_actions) > 1
+    if need_choice:
+        criteria = {
+            action: legal_result.candidate_descriptions.get(action, f"Execute {action} workflow step")
+            for action in legal_result.allowed_actions
+        }
+        questions["next_action"] = Choice(
             instructions="Which legal workflow action best matches the user intent and project evidence?",
             criteria=criteria,
-        ),
-    }
+        )
+        questions_sent.append("next_action")
+        reasons_needed["next_action"] = "Multiple legal candidate actions available; semantic preference needed."
 
     if enable_expanded_judgments:
         questions["wants_immediate_execution"] = Noul(
@@ -161,35 +178,37 @@ def route_with_jev(
                 "(e.g. '现在开始做吗？', '下一步做什么？', 'what should I do next?')?"
             ),
         )
+        questions_sent.append("wants_immediate_execution")
+        reasons_needed["wants_immediate_execution"] = "Assess user execution intent probability (advisory only; cannot grant authority)."
+
         questions["has_material_ambiguity"] = Noul(
             instructions="Does the request or project state have material ambiguity or unsettled decisions requiring clarification?",
         )
-        questions["readiness_score"] = Score(
-            instructions="What is the project implementation readiness grade?",
-            criteria=[
-                "Grade 0: Not ready - uninitialized or missing core requirements/clarification",
-                "Grade 1: Partially ready - spec exists but tickets not ready or blocked",
-                "Grade 2: Ready - unblocked tickets ready for implementation",
-                "Grade 3: Complete - all implementation complete and verified",
-            ],
-        )
+        questions_sent.append("has_material_ambiguity")
+        reasons_needed["has_material_ambiguity"] = "Detect semantic ambiguity or conflicting requirements requiring clarification."
+
         questions["needs_deep_reasoning_escalation"] = Noul(
             instructions="Does this request involve high architectural complexity or conflicting requirements requiring deep reasoning escalation rather than fast routing?",
         )
+        questions_sent.append("needs_deep_reasoning_escalation")
+        reasons_needed["needs_deep_reasoning_escalation"] = "Assess whether task complexity warrants deep reasoning escalation."
 
     try:
         ts_client = client or TypeSafeClient(api_key=api_key)
         response = ts_client.system_one(state=compact_state, questions=questions)
 
-        choice_ans = response.choices.get("next_action")
-        if not choice_ans:
-            raise ValueError("Choice answer 'next_action' missing from Jev response")
+        if need_choice:
+            choice_ans = response.choices.get("next_action")
+            if not choice_ans:
+                raise ValueError("Choice answer 'next_action' missing from Jev response")
+            selected_skill = choice_ans.choice
+            confidence = choice_ans.confidence
+            probabilities = dict(choice_ans.probabilities)
+        else:
+            selected_skill = baseline_skill
+            confidence = 1.0
+            probabilities = {baseline_skill: 1.0}
 
-        selected_skill = choice_ans.choice
-        confidence = choice_ans.confidence
-        probabilities = dict(choice_ans.probabilities)
-
-        semantic_judgments: Optional[SemanticJudgments] = None
         wants_exec_prob = 0.0
         ambiguity_prob = 0.0
         escalation_prob = 0.0
@@ -198,11 +217,6 @@ def route_with_jev(
             noul_exec = response.nouls.get("wants_immediate_execution")
             noul_ambig = response.nouls.get("has_material_ambiguity")
             noul_escala = response.nouls.get("needs_deep_reasoning_escalation")
-            score_ready = (
-                response.scores.get("readiness_score")
-                if hasattr(response, "scores") and response.scores
-                else None
-            )
 
             if noul_exec and hasattr(noul_exec, "noul") and isinstance(noul_exec.noul, (int, float)):
                 wants_exec_prob = float(noul_exec.noul)
@@ -211,27 +225,16 @@ def route_with_jev(
             if noul_escala and hasattr(noul_escala, "noul") and isinstance(noul_escala.noul, (int, float)):
                 escalation_prob = float(noul_escala.noul)
 
-            readiness_score_val = (
-                float(score_ready.score)
-                if score_ready and hasattr(score_ready, "score") and isinstance(score_ready.score, (int, float))
-                else None
-            )
-            readiness_conf_val = (
-                float(score_ready.confidence)
-                if score_ready and hasattr(score_ready, "confidence") and isinstance(score_ready.confidence, (int, float))
-                else None
-            )
-
-            semantic_judgments = SemanticJudgments(
-                action_choice=selected_skill,
-                action_confidence=confidence,
-                action_probabilities=probabilities,
-                wants_immediate_execution_prob=wants_exec_prob,
-                has_material_ambiguity_prob=ambiguity_prob,
-                readiness_score=readiness_score_val,
-                readiness_confidence=readiness_conf_val,
-                escalation_prob=escalation_prob,
-            )
+        semantic_judgments = SemanticJudgments(
+            action_choice=selected_skill if need_choice else None,
+            action_confidence=confidence if need_choice else None,
+            action_probabilities=probabilities if need_choice else {},
+            execution_intent_probability=wants_exec_prob,
+            ambiguity_probability=ambiguity_prob,
+            escalation_probability=escalation_prob,
+            questions_sent=questions_sent,
+            reason_each_question_needed=reasons_needed,
+        )
 
         # Defense-in-depth: Verify Jev selected strictly from legal allowed_actions
         if selected_skill not in legal_result.allowed_actions:
@@ -249,24 +252,47 @@ def route_with_jev(
                 justification=f"Jev unauthorized action prevented; defaulted to legal action {baseline_skill}.",
             )
 
-        # Escalation policy check: high ambiguity + escalation signal
+        # Escalation policy check: high complexity/escalation signal
         escalated = False
         escalation_reason = None
-        if escalation_prob >= ESCALATION_THRESHOLD:
+        alternative_skill = None
+        if escalation_prob >= effective_policy.escalation_threshold:
             escalated = True
             escalation_reason = f"High reasoning escalation need detected (p={escalation_prob:.2f})."
+            if selected_skill == "implement":
+                alternative_skill = "agent-config"
 
         # Material ambiguity routing: if high ambiguity detected and clarify is an option
-        if ambiguity_prob >= AMBIGUITY_THRESHOLD and "project-clarify" in legal_result.allowed_actions:
+        if ambiguity_prob >= effective_policy.ambiguity_threshold and "project-clarify" in legal_result.allowed_actions:
             selected_skill = "project-clarify"
 
-        # Execution intent detection: promote status to TRANSITION if user explicitly requested execution
+        # HARD INVARIANT (Section 12): Jev output cannot grant TRANSITION authority!
+        # Transition authority requires deterministic authorization (e.g. explicit command).
         final_status = legal_result.status
-        if wants_exec_prob >= EXECUTION_INTENT_THRESHOLD and legal_result.status == "RECOMMEND":
-            final_status = "TRANSITION"
+        intent_note = ""
+        if wants_exec_prob >= 0.80 and legal_result.status == "RECOMMEND":
+            intent_note = f" (Execution intent noted p={wants_exec_prob:.2f}; awaiting explicit command or confirmed approval)."
 
-        # Calibrated uncertainty threshold policy check
-        if confidence < confidence_threshold:
+        # Shadow mode evaluation: record judgments, return deterministic baseline
+        if shadow_mode:
+            return AskLightRecommendation(
+                status=legal_result.status,
+                primary_skill=baseline_skill,
+                alternative_skill=alternative_skill,
+                target_item=legal_result.target_item,
+                confidence=confidence,
+                probabilities=probabilities,
+                semantic_judgments=semantic_judgments,
+                fallback_used=False,
+                fallback_reason="Shadow mode: deterministic baseline returned; Jev judgments recorded.",
+                escalated=escalated,
+                escalation_reason=escalation_reason,
+                fail_closed=legal_result.fail_closed,
+                justification=f"Shadow mode active: baseline {baseline_skill} retained (Jev judged {selected_skill}).",
+            )
+
+        # Calibrated uncertainty threshold policy check for Choice
+        if need_choice and confidence < min_choice_conf:
             return AskLightRecommendation(
                 status=final_status,
                 primary_skill=baseline_skill,
@@ -276,24 +302,26 @@ def route_with_jev(
                 probabilities=probabilities,
                 semantic_judgments=semantic_judgments,
                 fallback_used=True,
-                fallback_reason=f"Jev confidence {confidence:.2f} below threshold {confidence_threshold:.2f}.",
+                fallback_reason=f"Jev confidence {confidence:.2f} below threshold {min_choice_conf:.2f}.",
                 escalated=escalated,
                 escalation_reason=escalation_reason,
                 fail_closed=legal_result.fail_closed,
-                justification=f"Borderline Jev confidence ({confidence:.2f}); safely preserved baseline {baseline_skill}.",
+                justification=f"Borderline Jev confidence ({confidence:.2f}); safely preserved baseline {baseline_skill}.{intent_note}",
             )
 
         # Success: Bounded Jev judgment accepted
-        justification_msg = (
-            f"Jev selected {selected_skill} (confidence {confidence:.2f}) from legal candidates."
-        )
+        if need_choice:
+            justification_msg = f"Jev selected {selected_skill} (confidence {confidence:.2f}) from legal candidates.{intent_note}"
+        else:
+            justification_msg = f"Deterministic action {selected_skill} selected (single legal candidate).{intent_note}"
+
         if escalated:
-            justification_msg += f" Note: Escalation recommended ({escalation_reason})."
+            justification_msg += f" Note: Escalation recommended ({escalation_reason}); recommend higher reasoning effort or agent-config."
 
         return AskLightRecommendation(
             status=final_status,
             primary_skill=selected_skill,
-            alternative_skill=None,
+            alternative_skill=alternative_skill,
             target_item=legal_result.target_item,
             confidence=confidence,
             probabilities=probabilities,

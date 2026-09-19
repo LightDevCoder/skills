@@ -286,5 +286,5 @@ the host-aware approval boundary.
 
 ## Semantic Acceleration (Optional)
 
-When `TYPESAFE_API_KEY` is configured and `typesafe-sdk` is present, `ask-light` can leverage bounded TypeSafe Jev System One judgments for fast intent calibration, material ambiguity detection, and candidate choice scoring within the strictly code-computed legal candidate actions. If unavailable, it gracefully defaults to deterministic baseline pre-checks without degradation in safety.
+When `TYPESAFE_API_KEY` is configured and `typesafe-sdk` is present, `ask-light` can leverage optional bounded TypeSafe Jev System One semantic judgments for candidate preference (only when multiple legal actions exist), material ambiguity detection, and deep reasoning escalation within strictly code-computed legal candidate actions. Probabilistic intent never grants transition authority: transition authority requires explicit deterministic user command or confirmed approval. If unavailable or low-confidence, it gracefully defaults to explicit deterministic fallback without degradation in safety.
 

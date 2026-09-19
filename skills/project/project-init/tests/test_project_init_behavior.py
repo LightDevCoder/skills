@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import os
 import tempfile
 import unittest
@@ -583,19 +584,113 @@ class ProjectInitBehaviorTest(unittest.TestCase):
     def test_jev_opt_in_without_global_skill_installs_local_skill(self) -> None:
         with tempfile.TemporaryDirectory(prefix="project-init-jev-local-") as tmp:
             root = Path(tmp)
-            source_skill = Path(tmp) / "source_skills" / "typesafe-ai"
-            source_skill.mkdir(parents=True)
-            (source_skill / "SKILL.md").write_text("---\nname: typesafe-ai\ndescription: test\n---\n", encoding="utf-8")
+            target_skill_dir = root / ".pi" / "skills" / "typesafe-ai"
+
+            def fake_installer(project_root: Path, installer_cmd=None):
+                target_skill_dir.mkdir(parents=True, exist_ok=True)
+                (target_skill_dir / "SKILL.md").write_text("---\nname: typesafe-ai\ndescription: official\n---\n# TypeSafe\n", encoding="utf-8")
+                return True, target_skill_dir, "installed-local"
 
             with mock.patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key-local"}):
                 with mock.patch.object(BOOTSTRAP, "check_global_skill", return_value=False):
-                    with mock.patch.object(BOOTSTRAP, "find_typesafe_skill_source", return_value=source_skill):
+                    with mock.patch.object(BOOTSTRAP, "install_official_typesafe_skill", side_effect=fake_installer):
                         report = BOOTSTRAP.bootstrap(root, config(), jev=True)
 
             local_skill = root / ".pi" / "skills" / "typesafe-ai" / "SKILL.md"
             self.assertTrue(local_skill.is_file())
             self.assertIn("typesafe-ai", local_skill.read_text(encoding="utf-8"))
             self.assertEqual(report["jev"]["skillLocation"], "installed-local")
+            project = (root / "docs/agents/light-project.md").read_text(encoding="utf-8")
+            self.assertIn("typesafe-ai", project)
+
+    def test_project_init_never_generates_fake_typesafe_ai_skill(self) -> None:
+        """Verify that missing official skill never generates a stub DEFAULT_TYPESAFE_SKILL_MD."""
+        self.assertFalse(hasattr(BOOTSTRAP, "DEFAULT_TYPESAFE_SKILL_MD"))
+        with tempfile.TemporaryDirectory(prefix="project-init-no-fake-") as tmp:
+            root = Path(tmp)
+            with mock.patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+                with mock.patch.object(BOOTSTRAP, "check_global_skill", return_value=False):
+                    with mock.patch.object(BOOTSTRAP, "install_official_typesafe_skill", return_value=(False, None, "JEV_SKILL_SETUP_INCOMPLETE")):
+                        report = BOOTSTRAP.bootstrap(root, config(), jev=True)
+
+            self.assertFalse((root / ".pi" / "skills" / "typesafe-ai").exists())
+            self.assertFalse((root / ".agents" / "skills" / "typesafe-ai").exists())
+            self.assertEqual(report["jev"]["skillLocation"], "JEV_SKILL_SETUP_INCOMPLETE")
+            self.assertEqual(report["jev"]["status"], "INCOMPLETE")
+
+    def test_official_skill_install_failure_reports_incomplete_setup(self) -> None:
+        """Verify official installer failure marks Jev onboarding as incomplete without failing project-init."""
+        with tempfile.TemporaryDirectory(prefix="project-init-fail-") as tmp:
+            root = Path(tmp)
+            with mock.patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+                with mock.patch.object(BOOTSTRAP, "check_global_skill", return_value=False):
+                    with mock.patch.object(BOOTSTRAP, "install_official_typesafe_skill", return_value=(False, None, "JEV_SKILL_SETUP_INCOMPLETE")):
+                        report = BOOTSTRAP.bootstrap(root, config(), jev=True)
+
+            self.assertEqual(report["jev"]["status"], "INCOMPLETE")
+            self.assertEqual(report["jev"]["skillLocation"], "JEV_SKILL_SETUP_INCOMPLETE")
+            self.assertTrue((root / "docs/agents/light-project.md").is_file())
+
+    def test_relevant_skills_updated_only_after_verified_skill_availability(self) -> None:
+        """Verify typesafe-ai is added to Relevant Skills ONLY after verified skill setup."""
+        with tempfile.TemporaryDirectory(prefix="project-init-rel-") as tmp:
+            root = Path(tmp)
+            # Case 1: Skill installation fails -> NOT added to Relevant Skills
+            with mock.patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+                with mock.patch.object(BOOTSTRAP, "check_global_skill", return_value=False):
+                    with mock.patch.object(BOOTSTRAP, "install_official_typesafe_skill", return_value=(False, None, "JEV_SKILL_SETUP_INCOMPLETE")):
+                        report = BOOTSTRAP.bootstrap(root, config(), jev=True)
+            project_content = (root / "docs/agents/light-project.md").read_text(encoding="utf-8")
+            self.assertNotIn("typesafe-ai", project_content)
+
+            # Case 2: Skill verified globally -> added to Relevant Skills
+            global_skills = Path(tmp) / "global_skills"
+            (global_skills / "typesafe-ai").mkdir(parents=True)
+            (global_skills / "typesafe-ai" / "SKILL.md").write_text("---\nname: typesafe-ai\n---\n# Valid\n", encoding="utf-8")
+            report2 = BOOTSTRAP.bootstrap(root, config(), capability_roots=[global_skills], jev=True)
+            project_content2 = (root / "docs/agents/light-project.md").read_text(encoding="utf-8")
+            self.assertIn("typesafe-ai", project_content2)
+
+    def test_optional_jev_setup_failure_preserves_core_bootstrap_success(self) -> None:
+        """Core project-init remains SUCCESS even if optional Jev onboarding fails."""
+        with tempfile.TemporaryDirectory(prefix="project-init-core-success-") as tmp:
+            root = Path(tmp)
+            with mock.patch.object(BOOTSTRAP, "check_global_skill", return_value=False):
+                with mock.patch.object(BOOTSTRAP, "install_official_typesafe_skill", return_value=(False, None, "JEV_SKILL_SETUP_INCOMPLETE")):
+                    report = BOOTSTRAP.bootstrap(root, config(), jev=True)
+
+            self.assertTrue((root / "docs/agents/light-project.md").is_file())
+            self.assertTrue((root / "docs/agents/issue-tracker.md").is_file())
+            self.assertTrue((root / "AGENTS.md").is_file())
+            self.assertEqual(report["jev"]["status"], "INCOMPLETE")
+
+    def test_raw_api_key_never_echoed(self) -> None:
+        """Verify raw API key never appears in report, stdout, or contracts."""
+        with tempfile.TemporaryDirectory(prefix="project-init-secret-") as tmp:
+            root = Path(tmp)
+            secret = "ts-live-secret-test-key-998877"
+            BOOTSTRAP.configure_typesafe_key(root, secret)
+
+            report = BOOTSTRAP.bootstrap(root, config(), jev=True)
+            report_str = json.dumps(report)
+            self.assertNotIn(secret, report_str)
+
+            project_content = (root / "docs/agents/light-project.md").read_text(encoding="utf-8")
+            self.assertNotIn(secret, project_content)
+
+    def test_prompt_typesafe_key_uses_getpass(self) -> None:
+        """Verify prompt_typesafe_key uses getpass instead of echoing input."""
+        with tempfile.TemporaryDirectory(prefix="project-init-getpass-") as tmp:
+            root = Path(tmp)
+            with mock.patch("sys.stdin.isatty", return_value=True):
+                with mock.patch.dict(os.environ, {}, clear=True):
+                    with mock.patch("getpass.getpass", return_value="ts-secret-pass") as mock_getpass:
+                        found, source = BOOTSTRAP.prompt_typesafe_key(root)
+                        self.assertTrue(found)
+                        self.assertEqual(source, ".env")
+                        mock_getpass.assert_called_once()
+                        self.assertTrue((root / ".env").is_file())
+                        self.assertIn("ts-secret-pass", (root / ".env").read_text(encoding="utf-8"))
 
     def test_non_interactive_fallback_defaults_to_no_jev(self) -> None:
         with tempfile.TemporaryDirectory(prefix="project-init-fallback-") as tmp:

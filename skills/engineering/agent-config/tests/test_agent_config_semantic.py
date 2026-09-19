@@ -171,19 +171,19 @@ class AgentConfigSemanticTest(unittest.TestCase):
         self.assertEqual(prof_high.reasoning_need, "high")
 
     def test_mock_jev_abstract_profiler(self) -> None:
-        """Verify abstract task profiling via mock Jev System One."""
-        mock_choice_tier = MagicMock()
-        mock_choice_tier.choice = "high"
-        mock_choice_tier.confidence = 0.92
+        """Verify abstract task profiling via mock Jev System One Score primitives."""
+        mock_score_comp = MagicMock()
+        mock_score_comp.score = 2.2  # maps to high / critical
+        mock_score_comp.confidence = 0.92
 
-        mock_choice_reasoning = MagicMock()
-        mock_choice_reasoning.choice = "high"
-        mock_choice_reasoning.confidence = 0.88
+        mock_score_reas = MagicMock()
+        mock_score_reas.score = 1.9  # maps to high
+        mock_score_reas.confidence = 0.88
 
         mock_resp = MagicMock()
-        mock_resp.choices = {
-            "recommended_tier": mock_choice_tier,
-            "reasoning_need": mock_choice_reasoning,
+        mock_resp.scores = {
+            "task_complexity": mock_score_comp,
+            "reasoning_need": mock_score_reas,
         }
 
         mock_client = MagicMock()
@@ -196,8 +196,72 @@ class AgentConfigSemanticTest(unittest.TestCase):
                 prof, conf, fallback, reason = extract_abstract_task_profile(task, client=mock_client)
                 self.assertEqual(prof.recommended_tier, "high")
                 self.assertEqual(prof.reasoning_need, "high")
-                self.assertEqual(conf, 0.92)
+                self.assertEqual(prof.complexity_confidence, 0.92)
+                self.assertEqual(prof.reasoning_confidence, 0.88)
+                self.assertEqual(conf, 0.88)  # Dimension-aware: min(0.92, 0.88)
                 self.assertFalse(fallback)
+
+    def test_jev_reasoning_need_influences_effort_when_no_explicit_policy(self) -> None:
+        """P0 (Section 22): Jev reasoning_need influences resolved effort when user policy is None."""
+        host = HostCapabilities(
+            has_model_selector=True,
+            active_model="gpt-4o",
+            available_models=["gpt-4o", "o3-mini"],
+            supported_effort=["low", "medium", "high"],
+            profile_tiers={"routine": "gpt-4o", "high": "o3-mini"},
+        )
+        task = TaskCharacteristics(shape="single-pass", reasoning_policy=None)
+        profile = AbstractTaskProfile(recommended_tier="high", reasoning_need="high")
+
+        res = select_configuration(host, task, profile)
+        self.assertEqual(res.execution_config.resolved_effort, "high")
+
+    def test_explicit_user_effort_overrides_jev(self) -> None:
+        """Section 22 & 25: Explicit user effort policy takes strict precedence over Jev."""
+        host = HostCapabilities(
+            supported_effort=["low", "medium", "high"],
+            profile_tiers={"high": "o3-mini"},
+        )
+        # User explicitly requested minimal effort; Jev says high
+        task = TaskCharacteristics(shape="single-pass", reasoning_policy="minimal")
+        profile = AbstractTaskProfile(recommended_tier="high", reasoning_need="high")
+
+        res = select_configuration(host, task, profile)
+        self.assertEqual(res.execution_config.resolved_effort, "low")  # User policy wins
+
+    def test_host_supported_effort_bounds_jev_output(self) -> None:
+        """Section 22 & 30: Host supported effort strictly bounds Jev output; never invents unsupported values."""
+        host = HostCapabilities(
+            supported_effort=["low", "medium"],  # No 'high' supported
+            profile_tiers={"high": "model-tier"},
+        )
+        task = TaskCharacteristics(reasoning_policy=None)
+        profile = AbstractTaskProfile(recommended_tier="high", reasoning_need="high")
+
+        res = select_configuration(host, task, profile)
+        # Host cannot satisfy 'high', so it gracefully resolves to nearest supported level 'medium'
+        self.assertEqual(res.execution_config.resolved_effort, "medium")
+
+    def test_approval_unknown_is_not_treated_as_approved(self) -> None:
+        """Section 28: Unknown preview approval is recommendation only (mode='plan-only', approval='unknown')."""
+        host = HostCapabilities(
+            has_model_selector=True,
+            active_model="active-default",
+            profile_tiers={"high": "high-model"},
+        )
+        task = TaskCharacteristics(difficulty="high")
+        profile = AbstractTaskProfile(recommended_tier="high")
+
+        res = select_configuration(host, task, profile)  # Default approval is unknown
+        self.assertEqual(res.approval, "unknown")
+        self.assertEqual(res.mode, "plan-only")
+
+    def test_cost_sensitive_does_not_automatically_downgrade_capability(self) -> None:
+        """Section 26: Cost sensitivity does NOT downgrade high complexity work to routine."""
+        task = TaskCharacteristics(difficulty="high", cost_sensitive=True)
+        prof = build_deterministic_profile(task)
+        self.assertEqual(prof.recommended_tier, "high")
+        self.assertEqual(prof.cost_sensitivity, "high")
 
 
 if __name__ == "__main__":

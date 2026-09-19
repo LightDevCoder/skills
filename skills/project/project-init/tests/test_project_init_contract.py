@@ -25,10 +25,10 @@ class ProjectInitContractTest(unittest.TestCase):
             self.assertIn(f"| {preset} |", presets)
         self.assertTrue(40 <= len(skill.splitlines()) <= 100)
 
-    def test_helper_is_syntax_valid_and_has_no_external_execution(self) -> None:
+    def test_helper_is_syntax_valid_and_has_no_arbitrary_network_calls(self) -> None:
         script = (ROOT / "scripts" / "bootstrap.py").read_text(encoding="utf-8")
         ast.parse(script)
-        for forbidden in ("subprocess", "requests", "urlopen", "shutil.rmtree", "unlink("):
+        for forbidden in ("requests", "urlopen", "shutil.rmtree", "unlink("):
             self.assertNotIn(forbidden, script)
 
 

@@ -166,7 +166,7 @@ class AskLightSemanticTest(unittest.TestCase):
             self.assertIn("unavailable", rec.fallback_reason.lower())
 
     def test_mock_jev_system_one_response(self) -> None:
-        """Verify multi-primitive Jev judgments: Choice, Noul (execution & ambiguity), Score, Escalation."""
+        """Verify multi-primitive Jev judgments: Noul (execution & ambiguity), Escalation."""
         mock_choice = MagicMock()
         mock_choice.choice = "implement"
         mock_choice.confidence = 0.95
@@ -181,10 +181,6 @@ class AskLightSemanticTest(unittest.TestCase):
         mock_noul_escala = MagicMock()
         mock_noul_escala.noul = 0.75
 
-        mock_score = MagicMock()
-        mock_score.score = 2.0
-        mock_score.confidence = 0.90
-
         mock_resp = MagicMock()
         mock_resp.choices = {"next_action": mock_choice}
         mock_resp.nouls = {
@@ -192,7 +188,7 @@ class AskLightSemanticTest(unittest.TestCase):
             "has_material_ambiguity": mock_noul_ambig,
             "needs_deep_reasoning_escalation": mock_noul_escala,
         }
-        mock_resp.scores = {"readiness_score": mock_score}
+        mock_resp.scores = {}
 
         mock_client = MagicMock()
         mock_client.system_one.return_value = mock_resp
@@ -202,16 +198,18 @@ class AskLightSemanticTest(unittest.TestCase):
 
         with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
             with patch("semantic_router.TYPESAFE_AVAILABLE", True):
-                rec = route_with_jev(legal, "Go ahead and implement", client=mock_client)
+                rec = route_with_jev(legal, "Should we implement now?", client=mock_client)
                 self.assertEqual(rec.primary_skill, "implement")
                 self.assertFalse(rec.fallback_used)
-                self.assertEqual(rec.status, "TRANSITION")  # Upgraded by wants_immediate_execution >= 0.80
+                # Hard invariant: Jev execution intent (0.92) does NOT grant TRANSITION authority
+                self.assertEqual(rec.status, "RECOMMEND")
                 self.assertTrue(rec.escalated)  # Escalation detected
                 self.assertIsNotNone(rec.semantic_judgments)
-                self.assertEqual(rec.semantic_judgments.readiness_score, 2.0)
+                self.assertEqual(rec.semantic_judgments.execution_intent_probability, 0.92)
+                self.assertNotIn("next_action", rec.semantic_judgments.questions_sent)  # singleton candidate skips Choice
 
     def test_defense_in_depth_unauthorized_action_rejected(self) -> None:
-        """Verify that if Jev hallucinates or selects an unauthorized action, it is blocked and falls back."""
+        """Verify that if Jev hallucinates or selects an unauthorized action among multiple choices, it is blocked and falls back."""
         mock_choice = MagicMock()
         mock_choice.choice = "unauthorized-external-skill"
         mock_choice.confidence = 0.99
@@ -225,15 +223,140 @@ class AskLightSemanticTest(unittest.TestCase):
         mock_client = MagicMock()
         mock_client.system_one.return_value = mock_resp
 
+        # Set up a legal result with multiple actions to trigger Choice
+        legal = LegalActionsResult(
+            status="RECOMMEND",
+            allowed_actions=["implement", "agent-config"],
+            fallback_action="implement",
+            candidate_descriptions={"implement": "Implement ticket", "agent-config": "Configure agent"},
+        )
+
+        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+            with patch("semantic_router.TYPESAFE_AVAILABLE", True):
+                rec = route_with_jev(legal, "What next?", client=mock_client)
+                self.assertTrue(rec.fallback_used)
+                self.assertEqual(rec.primary_skill, "implement")  # Baseline fallback preserved
+                self.assertIn("unauthorized", rec.fallback_reason.lower())
+
+    def test_jev_cannot_grant_transition_authority(self) -> None:
+        """Hard Invariant (Section 12): Jev execution intent = 0.99 cannot change status to TRANSITION."""
+        mock_noul_exec = MagicMock()
+        mock_noul_exec.noul = 0.99
+
+        mock_resp = MagicMock()
+        mock_resp.choices = {}
+        mock_resp.nouls = {"wants_immediate_execution": mock_noul_exec}
+        mock_resp.scores = {}
+
+        mock_client = MagicMock()
+        mock_client.system_one.return_value = mock_resp
+
+        state = CompactProjectState(initialized=True, spec_exists=True, spec_active=True, tickets_exist=True, ready_tickets=["01.md"])
+        legal = compute_legal_actions(state, user_request="Advice only, do not run.")
+        self.assertEqual(legal.status, "RECOMMEND")
+
+        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+            with patch("semantic_router.TYPESAFE_AVAILABLE", True):
+                rec = route_with_jev(legal, "Advice only, do not run.", client=mock_client)
+                self.assertEqual(rec.status, "RECOMMEND")
+                self.assertEqual(rec.semantic_judgments.execution_intent_probability, 0.99)
+
+    def test_single_legal_action_causes_zero_choice_request(self) -> None:
+        """Section 13: len(allowed_actions) == 1 must skip Choice."""
+        mock_resp = MagicMock()
+        mock_resp.choices = {}
+        mock_resp.nouls = {}
+        mock_resp.scores = {}
+
+        mock_client = MagicMock()
+        mock_client.system_one.return_value = mock_resp
+
+        legal = LegalActionsResult(
+            status="RECOMMEND",
+            allowed_actions=["implement"],
+            fallback_action="implement",
+        )
+
+        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+            with patch("semantic_router.TYPESAFE_AVAILABLE", True):
+                rec = route_with_jev(legal, "What next?", client=mock_client)
+                self.assertNotIn("next_action", rec.semantic_judgments.questions_sent)
+                self.assertEqual(rec.primary_skill, "implement")
+
+    def test_zero_legal_actions_causes_zero_choice_request(self) -> None:
+        """Section 13: len(allowed_actions) == 0 returns immediately without calling Jev."""
+        mock_client = MagicMock()
+
+        legal = LegalActionsResult(
+            status="BLOCKED",
+            allowed_actions=[],
+            blocked_reason="All tickets blocked",
+        )
+
+        rec = route_with_jev(legal, "What next?", client=mock_client)
+        self.assertEqual(rec.status, "BLOCKED")
+        mock_client.system_one.assert_not_called()
+
+    def test_fallback_action_is_explicit_not_list_order_dependent(self) -> None:
+        """Section 15: Fallback action is explicit, not list-order dependent."""
+        legal = LegalActionsResult(
+            status="RECOMMEND",
+            allowed_actions=["secondary-action", "preferred-fallback"],
+            fallback_action="preferred-fallback",
+            candidate_descriptions={"secondary-action": "Second", "preferred-fallback": "First"},
+        )
+
+        with patch.dict(os.environ, {}, clear=True):
+            rec = route_with_jev(legal, "What next?")
+            self.assertEqual(rec.primary_skill, "preferred-fallback")
+            self.assertTrue(rec.fallback_used)
+
+    def test_unconsumed_semantic_questions_are_not_sent(self) -> None:
+        """Section 16: Unconsumed readiness_score is never sent."""
+        mock_resp = MagicMock()
+        mock_resp.choices = {}
+        mock_resp.nouls = {}
+        mock_resp.scores = {}
+
+        mock_client = MagicMock()
+        mock_client.system_one.return_value = mock_resp
+
         state = CompactProjectState(initialized=True, spec_exists=True, spec_active=True, tickets_exist=True, ready_tickets=["01.md"])
         legal = compute_legal_actions(state)
 
         with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
             with patch("semantic_router.TYPESAFE_AVAILABLE", True):
                 rec = route_with_jev(legal, "What next?", client=mock_client)
-                self.assertTrue(rec.fallback_used)
-                self.assertEqual(rec.primary_skill, "implement")  # Baseline preserved
-                self.assertIn("unauthorized", rec.fallback_reason.lower())
+                self.assertNotIn("readiness_score", rec.semantic_judgments.questions_sent)
+
+    def test_shadow_evaluation_mode(self) -> None:
+        """Section 37: Shadow mode executes Jev, records judgments, but retains deterministic baseline."""
+        mock_choice = MagicMock()
+        mock_choice.choice = "agent-config"
+        mock_choice.confidence = 0.95
+        mock_choice.probabilities = {"agent-config": 0.95}
+
+        mock_resp = MagicMock()
+        mock_resp.choices = {"next_action": mock_choice}
+        mock_resp.nouls = {}
+        mock_resp.scores = {}
+
+        mock_client = MagicMock()
+        mock_client.system_one.return_value = mock_resp
+
+        legal = LegalActionsResult(
+            status="RECOMMEND",
+            allowed_actions=["implement", "agent-config"],
+            fallback_action="implement",
+            candidate_descriptions={"implement": "Do work", "agent-config": "Config"},
+        )
+
+        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+            with patch("semantic_router.TYPESAFE_AVAILABLE", True):
+                rec = route_with_jev(legal, "What next?", client=mock_client, shadow_mode=True)
+                self.assertEqual(rec.primary_skill, "implement")  # Deterministic baseline preserved
+                self.assertIn("Shadow mode", rec.justification)
+                self.assertEqual(rec.semantic_judgments.action_choice, "agent-config")
 
     def test_advisor_end_to_end_from_dict(self) -> None:
         """Verify ask_light_semantic_recommend accepting standard evidence dict."""

@@ -111,9 +111,11 @@ def compute_legal_actions(
         return LegalActionsResult(
             status="EXPLAIN",
             allowed_actions=[],
+            fallback_action=None,
             fail_closed=False,
             compact_state=state,
             candidate_descriptions={},
+            is_authorized=False,
         )
 
     # 2. Check for explicit progress inquiry without execution
@@ -121,9 +123,11 @@ def compute_legal_actions(
         return LegalActionsResult(
             status="EXPLAIN",
             allowed_actions=[],
+            fallback_action=None,
             fail_closed=False,
             compact_state=state,
             candidate_descriptions={},
+            is_authorized=False,
         )
 
     # 3. Fail-Closed Invariant: Unknown ticket references
@@ -132,10 +136,12 @@ def compute_legal_actions(
         return LegalActionsResult(
             status="BLOCKED",
             allowed_actions=[],
+            fallback_action=None,
             fail_closed=True,
             blocked_reason=reason,
             compact_state=state,
             candidate_descriptions={},
+            is_authorized=False,
         )
 
     # 4. Fail-Closed Invariant: Multiple active efforts ambiguity
@@ -143,10 +149,12 @@ def compute_legal_actions(
         return LegalActionsResult(
             status="NEED_INPUT",
             allowed_actions=[],
+            fallback_action=None,
             fail_closed=True,
             blocked_reason="Multiple active efforts detected without explicit target; disambiguation required",
             compact_state=state,
             candidate_descriptions={},
+            is_authorized=False,
         )
 
     # 5. Invariant: Uninitialized project
@@ -154,9 +162,12 @@ def compute_legal_actions(
         return LegalActionsResult(
             status="RECOMMEND",
             allowed_actions=["project-init"],
+            fallback_action="project-init",
+            deterministic_preference="project-init",
             fail_closed=False,
             compact_state=state,
             candidate_descriptions={"project-init": CANDIDATE_DESCRIPTIONS["project-init"]},
+            is_authorized=False,
         )
 
     # 6. Invariant: Review state and freshness checks
@@ -166,27 +177,36 @@ def compute_legal_actions(
                 return LegalActionsResult(
                     status="RECOMMEND",
                     allowed_actions=["project-review"],
+                    fallback_action="project-review",
+                    deterministic_preference="project-review",
                     fail_closed=True,
                     blocked_reason="Stale review verdict: source HEAD moved after review PASS",
                     compact_state=state,
                     candidate_descriptions={"project-review": CANDIDATE_DESCRIPTIONS["project-review"]},
+                    is_authorized=False,
                 )
             if state.working_tree_dirty or state.review_freshness == "dirty":
                 return LegalActionsResult(
                     status="RECOMMEND",
                     allowed_actions=["project-review"],
+                    fallback_action="project-review",
+                    deterministic_preference="project-review",
                     fail_closed=True,
                     blocked_reason="Working tree is dirty, invalidating review freshness",
                     compact_state=state,
                     candidate_descriptions={"project-review": CANDIDATE_DESCRIPTIONS["project-review"]},
+                    is_authorized=False,
                 )
             # Fresh clean PASS review -> Terminal for current effort
             return LegalActionsResult(
                 status="TERMINAL",
                 allowed_actions=["release-workflow"],
+                fallback_action="release-workflow",
+                deterministic_preference="release-workflow",
                 fail_closed=False,
                 compact_state=state,
                 candidate_descriptions={"release-workflow": CANDIDATE_DESCRIPTIONS["release-workflow"]},
+                is_authorized=False,
             )
 
     # 7. Invariant: Active SPEC & Ticket Graph
@@ -198,9 +218,12 @@ def compute_legal_actions(
             return LegalActionsResult(
                 status="RECOMMEND",
                 allowed_actions=["project-review"],
+                fallback_action="project-review",
+                deterministic_preference="project-review",
                 fail_closed=False,
                 compact_state=state,
                 candidate_descriptions={"project-review": CANDIDATE_DESCRIPTIONS["project-review"]},
+                is_authorized=False,
             )
 
         # Check tickets existence
@@ -209,9 +232,12 @@ def compute_legal_actions(
             return LegalActionsResult(
                 status="RECOMMEND",
                 allowed_actions=["project-tickets"],
+                fallback_action="project-tickets",
+                deterministic_preference="project-tickets",
                 fail_closed=False,
                 compact_state=state,
                 candidate_descriptions={"project-tickets": CANDIDATE_DESCRIPTIONS["project-tickets"]},
+                is_authorized=False,
             )
 
         # Unresolved tickets remain: inspect frontier
@@ -223,20 +249,25 @@ def compute_legal_actions(
             return LegalActionsResult(
                 status=action_status,
                 allowed_actions=["implement"],
+                fallback_action="implement",
+                deterministic_preference="implement",
                 target_item=target_ticket,
                 fail_closed=False,
                 compact_state=state,
                 candidate_descriptions={"implement": CANDIDATE_DESCRIPTIONS["implement"]},
+                is_authorized=is_execute_intent,
             )
 
         # Blocked: Unresolved tickets exist but ready_tickets is empty
         return LegalActionsResult(
             status="BLOCKED",
             allowed_actions=[],
+            fallback_action=None,
             fail_closed=True,
             blocked_reason="All remaining tickets are blocked by outstanding dependencies",
             compact_state=state,
             candidate_descriptions={},
+            is_authorized=False,
         )
 
     # 8. No active spec: check clarification handoff
@@ -244,16 +275,22 @@ def compute_legal_actions(
         return LegalActionsResult(
             status="RECOMMEND",
             allowed_actions=["project-spec"],
+            fallback_action="project-spec",
+            deterministic_preference="project-spec",
             fail_closed=False,
             compact_state=state,
             candidate_descriptions={"project-spec": CANDIDATE_DESCRIPTIONS["project-spec"]},
+            is_authorized=False,
         )
 
     # Default canonical starting point: project-clarify
     return LegalActionsResult(
         status="RECOMMEND",
         allowed_actions=["project-clarify"],
+        fallback_action="project-clarify",
+        deterministic_preference="project-clarify",
         fail_closed=False,
         compact_state=state,
         candidate_descriptions={"project-clarify": CANDIDATE_DESCRIPTIONS["project-clarify"]},
+        is_authorized=False,
     )

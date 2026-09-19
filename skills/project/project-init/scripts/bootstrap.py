@@ -4,14 +4,17 @@
 from __future__ import annotations
 
 import argparse
+import getpass
+import importlib.util
 import json
 import os
 import re
 import stat
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 PROJECT_PATH = Path("docs/agents/light-project.md")
 TRACKER_PATH = Path("docs/agents/issue-tracker.md")
@@ -33,15 +36,6 @@ MARKER_TOKENS = (START, END, POINTER_START, POINTER_END)
 
 JEV_SKILL_NAME = "typesafe-ai"
 JEV_CONSTRAINT = "TypeSafe Jev System One semantic acceleration"
-DEFAULT_TYPESAFE_SKILL_MD = """---
-name: typesafe-ai
-description: Build AI-powered software with TypeSafe System One models including Jev.
----
-
-# TypeSafe AI
-
-TypeSafe System One models provide fast, calibrated judgments for code.
-"""
 
 
 def mask_secret(value: str) -> str:
@@ -74,20 +68,55 @@ def detect_typesafe_key(project_root: Optional[Path] = None) -> tuple[bool, str]
     return False, "missing"
 
 
+def is_valid_typesafe_skill(skill_dir: Path) -> bool:
+    """Verify that a directory contains a valid official typesafe-ai skill.
+
+    Rejects missing files, empty stubs, and skills without proper frontmatter name.
+    """
+    skill_file = skill_dir / "SKILL.md"
+    if not skill_file.is_file():
+        return False
+    try:
+        content = skill_file.read_text(encoding="utf-8")
+        if not content.startswith("---"):
+            return False
+        parts = content.split("---", 2)
+        if len(parts) < 3:
+            return False
+        frontmatter = parts[1]
+        name_match = re.search(r"^name:\s*([^\s\n\r]+)", frontmatter, re.MULTILINE)
+        if not name_match or name_match.group(1).strip() != JEV_SKILL_NAME:
+            return False
+        if len(content.strip()) < 15:
+            return False
+        return True
+    except Exception:
+        return False
+
+
+def find_global_skill(
+    skill_name: str = JEV_SKILL_NAME,
+    search_roots: Optional[list[Path]] = None,
+) -> Optional[Path]:
+    """Locate official typesafe-ai skill in global agent skill directories."""
+    roots = search_roots if search_roots is not None else [
+        Path.home() / ".agents" / "skills",
+        Path.home() / ".pi" / "agent" / "skills",
+        Path.home() / ".pi" / "skills",
+    ]
+    for root in roots:
+        skill_dir = root / skill_name
+        if is_valid_typesafe_skill(skill_dir):
+            return skill_dir
+    return None
+
+
 def check_global_skill(
     skill_name: str = JEV_SKILL_NAME,
     search_roots: Optional[list[Path]] = None,
 ) -> bool:
-    """Check if skill is present in global skills directories."""
-    roots = search_roots if search_roots is not None else [
-        Path.home() / ".agents" / "skills",
-        Path.home() / ".pi" / "agent" / "skills",
-    ]
-    for root in roots:
-        skill_file = root / skill_name / "SKILL.md"
-        if skill_file.is_file():
-            return True
-    return False
+    """Check if valid official skill is present in global skills directories."""
+    return find_global_skill(skill_name, search_roots) is not None
 
 
 def ensure_gitignored(project_root: Path, entry: str = ".env") -> bool:
@@ -148,14 +177,17 @@ def prompt_jev_opt_in() -> bool:
 
 
 def prompt_typesafe_key(project_root: Path) -> tuple[bool, str]:
-    """Interactively prompt user for TYPESAFE_API_KEY if missing."""
+    """Interactively prompt user for TYPESAFE_API_KEY if missing.
+
+    Uses non-echoing password input to prevent raw key exposure in terminal/logs.
+    """
     found, source = detect_typesafe_key(project_root)
     if found:
         return True, source
     if not sys.stdin.isatty():
         return False, "missing"
     try:
-        raw_key = input("未检测到 TYPESAFE_API_KEY。请输入您的 TypeSafe API Key（留空跳过）: ").strip()
+        raw_key = getpass.getpass("未检测到 TYPESAFE_API_KEY。请输入您的 TypeSafe API Key（留空跳过）: ").strip()
         if raw_key:
             configure_typesafe_key(project_root, raw_key)
             return True, ".env"
@@ -164,56 +196,122 @@ def prompt_typesafe_key(project_root: Path) -> tuple[bool, str]:
     return False, "missing"
 
 
-def find_typesafe_skill_source(skill_name: str = JEV_SKILL_NAME) -> Optional[Path]:
-    """Find a source template directory for the skill if available on the system."""
-    candidates = [
-        Path.home() / ".agents" / "skills" / skill_name,
-        Path.home() / ".pi" / "agent" / "skills" / skill_name,
-        Path.home() / ".pi" / "skills" / skill_name,
-        Path.home() / ".agents" / "skill-src" / "lightdevcoder-skills" / "skills" / "productivity" / skill_name,
-        Path.home() / ".agents" / "skill-src" / "lightdevcoder-skills" / "skills" / skill_name,
+def install_official_typesafe_skill(
+    project_root: Path,
+    installer_cmd: Optional[list[str]] = None,
+) -> tuple[bool, Optional[Path], str]:
+    """Install official typesafe-ai skill via official package installer.
+
+    Valid only if originated from the official typesafe-ai/skills distribution.
+    Never fabricates stub or fake skill files.
+    """
+    cmd = installer_cmd or ["npx", "skills", "add", "typesafe-ai/skills", "--skill", "typesafe-ai", "-y"]
+    try:
+        proc = subprocess.run(
+            cmd,
+            cwd=str(project_root),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=120,
+        )
+    except Exception as exc:
+        return False, None, f"JEV_SKILL_SETUP_INCOMPLETE: installer execution failed ({type(exc).__name__})"
+
+    # Check candidate locations populated by installer
+    candidate_targets = [
+        project_root / ".agents" / "skills" / JEV_SKILL_NAME,
+        project_root / ".pi" / "skills" / JEV_SKILL_NAME,
+        project_root / "skills" / JEV_SKILL_NAME,
     ]
-    for candidate in candidates:
-        if (candidate / "SKILL.md").is_file():
-            return candidate
-    return None
+    for target in candidate_targets:
+        if is_valid_typesafe_skill(target):
+            return True, target, "installed-local"
+
+    return False, None, "JEV_SKILL_SETUP_INCOMPLETE"
 
 
-def copy_skill_tree(src: Path, dst: Path) -> None:
-    """Recursively copy skill directory contents."""
-    dst.mkdir(parents=True, exist_ok=True)
-    for entry in src.iterdir():
-        if entry.name.startswith("."):
-            continue
-        dest_entry = dst / entry.name
-        if entry.is_dir():
-            copy_skill_tree(entry, dest_entry)
-        elif entry.is_file():
-            dest_entry.write_bytes(entry.read_bytes())
+def verify_typesafe_sdk(python_bin: Optional[str] = None) -> bool:
+    """Verify that typesafe_sdk is importable by the Python runtime executing the scripts."""
+    py_exec = python_bin or sys.executable
+    try:
+        res = subprocess.run(
+            [py_exec, "-c", "import typesafe_sdk"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=10,
+        )
+        return res.returncode == 0
+    except Exception:
+        return False
 
 
-def install_project_skill(
-    skill_name: str = JEV_SKILL_NAME,
-    project_root: Path = Path("."),
-    source_path: Optional[Path] = None,
-) -> Path:
-    """Install skill into project-level skills directory."""
-    if (project_root / ".agents").is_dir() and not (project_root / ".pi").is_dir():
-        target = project_root / ".agents" / "skills" / skill_name
-    else:
-        target = project_root / ".pi" / "skills" / skill_name
+def install_typesafe_sdk(python_bin: Optional[str] = None) -> tuple[bool, str]:
+    """Attempt to install typesafe-sdk using the active Python interpreter.
 
-    source = source_path or find_typesafe_skill_source(skill_name)
-    if source is not None and (source / "SKILL.md").is_file():
-        copy_skill_tree(source, target)
-    else:
-        target.mkdir(parents=True, exist_ok=True)
-        (target / "SKILL.md").write_text(DEFAULT_TYPESAFE_SKILL_MD, encoding="utf-8")
-    return target
+    Does NOT install python-dotenv unless explicitly required.
+    """
+    py_exec = python_bin or sys.executable
+    try:
+        res = subprocess.run(
+            [py_exec, "-m", "pip", "install", "typesafe-sdk"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=120,
+        )
+        if res.returncode == 0:
+            return True, "installed"
+        return False, f"pip install failed with code {res.returncode}"
+    except Exception as exc:
+        return False, f"pip install error: {type(exc).__name__}"
+
+
+def verify_jev_runtime(
+    project_root: Optional[Path] = None,
+    client: Optional[Any] = None,
+) -> tuple[bool, str]:
+    """Perform a minimal smoke test verifying TypeSafe Jev System One readiness.
+
+    Verifies authentication, basic System One request, and typed response.
+    Never exposes raw API keys in exceptions or returned diagnostics.
+    """
+    try:
+        from typesafe_sdk import Noul, TypeSafeClient
+    except ImportError:
+        return False, "JEV_RUNTIME_UNVERIFIED: typesafe-sdk not importable"
+
+    found, _ = detect_typesafe_key(project_root)
+    if not found and client is None:
+        return False, "JEV_RUNTIME_UNVERIFIED: TYPESAFE_API_KEY missing"
+
+    try:
+        api_key = None
+        if os.environ.get("TYPESAFE_API_KEY"):
+            api_key = os.environ.get("TYPESAFE_API_KEY")
+        elif project_root:
+            env_path = project_root / ".env"
+            if env_path.is_file():
+                for line in env_path.read_text(encoding="utf-8").splitlines():
+                    if line.startswith("TYPESAFE_API_KEY="):
+                        api_key = line.split("=", 1)[1].strip().strip("'\"")
+                        break
+
+        ts_client = client or TypeSafeClient(api_key=api_key)
+        resp = ts_client.system_one(
+            state="Project initialization Jev runtime smoke test.",
+            questions={"readiness_check": Noul(instructions="Is this a readiness verification check?")},
+        )
+        if resp and hasattr(resp, "nouls") and "readiness_check" in resp.nouls:
+            return True, "verified"
+        return False, "JEV_RUNTIME_UNVERIFIED: unexpected response structure"
+    except Exception as exc:
+        return False, f"JEV_RUNTIME_UNVERIFIED: {type(exc).__name__}"
 
 
 def detect_project_stack(project_root: Path) -> list[str]:
-    """Detect stack and provide Jev installation advice."""
+    """Detect stack and provide Jev installation advice without extraneous packages."""
     recommendations: list[str] = []
     is_python = any((
         (project_root / "requirements.txt").is_file(),
@@ -226,11 +324,11 @@ def detect_project_stack(project_root: Path) -> list[str]:
         (project_root / "node_modules").is_dir(),
     ))
     if is_python:
-        recommendations.append("pip install typesafe-sdk python-dotenv")
+        recommendations.append("pip install typesafe-sdk")
     if is_node:
         recommendations.append("npm install @typesafe/sdk")
     if not recommendations:
-        recommendations.append("pip install typesafe-sdk python-dotenv (Python) or npm install @typesafe/sdk (Node)")
+        recommendations.append("pip install typesafe-sdk (Python) or npm install @typesafe/sdk (Node)")
     return recommendations
 
 
@@ -587,7 +685,18 @@ def bootstrap(
     capability_roots: Optional[list[Path]] = None,
     unavailable_capabilities: Optional[list[str]] = None,
     jev: Optional[bool] = None,
+    installer_cmd: Optional[list[str]] = None,
+    smoke_client: Optional[Any] = None,
 ) -> dict[str, Any]:
+    """Bootstrap Light Project contracts with explicit transaction phases.
+
+    Phases:
+      Phase A: Preflight validation
+      Phase B: Core project-init transaction (writes baseline contracts)
+      Phase C: Jev onboarding (official skill check/install, key detection, SDK verify)
+      Phase D: Jev verification (minimal System One smoke test)
+      Phase E: Contract registration (relevantSkills/constraints updated ONLY if verified)
+    """
     root = root.resolve()
     if not root.is_dir():
         raise ValueError(f"project root does not exist: {root}")
@@ -602,53 +711,7 @@ def bootstrap(
         else:
             jev = prompt_jev_opt_in()
 
-    installed_skill_path: Optional[Path] = None
-    key_found = False
-    key_source = "missing"
-    jev_skill_status = "none"
-    stack_recommendations: list[str] = []
-
-    if jev:
-        # 1. Contract Registration: relevantSkills
-        if JEV_SKILL_NAME not in config["relevantSkills"]:
-            config["relevantSkills"] = list(config["relevantSkills"]) + [JEV_SKILL_NAME]
-
-        # 2. Contract Registration: constraints
-        if "constraints" in config:
-            if JEV_CONSTRAINT not in config["constraints"]:
-                config["constraints"] = list(config["constraints"]) + [JEV_CONSTRAINT]
-        else:
-            existing_p = (root / PROJECT_PATH).read_text(encoding="utf-8") if (root / PROJECT_PATH).is_file() else ""
-            existing_c = existing_managed_value(existing_p, "Constraints")
-            if existing_c and existing_c != "none recorded":
-                c_list = [c.strip() for c in existing_c.split(",")]
-                if JEV_CONSTRAINT not in c_list:
-                    c_list.append(JEV_CONSTRAINT)
-                config["constraints"] = c_list
-            else:
-                config["constraints"] = [JEV_CONSTRAINT]
-
-        # 3. Skill Scope Awareness
-        is_global = check_global_skill(JEV_SKILL_NAME, search_roots=capability_roots)
-        if is_global:
-            jev_skill_status = "global"
-        else:
-            installed_skill_path = install_project_skill(JEV_SKILL_NAME, project_root=root)
-            jev_skill_status = "installed-local"
-            if capability_roots is not None:
-                local_root = installed_skill_path.parent
-                if local_root not in capability_roots:
-                    capability_roots = list(capability_roots) + [local_root]
-
-        # 4. Key Detection & Guidance
-        key_found, key_source = detect_typesafe_key(project_root=root)
-        if not key_found and sys.stdin.isatty():
-            key_found, key_source = prompt_typesafe_key(project_root=root)
-
-        # 5. Stack Recommendations
-        stack_recommendations = detect_project_stack(root)
-
-    capabilities = inspect_capabilities(config["relevantSkills"], capability_roots, unavailable_capabilities)
+    # Phase A: Target resolution and preflight checks
     project = safe_target(root, PROJECT_PATH, reject_symlink=True)
     tracker = safe_target(root, TRACKER_PATH, reject_symlink=True)
     instruction, instruction_conflict = instruction_target(root, config["instructionFile"])
@@ -658,6 +721,8 @@ def bootstrap(
         raise ValueError("bootstrap targets resolve to the same file; reconcile instruction symlinks before retrying")
     for path in (project, tracker, instruction):
         preflight_file_target(path)
+
+    # Phase B: Core project-init transaction (without unverified Jev additions)
     existing_project = project.read_text(encoding="utf-8") if project.is_file() else ""
     prepared = {
         project: prepare_merged(project, render_project(config, existing_project)),
@@ -665,28 +730,125 @@ def bootstrap(
         instruction: prepare_merged(instruction, "", instruction=True),
     }
     commit_prepared(root, prepared)
+
     statuses = {
         str(path.relative_to(root)): status
         for path, (_, status) in prepared.items()
     }
     conflicts = [f"Both instruction styles exist; only inspected host target {config['instructionFile']} was updated"] if instruction_conflict else []
+
+    # If user opted out of Jev, complete immediately
+    if not jev:
+        capabilities = inspect_capabilities(config["relevantSkills"], capability_roots, unavailable_capabilities)
+        return {
+            "projectRoot": str(root),
+            "instructionTarget": str(instruction),
+            "paths": statuses,
+            "conflicts": conflicts,
+            "capabilities": capabilities,
+        }
+
+    # Phase C: Jev onboarding
+    skill_verified = False
+    installed_skill_path: Optional[Path] = None
+    jev_skill_status = "none"
+
+    is_global = check_global_skill(JEV_SKILL_NAME, search_roots=capability_roots)
+    global_path = find_global_skill(JEV_SKILL_NAME, search_roots=capability_roots) if is_global else None
+    if is_global and global_path is not None:
+        skill_verified = True
+        jev_skill_status = "global"
+    else:
+        installed, local_path, install_msg = install_official_typesafe_skill(
+            project_root=root,
+            installer_cmd=installer_cmd,
+        )
+        if installed and local_path is not None:
+            skill_verified = True
+            jev_skill_status = "installed-local"
+            installed_skill_path = local_path
+            if capability_roots is not None:
+                local_root = local_path.parent
+                if local_root not in capability_roots:
+                    capability_roots = list(capability_roots) + [local_root]
+        else:
+            skill_verified = False
+            jev_skill_status = "JEV_SKILL_SETUP_INCOMPLETE"
+
+    key_found, key_source = detect_typesafe_key(project_root=root)
+    if not key_found and sys.stdin.isatty():
+        key_found, key_source = prompt_typesafe_key(project_root=root)
+
+    sdk_ok = verify_typesafe_sdk()
+    stack_recommendations = detect_project_stack(root)
+
+    # Phase D: Smoke verification
+    smoke_ok = False
+    smoke_msg = "skipped: prerequisites not met"
+    if skill_verified and sdk_ok and key_found:
+        smoke_ok, smoke_msg = verify_jev_runtime(project_root=root, client=smoke_client)
+    elif not skill_verified:
+        smoke_msg = "skipped: skill setup incomplete"
+    elif not sdk_ok:
+        smoke_msg = "skipped: typesafe-sdk unavailable"
+    elif not key_found:
+        smoke_msg = "skipped: TYPESAFE_API_KEY unavailable"
+
+    # Phase E: Contract registration (ONLY if skill verified)
+    effective_skills = list(config["relevantSkills"])
+    if skill_verified:
+        if JEV_SKILL_NAME not in effective_skills:
+            effective_skills.append(JEV_SKILL_NAME)
+
+        config_jev = dict(config)
+        config_jev["relevantSkills"] = effective_skills
+        if "constraints" in config_jev:
+            if JEV_CONSTRAINT not in config_jev["constraints"]:
+                config_jev["constraints"] = list(config_jev["constraints"]) + [JEV_CONSTRAINT]
+        else:
+            existing_p = project.read_text(encoding="utf-8") if project.is_file() else ""
+            existing_c = existing_managed_value(existing_p, "Constraints")
+            if existing_c and existing_c != "none recorded":
+                c_list = [c.strip() for c in existing_c.split(",")]
+                if JEV_CONSTRAINT not in c_list:
+                    c_list.append(JEV_CONSTRAINT)
+                config_jev["constraints"] = c_list
+            else:
+                config_jev["constraints"] = [JEV_CONSTRAINT]
+
+        cur_proj = project.read_text(encoding="utf-8")
+        prepared_update = {
+            project: prepare_merged(project, render_project(config_jev, cur_proj)),
+        }
+        commit_prepared(root, prepared_update)
+        statuses[str(project.relative_to(root))] = prepared_update[project][1]
+
+    capabilities = inspect_capabilities(effective_skills, capability_roots, unavailable_capabilities)
+
+    jev_status = "READY" if (skill_verified and smoke_ok) else ("UNVERIFIED" if skill_verified else "INCOMPLETE")
     report: dict[str, Any] = {
         "projectRoot": str(root),
         "instructionTarget": str(instruction),
         "paths": statuses,
         "conflicts": conflicts,
         "capabilities": capabilities,
-    }
-    if jev:
-        report["jev"] = {
+        "jev": {
             "enabled": True,
+            "status": jev_status,
             "keyDetected": key_found,
             "keySource": key_source,
             "skillLocation": jev_skill_status,
+            "sdkAvailable": sdk_ok,
+            "runtimeVerification": smoke_msg,
             "recommendations": stack_recommendations,
-        }
-        if installed_skill_path is not None:
+        },
+    }
+    if installed_skill_path is not None:
+        try:
             report["jev"]["installedSkillPath"] = str(installed_skill_path.relative_to(root))
+        except ValueError:
+            report["jev"]["installedSkillPath"] = str(installed_skill_path)
+
     return report
 
 

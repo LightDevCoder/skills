@@ -61,7 +61,11 @@ class TaskCharacteristics:
 class AbstractTaskProfile:
     """Abstract task profile determined semantically without vendor model names."""
     complexity_level: str = "standard"  # "routine", "standard", "high", "critical"
-    reasoning_need: str = "medium"  # "none", "low", "medium", "high"
+    complexity_score: Optional[float] = None
+    complexity_confidence: Optional[float] = None
+    reasoning_need: str = "medium"  # "low", "medium", "high"
+    reasoning_score: Optional[float] = None
+    reasoning_confidence: Optional[float] = None
     latency_sensitivity: str = "medium"  # "low", "medium", "high"
     cost_sensitivity: str = "medium"  # "low", "medium", "high"
     recommended_tier: str = "standard"  # "routine", "standard", "high", "review"
@@ -93,6 +97,7 @@ class AgentConfigResult:
     """Canonical AgentConfigResult envelope."""
     readiness: str  # "READY", "NEED_INPUT", "NEED_PROJECT_TICKETS", "BLOCKED", "UNSUPPORTED"
     mode: str = "plan-only"  # "persisted", "session-local", "plan-only"
+    approval: str = "unknown"  # "unknown", "approved", "declined"
     setup_state: Dict[str, str] = field(
         default_factory=lambda: {"companion": "ready", "profile": "persisted"}
     )

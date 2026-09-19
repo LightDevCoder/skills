@@ -18,50 +18,83 @@ except ImportError:
 
 def resolve_reasoning_effort(
     host: HostCapabilities,
-    policy: Optional[str],
+    policy: Optional[str] = None,
+    profile_reasoning_need: Optional[str] = None,
 ) -> Optional[str]:
-    """Resolve abstract reasoning policy strictly to verified host-supported strings.
-    
-    Invariant: NEVER emit unverified literal 'max'.
-    If the harness does not support reasoning controls, returns None safely.
+    """Resolve reasoning effort strictly to verified host-supported strings.
+
+    Precedence:
+      1. Host capability constraints: if host does not support reasoning controls, returns None.
+      2. Explicit user reasoning policy / profile policy: authoritative; Jev cannot lower or override.
+      3. Jev reasoning judgment (profile_reasoning_need): maps to nearest verified supported value.
+      4. Deterministic fallback: None.
+
+    Invariants:
+      - NEVER emit unverified literal 'max'.
+      - Host-supported effort strictly bounds output (Jev cannot invent unsupported effort).
     """
     if not host.supported_effort:
         return None
 
-    if not policy:
-        return None
-
     efforts = [e.lower() for e in host.supported_effort]
 
-    if policy == "highest-supported":
+    # Precedence 1: Explicit user reasoning policy
+    if policy:
+        if policy == "highest-supported":
+            for preferred in ["high", "medium", "low"]:
+                if preferred in efforts:
+                    return preferred
+            return host.supported_effort[-1]
+
+        if policy == "minimal":
+            for preferred in ["low", "minimal", "medium"]:
+                if preferred in efforts:
+                    return preferred
+            return host.supported_effort[0]
+
+        if policy == "standard":
+            if "medium" in efforts:
+                return "medium"
+            if "standard" in efforts:
+                return "standard"
+            return host.supported_effort[0]
+
+        # If policy matches an exact host effort string
+        if policy.lower() in efforts:
+            return policy.lower()
+
+        # If policy requested 'max' or unsupported literal, never emit unverified literal 'max';
+        # fall back safely to highest verified level.
         for preferred in ["high", "medium", "low"]:
             if preferred in efforts:
                 return preferred
         return host.supported_effort[-1]
 
-    if policy == "minimal":
-        for preferred in ["low", "minimal", "medium"]:
-            if preferred in efforts:
-                return preferred
-        return host.supported_effort[0]
+    # Precedence 2: Jev semantic reasoning judgment
+    if profile_reasoning_need:
+        need = profile_reasoning_need.lower()
+        if need == "high":
+            if "high" in efforts:
+                return "high"
+            if "medium" in efforts:
+                return "medium"
+            return host.supported_effort[-1]
+        elif need == "medium":
+            if "medium" in efforts:
+                return "medium"
+            if "standard" in efforts:
+                return "standard"
+            if "low" in efforts:
+                return "low"
+            return host.supported_effort[0]
+        elif need == "low":
+            if "low" in efforts:
+                return "low"
+            if "minimal" in efforts:
+                return "minimal"
+            return host.supported_effort[0]
 
-    if policy == "standard":
-        if "medium" in efforts:
-            return "medium"
-        if "standard" in efforts:
-            return "standard"
-        return host.supported_effort[0]
-
-    # If policy matches an exact host effort string
-    if policy.lower() in efforts:
-        return policy.lower()
-
-    # If policy requested 'max' or unsupported literal, never emit unverified literal 'max';
-    # fall back safely to highest verified level.
-    for preferred in ["high", "medium", "low"]:
-        if preferred in efforts:
-            return preferred
-    return host.supported_effort[-1]
+    return None
 
 
 def discover_valid_candidates(host: HostCapabilities) -> List[str]:

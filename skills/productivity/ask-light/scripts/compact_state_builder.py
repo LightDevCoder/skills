@@ -2,24 +2,41 @@
 
 Constructs a compact, token-efficient, sanitized structured dictionary for Jev System One queries:
   1. Zero raw repository files or whole file trees.
-  2. No secrets, API keys, or raw code diffs.
-  3. Minimal essential facts: user_request, project readiness summary, known blockers, allowed actions.
+  2. No secrets, API keys, credentials, or raw code diffs.
+  3. Strict input length capping and regex-based token redaction.
+  4. Minimal essential facts: sanitized user_request, project readiness summary, known blockers, allowed actions.
 """
 
 from __future__ import annotations
 
+import re
 from typing import Any, Dict, List
 try:
     from .ask_light_models import CompactProjectState, LegalActionsResult
 except ImportError:
     from ask_light_models import CompactProjectState, LegalActionsResult
 
+SECRET_PATTERNS = [
+    re.compile(r"(?:sk-[a-zA-Z0-9_\-]{16,}|ts-[a-zA-Z0-9_\-]{16,}|[A-Za-z0-9_\-]{32,}|bearer\s+[a-zA-Z0-9_\-\.]+)", re.IGNORECASE),
+    re.compile(r"(?:api[_-]?key|secret|token|password|auth)\s*[:=]\s*[^\s]+", re.IGNORECASE),
+]
+
+
+def sanitize_user_request(text: str, max_chars: int = 350) -> str:
+    """Sanitize user request: cap length and redact obvious tokens/secrets."""
+    cleaned = text.strip()
+    if len(cleaned) > max_chars:
+        cleaned = cleaned[:max_chars].rstrip() + "..."
+    for pattern in SECRET_PATTERNS:
+        cleaned = pattern.sub("[REDACTED]", cleaned)
+    return cleaned
+
 
 def build_compact_jev_state(
     legal_result: LegalActionsResult,
     user_request: str,
 ) -> Dict[str, Any]:
-    """Build a compact structured dictionary for Jev queries (<350 bytes)."""
+    """Build a compact, sanitized structured dictionary for Jev queries."""
     state = legal_result.compact_state or CompactProjectState()
 
     # Summarize implementation status
@@ -55,8 +72,10 @@ def build_compact_jev_state(
     if state.review_freshness == "stale":
         known_blockers.append("stale_review_verdict")
 
+    sanitized_request = sanitize_user_request(user_request)
+
     return {
-        "user_request": user_request.strip(),
+        "user_request": sanitized_request,
         "project": {
             "initialized": state.initialized,
             "spec_active": state.spec_active,

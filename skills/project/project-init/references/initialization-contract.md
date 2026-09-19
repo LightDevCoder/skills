@@ -53,38 +53,59 @@ create tickets, workflow state, implementation code, or review verdicts.
 the write set is empty and the result is `BLOCKED`; there is no manual write
 fallback because the script owns validation, staging, and rollback.
 
-## TypeSafe Jev System One onboarding (optional)
+## TypeSafe Jev ecosystem onboarding (optional)
 
 When initializing a project, `project-init` provides an optional, non-intrusive
-onboarding gate for TypeSafe Jev semantic acceleration (`typesafe-ai`):
+onboarding gate for TypeSafe Jev ecosystem integration (`typesafe-ai`):
 
-1. **Interactive opt-in gate:**
-   - Prompt: `"是否为此项目初始化 TypeSafe Jev 语义增强？[y/N]"` (default: `No`).
+1. **Explicit transaction phases:**
+   - **Phase A (Preflight):** Validates configuration and targets.
+   - **Phase B (Core project-init):** Stages and commits baseline contracts
+     (`docs/agents/light-project.md`, `docs/agents/issue-tracker.md`, instruction target).
+   - **Phase C (Jev onboarding):** Official skill check/installation, key detection,
+     and Python SDK runtime verification.
+   - **Phase D (Jev verification):** Minimal System One readiness verification.
+   - **Phase E (Contract registration):** Appends `typesafe-ai` to `Relevant Skills`
+     and constraints *only after* verified skill availability.
+   - **Isolation invariant:** If optional Jev onboarding or verification fails, the
+     core project bootstrap remains successful (`projectInit = SUCCESS`,
+     `jev = INCOMPLETE/UNVERIFIED`).
+
+2. **Interactive opt-in gate:**
+   - Prompt: `"是否为此项目初始化 TypeSafe Jev？[y/N]"` (default: `No`).
    - CLI flags: `--jev` forces activation; `--no-jev` forces deactivation.
    - Safe fallback: In non-interactive environments or CI pipelines without
-     explicit `--jev`, defaults safely to standard flow with zero Jev
-     side-effects.
-2. **Environment & key detection:**
+     explicit `--jev`, defaults safely to standard flow with zero Jev side-effects.
+
+3. **Official TypeSafe skill installation & global reuse:**
+   - Checks whether the official `typesafe-ai` skill is already available to the
+     active Agent globally (valid `SKILL.md` with `name: typesafe-ai`).
+   - If present globally: reuses the official global installation directly without
+     duplicating files into the project.
+   - If absent globally: installs through the official installer
+     (`npx skills add typesafe-ai/skills --skill typesafe-ai`).
+   - Strictly rejects and never generates fake stubs, stubs with fabricated content,
+     or arbitrary local tree copies. If installation fails, reports
+     `JEV_SKILL_SETUP_INCOMPLETE`.
+
+4. **Environment & key detection:**
    - Auto-detects `TYPESAFE_API_KEY` from `os.environ` and local `.env`.
-   - If missing, prompts the user to input a key interactively.
+   - If missing, prompts the user via a non-echoing secret entry mechanism (`getpass`).
    - **Strict gitignore guarantee:** Whenever a local `.env` is created or
      updated, `.env` is strictly added to `.gitignore` *before* writing the key.
    - **Strict redaction:** Raw API keys are never printed, displayed, or
      recorded in logs/reports (`[REDACTED]`).
-3. **Skill scope awareness & deduplication:**
-   - Checks whether `typesafe-ai` is already available in the global agent
-     skills directories (`~/.agents/skills/typesafe-ai` or
-     `~/.pi/agent/skills/typesafe-ai`).
-   - If present globally: reuses the global skill directly without duplicating
-     files into the project.
-   - If absent globally: installs `typesafe-ai` into the project-level skill
-     directory (`.pi/skills/typesafe-ai` or `.agents/skills/typesafe-ai`).
-4. **Contract registration:**
-   - Appends `typesafe-ai` to `Relevant Skills` in `docs/agents/light-project.md`.
-   - Records `TypeSafe Jev System One semantic acceleration` in `Constraints`.
-5. **Stack-aware dependency guidance:**
-   - Python projects: recommends `pip install typesafe-sdk python-dotenv`.
-   - Node.js projects: recommends `npm install @typesafe/sdk`.
+
+5. **Python runtime dependency & smoke verification:**
+   - Inspects the active Python interpreter executing the Light scripts and
+     verifies `typesafe_sdk` is importable (`<python> -c "import typesafe_sdk"`).
+   - If unavailable and full onboarding is opted in, installs `typesafe-sdk` using
+     that interpreter without installing `python-dotenv`.
+   - When skill, SDK, and key are present, runs a minimal System One smoke test
+     verifying authentication, basic request handling, and typed response.
+     Failure reports `JEV_RUNTIME_UNVERIFIED` separately from skill installation.
+   - Stack recommendations advise `pip install typesafe-sdk` (Python) or
+     `npm install @typesafe/sdk` (Node.js).
 
 ## Downstream consumption
 

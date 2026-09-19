@@ -52,6 +52,9 @@ class LegalActionsResult:
     blocked_reason: Optional[str] = None
     compact_state: Optional[CompactProjectState] = None
     candidate_descriptions: Dict[str, str] = field(default_factory=dict)
+    fallback_action: Optional[str] = None
+    deterministic_preference: Optional[str] = None
+    is_authorized: bool = False
 
     def model_dump(self) -> Dict[str, Any]:
         return asdict(self)
@@ -61,22 +64,57 @@ class LegalActionsResult:
 
 
 @dataclass
+class JevPolicy:
+    """Calibrated policy governing Jev uncertainty and threshold evaluation."""
+    source: str = "calibrated-eval"
+    version: str = "1.0.0"
+    action_choice_min_confidence: float = 0.55
+    ambiguity_threshold: float = 0.65
+    escalation_threshold: float = 0.60
+
+
+@dataclass
 class SemanticJudgments:
-    """Expanded multi-primitive semantic judgments returned by Jev System One."""
+    """Bounded multi-primitive semantic judgments returned by Jev System One."""
     action_choice: Optional[str] = None
     action_confidence: Optional[float] = None
     action_probabilities: Dict[str, float] = field(default_factory=dict)
-    wants_immediate_execution_prob: Optional[float] = None
-    has_material_ambiguity_prob: Optional[float] = None
-    readiness_score: Optional[float] = None
-    readiness_confidence: Optional[float] = None
-    escalation_prob: Optional[float] = None
+    execution_intent_probability: Optional[float] = None
+    ambiguity_probability: Optional[float] = None
+    escalation_probability: Optional[float] = None
+    questions_sent: List[str] = field(default_factory=list)
+    reason_each_question_needed: Dict[str, str] = field(default_factory=dict)
+
+    # Backwards-compatible properties
+    @property
+    def wants_immediate_execution_prob(self) -> Optional[float]:
+        return self.execution_intent_probability
+
+    @property
+    def has_material_ambiguity_prob(self) -> Optional[float]:
+        return self.ambiguity_probability
+
+    @property
+    def escalation_prob(self) -> Optional[float]:
+        return self.escalation_probability
+
+    @property
+    def readiness_score(self) -> Optional[float]:
+        return None
+
+    @property
+    def readiness_confidence(self) -> Optional[float]:
+        return None
 
     def model_dump(self) -> Dict[str, Any]:
-        return asdict(self)
+        data = asdict(self)
+        data["wants_immediate_execution_prob"] = self.execution_intent_probability
+        data["has_material_ambiguity_prob"] = self.ambiguity_probability
+        data["escalation_prob"] = self.escalation_probability
+        return data
 
     def dict(self) -> Dict[str, Any]:
-        return asdict(self)
+        return self.model_dump()
 
 
 @dataclass
