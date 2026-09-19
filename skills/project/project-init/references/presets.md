@@ -15,10 +15,12 @@ the choice before writing. Do not silently select by filename count.
 
 Every preset asks for the same six answers: project type, user-visible goal,
 expected outputs, collaboration mode, important constraints, and required
-review level. Every plan also records the target root, the instruction filename
-confirmed from current host evidence, created or updated paths, relevant
-capabilities, and validation checks. The implemented local-markdown adapter
-uses `.scratch/<effort>/issues`; a different locator requires another adapter.
+review level. All presets support optional TypeSafe Jev semantic acceleration
+onboarding (`typesafe-ai`). Every plan also records the target root, the
+instruction filename confirmed from current host evidence, created or updated
+paths, relevant capabilities, and validation checks. The implemented
+local-markdown adapter uses `.scratch/<effort>/issues`; a different locator
+requires another adapter.
 
 | Preset | Detection signals | Recommended documents | Issue tracker | Context and Skills | Review default | Initialization checks |
 | --- | --- | --- | --- | --- | --- | --- |

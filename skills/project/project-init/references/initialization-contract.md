@@ -44,12 +44,47 @@ in the stable project contract. `reject` means an empty write set;
 requested changes produce a revised plan and another confirmation gate.
 
 Writes are limited to the instruction pointer and the two stable bootstrap
-contracts. Do not create tickets, workflow state, implementation code, review
-verdicts, or Skill packages.
+contracts. When TypeSafe Jev System One onboarding is confirmed, writes may
+additionally include `.gitignore` (for `.env` protection), local `.env`, and
+the project-level `typesafe-ai` skill directory when absent globally. Do not
+create tickets, workflow state, implementation code, or review verdicts.
 
 `scripts/bootstrap.py` requires Python 3.9 or newer. When the runtime is absent,
 the write set is empty and the result is `BLOCKED`; there is no manual write
 fallback because the script owns validation, staging, and rollback.
+
+## TypeSafe Jev System One onboarding (optional)
+
+When initializing a project, `project-init` provides an optional, non-intrusive
+onboarding gate for TypeSafe Jev semantic acceleration (`typesafe-ai`):
+
+1. **Interactive opt-in gate:**
+   - Prompt: `"是否为此项目初始化 TypeSafe Jev 语义增强？[y/N]"` (default: `No`).
+   - CLI flags: `--jev` forces activation; `--no-jev` forces deactivation.
+   - Safe fallback: In non-interactive environments or CI pipelines without
+     explicit `--jev`, defaults safely to standard flow with zero Jev
+     side-effects.
+2. **Environment & key detection:**
+   - Auto-detects `TYPESAFE_API_KEY` from `os.environ` and local `.env`.
+   - If missing, prompts the user to input a key interactively.
+   - **Strict gitignore guarantee:** Whenever a local `.env` is created or
+     updated, `.env` is strictly added to `.gitignore` *before* writing the key.
+   - **Strict redaction:** Raw API keys are never printed, displayed, or
+     recorded in logs/reports (`[REDACTED]`).
+3. **Skill scope awareness & deduplication:**
+   - Checks whether `typesafe-ai` is already available in the global agent
+     skills directories (`~/.agents/skills/typesafe-ai` or
+     `~/.pi/agent/skills/typesafe-ai`).
+   - If present globally: reuses the global skill directly without duplicating
+     files into the project.
+   - If absent globally: installs `typesafe-ai` into the project-level skill
+     directory (`.pi/skills/typesafe-ai` or `.agents/skills/typesafe-ai`).
+4. **Contract registration:**
+   - Appends `typesafe-ai` to `Relevant Skills` in `docs/agents/light-project.md`.
+   - Records `TypeSafe Jev System One semantic acceleration` in `Constraints`.
+5. **Stack-aware dependency guidance:**
+   - Python projects: recommends `pip install typesafe-sdk python-dotenv`.
+   - Node.js projects: recommends `npm install @typesafe/sdk`.
 
 ## Downstream consumption
 

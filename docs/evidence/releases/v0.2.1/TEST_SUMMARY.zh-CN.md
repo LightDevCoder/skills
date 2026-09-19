@@ -12,4 +12,4 @@
 | Git 差异与空白检查 | `PASS` | `git diff --check` 无违规 |
 | 集合契约测试 | `PASS` | 精准匹配 36 个已准入包目录 |
 | 集合发现测试 | `PASS` | 双语文档、相对链接与元数据全部同步 |
-| 单包测试套件 | `PASS` | `ask-light` (94), `project-retro` (12), `implement` (17), `review-loop` (17), `project-review` (20), `socratic` (16), `agent-config` (57), `integrated-workflow` (3) |
+| 单包测试套件 | `PASS` | `ask-light` (94), `project-retro` (12), `implement` (17), `review-loop` (17), `project-review` (20), `socratic` (16), `agent-config` (57), `project-init` (41), `integrated-workflow` (3) |
