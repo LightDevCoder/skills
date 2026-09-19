@@ -8,6 +8,7 @@ import json
 import os
 import re
 import stat
+import sys
 import tempfile
 from pathlib import Path
 from typing import Any, Optional
@@ -29,6 +30,208 @@ PRESETS = {
     "knowledge-base", "data-analysis", "research-fallback",
 }
 MARKER_TOKENS = (START, END, POINTER_START, POINTER_END)
+
+JEV_SKILL_NAME = "typesafe-ai"
+JEV_CONSTRAINT = "TypeSafe Jev System One semantic acceleration"
+DEFAULT_TYPESAFE_SKILL_MD = """---
+name: typesafe-ai
+description: Build AI-powered software with TypeSafe System One models including Jev.
+---
+
+# TypeSafe AI
+
+TypeSafe System One models provide fast, calibrated judgments for code.
+"""
+
+
+def mask_secret(value: str) -> str:
+    """Mask sensitive keys or tokens. Never print or store raw secrets in plaintext."""
+    if not value:
+        return ""
+    return "[REDACTED]"
+
+
+def detect_typesafe_key(project_root: Optional[Path] = None) -> tuple[bool, str]:
+    """Inspect os.environ and project .env for TYPESAFE_API_KEY.
+
+    Returns (found, source). Never returns raw key value.
+    """
+    if os.environ.get("TYPESAFE_API_KEY", "").strip():
+        return True, "os.environ"
+    if project_root is not None:
+        env_path = project_root / ".env"
+        if env_path.is_file():
+            try:
+                for line in env_path.read_text(encoding="utf-8").splitlines():
+                    line = line.strip()
+                    if line.startswith("#") or "=" not in line:
+                        continue
+                    k, v = line.split("=", 1)
+                    if k.strip() == "TYPESAFE_API_KEY" and v.strip().strip("'\""):
+                        return True, ".env"
+            except Exception:
+                pass
+    return False, "missing"
+
+
+def check_global_skill(
+    skill_name: str = JEV_SKILL_NAME,
+    search_roots: Optional[list[Path]] = None,
+) -> bool:
+    """Check if skill is present in global skills directories."""
+    roots = search_roots if search_roots is not None else [
+        Path.home() / ".agents" / "skills",
+        Path.home() / ".pi" / "agent" / "skills",
+    ]
+    for root in roots:
+        skill_file = root / skill_name / "SKILL.md"
+        if skill_file.is_file():
+            return True
+    return False
+
+
+def ensure_gitignored(project_root: Path, entry: str = ".env") -> bool:
+    """Ensure entry is present in project .gitignore. Return True if added."""
+    clean_entry = entry.strip()
+    gitignore_path = project_root / ".gitignore"
+    if gitignore_path.is_file():
+        content = gitignore_path.read_text(encoding="utf-8")
+        lines = [line.strip() for line in content.splitlines()]
+        if clean_entry in lines or f"/{clean_entry}" in lines or f"{clean_entry}/" in lines:
+            return False
+        new_content = content
+        if new_content and not new_content.endswith("\n"):
+            new_content += "\n"
+        new_content += f"{clean_entry}\n"
+        gitignore_path.write_text(new_content, encoding="utf-8")
+        return True
+    else:
+        gitignore_path.write_text(f"{clean_entry}\n", encoding="utf-8")
+        return True
+
+
+def configure_typesafe_key(project_root: Path, api_key: str) -> bool:
+    """Safely configure TYPESAFE_API_KEY in local .env, enforcing .gitignore first."""
+    clean_key = api_key.strip()
+    if not clean_key:
+        return False
+    ensure_gitignored(project_root, ".env")
+    env_file = project_root / ".env"
+    existing_lines: list[str] = []
+    found = False
+    if env_file.is_file():
+        try:
+            for line in env_file.read_text(encoding="utf-8").splitlines():
+                stripped = line.strip()
+                if not stripped.startswith("#") and "=" in stripped:
+                    k, _ = stripped.split("=", 1)
+                    if k.strip() == "TYPESAFE_API_KEY":
+                        existing_lines.append(f"TYPESAFE_API_KEY={clean_key}")
+                        found = True
+                        continue
+                existing_lines.append(line)
+        except Exception:
+            existing_lines = []
+    if not found:
+        existing_lines.append(f"TYPESAFE_API_KEY={clean_key}")
+    env_file.write_text("\n".join(existing_lines) + "\n", encoding="utf-8")
+    return True
+
+
+def prompt_jev_opt_in() -> bool:
+    """Interactively ask user if they want to initialize TypeSafe Jev."""
+    try:
+        response = input("是否为此项目初始化 TypeSafe Jev 语义增强？[y/N] ").strip().lower()
+        return response in ("y", "yes")
+    except (EOFError, KeyboardInterrupt, OSError):
+        return False
+
+
+def prompt_typesafe_key(project_root: Path) -> tuple[bool, str]:
+    """Interactively prompt user for TYPESAFE_API_KEY if missing."""
+    found, source = detect_typesafe_key(project_root)
+    if found:
+        return True, source
+    if not sys.stdin.isatty():
+        return False, "missing"
+    try:
+        raw_key = input("未检测到 TYPESAFE_API_KEY。请输入您的 TypeSafe API Key（留空跳过）: ").strip()
+        if raw_key:
+            configure_typesafe_key(project_root, raw_key)
+            return True, ".env"
+    except (EOFError, KeyboardInterrupt, OSError):
+        pass
+    return False, "missing"
+
+
+def find_typesafe_skill_source(skill_name: str = JEV_SKILL_NAME) -> Optional[Path]:
+    """Find a source template directory for the skill if available on the system."""
+    candidates = [
+        Path.home() / ".agents" / "skills" / skill_name,
+        Path.home() / ".pi" / "agent" / "skills" / skill_name,
+        Path.home() / ".pi" / "skills" / skill_name,
+        Path.home() / ".agents" / "skill-src" / "lightdevcoder-skills" / "skills" / "productivity" / skill_name,
+        Path.home() / ".agents" / "skill-src" / "lightdevcoder-skills" / "skills" / skill_name,
+    ]
+    for candidate in candidates:
+        if (candidate / "SKILL.md").is_file():
+            return candidate
+    return None
+
+
+def copy_skill_tree(src: Path, dst: Path) -> None:
+    """Recursively copy skill directory contents."""
+    dst.mkdir(parents=True, exist_ok=True)
+    for entry in src.iterdir():
+        if entry.name.startswith("."):
+            continue
+        dest_entry = dst / entry.name
+        if entry.is_dir():
+            copy_skill_tree(entry, dest_entry)
+        elif entry.is_file():
+            dest_entry.write_bytes(entry.read_bytes())
+
+
+def install_project_skill(
+    skill_name: str = JEV_SKILL_NAME,
+    project_root: Path = Path("."),
+    source_path: Optional[Path] = None,
+) -> Path:
+    """Install skill into project-level skills directory."""
+    if (project_root / ".agents").is_dir() and not (project_root / ".pi").is_dir():
+        target = project_root / ".agents" / "skills" / skill_name
+    else:
+        target = project_root / ".pi" / "skills" / skill_name
+
+    source = source_path or find_typesafe_skill_source(skill_name)
+    if source is not None and (source / "SKILL.md").is_file():
+        copy_skill_tree(source, target)
+    else:
+        target.mkdir(parents=True, exist_ok=True)
+        (target / "SKILL.md").write_text(DEFAULT_TYPESAFE_SKILL_MD, encoding="utf-8")
+    return target
+
+
+def detect_project_stack(project_root: Path) -> list[str]:
+    """Detect stack and provide Jev installation advice."""
+    recommendations: list[str] = []
+    is_python = any((
+        (project_root / "requirements.txt").is_file(),
+        (project_root / "pyproject.toml").is_file(),
+        (project_root / "setup.py").is_file(),
+        (project_root / "Pipfile").is_file(),
+    ))
+    is_node = any((
+        (project_root / "package.json").is_file(),
+        (project_root / "node_modules").is_dir(),
+    ))
+    if is_python:
+        recommendations.append("pip install typesafe-sdk python-dotenv")
+    if is_node:
+        recommendations.append("npm install @typesafe/sdk")
+    if not recommendations:
+        recommendations.append("pip install typesafe-sdk python-dotenv (Python) or npm install @typesafe/sdk (Node)")
+    return recommendations
 
 
 def validate_render_text(label: str, value: Any) -> None:
@@ -383,11 +586,68 @@ def bootstrap(
     config: dict[str, Any],
     capability_roots: Optional[list[Path]] = None,
     unavailable_capabilities: Optional[list[str]] = None,
+    jev: Optional[bool] = None,
 ) -> dict[str, Any]:
     root = root.resolve()
     if not root.is_dir():
         raise ValueError(f"project root does not exist: {root}")
     validate_config(config)
+
+    # Resolve Jev opt-in
+    if jev is None:
+        if "jev" in config:
+            jev = bool(config["jev"])
+        elif os.environ.get("CI") or not sys.stdin.isatty():
+            jev = False
+        else:
+            jev = prompt_jev_opt_in()
+
+    installed_skill_path: Optional[Path] = None
+    key_found = False
+    key_source = "missing"
+    jev_skill_status = "none"
+    stack_recommendations: list[str] = []
+
+    if jev:
+        # 1. Contract Registration: relevantSkills
+        if JEV_SKILL_NAME not in config["relevantSkills"]:
+            config["relevantSkills"] = list(config["relevantSkills"]) + [JEV_SKILL_NAME]
+
+        # 2. Contract Registration: constraints
+        if "constraints" in config:
+            if JEV_CONSTRAINT not in config["constraints"]:
+                config["constraints"] = list(config["constraints"]) + [JEV_CONSTRAINT]
+        else:
+            existing_p = (root / PROJECT_PATH).read_text(encoding="utf-8") if (root / PROJECT_PATH).is_file() else ""
+            existing_c = existing_managed_value(existing_p, "Constraints")
+            if existing_c and existing_c != "none recorded":
+                c_list = [c.strip() for c in existing_c.split(",")]
+                if JEV_CONSTRAINT not in c_list:
+                    c_list.append(JEV_CONSTRAINT)
+                config["constraints"] = c_list
+            else:
+                config["constraints"] = [JEV_CONSTRAINT]
+
+        # 3. Skill Scope Awareness
+        is_global = check_global_skill(JEV_SKILL_NAME, search_roots=capability_roots)
+        if is_global:
+            jev_skill_status = "global"
+        else:
+            installed_skill_path = install_project_skill(JEV_SKILL_NAME, project_root=root)
+            jev_skill_status = "installed-local"
+            if capability_roots is not None:
+                local_root = installed_skill_path.parent
+                if local_root not in capability_roots:
+                    capability_roots = list(capability_roots) + [local_root]
+
+        # 4. Key Detection & Guidance
+        key_found, key_source = detect_typesafe_key(project_root=root)
+        if not key_found and sys.stdin.isatty():
+            key_found, key_source = prompt_typesafe_key(project_root=root)
+
+        # 5. Stack Recommendations
+        stack_recommendations = detect_project_stack(root)
+
     capabilities = inspect_capabilities(config["relevantSkills"], capability_roots, unavailable_capabilities)
     project = safe_target(root, PROJECT_PATH, reject_symlink=True)
     tracker = safe_target(root, TRACKER_PATH, reject_symlink=True)
@@ -410,25 +670,43 @@ def bootstrap(
         for path, (_, status) in prepared.items()
     }
     conflicts = [f"Both instruction styles exist; only inspected host target {config['instructionFile']} was updated"] if instruction_conflict else []
-    return {
+    report: dict[str, Any] = {
         "projectRoot": str(root),
         "instructionTarget": str(instruction),
         "paths": statuses,
         "conflicts": conflicts,
         "capabilities": capabilities,
     }
+    if jev:
+        report["jev"] = {
+            "enabled": True,
+            "keyDetected": key_found,
+            "keySource": key_source,
+            "skillLocation": jev_skill_status,
+            "recommendations": stack_recommendations,
+        }
+        if installed_skill_path is not None:
+            report["jev"]["installedSkillPath"] = str(installed_skill_path.relative_to(root))
+    return report
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser()
+def build_argument_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Bootstrap Light Project contracts.")
     parser.add_argument("--project-root", required=True, type=Path)
     parser.add_argument("--config-json", required=True)
     parser.add_argument("--capability-roots-json", default="[]")
     parser.add_argument("--unavailable-capabilities-json", default="[]")
+    parser.add_argument("--jev", dest="jev", action="store_true", default=None, help="Enable TypeSafe Jev semantic acceleration")
+    parser.add_argument("--no-jev", dest="jev", action="store_false", help="Disable TypeSafe Jev semantic acceleration")
+    return parser
+
+
+def main() -> int:
+    parser = build_argument_parser()
     args = parser.parse_args()
     roots = [Path(value) for value in json.loads(args.capability_roots_json)]
     unavailable = json.loads(args.unavailable_capabilities_json)
-    print(json.dumps(bootstrap(args.project_root, json.loads(args.config_json), roots, unavailable), indent=2))
+    print(json.dumps(bootstrap(args.project_root, json.loads(args.config_json), roots, unavailable, jev=args.jev), indent=2))
     return 0
 
 

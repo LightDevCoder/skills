@@ -23,6 +23,7 @@ class ProjectInitContractTest(unittest.TestCase):
             self.assertIn(consumer, contract)
         for preset in ("generic", "software", "manuscript", "skill-development", "research", "knowledge-base", "data-analysis"):
             self.assertIn(f"| {preset} |", presets)
+        self.assertTrue(40 <= len(skill.splitlines()) <= 100)
 
     def test_helper_is_syntax_valid_and_has_no_external_execution(self) -> None:
         script = (ROOT / "scripts" / "bootstrap.py").read_text(encoding="utf-8")

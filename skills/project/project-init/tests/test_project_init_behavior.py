@@ -463,6 +463,161 @@ class ProjectInitBehaviorTest(unittest.TestCase):
             for field in fields:
                 self.assertIn(field, text, f"{name} does not consume {field}")
 
+    def test_default_invocation_has_no_jev_side_effects(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="project-init-no-jev-") as tmp:
+            root = Path(tmp)
+            report = BOOTSTRAP.bootstrap(root, config())
+            project = (root / "docs/agents/light-project.md").read_text(encoding="utf-8")
+            self.assertNotIn("typesafe-ai", project)
+            self.assertNotIn("TypeSafe Jev", project)
+            self.assertFalse((root / ".env").exists())
+            self.assertFalse((root / ".gitignore").exists())
+            self.assertFalse((root / ".pi").exists())
+            self.assertNotIn("jev", report)
+
+    def test_detect_typesafe_key_from_env_and_dotenv(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="project-init-key-") as tmp:
+            root = Path(tmp)
+            # 1. Neither env nor .env
+            with mock.patch.dict(os.environ, {}, clear=True):
+                found, source = BOOTSTRAP.detect_typesafe_key(root)
+                self.assertFalse(found)
+                self.assertEqual(source, "missing")
+
+            # 2. From os.environ
+            with mock.patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key-12345"}):
+                found, source = BOOTSTRAP.detect_typesafe_key(root)
+                self.assertTrue(found)
+                self.assertEqual(source, "os.environ")
+
+            # 3. From project-level .env
+            (root / ".env").write_text("TYPESAFE_API_KEY=dotenv-key-67890\nOTHER=1\n", encoding="utf-8")
+            with mock.patch.dict(os.environ, {}, clear=True):
+                found, source = BOOTSTRAP.detect_typesafe_key(root)
+                self.assertTrue(found)
+                self.assertEqual(source, ".env")
+
+    def test_check_global_skill(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="project-init-global-") as tmp:
+            skill_root = Path(tmp)
+            # Missing skill
+            self.assertFalse(BOOTSTRAP.check_global_skill("typesafe-ai", search_roots=[skill_root]))
+
+            # Present skill
+            skill_dir = skill_root / "typesafe-ai"
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text("---\nname: typesafe-ai\n---\n", encoding="utf-8")
+            self.assertTrue(BOOTSTRAP.check_global_skill("typesafe-ai", search_roots=[skill_root]))
+
+    def test_ensure_gitignored(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="project-init-ignore-") as tmp:
+            root = Path(tmp)
+            # Creates .gitignore if missing
+            added = BOOTSTRAP.ensure_gitignored(root, ".env")
+            self.assertTrue(added)
+            self.assertTrue((root / ".gitignore").is_file())
+            self.assertIn(".env\n", (root / ".gitignore").read_text(encoding="utf-8"))
+
+            # Does not duplicate if already present
+            added_again = BOOTSTRAP.ensure_gitignored(root, ".env")
+            self.assertFalse(added_again)
+            self.assertEqual((root / ".gitignore").read_text(encoding="utf-8").count(".env"), 1)
+
+            # Appends to existing .gitignore with other content
+            (root / ".gitignore").write_text("node_modules/\n", encoding="utf-8")
+            added_to_existing = BOOTSTRAP.ensure_gitignored(root, ".env")
+            self.assertTrue(added_to_existing)
+            content = (root / ".gitignore").read_text(encoding="utf-8")
+            self.assertIn("node_modules/", content)
+            self.assertIn(".env", content)
+
+    def test_configure_typesafe_key_enforces_gitignore_and_masks_output(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="project-init-cfg-") as tmp:
+            root = Path(tmp)
+            secret = "ts-test-secret-abcdef123456"
+            BOOTSTRAP.configure_typesafe_key(root, secret)
+
+            # Enforces gitignore
+            self.assertTrue((root / ".gitignore").is_file())
+            self.assertIn(".env", (root / ".gitignore").read_text(encoding="utf-8"))
+
+            # Writes .env correctly
+            self.assertTrue((root / ".env").is_file())
+            self.assertIn(f"TYPESAFE_API_KEY={secret}", (root / ".env").read_text(encoding="utf-8"))
+
+            # Masking never leaks secret
+            masked = BOOTSTRAP.mask_secret(secret)
+            self.assertNotIn(secret, masked)
+            self.assertEqual(masked, "[REDACTED]")
+
+    def test_jev_opt_in_with_global_key_and_global_skill_reuses_without_local_duplication(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="project-init-jev-global-") as tmp:
+            root = Path(tmp)
+            global_skills = Path(tmp) / "global_skills"
+            (global_skills / "typesafe-ai").mkdir(parents=True)
+            (global_skills / "typesafe-ai" / "SKILL.md").write_text("---\nname: typesafe-ai\n---\n", encoding="utf-8")
+
+            with mock.patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key-global"}):
+                report = BOOTSTRAP.bootstrap(
+                    root,
+                    config(),
+                    capability_roots=[global_skills],
+                    jev=True,
+                )
+
+            project = (root / "docs/agents/light-project.md").read_text(encoding="utf-8")
+            self.assertIn("typesafe-ai", project)
+            self.assertIn("TypeSafe Jev System One semantic acceleration", project)
+
+            # No local skill duplication
+            self.assertFalse((root / ".pi" / "skills" / "typesafe-ai").exists())
+            self.assertFalse((root / ".agents" / "skills" / "typesafe-ai").exists())
+
+            # Report asserts
+            self.assertIn("jev", report)
+            self.assertTrue(report["jev"]["enabled"])
+            self.assertTrue(report["jev"]["keyDetected"])
+            self.assertEqual(report["jev"]["keySource"], "os.environ")
+            self.assertEqual(report["jev"]["skillLocation"], "global")
+
+    def test_jev_opt_in_without_global_skill_installs_local_skill(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="project-init-jev-local-") as tmp:
+            root = Path(tmp)
+            source_skill = Path(tmp) / "source_skills" / "typesafe-ai"
+            source_skill.mkdir(parents=True)
+            (source_skill / "SKILL.md").write_text("---\nname: typesafe-ai\ndescription: test\n---\n", encoding="utf-8")
+
+            with mock.patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key-local"}):
+                with mock.patch.object(BOOTSTRAP, "check_global_skill", return_value=False):
+                    with mock.patch.object(BOOTSTRAP, "find_typesafe_skill_source", return_value=source_skill):
+                        report = BOOTSTRAP.bootstrap(root, config(), jev=True)
+
+            local_skill = root / ".pi" / "skills" / "typesafe-ai" / "SKILL.md"
+            self.assertTrue(local_skill.is_file())
+            self.assertIn("typesafe-ai", local_skill.read_text(encoding="utf-8"))
+            self.assertEqual(report["jev"]["skillLocation"], "installed-local")
+
+    def test_non_interactive_fallback_defaults_to_no_jev(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="project-init-fallback-") as tmp:
+            root = Path(tmp)
+            with mock.patch("sys.stdin.isatty", return_value=False):
+                report = BOOTSTRAP.bootstrap(root, config(), jev=None)
+            self.assertNotIn("jev", report)
+            project = (root / "docs/agents/light-project.md").read_text(encoding="utf-8")
+            self.assertNotIn("typesafe-ai", project)
+
+    def test_cli_flags_jev_and_no_jev(self) -> None:
+        parser = BOOTSTRAP.build_argument_parser()
+        args_jev = parser.parse_args(["--project-root", ".", "--config-json", "{}", "--jev"])
+        self.assertIs(args_jev.jev, True)
+
+        args_no_jev = parser.parse_args(["--project-root", ".", "--config-json", "{}", "--no-jev"])
+        self.assertIs(args_no_jev.jev, False)
+
+        args_default = parser.parse_args(["--project-root", ".", "--config-json", "{}"])
+        self.assertIsNone(args_default.jev)
+
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

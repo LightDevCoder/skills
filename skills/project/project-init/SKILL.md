@@ -24,15 +24,18 @@ tickets, or run later workflow stages.
    expected outputs, collaboration mode, important constraints, relevant
    Skills, issue tracker, domain-context locations, review profile/acceptance
    strategy, working area, and the active host's inspected instruction filename
-   (`AGENTS.md` or `CLAUDE.md`). Ask only fields inspection did not settle, one
-   short question at a time.
+   (`AGENTS.md` or `CLAUDE.md`). When confirmed by the user, optionally onboard
+   TypeSafe Jev System One semantic acceleration (`typesafe-ai`). Ask only
+   fields inspection did not settle, one short question at a time.
 4. **Bootstrap idempotently.** Use
    [bootstrap.py](scripts/bootstrap.py) to write or update
    `docs/agents/light-project.md`, `docs/agents/issue-tracker.md`, and one
-   instruction pointer in the inspected host target. Preserve manual additions
-   and previously valid decisions; revise only confirmed fields. The current
-   local-markdown adapter uses `.scratch/<effort>/issues`; other tracker
-   locators fail closed until an adapter exists.
+   instruction pointer in the inspected host target. Supports optional `--jev`
+   and `--no-jev` flags for TypeSafe Jev onboarding (key detection, gitignore
+   protection, and global skill reuse). Preserve manual additions and previously
+   valid decisions; revise only confirmed fields. The current local-markdown
+   adapter uses `.scratch/<effort>/issues`; other tracker locators fail closed
+   until an adapter exists.
    The helper requires Python 3.9 or newer; if unavailable, report `BLOCKED`
    before any write instead of emulating the transaction manually.
 5. **Validate and report.** Confirm every created path is inside the target
