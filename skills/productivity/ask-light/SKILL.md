@@ -283,3 +283,8 @@ freshness protections, router boundary (Python makes no semantic decision),
 hard-state scoping, post-model selection validation, workflow recipe
 publication, root discovery, first-party provenance, host availability, and
 the host-aware approval boundary.
+
+## Semantic Acceleration (Optional)
+
+When `TYPESAFE_API_KEY` is configured and `typesafe-sdk` is present, `ask-light` can leverage bounded TypeSafe Jev System One judgments for fast intent calibration, material ambiguity detection, and candidate choice scoring within the strictly code-computed legal candidate actions. If unavailable, it gracefully defaults to deterministic baseline pre-checks without degradation in safety.
+

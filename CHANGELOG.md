@@ -6,6 +6,7 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
+- **TypeSafe Jev System One semantic acceleration for `ask-light` & `agent-config`:** Integrated optional fast semantic judgments (Choice, Noul, Score) for workflow recommendation, intent calibration, and abstract task profiling. When `TYPESAFE_API_KEY` is present, `ask-light` accelerates candidate selection and execution intent detection while preserving deterministic fail-closed invariants (unknown tickets, multiple efforts, stale review, and dirty working tree); `agent-config` profiles abstract complexity and reasoning need without vendor model coupling. When unconfigured or offline, both skills gracefully degrade to zero-dependency deterministic baselines with zero regression across the full test suite.
 - Group all 36 Skills into seven purpose-based categories with bilingual collection guides. Update source discovery, installation guidance, CI, and the migration map while preserving names and invocation/approval boundaries. Main-only update; no new tag or release.
 
 ## 0.2.1 — 2026-09-16

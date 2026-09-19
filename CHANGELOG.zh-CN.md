@@ -6,6 +6,7 @@
 
 ## Unreleased
 
+- **为 `ask-light` 与 `agent-config` 引入 TypeSafe Jev System One 语义加速：** 引入可选的快速语义裁决（Choice、Noul、Score）用于工作流推荐、意图校准与抽象任务画像。配置 `TYPESAFE_API_KEY` 时，`ask-light` 加速候选选择与执行意图探测，同时完整保持确定性 Fail-Closed 硬安全边界（未知工单、多任务歧义、过期 Review、脏工作树修改）；`agent-config` 实现任务复杂度与推理需求的抽象画像，与厂商模型名称彻底解耦。未配置 Key 或离线时，两项技能平滑降级至零外部依赖的确定性规则基准，保持全量测试套件零回归。
 - 将 36 个 Skill 移入七个用途分类，增加每类中英文集合说明，并更新源码发现、安装指引、CI 与迁移表。保留技能名称和调用/批准边界；仅更新 main，不创建新 tag 或 release。
 
 ## 0.2.1 — 2026-09-16

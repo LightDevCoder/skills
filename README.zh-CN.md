@@ -89,6 +89,16 @@ cd agent-config && npm ci && npm run build && npm install -g .
 agent-config setup --check
 ```
 
+### 可选语义加速（TypeSafe Jev）
+
+`ask-light` 与 `agent-config` 支持通过 TypeSafe Jev System One 模型进行可选的语义加速，用于快速意图校准、歧义检测与抽象任务画像：
+
+```bash
+export TYPESAFE_API_KEY="your-api-key"
+```
+
+配置后，Jev 在确定性代码安全边界内完成语义裁决。未配置或离线时，两项技能平滑降级至零外部依赖的确定性规则基准，保持 Fail-Closed 硬安全保障。
+
 详细安装选项（指定 Agent、独立复制模式、非交互式 CI 安装）、手动复制方式与验证记录见[安装指南](docs/INSTALLATION.zh-CN.md)。
 
 ## 快速上手

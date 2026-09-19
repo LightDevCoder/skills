@@ -26,7 +26,7 @@
 
 ### agent-config
 
-- **作用：** Profile 驱动的跨 Harness 执行配置器：检查当前宿主真实执行能力，匹配用户确认的模型档位 Profile 与任务形态，精准配置执行拓扑、模型等级与 effort，支持可选 companion MCP（原生支持 primary coding-agent harnesses [10 native adapters + 1 generic fallback]）并提供单模型对等一等模式。
+- **作用：** Profile 驱动的跨 Harness 执行配置器：检查当前宿主真实执行能力，匹配用户确认的模型档位 Profile 与任务形态，精准配置执行拓扑、模型等级与 effort，支持可选 companion MCP（原生支持 primary coding-agent harnesses [10 native adapters + 1 generic fallback]）、单模型对等一等模式及可选 TypeSafe Jev 抽象任务画像。
 - **调用：** Model-invoked。
 - **包：** [skills/engineering/agent-config/](skills/engineering/agent-config)
 - **状态：** 第一方已准入；REFACTOR（参照 Sol Advisor 设计理念，Profile 驱动跨 Harness 执行配置器，覆盖主要编码 Agent Harness [10 种原生适配器 + 1 种通用回退]）。
@@ -35,7 +35,7 @@
 
 ### ask-light
 
-- **作用：** 作为 Light 工作流顾问、导航器与路由入口：检查项目与工作流状态，推荐下一步 Skill 并给出理由，用户批准后安全转换。
+- **作用：** 作为 Light 工作流顾问、导航器与路由入口：检查项目与工作流状态，推荐下一步 Skill 并给出理由，用户批准后安全转换（支持可选 TypeSafe Jev System One 语义加速）。
 - **调用：** 仅 user-invoked；批准前只读。批准后支持的环境下可直接开始 model-invoked 目标，user-invoked 目标遵循 Host 转换策略并在缺少直接通道时渲染精确调用。
 - **包：** [skills/productivity/ask-light/](skills/productivity/ask-light)
 - **状态：** 第一方已准入；REFACTOR（在完整 Skill map 建好后最后构建）。

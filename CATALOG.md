@@ -26,7 +26,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### agent-config
 
-- **Purpose:** Profile-driven cross-harness execution configurator: inspect current Host capabilities, match user-confirmed model-tier profiles and task shape, and right-size execution topology, model tier, and effort with optional companion MCP support across primary coding-agent harnesses (10 native adapters + 1 generic fallback) and safe single-model peer mode.
+- **Purpose:** Profile-driven cross-harness execution configurator: inspect current Host capabilities, match user-confirmed model-tier profiles and task shape, and right-size execution topology, model tier, and effort with optional companion MCP support across primary coding-agent harnesses (10 native adapters + 1 generic fallback), safe single-model peer mode, and optional TypeSafe Jev abstract task profiling.
 - **When to use:** Execution configuration or setup intent where model tier, reasoning effort, or execution topology affects the result.
 - **Invocation:** Model-invoked.
 - **Package:** [skills/engineering/agent-config/](skills/engineering/agent-config)
@@ -36,7 +36,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### ask-light
 
-- **Purpose:** Act as the Light workflow advisor, navigator, and router: inspect project/workflow state, recommend the next Skill with reasoning, and transition safely after user approval.
+- **Purpose:** Act as the Light workflow advisor, navigator, and router: inspect project/workflow state, recommend the next Skill with reasoning, and transition safely after user approval (enhanced with optional TypeSafe Jev System One semantic acceleration).
 - **When to use:** The next step is unclear; you need project-aware routing, collection navigation, or standalone routing.
 - **Invocation:** User-invoked only; read-only before approval. After approval, model-invoked targets may begin where supported; user-invoked targets follow Host transition policy and render the exact invocation when direct transition is unavailable.
 - **Package:** [skills/productivity/ask-light/](skills/productivity/ask-light)

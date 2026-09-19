@@ -28,6 +28,23 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
+try:
+    from .ask_light_models import CompactProjectState, LegalActionsResult, SemanticJudgments, AskLightRecommendation
+    from .state_extractor import compute_legal_actions, extract_compact_state_from_dict, CANDIDATE_DESCRIPTIONS
+    from .compact_state_builder import build_compact_jev_state
+    from .semantic_router import route_with_jev
+    from .advisor import ask_light_semantic_recommend
+except (ImportError, ValueError):
+    import sys
+    _scripts_dir = str(Path(__file__).resolve().parent)
+    if _scripts_dir not in sys.path:
+        sys.path.insert(0, _scripts_dir)
+    from ask_light_models import CompactProjectState, LegalActionsResult, SemanticJudgments, AskLightRecommendation
+    from state_extractor import compute_legal_actions, extract_compact_state_from_dict, CANDIDATE_DESCRIPTIONS
+    from compact_state_builder import build_compact_jev_state
+    from semantic_router import route_with_jev
+    from advisor import ask_light_semantic_recommend
+
 MAP_PATH = Path(__file__).resolve().parents[1] / "references" / "light-skill-map.json"
 LIGHT_CATEGORIES = {"first-party", "light-first-party"}
 INVOCATION_CONTROLS = {"explicit-only", "model-callable", "either"}
@@ -2867,6 +2884,19 @@ def route(roots: list[dict[str, Any]] | None, context: dict[str, Any], host: str
         return recipes_result(roots, context, host, skill_map)
     if mode == "navigate":
         return navigate_result(skill_map, str(context.get("goal", "")), host)
+    if mode == "semantic":
+        project_root_value = context.get("projectRoot") or context.get("cwd")
+        if project_root_value and str(project_root_value).strip():
+            evidence = inspect_project_evidence(Path(str(project_root_value)))
+        else:
+            evidence = _empty_evidence()
+        rec = ask_light_semantic_recommend(
+            evidence,
+            user_request=str(context.get("goal", "") or ""),
+            scope=str(context.get("scope", "current-workflow")),
+            explicit_target=context.get("target"),
+        )
+        return rec.model_dump()
     return next_evidence(roots, context, host, skill_map)
 
 
@@ -2876,7 +2906,7 @@ def main() -> int:
     parser.add_argument("--context-json", required=True)
     parser.add_argument("--host-name", default="codex")
     # Public modes: choices=("next", "workflow", "navigate") + internal validate
-    parser.add_argument("--mode", choices=("next", "workflow", "navigate", "validate"), default="next")
+    parser.add_argument("--mode", choices=("next", "workflow", "navigate", "validate", "semantic"), default="next")
     parser.add_argument("--skill", default="")
     parser.add_argument(
         "--scope",

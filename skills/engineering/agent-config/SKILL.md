@@ -33,7 +33,7 @@ description: Map the current Agent Host's evidenced capabilities and confirmed p
 2. **Inspect host:** Read active models, supported effort values, and concurrency limits.
 3. **Determine task shape:** Classify as `single-pass` or `decomposed` (never by word count).
 4. **Decomposition gate:** If decomposed and formal tickets do not exist, emit `readiness: NEED_PROJECT_TICKETS`, `handoff: "project-tickets"`, `execution_config: null`, and return the ticketing recommendation to the caller.
-5. **Difficulty & tier:** For multi-model, map work difficulty (`routine`..`critical`) to user-confirmed profile tiers (`routine`, `standard`, `high`, `review`).
+5. **Difficulty & tier:** For multi-model, map work difficulty (`routine`..`critical`) to user-confirmed profile tiers (`routine`, `standard`, `high`, `review`). Optional TypeSafe Jev System One semantic profiling may classify abstract task tiers without vendor coupling.
 6. **Resolve effort:** Resolve abstract policies (e.g. `highest-supported`) strictly to verified host-supported strings (e.g. `high`), never emitting unverified literal `max`.
 7. **Select execution mode:**
    - **Case A (Fixed Single-model + Single-pass):** Direct execution in main session, single model, resolved effort, no fake roles.

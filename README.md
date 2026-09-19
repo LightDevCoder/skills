@@ -89,6 +89,16 @@ cd agent-config && npm ci && npm run build && npm install -g .
 agent-config setup --check
 ```
 
+### Optional Semantic Acceleration (TypeSafe Jev)
+
+`ask-light` and `agent-config` support optional semantic acceleration using TypeSafe Jev System One models for fast intent calibration, ambiguity detection, and abstract task profiling:
+
+```bash
+export TYPESAFE_API_KEY="your-api-key"
+```
+
+When configured, Jev enhances candidate choices within deterministic boundaries. When unconfigured or offline, both Skills gracefully fall back to zero-dependency deterministic baselines with no change in fail-closed safety.
+
 See [Installation](docs/INSTALLATION.md) for advanced options (explicit agent targets, copy mode, non-interactive CI flags), manual file copying, and verification notes.
 
 ## Quick Start
