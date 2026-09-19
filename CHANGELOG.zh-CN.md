@@ -11,6 +11,12 @@
 
 ## 0.2.1 — 2026-09-16
 
+### 新增 — 为 `ask-light` 与 `agent-config` 引入 TypeSafe Jev System One 语义加速
+
+- **Jev 语义路由与意图校准（`ask-light`）：** 引入紧凑状态构建（<350 字符，不泄露原始源码树）与有界 Jev Choice / Noul / Score 原语裁决，实现执行意图强标定（`p >= 0.80` 升级为 `TRANSITION`）、关键歧义检测（`p >= 0.65` 导向 `project-clarify`）与就绪度分级打分，由代码独占存在性校验与 Fail-Closed 硬安全红线（未知工单、多任务歧义、过期/脏工作树 Review）。
+- **抽象任务画像（`agent-config`）：** 引入无厂商模型耦合的抽象复杂度画像（`routine`、`standard`、`high`）与推理需求评估，底层保留 Harness 探测、Effort 严格解析（杜绝非法 `max`）与配置预览审批门禁。
+- **Fail-Closed 与零外部依赖降级：** 采用软依赖引入机制；未安装 `typesafe-sdk` 或未配置 `TYPESAFE_API_KEY` 时，100% 优雅退回确定性规则基准，保持全量 336 项测试零破坏、零回归。
+
 ### 新增 — project-retro 技能与工作流复盘集成（第 36 个包）
 
 - **project-retro 技能：** 新增第一方模型调用（model-invoked）Skill，用于对已完成的项目或编码会话进行复盘，识别智能体环境、自动化守护线、文件导航、工具经济性、引导指令及运行信息中的具体改进点。移植并适配自 Matt Pocock 的 `retro`（`959a8e9f1edc3adbe2f7e3054bb6fbefa6696260`），完整保留归属，运行时完全自包含无外部依赖。

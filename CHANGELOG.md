@@ -11,6 +11,12 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## 0.2.1 — 2026-09-16
 
+### Added — TypeSafe Jev System One semantic acceleration for `ask-light` & `agent-config`
+
+- **Jev Semantic Routing & Intent Calibration (`ask-light`):** Introduced compact token-efficient state extraction (<350 bytes) and bounded Jev Choice/Noul/Score judgments for intent calibration (`p >= 0.80` for immediate execution), material ambiguity routing (`p >= 0.65` to `project-clarify`), and readiness scoring, while strictly enforcing code-owned fail-closed boundaries (unknown tickets, multiple efforts, stale/dirty review).
+- **Abstract Task Profiling (`agent-config`):** Replaced coupled heuristic keyword matching with abstract task profiling (routine, standard, high) and reasoning needs assessment without hardcoding vendor model names, preserving host evidence adaptation and preview approval gates.
+- **Fail-Closed & Zero-Dependency Fallback:** Soft-imported via `try...except ImportError`; when `TYPESAFE_API_KEY` is not present or in case of network/timeout failure, both skills gracefully degrade to deterministic baselines with zero regression across all 336 test cases.
+
 ### Added — project-retro skill & workflow retrospective integration (36th package)
 
 - **project-retro skill:** New first-party model-invoked Skill that conducts retrospectives on completed projects or coding sessions, identifying actionable improvements to agent environment, automated guardrails, file navigation, tool economy, steering instructions, and telemetry. Ported and adapted from Matt Pocock's `retro` (`959a8e9f1edc3adbe2f7e3054bb6fbefa6696260`) with full attribution; decoupled from external runtime.

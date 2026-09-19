@@ -21,6 +21,7 @@
 - **`agent-config` 重构与 Companion MCP：** 彻底重构为 Profile 驱动的执行配置器，原生覆盖 10 大主流编码 Agent Harness（Codex、Claude Code、Antigravity、DeepSeek Harness、OpenCode、ZCode、Cursor、Grok Build、Hermes、Pi [需 MCP 扩展]）及通用回退。用真实宿主证据与用户确认 Profile 替代名称推断；引入 Companion MCP 运行时与健康检查语义（`agent-config setup --check`）。
 - **新准入 `light-travelpage`：** 作为第 35 个包准入，提供双语旅行页面、机票住宿卡片、区域地图生成器、离线优先账本及 Cloudflare Pages/Functions/D1 协同同步。
 - **自主权与完成边界：** 澄清了 `tdd`、`clarify`、`implement`、`review-loop` 与 `manuscript-ops` 中的授权复用与阶段局部完成边界。
+- **TypeSafe Jev System One 语义加速：** 为 `ask-light`（有界 Choice 路由、执行意图 Noul 校准、歧义检测、就绪度 Score 打分）与 `agent-config`（抽象复杂度画像、无厂商模型耦合）引入可选语义加速，独占 Fail-Closed 硬安全保障，并在无 Key 或网络故障时提供零外部依赖平滑降级。
 - **集合扩充：** 集合由 v0.2.0 阶段的 34 个包扩充为 36 个已准入第一方包。
 
 ## 发布验证清单
