@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -39,26 +41,45 @@ class ReleaseIntegrityTests(unittest.TestCase):
 
     def test_existing_tag_same_target_is_idempotent_pass(self) -> None:
         """An existing tag pointing to the exact same target commit returns IDEMPOTENT_PASS."""
-        # v0.2.1 is an existing tag
-        v021_sha = resolve_tag_sha("v0.2.1", cwd=ROOT)
-        self.assertIsNotNone(v021_sha)
+        with tempfile.TemporaryDirectory(prefix="git-tag-test-") as tmp:
+            tmp_root = Path(tmp)
+            subprocess.run(["git", "init"], cwd=tmp_root, capture_output=True, check=True)
+            subprocess.run(["git", "config", "user.name", "Test User"], cwd=tmp_root, capture_output=True, check=True)
+            subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=tmp_root, capture_output=True, check=True)
+            (tmp_root / "file.txt").write_text("v1", encoding="utf-8")
+            subprocess.run(["git", "add", "."], cwd=tmp_root, capture_output=True, check=True)
+            subprocess.run(["git", "commit", "-m", "initial"], cwd=tmp_root, capture_output=True, check=True)
+            subprocess.run(["git", "tag", "-a", "v1.0.0", "-m", "v1.0.0"], cwd=tmp_root, capture_output=True, check=True)
 
-        res = check_tag_immutability("v0.2.1", v021_sha, cwd=ROOT)
-        self.assertTrue(res.passed)
-        self.assertEqual(res.status, "IDEMPOTENT_PASS")
-        self.assertIn("Safe for CI retry", res.message)
+            c1_sha = resolve_tag_sha("v1.0.0", cwd=tmp_root)
+            self.assertIsNotNone(c1_sha)
+
+            res = check_tag_immutability("v1.0.0", c1_sha, cwd=tmp_root)
+            self.assertTrue(res.passed)
+            self.assertEqual(res.status, "IDEMPOTENT_PASS")
+            self.assertIn("Safe for CI retry", res.message)
 
     def test_existing_tag_different_target_is_hard_fail(self) -> None:
         """An existing tag pointing to a different commit returns HARD_FAIL, blocking retargeting."""
-        # v0.2.1 points to 6f9d173, while HEAD is a subsequent commit (61402e1 or similar)
-        head_sha = resolve_commit_sha("HEAD", cwd=ROOT)
-        v021_sha = resolve_tag_sha("v0.2.1", cwd=ROOT)
-        self.assertNotEqual(head_sha, v021_sha)
+        with tempfile.TemporaryDirectory(prefix="git-tag-test-") as tmp:
+            tmp_root = Path(tmp)
+            subprocess.run(["git", "init"], cwd=tmp_root, capture_output=True, check=True)
+            subprocess.run(["git", "config", "user.name", "Test User"], cwd=tmp_root, capture_output=True, check=True)
+            subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=tmp_root, capture_output=True, check=True)
+            (tmp_root / "file.txt").write_text("v1", encoding="utf-8")
+            subprocess.run(["git", "add", "."], cwd=tmp_root, capture_output=True, check=True)
+            subprocess.run(["git", "commit", "-m", "initial"], cwd=tmp_root, capture_output=True, check=True)
+            subprocess.run(["git", "tag", "-a", "v1.0.0", "-m", "v1.0.0"], cwd=tmp_root, capture_output=True, check=True)
 
-        res = check_tag_immutability("v0.2.1", "HEAD", cwd=ROOT)
-        self.assertFalse(res.passed)
-        self.assertEqual(res.status, "HARD_FAIL")
-        self.assertIn("Tag retargeting/force-moving is strictly forbidden", res.message)
+            # Second commit
+            (tmp_root / "file.txt").write_text("v2", encoding="utf-8")
+            subprocess.run(["git", "add", "."], cwd=tmp_root, capture_output=True, check=True)
+            subprocess.run(["git", "commit", "-m", "second"], cwd=tmp_root, capture_output=True, check=True)
+
+            res = check_tag_immutability("v1.0.0", "HEAD", cwd=tmp_root)
+            self.assertFalse(res.passed)
+            self.assertEqual(res.status, "HARD_FAIL")
+            self.assertIn("Tag retargeting/force-moving is strictly forbidden", res.message)
 
     def test_receipt_consistency_v022(self) -> None:
         """v0.2.2 release receipts match dual-language requirements and package count."""
