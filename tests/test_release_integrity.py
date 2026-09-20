@@ -2363,6 +2363,56 @@ class TaggedSnapshotVerificationTests(unittest.TestCase):
             self.assertEqual(res_absence.status, "CANDIDATE_RECEIPT_FORBIDDEN")
 
 
+class ReleaseBodyLinkHardeningTests(unittest.TestCase):
+    """Verify that release body preparation expands relative links and verification rejects bare links."""
+
+    def test_prepare_release_body_expands_sibling_relative_links(self) -> None:
+        import prepare_release_body
+        raw_text = (
+            "# Release Notes v9.9.9\n\n"
+            "[中文说明](RELEASE_NOTES.zh-CN.md) · [Release Manifest](RELEASE_MANIFEST.md) · [External](https://example.com)\n"
+        )
+        transformed = prepare_release_body.transform_release_notes_for_web(
+            text=raw_text,
+            tag="v9.9.9",
+            repo="LightDevCoder/skills",
+            branch="main",
+        )
+        self.assertIn("https://github.com/LightDevCoder/skills/blob/main/docs/evidence/releases/v9.9.9/RELEASE_NOTES.zh-CN.md", transformed)
+        self.assertIn("https://github.com/LightDevCoder/skills/blob/main/docs/evidence/releases/v9.9.9/RELEASE_MANIFEST.md", transformed)
+        self.assertIn("https://example.com", transformed)
+
+    def test_validate_release_body_rejects_bare_relative_links(self) -> None:
+        import prepare_release_body
+        bad_body = "[中文说明](RELEASE_NOTES.zh-CN.md)"
+        valid, errors = prepare_release_body.validate_release_body_links(bad_body, "v9.9.9")
+        self.assertFalse(valid)
+        self.assertTrue(any("Bare relative link detected" in e for e in errors))
+
+    def test_validate_release_body_accepts_absolute_links(self) -> None:
+        import prepare_release_body
+        good_body = "[中文说明](https://github.com/LightDevCoder/skills/blob/main/docs/evidence/releases/v9.9.9/RELEASE_NOTES.zh-CN.md)"
+        valid, errors = prepare_release_body.validate_release_body_links(good_body, "v9.9.9")
+        self.assertTrue(valid)
+        self.assertEqual(len(errors), 0)
+
+    def test_verify_release_integrity_check_github_release_navigation_rejects_relative_links(self) -> None:
+        from unittest.mock import patch
+        import verify_release_integrity
+
+        mock_body_json = json.dumps({"body": "[中文说明](RELEASE_NOTES.zh-CN.md)"})
+        with patch("subprocess.run") as mock_run:
+            mock_run.return_value = subprocess.CompletedProcess(
+                args=["gh", "release", "view"],
+                returncode=0,
+                stdout=mock_body_json,
+                stderr="",
+            )
+            res = verify_release_integrity.check_github_release_navigation("v9.9.9")
+            self.assertFalse(res.passed)
+            self.assertEqual(res.status, "RELEASE_BODY_RELATIVE_LINK_FORBIDDEN")
+
+
 class ReleaseLifecycleHermeticE2ETests(unittest.TestCase):
     """Full lifecycle hermetic E2E executing exact six-stage release-workflow/SKILL.md sequence."""
 

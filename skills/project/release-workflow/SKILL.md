@@ -181,15 +181,28 @@ independent of the source checkout:
 
 Create the formal GitHub Release:
 
-1. Prepare release body linking English Release Notes, Chinese Release Notes,
-   and Release Manifest. Note in the body that post-publication verification facts
-   are attested on `main` in `RELEASE_RECEIPT.md` during stage `ATTESTED` (do not link
-   uncreated receipts).
-2. Publish release:
+> **Important — Link Context on GitHub Releases:** GitHub Releases renders Markdown
+> with the repository root (`/`) as its base path, not `docs/evidence/releases/vX.Y.Z/`.
+> Sibling relative links in `RELEASE_NOTES.md` (such as links pointing to `RELEASE_NOTES.zh-CN.md`)
+> will 404 if uploaded directly. Always expand them into canonical repository URLs
+> using `scripts/prepare_release_body.py` before publication.
+
+1. Prepare release body expanding sibling relative links to full canonical repository URLs:
    ```bash
-   gh release create vX.Y.Z --title "vX.Y.Z — <title>" --notes-file <notes.md>
+   python3 scripts/prepare_release_body.py \
+     --tag vX.Y.Z \
+     --output /tmp/release_body_vX.Y.Z.md
    ```
-3. Verify release status and public URL.
+2. Publish release using the prepared release body:
+   ```bash
+   gh release create vX.Y.Z \
+     --title "vX.Y.Z — <title>" \
+     --notes-file /tmp/release_body_vX.Y.Z.md
+   ```
+3. Verify release status and public URL, confirming all navigation links resolve cleanly:
+   ```bash
+   gh release view vX.Y.Z
+   ```
 4. **Transition:** Transition lifecycle state to `PUBLISHED`.
 
 ### 6. Stage ATTESTED (Post-Release Attestation — Receipt Created on Main)

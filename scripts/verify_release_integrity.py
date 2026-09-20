@@ -17,6 +17,7 @@ Enforces release integrity and tag immutability:
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
 import subprocess
@@ -316,6 +317,73 @@ def check_release_manifest_consistency(
         passed=True,
         status="PASS",
         message=f"Release manifest for {tag} verified: valid dual manifests, verified {actual_pkg_count} packages, and policy status confirmed.",
+    )
+
+
+def check_github_release_navigation(
+    tag: str,
+    repo: str = "LightDevCoder/skills",
+    cwd: Path = REPO_ROOT,
+) -> VerificationResult:
+    """Verify that published GitHub Release body does not contain bare relative links that 404."""
+    version_match = re.match(r"v?(\d+)\.(\d+)\.(\d+)", tag)
+    if version_match:
+        major, minor, patch = map(int, version_match.groups())
+        if (major, minor, patch) <= (0, 2, 2):
+            return VerificationResult(
+                passed=True,
+                status="SKIPPED_HISTORICAL",
+                message=f"Release {tag} precedes release body link verification.",
+            )
+
+    proc = subprocess.run(
+        ["gh", "release", "view", tag, "--repo", repo, "--json", "body"],
+        cwd=cwd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if proc.returncode != 0:
+        return VerificationResult(
+            passed=True,
+            status="SKIPPED_REMOTE",
+            message=f"Could not query GitHub Release body via gh CLI ({proc.stderr.strip() or 'gh unavailable'}).",
+        )
+
+    try:
+        data = json.loads(proc.stdout)
+        body = data.get("body", "")
+    except Exception as e:
+        return VerificationResult(
+            passed=False,
+            status="RELEASE_BODY_ERROR",
+            message=f"Failed to parse GitHub Release body JSON: {e}",
+        )
+
+    pattern = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
+    bare_links = []
+    for match in pattern.finditer(body):
+        label = match.group(1)
+        target = match.group(2).strip()
+        if re.match(r"^(?:https?://|mailto:|#)", target, re.IGNORECASE):
+            continue
+        bare_links.append(f"[{label}]({target})")
+
+    if bare_links:
+        return VerificationResult(
+            passed=False,
+            status="RELEASE_BODY_RELATIVE_LINK_FORBIDDEN",
+            message=(
+                f"GitHub Release body for '{tag}' contains bare relative link(s): {', '.join(bare_links)}. "
+                "GitHub Releases evaluates relative links against repository root, causing 404 Not Found. "
+                "All release body navigation links must use full repository URLs."
+            ),
+        )
+
+    return VerificationResult(
+        passed=True,
+        status="PASS",
+        message=f"GitHub Release body for {tag} verified: all navigation links use full repository URLs.",
     )
 
 
@@ -1154,6 +1222,12 @@ def main() -> int:
         print(f"[{res_notes.status}] Notes Consistency: {res_notes.message}")
         if not res_notes.passed:
             all_passed = False
+
+        if args.check_remote:
+            res_rel_body = check_github_release_navigation(tag, repo="LightDevCoder/skills", cwd=repo_root)
+            print(f"[{res_rel_body.status}] GitHub Release Navigation: {res_rel_body.message}")
+            if not res_rel_body.passed:
+                all_passed = False
 
         # Release receipt is verified from committed HEAD (receipt_revision)
         # against the immutable candidate/tag snapshot (release_revision)
