@@ -2,19 +2,19 @@
 
 > **Notice:** The previous 12/12 complexity and 13/13 reasoning live semantic figures are **SUPERSEDED** because declared difficulty was previously included in the semantic state payload (label leakage). The figures below represent independent, label-clean evaluation.
 
-- **Timestamp:** `2026-09-20T06:26:25Z`
+- **Timestamp:** `2026-09-20T06:51:30Z`
 - **Mode:** `live`
 - **Model Version:** `jev-latest`
 - **Total Scenarios:** `36`
-- **Overall Passed:** `35`
-- **Overall Failed:** `1`
-- **Overall Accuracy:** `97.2%`
+- **Overall Passed:** `36`
+- **Overall Failed:** `0`
+- **Overall Accuracy:** `100.0%`
 - **ask-light Workflow Safety:** `22/22 (100.0%)`
 - **ask-light Semantic Accuracy:** `100.0%` (Evaluated: 4, Not Evaluated: 18, Passed: 4)
-- **agent-config Config Correctness:** `13/14 (92.9%)`
-- **agent-config Complexity Semantic Accuracy:** `90.9%` (Authoritative code-owned: 3, Jev Evaluated: 11, Passed: 10, Failed: 1, Fallback: 0, Not Evaluated: 3)
+- **agent-config Config Correctness:** `14/14 (100.0%)`
+- **agent-config Complexity Semantic Accuracy:** `100.0%` (Authoritative code-owned: 3, Jev Evaluated: 10, Passed: 10, Failed: 0, Fallback: 1, Not Evaluated: 4)
 - **agent-config Reasoning Semantic Accuracy:** `100.0%` (Explicit-policy owned: 1, Jev Evaluated: 11, Passed: 11, Failed: 0, Fallback: 2, Not Evaluated: 3)
-- **Duration:** `10.652s`
+- **Duration:** `10.647s`
 
 ## 1. ask-light Evaluation Results (22 scenarios)
 
@@ -38,7 +38,7 @@
 | AL-16 | Ambiguous user request with trade-offs | `RECOMMEND` | `implement` | 0.89 | N/A | Yes | PASS | PASS | **PASS** |
 | AL-17 | Complex architectural overhaul request | `RECOMMEND` | `implement` | N/A | 0.87 | Yes | PASS | PASS | **PASS** |
 | AL-18 | Clear status question negative case (no false ambiguity) | `EXPLAIN` | `None` | N/A | N/A | Yes | PASS | NOT_EVALUATED | **PASS** |
-| AL-19 | Negative ambiguity case: unambiguous disjunction query | `RECOMMEND` | `implement` | 0.37 | N/A | Yes | PASS | PASS | **PASS** |
+| AL-19 | Negative ambiguity case: unambiguous disjunction query | `RECOMMEND` | `implement` | 0.36 | N/A | Yes | PASS | PASS | **PASS** |
 | AL-20 | Negative escalation case: simple refactor task | `RECOMMEND` | `implement` | N/A | 0.03 | Yes | PASS | PASS | **PASS** |
 | AL-21 | Adversarial: what is next, do not execute | `RECOMMEND` | `implement` | N/A | N/A | Yes | PASS | NOT_EVALUATED | **PASS** |
 | AL-22 | Adversarial: explain whether implementation is next | `EXPLAIN` | `None` | N/A | N/A | Yes | PASS | NOT_EVALUATED | **PASS** |
@@ -54,7 +54,7 @@
 | ID | Scenario Name | Observed Model | Observed Effort | Topology | Config Correct | Complexity Semantic | Reasoning Semantic | Overall |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | AC-01 | Routine documentation edit | `gpt-4o-mini` | `default` | `Case C` | PASS | PASS | PASS | **PASS** |
-| AC-02 | Small bug fix | `gpt-4o-mini` | `default` | `Case C` | FAIL | FAIL | PASS | **FAIL** |
+| AC-02 | Small bug fix | `claude-3-5-sonnet` | `default` | `Case A` | PASS | NOT_EVALUATED | PASS | **PASS** |
 | AC-03 | Standard feature implementation | `claude-3-5-sonnet` | `default` | `Case A` | PASS | PASS | NOT_EVALUATED | **PASS** |
 | AC-04 | Large refactor | `o3-mini` | `high` | `Case C` | PASS | PASS | PASS | **PASS** |
 | AC-05 | Security-critical change | `o3-mini` | `high` | `Case C` | PASS | PASS | NOT_EVALUATED | **PASS** |

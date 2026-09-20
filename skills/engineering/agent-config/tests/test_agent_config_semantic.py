@@ -554,6 +554,111 @@ class AgentConfigSemanticTest(unittest.TestCase):
                 self.assertEqual(res.execution_config.model, "tier-high")
                 self.assertTrue(res.fallback_used)
 
+    def test_downgrade_policy_rejects_marginal_confidence_downgrade(self) -> None:
+        """Verify downgrade from baseline standard to routine is rejected when evidence is marginal."""
+        mock_score_comp = MagicMock()
+        mock_score_comp.score = 0.41  # candidate routine
+        mock_score_comp.confidence = 0.59  # marginal confidence (<0.75 threshold)
+
+        mock_score_reas = MagicMock()
+        mock_score_reas.score = 0.5
+        mock_score_reas.confidence = 0.90
+
+        mock_resp = MagicMock()
+        mock_resp.scores = {
+            "task_complexity": mock_score_comp,
+            "reasoning_need": mock_score_reas,
+        }
+        mock_client = MagicMock()
+        mock_client.system_one.return_value = mock_resp
+
+        task = TaskCharacteristics(
+            title="Fix off-by-one error in pagination",
+            description="Page index starts at 0 instead of 1",
+            difficulty="standard",
+            difficulty_source="unknown",
+        )
+
+        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+            with patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
+                prof, conf, fallback, reason = extract_abstract_task_profile(task, client=mock_client)
+
+                # Downgrade rejected! Retains baseline standard
+                self.assertEqual(prof.recommended_tier, "standard")
+                self.assertEqual(prof.complexity_level, "standard")
+                self.assertTrue(prof.dimension_provenance["complexity"].fallback_used)
+                self.assertEqual(prof.dimension_provenance["complexity"].source, "deterministic-fallback")
+                self.assertIn("Downgrade from standard to routine rejected", prof.dimension_provenance["complexity"].fallback_reason)
+
+    def test_downgrade_policy_accepts_strong_evidence_downgrade(self) -> None:
+        """Verify downgrade from baseline standard to routine is accepted with strong evidence."""
+        mock_score_comp = MagicMock()
+        mock_score_comp.score = 0.10  # candidate routine, far from 0.5 boundary
+        mock_score_comp.confidence = 0.90  # strong confidence (>=0.75 threshold)
+
+        mock_score_reas = MagicMock()
+        mock_score_reas.score = 0.2
+        mock_score_reas.confidence = 0.90
+
+        mock_resp = MagicMock()
+        mock_resp.scores = {
+            "task_complexity": mock_score_comp,
+            "reasoning_need": mock_score_reas,
+        }
+        mock_client = MagicMock()
+        mock_client.system_one.return_value = mock_resp
+
+        task = TaskCharacteristics(
+            title="Fix typo in README header",
+            description="Fix spelling error",
+            difficulty="standard",
+            difficulty_source="unknown",
+        )
+
+        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+            with patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
+                prof, conf, fallback, reason = extract_abstract_task_profile(task, client=mock_client)
+
+                # Strong evidence downgrade accepted!
+                self.assertEqual(prof.recommended_tier, "routine")
+                self.assertEqual(prof.complexity_level, "routine")
+                self.assertFalse(prof.dimension_provenance["complexity"].fallback_used)
+                self.assertEqual(prof.dimension_provenance["complexity"].source, "jev")
+
+    def test_upgrade_policy_accepts_standard_confidence(self) -> None:
+        """Verify upgrade from routine to standard is accepted with standard confidence (>=0.50)."""
+        mock_score_comp = MagicMock()
+        mock_score_comp.score = 1.0  # candidate standard
+        mock_score_comp.confidence = 0.55  # >=0.50 upgrade threshold
+
+        mock_score_reas = MagicMock()
+        mock_score_reas.score = 1.0
+        mock_score_reas.confidence = 0.90
+
+        mock_resp = MagicMock()
+        mock_resp.scores = {
+            "task_complexity": mock_score_comp,
+            "reasoning_need": mock_score_reas,
+        }
+        mock_client = MagicMock()
+        mock_client.system_one.return_value = mock_resp
+
+        task = TaskCharacteristics(
+            title="Implement webhook dispatcher",
+            description="Process incoming events",
+            difficulty="routine",
+            difficulty_source="unknown",
+        )
+
+        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+            with patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
+                prof, conf, fallback, reason = extract_abstract_task_profile(task, client=mock_client)
+
+                # Upgrade accepted
+                self.assertEqual(prof.recommended_tier, "standard")
+                self.assertFalse(prof.dimension_provenance["complexity"].fallback_used)
+                self.assertEqual(prof.dimension_provenance["complexity"].source, "jev")
+
 
 if __name__ == "__main__":
     unittest.main()

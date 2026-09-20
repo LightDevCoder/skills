@@ -69,6 +69,20 @@ try:
 except ImportError:
     from agent_config_models import AbstractTaskProfile, DimensionProvenance, TaskCharacteristics
 
+# Semantic Acceptance and Downgrade Policy (PROVISIONAL)
+# Capability tier ranks for direction evaluation
+TIER_RANKS: Dict[str, int] = {"routine": 1, "standard": 2, "high": 3}
+REASONING_RANKS: Dict[str, int] = {"low": 1, "medium": 2, "high": 3}
+
+# Upgrades allocate more capability/safety (safe failure direction) -> standard threshold
+UPGRADE_CONFIDENCE_THRESHOLD: float = 0.50
+# Holds preserve heuristic baseline -> standard threshold
+HOLD_CONFIDENCE_THRESHOLD: float = 0.50
+# Downgrades reduce capability tier below baseline (unsafe failure direction) -> requires stronger evidence
+DOWNGRADE_CONFIDENCE_THRESHOLD: float = 0.75
+# Downgrades must not hover on the tier discretization boundary unless confidence is very high (>= 0.85)
+DOWNGRADE_MARGIN: float = 0.15
+
 
 def build_deterministic_profile(task: TaskCharacteristics) -> AbstractTaskProfile:
     """Deterministic fallback mapping of task characteristics to abstract profile.
@@ -276,41 +290,98 @@ def extract_abstract_task_profile(
                 fallback_used=False,
             )
         else:
-            if comp_conf is not None and comp_conf >= 0.50 and comp_score_val is not None:
-                reported_confs.append(comp_conf)
+            det_base = build_deterministic_profile(task)
+            baseline_tier = det_base.recommended_tier
+            baseline_level = det_base.complexity_level
+
+            if comp_score_val is not None and comp_conf is not None:
+                # 1. Discretization mapping
                 if comp_score_val < 0.5:
-                    comp_level = "routine"
-                    rec_tier = "routine"
+                    cand_level = "routine"
+                    cand_tier = "routine"
+                    boundary_dist = 0.5 - comp_score_val
                 elif comp_score_val < 1.5:
-                    comp_level = "standard"
-                    rec_tier = "standard"
+                    cand_level = "standard"
+                    cand_tier = "standard"
+                    boundary_dist = min(comp_score_val - 0.5, 1.5 - comp_score_val)
                 elif comp_score_val < 2.5:
-                    comp_level = "high"
-                    rec_tier = "high"
+                    cand_level = "high"
+                    cand_tier = "high"
+                    boundary_dist = min(comp_score_val - 1.5, 2.5 - comp_score_val)
                 else:
-                    comp_level = "critical"
-                    rec_tier = "high"
-                prov["complexity"] = DimensionProvenance(
-                    dimension="complexity",
-                    value=comp_level,
-                    confidence=comp_conf,
-                    source="jev",
-                    fallback_used=False,
-                )
-                prov["tier"] = DimensionProvenance(
-                    dimension="tier",
-                    value=rec_tier,
-                    confidence=comp_conf,
-                    source="jev",
-                    fallback_used=False,
-                )
+                    cand_level = "critical"
+                    cand_tier = "high"
+                    boundary_dist = comp_score_val - 2.5
+
+                # 2. Evaluate direction relative to baseline: UPGRADE, HOLD, or DOWNGRADE
+                cand_rank = TIER_RANKS[cand_tier]
+                base_rank = TIER_RANKS[baseline_tier]
+
+                if cand_rank > base_rank:
+                    # UPGRADE: allocating higher capability tier (safe failure direction)
+                    accepted = comp_conf >= UPGRADE_CONFIDENCE_THRESHOLD
+                    rejection_reason = f"Upgrade to {cand_tier} rejected: confidence {comp_conf:.2f} < {UPGRADE_CONFIDENCE_THRESHOLD:.2f}"
+                elif cand_rank == base_rank:
+                    # HOLD: preserving baseline capability tier
+                    accepted = comp_conf >= HOLD_CONFIDENCE_THRESHOLD
+                    rejection_reason = f"Hold at {cand_tier} rejected: confidence {comp_conf:.2f} < {HOLD_CONFIDENCE_THRESHOLD:.2f}"
+                else:
+                    # DOWNGRADE: reducing capability tier below baseline (unsafe failure direction)
+                    # Downgrade policy (PROVISIONAL): Requires stronger evidence to prevent under-powering tasks.
+                    strong_confidence = comp_conf >= DOWNGRADE_CONFIDENCE_THRESHOLD
+                    strong_margin = (boundary_dist >= DOWNGRADE_MARGIN) or (comp_conf >= 0.85)
+                    accepted = strong_confidence and strong_margin
+                    rejection_reason = (
+                        f"Downgrade from {baseline_tier} to {cand_tier} rejected: "
+                        f"confidence {comp_conf:.2f} < {DOWNGRADE_CONFIDENCE_THRESHOLD:.2f} or "
+                        f"boundary margin {boundary_dist:.2f} < {DOWNGRADE_MARGIN:.2f} (policy: PROVISIONAL)"
+                    )
+
+                if accepted:
+                    reported_confs.append(comp_conf)
+                    comp_level = cand_level
+                    rec_tier = cand_tier
+                    prov["complexity"] = DimensionProvenance(
+                        dimension="complexity",
+                        value=comp_level,
+                        confidence=comp_conf,
+                        source="jev",
+                        fallback_used=False,
+                    )
+                    prov["tier"] = DimensionProvenance(
+                        dimension="tier",
+                        value=rec_tier,
+                        confidence=comp_conf,
+                        source="jev",
+                        fallback_used=False,
+                    )
+                else:
+                    comp_fallback = True
+                    fallback_dims.append("complexity")
+                    comp_level = baseline_level
+                    rec_tier = baseline_tier
+                    prov["complexity"] = DimensionProvenance(
+                        dimension="complexity",
+                        value=comp_level,
+                        confidence=comp_conf,
+                        source="deterministic-fallback",
+                        fallback_used=True,
+                        fallback_reason=rejection_reason,
+                    )
+                    prov["tier"] = DimensionProvenance(
+                        dimension="tier",
+                        value=rec_tier,
+                        confidence=comp_conf,
+                        source="deterministic-fallback",
+                        fallback_used=True,
+                        fallback_reason=rejection_reason,
+                    )
             else:
                 comp_fallback = True
                 fallback_dims.append("complexity")
-                det_base = build_deterministic_profile(task)
-                comp_level = det_base.complexity_level
-                rec_tier = det_base.recommended_tier
-                reason_msg = f"Jev confidence {comp_conf:.2f} < 0.50" if comp_conf is not None else "Jev score missing"
+                comp_level = baseline_level
+                rec_tier = baseline_tier
+                reason_msg = "Jev score or confidence missing"
                 prov["complexity"] = DimensionProvenance(
                     dimension="complexity",
                     value=comp_level,
@@ -349,21 +420,61 @@ def extract_abstract_task_profile(
                 fallback_used=False,
             )
         else:
-            if reas_conf is not None and reas_conf >= 0.50 and reas_score_val is not None:
-                reported_confs.append(reas_conf)
+            det_base_reas = build_deterministic_profile(task)
+            baseline_reas = det_base_reas.reasoning_need
+
+            if reas_conf is not None and reas_score_val is not None:
                 if reas_score_val < 0.5:
-                    reasoning_need = "low"
+                    cand_reas = "low"
+                    boundary_dist_reas = 0.5 - reas_score_val
                 elif reas_score_val < 1.5:
-                    reasoning_need = "medium"
+                    cand_reas = "medium"
+                    boundary_dist_reas = min(reas_score_val - 0.5, 1.5 - reas_score_val)
                 else:
-                    reasoning_need = "high"
-                prov["reasoning"] = DimensionProvenance(
-                    dimension="reasoning",
-                    value=reasoning_need,
-                    confidence=reas_conf,
-                    source="jev",
-                    fallback_used=False,
-                )
+                    cand_reas = "high"
+                    boundary_dist_reas = reas_score_val - 1.5
+
+                cand_rank_reas = REASONING_RANKS[cand_reas]
+                base_rank_reas = REASONING_RANKS[baseline_reas]
+
+                if cand_rank_reas > base_rank_reas:
+                    accepted_reas = reas_conf >= UPGRADE_CONFIDENCE_THRESHOLD
+                    rejection_reason_reas = f"Upgrade reasoning to {cand_reas} rejected: confidence {reas_conf:.2f} < {UPGRADE_CONFIDENCE_THRESHOLD:.2f}"
+                elif cand_rank_reas == base_rank_reas:
+                    accepted_reas = reas_conf >= HOLD_CONFIDENCE_THRESHOLD
+                    rejection_reason_reas = f"Hold reasoning at {cand_reas} rejected: confidence {reas_conf:.2f} < {HOLD_CONFIDENCE_THRESHOLD:.2f}"
+                else:
+                    strong_confidence_reas = reas_conf >= DOWNGRADE_CONFIDENCE_THRESHOLD
+                    strong_margin_reas = (boundary_dist_reas >= DOWNGRADE_MARGIN) or (reas_conf >= 0.85)
+                    accepted_reas = strong_confidence_reas and strong_margin_reas
+                    rejection_reason_reas = (
+                        f"Downgrade reasoning from {baseline_reas} to {cand_reas} rejected: "
+                        f"confidence {reas_conf:.2f} < {DOWNGRADE_CONFIDENCE_THRESHOLD:.2f} or "
+                        f"boundary margin {boundary_dist_reas:.2f} < {DOWNGRADE_MARGIN:.2f} (policy: PROVISIONAL)"
+                    )
+
+                if accepted_reas:
+                    reported_confs.append(reas_conf)
+                    reasoning_need = cand_reas
+                    prov["reasoning"] = DimensionProvenance(
+                        dimension="reasoning",
+                        value=reasoning_need,
+                        confidence=reas_conf,
+                        source="jev",
+                        fallback_used=False,
+                    )
+                else:
+                    reas_fallback = True
+                    fallback_dims.append("reasoning")
+                    reasoning_need = baseline_reas
+                    prov["reasoning"] = DimensionProvenance(
+                        dimension="reasoning",
+                        value=reasoning_need,
+                        confidence=reas_conf,
+                        source="deterministic-fallback",
+                        fallback_used=True,
+                        fallback_reason=rejection_reason_reas,
+                    )
             else:
                 reas_fallback = True
                 fallback_dims.append("reasoning")

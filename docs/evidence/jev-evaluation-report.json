@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-09-20T06:26:25Z",
+  "timestamp": "2026-09-20T06:51:30Z",
   "mode": "live",
   "model_version": "jev-latest",
   "total_scenarios": 36,
-  "total_passed": 35,
-  "total_failed": 1,
-  "overall_accuracy": 0.9722222222222222,
-  "duration_seconds": 10.652,
+  "total_passed": 36,
+  "total_failed": 0,
+  "overall_accuracy": 1.0,
+  "duration_seconds": 10.647,
   "suites": {
     "ask-light": {
       "suite": "ask-light",
@@ -604,7 +604,7 @@
             "action_confidence": null,
             "action_probabilities": {},
             "execution_intent_probability": null,
-            "ambiguity_probability": 0.37,
+            "ambiguity_probability": 0.36,
             "escalation_probability": null,
             "questions_sent": [
               "has_material_ambiguity"
@@ -613,7 +613,7 @@
               "has_material_ambiguity": "Ambiguity phrasing detected on implementable state."
             },
             "wants_immediate_execution_prob": null,
-            "has_material_ambiguity_prob": 0.37,
+            "has_material_ambiguity_prob": 0.36,
             "escalation_prob": null
           }
         },
@@ -709,23 +709,23 @@
           "semantic_judgments": null
         }
       ],
-      "duration_seconds": 6.687
+      "duration_seconds": 6.764
     },
     "agent-config": {
       "suite": "agent-config",
       "total": 14,
-      "passed": 13,
-      "failed": 1,
-      "accuracy": 0.9285714285714286,
-      "config_correctness_passed": 13,
-      "config_correctness_accuracy": 0.9285714285714286,
+      "passed": 14,
+      "failed": 0,
+      "accuracy": 1.0,
+      "config_correctness_passed": 14,
+      "config_correctness_accuracy": 1.0,
       "complexity_authoritative": 3,
-      "complexity_evaluated": 11,
+      "complexity_evaluated": 10,
       "complexity_passed": 10,
-      "complexity_failed": 1,
-      "complexity_fallback": 0,
-      "complexity_not_evaluated": 3,
-      "complexity_accuracy": 0.9090909090909091,
+      "complexity_failed": 0,
+      "complexity_fallback": 1,
+      "complexity_not_evaluated": 4,
+      "complexity_accuracy": 1.0,
       "reasoning_explicit_policy": 1,
       "reasoning_evaluated": 11,
       "reasoning_passed": 11,
@@ -774,33 +774,33 @@
         {
           "id": "AC-02",
           "name": "Small bug fix",
-          "passed": false,
-          "config_correctness_passed": false,
-          "complexity_semantic": "FAIL",
+          "passed": true,
+          "config_correctness_passed": true,
+          "complexity_semantic": "NOT_EVALUATED",
           "reasoning_semantic": "PASS",
           "readiness_matched": true,
-          "topology_matched": false,
-          "model_matched": false,
+          "topology_matched": true,
+          "model_matched": true,
           "effort_matched": true,
-          "tier_matched": false,
+          "tier_matched": true,
           "candidate_safe": true,
-          "observed_model": "gpt-4o-mini",
+          "observed_model": "claude-3-5-sonnet",
           "observed_effort": null,
-          "observed_topology": "Case C",
-          "observed_tier": "routine",
+          "observed_topology": "Case A",
+          "observed_tier": "standard",
           "observed_reasoning": "low",
-          "fallback_used": false,
+          "fallback_used": true,
           "approval_state": "approved",
           "raw_evidence": {
             "complexity_score": 0.41,
             "complexity_confidence": 0.59,
-            "complexity_source": "jev",
+            "complexity_source": "deterministic-fallback",
             "expected_complexity_range": [
               0.5,
               1.5
             ],
-            "reasoning_score": 0.1,
-            "reasoning_confidence": 0.85,
+            "reasoning_score": 0.08,
+            "reasoning_confidence": 0.88,
             "reasoning_source": "jev",
             "expected_reasoning_range": [
               0.0,
@@ -836,8 +836,8 @@
               0.5,
               1.5
             ],
-            "reasoning_score": 0.58,
-            "reasoning_confidence": 0.37,
+            "reasoning_score": 0.6,
+            "reasoning_confidence": 0.39,
             "reasoning_source": "deterministic-fallback",
             "expected_reasoning_range": [
               0.5,
@@ -866,15 +866,15 @@
           "fallback_used": false,
           "approval_state": "approved",
           "raw_evidence": {
-            "complexity_score": 2.66,
-            "complexity_confidence": 0.66,
+            "complexity_score": 2.68,
+            "complexity_confidence": 0.68,
             "complexity_source": "jev",
             "expected_complexity_range": [
               1.5,
               3.0
             ],
-            "reasoning_score": 1.79,
-            "reasoning_confidence": 0.68,
+            "reasoning_score": 1.77,
+            "reasoning_confidence": 0.66,
             "reasoning_source": "jev",
             "expected_reasoning_range": [
               1.5,
@@ -903,15 +903,15 @@
           "fallback_used": true,
           "approval_state": "approved",
           "raw_evidence": {
-            "complexity_score": 2.95,
-            "complexity_confidence": 0.95,
+            "complexity_score": 2.96,
+            "complexity_confidence": 0.96,
             "complexity_source": "jev",
             "expected_complexity_range": [
               1.5,
               3.0
             ],
-            "reasoning_score": 1.34,
-            "reasoning_confidence": 0.47,
+            "reasoning_score": 1.35,
+            "reasoning_confidence": 0.45,
             "reasoning_source": "deterministic-fallback",
             "expected_reasoning_range": [
               1.5,
@@ -948,7 +948,7 @@
               3.0
             ],
             "reasoning_score": 1.99,
-            "reasoning_confidence": 0.98,
+            "reasoning_confidence": 0.99,
             "reasoning_source": "jev",
             "expected_reasoning_range": [
               1.5,
@@ -1096,7 +1096,7 @@
               3.0
             ],
             "reasoning_score": 1.89,
-            "reasoning_confidence": 0.84,
+            "reasoning_confidence": 0.83,
             "reasoning_source": "jev",
             "expected_reasoning_range": [
               1.5,
@@ -1125,8 +1125,8 @@
           "fallback_used": false,
           "approval_state": "approved",
           "raw_evidence": {
-            "complexity_score": 2.02,
-            "complexity_confidence": 0.98,
+            "complexity_score": 2.01,
+            "complexity_confidence": 0.99,
             "complexity_source": "jev",
             "expected_complexity_range": [
               1.5,
@@ -1253,7 +1253,7 @@
           }
         }
       ],
-      "duration_seconds": 3.937
+      "duration_seconds": 3.863
     }
   }
 }
