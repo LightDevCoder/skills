@@ -263,6 +263,92 @@ class AgentConfigSemanticTest(unittest.TestCase):
         self.assertEqual(prof.recommended_tier, "high")
         self.assertEqual(prof.cost_sensitivity, "high")
 
+    def test_cost_sensitive_standard_task_does_not_downgrade_to_routine(self) -> None:
+        """P1 (Section 24-25): Standard task with cost_sensitive must stay standard, not downgrade to routine."""
+        task = TaskCharacteristics(difficulty="standard", cost_sensitive=True)
+        prof = build_deterministic_profile(task)
+        self.assertEqual(prof.recommended_tier, "standard")
+        self.assertEqual(prof.reasoning_need, "medium")
+
+    def test_independent_per_dimension_confidence_fallback(self) -> None:
+        """P1 (Sections 27-29): High-confidence complexity is retained when reasoning falls back."""
+        mock_score_comp = MagicMock()
+        mock_score_comp.score = 2.2  # high
+        mock_score_comp.confidence = 0.95  # High confidence -> keep Jev
+
+        mock_score_reas = MagicMock()
+        mock_score_reas.score = 1.8
+        mock_score_reas.confidence = 0.35  # Low confidence (<0.50) -> fallback reasoning only
+
+        mock_resp = MagicMock()
+        mock_resp.scores = {
+            "task_complexity": mock_score_comp,
+            "reasoning_need": mock_score_reas,
+        }
+        mock_client = MagicMock()
+        mock_client.system_one.return_value = mock_resp
+
+        task = TaskCharacteristics(title="Complex feature", description="Refactor with low reasoning certainty", difficulty="standard")
+
+        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+            with patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
+                prof, conf, fallback, reason = extract_abstract_task_profile(task, client=mock_client)
+
+                # Complexity retained from Jev
+                self.assertEqual(prof.recommended_tier, "high")
+                self.assertEqual(prof.complexity_level, "high")
+                self.assertFalse(prof.dimension_provenance["complexity"].fallback_used)
+                self.assertEqual(prof.dimension_provenance["complexity"].source, "jev")
+
+                # Reasoning fell back to deterministic baseline for standard (medium)
+                self.assertEqual(prof.reasoning_need, "medium")
+                self.assertTrue(prof.dimension_provenance["reasoning"].fallback_used)
+                self.assertEqual(prof.dimension_provenance["reasoning"].source, "deterministic-fallback")
+
+                self.assertTrue(fallback)
+                self.assertIn("reasoning", reason)
+
+    def test_score_discretization_boundaries(self) -> None:
+        """P1 (Section 30): Explicit boundary validation for Score discretization mapping."""
+        task = TaskCharacteristics(difficulty="standard")
+
+        def make_mock_client(comp_score: float, reas_score: float):
+            resp = MagicMock()
+            s_comp = MagicMock(score=comp_score, confidence=0.99)
+            s_reas = MagicMock(score=reas_score, confidence=0.99)
+            resp.scores = {"task_complexity": s_comp, "reasoning_need": s_reas}
+            client = MagicMock()
+            client.system_one.return_value = resp
+            return client
+
+        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+            with patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
+                # Boundary 0.49 vs 0.50 for complexity
+                p_under, _, _, _ = extract_abstract_task_profile(task, client=make_mock_client(0.49, 0.49))
+                self.assertEqual(p_under.complexity_level, "routine")
+                self.assertEqual(p_under.reasoning_need, "low")
+
+                p_over, _, _, _ = extract_abstract_task_profile(task, client=make_mock_client(0.50, 0.50))
+                self.assertEqual(p_over.complexity_level, "standard")
+                self.assertEqual(p_over.reasoning_need, "medium")
+
+                # Boundary 1.49 vs 1.50
+                p_under2, _, _, _ = extract_abstract_task_profile(task, client=make_mock_client(1.49, 1.49))
+                self.assertEqual(p_under2.complexity_level, "standard")
+                self.assertEqual(p_under2.reasoning_need, "medium")
+
+                p_over2, _, _, _ = extract_abstract_task_profile(task, client=make_mock_client(1.50, 1.50))
+                self.assertEqual(p_over2.complexity_level, "high")
+                self.assertEqual(p_over2.reasoning_need, "high")
+
+                # Boundary 2.49 vs 2.50
+                p_under3, _, _, _ = extract_abstract_task_profile(task, client=make_mock_client(2.49, 1.8))
+                self.assertEqual(p_under3.complexity_level, "high")
+
+                p_over3, _, _, _ = extract_abstract_task_profile(task, client=make_mock_client(2.50, 1.8))
+                self.assertEqual(p_over3.complexity_level, "critical")
+                self.assertEqual(p_over3.recommended_tier, "high")
+
 
 if __name__ == "__main__":
     unittest.main()

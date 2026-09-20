@@ -371,6 +371,65 @@ class AskLightSemanticTest(unittest.TestCase):
         self.assertEqual(rec.primary_skill, "implement")
         self.assertEqual(rec.target_item, "01.md")
 
+    def test_query_planner_zero_questions_on_plain_query_and_single_action(self) -> None:
+        """P1 (Section 13-15): Standard query with single legal action skips Jev API calls completely."""
+        state = CompactProjectState(initialized=True, spec_exists=True, spec_active=True, tickets_exist=True, ready_tickets=["01.md"])
+        legal = compute_legal_actions(state)
+
+        mock_client = MagicMock()
+        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+            with patch("semantic_router.TYPESAFE_AVAILABLE", True):
+                rec = route_with_jev(legal, "What should I do next?", client=mock_client)
+                self.assertEqual(rec.primary_skill, "implement")
+                self.assertEqual(rec.confidence, 1.0)
+                # Query planner emitted 0 questions -> system_one was never called!
+                mock_client.system_one.assert_not_called()
+                self.assertEqual(rec.semantic_judgments.questions_sent, [])
+
+    def test_query_planner_sends_ambiguity_when_ambiguous_phrasing_present(self) -> None:
+        """P1 (Section 14): Ambiguous user phrasing triggers ambiguity question."""
+        state = CompactProjectState(initialized=True, spec_exists=False)
+        legal = compute_legal_actions(state)
+
+        mock_resp = MagicMock()
+        mock_resp.choices = {}
+        mock_resp.nouls = {"has_material_ambiguity": MagicMock(noul=0.92)}
+        mock_client = MagicMock()
+        mock_client.system_one.return_value = mock_resp
+
+        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+            with patch("semantic_router.TYPESAFE_AVAILABLE", True):
+                rec = route_with_jev(legal, "Maybe we should redesign auth or database first?", client=mock_client)
+                self.assertIn("has_material_ambiguity", rec.semantic_judgments.questions_sent)
+                self.assertEqual(rec.primary_skill, "project-clarify")
+
+    def test_adversarial_linguistic_cases_distinguish_intent_from_authorization(self) -> None:
+        """P1 (Sections 35-37): Natural language adversarial cases separate semantic intent from deterministic authority."""
+        state = CompactProjectState(initialized=True, spec_exists=True, spec_active=True, tickets_exist=True, ready_tickets=["01.md"])
+
+        mock_client = MagicMock()
+        mock_client.system_one.return_value = MagicMock(
+            choices={},
+            nouls={"wants_immediate_execution": MagicMock(noul=0.15)}
+        )
+
+        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+            with patch("semantic_router.TYPESAFE_AVAILABLE", True):
+                # 1. "Don't implement anything; just tell me what comes next."
+                legal_neg = compute_legal_actions(state, user_request="Don't implement anything; just tell me what comes next.")
+                rec_neg = route_with_jev(legal_neg, "Don't implement anything; just tell me what comes next.", client=mock_client)
+                self.assertEqual(rec_neg.status, "RECOMMEND")
+                self.assertEqual(rec_neg.primary_skill, "implement")
+
+                # 2. "Should I implement now?"
+                legal_hes = compute_legal_actions(state, user_request="Should I implement now?")
+                rec_hes = route_with_jev(legal_hes, "Should I implement now?", client=mock_client)
+                self.assertEqual(rec_hes.status, "RECOMMEND")  # Hesitant inquiry cannot grant transition
+
+                # 3. "Implement now."
+                legal_cmd = compute_legal_actions(state, user_request="Implement now.")
+                self.assertEqual(legal_cmd.status, "TRANSITION")  # Deterministic authorization holds!
+
 
 if __name__ == "__main__":
     unittest.main()

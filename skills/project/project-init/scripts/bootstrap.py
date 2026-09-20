@@ -37,6 +37,80 @@ MARKER_TOKENS = (START, END, POINTER_START, POINTER_END)
 JEV_SKILL_NAME = "typesafe-ai"
 JEV_CONSTRAINT = "TypeSafe Jev System One semantic acceleration"
 
+SUPPORTED_AGENT_TARGETS: dict[str, dict[str, Any]] = {
+    "pi": {
+        "cli_agent": "pi",
+        "local_paths": [Path(".pi/skills"), Path(".pi/agent/skills")],
+        "global_paths": [Path.home() / ".pi" / "agent" / "skills", Path.home() / ".pi" / "skills"],
+    },
+    "claude": {
+        "cli_agent": "claude",
+        "local_paths": [Path(".claude/skills"), Path(".agents/skills")],
+        "global_paths": [Path.home() / ".claude" / "skills", Path.home() / ".agents" / "skills"],
+    },
+    "cursor": {
+        "cli_agent": "cursor",
+        "local_paths": [Path(".cursor/skills")],
+        "global_paths": [Path.home() / ".cursor" / "skills"],
+    },
+    "codex": {
+        "cli_agent": "codex",
+        "local_paths": [Path(".codex/skills"), Path(".agents/skills")],
+        "global_paths": [Path.home() / ".codex" / "skills", Path.home() / ".agents" / "skills"],
+    },
+}
+
+
+def resolve_active_agent_target(
+    root: Optional[Path] = None,
+    config: Optional[dict[str, Any]] = None,
+    explicit_target: Optional[str] = None,
+) -> Optional[str]:
+    """Resolve canonical active-Agent target for skills installer.
+
+    Order:
+      1. explicit_target argument
+      2. config.get("agentTarget") or config.get("hostAgent")
+      3. os.environ["SKILLS_AGENT_TARGET"]
+      4. Evidenced host environment:
+         - PI_* env vars -> "pi"
+         - CLAUDE_CODE_ENTRY or CLAUDE_PROJECT_DIR -> "claude"
+         - CURSOR_AGENT or CURSOR_PROJECT_DIR -> "cursor"
+         - CODEX_AGENT or CODEX_DIR -> "codex"
+      5. Evidenced instruction file:
+         - CLAUDE.md -> "claude"
+         - AGENTS.md with evidenced Pi environment -> "pi"
+      6. Fails closed (returns None) if agent is unknown or unverified.
+    """
+    candidates = [
+        explicit_target,
+        config.get("agentTarget") if config else None,
+        config.get("hostAgent") if config else None,
+        os.environ.get("SKILLS_AGENT_TARGET"),
+    ]
+    for cand in candidates:
+        if cand and str(cand).strip().lower() in SUPPORTED_AGENT_TARGETS:
+            return str(cand).strip().lower()
+
+    if any(k.startswith("PI_") for k in os.environ):
+        return "pi"
+    if os.environ.get("CLAUDE_CODE_ENTRY") or os.environ.get("CLAUDE_PROJECT_DIR"):
+        return "claude"
+    if os.environ.get("CURSOR_AGENT") or os.environ.get("CURSOR_PROJECT_DIR"):
+        return "cursor"
+    if os.environ.get("CODEX_AGENT") or os.environ.get("CODEX_DIR"):
+        return "codex"
+
+    if config:
+        inst_file = str(config.get("instructionFile", "")).lower()
+        if inst_file == "claude.md":
+            return "claude"
+        if inst_file == "agents.md":
+            if (Path.home() / ".pi").is_dir() or (root and (root / ".pi").is_dir()):
+                return "pi"
+
+    return None
+
 
 def mask_secret(value: str) -> str:
     """Mask sensitive keys or tokens. Never print or store raw secrets in plaintext."""
@@ -45,27 +119,46 @@ def mask_secret(value: str) -> str:
     return "[REDACTED]"
 
 
-def detect_typesafe_key(project_root: Optional[Path] = None) -> tuple[bool, str]:
-    """Inspect os.environ and project .env for TYPESAFE_API_KEY.
+def resolve_typesafe_credentials(project_root: Optional[Path] = None) -> tuple[Optional[str], str]:
+    """Canonical credential resolution for TypeSafe API key.
 
-    Returns (found, source). Never returns raw key value.
+    Order:
+      1. Current process environment: os.environ["TYPESAFE_API_KEY"]
+      2. Explicit active project .env (parsed line-by-line, no dotenv dependency)
+      3. Unavailable (None, "missing")
+
+    Never scans arbitrary parents or unrelated directories.
     """
-    if os.environ.get("TYPESAFE_API_KEY", "").strip():
-        return True, "os.environ"
+    env_key = os.environ.get("TYPESAFE_API_KEY", "").strip()
+    if env_key:
+        return env_key, "os.environ"
+
     if project_root is not None:
         env_path = project_root / ".env"
         if env_path.is_file():
             try:
                 for line in env_path.read_text(encoding="utf-8").splitlines():
                     line = line.strip()
-                    if line.startswith("#") or "=" not in line:
+                    if not line or line.startswith("#") or "=" not in line:
                         continue
                     k, v = line.split("=", 1)
-                    if k.strip() == "TYPESAFE_API_KEY" and v.strip().strip("'\""):
-                        return True, ".env"
+                    if k.strip() == "TYPESAFE_API_KEY":
+                        clean_v = v.strip().strip("'\"")
+                        if clean_v:
+                            return clean_v, ".env"
             except Exception:
                 pass
-    return False, "missing"
+
+    return None, "missing"
+
+
+def detect_typesafe_key(project_root: Optional[Path] = None) -> tuple[bool, str]:
+    """Inspect os.environ and explicit project .env for TYPESAFE_API_KEY.
+
+    Returns (found, source). Never returns raw key value.
+    """
+    key, source = resolve_typesafe_credentials(project_root)
+    return bool(key), source
 
 
 def is_valid_typesafe_skill(skill_dir: Path) -> bool:
@@ -96,14 +189,20 @@ def is_valid_typesafe_skill(skill_dir: Path) -> bool:
 
 def find_global_skill(
     skill_name: str = JEV_SKILL_NAME,
+    agent_target: Optional[str] = None,
     search_roots: Optional[list[Path]] = None,
 ) -> Optional[Path]:
-    """Locate official typesafe-ai skill in global agent skill directories."""
-    roots = search_roots if search_roots is not None else [
-        Path.home() / ".agents" / "skills",
-        Path.home() / ".pi" / "agent" / "skills",
-        Path.home() / ".pi" / "skills",
-    ]
+    """Locate official typesafe-ai skill in global agent skill directories matching target."""
+    if search_roots is not None:
+        roots = search_roots
+    elif agent_target and agent_target in SUPPORTED_AGENT_TARGETS:
+        roots = SUPPORTED_AGENT_TARGETS[agent_target]["global_paths"]
+    else:
+        roots = [
+            Path.home() / ".pi" / "agent" / "skills",
+            Path.home() / ".pi" / "skills",
+            Path.home() / ".agents" / "skills",
+        ]
     for root in roots:
         skill_dir = root / skill_name
         if is_valid_typesafe_skill(skill_dir):
@@ -113,10 +212,11 @@ def find_global_skill(
 
 def check_global_skill(
     skill_name: str = JEV_SKILL_NAME,
+    agent_target: Optional[str] = None,
     search_roots: Optional[list[Path]] = None,
 ) -> bool:
-    """Check if valid official skill is present in global skills directories."""
-    return find_global_skill(skill_name, search_roots) is not None
+    """Check if valid official skill is present in global skills directories for agent target."""
+    return find_global_skill(skill_name, agent_target=agent_target, search_roots=search_roots) is not None
 
 
 def ensure_gitignored(project_root: Path, entry: str = ".env") -> bool:
@@ -196,16 +296,33 @@ def prompt_typesafe_key(project_root: Path) -> tuple[bool, str]:
     return False, "missing"
 
 
+def prompt_install_sdk() -> bool:
+    """Interactively ask user if they want to install typesafe-sdk in active Python."""
+    try:
+        response = input("typesafe-sdk 未安装。是否立即在当前 Python 环境中安装？[y/N] ").strip().lower()
+        return response in ("y", "yes")
+    except (EOFError, KeyboardInterrupt, OSError):
+        return False
+
+
 def install_official_typesafe_skill(
     project_root: Path,
+    agent_target: Optional[str] = None,
     installer_cmd: Optional[list[str]] = None,
 ) -> tuple[bool, Optional[Path], str]:
-    """Install official typesafe-ai skill via official package installer.
+    """Install official typesafe-ai skill via official package installer targeting active Agent.
 
-    Valid only if originated from the official typesafe-ai/skills distribution.
-    Never fabricates stub or fake skill files.
+    Fails closed if agent_target is unknown. Never calls installer without --agent.
     """
-    cmd = installer_cmd or ["npx", "skills", "add", "typesafe-ai/skills", "--skill", "typesafe-ai", "-y"]
+    if not agent_target or agent_target not in SUPPORTED_AGENT_TARGETS:
+        return False, None, "JEV_SKILL_TARGET_UNRESOLVED: unable to determine active Agent target for skills installer"
+
+    cmd = installer_cmd or [
+        "npx", "skills", "add", "typesafe-ai/skills",
+        "--skill", JEV_SKILL_NAME,
+        "--agent", agent_target,
+        "--yes",
+    ]
     try:
         proc = subprocess.run(
             cmd,
@@ -215,20 +332,19 @@ def install_official_typesafe_skill(
             text=True,
             timeout=120,
         )
+        if proc.returncode != 0:
+            return False, None, f"JEV_SKILL_SETUP_INCOMPLETE: installer failed with code {proc.returncode}"
     except Exception as exc:
         return False, None, f"JEV_SKILL_SETUP_INCOMPLETE: installer execution failed ({type(exc).__name__})"
 
-    # Check candidate locations populated by installer
-    candidate_targets = [
-        project_root / ".agents" / "skills" / JEV_SKILL_NAME,
-        project_root / ".pi" / "skills" / JEV_SKILL_NAME,
-        project_root / "skills" / JEV_SKILL_NAME,
-    ]
-    for target in candidate_targets:
-        if is_valid_typesafe_skill(target):
-            return True, target, "installed-local"
+    # Verify strictly in expected scope of the target agent
+    target_info = SUPPORTED_AGENT_TARGETS[agent_target]
+    for rel_path in target_info["local_paths"]:
+        candidate = project_root / rel_path / JEV_SKILL_NAME
+        if is_valid_typesafe_skill(candidate):
+            return True, candidate, "installed-local"
 
-    return False, None, "JEV_SKILL_SETUP_INCOMPLETE"
+    return False, None, "JEV_SKILL_SETUP_INCOMPLETE: installed skill missing or invalid in expected agent scope"
 
 
 def verify_typesafe_sdk(python_bin: Optional[str] = None) -> bool:
@@ -271,6 +387,7 @@ def install_typesafe_sdk(python_bin: Optional[str] = None) -> tuple[bool, str]:
 def verify_jev_runtime(
     project_root: Optional[Path] = None,
     client: Optional[Any] = None,
+    api_key: Optional[str] = None,
 ) -> tuple[bool, str]:
     """Perform a minimal smoke test verifying TypeSafe Jev System One readiness.
 
@@ -282,23 +399,15 @@ def verify_jev_runtime(
     except ImportError:
         return False, "JEV_RUNTIME_UNVERIFIED: typesafe-sdk not importable"
 
-    found, _ = detect_typesafe_key(project_root)
-    if not found and client is None:
+    resolved_key = api_key
+    if not resolved_key:
+        resolved_key, _ = resolve_typesafe_credentials(project_root)
+
+    if not resolved_key and client is None:
         return False, "JEV_RUNTIME_UNVERIFIED: TYPESAFE_API_KEY missing"
 
     try:
-        api_key = None
-        if os.environ.get("TYPESAFE_API_KEY"):
-            api_key = os.environ.get("TYPESAFE_API_KEY")
-        elif project_root:
-            env_path = project_root / ".env"
-            if env_path.is_file():
-                for line in env_path.read_text(encoding="utf-8").splitlines():
-                    if line.startswith("TYPESAFE_API_KEY="):
-                        api_key = line.split("=", 1)[1].strip().strip("'\"")
-                        break
-
-        ts_client = client or TypeSafeClient(api_key=api_key)
+        ts_client = client or TypeSafeClient(api_key=resolved_key)
         resp = ts_client.system_one(
             state="Project initialization Jev runtime smoke test.",
             questions={"readiness_check": Noul(instructions="Is this a readiness verification check?")},
@@ -685,8 +794,11 @@ def bootstrap(
     capability_roots: Optional[list[Path]] = None,
     unavailable_capabilities: Optional[list[str]] = None,
     jev: Optional[bool] = None,
+    agent_target: Optional[str] = None,
     installer_cmd: Optional[list[str]] = None,
     smoke_client: Optional[Any] = None,
+    auto_install_sdk: bool = False,
+    python_bin: Optional[str] = None,
 ) -> dict[str, Any]:
     """Bootstrap Light Project contracts with explicit transaction phases.
 
@@ -753,46 +865,70 @@ def bootstrap(
     installed_skill_path: Optional[Path] = None
     jev_skill_status = "none"
 
-    is_global = check_global_skill(JEV_SKILL_NAME, search_roots=capability_roots)
-    global_path = find_global_skill(JEV_SKILL_NAME, search_roots=capability_roots) if is_global else None
-    if is_global and global_path is not None:
-        skill_verified = True
-        jev_skill_status = "global"
+    active_agent = resolve_active_agent_target(root, config, explicit_target=agent_target)
+    if not active_agent:
+        jev_skill_status = "TARGET_UNRESOLVED"
     else:
-        installed, local_path, install_msg = install_official_typesafe_skill(
-            project_root=root,
-            installer_cmd=installer_cmd,
-        )
-        if installed and local_path is not None:
+        is_global = check_global_skill(JEV_SKILL_NAME, agent_target=active_agent, search_roots=capability_roots)
+        global_path = find_global_skill(JEV_SKILL_NAME, agent_target=active_agent, search_roots=capability_roots) if is_global else None
+        if is_global and global_path is not None:
             skill_verified = True
-            jev_skill_status = "installed-local"
-            installed_skill_path = local_path
-            if capability_roots is not None:
-                local_root = local_path.parent
-                if local_root not in capability_roots:
-                    capability_roots = list(capability_roots) + [local_root]
+            jev_skill_status = "global"
         else:
-            skill_verified = False
-            jev_skill_status = "JEV_SKILL_SETUP_INCOMPLETE"
+            installed, local_path, install_msg = install_official_typesafe_skill(
+                project_root=root,
+                agent_target=active_agent,
+                installer_cmd=installer_cmd,
+            )
+            if installed and local_path is not None:
+                skill_verified = True
+                jev_skill_status = "installed-local"
+                installed_skill_path = local_path
+                if capability_roots is not None:
+                    local_root = local_path.parent
+                    if local_root not in capability_roots:
+                        capability_roots = list(capability_roots) + [local_root]
+            else:
+                skill_verified = False
+                jev_skill_status = install_msg or "SKILL_INCOMPLETE"
 
-    key_found, key_source = detect_typesafe_key(project_root=root)
-    if not key_found and sys.stdin.isatty():
-        key_found, key_source = prompt_typesafe_key(project_root=root)
+    key, key_source = resolve_typesafe_credentials(project_root=root)
+    if not key and sys.stdin.isatty():
+        key_prompted, key_source = prompt_typesafe_key(project_root=root)
+        if key_prompted:
+            key, key_source = resolve_typesafe_credentials(project_root=root)
+    key_found = bool(key)
 
-    sdk_ok = verify_typesafe_sdk()
+    sdk_ok = verify_typesafe_sdk(python_bin=python_bin)
+    sdk_declined = False
+    if not sdk_ok:
+        if auto_install_sdk or (sys.stdin.isatty() and prompt_install_sdk()):
+            installed_sdk, _ = install_typesafe_sdk(python_bin=python_bin)
+            sdk_ok = verify_typesafe_sdk(python_bin=python_bin)
+        elif sys.stdin.isatty():
+            sdk_declined = True
+
     stack_recommendations = detect_project_stack(root)
 
-    # Phase D: Smoke verification
+    # Phase D: Smoke verification & precise setup states
     smoke_ok = False
     smoke_msg = "skipped: prerequisites not met"
-    if skill_verified and sdk_ok and key_found:
-        smoke_ok, smoke_msg = verify_jev_runtime(project_root=root, client=smoke_client)
+
+    if not active_agent:
+        jev_status = "TARGET_UNRESOLVED"
+        smoke_msg = "skipped: active agent target unresolved"
     elif not skill_verified:
-        smoke_msg = "skipped: skill setup incomplete"
-    elif not sdk_ok:
-        smoke_msg = "skipped: typesafe-sdk unavailable"
+        jev_status = "SKILL_INCOMPLETE"
+        smoke_msg = f"skipped: {jev_skill_status}"
     elif not key_found:
+        jev_status = "KEY_MISSING"
         smoke_msg = "skipped: TYPESAFE_API_KEY unavailable"
+    elif not sdk_ok:
+        jev_status = "SDK_INSTALL_DECLINED" if sdk_declined else "SDK_MISSING"
+        smoke_msg = "skipped: typesafe-sdk unavailable"
+    else:
+        smoke_ok, smoke_msg = verify_jev_runtime(project_root=root, client=smoke_client, api_key=key)
+        jev_status = "READY" if smoke_ok else "RUNTIME_UNVERIFIED"
 
     # Phase E: Contract registration (ONLY if skill verified)
     effective_skills = list(config["relevantSkills"])
@@ -825,7 +961,6 @@ def bootstrap(
 
     capabilities = inspect_capabilities(effective_skills, capability_roots, unavailable_capabilities)
 
-    jev_status = "READY" if (skill_verified and smoke_ok) else ("UNVERIFIED" if skill_verified else "INCOMPLETE")
     report: dict[str, Any] = {
         "projectRoot": str(root),
         "instructionTarget": str(instruction),
@@ -835,6 +970,7 @@ def bootstrap(
         "jev": {
             "enabled": True,
             "status": jev_status,
+            "agentTarget": active_agent or "unknown",
             "keyDetected": key_found,
             "keySource": key_source,
             "skillLocation": jev_skill_status,
@@ -850,6 +986,13 @@ def bootstrap(
             report["jev"]["installedSkillPath"] = str(installed_skill_path)
 
     return report
+    if installed_skill_path is not None:
+        try:
+            report["jev"]["installedSkillPath"] = str(installed_skill_path.relative_to(root))
+        except ValueError:
+            report["jev"]["installedSkillPath"] = str(installed_skill_path)
+
+    return report
 
 
 def build_argument_parser() -> argparse.ArgumentParser:
@@ -858,6 +1001,8 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--config-json", required=True)
     parser.add_argument("--capability-roots-json", default="[]")
     parser.add_argument("--unavailable-capabilities-json", default="[]")
+    parser.add_argument("--agent-target", default=None, help="Target Agent identifier for skills installation (pi, claude, cursor, codex)")
+    parser.add_argument("--auto-install-sdk", action="store_true", default=False, help="Automatically install typesafe-sdk into active python runtime if missing")
     parser.add_argument("--jev", dest="jev", action="store_true", default=None, help="Enable TypeSafe Jev semantic acceleration")
     parser.add_argument("--no-jev", dest="jev", action="store_false", help="Disable TypeSafe Jev semantic acceleration")
     return parser
@@ -868,7 +1013,15 @@ def main() -> int:
     args = parser.parse_args()
     roots = [Path(value) for value in json.loads(args.capability_roots_json)]
     unavailable = json.loads(args.unavailable_capabilities_json)
-    print(json.dumps(bootstrap(args.project_root, json.loads(args.config_json), roots, unavailable, jev=args.jev), indent=2))
+    print(json.dumps(bootstrap(
+        args.project_root,
+        json.loads(args.config_json),
+        roots,
+        unavailable,
+        jev=args.jev,
+        agent_target=args.agent_target,
+        auto_install_sdk=args.auto_install_sdk,
+    ), indent=2))
     return 0
 
 

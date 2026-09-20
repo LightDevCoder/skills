@@ -104,27 +104,44 @@ def run_all_evals(live: bool = False, output_path: Optional[Path] = None) -> Dic
             f"- **Mode:** `{report['mode']}`",
             f"- **Model Version:** `{report['model_version']}`",
             f"- **Total Scenarios:** `{report['total_scenarios']}`",
-            f"- **Passed:** `{report['total_passed']}`",
-            f"- **Failed:** `{report['total_failed']}`",
-            f"- **Accuracy:** `{report['overall_accuracy'] * 100:.1f}%`",
+            f"- **Overall Passed:** `{report['total_passed']}`",
+            f"- **Overall Failed:** `{report['total_failed']}`",
+            f"- **Overall Accuracy:** `{report['overall_accuracy'] * 100:.1f}%`",
+            f"- **ask-light Workflow Safety:** `{ask_light_res.get('workflow_safety_passed', 0)}/{ask_light_res['total']} ({ask_light_res.get('workflow_safety_accuracy', 0.0) * 100:.1f}%)`",
+            f"- **ask-light Semantic Accuracy:** `{ask_light_res.get('semantic_passed', 0)}/{ask_light_res['total']} ({ask_light_res.get('semantic_accuracy', 0.0) * 100:.1f}%)`",
+            f"- **agent-config Configuration Accuracy:** `{agent_config_res['passed']}/{agent_config_res['total']} ({agent_config_res['accuracy'] * 100:.1f}%)`",
             f"- **Duration:** `{report['duration_seconds']}s`",
             "",
-            "## 1. ask-light Evaluation Results (17 scenarios)",
+            f"## 1. ask-light Evaluation Results ({len(ask_light_res['results'])} scenarios)",
             "",
-            "| ID | Scenario Name | Status | Observed Primary | Jev Execution Prob | Ambiguity | Choice Skipped | Verdict |",
-            "| --- | --- | --- | --- | --- | --- | --- | --- |",
+            "| ID | Scenario Name | Status | Observed Primary | Jev Execution Prob | Ambiguity | Choice Skipped | Safety Verdict | Overall |",
+            "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
         ]
         for r in ask_light_res["results"]:
             sj = r.get("semantic_judgments") or {}
-            exec_p = f"{sj.get('execution_intent_probability', 0.0):.2f}" if sj else "N/A"
-            amb_p = f"{sj.get('ambiguity_probability', 0.0):.2f}" if sj else "N/A"
+            exec_val = sj.get('execution_intent_probability')
+            exec_p = f"{exec_val:.2f}" if (sj and exec_val is not None) else "N/A"
+            amb_val = sj.get('ambiguity_probability')
+            amb_p = f"{amb_val:.2f}" if (sj and amb_val is not None) else "N/A"
             skipped = "Yes" if r.get("choice_skipped_for_singleton") else "No"
+            safety_v = "PASS" if r.get("workflow_safety_passed", True) else "FAIL"
             verdict = "PASS" if r["passed"] else "FAIL"
-            md_lines.append(f"| {r['id']} | {r['name']} | `{r['observed_status']}` | `{r['observed_primary_skill'] or 'None'}` | {exec_p} | {amb_p} | {skipped} | **{verdict}** |")
+            md_lines.append(f"| {r['id']} | {r['name']} | `{r['observed_status']}` | `{r['observed_primary_skill'] or 'None'}` | {exec_p} | {amb_p} | {skipped} | {safety_v} | **{verdict}** |")
+
+        # Add Confusion Matrices section if live evaluation recorded samples
+        cm = ask_light_res.get("confusion_matrices", {})
+        md_lines.extend([
+            "",
+            "### 1.1 Confusion Matrices for Binary Semantic Judgments",
+            "",
+            f"- **Material Ambiguity (p >= 0.65):** TP={cm.get('ambiguity', {}).get('tp', 0)}, FP={cm.get('ambiguity', {}).get('fp', 0)}, TN={cm.get('ambiguity', {}).get('tn', 0)}, FN={cm.get('ambiguity', {}).get('fn', 0)} (Total evaluated: {cm.get('ambiguity', {}).get('total', 0)})",
+            f"- **Reasoning Escalation (p >= 0.60):** TP={cm.get('escalation', {}).get('tp', 0)}, FP={cm.get('escalation', {}).get('fp', 0)}, TN={cm.get('escalation', {}).get('tn', 0)}, FN={cm.get('escalation', {}).get('fn', 0)} (Total evaluated: {cm.get('escalation', {}).get('total', 0)})",
+            f"- **Execution Intent (p >= 0.80):** TP={cm.get('execution_intent', {}).get('tp', 0)}, FP={cm.get('execution_intent', {}).get('fp', 0)}, TN={cm.get('execution_intent', {}).get('tn', 0)}, FN={cm.get('execution_intent', {}).get('fn', 0)} (Total evaluated: {cm.get('execution_intent', {}).get('total', 0)})",
+        ])
 
         md_lines.extend([
             "",
-            "## 2. agent-config Evaluation Results (14 scenarios)",
+            f"## 2. agent-config Evaluation Results ({len(agent_config_res['results'])} scenarios)",
             "",
             "| ID | Scenario Name | Observed Model | Observed Effort | Topology | Candidate Safe | Verdict |",
             "| --- | --- | --- | --- | --- | --- | --- |",
@@ -168,8 +185,9 @@ def main() -> int:
     print(f"Accuracy        : {report['overall_accuracy'] * 100:.1f}%")
     print(f"Duration        : {report['duration_seconds']}s")
     print("-" * 60)
-    print(f"ask-light    : {report['suites']['ask-light']['passed']}/{report['suites']['ask-light']['total']} passed")
-    print(f"agent-config : {report['suites']['agent-config']['passed']}/{report['suites']['agent-config']['total']} passed")
+    print(f"ask-light Workflow Safety : {report['suites']['ask-light']['workflow_safety_passed']}/{report['suites']['ask-light']['total']} passed")
+    print(f"ask-light Semantic Judgments : {report['suites']['ask-light']['semantic_passed']}/{report['suites']['ask-light']['total']} passed")
+    print(f"agent-config Configuration   : {report['suites']['agent-config']['passed']}/{report['suites']['agent-config']['total']} passed")
     print("=" * 60 + "\n")
 
     return 0 if report["total_failed"] == 0 else 1

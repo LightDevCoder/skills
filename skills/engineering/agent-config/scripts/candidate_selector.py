@@ -158,7 +158,7 @@ def select_configuration(
 
     cost_note = ""
     if task.cost_sensitive:
-        cost_note = " (Cost sensitivity maintained: verified candidate selected without capability downgrade)"
+        cost_note = " (Cost sensitivity recorded; no host cost metadata available for tie-breaking within valid candidates)"
 
     justification_msg = (
         f"Selected {target_model} for {tier} tier (topology: {topology}, effort: {effort or 'default'}).{cost_note}"

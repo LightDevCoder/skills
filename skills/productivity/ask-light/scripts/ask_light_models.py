@@ -65,12 +65,14 @@ class LegalActionsResult:
 
 @dataclass
 class JevPolicy:
-    """Calibrated policy governing Jev uncertainty and threshold evaluation."""
-    source: str = "calibrated-eval"
+    """Policy governing Jev uncertainty, query planning, and threshold evaluation."""
+    status: str = "provisional"
+    source: str = "initial-live-eval"
     version: str = "1.0.0"
     action_choice_min_confidence: float = 0.55
     ambiguity_threshold: float = 0.65
     escalation_threshold: float = 0.60
+    execution_intent_threshold: float = 0.80
 
 
 @dataclass

@@ -34,7 +34,7 @@ STATUS_REPORT_PATTERNS = [
     re.compile(r"汇报.*进度|当前.*走到哪里|进度如何|where is the project|status.*report|不要执行", re.IGNORECASE),
 ]
 EXECUTE_PATTERNS = [
-    re.compile(r"立刻开始|开始执行|确认.*执行|go ahead and implement|start executing|do it now", re.IGNORECASE),
+    re.compile(r"立刻开始|开始执行|确认.*执行|go ahead and implement|start executing|do it now|implement now|run it now", re.IGNORECASE),
 ]
 
 
@@ -243,7 +243,8 @@ def compute_legal_actions(
         # Unresolved tickets remain: inspect frontier
         if len(state.ready_tickets) > 0:
             target_ticket = state.ready_tickets[0]
-            is_execute_intent = any(p.search(user_request) for p in EXECUTE_PATTERNS)
+            is_question = bool(re.search(r"^(should|can|could|shall|may|what|how|i guess|maybe)\b|\?$|吗[？?]?$", user_request.strip(), re.IGNORECASE))
+            is_execute_intent = (not is_question) and any(p.search(user_request) for p in EXECUTE_PATTERNS)
             action_status = "TRANSITION" if is_execute_intent else "RECOMMEND"
 
             return LegalActionsResult(

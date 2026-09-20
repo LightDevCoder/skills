@@ -96,6 +96,36 @@ If Jev is disabled, offline, or returns low confidence, the workflow seamlessly 
 
 | Skill | Hardened Boundary | Terminology |
 | --- | --- | --- |
-| `project-init` | Onboards TypeSafe skill (official `npx skills add` or global reuse), verifies SDK runtime, checks key without echoing. | **Jev ecosystem onboarding** |
-| `ask-light` | Evaluates material ambiguity and candidate preference across $>1$ legal actions. Intent calibration never creates authority. | **Bounded Jev semantic workflow judgments** |
-| `agent-config` | Profiles task complexity and reasoning need using `Score`; maps to host-evidenced candidates and effort. | **Jev semantic task profiling** |
+| `project-init` | Onboards TypeSafe skill targeting explicit active Agent (`--agent <target>`), fails closed on unknown Agent, canonical credential resolver (`resolve_typesafe_credentials`), verified SDK runtime in active Python, precise setup state tracking (`READY`, `SKILL_INCOMPLETE`, `KEY_MISSING`, `SDK_MISSING`, `SDK_INSTALL_DECLINED`, `RUNTIME_UNVERIFIED`, `TARGET_UNRESOLVED`). | **Jev ecosystem onboarding** |
+| `ask-light` | Semantic query planner minimizes queries (0 Jev calls for status queries & clear single actions); evaluates material ambiguity and candidate preference strictly across $>1$ legal actions. Intent calibration is advisory presentation note and never creates authority. Evaluation separates deterministic workflow safety from semantic judgment accuracy. | **Bounded Jev semantic workflow judgments** |
+| `agent-config` | Profiles task complexity and reasoning need using `Score`; maps to host-evidenced candidates and effort. Enforces true independent per-dimension confidence fallback with `DimensionProvenance`. Strictly separates capability requirements from cost preferences; defers cost optimization honestly when host metadata is missing. | **Jev semantic task profiling** |
+
+---
+
+## 4. Canonical Credential Resolution Contract
+
+All skills consume the single canonical credential resolver:
+1. Current process environment: `os.environ["TYPESAFE_API_KEY"]`
+2. Explicit active project `.env` (parsed line-by-line, no ambient `python-dotenv` dependency)
+3. Unavailable (`None, "missing"`)
+
+Scanning arbitrary parents or unrelated current-working-directory `.env` files is strictly prohibited. Credentials are passed explicitly into `TypeSafeClient(api_key=api_key)`.
+
+---
+
+## 5. Score Discretization and Calibration Standards
+
+Score primitives evaluate ordered dimensions according to explicit boundaries:
+- **Task Complexity Score:**
+  - `[0.0, 0.5)` $\to$ `routine` (recommended tier: `routine`)
+  - `[0.5, 1.5)` $\to$ `standard` (recommended tier: `standard`)
+  - `[1.5, 2.5)` $\to$ `high` (recommended tier: `high`)
+  - `[2.5, 3.0]` $\to$ `critical` (recommended tier: `high`)
+- **Reasoning Need Score:**
+  - `[0.0, 0.5)` $\to$ `low`
+  - `[0.5, 1.5)` $\to$ `medium`
+  - `[1.5, 2.0]` $\to$ `high`
+
+Evaluation suites explicitly distinguish:
+- **Workflow Safety Accuracy:** Deterministic legal action computation, authorization defense-in-depth, and fail-closed gates.
+- **Semantic Judgment Accuracy:** Noul ambiguity detection, reasoning escalation, and Choice preference against labeled ground truth, recorded with full confusion matrix metrics.

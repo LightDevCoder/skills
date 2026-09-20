@@ -58,6 +58,23 @@ class TaskCharacteristics:
 
 
 @dataclass
+class DimensionProvenance:
+    """Provenance tracking for an individual semantic task dimension."""
+    dimension: str  # "complexity", "reasoning", "tier"
+    value: str
+    confidence: Optional[float] = None
+    source: str = "deterministic-fallback"  # "explicit-user", "profile-policy", "jev", "deterministic-fallback", "host-bound"
+    fallback_used: bool = False
+    fallback_reason: Optional[str] = None
+
+    def model_dump(self) -> Dict[str, Any]:
+        return asdict(self)
+
+    def dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
 class AbstractTaskProfile:
     """Abstract task profile determined semantically without vendor model names."""
     complexity_level: str = "standard"  # "routine", "standard", "high", "critical"
@@ -69,6 +86,7 @@ class AbstractTaskProfile:
     latency_sensitivity: str = "medium"  # "low", "medium", "high"
     cost_sensitivity: str = "medium"  # "low", "medium", "high"
     recommended_tier: str = "standard"  # "routine", "standard", "high", "review"
+    dimension_provenance: Dict[str, DimensionProvenance] = field(default_factory=dict)
 
     def model_dump(self) -> Dict[str, Any]:
         return asdict(self)

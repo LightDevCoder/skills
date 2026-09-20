@@ -586,7 +586,7 @@ class ProjectInitBehaviorTest(unittest.TestCase):
             root = Path(tmp)
             target_skill_dir = root / ".pi" / "skills" / "typesafe-ai"
 
-            def fake_installer(project_root: Path, installer_cmd=None):
+            def fake_installer(project_root: Path, agent_target=None, installer_cmd=None):
                 target_skill_dir.mkdir(parents=True, exist_ok=True)
                 (target_skill_dir / "SKILL.md").write_text("---\nname: typesafe-ai\ndescription: official\n---\n# TypeSafe\n", encoding="utf-8")
                 return True, target_skill_dir, "installed-local"
@@ -616,7 +616,7 @@ class ProjectInitBehaviorTest(unittest.TestCase):
             self.assertFalse((root / ".pi" / "skills" / "typesafe-ai").exists())
             self.assertFalse((root / ".agents" / "skills" / "typesafe-ai").exists())
             self.assertEqual(report["jev"]["skillLocation"], "JEV_SKILL_SETUP_INCOMPLETE")
-            self.assertEqual(report["jev"]["status"], "INCOMPLETE")
+            self.assertEqual(report["jev"]["status"], "SKILL_INCOMPLETE")
 
     def test_official_skill_install_failure_reports_incomplete_setup(self) -> None:
         """Verify official installer failure marks Jev onboarding as incomplete without failing project-init."""
@@ -627,7 +627,7 @@ class ProjectInitBehaviorTest(unittest.TestCase):
                     with mock.patch.object(BOOTSTRAP, "install_official_typesafe_skill", return_value=(False, None, "JEV_SKILL_SETUP_INCOMPLETE")):
                         report = BOOTSTRAP.bootstrap(root, config(), jev=True)
 
-            self.assertEqual(report["jev"]["status"], "INCOMPLETE")
+            self.assertEqual(report["jev"]["status"], "SKILL_INCOMPLETE")
             self.assertEqual(report["jev"]["skillLocation"], "JEV_SKILL_SETUP_INCOMPLETE")
             self.assertTrue((root / "docs/agents/light-project.md").is_file())
 
@@ -662,7 +662,7 @@ class ProjectInitBehaviorTest(unittest.TestCase):
             self.assertTrue((root / "docs/agents/light-project.md").is_file())
             self.assertTrue((root / "docs/agents/issue-tracker.md").is_file())
             self.assertTrue((root / "AGENTS.md").is_file())
-            self.assertEqual(report["jev"]["status"], "INCOMPLETE")
+            self.assertEqual(report["jev"]["status"], "SKILL_INCOMPLETE")
 
     def test_raw_api_key_never_echoed(self) -> None:
         """Verify raw API key never appears in report, stdout, or contracts."""
@@ -671,7 +671,8 @@ class ProjectInitBehaviorTest(unittest.TestCase):
             secret = "ts-live-secret-test-key-998877"
             BOOTSTRAP.configure_typesafe_key(root, secret)
 
-            report = BOOTSTRAP.bootstrap(root, config(), jev=True)
+            with mock.patch.object(BOOTSTRAP, "check_global_skill", return_value=True):
+                report = BOOTSTRAP.bootstrap(root, config(), jev=True)
             report_str = json.dumps(report)
             self.assertNotIn(secret, report_str)
 
@@ -711,6 +712,186 @@ class ProjectInitBehaviorTest(unittest.TestCase):
 
         args_default = parser.parse_args(["--project-root", ".", "--config-json", "{}"])
         self.assertIsNone(args_default.jev)
+
+    def test_active_agent_target_resolution(self) -> None:
+        """Verify host target resolution across Pi, Claude, Cursor, Codex, and fail-closed unknown."""
+        # Explicit target
+        self.assertEqual(BOOTSTRAP.resolve_active_agent_target(explicit_target="pi"), "pi")
+        self.assertEqual(BOOTSTRAP.resolve_active_agent_target(explicit_target="claude"), "claude")
+
+        # Config target
+        self.assertEqual(BOOTSTRAP.resolve_active_agent_target(config={"agentTarget": "cursor"}), "cursor")
+
+        # Environment target
+        with mock.patch.dict(os.environ, {"SKILLS_AGENT_TARGET": "codex"}, clear=True):
+            self.assertEqual(BOOTSTRAP.resolve_active_agent_target(), "codex")
+
+        # Pi environment variable detection
+        with mock.patch.dict(os.environ, {"PI_APP_NAME": "pi"}, clear=True):
+            self.assertEqual(BOOTSTRAP.resolve_active_agent_target(), "pi")
+
+        # Claude environment variable detection
+        with mock.patch.dict(os.environ, {"CLAUDE_CODE_ENTRY": "1"}, clear=True):
+            self.assertEqual(BOOTSTRAP.resolve_active_agent_target(), "claude")
+
+        # Unknown environment without evidence fails closed
+        with mock.patch.dict(os.environ, {}, clear=True):
+            with mock.patch.object(Path, "is_dir", return_value=False):
+                self.assertIsNone(BOOTSTRAP.resolve_active_agent_target(config={"instructionFile": "OTHER.md"}))
+
+    def test_unknown_agent_target_fails_closed_without_calling_installer(self) -> None:
+        """P0 (Section 4): Unknown agent target must fail closed and never run installer."""
+        with tempfile.TemporaryDirectory(prefix="project-init-unknown-") as tmp:
+            root = Path(tmp)
+            cfg = config()
+
+            with mock.patch("subprocess.run") as mock_sub:
+                with mock.patch.dict(os.environ, {}, clear=True):
+                    with mock.patch.object(BOOTSTRAP, "resolve_active_agent_target", return_value=None):
+                        report = BOOTSTRAP.bootstrap(root, cfg, jev=True)
+
+            self.assertEqual(report["jev"]["status"], "TARGET_UNRESOLVED")
+            for call_args in mock_sub.call_args_list:
+                cmd = call_args[0][0]
+                self.assertNotIn("skills", cmd)
+                self.assertNotIn("npx", cmd)
+
+    def test_installer_invokes_correct_agent_flags(self) -> None:
+        """P0 (Section 3 & 32): Installer commands must include exact --agent and --yes without real execution."""
+        with tempfile.TemporaryDirectory(prefix="project-init-cmd-") as tmp:
+            root = Path(tmp)
+
+            # Test Pi target
+            with mock.patch("subprocess.run") as mock_sub:
+                mock_sub.return_value = mock.MagicMock(returncode=0)
+                BOOTSTRAP.install_official_typesafe_skill(root, agent_target="pi")
+                mock_sub.assert_called_once()
+                called_cmd = mock_sub.call_args[0][0]
+                self.assertIn("--agent", called_cmd)
+                self.assertIn("pi", called_cmd)
+                self.assertIn("--yes", called_cmd)
+
+            # Test Claude target
+            with mock.patch("subprocess.run") as mock_sub:
+                mock_sub.return_value = mock.MagicMock(returncode=0)
+                BOOTSTRAP.install_official_typesafe_skill(root, agent_target="claude")
+                called_cmd = mock_sub.call_args[0][0]
+                self.assertIn("--agent", called_cmd)
+                self.assertIn("claude", called_cmd)
+
+    def test_target_scope_verification(self) -> None:
+        """P0 (Section 5): Installation must verify expected agent scope only."""
+        with tempfile.TemporaryDirectory(prefix="project-init-scope-") as tmp:
+            root = Path(tmp)
+
+            # Create skill in Claude directory, but target is Pi
+            claude_skill = root / ".claude" / "skills" / "typesafe-ai"
+            claude_skill.mkdir(parents=True)
+            (claude_skill / "SKILL.md").write_text("---\nname: typesafe-ai\n---\n# TypeSafe\n", encoding="utf-8")
+
+            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)):
+                ok, path, msg = BOOTSTRAP.install_official_typesafe_skill(root, agent_target="pi")
+                # Must fail because it was not installed in Pi scope!
+                self.assertFalse(ok)
+                self.assertIsNone(path)
+                self.assertIn("expected agent scope", msg)
+
+            # Now create in Pi directory
+            pi_skill = root / ".pi" / "skills" / "typesafe-ai"
+            pi_skill.mkdir(parents=True)
+            (pi_skill / "SKILL.md").write_text("---\nname: typesafe-ai\n---\n# TypeSafe\n", encoding="utf-8")
+
+            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)):
+                ok, path, msg = BOOTSTRAP.install_official_typesafe_skill(root, agent_target="pi")
+                self.assertTrue(ok)
+                self.assertEqual(path, pi_skill)
+
+    def test_canonical_credential_resolution_and_cross_process_availability(self) -> None:
+        """P0 (Sections 7, 8, 49): Canonical credential resolution across simulated processes."""
+        with tempfile.TemporaryDirectory(prefix="project-init-creds-") as tmp:
+            root = Path(tmp)
+            secret = "ts-test-secret-key-12345"
+
+            # 1. Configured via project-init
+            BOOTSTRAP.configure_typesafe_key(root, secret)
+
+            # 2. Re-read without python-dotenv or process env
+            with mock.patch.dict(os.environ, {}, clear=True):
+                key, source = BOOTSTRAP.resolve_typesafe_credentials(root)
+                self.assertEqual(key, secret)
+                self.assertEqual(source, ".env")
+
+                # Test ask-light resolver finds the same project key
+                al_script = ROOT.parent.parent / "productivity" / "ask-light" / "scripts"
+                import sys
+                if str(al_script) not in sys.path:
+                    sys.path.insert(0, str(al_script))
+                from semantic_router import resolve_typesafe_key as ask_light_key_resolver
+                al_key, al_src = ask_light_key_resolver(root)
+                self.assertEqual(al_key, secret)
+                self.assertEqual(al_src, ".env")
+
+                # Test agent-config resolver finds the same project key
+                ac_script = ROOT.parent.parent / "engineering" / "agent-config" / "scripts"
+                if str(ac_script) not in sys.path:
+                    sys.path.insert(0, str(ac_script))
+                from abstract_profiler import resolve_typesafe_key as agent_config_key_resolver
+                ac_key, ac_src = agent_config_key_resolver(root)
+                self.assertEqual(ac_key, secret)
+                self.assertEqual(ac_src, ".env")
+
+    def test_end_to_end_local_integration_without_network(self) -> None:
+        """Section 49: Full local integration test verifying contracts, credentials, and downstream resolvers."""
+        with tempfile.TemporaryDirectory(prefix="project-init-e2e-") as tmp:
+            root = Path(tmp)
+            pi_skill = root / ".pi" / "skills" / "typesafe-ai"
+            pi_skill.mkdir(parents=True)
+            (pi_skill / "SKILL.md").write_text("---\nname: typesafe-ai\n---\n# TypeSafe\n", encoding="utf-8")
+
+            secret_key = "ts-mock-e2e-key-7788"
+            BOOTSTRAP.configure_typesafe_key(root, secret_key)
+
+            fake_client = mock.MagicMock()
+            fake_client.system_one.return_value = mock.MagicMock(
+                nouls={"readiness_check": mock.MagicMock(noul=1.0)}
+            )
+
+            with mock.patch.object(BOOTSTRAP, "check_global_skill", return_value=False):
+                with mock.patch.object(BOOTSTRAP, "verify_typesafe_sdk", return_value=True):
+                    with mock.patch.object(BOOTSTRAP, "install_official_typesafe_skill", return_value=(True, pi_skill, "installed-local")):
+                        report = BOOTSTRAP.bootstrap(
+                            root,
+                            config(),
+                            jev=True,
+                            agent_target="pi",
+                            smoke_client=fake_client,
+                        )
+
+            # Contract checks
+            self.assertEqual(report["jev"]["status"], "READY")
+            self.assertEqual(report["jev"]["agentTarget"], "pi")
+            self.assertTrue(report["jev"]["keyDetected"])
+            self.assertEqual(report["jev"]["keySource"], ".env")
+
+            proj_md = (root / "docs/agents/light-project.md").read_text(encoding="utf-8")
+            self.assertIn("typesafe-ai", proj_md)
+            self.assertIn("TypeSafe Jev System One semantic acceleration", proj_md)
+
+            # New simulated process without process env
+            with mock.patch.dict(os.environ, {}, clear=True):
+                al_script = ROOT.parent.parent / "productivity" / "ask-light" / "scripts"
+                ac_script = ROOT.parent.parent / "engineering" / "agent-config" / "scripts"
+                import sys
+                if str(al_script) not in sys.path:
+                    sys.path.insert(0, str(al_script))
+                if str(ac_script) not in sys.path:
+                    sys.path.insert(0, str(ac_script))
+                from semantic_router import resolve_typesafe_key as al_res
+                from abstract_profiler import resolve_typesafe_key as ac_res
+                k1, _ = al_res(root)
+                k2, _ = ac_res(root)
+                self.assertEqual(k1, secret_key)
+                self.assertEqual(k2, secret_key)
 
 
 

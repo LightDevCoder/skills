@@ -15,8 +15,9 @@ This review inspects the release history, tag targets, and release evidence inco
 | **Release Doc Retrofit** | `f83720d` | `f83720d7fd6ad222f5ce4f6da6c54b12b831ff56` | 2026-09-20 | `docs(release): update v0.2.1 release notes and receipt with TypeSafe Jev semantic acceleration` |
 | **Jev Project-Init Feature** | `9163a34` | `9163a34bddf8d0b149522c6940447d8c766cea19` | 2026-09-20 | `feat(project-init): add optional TypeSafe Jev ecosystem onboarding and .gitignore protection` |
 | **Jev Project-Init Docs** | `6f9d173` | `6f9d173e1038e3d25c44fd8a42af52a2f14406e2` | 2026-09-20 | `docs(project-init): document Jev onboarding in contract references and release evidence` |
+| **Reviewed Hardening Baseline** | `a990aa4` | `a990aa471ffc700a27d8f4b00a374624a7548eeb` | 2026-09-20 | `feat(jev): harden TypeSafe Jev integration across project-init, ask-light, and agent-config` (Reviewed: CHANGES REQUIRED) |
+| **Final Repair Pass** | `HEAD` | Current branch `main` HEAD | 2026-09-20 | Final repair addressing human review findings across all 14 phases |
 | **Current Tag `v0.2.1` Target** | `v0.2.1` | `6f9d173e1038e3d25c44fd8a42af52a2f14406e2` | 2026-09-20 | Annotated tag object `318d32a602e10f452e39974010aa03abb50aff33` pointing to commit `6f9d173` |
-| **Current Main HEAD** | `HEAD` | `6f9d173e1038e3d25c44fd8a42af52a2f14406e2` | 2026-09-20 | Head of local branch `main` |
 
 ---
 

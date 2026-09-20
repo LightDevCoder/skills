@@ -14,15 +14,38 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-# Load .env safely only if present in explicit project root
-try:
-    from dotenv import load_dotenv
-    project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
-    dotenv_path = project_root / ".env"
-    if dotenv_path.is_file():
-        load_dotenv(dotenv_path)
-except ImportError:
-    pass
+def resolve_typesafe_key(project_root: Optional[Path] = None) -> tuple[Optional[str], str]:
+    """Canonical credential resolution for TypeSafe API key.
+
+    Order:
+      1. Current process environment: os.environ["TYPESAFE_API_KEY"]
+      2. Explicit active project .env (parsed line-by-line, no python-dotenv dependency)
+      3. Unavailable (None, "missing")
+
+    Never scans arbitrary parents or unrelated current-working-directory .env files.
+    """
+    env_key = os.environ.get("TYPESAFE_API_KEY", "").strip()
+    if env_key:
+        return env_key, "os.environ"
+
+    if project_root is not None:
+        env_path = project_root / ".env"
+        if env_path.is_file():
+            try:
+                for line in env_path.read_text(encoding="utf-8").splitlines():
+                    line = line.strip()
+                    if not line or line.startswith("#") or "=" not in line:
+                        continue
+                    k, v = line.split("=", 1)
+                    if k.strip() == "TYPESAFE_API_KEY":
+                        clean_v = v.strip().strip("'\"")
+                        if clean_v:
+                            return clean_v, ".env"
+            except Exception:
+                pass
+
+    return None, "missing"
+
 
 try:
     from typesafe_sdk import Choice, Noul, Score, TypeSafeClient
@@ -66,6 +89,85 @@ except ImportError:
 DEFAULT_POLICY = JevPolicy()
 
 
+def plan_semantic_queries(
+    legal_result: LegalActionsResult,
+    user_request: str,
+    enable_expanded_judgments: bool = True,
+) -> tuple[Dict[str, Any], List[str], Dict[str, str]]:
+    """Plan minimal necessary Jev questions based on deterministic facts and request phrasing.
+
+    Invariants:
+      1. Non-executable queries (BLOCKED, NEED_INPUT, EXPLAIN) send 0 questions.
+      2. Choice is sent ONLY when len(allowed_actions) > 1.
+      3. Ambiguity Noul is sent ONLY when clarify is legal or user phrasing contains ambiguity signals.
+      4. Escalation Noul is sent ONLY when implement is legal and task complexity warrants agent-config.
+      5. Execution intent Noul is sent ONLY when presentation wording benefits from advisory intent.
+    """
+    questions: Dict[str, Any] = {}
+    questions_sent: List[str] = []
+    reasons_needed: Dict[str, str] = {}
+
+    req_lower = user_request.lower()
+
+    # 1. Choice: Multiple legal alternatives
+    if len(legal_result.allowed_actions) > 1:
+        criteria = {
+            action: legal_result.candidate_descriptions.get(action, f"Execute {action} workflow step")
+            for action in legal_result.allowed_actions
+        }
+        questions["next_action"] = Choice(
+            instructions="Which legal workflow action best matches the user intent and project evidence?",
+            criteria=criteria,
+        )
+        questions_sent.append("next_action")
+        reasons_needed["next_action"] = "Multiple legal candidate actions available; semantic preference needed."
+
+    if not enable_expanded_judgments:
+        return questions, questions_sent, reasons_needed
+
+    # 2. Material Ambiguity
+    ambiguity_keywords = ["maybe", "perhaps", " or ", "not sure", "whether", "should we", "tradeoff", "redesign", "unclear", "ambiguous", "confused"]
+    has_ambiguity_phrasing = any(kw in req_lower for kw in ambiguity_keywords)
+    clarify_relevant = "project-clarify" in legal_result.allowed_actions
+    if clarify_relevant or has_ambiguity_phrasing:
+        questions["has_material_ambiguity"] = Noul(
+            instructions="Does the request or project state have material ambiguity or unsettled decisions requiring clarification?",
+        )
+        questions_sent.append("has_material_ambiguity")
+        reasons_needed["has_material_ambiguity"] = "Detect semantic ambiguity or conflicting requirements requiring clarification."
+
+    # 3. Deep Reasoning Escalation
+    complexity_keywords = [
+        "architecture", "overhaul", "distributed", "consensus", "raft", "concurrency",
+        "lock-free", "refactor", "security", "cryptographic", "rework", "performance",
+    ]
+    has_complexity_phrasing = any(kw in req_lower for kw in complexity_keywords)
+    implement_relevant = "implement" in legal_result.allowed_actions
+    if implement_relevant and has_complexity_phrasing:
+        questions["needs_deep_reasoning_escalation"] = Noul(
+            instructions="Does this request involve high architectural complexity or conflicting requirements requiring deep reasoning escalation rather than fast routing?",
+        )
+        questions_sent.append("needs_deep_reasoning_escalation")
+        reasons_needed["needs_deep_reasoning_escalation"] = "Assess whether implementation task warrants reasoning escalation to agent-config."
+
+    # 4. Immediate Execution Intent
+    if legal_result.status == "RECOMMEND":
+        exec_keywords = ["start", "go ahead", "run", "do it", "execute", "implement", "now", "开始", "执行", "should we"]
+        if any(kw in req_lower for kw in exec_keywords):
+            questions["wants_immediate_execution"] = Noul(
+                instructions=(
+                    "Does the user request command or authorize immediate execution right now "
+                    "(e.g. '立刻开始', 'go ahead and run it', 'start executing now'), "
+                    "as opposed to asking a question, asking for advice, or asking for confirmation "
+                    "(e.g. '现在开始做吗？', '下一步做什么？', 'what should I do next?')?"
+                ),
+            )
+            questions_sent.append("wants_immediate_execution")
+            reasons_needed["wants_immediate_execution"] = "Assess user execution intent probability for advisory presentation."
+
+    return questions, questions_sent, reasons_needed
+
+
 def route_with_jev(
     legal_result: LegalActionsResult,
     user_request: str,
@@ -74,6 +176,7 @@ def route_with_jev(
     policy: Optional[JevPolicy] = None,
     enable_expanded_judgments: bool = True,
     shadow_mode: bool = False,
+    project_root: Optional[Path] = None,
 ) -> AskLightRecommendation:
     """Judge legal candidate actions using bounded Jev semantic primitives with calibrated fallback.
 
@@ -132,7 +235,7 @@ def route_with_jev(
     baseline_justification = f"Deterministic baseline selected {baseline_skill} from legal candidates."
 
     # If TypeSafe is not installed or no API key, fall back immediately
-    api_key = os.environ.get("TYPESAFE_API_KEY")
+    api_key, _ = resolve_typesafe_key(project_root)
     if not TYPESAFE_AVAILABLE or not api_key:
         return AskLightRecommendation(
             status=legal_result.status,
@@ -151,47 +254,34 @@ def route_with_jev(
     compact_state = build_compact_jev_state(legal_result, user_request)
 
     # Query planning: Only ask what is needed
-    questions: Dict[str, Any] = {}
-    questions_sent: List[str] = []
-    reasons_needed: Dict[str, str] = {}
+    questions, questions_sent, reasons_needed = plan_semantic_queries(
+        legal_result,
+        user_request,
+        enable_expanded_judgments=enable_expanded_judgments,
+    )
+    need_choice = "next_action" in questions
 
-    # Choice is sent ONLY when there are genuinely multiple legal alternatives
-    need_choice = len(legal_result.allowed_actions) > 1
-    if need_choice:
-        criteria = {
-            action: legal_result.candidate_descriptions.get(action, f"Execute {action} workflow step")
-            for action in legal_result.allowed_actions
-        }
-        questions["next_action"] = Choice(
-            instructions="Which legal workflow action best matches the user intent and project evidence?",
-            criteria=criteria,
-        )
-        questions_sent.append("next_action")
-        reasons_needed["next_action"] = "Multiple legal candidate actions available; semantic preference needed."
-
-    if enable_expanded_judgments:
-        questions["wants_immediate_execution"] = Noul(
-            instructions=(
-                "Does the user request command or authorize immediate execution right now "
-                "(e.g. '立刻开始', 'go ahead and run it', 'start executing now'), "
-                "as opposed to asking a question, asking for advice, or asking for confirmation "
-                "(e.g. '现在开始做吗？', '下一步做什么？', 'what should I do next?')?"
+    # If query planning determined zero semantic questions needed, return deterministic baseline
+    if not questions:
+        return AskLightRecommendation(
+            status=legal_result.status,
+            primary_skill=baseline_skill,
+            alternative_skill=None,
+            target_item=legal_result.target_item,
+            confidence=1.0,
+            probabilities={baseline_skill: 1.0},
+            semantic_judgments=SemanticJudgments(
+                action_choice=None,
+                action_confidence=None,
+                action_probabilities={},
+                questions_sent=[],
+                reason_each_question_needed={},
             ),
+            fallback_used=False,
+            fallback_reason=None,
+            fail_closed=legal_result.fail_closed,
+            justification=f"Deterministic action {baseline_skill} selected; query planner determined zero semantic queries needed.",
         )
-        questions_sent.append("wants_immediate_execution")
-        reasons_needed["wants_immediate_execution"] = "Assess user execution intent probability (advisory only; cannot grant authority)."
-
-        questions["has_material_ambiguity"] = Noul(
-            instructions="Does the request or project state have material ambiguity or unsettled decisions requiring clarification?",
-        )
-        questions_sent.append("has_material_ambiguity")
-        reasons_needed["has_material_ambiguity"] = "Detect semantic ambiguity or conflicting requirements requiring clarification."
-
-        questions["needs_deep_reasoning_escalation"] = Noul(
-            instructions="Does this request involve high architectural complexity or conflicting requirements requiring deep reasoning escalation rather than fast routing?",
-        )
-        questions_sent.append("needs_deep_reasoning_escalation")
-        reasons_needed["needs_deep_reasoning_escalation"] = "Assess whether task complexity warrants deep reasoning escalation."
 
     try:
         ts_client = client or TypeSafeClient(api_key=api_key)
@@ -270,7 +360,7 @@ def route_with_jev(
         # Transition authority requires deterministic authorization (e.g. explicit command).
         final_status = legal_result.status
         intent_note = ""
-        if wants_exec_prob >= 0.80 and legal_result.status == "RECOMMEND":
+        if wants_exec_prob >= effective_policy.execution_intent_threshold and legal_result.status == "RECOMMEND":
             intent_note = f" (Execution intent noted p={wants_exec_prob:.2f}; awaiting explicit command or confirmed approval)."
 
         # Shadow mode evaluation: record judgments, return deterministic baseline
