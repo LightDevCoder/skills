@@ -6,11 +6,11 @@ When reaching the conclusion of a project workflow (after `project-review` or `r
 
 ## 1. Decision Principles
 
-1. **Friction-Driven:** Retrospectives are triggered by evidenced execution friction, not by rote procedure.
-2. **Value-Driven Invocation:** Run a retrospective only when meaningful, reusable systemic improvements can be extracted. If a session ran smoothly without systemic friction, skip cleanly to save tokens and avoid noise.
-3. **Current-State Deduplication:** Every candidate finding must be verified against current repository `HEAD` before reporting, classifying findings into `CLOSED`, `PARTIAL`, or `OPEN`.
-4. **Neutral Tone Discipline:** Present cold, audit-style findings directly from evidence without flattery, congratulations, or subjective commentary.
-5. **Actionability:** Retrospective findings must propose concrete, bounded improvements (tests, scripts, references, linters, or steering cleanups).
+1. **Friction-Driven:** Retrospectives originate from evidenced execution friction rather than procedural routine.
+2. **Value-Driven Invocation:** Run a retrospective when meaningful, reusable systemic improvements can be extracted. Routine sessions with no reusable systemic friction complete through the existing workflow without opening a retrospective.
+3. **Current-State Deduplication:** Verify every candidate finding against current repository `HEAD` before reporting, classifying findings into `CLOSED`, `PARTIAL`, or `OPEN`.
+4. **Neutral Tone:** Present audit findings directly from verified repository evidence, test results, and system state.
+5. **Actionability:** Formulate concrete, bounded improvements (tests, scripts, references, linters, or steering cleanups) that transition to `AWAITING_SELECTION`.
 
 ---
 
@@ -33,7 +33,7 @@ Evaluate the session against the following indicators:
 ### Evaluation Outcome
 
 - **Trigger `project-retro`:** If any **High** impact indicator is present, or if two or more **Medium** indicators are detected.
-- **Skip `project-retro`:** If zero High indicators and at most one Medium/Low indicator are present, and the primary work passed cleanly.
+- **Skip `project-retro`:** If zero High indicators and at most one Medium/Low indicator are present, and the primary work completed cleanly. Routine sessions with no reusable systemic friction complete through the existing workflow without opening a retrospective.
 
 ---
 
@@ -47,12 +47,13 @@ Finding
 ├── friction (observed failure or delay)
 ├── root_cause (why tooling/workflow missed it)
 ├── status
-│   ├── [CLOSED]  -> Root cause already has persistent code, test, CI, doc, or process guardrail.
-│   │                Document as closed experience; do NOT generate duplicate action items.
+│   ├── [CLOSED]  -> CLOSED findings document durable lessons already protected by current
+│   │                code, tests, CI, references, or workflow. They remain as evidence of
+│   │                successful closure and stay outside Suggested Actions.
 │   ├── [PARTIAL] -> Immediate symptom fixed, but durable guardrail, test, or reference has gaps.
-│   │                Enter systemic findings.
-│   └── [OPEN]    -> Problem remains unaddressed and can easily recur in future workflows.
-│                    Enter systemic findings.
+│   │                Eligible for systemic findings.
+│   └── [OPEN]    -> Problem remains unaddressed and can recur in future workflows.
+│                    Eligible for systemic findings.
 ├── existing_guardrail
 ├── remaining_gap
 ├── durable_improvement
@@ -64,15 +65,15 @@ Finding
 
 ## 4. Audit Invariants & Reporting Discipline
 
-When compiling a retrospective report, strictly enforce these discipline rules:
+When compiling a retrospective report, guide the findings with these discipline rules:
 
-1. **Neutral Tone:** Do not praise, thank, flatter, congratulate, or evaluate the reviewer or user. Start directly from verified facts, test status, and findings.
-2. **Facts Before Conclusions:** Verify repository `HEAD`, test suite status, and commit/tag/release state before asserting claims.
-3. **Recommendation Is Not Authorization:** Never label work "Approved" unless the user explicitly authorized execution in their message. Keep proposed actions labeled under `Suggested Actions — Pending Approval`.
-4. **Deduplicate Against Current State:** Before creating a proposed TODO, verify whether the guard or test already exists at `HEAD`. Record already-closed historical remediations under `Already-Closed Guardrails [CLOSED]`, keeping them out of suggested actions.
-5. **Preserve Conditional Evidence:** Do not collapse conditional environment data (e.g. "394 pass + 1 skip standalone / 395 pass with companion") into an unqualified aggregate.
-6. **Explicit Structural Separation:** Clearly distinguish:
+1. **Neutral Tone:** Use a neutral engineering audit tone. Begin with verified repository evidence, current state, and test results. Frame findings around systems, workflows, information architecture, guardrails, and tool behavior.
+2. **Facts Before Conclusions:** Ground all assertions in verified repository HEAD state, test suite outcomes, and peeled commit/tag/release records.
+3. **Recommendation Is Not Authorization:** Transition completed retrospective findings to `AWAITING_SELECTION`. Maintain proposed changes under `Suggested Actions — Pending Approval`. When the human selects a recommendation, transition the selected item to `APPROVED_ACTION` for bounded execution.
+4. **Deduplicate Against Current State:** Inspect repository HEAD to identify existing guardrails. Record verified historical solutions under `Already-Closed Guardrails [CLOSED]`, maintaining them outside suggested actions.
+5. **Preserve Conditional Evidence:** Record conditional environment data with complete context (for example, distinguishing standalone offline test passes from companion-enabled integration passes).
+6. **Explicit Structural Separation:** Trace each finding through its lifecycle stages:
    - Observed incident / friction
    - Immediate repair
    - Permanent systemic guardrail
-   - Proposed action
+   - Proposed action in `AWAITING_SELECTION` state

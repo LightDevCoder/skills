@@ -40,7 +40,7 @@ Use these categories when analyzing session friction and extracting durable impr
   - Write dedicated preflight scripts (e.g. `scripts/verify_release_integrity.py`).
   - Add negative test assertions and fixture sanitization tests (e.g. `test_evaluation_fixtures_clean.py`).
   - Implement deterministic structural AST or schema linters.
-  - *Rule:* Prefer building an automated check over writing a prose instruction.
+  - *Rule:* Build automated, deterministic checks to establish durable mechanical protection before relying on prose instructions.
 
 ---
 
@@ -77,7 +77,7 @@ Use these categories when analyzing session friction and extracting durable impr
   - Instructions that fail to alter agent behavior across sessions.
 - **Typical durable improvements:**
   - Move detailed guides into `docs/` or `references/`, leaving concise pointers in `AGENTS.md`.
-  - Delete instructions that do not demonstrably change agent behavior.
+  - Refine instructions to retain only active, high-leverage steering that demonstrably guides agent behavior.
   - Replace hardcoded feature paths with dynamic wayfinding conventions.
 
 ---

@@ -93,6 +93,22 @@ class ProjectRetroContractTest(unittest.TestCase):
         self.assertIn("Neutral Tone", HEURISTICS)
         self.assertIn("Recommendation Is Not Authorization", HEURISTICS)
 
+    def test_positive_instruction_and_state_transitions(self) -> None:
+        """Verify positive instructions, Audit Communication, and state transitions."""
+        skill_text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        heuristics_text = (ROOT / "references" / "heuristics.md").read_text(encoding="utf-8")
+        template_text = (ROOT / "references" / "template.md").read_text(encoding="utf-8")
+
+        self.assertIn("Audit Communication", skill_text)
+        self.assertIn("AWAITING_SELECTION", skill_text)
+        self.assertIn("APPROVED_ACTION", skill_text)
+        self.assertRegex(skill_text, r"Routine sessions with no reusable systemic\s+friction")
+        self.assertIn("AWAITING_SELECTION", heuristics_text)
+        self.assertIn("APPROVED_ACTION", heuristics_text)
+        self.assertIn("AWAITING_SELECTION", template_text)
+        self.assertIn("APPROVED_ACTION", template_text)
+
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

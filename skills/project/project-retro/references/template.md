@@ -39,4 +39,9 @@ Use this format when presenting retrospective findings:
 1. [Specific bounded change, e.g. wire preflight script into CI]
 2. [Specific reference update or contract test]
 3. [Specific steering cleanup or navigation pointer]
+
+## State Transition
+
+- **Current state:** `AWAITING_SELECTION`
+- **Next transition:** Transition selected item to `APPROVED_ACTION` upon explicit human selection.
 ```

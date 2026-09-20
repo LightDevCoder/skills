@@ -7,6 +7,30 @@ from typing import NamedTuple, Literal
 
 
 FindingStatus = Literal["CLOSED", "PARTIAL", "OPEN"]
+RetroState = Literal["GATHERING", "EVALUATING", "AWAITING_SELECTION", "APPROVED_ACTION"]
+
+
+class RecommendationLifecycle:
+    def __init__(self, findings: list[RetroFinding]) -> None:
+        self.findings = findings
+        self.state: RetroState = "GATHERING"
+        self.suggested_actions: list[str] = []
+        self.approved_action: str | None = None
+
+    def present_findings(self) -> None:
+        """Present findings and transition retrospective to AWAITING_SELECTION."""
+        self.suggested_actions = filter_suggested_actions(self.findings)
+        self.state = "AWAITING_SELECTION"
+
+    def select_action(self, action: str) -> None:
+        """Transition selected item to APPROVED_ACTION upon human selection."""
+        if self.state != "AWAITING_SELECTION":
+            raise ValueError(f"Cannot select action while in state {self.state}")
+        if action not in self.suggested_actions:
+            raise ValueError(f"Action '{action}' is not in suggested actions: {self.suggested_actions}")
+        self.approved_action = action
+        self.state = "APPROVED_ACTION"
+
 
 
 class FrictionEvent(NamedTuple):
@@ -197,6 +221,45 @@ class ProjectRetroBehaviorTest(unittest.TestCase):
         self.assertIn("2. Document canonical Skills CLI conventions in references/", actions)
         self.assertIn("3. Establish Layer 1 hermetic schema snapshot and Layer 2 drift test", actions)
         self.assertNotIn("4. Update AGENTS.md with dynamic wayfinding rule", actions)
+
+    def test_recommendation_lifecycle_state_transitions(self) -> None:
+        """Retrospective findings transition to AWAITING_SELECTION, then APPROVED_ACTION upon human selection."""
+        findings = [
+            RetroFinding(
+                category="Automated checks",
+                title="Tag immutability guard",
+                severity="High",
+                status="OPEN",
+                has_durable_guardrail_at_head=False,
+                proposed_action="Add verify_release_integrity.py to CI",
+            ),
+            RetroFinding(
+                category="Automated checks",
+                title="Historical label leak",
+                severity="High",
+                status="CLOSED",
+                has_durable_guardrail_at_head=True,
+                proposed_action="Add fixture test",
+            ),
+        ]
+        lifecycle = RecommendationLifecycle(findings)
+        self.assertEqual(lifecycle.state, "GATHERING")
+
+        lifecycle.present_findings()
+        self.assertEqual(lifecycle.state, "AWAITING_SELECTION")
+        self.assertEqual(lifecycle.suggested_actions, ["Add verify_release_integrity.py to CI"])
+        self.assertIsNone(lifecycle.approved_action)
+
+        lifecycle.select_action("Add verify_release_integrity.py to CI")
+        self.assertEqual(lifecycle.state, "APPROVED_ACTION")
+        self.assertEqual(lifecycle.approved_action, "Add verify_release_integrity.py to CI")
+
+    def test_selection_fails_if_not_awaiting_selection(self) -> None:
+        """Cannot transition to APPROVED_ACTION before findings are presented."""
+        lifecycle = RecommendationLifecycle([])
+        with self.assertRaises(ValueError):
+            lifecycle.select_action("Some action")
+
 
 
 if __name__ == "__main__":

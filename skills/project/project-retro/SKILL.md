@@ -45,8 +45,9 @@ warranted using the value-judgment matrix in [heuristics.md](references/heuristi
 
 - **If meaningful, reusable friction is observed:** Invoke `project-retro` to
   extract durable systemic improvements.
-- **If the session ran smoothly without systemic friction:** Skip cleanly.
-  Do not add token overhead or redundant retrospective noise to routine runs.
+- **Routine smooth delivery:** Routine sessions with no reusable systemic
+  friction complete through the existing workflow without opening a
+  retrospective.
 
 ## Retrospective Workflow
 
@@ -73,8 +74,10 @@ warranted using the value-judgment matrix in [heuristics.md](references/heuristi
      invariants, or state transitions unprotected?
 4. **Verify Current State (Deduplication):** Inspect repository `HEAD` for
    each candidate finding before reporting:
-   - **`[CLOSED]`:** Root cause already has a persistent code, test, CI, doc,
-     or process guardrail. Document as closed experience; generate no duplicate TODO.
+   - **`[CLOSED]`:** CLOSED findings document durable lessons already protected
+     by current code, tests, CI, references, or workflow. They remain in the
+     retrospective as evidence of successful closure and stay outside Suggested
+     Actions.
    - **`[PARTIAL]`:** Immediate symptom repaired, but long-term automated
      guardrail, test coverage, or reference remains missing.
    - **`[OPEN]`:** Systemic gap remains unguarded and can recur.
@@ -91,16 +94,39 @@ warranted using the value-judgment matrix in [heuristics.md](references/heuristi
    from `Remaining Systemic Findings`.
 9. **Formulate Suggested Actions:** Propose bounded, actionable steps
    (default top 3) under `Suggested Actions — Pending Approval`.
-10. **Handoff and Stop:** Stop immediately after presenting the report.
-    Recommendation is not authorization. Await explicit human selection before
-    implementing any approved change in a bounded step.
+10. **Transition State & Await Selection:** Transition the retrospective to
+    `AWAITING_SELECTION`. Await explicit human selection before moving any
+    recommendation to `APPROVED_ACTION`.
 
-## Audit Tone Discipline
+## Audit Communication
 
-- Adopt a neutral engineering audit tone.
-- Do not praise, thank, flatter, congratulate, or evaluate the reviewer or user.
-- Start directly from verified evidence, test status, and findings.
-- Evaluate systems, workflows, and guardrails—not people or personalities.
+Use a neutral engineering audit tone.
+
+Begin with verified repository evidence, current state, and test results.
+
+Frame findings around systems, workflows, information architecture,
+guardrails, and tool behavior.
+
+Describe recommendations through evidence, expected leverage, and the
+corresponding durable improvement.
+
+Keep the report concise enough for human selection and follow-up.
+
+## Handoff
+
+After presenting findings, transition the retrospective to:
+
+AWAITING_SELECTION
+
+The report provides ranked recommendations and sufficient evidence for the
+human to choose the next action.
+
+When the human selects a recommendation, transition the selected item to:
+
+APPROVED_ACTION
+
+The selected action can then enter its normal bounded implementation and
+verification workflow.
 
 ## References
 
