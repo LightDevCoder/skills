@@ -4,7 +4,23 @@
 
 所有变更都必须记录在实际版本/tag 对应的条目中，不能因为文档已起草就提前宣称 release。
 
-## Unreleased — target v0.2.2
+## Unreleased — target v0.2.3
+
+### 变更 — 发布证据生命周期与清单架构解耦
+
+- **发布前清单与发布后收据分离：** 彻底解耦发布前不可变规格（`RELEASE_MANIFEST.md`，直接固化于 Release Tag 快照内）与发布后验证事实证明（`RELEASE_RECEIPT.md`，存于 `main` 分支）。
+- **形式化六阶段发布生命周期模型：** 确立明确的状态流转架构：`PREPARED → CI_VERIFIED → TAGGED → INSTALL_VERIFIED → PUBLISHED → ATTESTED`。
+- **v0.2.2 发布后事实证明与历史溯源追加：** 详细记录 v0.2.2 发布的历史事实、初始 CI 在浅检出环境下的失败根因以及后续纠正性提交（`0862a19...`）。
+- **自动化发布完整性校验机制增强：** 在 `scripts/verify_release_integrity.py` 中增加对 v0.2.3+ 的清单校验及收据目标 commit 比对，并在 `tests/test_release_integrity.py` 中新增密封单元测试。
+
+### 重构 — `project-retro` 正向指令风格与状态驱动架构
+
+- **正向职责与流程指令表达：** 将面向 Agent 的指令全面调整为目标、职责、流程、信息流与状态转换驱动的正向表达。
+- **建议动作生命周期状态机：** 显式定义复盘结论交付状态为 `AWAITING_SELECTION`；在人类用户做出显式选择后，将选定项流转为 `APPROVED_ACTION` 进而进入有界执行。
+- **工程审计沟通：** 严格基于已验证的代码库事实、当前 HEAD 状态与测试结果展开，聚焦系统、流程、信息架构、防护栏与工具经济性。
+- **已闭环经验隔离与顺畅运行处理：** 明确 `[CLOSED]` 结论代表已有持久防护机制保护的历史经验，保留于复盘事实中但坚决排除在 Suggested Actions 之外；无复发性系统摩擦的常规任务直接完成，不触发复盘。
+
+## 0.2.2 — 2026-09-20
 
 ### 新增 — TypeSafe Jev System One 语义加速最终收敛（`ask-light`, `agent-config`, `project-init`）
 

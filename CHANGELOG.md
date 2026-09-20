@@ -4,7 +4,23 @@
 
 All notable changes are recorded here. A release entry must be tied to an actual version or tag and must not be created merely because a document was drafted.
 
-## Unreleased — target v0.2.2
+## Unreleased — target v0.2.3
+
+### Changed — Release Evidence Lifecycle & Manifest Architecture
+
+- **Separation of Release Manifest and Release Receipt:** Decoupled immutable pre-publication specifications (`RELEASE_MANIFEST.md`, embedded inside the release tag) from post-publication verification proofs (`RELEASE_RECEIPT.md`, finalized on `main`).
+- **Formalized Six-Stage Release Lifecycle:** Modeled release transitions explicitly as `PREPARED → CI_VERIFIED → TAGGED → INSTALL_VERIFIED → PUBLISHED → ATTESTED`.
+- **v0.2.2 Historical Post-Release Attestation:** Added historical documentation detailing v0.2.2 publication facts, shallow-checkout CI root cause, and subsequent corrective development (`0862a19...`).
+- **Release Integrity Guard Enhancements:** Added automated manifest verification (`check_release_manifest_consistency`) and receipt target commit verification to `scripts/verify_release_integrity.py`, backed by hermetic unit tests in `tests/test_release_integrity.py`.
+
+### Refactored — `project-retro` Positive Instruction & State Architecture
+
+- **Positive Instruction Phrasing:** Refactored agent-facing instructions into goal-, responsibility-, process-, and state-driven positive expressions.
+- **Explicit Recommendation State Transitions:** Modeled findings transition to `AWAITING_SELECTION`, and transitioned human-selected recommendations to `APPROVED_ACTION` for bounded execution.
+- **Audit Communication:** Grounded findings in verified repository evidence, current state, and test outcomes, focusing on systems, workflows, information architecture, guardrails, and tool behavior.
+- **Closure & Smooth Run Clarity:** Clarified that `[CLOSED]` findings document durable lessons already protected by code/tests/CI/workflow and remain outside Suggested Actions; clarified that routine sessions without systemic friction complete without opening retrospectives.
+
+## 0.2.2 — 2026-09-20
 
 ### Added — Finalized TypeSafe Jev System One Semantic Acceleration (`ask-light`, `agent-config`, `project-init`)
 
