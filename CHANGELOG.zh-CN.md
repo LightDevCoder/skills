@@ -4,18 +4,28 @@
 
 所有变更都必须记录在实际版本/tag 对应的条目中，不能因为文档已起草就提前宣称 release。
 
-## Unreleased
+## Unreleased — target v0.2.2
 
-- **为 `ask-light` 与 `agent-config` 引入 TypeSafe Jev System One 语义加速：** 引入可选的快速语义裁决（Choice、Noul、Score）用于工作流推荐、意图校准与抽象任务画像。配置 `TYPESAFE_API_KEY` 时，`ask-light` 加速候选选择与执行意图探测，同时完整保持确定性 Fail-Closed 硬安全边界（未知工单、多任务歧义、过期 Review、脏工作树修改）；`agent-config` 实现任务复杂度与推理需求的抽象画像，与厂商模型名称彻底解耦。未配置 Key 或离线时，两项技能平滑降级至零外部依赖的确定性规则基准，保持全量测试套件零回归。
-- 将 36 个 Skill 移入七个用途分类，增加每类中英文集合说明，并更新源码发现、安装指引、CI 与迁移表。保留技能名称和调用/批准边界；仅更新 main，不创建新 tag 或 release。
+### 新增 — TypeSafe Jev System One 语义加速最终收敛（`ask-light`, `agent-config`, `project-init`）
+
+- **`ask-light` 活跃消费者查询规划与有界语义路由：** 引入活跃消费者查询规划架构，Python 证据引擎独占工作流法定权威。Jev Choice 严格仅在多合法候选时（`len(allowed_actions) > 1`）发送；单一候选集自动跳过 Choice。有界 Noul 仅在存在活跃消费者时触发（关键歧义用于引导至 `project-clarify` 或在存在模糊实现请求时提示澄清；深度推理升级用于提示 `agent-config`）。彻底移除执行意图相关查询；Jev 绝不赋予工作流流转授权，零价值查询自动跳过。提供紧凑状态脱敏构建（<350 字符），杜绝源码与文件树泄露。
+- **`project-init` 规范 Skills CLI 映射与 Jev 生态接入：** 增加可选交互式接入门禁（`--jev` / `--no-jev`）。完全遵循 `vercel-labs/skills` v1.7.0 CLI 规范 Agent 标识映射（`pi`, `claude-code`, `cursor`, `codex`, `antigravity`, `grok`, `hermes-agent`）与规范项目作用域（`.agents/skills` 适用于 Cursor、Codex 与 Antigravity；`.pi/skills` 适用于 Pi 等）。未支持环境（如 DSH）严格确定性 Fail-Closed（`TARGET_UNRESOLVED`）。安全凭据解析（优先环境变量，其次项目 `.env`），写入本地凭据前强制校验 `.env` 已加入 `.gitignore`；支持全局技能复用。
+- **`agent-config` 抽象任务画像与临时非对称降级防御：** 引入跨厂商解耦的抽象任务画像（routine, standard, high）与推理需求评估（low, medium, high）。无标签泄露的独立干净评测，权威输入完全由代码独占。执行临时非对称降级防御策略（置信度 `>= 0.75` 且边界裕度 `>= 0.15`，策略状态：`PROVISIONAL`）。真实评测实证（AC-02）安全拦截临界降级提议（分值 0.41，置信度 0.59），正确保留标准基线档位（`claude-3-5-sonnet`）。
+- **Fail-Closed 与零外部依赖平滑降级：** 采用软依赖机制；未配置 `TYPESAFE_API_KEY` 或离线时，所有技能优雅退回确定性规则基准，保持全量测试套件零回归。
+
+### 新增 — 七大职责分类目录归整（36 个已准入 Skill）
+
+- 将全部 36 个 Skill 收纳至 `skills/` 下的七大分类目录：`project/`, `thinking/`, `engineering/`, `review/`, `knowledge/`, `writing/`, `productivity/`。
+- 丰富各分类中英文集合指南，更新源码发现、安装指引与 CI 验证，完全保留宿主端平铺安装（`<skills-root>/<name>/`）与官方 CLI 选装（`--skill <name>`）兼容性。
+
+### 变更 — 发布完整性与 Release Tag 不可变性政策
+
+- 正式确立自 v0.2.2 起的发布 Tag 永久不可变性政策：已发布的 Tag 绝不强制移动、绝不重指向、绝不重写代码边界。
+- 阐明并修复了 v0.2.1 在 Jev 集成演进周期中因 Tag 重指向产生的发布溯源问题。发布证据见：[v0.2.2 发布收据](docs/evidence/releases/v0.2.2/RELEASE_RECEIPT.zh-CN.md)。
 
 ## 0.2.1 — 2026-09-16
 
-### 新增 — 为 `ask-light` 与 `agent-config` 引入 TypeSafe Jev System One 语义加速
-
-- **Jev 语义路由与意图校准（`ask-light`）：** 引入紧凑状态构建（<350 字符，不泄露原始源码树）与有界 Jev Choice / Noul / Score 原语裁决，实现执行意图强标定（`p >= 0.80` 升级为 `TRANSITION`）、关键歧义检测（`p >= 0.65` 导向 `project-clarify`）与就绪度分级打分，由代码独占存在性校验与 Fail-Closed 硬安全红线（未知工单、多任务歧义、过期/脏工作树 Review）。
-- **抽象任务画像（`agent-config`）：** 引入无厂商模型耦合的抽象复杂度画像（`routine`、`standard`、`high`）与推理需求评估，底层保留 Harness 探测、Effort 严格解析（杜绝非法 `max`）与配置预览审批门禁。
-- **Fail-Closed 与零外部依赖降级：** 采用软依赖引入机制；未安装 `typesafe-sdk` 或未配置 `TYPESAFE_API_KEY` 时，100% 优雅退回确定性规则基准，保持全量 336 项测试零破坏、零回归。
+*(发布溯源说明：v0.2.1 最初于 2026-09-16 在 commit `70a48ef4c81b9b9f40604a43f2914e5467be4269` [收据记录为 `cb17b17c8227b7d7211e4bf5b72223703d987d60`] 正式发布，包含 project-retro、light-travelpage 与 agent-config 的 Profile 架构重构。在随后的 Jev 集成加固迭代周期中其 Tag 曾被移动以跟随开发演进 [`6f9d173`，后至 `27f16e4`]。v0.2.2 为最终收敛的 Jev 集成确立全新的不可变发布边界。)*
 
 ### 新增 — project-retro 技能与工作流复盘集成（第 36 个包）
 

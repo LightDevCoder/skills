@@ -34,3 +34,7 @@
 | 锁定版本整集合全新安装 | `PASS` | `npx skills add LightDevCoder/skills#v0.2.1` 安装 36 个包 |
 | 通用最新整集合全新安装 | `PASS` | `npx skills add LightDevCoder/skills` 安装 36 个包 |
 | 发现验证 | `PASS` | `npx --yes skills list` 成功发现全部 36 个已安装包 |
+
+## 发布溯源说明（Provenance Note）
+
+v0.2.1 最初于早期 release 边界（commit `70a48ef4c81b9b9f40604a43f2914e5467be4269`，最初收据记录为 `cb17b17c8227b7d7211e4bf5b72223703d987d60`）发布。在随后的 Jev 集成加固迭代周期中，其 Tag 曾被移动以跟随当时的开发演进（`6f9d173`，后至 `27f16e4`）。Release `v0.2.2` 正式确立全新的不可变发布边界。`v0.2.1` tag 绝不再度移动。

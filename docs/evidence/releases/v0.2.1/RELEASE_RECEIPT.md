@@ -34,3 +34,7 @@ Status: `RELEASED` — Tag published (`v0.2.1`), GitHub Release published, CI PA
 | Pinned Whole Collection Fresh Install | `PASS` | `npx skills add LightDevCoder/skills#v0.2.1` installed 36 packages |
 | Generic Latest Whole Collection Fresh Install | `PASS` | `npx skills add LightDevCoder/skills` installed 36 packages |
 | Discovery Verification | `PASS` | `npx --yes skills list` discovers all 36 installed packages |
+
+## Provenance Note
+
+v0.2.1 was originally published against an earlier release boundary (commit `70a48ef4c81b9b9f40604a43f2914e5467be4269`, recorded in original release receipt as `cb17b17c8227b7d7211e4bf5b72223703d987d60`). Its tag was subsequently repointed during the Jev integration stabilization cycle (`6f9d173`, then `27f16e4`). Release `v0.2.2` establishes the new immutable release boundary. The `v0.2.1` tag will not be modified again.

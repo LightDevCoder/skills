@@ -4,18 +4,28 @@
 
 All notable changes are recorded here. A release entry must be tied to an actual version or tag and must not be created merely because a document was drafted.
 
-## Unreleased
+## Unreleased — target v0.2.2
 
-- **TypeSafe Jev System One semantic acceleration for `ask-light` & `agent-config`:** Integrated optional fast semantic judgments (Choice, Noul, Score) for workflow recommendation, intent calibration, and abstract task profiling. When `TYPESAFE_API_KEY` is present, `ask-light` accelerates candidate selection and execution intent detection while preserving deterministic fail-closed invariants (unknown tickets, multiple efforts, stale review, and dirty working tree); `agent-config` profiles abstract complexity and reasoning need without vendor model coupling. When unconfigured or offline, both skills gracefully degrade to zero-dependency deterministic baselines with zero regression across the full test suite.
-- Group all 36 Skills into seven purpose-based categories with bilingual collection guides. Update source discovery, installation guidance, CI, and the migration map while preserving names and invocation/approval boundaries. Main-only update; no new tag or release.
+### Added — Finalized TypeSafe Jev System One Semantic Acceleration (`ask-light`, `agent-config`, `project-init`)
+
+- **`ask-light` Semantic Query Planning & Bounded Routing:** Integrated active-consumer query planning where Python evidence retains deterministic workflow authority. Jev Choice is sent strictly when multiple legal candidates exist (`len(allowed_actions) > 1`); singleton sets skip Choice. Bounded Noul is queried only when active consumers exist (material ambiguity to select `project-clarify` or recommend clarification for ambiguous implementation requests; reasoning escalation to recommend `agent-config`). Execution intent queries have been removed; Jev never grants workflow transition authority, and zero-value queries are skipped. Sanitized compact state builder (<350 bytes) without raw code or file tree leakage.
+- **`project-init` Canonical Skills CLI Mappings & Jev Onboarding:** Added optional interactive onboarding gate (`--jev` / `--no-jev`) for TypeSafe Jev acceleration. Integrated canonical agent mappings for `vercel-labs/skills` v1.7.0 CLI (`pi`, `claude-code`, `cursor`, `codex`, `antigravity`, `grok`, `hermes-agent`) and canonical project scopes (`.agents/skills` for Cursor/Codex/Antigravity; `.pi/skills`, etc.). Unsupported hosts (such as DSH) fail closed deterministically (`TARGET_UNRESOLVED`). Safe `TYPESAFE_API_KEY` resolution (env, project `.env`) with guaranteed `.env` `.gitignore` protection before local credential writes; global skill reuse supported.
+- **`agent-config` Abstract Task Profiling & Provisional Downgrade Guard:** Abstract task profiling (routine, standard, high) and reasoning needs assessment (low, medium, high) without vendor model coupling. Label-clean evaluation with code-owned authoritative inputs. Enforced provisional asymmetric downgrade policy requiring confidence `>= 0.75` and margin `>= 0.15` before reducing capability below baseline (`Policy status: PROVISIONAL`). Live evidence (AC-02) confirms safe rejection of marginal downgrade (score 0.41, confidence 0.59), retaining baseline standard tier (`claude-3-5-sonnet`).
+- **Fail-Closed & Zero-Dependency Fallback:** Soft imports and deterministic code baselines guarantee that when `TYPESAFE_API_KEY` is unset or offline, all skills degrade smoothly with zero regression across all test suites.
+
+### Added — Purpose-Based Category Organization (36 Admitted Skills)
+
+- Group all 36 Skills into seven documented categories under `skills/`: `project/`, `thinking/`, `engineering/`, `review/`, `knowledge/`, `writing/`, `productivity/`.
+- Updated source discovery, bilingual collection guides, and installation references while fully preserving flat host installations (`<skills-root>/<name>/`) and official Skills CLI selection (`--skill <name>`).
+
+### Changed — Release Integrity & Immutable Boundary Policy
+
+- Established permanent tag immutability starting with v0.2.2: published release tags will never be force-moved, retargeted, or rewritten.
+- Clarified v0.2.1 provenance following tag repointing during the Jev stabilization cycle. Release evidence: [v0.2.2 Release Receipt](docs/evidence/releases/v0.2.2/RELEASE_RECEIPT.md).
 
 ## 0.2.1 — 2026-09-16
 
-### Added — TypeSafe Jev System One semantic acceleration for `ask-light` & `agent-config`
-
-- **Jev Semantic Routing & Intent Calibration (`ask-light`):** Introduced compact token-efficient state extraction (<350 bytes) and bounded Jev Choice/Noul/Score judgments for intent calibration (`p >= 0.80` for immediate execution), material ambiguity routing (`p >= 0.65` to `project-clarify`), and readiness scoring, while strictly enforcing code-owned fail-closed boundaries (unknown tickets, multiple efforts, stale/dirty review).
-- **Abstract Task Profiling (`agent-config`):** Replaced coupled heuristic keyword matching with abstract task profiling (routine, standard, high) and reasoning needs assessment without hardcoding vendor model names, preserving host evidence adaptation and preview approval gates.
-- **Fail-Closed & Zero-Dependency Fallback:** Soft-imported via `try...except ImportError`; when `TYPESAFE_API_KEY` is not present or in case of network/timeout failure, both skills gracefully degrade to deterministic baselines with zero regression across all 336 test cases.
+*(Provenance Note: v0.2.1 was originally published on 2026-09-16 against commit `70a48ef4c81b9b9f40604a43f2914e5467be4269` [receipt recorded `cb17b17c8227b7d7211e4bf5b72223703d987d60`] for project-retro, light-travelpage, and the agent-config profile refactoring. Its tag was subsequently repointed during the Jev integration stabilization cycle [`6f9d173`, then `27f16e4`]. Release v0.2.2 establishes the clean immutable release boundary for the finalized Jev integration.)*
 
 ### Added — project-retro skill & workflow retrospective integration (36th package)
 
