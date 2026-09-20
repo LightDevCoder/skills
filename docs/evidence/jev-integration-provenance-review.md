@@ -20,8 +20,10 @@ This review inspects the release history, tag targets, and release evidence inco
 | **Final Verification Repair** | `c975647` | `c9756478f480dda422510a8368491e22292ce5b5` | 2026-09-20 | Final hermetic verification repair (host independence, boundary guard, tri-state semantic evaluation, query consumer planning) |
 | **Live Calibration Baseline** | `936653c` | `936653cdadf04036d39eefec988db356943dbce0` | 2026-09-20 | `docs(evidence): update live Jev evaluation report and calibration evidence` (Reviewed: CHANGES REQUIRED due to P0 mapping and P1 label leakage) |
 | **Release-Gate Repair Pass** | `3625e61` | `3625e618a49ceb8fbd4a299da709acbc6263cd81` | 2026-09-20 | Canonical Skills CLI agent ID mappings and scopes, elimination of declared_difficulty label leakage, runtime input / ground truth separation |
-| **Calibration Repair Pass** | `520fe94` | `520fe94991024da269e2a9f24baf0d274d31a557` | 2026-09-20 | Asymmetric downgrade policy (PROVISIONAL) distinguishing upgrade, hold, and downgrade; evidence guard for capability reduction; calibration convergence |
+| **Calibration Repair Pass** | `b260bb9` | `b260bb96fcc8633abe91a236d029d9a7f40520fe` | 2026-09-20 | Asymmetric downgrade policy (PROVISIONAL) distinguishing upgrade, hold, and downgrade; evidence guard for capability reduction; calibration convergence |
 | **Current Tag `v0.2.1` Target** | `v0.2.1` | `6f9d173e1038e3d25c44fd8a42af52a2f14406e2` | 2026-09-20 | Annotated tag object `318d32a602e10f452e39974010aa03abb50aff33` pointing to commit `6f9d173` |
+
+> **Note on evidence-only cleanup revisions:** Subsequent evidence-only documentation cleanup commits (such as synchronizing report metrics or clarifying test environment splits) are intentionally not self-recorded in the table above to prevent recursive Git SHA self-reference. Their immutable identity is provided by Git commit history and will be formally recorded by the subsequent release commit and release evidence under `release-workflow`.
 
 ---
 

@@ -76,4 +76,22 @@
 - **Invariant 4: Host capabilities bound Jev output:** Verified in AC-12 where host without 'high' bounded Jev output to 'medium' without inventing unsupported values.
 - **Invariant 5: Cost sensitivity does not downgrade capability tier:** Verified in AC-07 where task remained in 'high' tier while honoring cost preference.
 - **Invariant 6: Honest cost policy:** Cost optimization tie-breaking is explicitly deferred when host lacks pricing metadata.
+- **Invariant 7: Asymmetric capability downgrade protection:** Verified in AC-02 where Jev candidate downgrade from baseline standard to routine was rejected due to marginal confidence (0.59 < 0.75) and boundary proximity (score 0.41), safely retaining baseline standard tier (claude-3-5-sonnet).
+
+## 4. Test Suite Environment Coverage
+
+- **Local Development Host (Companion repo present):**
+  - Collected: `395`
+  - Passed: `395`
+  - Skipped: `0`
+  - Failed: `0`
+  - Companion schema integration tests via Ajv (`test_layer1_deterministic_schemas_via_companion_ajv`) executed and passed against local `agent-config/schemas`.
+
+- **Isolated / Clean CI Environment (Companion repo absent):**
+  - Collected: `395`
+  - Passed: `394`
+  - Skipped: `1`
+  - Failed: `0`
+  - Skip Reason: `test_layer1_deterministic_schemas_via_companion_ajv` safely skips with `"Companion repo not found in test environment"` when running hermetically without the external companion repository.
+
 
