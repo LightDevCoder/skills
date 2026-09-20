@@ -48,13 +48,13 @@ Light Skills v0.2.2 为全部 36 个第一方 Skill 确立了永久、不可变�
 
 ### 5. 七大职责分类目录归整（36 个第一方 Skill）
 全部 36 个第一方 Skill 按职责分类收纳在 `skills/` 下的七大目录中：
-- **`project/`（7 个）：** `project-init`, `project-clarify`, `project-spec`, `project-tickets`, `implement`, `kanban-worker`, `release-workflow`。
+- **`project/`（8 个）：** `project-init`, `project-clarify`, `project-spec`, `project-tickets`, `implement`, `kanban-worker`, `project-retro`, `release-workflow`。
 - **`thinking/`（5 个）：** `clarify`, `decision-map`, `research`, `socratic`, `to-questionnaire`。
 - **`engineering/`（5 个）：** `agent-config`, `diagnosing-bugs`, `prototype`, `resolving-merge-conflicts`, `tdd`。
 - **`review/`（4 个）：** `code-review`, `generic-review`, `project-review`, `review-loop`。
 - **`knowledge/`（5 个）：** `eli5`, `kb-init`, `language-learning`, `learn-anything`, `teach`。
 - **`writing/`（3 个）：** `humanizer`, `manuscript-ops`, `writing-for-agents`。
-- **`productivity/`（7 个）：** `ask-light`, `handoff`, `light-travelpage`, `project-retro`, `recap`, `wait-what`, `wizard`。
+- **`productivity/`（6 个）：** `ask-light`, `handoff`, `light-travelpage`, `recap`, `wait-what`, `wizard`。
 
 宿主端安装依然保持平铺结构（`<skills-root>/<name>/`），CLI 选装命令（`npx skills add ... --skill <name>`）完全兼容。
 

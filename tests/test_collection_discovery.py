@@ -120,6 +120,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.1\.6", installation)), "Installation guide is missing the pinned v0.1.6 release command.")
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.2\.0", installation)), "Installation guide is missing the pinned v0.2.0 release command.")
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.2\.1", installation)), "Installation guide is missing the pinned v0.2.1 release command.")
+    c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.2\.2", installation)), "Installation guide is missing the pinned v0.2.2 release command.")
     c.check(bool(re.search(r"#ref|fragment|default revision", installation)), "Installation guide must explain revision semantics rather than overclaim shorthand immutability.")
     c.check("commands target the immutable v0.1.0 release" not in installation, "Installation guide must not claim the old shorthand is permanently immutable.")
     c.check(not re.search(r"not a verified command|<owner>/<repository>", installation), "Installation guide still contains unresolved pre-release command wording.")
@@ -128,9 +129,10 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         all(token in installation for token in ("source_root", "skill_name", "destination_root")),
         "Manual fallback must use valid shell variables.",
     )
-    c.check(bool(re.search(r"(?is)v0\.2\.1.{0,160}is published from", readme)), "README must present v0.2.1 as the published release.")
+    c.check(bool(re.search(r"(?is)v0\.2\.2.{0,160}is published from", readme)), "README must present v0.2.2 as the published release.")
     c.check("33" in catalog and "admitted" in catalog, "Catalog must present the 36-package collection (historical 33 at the original v0.2.0 publication).")
     c.check("v0.2.1" in catalog, "Catalog must mention v0.2.1.")
+    c.check("v0.2.2" in catalog, "Catalog must mention v0.2.2.")
     c.check("36" in readme, "README must mention 36 Skills.")
     c.check(bool(re.search(r"ask-light", readme, re.IGNORECASE)), "README must mention ask-light entry.")
     c.check(bool(re.search(r"project-init.*project-clarify.*project-spec.*project-tickets.*implement.*project-review.*release-workflow", readme, re.DOTALL | re.IGNORECASE)), "README must present the main workflow project-init → project-clarify → project-spec → project-tickets → implement → project-review → release-workflow.")
@@ -255,6 +257,8 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         "docs/evidence/releases/v0.2.0/INSTALLATION_VERIFICATION.md",
         "docs/evidence/releases/v0.2.1/RELEASE_RECEIPT.md",
         "docs/evidence/releases/v0.2.1/INSTALLATION_VERIFICATION.md",
+        "docs/evidence/releases/v0.2.2/RELEASE_RECEIPT.md",
+        "docs/evidence/releases/v0.2.2/INSTALLATION_VERIFICATION.md",
         ".github/workflows/quality.yml",
     ]:
         c.check((root / required).is_file(), f"Required documentation path is missing: {required}")

@@ -48,13 +48,13 @@ Light Skills v0.2.2 establishes a permanent, immutable release boundary for the 
 
 ### 5. Purpose-Based Category Organization (36 Admitted Skills)
 All 36 first-party Skills are organized into seven documented categories under `skills/`:
-- **`project/` (7):** `project-init`, `project-clarify`, `project-spec`, `project-tickets`, `implement`, `kanban-worker`, `release-workflow`.
+- **`project/` (8):** `project-init`, `project-clarify`, `project-spec`, `project-tickets`, `implement`, `kanban-worker`, `project-retro`, `release-workflow`.
 - **`thinking/` (5):** `clarify`, `decision-map`, `research`, `socratic`, `to-questionnaire`.
 - **`engineering/` (5):** `agent-config`, `diagnosing-bugs`, `prototype`, `resolving-merge-conflicts`, `tdd`.
 - **`review/` (4):** `code-review`, `generic-review`, `project-review`, `review-loop`.
 - **`knowledge/` (5):** `eli5`, `kb-init`, `language-learning`, `learn-anything`, `teach`.
 - **`writing/` (3):** `humanizer`, `manuscript-ops`, `writing-for-agents`.
-- **`productivity/` (7):** `ask-light`, `handoff`, `light-travelpage`, `project-retro`, `recap`, `wait-what`, `wizard`.
+- **`productivity/` (6):** `ask-light`, `handoff`, `light-travelpage`, `recap`, `wait-what`, `wizard`.
 
 Host installation remains flat (`<skills-root>/<name>/`), and CLI invocation (`npx skills add ... --skill <name>`) remains unchanged.
 

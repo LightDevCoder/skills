@@ -12,13 +12,13 @@ This catalog is synchronized from the 36 admitted package directories under `ski
 | --- | --- |
 | Collection | Light Skills — Composable Agent Workflows |
 | Package count | 36 admitted first-party Skills |
-| Current state | 36 packages on main; v0.2.1 is the current stable release |
-| Stable release | [v0.2.1](https://github.com/LightDevCoder/skills/releases/tag/v0.2.1) (36 packages; previous stable was v0.2.0 with 34 packages) |
+| Current state | 36 packages on main; v0.2.2 is the current stable release |
+| Stable release | [v0.2.2](https://github.com/LightDevCoder/skills/releases/tag/v0.2.2) (36 packages; previous stable was v0.2.1) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
-| Evidence | [v0.2.1 release evidence](docs/evidence/releases/v0.2.1) |
+| Evidence | [v0.2.2 release evidence](docs/evidence/releases/v0.2.2) |
 
-`v0.1.1` shipped five packages; `v0.1.2` added `recap` and `language-learning` (seven); `v0.1.3` migrated the test toolchain; `v0.1.4` added `kanban-worker`; `v0.1.5` tightened kanban scheduling and identity; `v0.1.6` added `kb-init` (nine). `v0.2.0` released the full 33-package architecture across project workflow, clarification, execution, review, and specialized tools, and the v0.2.0 line was extended with the `humanizer` admission (34 packages; see [CHANGELOG.md](CHANGELOG.md)).
+`v0.1.1` shipped five packages; `v0.1.2` added `recap` and `language-learning` (seven); `v0.1.3` migrated the test toolchain; `v0.1.4` added `kanban-worker`; `v0.1.5` tightened kanban scheduling and identity; `v0.1.6` added `kb-init` (nine). `v0.2.0` released the full 33-package architecture across project workflow, clarification, execution, review, and specialized tools, and the v0.2.0 line was extended with the `humanizer` admission (34 packages; see [CHANGELOG.md](CHANGELOG.md)). `v0.2.1` added `light-travelpage` and `project-retro` (36 packages). `v0.2.2` finalized TypeSafe Jev semantic acceleration, category layout, and immutable release integrity.
 
 No package in this table is an unmodified upstream copy. Approved Matt PORTs carry `ATTRIBUTION.md` and no upstream runtime dependency.
 

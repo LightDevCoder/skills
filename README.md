@@ -6,7 +6,7 @@
 
 `LightDevCoder/skills` provides 36 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<category>/<name>/` and defines its own behavior in `SKILL.md`.
 
-> **Release:** [v0.2.1](https://github.com/LightDevCoder/skills/releases/tag/v0.2.1) is published from the `v0.2.1` tag — the release line carries the full 36 first-party Skills — and is the current stable release. The exact commit is recorded in the [release receipt](docs/evidence/releases/v0.2.1/RELEASE_RECEIPT.md).
+> **Release:** [v0.2.2](https://github.com/LightDevCoder/skills/releases/tag/v0.2.2) is published from the `v0.2.2` tag — the release line carries the full 36 first-party Skills — and is the current stable release. The exact commit is recorded in the [release receipt](docs/evidence/releases/v0.2.2/RELEASE_RECEIPT.md).
 
 ## Browse by category
 
@@ -55,20 +55,20 @@ npx skills add LightDevCoder/skills --skill research
 
 > **Note:** An unqualified repository source (`LightDevCoder/skills`) follows the default branch `main`, delivering the latest admitted features and integrations.
 
-### Stable release snapshot (v0.2.1)
+### Stable release snapshot (v0.2.2)
 
-To install the reproducible historical stable release snapshot, pin the `#v0.2.1` tag:
+To install the reproducible historical stable release snapshot, pin the `#v0.2.2` tag:
+
+```bash
+npx skills add LightDevCoder/skills#v0.2.2
+npx skills add LightDevCoder/skills#v0.2.2 --skill project-retro
+```
+
+Previous releases (such as `#v0.2.1` and `#v0.2.0`) remain available for reproducible installs:
 
 ```bash
 npx skills add LightDevCoder/skills#v0.2.1
-npx skills add LightDevCoder/skills#v0.2.1 --skill project-retro
-```
-
-Previous releases (such as `#v0.2.0`) remain available for reproducible installs:
-
-```bash
 npx skills add LightDevCoder/skills#v0.2.0
-npx skills add LightDevCoder/skills#v0.2.0 --skill project-review
 ```
 
 > **Note:** The `#v0.2.0` tag remains an immutable, reproducible snapshot of the v0.2.0 release line and is not modified by subsequent work on `main`.
