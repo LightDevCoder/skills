@@ -1,0 +1,216 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/LightDevCoder/agent-config/main/schemas/profile.schema.json",
+  "title": "AgentConfigProfile",
+  "description": "Canonical schema for user-confirmed, host-scoped and workspace-scoped execution profiles. Strictly separates host availability from user-confirmed tier mappings, and abstract effort policies from host-resolved discrete values.",
+  "type": "object",
+  "required": [
+    "profile_version",
+    "host",
+    "scope",
+    "model_mode"
+  ],
+  "properties": {
+    "profile_version": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1,
+      "description": "Schema version of the profile document."
+    },
+    "host": {
+      "type": "object",
+      "description": "Host binding defining identity and adapter for this profile.",
+      "required": ["id", "adapter"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier of the agent host (e.g. codex, opencode, claude-code)."
+        },
+        "adapter": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier of the adapter implementing inspection and mutation for this host."
+        },
+        "provider": {
+          "type": "string",
+          "description": "Optional model provider identity if relevant to the host."
+        },
+        "platform": {
+          "type": "string",
+          "description": "Optional runtime platform or OS identifier."
+        }
+      },
+      "additionalProperties": false
+    },
+    "scope": {
+      "type": "object",
+      "description": "Isolation scope preventing profiles from leaking across workspaces or hosts.",
+      "required": ["type", "workspace"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["project", "global"],
+          "description": "Scope boundary: project-isolated or host-global."
+        },
+        "workspace": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Canonical filesystem path or workspace identifier."
+        }
+      },
+      "additionalProperties": false
+    },
+    "model_mode": {
+      "type": "string",
+      "enum": ["single", "multi"],
+      "description": "Operating mode: single fixed model harness (first-class) or selectable multi-model harness."
+    },
+    "single_model": {
+      "type": "object",
+      "description": "Configuration for single-model harnesses. Defines execution and review effort policies without artificial tier routing.",
+      "required": ["model"],
+      "properties": {
+        "model": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Configured executable model identifier."
+        },
+        "execution_effort": {
+          "$ref": "#/definitions/effort_policy",
+          "description": "Effort policy for implementation/execution tasks."
+        },
+        "review_effort": {
+          "$ref": "#/definitions/effort_policy",
+          "description": "Effort policy for review tasks."
+        }
+      },
+      "additionalProperties": false
+    },
+    "tiers": {
+      "type": "object",
+      "description": "User-confirmed mapping from abstract difficulty tiers to real model IDs and effort policies. Automatic model intelligence guessing is strictly forbidden.",
+      "required": ["routine", "standard", "high", "review"],
+      "properties": {
+        "routine": {
+          "$ref": "#/definitions/tier_mapping"
+        },
+        "standard": {
+          "$ref": "#/definitions/tier_mapping"
+        },
+        "high": {
+          "$ref": "#/definitions/tier_mapping"
+        },
+        "review": {
+          "$ref": "#/definitions/tier_mapping"
+        }
+      },
+      "additionalProperties": false
+    },
+    "capabilities": {
+      "type": "object",
+      "description": "User-confirmed or host-agreed execution topology capabilities.",
+      "properties": {
+        "subagents": {
+          "type": "string",
+          "enum": ["available", "unavailable", "unknown"]
+        },
+        "threads": {
+          "type": "string",
+          "enum": ["available", "unavailable", "unknown"]
+        },
+        "parallelism": {
+          "type": "string",
+          "enum": ["available", "unavailable", "unknown"]
+        },
+        "concurrency": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "effort_policy": {
+      "type": "object",
+      "description": "Abstract effort policy (e.g. highest-supported) or explicit discrete string value.",
+      "oneOf": [
+        {
+          "properties": {
+            "policy": {
+              "type": "string",
+              "enum": ["highest-supported", "default", "lowest-supported", "custom"],
+              "description": "Abstract policy resolved by adapters at execution time against host-supported discrete values."
+            }
+          },
+          "required": ["policy"],
+          "additionalProperties": false
+        },
+        {
+          "properties": {
+            "value": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Explicit discrete effort value matching a host-supported option."
+            }
+          },
+          "required": ["value"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "tier_mapping": {
+      "type": "object",
+      "description": "User-confirmed tier assignment. Forbids automatic model ranking or intelligence heuristics.",
+      "required": ["model", "source"],
+      "properties": {
+        "model": {
+          "type": "string",
+          "minLength": 1,
+          "description": "User-confirmed model identifier assigned to this tier."
+        },
+        "effort": {
+          "$ref": "#/definitions/effort_policy"
+        },
+        "source": {
+          "type": "string",
+          "enum": ["user-confirmed"],
+          "description": "Provenance tag certifying that this mapping was confirmed by the user and never guessed."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "model_mode": { "const": "single" }
+        }
+      },
+      "then": {
+        "required": ["single_model"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "model_mode": { "const": "multi" }
+        }
+      },
+      "then": {
+        "required": ["tiers"]
+      }
+    }
+  ]
+}

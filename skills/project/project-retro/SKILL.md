@@ -1,80 +1,112 @@
 ---
 name: project-retro
-description: Conduct a retrospective on a completed project or session to identify environment, guardrail, navigation, tool economy, and workflow improvements. Model-invoked at the conclusion of a project or user-invoked when requested.
+description: >
+  Review a completed project or complex working session, trace meaningful
+  execution friction to its root causes, verify which issues are already
+  permanently guarded, and surface durable improvements to workflow,
+  navigation, automated checks, steering, information access, test
+  architecture, and tool economy.
 ---
 
 # Project Retro
 
-`project-retro` conducts a retrospective on a completed project or coding
-session, identifying actionable improvements to the agent's environment,
-guardrails, navigation, tool economy, and steering files to make future runs
-smoother and more reliable.
+`project-retro` is a workflow-aware retrospective skill. Following a complex
+project, implementation session, review, or release, it traces evidenced
+friction to root causes, verifies which issues are already permanently
+guarded at current HEAD, and extracts durable improvements across the agent's
+environment, workflow, and guardrails.
 
 ## When to use
 
-- **At the conclusion of a project workflow:** After `project-review` issues a
-  verdict or `release-workflow` completes, the Agent evaluates whether a
-  retrospective is warranted.
-- **After a complex implementation session:** When an agent encounters
-  non-trivial friction during coding or debugging.
-- **User-invoked on demand:** Whenever the user explicitly asks for a
-  retrospective, post-mortem, or environment review (`$project-retro`).
+- **Workflow completion:** After `project-review` issues a verdict,
+  `release-workflow` prepares/completes a release, or a complex implementation
+  effort finishes.
+- **Friction-heavy session:** When an agent encounters repeated rework,
+  reviewer-caught mechanical defects, unverified assumptions, unfindable
+  contracts, expensive tool churn, or cross-repo friction.
+- **User-invoked:** On direct human request (`project-retro`, `retrospective`,
+  `$project-retro`).
 
 ## Agent self-evaluation trigger (Workflow final step)
 
-At the final step of a project or task, the Agent must independently assess
-whether to invoke `project-retro` by checking for friction signals:
+At the final step of a project or task, evaluate whether a retrospective is
+warranted using the value-judgment matrix in [heuristics.md](references/heuristics.md):
 
-| Friction signal | Threshold to invoke |
-| --- | --- |
-| **Navigation** | Agent spent significant turns or tool calls searching for files, or hidden dependencies caused confusion. |
-| **Missing guardrail** | Agent made an error or broke tests that an automated check (lint, typecheck, pre-commit hook, CI job) could have caught deterministically. |
-| **Reviewer / Standards gap** | Reviewer missed an issue, or a mechanical rule was expressed as prose rather than a deterministic check. |
-| **Steering bloat** | `AGENTS.md` / `CLAUDE.md` has grown unwieldy, contains stale rules, or has instructions that do not alter behavior (no-ops). |
-| **Tool economy** | Inefficient or redundant tool calls were made (e.g. repeated large-file reads, unindexed searches). |
-| **Information access** | Crucial logs, runtime status, or primary source docs were unavailable or hard to inspect. |
+| Friction signal | Recurrence | Preventable | Impact | Decision |
+| :--- | :--- | :--- | :--- | :--- |
+| **Preventable failure** | High | High (lint/test/CI) | High | **Invoke** |
+| **Reviewer / Standards gap** | High | High (mechanical check) | Medium | **Invoke** |
+| **Hidden dependency / Test coupling** | High | High (hermetic boundary) | High | **Invoke** |
+| **Release / Workflow friction** | High | High (preflight guard) | High | **Invoke** |
+| **Information gap / Extrapolation** | Medium | Medium (provenance ref) | Medium | **Invoke** |
+| **Navigation / Steering bloat** | Medium | Medium (index / cleanup) | Low | **Invoke if >1** |
+| **Tool economy churn** | Medium | High (query planning) | Medium | **Invoke if >1** |
+| **Routine smooth delivery** | Low | N/A | None | **Skip** |
 
-- **If one or more friction signals are observed:** Invoke `project-retro` to
-  analyze the session and present structured findings.
-- **If the session ran smoothly without friction:** Skip `project-retro`
-  cleanly. Do not add noise, unnecessary token overhead, or redundant steps to
-  a successful, routine run.
+- **If meaningful, reusable friction is observed:** Invoke `project-retro` to
+  extract durable systemic improvements.
+- **If the session ran smoothly without systemic friction:** Skip cleanly.
+  Do not add token overhead or redundant retrospective noise to routine runs.
 
-## Steps
+## Retrospective Workflow
 
-1. **Review writing standards:** Follow `writing-for-agents` principles — keep
-   recommendations concise, specific, and actionable.
-2. **Gather session evidence:** Examine the primary sources for the session:
-   session logs, git history/diff, test output, review findings, and steering
-   files. Default to the current session if none is specified.
-3. **Analyze candidate improvements across core categories:**
-   - **Navigation:** Are file pointers missing? Would an explicit index help?
-   - **Automated checks:** Can a deterministic check (lint, typecheck, hook,
-     script) replace human vigilance or agent guesswork? Prefer building a
-     check over writing a prose rule.
-   - **Coding standards:** Should reviewer instructions be clarified? Reserve
-     `CODING_STANDARDS.md` for genuine judgment calls; push mechanical rules to
-     linters or CI.
+1. **Establish Scope:** Identify target scope (`current session`,
+   `implementation effort`, `workflow run`, `release cycle`, or user range).
+2. **Gather Primary Evidence:** Inspect primary sources: git history and diff,
+   test and CI outputs, review findings, release evidence, relevant steering,
+   and primary-source references involved in the friction.
+3. **Extract Friction Signals:** Scan candidate friction across core categories:
+   - **Navigation:** Are file pointers, indices, or contract locations missing?
+   - **Automated checks:** Could a deterministic check (lint, typecheck, hook,
+     script, preflight) replace manual vigilance or guesswork?
+   - **Coding standards:** Should mechanical reviewer rules move to linters,
+     leaving judgment calls to standards?
    - **Steering economy:** Can instructions in `AGENTS.md` or `CLAUDE.md` be
-     slimmed, moved to standards, or removed as no-ops?
-   - **Tool economy:** Did the agent make expensive or redundant tool calls?
-   - **Information access:** Was key telemetry or logging missing?
-4. **Present findings in order of severity:** Use the standard report format
-   (see [template.md](references/template.md)). Rank candidates by impact,
-   distinguishing high-leverage guardrails from minor polish.
+     slimmed, uncoupled from stale paths, or moved to progressive references?
+   - **Tool economy:** Did the agent make redundant reads or queries without
+     an active consumer?
+   - **Information access:** Were upstream schemas, provenance, or runtime
+     logs unavailable locally?
+   - **Test architecture:** Are tests coupled to external sibling repos,
+     missing hermetic snapshots, or lacking drift detection?
+   - **Workflow / Release mechanics:** Were tag immutability, receipt
+     invariants, or state transitions unprotected?
+4. **Verify Current State (Deduplication):** Inspect repository `HEAD` for
+   each candidate finding before reporting:
+   - **`[CLOSED]`:** Root cause already has a persistent code, test, CI, doc,
+     or process guardrail. Document as closed experience; generate no duplicate TODO.
+   - **`[PARTIAL]`:** Immediate symptom repaired, but long-term automated
+     guardrail, test coverage, or reference remains missing.
+   - **`[OPEN]`:** Systemic gap remains unguarded and can recur.
+5. **Separate Immediate Fix from Permanent Improvement:** Distinguish
+   `Observed incident` $\to$ `Immediate repair` $\to$ `Permanent guardrail`.
+   The retrospective focuses strictly on permanent systemic guardrails.
+6. **Classify Improvement Type & Nature:** Label each finding's category and
+   nature (`Mechanical` $\to$ test/script/CI; `Judgment-based` $\to$ standards/review;
+   `Hybrid`).
+7. **Rank by Leverage:** Order remaining findings by:
+   `Severity × recurrence probability × generalizability ÷ maintenance cost`.
+8. **Present Findings:** Use the neutral, facts-first template in
+   [template.md](references/template.md), separating `Already-Closed Guardrails`
+   from `Remaining Systemic Findings`.
+9. **Formulate Suggested Actions:** Propose bounded, actionable steps
+   (default top 3) under `Suggested Actions — Pending Approval`.
+10. **Handoff and Stop:** Stop immediately after presenting the report.
+    Recommendation is not authorization. Await explicit human selection before
+    implementing any approved change in a bounded step.
 
-## Handoff and stop
+## Audit Tone Discipline
 
-- Stop after presenting the retrospective findings.
-- Do not automatically edit repository configuration, linters, or steering
-  files without explicit human approval.
-- When the user approves a specific recommendation, implement only the
-  approved change in a bounded, verified step.
+- Adopt a neutral engineering audit tone.
+- Do not praise, thank, flatter, congratulate, or evaluate the reviewer or user.
+- Start directly from verified evidence, test status, and findings.
+- Evaluate systems, workflows, and guardrails—not people or personalities.
 
 ## References
 
-- [categories.md](references/categories.md) — Detailed inspection criteria and
-  remediation patterns across the six categories.
-- [heuristics.md](references/heuristics.md) — Decision matrix and heuristic
-  rules for the agent's self-evaluation trigger.
-- [template.md](references/template.md) — Markdown retrospective report template.
+- [categories.md](references/categories.md) — Detailed inspection criteria,
+  signals, and typical durable improvements across all categories.
+- [heuristics.md](references/heuristics.md) — Decision matrix, tri-state status
+  classification (`CLOSED`/`PARTIAL`/`OPEN`), and reporting discipline.
+- [template.md](references/template.md) — Standard markdown retrospective
+  report template.

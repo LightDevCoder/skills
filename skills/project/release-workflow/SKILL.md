@@ -37,6 +37,7 @@ tagging, verify the candidate is internally consistent:
 
 Validation gates:
 ```bash
+python3 scripts/verify_release_integrity.py
 python3 -m pytest -q
 python3 -m unittest discover -s tests
 python3 -m compileall -q skills tests
@@ -76,7 +77,12 @@ candidate`).
 > verification in Phase 3 still runs afterwards, and nothing is declared
 > `released` / `VERIFIED` until Phase 4.
 
-Tag the candidate commit and publish `main` and the tag together (preferring atomic push):
+Tag the candidate commit and publish `main` and the tag together (preferring atomic push).
+First, run the release integrity guard to enforce tag immutability:
+```bash
+python3 scripts/verify_release_integrity.py --tag vX.Y.Z --commit HEAD
+```
+If the tag already exists pointing to the exact same target commit, it passes idempotently. If it points to a different commit, tagging is strictly blocked to protect release immutability.
 
 ```bash
 git tag -a vX.Y.Z -m "vX.Y.Z — <title>"
@@ -147,6 +153,7 @@ Flip the whole tree from candidate to released:
 
 Validation gates:
 ```bash
+python3 scripts/verify_release_integrity.py
 python3 -m pytest -q
 python3 -m unittest discover -s tests
 python3 -m compileall -q skills tests

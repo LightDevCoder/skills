@@ -1091,6 +1091,17 @@ class ProjectInitBehaviorTest(unittest.TestCase):
                 self.assertEqual(k1, secret_key)
                 self.assertEqual(k2, secret_key)
 
+    def test_skills_cli_conventions_provenance_document_and_matrix_parity(self) -> None:
+        """Verify references/skills_cli_conventions.md exists and documents upstream provenance."""
+        ref_doc = ROOT / "references" / "skills_cli_conventions.md"
+        self.assertTrue(ref_doc.is_file(), f"Reference doc missing: {ref_doc}")
+        content = ref_doc.read_text(encoding="utf-8")
+        self.assertIn("vercel-labs/skills", content)
+        self.assertIn("v1.7.0", content)
+        self.assertIn("2026-09-20", content)
+        # Verify all AGENT_TARGETS keys are documented in reference table
+        for key in BOOTSTRAP.AGENT_TARGETS:
+            self.assertIn(f"`{key}`", content)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,234 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/LightDevCoder/agent-config/main/schemas/host-capabilities.schema.json",
+  "title": "HostCapabilities",
+  "description": "Canonical schema for host capabilities reported by Host Adapters. Strictly records factual availability and discrete options, forbidding automatic intelligence ranking or routing ranks.",
+  "type": "object",
+  "required": [
+    "host_id",
+    "adapter_id",
+    "observed_at",
+    "available_models",
+    "supported_effort_values",
+    "capabilities"
+  ],
+  "properties": {
+    "host_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identifier of the agent host (e.g. codex, opencode, claude-code, generic)."
+    },
+    "adapter_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identifier of the adapter reporting these capabilities."
+    },
+    "workspace": {
+      "type": "string",
+      "description": "Canonical workspace directory inspected, if applicable."
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when this host capability snapshot was observed."
+    },
+    "platform": {
+      "type": "string",
+      "description": "Optional OS/environment platform detail (e.g. darwin-arm64, linux-x64)."
+    },
+    "available_models": {
+      "type": "array",
+      "description": "Factual inventory of models exposed by this host. Forbids routing_rank and intelligence assumptions.",
+      "items": {
+        "$ref": "#/definitions/model_info"
+      },
+      "uniqueItems": true
+    },
+    "supported_effort_values": {
+      "type": "array",
+      "description": "Exact discrete string values supported by the host runtime for reasoning effort.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "default_effort_value": {
+      "type": "string",
+      "description": "Default reasoning effort value assumed by the host when none is specified."
+    },
+    "capabilities": {
+      "type": "object",
+      "description": "Execution and context capabilities supported by the host runtime.",
+      "required": [
+        "subagents",
+        "threads",
+        "parallelism",
+        "model_selection"
+      ],
+      "properties": {
+        "subagents": {
+          "$ref": "#/definitions/capability_entry"
+        },
+        "threads": {
+          "$ref": "#/definitions/capability_entry"
+        },
+        "parallelism": {
+          "$ref": "#/definitions/capability_entry"
+        },
+        "model_selection": {
+          "$ref": "#/definitions/model_selection_capability"
+        },
+        "per_agent_model_selection": {
+          "$ref": "#/definitions/capability_entry"
+        },
+        "concurrency": {
+          "$ref": "#/definitions/concurrency_capability"
+        },
+        "configuration_mutation": {
+          "$ref": "#/definitions/configuration_mutation_capability"
+        },
+        "reasoning": {
+          "$ref": "#/definitions/capability_entry"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "model_info": {
+      "type": "object",
+      "description": "Factual model descriptor. Exclusively describes presence and features without ranking or tier guessing.",
+      "required": ["id", "state"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Authentic model identifier as exposed by the host."
+        },
+        "label": {
+          "type": "string",
+          "description": "Human-readable model label provided by the host UI/runtime."
+        },
+        "state": {
+          "type": "string",
+          "enum": ["available", "unavailable", "unknown"],
+          "description": "Availability state of this model on the host."
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Technical features reported by the host (e.g. reasoning, tools, vision)."
+        },
+        "evidence": {
+          "$ref": "#/definitions/evidence_source"
+        }
+      },
+      "additionalProperties": false
+    },
+    "evidence_source": {
+      "type": "object",
+      "description": "Provenance evidence verifying host capability or model presence.",
+      "required": ["kind", "locator"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["host-runtime", "host-config", "host-schema", "adapter-probe", "user-confirmed"]
+        },
+        "locator": {
+          "type": "string",
+          "description": "Path, CLI command, config key, or runtime API from which evidence was derived."
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    },
+    "capability_entry": {
+      "type": "object",
+      "description": "State of a specific host capability with supporting evidence.",
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": ["available", "unavailable", "unknown"]
+        },
+        "evidence": {
+          "$ref": "#/definitions/evidence_source"
+        }
+      },
+      "additionalProperties": false
+    },
+    "model_selection_capability": {
+      "type": "object",
+      "description": "Model selection capabilities and supported scopes.",
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": ["available", "unavailable", "unknown"]
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["current-session", "new-session", "per-agent"]
+          },
+          "uniqueItems": true
+        },
+        "evidence": {
+          "$ref": "#/definitions/evidence_source"
+        }
+      },
+      "additionalProperties": false
+    },
+    "concurrency_capability": {
+      "type": "object",
+      "description": "Concurrent execution limits of the host runtime.",
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": ["available", "unavailable", "unknown"]
+        },
+        "max_concurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum parallel workers or subagents supported by the host pool."
+        },
+        "evidence": {
+          "$ref": "#/definitions/evidence_source"
+        }
+      },
+      "additionalProperties": false
+    },
+    "configuration_mutation_capability": {
+      "type": "object",
+      "description": "Whether the host supports programmatic configuration updates (file-based or live session).",
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": ["available", "unavailable", "unknown"]
+        },
+        "supports_native_files": {
+          "type": "boolean",
+          "description": "True if host configuration files (e.g. config.toml, settings.json) can be safely rendered and written."
+        },
+        "supports_session_mutation": {
+          "type": "boolean",
+          "description": "True if live session state can be altered via API or commands."
+        },
+        "evidence": {
+          "$ref": "#/definitions/evidence_source"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

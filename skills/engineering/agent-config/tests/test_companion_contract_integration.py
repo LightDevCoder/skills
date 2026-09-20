@@ -47,7 +47,107 @@ from test_agent_config_behavior import (
 
 
 class CompanionContractIntegrationTest(unittest.TestCase):
-    """Layer 1: Deterministic Schema & Canonical Contract Tests."""
+    """Deterministic Schema & Canonical Contract Tests: Hermetic Layer 1 and Cross-Repo Integration Layer 2."""
+
+    def test_hermetic_schemas_snapshot_provenance_and_integrity(self) -> None:
+        """Layer 1 Hermetic: In-repo schema snapshot carries full provenance metadata and valid JSON schemas."""
+        schemas_dir = FIXTURES / "schemas"
+        meta_file = schemas_dir / "METADATA.json"
+        self.assertTrue(meta_file.is_file(), f"Hermetic schema snapshot metadata missing: {meta_file}")
+
+        meta = json.loads(meta_file.read_text(encoding="utf-8"))
+        self.assertEqual(meta.get("source_repository"), "LightDevCoder/agent-config")
+        self.assertEqual(len(meta.get("source_revision", "")), 40)
+        self.assertTrue(meta.get("contract_version"))
+        self.assertTrue(meta.get("snapshot_date"))
+
+        declared_schemas = meta.get("schemas", [])
+        self.assertGreaterEqual(len(declared_schemas), 3)
+
+        for s_name in declared_schemas:
+            s_file = schemas_dir / s_name
+            self.assertTrue(s_file.is_file(), f"Declared schema snapshot file missing: {s_file}")
+            s_json = json.loads(s_file.read_text(encoding="utf-8"))
+            self.assertIn("$schema", s_json)
+            self.assertIn("type", s_json)
+
+    def test_hermetic_fixtures_structural_contracts(self) -> None:
+        """Layer 1 Hermetic: Validate profiles, hosts, and execution configs structurally in clean environment."""
+        # 1. Profiles
+        for p in ["profile-single-model.json", "profile-multi-model.json", "profile-multi-model-shared.json"]:
+            data = json.loads((FIXTURES / p).read_text(encoding="utf-8"))
+            self.assertEqual(data.get("profile_version"), 1)
+            self.assertIn("host", data)
+            self.assertIn("scope", data)
+            self.assertIn(data.get("model_mode"), ("single", "multi"))
+            self.assertIn("capabilities", data)
+            if data["model_mode"] == "single":
+                self.assertIn("single_model", data)
+            else:
+                self.assertIn("tiers", data)
+
+        # 2. Host fixtures
+        host_files = [
+            "case-c-fixed-single-pass.json",
+            "case-d-fixed-decomposed.json",
+            "case-a-tiered-single-pass.json",
+            "case-b-tiered-decomposed.json",
+            "unranked-multiple-models.json",
+            "missing-reasoning-control.json",
+        ]
+        for h in host_files:
+            data = json.loads((FIXTURES / h).read_text(encoding="utf-8"))
+            self.assertIn("host_id", data)
+            self.assertIn("adapter_id", data)
+            self.assertIn("available_models", data)
+            self.assertIsInstance(data["available_models"], list)
+            self.assertIn("capabilities", data)
+
+        # 3. Execution Configs
+        for c in ["case-a", "case-b", "case-c", "case-d"]:
+            data = json.loads((FIXTURES / f"execution-config-{c}.json").read_text(encoding="utf-8"))
+            self.assertIn("task_shape", data)
+            self.assertIn(data["task_shape"], ("single-pass", "decomposed"))
+            self.assertIn("model_mode", data)
+            self.assertIn(data["model_mode"], ("single", "multi"))
+            self.assertIn("topology", data)
+            self.assertIsInstance(data["topology"]["concurrency"], int)
+            if data["task_shape"] == "single-pass":
+                self.assertIn("execution", data)
+                self.assertIn("model", data["execution"])
+            else:
+                self.assertIn("controller", data)
+                self.assertIn("work_items", data)
+                self.assertIsInstance(data["work_items"], list)
+
+    def test_cross_repo_schema_drift_detection(self) -> None:
+        """Layer 2 Cross-Repo: Detect schema drift between local hermetic snapshot and live companion repo."""
+        companion_repo = find_companion_repo()
+        if not companion_repo:
+            self.skipTest("Companion repo not found in test environment; cross-repo drift check skipped.")
+
+        schemas_dir = FIXTURES / "schemas"
+        meta = json.loads((schemas_dir / "METADATA.json").read_text(encoding="utf-8"))
+        drifted: list[str] = []
+
+        for s_name in meta.get("schemas", []):
+            local_file = schemas_dir / s_name
+            comp_file = companion_repo / "schemas" / s_name
+            if not comp_file.is_file():
+                drifted.append(f"{s_name} (missing in companion)")
+                continue
+
+            local_json = json.loads(local_file.read_text(encoding="utf-8"))
+            comp_json = json.loads(comp_file.read_text(encoding="utf-8"))
+            if local_json != comp_json:
+                drifted.append(s_name)
+
+        self.assertEqual(
+            drifted,
+            [],
+            f"Schema drift detected between local hermetic snapshot (revision {meta['source_revision']}) "
+            f"and live companion repo for: {drifted}. Update local snapshot schemas and METADATA.json.",
+        )
 
     def test_layer1_deterministic_schemas_via_companion_ajv(self) -> None:
         """All Skill-documented profiles, host fixtures, and execution configs pass canonical companion schemas."""

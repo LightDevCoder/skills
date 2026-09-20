@@ -1,41 +1,78 @@
-# Agent Self-Evaluation Heuristics
+# Agent Self-Evaluation Heuristics & Decision Matrix
 
-When reaching the conclusion of a project workflow (after `project-review` or `release-workflow`), or at the end of an implementation milestone, the Agent considers whether to invoke `project-retro`.
+When reaching the conclusion of a project workflow (after `project-review` or `release-workflow`), or at the end of a complex implementation milestone, the Agent evaluates whether to invoke `project-retro`.
 
-## Decision Principles
+---
 
-1. **Friction-Driven:** Retrospectives are triggered by evidenced friction during execution, not by default rote procedure.
-2. **Noise Reduction:** On clean, smooth runs where everything succeeded on the first pass without confusion, skip the retrospective to minimize latency and token consumption.
-3. **Actionability:** A retrospective finding must lead to a concrete check, pointer, or rule change. Speculative or vague observations are discarded.
+## 1. Decision Principles
 
-## Scoring & Trigger Matrix
+1. **Friction-Driven:** Retrospectives are triggered by evidenced execution friction, not by rote procedure.
+2. **Value-Driven Invocation:** Run a retrospective only when meaningful, reusable systemic improvements can be extracted. If a session ran smoothly without systemic friction, skip cleanly to save tokens and avoid noise.
+3. **Current-State Deduplication:** Every candidate finding must be verified against current repository `HEAD` before reporting, classifying findings into `CLOSED`, `PARTIAL`, or `OPEN`.
+4. **Neutral Tone Discipline:** Present cold, audit-style findings directly from evidence without flattery, congratulations, or subjective commentary.
+5. **Actionability:** Retrospective findings must propose concrete, bounded improvements (tests, scripts, references, linters, or steering cleanups).
+
+---
+
+## 2. Value-Judgment Trigger Matrix
 
 Evaluate the session against the following indicators:
 
-| Category | Indicator | Weight |
-| --- | --- | --- |
-| Navigation | >3 unsuccessful file search attempts, or editing the wrong target | Moderate |
-| Guardrails | Test failure or bug that a deterministic linter/typecheck could catch | High |
-| Guardrails | Unwired or missing CI/pre-commit check in the repository | High |
-| Standards | Reviewer missed an error, or mechanical rules exist in prose | Moderate |
-| Steering | `AGENTS.md` / `CLAUDE.md` contains redundant instructions or no-ops | Moderate |
-| Tool Economy | >2 redundant reads of large files (>50KB) or excessive token usage | Low |
-| Information | Missing dev server logs or inaccessible error traces | Moderate |
+| Signal | Evidence Strength | Recurrence Likelihood | Mechanical Preventability | Future Impact | Recommendation |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Preventable failure** | High (failing test/crash) | High | High (lint/test/CI) | High | **Invoke** |
+| **Reviewer / Standards gap** | High (review finding) | High | High (deterministic check) | Medium | **Invoke** |
+| **Release / Provenance friction** | High (tag movement / audit) | High | High (preflight script) | High | **Invoke** |
+| **Hidden dependency / Coupling** | High (standalone test failure) | High | High (hermetic boundary) | High | **Invoke** |
+| **Information gap / Guessing** | Medium (extrapolated mappings) | Medium | Medium (provenance ref) | Medium | **Invoke** |
+| **Steering bloat / Stale pointer** | Medium (stale path in steering) | Medium | Medium (wayfinding rule) | Low | **Invoke if combined** |
+| **Tool economy churn** | Medium (zero-value queries) | Medium | High (query planning) | Medium | **Invoke if combined** |
+| **Isolated minor typo / bug** | Low (single trivial fix) | Low | Low | Low | **Skip** |
+| **Routine smooth delivery** | None (clean execution) | None | N/A | None | **Skip** |
 
 ### Evaluation Outcome
 
-- **Trigger `project-retro`:** If any **High** weight indicator is present, or if two or more **Moderate** indicators are detected.
-- **Skip `project-retro`:** If zero High indicators and at most one Moderate/Low indicator are present, and the primary work passed review cleanly.
+- **Trigger `project-retro`:** If any **High** impact indicator is present, or if two or more **Medium** indicators are detected.
+- **Skip `project-retro`:** If zero High indicators and at most one Medium/Low indicator are present, and the primary work passed cleanly.
 
-## Example Scenarios
+---
 
-### Scenario A — Trigger (Missing Guardrail & Navigation Friction)
-- **Session events:** Agent edited `api.ts`, forgot an import, ran tests which crashed. Then searched 4 different folders to find where types were exported. Reviewer finally caught a formatting discrepancy.
-- **Decision:** Trigger `project-retro`.
-- **Finding:**
-  1. Add pre-commit typecheck (`tsc --noEmit`) to catch missing imports immediately.
-  2. Add navigation index in `src/types/README.md`.
+## 3. Tri-State Finding Classification Model
 
-### Scenario B — Skip (Routine Clean Run)
-- **Session events:** Ticket was clear, agent located the exact file immediately, wrote tests first (TDD), implemented the feature, all tests passed on first run, code-review and project-review issued clean PASS.
-- **Decision:** Skip `project-retro`. Report task completion without retrospective noise.
+When analyzing candidate findings against current repository `HEAD`, assign one of three statuses:
+
+```text
+Finding
+├── evidence (file, commit, command)
+├── friction (observed failure or delay)
+├── root_cause (why tooling/workflow missed it)
+├── status
+│   ├── [CLOSED]  -> Root cause already has persistent code, test, CI, doc, or process guardrail.
+│   │                Document as closed experience; do NOT generate duplicate action items.
+│   ├── [PARTIAL] -> Immediate symptom fixed, but durable guardrail, test, or reference has gaps.
+│   │                Enter systemic findings.
+│   └── [OPEN]    -> Problem remains unaddressed and can easily recur in future workflows.
+│                    Enter systemic findings.
+├── existing_guardrail
+├── remaining_gap
+├── durable_improvement
+├── improvement_type
+└── priority
+```
+
+---
+
+## 4. Audit Invariants & Reporting Discipline
+
+When compiling a retrospective report, strictly enforce these discipline rules:
+
+1. **Neutral Tone:** Do not praise, thank, flatter, congratulate, or evaluate the reviewer or user. Start directly from verified facts, test status, and findings.
+2. **Facts Before Conclusions:** Verify repository `HEAD`, test suite status, and commit/tag/release state before asserting claims.
+3. **Recommendation Is Not Authorization:** Never label work "Approved" unless the user explicitly authorized execution in their message. Keep proposed actions labeled under `Suggested Actions — Pending Approval`.
+4. **Deduplicate Against Current State:** Before creating a proposed TODO, verify whether the guard or test already exists at `HEAD`. Record already-closed historical remediations under `Already-Closed Guardrails [CLOSED]`, keeping them out of suggested actions.
+5. **Preserve Conditional Evidence:** Do not collapse conditional environment data (e.g. "394 pass + 1 skip standalone / 395 pass with companion") into an unqualified aggregate.
+6. **Explicit Structural Separation:** Clearly distinguish:
+   - Observed incident / friction
+   - Immediate repair
+   - Permanent systemic guardrail
+   - Proposed action

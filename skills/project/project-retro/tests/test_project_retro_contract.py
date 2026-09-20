@@ -79,6 +79,20 @@ class ProjectRetroContractTest(unittest.TestCase):
         self.assertNotRegex(full_text, r"/Users/|/home/|C:\\")
         self.assertNotIn("install mattpocock/skills", full_text.lower())
 
+    def test_tri_state_deduplication_and_audit_discipline_documented(self) -> None:
+        """Verify CLOSED/PARTIAL/OPEN status model and template structure."""
+        self.assertIn("[CLOSED]", SKILL)
+        self.assertIn("[PARTIAL]", SKILL)
+        self.assertIn("[OPEN]", SKILL)
+        self.assertIn("Already-Closed Guardrails", TEMPLATE)
+        self.assertIn("Remaining Systemic Findings", TEMPLATE)
+        self.assertIn("Suggested Actions — Pending Approval", TEMPLATE)
+        self.assertIn("Suggested Actions — Pending Approval", SKILL)
+        self.assertIn("Useful signals", CATEGORIES)
+        self.assertIn("Typical durable improvements", CATEGORIES)
+        self.assertIn("Neutral Tone", HEURISTICS)
+        self.assertIn("Recommendation Is Not Authorization", HEURISTICS)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

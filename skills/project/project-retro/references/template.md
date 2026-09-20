@@ -5,23 +5,38 @@ Use this format when presenting retrospective findings:
 ```markdown
 # Session Retrospective
 
-## Overview
-- **Session / Project Scope:** [Brief description of what was built or debugged]
-- **Session Duration / Complexity:** [Estimated turns, files modified, or outcome]
-- **Friction Trigger:** [Why this retrospective was conducted, e.g. missing guardrails, navigation delays]
+## Trigger & Scope
 
-## Key Findings (Ordered by Severity)
+- **Scope:** [Current session, specific effort, workflow, release cycle, or user-specified range]
+- **Friction trigger:** [Why retrospective was invoked, e.g. preventable failure, reviewer gap, test coupling]
+- **Evidence reviewed:** [Exact commit SHA, changed files, test output, review findings, steering files]
 
-### 1. [Category]: [Concise Title] (Severity: High / Medium / Low)
-- **Observed Friction:** [What happened during the session, with exact file or command references]
-- **Root Cause:** [Why the agent struggled or why the error escaped early detection]
-- **Actionable Recommendation:** [Concrete fix: e.g. add pre-commit hook, add navigation pointer in AGENTS.md, prune no-op rule]
-- **Mechanical vs Judgment:** [Automated check preferred vs prose standard]
+## Already-Closed Guardrails
 
-### 2. [Category]: [Concise Title] (Severity: High / Medium / Low)
+### [CLOSED] [Finding Title]
+- **Original friction:** [Observed issue during implementation/review]
+- **Current guardrail:** [Implemented code, test, CI, or doc mechanism at HEAD]
+- **Verification:** [Exact test names or commands proving closure at HEAD]
+
+## Remaining Systemic Findings
+
+### 1. [OPEN/PARTIAL] [Category] — [Concise Title]
+**Severity:** High / Medium / Low
+
+- **Evidence:** [Exact file, commit, log, or command reference]
+- **Observed friction:** [What failed or caused execution friction]
+- **Root cause:** [Why existing workflow/tooling did not prevent it earlier]
+- **Current state:** [What immediate repair was made vs what systemic gap remains]
+- **Durable improvement:** [Concrete permanent guardrail, script, test, or reference]
+- **Improvement type:** [Automated Guardrail / Navigation / Reference & Provenance / Test Architecture / Steering / Tooling / Workflow / Human Judgment]
+- **Mechanical vs Judgment:** [Mechanical / Judgment-based / Hybrid]
+
+### 2. [OPEN/PARTIAL] [Category] — [Concise Title]
 ...
 
-## Immediate Next Steps (Pending User Approval)
-- [ ] 1. [Specific bounded change, e.g. wire `npm run lint` into CI]
-- [ ] 2. [Specific documentation update, e.g. add directory pointer to `AGENTS.md`]
+## Suggested Actions — Pending Approval
+
+1. [Specific bounded change, e.g. wire preflight script into CI]
+2. [Specific reference update or contract test]
+3. [Specific steering cleanup or navigation pointer]
 ```

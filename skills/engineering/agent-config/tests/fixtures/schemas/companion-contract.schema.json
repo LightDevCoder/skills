@@ -1,0 +1,143 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/LightDevCoder/agent-config/main/schemas/companion-contract.schema.json",
+  "title": "CompanionContract",
+  "description": "Canonical machine-readable contract specification for Agent Config companion MCP server, tools, requests, responses, and errors.",
+  "type": "object",
+  "required": [
+    "protocol_version",
+    "profile_version",
+    "tools",
+    "errors"
+  ],
+  "properties": {
+    "protocol_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Fixed companion MCP tool protocol version."
+    },
+    "profile_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Canonical profile schema version."
+    },
+    "tools": {
+      "type": "object",
+      "required": [
+        "get_setup_status",
+        "inspect_host",
+        "get_profile",
+        "save_profile",
+        "preview_configuration",
+        "apply_configuration",
+        "validate_configuration",
+        "reset_profile"
+      ],
+      "properties": {
+        "get_setup_status": {
+          "$ref": "#/definitions/tool_contract"
+        },
+        "inspect_host": {
+          "$ref": "#/definitions/tool_contract"
+        },
+        "get_profile": {
+          "$ref": "#/definitions/tool_contract"
+        },
+        "save_profile": {
+          "$ref": "#/definitions/tool_contract"
+        },
+        "preview_configuration": {
+          "$ref": "#/definitions/tool_contract"
+        },
+        "apply_configuration": {
+          "$ref": "#/definitions/tool_contract"
+        },
+        "validate_configuration": {
+          "$ref": "#/definitions/tool_contract"
+        },
+        "reset_profile": {
+          "$ref": "#/definitions/tool_contract"
+        }
+      },
+      "additionalProperties": false
+    },
+    "errors": {
+      "$ref": "#/definitions/error_contract"
+    }
+  },
+  "definitions": {
+    "tool_contract": {
+      "type": "object",
+      "required": ["name", "description", "request", "response"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": [
+            "get_setup_status",
+            "inspect_host",
+            "get_profile",
+            "save_profile",
+            "preview_configuration",
+            "apply_configuration",
+            "validate_configuration",
+            "reset_profile"
+          ]
+        },
+        "description": {
+          "type": "string"
+        },
+        "request": {
+          "type": "object",
+          "required": ["type", "properties"],
+          "properties": {
+            "type": { "type": "string", "const": "object" },
+            "properties": { "type": "object" },
+            "required": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "response": {
+          "type": "object",
+          "required": ["type", "properties"],
+          "properties": {
+            "type": { "type": "string", "const": "object" },
+            "properties": { "type": "object" },
+            "required": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "error_contract": {
+      "type": "object",
+      "required": ["type", "properties"],
+      "properties": {
+        "type": { "type": "string", "const": "object" },
+        "properties": {
+          "isError": { "type": "boolean", "const": true },
+          "content": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["type", "text"],
+              "properties": {
+                "type": { "type": "string", "const": "text" },
+                "text": { "type": "string" }
+              }
+            }
+          }
+        },
+        "required": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

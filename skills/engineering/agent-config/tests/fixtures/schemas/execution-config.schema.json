@@ -1,0 +1,354 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/LightDevCoder/agent-config/main/schemas/execution-config.schema.json",
+  "title": "ExecutionConfig",
+  "description": "Canonical schema for resolved execution configuration output by Agent Config and consumed by companion preview/apply tools. Discrete host effort values are resolved from abstract policies; intelligence guessing and routing_rank are strictly disallowed.",
+  "type": "object",
+  "required": [
+    "task_shape",
+    "model_mode",
+    "readiness",
+    "topology",
+    "review"
+  ],
+  "properties": {
+    "task_shape": {
+      "type": "string",
+      "enum": ["single-pass", "decomposed"],
+      "description": "Architectural scope of the work item: continuous single-pass or structured decomposed ticket graph."
+    },
+    "model_mode": {
+      "type": "string",
+      "enum": ["single", "multi"],
+      "description": "Operating mode: single fixed model or selectable multi-model."
+    },
+    "readiness": {
+      "type": "string",
+      "enum": [
+        "executable",
+        "needs-project-tickets",
+        "waiting-on-frontier",
+        "blocked-gate"
+      ],
+      "description": "Execution readiness status determining next workflow handoff."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Concise justification for topology, sizing, and effort decisions."
+    },
+    "topology": {
+      "type": "object",
+      "description": "Structural topology for task execution.",
+      "required": ["type", "concurrency"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "single-session",
+            "controller-workers",
+            "serial-tickets",
+            "parallel-workers"
+          ],
+          "description": "Execution topology pattern matching task shape and host capabilities."
+        },
+        "concurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of concurrent execution contexts or workers."
+        },
+        "fresh_contexts": {
+          "type": "boolean",
+          "description": "Whether workers run in isolated, fresh execution contexts."
+        },
+        "subagent_contexts": {
+          "type": "boolean",
+          "description": "Whether subagents are utilized for helper queries or parallel tasks."
+        }
+      },
+      "additionalProperties": false
+    },
+    "controller": {
+      "type": "object",
+      "description": "Configuration for the controller/orchestrator context.",
+      "required": ["model", "context"],
+      "properties": {
+        "model": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Host model identifier assigned to the controller."
+        },
+        "reasoning": {
+          "$ref": "#/definitions/reasoning"
+        },
+        "effort": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Concrete discrete effort value supported by the host (e.g. 'high')."
+        },
+        "effort_policy": {
+          "type": "string",
+          "description": "Abstract policy from which effort was resolved (e.g. 'highest-supported')."
+        },
+        "context": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Context locator (e.g. 'main-session')."
+        }
+      },
+      "additionalProperties": false
+    },
+    "execution": {
+      "type": "object",
+      "description": "Primary execution configuration for single-pass tasks.",
+      "required": ["model", "context"],
+      "properties": {
+        "model": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Host model identifier assigned for implementation."
+        },
+        "reasoning": {
+          "$ref": "#/definitions/reasoning"
+        },
+        "effort": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Concrete discrete effort value supported by the host."
+        },
+        "effort_policy": {
+          "type": "string",
+          "description": "Abstract policy from which effort was resolved."
+        },
+        "context": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Execution context locator (e.g. 'current-session')."
+        }
+      },
+      "additionalProperties": false
+    },
+    "helper": {
+      "type": "object",
+      "description": "Optional helper configuration for research or query assistance in single-pass tasks.",
+      "required": ["model", "context"],
+      "properties": {
+        "model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reasoning": {
+          "$ref": "#/definitions/reasoning"
+        },
+        "effort": {
+          "type": "string",
+          "minLength": 1
+        },
+        "effort_policy": {
+          "type": "string"
+        },
+        "context": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "work_items": {
+      "type": "array",
+      "description": "Per-ticket execution specifications for decomposed tasks.",
+      "items": {
+        "$ref": "#/definitions/work_item"
+      }
+    },
+    "review": {
+      "type": "object",
+      "description": "Review context and model configuration. Configures review environment without determining formal pass/fail verdict.",
+      "required": ["strategy", "model", "context"],
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "enum": [
+            "controller-review",
+            "self-check",
+            "independent-review"
+          ],
+          "description": "Type of review context required."
+        },
+        "tier": {
+          "type": "string",
+          "enum": ["routine", "standard", "high", "review"],
+          "description": "Optional tier mapping used to select model if multi-model."
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Host model identifier assigned for review."
+        },
+        "reasoning": {
+          "$ref": "#/definitions/reasoning"
+        },
+        "effort": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Concrete discrete effort value supported by the host."
+        },
+        "effort_policy": {
+          "type": "string",
+          "description": "Abstract policy from which effort was resolved."
+        },
+        "context": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Context locator (e.g. 'fresh-session', 'main-session')."
+        }
+      },
+      "additionalProperties": false
+    },
+    "preview": {
+      "type": "object",
+      "description": "Preview metadata generated by the MCP companion for verifiable mutation apply.",
+      "required": ["preview_id", "diff"],
+      "properties": {
+        "preview_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Deterministic hash/id of the pending configuration mutation."
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "mutation_targets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Host files or runtime settings targeted for modification."
+        },
+        "diff": {
+          "type": "string",
+          "description": "Unified diff or readable summary of planned host mutations."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "reasoning": {
+      "type": "object",
+      "description": "Host-neutral reasoning configuration and resolved host binding.",
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": ["disabled", "enabled", "unsupported", "unknown"]
+        },
+        "policy": {
+          "type": "string",
+          "enum": ["highest-supported", "default", "lowest-supported", "custom"]
+        },
+        "resolved": {
+          "type": "object",
+          "required": ["host_field", "host_value"],
+          "properties": {
+            "host_field": { "type": "string" },
+            "host_value": {
+              "type": ["string", "number", "boolean"]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "work_item": {
+      "type": "object",
+      "description": "Execution specification for a single ticket within a decomposed plan.",
+      "required": [
+        "ticket_id",
+        "difficulty",
+        "model",
+        "context"
+      ],
+      "properties": {
+        "ticket_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Ticket identifier (e.g. '01-init', '02-profile-store')."
+        },
+        "difficulty": {
+          "type": "string",
+          "enum": ["routine", "moderate", "demanding", "critical"],
+          "description": "Assessed work-item difficulty."
+        },
+        "tier": {
+          "type": ["string", "null"],
+          "enum": ["routine", "standard", "high", "review", null],
+          "description": "User-configured tier used to select model if multi-model mode."
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Host model identifier assigned to this work item."
+        },
+        "reasoning": {
+          "$ref": "#/definitions/reasoning"
+        },
+        "effort": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Concrete discrete effort value supported by the host."
+        },
+        "effort_policy": {
+          "type": "string",
+          "description": "Abstract policy from which effort was resolved."
+        },
+        "context": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Context locator (e.g. 'thread-1', 'worker-2')."
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Ticket IDs that must complete before this item can execute."
+        },
+        "review_strategy": {
+          "type": "string",
+          "enum": [
+            "controller-review",
+            "self-check",
+            "independent-review"
+          ],
+          "description": "Review strategy for this specific work item."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "task_shape": { "const": "single-pass" }
+        }
+      },
+      "then": {
+        "required": ["execution"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "task_shape": { "const": "decomposed" }
+        }
+      },
+      "then": {
+        "required": ["work_items", "controller"]
+      }
+    }
+  ]
+}

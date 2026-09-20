@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/LightDevCoder/agent-config/main/schemas/apply.schema.json",
+  "title": "ApplyResult",
+  "description": "Canonical schema for configuration mutation apply result.",
+  "type": "object",
+  "required": [
+    "success",
+    "preview_id",
+    "applied_targets",
+    "message"
+  ],
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether configuration mutation was successfully written."
+    },
+    "preview_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Preview identifier that was applied."
+    },
+    "applied_targets": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "File paths or target keys modified."
+    },
+    "target": {
+      "type": "string",
+      "description": "Primary mutation target."
+    },
+    "baseline_hash": {
+      "type": ["string", "null"],
+      "description": "Baseline hash captured at preview time."
+    },
+    "message": {
+      "type": "string",
+      "description": "Human-readable summary of apply action."
+    }
+  },
+  "additionalProperties": true
+}
