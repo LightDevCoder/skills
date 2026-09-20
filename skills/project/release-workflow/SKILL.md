@@ -33,28 +33,31 @@ ATTESTED
 
 ## Release Artifact Architecture
 
-The release workflow maintains three distinct artifacts:
+The release workflow maintains three distinct artifacts across cleanly separated lifecycles:
 
 1. **Release Notes (`RELEASE_NOTES.md` / `RELEASE_NOTES.zh-CN.md`):**
    User-facing summary of new capabilities, architectural changes, breaking
-   changes, and migration guidance.
+   changes, and migration guidance. Created during `PREPARED` and frozen inside the tag.
 2. **Release Manifest (`RELEASE_MANIFEST.md` / `RELEASE_MANIFEST.zh-CN.md`):**
    Immutable pre-publication release snapshot committed directly into the
    candidate commit and frozen inside the tag. Records version, scope, package
    count, policy status, expected tag identity (`refs/tags/vX.Y.Z^{commit}`),
    compatibility baselines, and local verification evidence. Avoids circular
-   commit-hash self-references.
+   commit-hash self-references and does not link relatively to uncreated receipts;
+   notes that post-publication verification is attested on `main` in `RELEASE_RECEIPT.md`.
 3. **Release Receipt (`RELEASE_RECEIPT.md` / `RELEASE_RECEIPT.zh-CN.md`):**
    Post-publication attestation recording verified facts: tag object SHA, peeled
    commit SHA, exact GitHub Actions CI run ID and conclusion, pinned and generic
-   fresh install outcomes, GitHub Release URL, and publication timestamp. Lives
-   on `main` following tag publication.
+   fresh install outcomes, GitHub Release URL, and publication timestamp.
+   **Created for the first time on `main` during `ATTESTED`** (directly with
+   `Status: VERIFIED` or documented failure). Receipts never exist inside tag
+   snapshots or candidate preparation commits.
 
 ---
 
 ## Release Lifecycle Stages
 
-### 1. Stage PREPARED (Candidate Preparation)
+### 1. Stage PREPARED (Candidate Preparation — Manifest + Notes Only)
 
 Prepare the candidate commit carrying code, documentation, and the immutable
 release manifest:
@@ -64,19 +67,23 @@ release manifest:
    the target release candidate and keeping the current stable release explicit.
 3. Create `RELEASE_MANIFEST.md` and `RELEASE_MANIFEST.zh-CN.md` under
    `docs/evidence/releases/vX.Y.Z/` recording pre-tag facts (version, scope,
-   package count, policy status, tag ref).
+   package count, policy status, tag ref). Manifest must not include relative
+   links to uncreated receipts.
 4. Create candidate `RELEASE_NOTES.md` and `RELEASE_NOTES.zh-CN.md`.
-5. Execute local verification gates:
+5. **Do NOT create `RELEASE_RECEIPT*.md`** in `PREPARED`. No candidate receipts
+   may enter candidate commits or tag snapshots.
+6. Execute local verification gates:
    ```bash
-   python3 scripts/verify_release_integrity.py --tag vX.Y.Z --commit HEAD
+   python3 scripts/verify_release_integrity.py --tag vX.Y.Z --commit HEAD --stage prepared
+   python3 scripts/check_public_docs.py
    python3 -m pytest -q
    python3 -m unittest discover -s tests
    python3 -m compileall -q skills tests
    git diff --check
    git status --short
    ```
-6. Commit candidate changes: `release: prepare vX.Y.Z`.
-7. **Transition:** Transition lifecycle state to `PREPARED`.
+7. Commit candidate changes: `release: prepare vX.Y.Z`.
+8. **Transition:** Transition lifecycle state to `PREPARED`.
 
 ### 2. Stage CI_VERIFIED (Remote CI Verification on Main)
 
@@ -91,7 +98,7 @@ Ensure the exact candidate commit is verified by remote CI:
 3. Verify CI conclusion is `SUCCESS`.
 4. **Transition:** Transition lifecycle state to `CI_VERIFIED`.
 
-### 3. Stage TAGGED (Annotated Tag Creation)
+### 3. Stage TAGGED (Remote Tag Protection Gate & Immutable Tag Creation)
 
 > **Publication Gate — User Authorization:** Creating the public tag and
 > publishing the release are externally visible actions. Present the candidate
@@ -101,21 +108,28 @@ Ensure the exact candidate commit is verified by remote CI:
 
 Create the annotated tag pointing to the exact CI-verified commit:
 
-1. Verify tag immutability guard:
+1. Verify remote GitHub tag ruleset protection:
    ```bash
-   python3 scripts/verify_release_integrity.py --tag vX.Y.Z --commit HEAD
+   python3 scripts/check_release_tag_protection.py
    ```
-2. Create annotated tag:
+   Requires: target is `tag`, enforcement is `active`, pattern covers `refs/tags/v*`,
+   and both `deletion` and `update` restrictions are present. If missing or inactive,
+   report `BLOCKED` and halt tag publication.
+2. Verify tag immutability guard:
+   ```bash
+   python3 scripts/verify_release_integrity.py --tag vX.Y.Z --commit HEAD --stage tagged
+   ```
+3. Create annotated tag (tag snapshot contains Manifest + Notes; Receipt does NOT exist):
    ```bash
    git tag -a vX.Y.Z -m "vX.Y.Z — <title>"
    git push origin vX.Y.Z
    ```
-3. Confirm tag resolution:
+4. Confirm tag resolution:
    ```bash
    git rev-parse refs/tags/vX.Y.Z
    git rev-parse refs/tags/vX.Y.Z^{commit}
    ```
-4. **Transition:** Transition lifecycle state to `TAGGED`.
+5. **Transition:** Transition lifecycle state to `TAGGED`.
 
 ### 4. Stage INSTALL_VERIFIED (Fresh Install Verification)
 
@@ -148,19 +162,21 @@ Create the formal GitHub Release:
 3. Verify release status and public URL.
 4. **Transition:** Transition lifecycle state to `PUBLISHED`.
 
-### 6. Stage ATTESTED (Post-Release Attestation)
+### 6. Stage ATTESTED (Post-Release Attestation — Receipt Created on Main)
 
 Record verified publication facts into `RELEASE_RECEIPT.md`:
 
-1. Update `docs/evidence/releases/vX.Y.Z/RELEASE_RECEIPT.md` and `.zh-CN.md` with:
+1. Create `docs/evidence/releases/vX.Y.Z/RELEASE_RECEIPT.md` and `.zh-CN.md` for
+   the first time on `main` (with `Status: VERIFIED` or documented failure), recording:
    - Tag object SHA and peel target commit SHA
    - Exact CI run ID and conclusion
    - Pinned and generic fresh install verification counts
    - GitHub Release URL and publication timestamp
+   Receipts may link back to `RELEASE_MANIFEST.md`.
 2. Update documentation and catalog to reflect the new stable release.
 3. Verify release integrity guard passes across all evidence artifacts:
    ```bash
-   python3 scripts/verify_release_integrity.py --tag vX.Y.Z --commit HEAD
+   python3 scripts/verify_release_integrity.py --tag vX.Y.Z --commit HEAD --stage attested
    ```
 4. Commit attestation to `main`: `docs(release): attest vX.Y.Z publication`.
 5. Push attestation commit to `origin/main`.

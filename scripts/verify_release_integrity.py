@@ -231,6 +231,100 @@ def check_release_manifest_consistency(tag: str, repo_root: Path = REPO_ROOT) ->
     )
 
 
+def check_manifest_navigation(tag: str, repo_root: Path = REPO_ROOT) -> VerificationResult:
+    """Verify that release manifest does not contain relative links to candidate receipts (v0.2.4+)."""
+    # Historical tags through v0.2.3 are preserved as immutable legacy artifacts
+    version_match = re.match(r"v?(\d+)\.(\d+)\.(\d+)", tag)
+    if version_match:
+        major, minor, patch = map(int, version_match.groups())
+        if (major, minor, patch) <= (0, 2, 3):
+            return VerificationResult(
+                passed=True,
+                status="SKIPPED_HISTORICAL",
+                message=f"Release {tag} is a known legacy lifecycle artifact with historical manifest navigation.",
+            )
+
+    evidence_dir = repo_root / "docs" / "evidence" / "releases" / tag
+    for manifest_name in ["RELEASE_MANIFEST.md", "RELEASE_MANIFEST.zh-CN.md"]:
+        p = evidence_dir / manifest_name
+        if p.is_file():
+            text = p.read_text(encoding="utf-8")
+            if re.search(r"\[[^\]]+\]\(\s*RELEASE_RECEIPT(?:\.zh-CN)?\.md\s*\)", text):
+                return VerificationResult(
+                    passed=False,
+                    status="RELATIVE_RECEIPT_LINK_FORBIDDEN",
+                    message=(
+                        f"Manifest {p.relative_to(repo_root)} contains a relative link to RELEASE_RECEIPT.md. "
+                        "Manifest must not navigate to candidate receipts in immutable tags; "
+                        "post-publication attestation lives on main."
+                    ),
+                )
+
+    return VerificationResult(
+        passed=True,
+        status="PASS",
+        message=f"Manifest navigation for {tag} verified: no relative links to post-publication receipts.",
+    )
+
+
+def check_release_notes_consistency(tag: str, repo_root: Path = REPO_ROOT) -> VerificationResult:
+    """Verify dual release notes exist."""
+    evidence_dir = repo_root / "docs" / "evidence" / "releases" / tag
+    notes_en = evidence_dir / "RELEASE_NOTES.md"
+    notes_zh = evidence_dir / "RELEASE_NOTES.zh-CN.md"
+
+    if not notes_en.is_file():
+        return VerificationResult(
+            passed=False,
+            status="NOTES_MISSING",
+            message=f"English release notes missing at {notes_en.relative_to(repo_root)}",
+        )
+    if not notes_zh.is_file():
+        return VerificationResult(
+            passed=False,
+            status="NOTES_MISSING",
+            message=f"Chinese release notes missing at {notes_zh.relative_to(repo_root)}",
+        )
+    return VerificationResult(
+        passed=True,
+        status="PASS",
+        message=f"Release notes for {tag} verified.",
+    )
+
+
+def check_receipt_absence_in_candidate(tag: str, repo_root: Path = REPO_ROOT) -> VerificationResult:
+    """Verify that candidate/pre-tag directories do not contain pre-publication candidate receipts (v0.2.4+)."""
+    version_match = re.match(r"v?(\d+)\.(\d+)\.(\d+)", tag)
+    if version_match:
+        major, minor, patch = map(int, version_match.groups())
+        if (major, minor, patch) <= (0, 2, 3):
+            return VerificationResult(
+                passed=True,
+                status="SKIPPED_HISTORICAL",
+                message=f"Release {tag} is a known legacy lifecycle artifact.",
+            )
+
+    evidence_dir = repo_root / "docs" / "evidence" / "releases" / tag
+    receipt_en = evidence_dir / "RELEASE_RECEIPT.md"
+    receipt_zh = evidence_dir / "RELEASE_RECEIPT.zh-CN.md"
+
+    if receipt_en.is_file() or receipt_zh.is_file():
+        return VerificationResult(
+            passed=False,
+            status="CANDIDATE_RECEIPT_FORBIDDEN",
+            message=(
+                f"Candidate release directory {evidence_dir.relative_to(repo_root)} contains pre-publication receipt(s). "
+                "Receipts may only be created on main during stage ATTESTED following publication."
+            ),
+        )
+
+    return VerificationResult(
+        passed=True,
+        status="PASS",
+        message=f"No premature candidate receipts found for {tag}.",
+    )
+
+
 def check_release_receipt_consistency(tag: str, repo_root: Path = REPO_ROOT) -> VerificationResult:
     """Verify mechanical consistency of release receipt and evidence files."""
     evidence_dir = repo_root / "docs" / "evidence" / "releases" / tag
@@ -353,16 +447,28 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Verify release integrity and tag immutability.")
     parser.add_argument("--tag", help="Release tag to verify (e.g. v0.2.2). Default: latest candidate tag.")
     parser.add_argument("--commit", default="HEAD", help="Target commit ref (default: HEAD).")
+    parser.add_argument("--stage", choices=["auto", "prepared", "candidate", "tagged", "attested"], default="auto", help="Lifecycle stage to verify (default: auto).")
     parser.add_argument("--check-remote", action="store_true", help="Also query git remote for tag status.")
     parser.add_argument("--allow-dirty", action="store_true", help="Allow uncommitted tracked changes.")
 
     args = parser.parse_args()
     tag = args.tag or detect_candidate_tag(REPO_ROOT)
     commit = args.commit
+    stage = args.stage
+
+    # Auto-resolve stage if auto
+    if stage == "auto":
+        evidence_dir = REPO_ROOT / "docs" / "evidence" / "releases" / tag
+        receipt_file = evidence_dir / "RELEASE_RECEIPT.md"
+        if receipt_file.is_file():
+            stage = "attested"
+        else:
+            stage = "prepared"
 
     print(f"=== Release Integrity Guard ===")
     print(f"Target Tag:    {tag}")
     print(f"Target Commit: {commit}")
+    print(f"Stage:         {stage}")
     print(f"Repository:    {REPO_ROOT}")
     print("--------------------------------")
 
@@ -377,11 +483,12 @@ def main() -> int:
     else:
         print("[SKIPPED] Working Tree check bypassed via --allow-dirty.")
 
-    # 2. Tag immutability & idempotency check
-    res_tag = check_tag_immutability(tag, commit, check_remote=args.check_remote, cwd=REPO_ROOT)
-    print(f"[{res_tag.status}] Tag Immutability: {res_tag.message}")
-    if not res_tag.passed:
-        all_passed = False
+    # 2. Tag immutability check
+    if stage in ("tagged", "attested", "auto"):
+        res_tag = check_tag_immutability(tag, commit, check_remote=args.check_remote, cwd=REPO_ROOT)
+        print(f"[{res_tag.status}] Tag Immutability: {res_tag.message}")
+        if not res_tag.passed:
+            all_passed = False
 
     # 3. Release manifest consistency check
     res_manifest = check_release_manifest_consistency(tag, repo_root=REPO_ROOT)
@@ -389,11 +496,29 @@ def main() -> int:
     if not res_manifest.passed:
         all_passed = False
 
-    # 4. Release receipt consistency check
-    res_receipt = check_release_receipt_consistency(tag, repo_root=REPO_ROOT)
-    print(f"[{res_receipt.status}] Receipt Consistency: {res_receipt.message}")
-    if not res_receipt.passed:
+    # 4. Manifest navigation check
+    res_nav = check_manifest_navigation(tag, repo_root=REPO_ROOT)
+    print(f"[{res_nav.status}] Manifest Navigation: {res_nav.message}")
+    if not res_nav.passed:
         all_passed = False
+
+    # 5. Release notes consistency check
+    res_notes = check_release_notes_consistency(tag, repo_root=REPO_ROOT)
+    print(f"[{res_notes.status}] Notes Consistency: {res_notes.message}")
+    if not res_notes.passed:
+        all_passed = False
+
+    # 6. Stage-specific receipt check
+    if stage in ("prepared", "candidate", "tagged"):
+        res_absence = check_receipt_absence_in_candidate(tag, repo_root=REPO_ROOT)
+        print(f"[{res_absence.status}] Candidate Receipt Absence: {res_absence.message}")
+        if not res_absence.passed:
+            all_passed = False
+    else:
+        res_receipt = check_release_receipt_consistency(tag, repo_root=REPO_ROOT)
+        print(f"[{res_receipt.status}] Receipt Consistency: {res_receipt.message}")
+        if not res_receipt.passed:
+            all_passed = False
 
     print("--------------------------------")
     if all_passed:

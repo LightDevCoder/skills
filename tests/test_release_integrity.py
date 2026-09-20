@@ -15,11 +15,15 @@ from verify_release_integrity import (
     check_tag_immutability,
     check_release_manifest_consistency,
     check_release_receipt_consistency,
+    check_manifest_navigation,
+    check_release_notes_consistency,
+    check_receipt_absence_in_candidate,
     get_admitted_package_count,
     detect_candidate_tag,
     resolve_tag_sha,
     resolve_commit_sha,
 )
+from check_release_tag_protection import verify_ruleset_payload
 
 
 class ReleaseIntegrityTests(unittest.TestCase):
@@ -189,6 +193,150 @@ class ReleaseIntegrityTests(unittest.TestCase):
             res = check_release_receipt_consistency("v0.2.3", repo_root=tmp_root)
             self.assertFalse(res.passed)
             self.assertEqual(res.status, "RECEIPT_TARGET_MISMATCH")
+
+    def test_candidate_lifecycle_requirements(self) -> None:
+        """Candidate stage (v0.2.4+) requires Manifest and Notes, and strictly forbids Receipt."""
+        with tempfile.TemporaryDirectory(prefix="candidate-test-") as tmp:
+            tmp_root = Path(tmp)
+            pkg_dir = tmp_root / "skills" / "category" / "pkg"
+            pkg_dir.mkdir(parents=True)
+            (pkg_dir / "SKILL.md").write_text("# Skill", encoding="utf-8")
+
+            rel_dir = tmp_root / "docs" / "evidence" / "releases" / "v0.2.4"
+            rel_dir.mkdir(parents=True)
+
+            # 1. Manifest exists
+            (rel_dir / "RELEASE_MANIFEST.md").write_text(
+                "# Manifest v0.2.4\nRelease: `v0.2.4`\nRelease identity: `refs/tags/v0.2.4^{commit}`\n"
+                "Collection package count: 1 admitted packages\nPolicy status: `PROVISIONAL`\n",
+                encoding="utf-8",
+            )
+            (rel_dir / "RELEASE_MANIFEST.zh-CN.md").write_text(
+                "# 清单 v0.2.4\n发布版本：`v0.2.4`\n发布身份：`refs/tags/v0.2.4^{commit}`\n"
+                "集合包总数：1 个\n政策状态：`PROVISIONAL`\n",
+                encoding="utf-8",
+            )
+            # 2. Notes exist
+            (rel_dir / "RELEASE_NOTES.md").write_text("# Notes", encoding="utf-8")
+            (rel_dir / "RELEASE_NOTES.zh-CN.md").write_text("# 说明", encoding="utf-8")
+
+            # Check candidate receipt absence passes
+            res_absence = check_receipt_absence_in_candidate("v0.2.4", repo_root=tmp_root)
+            self.assertTrue(res_absence.passed)
+            self.assertEqual(res_absence.status, "PASS")
+
+            # Notes check passes
+            res_notes = check_release_notes_consistency("v0.2.4", repo_root=tmp_root)
+            self.assertTrue(res_notes.passed)
+
+            # If a candidate receipt is prematurely added, check fails
+            (rel_dir / "RELEASE_RECEIPT.md").write_text("# Candidate receipt", encoding="utf-8")
+            res_fail = check_receipt_absence_in_candidate("v0.2.4", repo_root=tmp_root)
+            self.assertFalse(res_fail.passed)
+            self.assertEqual(res_fail.status, "CANDIDATE_RECEIPT_FORBIDDEN")
+
+    def test_tag_lifecycle_requirements(self) -> None:
+        """Tag stage requires Manifest without relative link to Receipt."""
+        with tempfile.TemporaryDirectory(prefix="tag-nav-test-") as tmp:
+            tmp_root = Path(tmp)
+            rel_dir = tmp_root / "docs" / "evidence" / "releases" / "v0.2.4"
+            rel_dir.mkdir(parents=True)
+
+            # Valid manifest explaining post-publication attestation without relative receipt link
+            valid_manifest = (
+                "# Manifest v0.2.4\n"
+                "[中文清单](RELEASE_MANIFEST.zh-CN.md) · [Release Notes](RELEASE_NOTES.md)\n\n"
+                "Post-publication verification facts are attested on main in RELEASE_RECEIPT.md.\n"
+            )
+            (rel_dir / "RELEASE_MANIFEST.md").write_text(valid_manifest, encoding="utf-8")
+            (rel_dir / "RELEASE_MANIFEST.zh-CN.md").write_text(valid_manifest, encoding="utf-8")
+
+            res_nav = check_manifest_navigation("v0.2.4", repo_root=tmp_root)
+            self.assertTrue(res_nav.passed)
+            self.assertEqual(res_nav.status, "PASS")
+
+            # Invalid manifest with relative link to RELEASE_RECEIPT.md
+            invalid_manifest = (
+                "# Manifest v0.2.4\n"
+                "[Release Receipt](RELEASE_RECEIPT.md)\n"
+            )
+            (rel_dir / "RELEASE_MANIFEST.md").write_text(invalid_manifest, encoding="utf-8")
+            res_fail = check_manifest_navigation("v0.2.4", repo_root=tmp_root)
+            self.assertFalse(res_fail.passed)
+            self.assertEqual(res_fail.status, "RELATIVE_RECEIPT_LINK_FORBIDDEN")
+
+    def test_historical_v023_legacy_compatibility(self) -> None:
+        """v0.2.3 is recognized as a known legacy lifecycle artifact."""
+        res_nav = check_manifest_navigation("v0.2.3", repo_root=ROOT)
+        self.assertTrue(res_nav.passed)
+        self.assertEqual(res_nav.status, "SKIPPED_HISTORICAL")
+
+        res_absence = check_receipt_absence_in_candidate("v0.2.3", repo_root=ROOT)
+        self.assertTrue(res_absence.passed)
+        self.assertEqual(res_absence.status, "SKIPPED_HISTORICAL")
+
+    def test_attested_lifecycle_v023_on_main(self) -> None:
+        """On main, v0.2.3 has final attested receipts matching local tag and package count."""
+        res_receipt = check_release_receipt_consistency("v0.2.3", repo_root=ROOT)
+        self.assertTrue(res_receipt.passed)
+        self.assertEqual(res_receipt.status, "PASS")
+
+        # Verify peeled commit matches
+        tag_target = resolve_tag_sha("v0.2.3", cwd=ROOT)
+        self.assertEqual(tag_target, "398e30627c18d9bffe877bb69695d38dcd5e7633")
+
+    def test_remote_tag_protection_ruleset_validation(self) -> None:
+        """verify_ruleset_payload accurately validates GitHub ruleset structures."""
+        valid_ruleset = {
+            "id": 12345,
+            "name": "Protect Release Tags",
+            "target": "tag",
+            "enforcement": "active",
+            "conditions": {
+                "ref_name": {
+                    "include": ["refs/tags/v*"],
+                    "exclude": [],
+                }
+            },
+            "rules": [
+                {"type": "deletion"},
+                {"type": "update"},
+            ],
+        }
+
+        # 1. Valid ruleset passes
+        res = verify_ruleset_payload([valid_ruleset])
+        self.assertTrue(res.passed)
+        self.assertEqual(res.status, "PASS")
+
+        # 2. Inactive enforcement is BLOCKED
+        inactive_rs = dict(valid_ruleset, enforcement="disabled")
+        res = verify_ruleset_payload([inactive_rs])
+        self.assertFalse(res.passed)
+        self.assertEqual(res.status, "BLOCKED")
+
+        # 3. Missing deletion restriction is BLOCKED
+        no_del_rs = dict(valid_ruleset, rules=[{"type": "update"}])
+        res = verify_ruleset_payload([no_del_rs])
+        self.assertFalse(res.passed)
+        self.assertEqual(res.status, "BLOCKED")
+        self.assertIn("deletion", res.message)
+
+        # 4. Missing update restriction is BLOCKED
+        no_upd_rs = dict(valid_ruleset, rules=[{"type": "deletion"}])
+        res = verify_ruleset_payload([no_upd_rs])
+        self.assertFalse(res.passed)
+        self.assertEqual(res.status, "BLOCKED")
+        self.assertIn("update", res.message)
+
+        # 5. Non-matching pattern is BLOCKED
+        wrong_pat_rs = dict(
+            valid_ruleset,
+            conditions={"ref_name": {"include": ["refs/tags/release-*"], "exclude": []}},
+        )
+        res = verify_ruleset_payload([wrong_pat_rs])
+        self.assertFalse(res.passed)
+        self.assertEqual(res.status, "BLOCKED")
 
 
 

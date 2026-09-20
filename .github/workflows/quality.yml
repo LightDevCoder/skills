@@ -54,8 +54,22 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git clone --depth 1 https://github.com/LightDevCoder/agent-config.git /tmp/agent-config-companion
-          (cd /tmp/agent-config-companion && npm ci)
+          PIN=$(python -c "import json; print(json.load(open('skills/engineering/agent-config/tests/fixtures/schemas/METADATA.json'))['source_revision'])")
+          echo "Using canonical companion pin: $PIN"
+          mkdir -p /tmp/agent-config-companion
+          git init /tmp/agent-config-companion
+          (
+            cd /tmp/agent-config-companion
+            git remote add origin https://github.com/LightDevCoder/agent-config.git
+            git fetch --depth 1 origin "$PIN"
+            git checkout --detach "$PIN"
+            current_head=$(git rev-parse HEAD)
+            if [ "$current_head" != "$PIN" ]; then
+              echo "Error: Checked out $current_head, expected $PIN"
+              exit 1
+            fi
+            npm ci
+          )
           export AGENT_CONFIG_COMPANION_PATH="/tmp/agent-config-companion"
           python -m unittest skills/engineering/agent-config/tests/test_companion_contract_integration.py
       - name: Retired package boundary
