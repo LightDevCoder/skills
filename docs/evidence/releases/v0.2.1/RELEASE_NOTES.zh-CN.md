@@ -33,8 +33,8 @@ Light Skills v0.2.1 带来包含 36 个已准入第一方 Skill 的完整能力�
 
 ### 5. TypeSafe Jev System One 语义加速
 - **`ask-light` 语义路由与意图校准：** 引入紧凑状态构建（<350 字符，不泄露原始源码树）与有界 Jev Choice / Noul / Score 原语裁决，实现执行意图强标定（`p >= 0.80` 升级为 `TRANSITION`）、关键歧义检测（`p >= 0.65` 导向 `project-clarify`）与就绪度分级打分，由代码独占存在性校验与 Fail-Closed 硬安全红线（未知工单、多任务歧义、过期/脏工作树 Review）。
-- **`agent-config` 抽象任务画像：** 引入无厂商模型耦合的抽象复杂度画像（`routine`、`standard`、`high`）与推理需求评估，底层保留 Harness 探测、Effort 严格解析（杜绝非法 `max`）与配置预览审批门禁。
-- **`project-init` Jev 生态接入：** 在脚手架初始化流程中提供交互式门禁（"是否为此项目初始化 TypeSafe Jev 语义增强？[y/N]"，支持 `--jev` / `--no-jev` CLI 参数）。具备 `TYPESAFE_API_KEY` 自动感知、前置 `.gitignore` 防护（在写入 `.env` 前强制添加忽略规则）、全局技能复用（`~/.agents/skills/typesafe-ai` 优先复用，杜绝项目内冗余复制）、自动绑定契约与约束至 `docs/agents/light-project.md`，并输出按技术栈区分的依赖安装指引。
+- **`agent-config` 抽象任务画像与校准：** 废除硬编码厂商模型名称的关键词推断，建立抽象复杂度画像（`routine`、`standard`、`high`）与推理需求评估。基于无标签泄露的独立真实场景评测；确定性权威源（`explicit-user`、`verified-ticket`、`deterministic-policy`）完全由代码接管，0 Jev complexity 调用。引入临时非对称降级守卫策略（Provisional Downgrade Policy），在向低于 baseline 的 capability tier 降级时强制要求强证据（`confidence >= 0.75` 且边界余量 `>= 0.15`），杜绝模型能力盲目降级。
+- **`project-init` 官方 CLI 规范映射与 Jev 生态接入：** 严格对齐官方 `vercel-labs/skills` v1.7.0 规范，提供标准的 Agent 标识映射（`pi`、`claude-code`、`cursor`、`codex`、`antigravity`、`grok`、`hermes-agent`）与规范项目路径（Cursor、Codex 与 AGY 统一对齐 `.agents/skills`），未受官方 CLI 支持的目标（如 DSH）严格 Fail-Closed 且不发起任何外部安装器调用。脚手架具备交互式门禁（支持 `--jev` / `--no-jev` 参数）、`TYPESAFE_API_KEY` 自动感知、前置 `.gitignore` 防护与全局技能规范复用。
 - **Fail-Closed 与零外部依赖降级：** 采用软依赖引入机制；未安装 `typesafe-sdk` 或未配置 `TYPESAFE_API_KEY` 时，100% 优雅退回确定性规则基准，保持全量测试零破坏、零回归。
 
 ## 安装指南
