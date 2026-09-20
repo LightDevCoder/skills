@@ -22,6 +22,7 @@
 ## 变更内容
 
 - **Release 边界与 Tag 不可变性：** 建立不可变发布快照。已发布的 Tag 永久不可变：绝不强制移动（force-move）、绝不重指向（retarget）、绝不重写代码边界。发布后的元数据维护仅限通过不移动 Tag 的显式文档修正或递增 Patch 版本进行。
+- **发布完整性守卫与复盘技能演化：** 增加自动化前置检查 `scripts/verify_release_integrity.py`，确定性校验 Tag 不可变性（同 Target 幂等放行，异 Target 强行阻断）、双语发布收据与 Git 工作区干净度。将 `project-retro` 升级为具备工作流感知、三态去重（`CLOSED` / `PARTIAL` / `OPEN`）与价值判断矩阵的完整复盘 Skill。固化官方 Skills CLI 规范映射参考文档 `skills_cli_conventions.md`，建立 Companion 双层测试架构（封闭 Schema 快照 + 跨仓漂移监控），并精简全局动态寻路指针。
 - **`ask-light` 语义路由与查询规划：** 最终收敛的架构由 Python 证据引擎独占工作流权威；Jev 查询仅在存在活跃消费者时触发（多候选时调用 Choice；关键歧义与深度推理升级调用 Noul）。Jev 绝不赋予工作流流转授权；执行意图相关查询已被完全移除。零价值查询自动跳过。
 - **`project-init` 官方 Skills CLI 集成：** 严格遵循 `vercel-labs/skills` v1.7.0 CLI 映射（`pi`, `claude-code`, `cursor`, `codex`, `antigravity`, `grok`, `hermes-agent`）及规范项目作用域（`.agents/skills` 适用于 Cursor、Codex 与 Antigravity）。不支持环境（如 DSH）严格确定性 Fail-Closed。提供可选 TypeSafe Jev 生态接入（`--jev` / `--no-jev`）、安全凭据解析（优先 `os.environ` 其次 `.env`）、写入前强制 `.gitignore` 保护，以及全局 Skill 复用。
 - **`agent-config` 抽象任务分析与非对称降级防御：** 实现跨厂商解耦的抽象任务画像（routine, standard, high）与推理需求（low, medium, high）。无标签泄露的干净评测，权威输入完全由代码独占。执行临时非对称降级防御策略（置信度 `>= 0.75` 且边界裕度 `>= 0.15`，策略状态：`PROVISIONAL`）。
@@ -32,7 +33,7 @@
 
 | 门禁 | 状态 | 证据 |
 | --- | --- | --- |
-| 本地测试套件 | `PASS` | 395 passed（独立无外部 companion 仓库环境：394 passed, 1 skip: `test_layer1_deterministic_schemas_via_companion_ajv`）；32 unittest（268 断言）；compileall clean；git diff --check clean |
+| 本地测试套件 | `PASS` | 409 passed（独立无外部 companion 仓库环境：408 passed, 1 skip: `test_layer1_deterministic_schemas_via_companion_ajv`）；39 unittest（271 断言）；compileall clean；git diff --check clean |
 | Jev 评测实证 | `PASS` | AC-02 分值：0.41，置信度：0.59，最终档位：standard（`Policy status: PROVISIONAL`） |
 | Phase 2 人类审批门禁 | `PENDING` | 当前仅本地提交；等待人类确认后方可进行远端推送与发布 |
 | GitHub Actions CI (`collection-quality`) | `PENDING` | 等待推送到 main 后触发 |
