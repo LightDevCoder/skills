@@ -26,6 +26,19 @@ from typing import NamedTuple
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
+# Ensure scripts dir is on sys.path for sibling imports
+SCRIPTS_DIR = Path(__file__).resolve().parent
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+from check_release_tag_preflight import (
+    AnnotatedTagIdentity,
+    RemoteTagResult,
+    RemoteTagStatus,
+    resolve_annotated_tag_identity,
+    resolve_remote_tag,
+)
+
 
 class VerificationResult(NamedTuple):
     passed: bool
@@ -45,45 +58,18 @@ def run_git(cmd: list[str], cwd: Path = REPO_ROOT) -> tuple[int, str, str]:
     return proc.returncode, proc.stdout.strip(), proc.stderr.strip()
 
 
-class AnnotatedTagIdentity(NamedTuple):
-    tag_type: str | None
-    tag_object_sha: str | None
-    peeled_commit_sha: str | None
-    is_annotated: bool
+def git_path_exists(revision: str, path: str, cwd: Path = REPO_ROOT) -> bool:
+    """Check if path exists in git revision."""
+    code, _, _ = run_git(["cat-file", "-e", f"{revision}:{path}"], cwd=cwd)
+    return code == 0
 
 
-def resolve_annotated_tag_identity(tag: str, cwd: Path = REPO_ROOT) -> AnnotatedTagIdentity:
-    """Resolve tag identity using git cat-file -t and git rev-parse.
-
-    For annotated tags, git cat-file -t returns 'tag'.
-    For lightweight tags, git cat-file -t returns 'commit' and is_annotated is False.
-    """
-    code_type, out_type, _ = run_git(["cat-file", "-t", f"refs/tags/{tag}"], cwd=cwd)
-    if code_type != 0 or not out_type:
-        return AnnotatedTagIdentity(tag_type=None, tag_object_sha=None, peeled_commit_sha=None, is_annotated=False)
-
-    tag_type = out_type.strip()
-    if tag_type != "tag":
-        code_rev, out_rev, _ = run_git(["rev-parse", f"refs/tags/{tag}"], cwd=cwd)
-        sha = out_rev if code_rev == 0 and len(out_rev) == 40 else None
-        return AnnotatedTagIdentity(
-            tag_type=tag_type,
-            tag_object_sha=sha,
-            peeled_commit_sha=sha,
-            is_annotated=False,
-        )
-
-    code_obj, out_obj, _ = run_git(["rev-parse", f"refs/tags/{tag}"], cwd=cwd)
-    code_peel, out_peel, _ = run_git(["rev-parse", f"refs/tags/{tag}^{{commit}}"], cwd=cwd)
-    obj_sha = out_obj if code_obj == 0 and len(out_obj) == 40 else None
-    peel_sha = out_peel if code_peel == 0 and len(out_peel) == 40 else None
-
-    return AnnotatedTagIdentity(
-        tag_type="tag",
-        tag_object_sha=obj_sha,
-        peeled_commit_sha=peel_sha,
-        is_annotated=True,
-    )
+def git_read_text(revision: str, path: str, cwd: Path = REPO_ROOT) -> str | None:
+    """Read file content as text from git revision."""
+    code, out, _ = run_git(["cat-file", "-p", f"{revision}:{path}"], cwd=cwd)
+    if code == 0:
+        return out
+    return None
 
 
 def resolve_commit_sha(commit_ref: str, cwd: Path = REPO_ROOT) -> str | None:
@@ -111,24 +97,24 @@ def resolve_tag_sha(tag: str, cwd: Path = REPO_ROOT) -> str | None:
 
 
 def resolve_remote_tag_sha(tag: str, remote: str = "origin", cwd: Path = REPO_ROOT) -> str | None:
-    """Query remote for tag commit SHA."""
-    code, out, _ = run_git(["ls-remote", "--tags", remote, f"refs/tags/{tag}"], cwd=cwd)
-    if code != 0 or not out:
-        return None
-    # ls-remote output lines: <sha>\trefs/tags/<tag> or <sha>\trefs/tags/<tag>^{}
-    # If peeled ref exists, prefer it
-    lines = out.splitlines()
-    peeled = [l.split()[0] for l in lines if l.endswith("^{}")]
-    if peeled:
-        return peeled[0]
-    unpeeled = [l.split()[0] for l in lines if f"refs/tags/{tag}" in l]
-    if unpeeled:
-        return unpeeled[0]
+    """Query remote for tag peeled commit SHA."""
+    res = resolve_remote_tag(tag, remote=remote, cwd=cwd)
+    if res.status == RemoteTagStatus.EXISTS:
+        return res.peeled_commit_sha
     return None
 
 
-def get_admitted_package_count(repo_root: Path = REPO_ROOT) -> int:
+def get_admitted_package_count(repo_root: Path = REPO_ROOT, revision: str | None = None) -> int:
     """Count admitted packages with SKILL.md under skills/*/*."""
+    if revision:
+        code, out, _ = run_git(["ls-tree", "-r", "--name-only", revision, "skills"], cwd=repo_root)
+        if code == 0:
+            count = 0
+            pattern = re.compile(r"^skills/[^/]+/[^/]+/SKILL\.md$")
+            for line in out.splitlines():
+                if pattern.match(line.strip()):
+                    count += 1
+            return count
     skill_files = list(repo_root.glob("skills/*/*/SKILL.md"))
     return len(skill_files)
 
@@ -189,9 +175,24 @@ def check_tag_immutability(
 
     # 2. Check remote tag if requested
     if check_remote:
-        remote_tag_sha = resolve_remote_tag_sha(tag, cwd=cwd)
-        if remote_tag_sha:
-            if remote_tag_sha == target_sha:
+        remote_res = resolve_remote_tag(tag, remote="origin", cwd=cwd)
+        if remote_res.status == RemoteTagStatus.QUERY_FAILED:
+            return VerificationResult(
+                passed=False,
+                status="QUERY_FAILED",
+                message=f"Could not verify remote tag state for '{tag}': {remote_res.error}",
+            )
+        elif remote_res.status == RemoteTagStatus.EXISTS:
+            if stage in ("tagged", "attested") and not remote_res.is_annotated:
+                return VerificationResult(
+                    passed=False,
+                    status="LIGHTWEIGHT_TAG_FORBIDDEN",
+                    message=(
+                        f"Remote tag '{tag}' is not an annotated tag. "
+                        "Lightweight tags are strictly forbidden for release tags."
+                    ),
+                )
+            if remote_res.peeled_commit_sha == target_sha:
                 return VerificationResult(
                     passed=True,
                     status="IDEMPOTENT_PASS",
@@ -202,7 +203,7 @@ def check_tag_immutability(
                     passed=False,
                     status="HARD_FAIL",
                     message=(
-                        f"Tag immutability violation! Remote tag '{tag}' points to {remote_tag_sha}, "
+                        f"Tag immutability violation! Remote tag '{tag}' points to {remote_res.peeled_commit_sha}, "
                         f"which differs from candidate commit {target_sha}. Tag retargeting/force-moving is strictly forbidden."
                     ),
                 )
@@ -214,7 +215,11 @@ def check_tag_immutability(
     )
 
 
-def check_release_manifest_consistency(tag: str, repo_root: Path = REPO_ROOT) -> VerificationResult:
+def check_release_manifest_consistency(
+    tag: str,
+    revision: str | None = None,
+    repo_root: Path = REPO_ROOT,
+) -> VerificationResult:
     """Verify mechanical consistency of release manifest for v0.2.3+."""
     # Manifest architecture introduced in v0.2.3
     # Check if this tag version is < v0.2.3
@@ -228,34 +233,52 @@ def check_release_manifest_consistency(tag: str, repo_root: Path = REPO_ROOT) ->
                 message=f"Release {tag} precedes immutable manifest architecture (introduced in v0.2.3).",
             )
 
-    evidence_dir = repo_root / "docs" / "evidence" / "releases" / tag
-    manifest_en = evidence_dir / "RELEASE_MANIFEST.md"
-    manifest_zh = evidence_dir / "RELEASE_MANIFEST.zh-CN.md"
+    rel_manifest_en = f"docs/evidence/releases/{tag}/RELEASE_MANIFEST.md"
+    rel_manifest_zh = f"docs/evidence/releases/{tag}/RELEASE_MANIFEST.zh-CN.md"
 
-    if not manifest_en.is_file():
-        return VerificationResult(
-            passed=False,
-            status="MANIFEST_MISSING",
-            message=f"English release manifest missing at {manifest_en.relative_to(repo_root)}",
-        )
+    if revision:
+        if not git_path_exists(revision, rel_manifest_en, cwd=repo_root):
+            return VerificationResult(
+                passed=False,
+                status="MANIFEST_MISSING",
+                message=f"English release manifest missing in git revision '{revision}' at {rel_manifest_en}",
+            )
+        if not git_path_exists(revision, rel_manifest_zh, cwd=repo_root):
+            return VerificationResult(
+                passed=False,
+                status="MANIFEST_MISSING",
+                message=f"Chinese release manifest missing in git revision '{revision}' at {rel_manifest_zh}",
+            )
+        text_en = git_read_text(revision, rel_manifest_en, cwd=repo_root) or ""
+        text_zh = git_read_text(revision, rel_manifest_zh, cwd=repo_root) or ""
+        actual_pkg_count = get_admitted_package_count(repo_root, revision=revision)
+    else:
+        evidence_dir = repo_root / "docs" / "evidence" / "releases" / tag
+        manifest_en = evidence_dir / "RELEASE_MANIFEST.md"
+        manifest_zh = evidence_dir / "RELEASE_MANIFEST.zh-CN.md"
 
-    if not manifest_zh.is_file():
-        return VerificationResult(
-            passed=False,
-            status="MANIFEST_MISSING",
-            message=f"Chinese release manifest missing at {manifest_zh.relative_to(repo_root)}",
-        )
-
-    text_en = manifest_en.read_text(encoding="utf-8")
-    text_zh = manifest_zh.read_text(encoding="utf-8")
-    actual_pkg_count = get_admitted_package_count(repo_root)
+        if not manifest_en.is_file():
+            return VerificationResult(
+                passed=False,
+                status="MANIFEST_MISSING",
+                message=f"English release manifest missing at {manifest_en.relative_to(repo_root)}",
+            )
+        if not manifest_zh.is_file():
+            return VerificationResult(
+                passed=False,
+                status="MANIFEST_MISSING",
+                message=f"Chinese release manifest missing at {manifest_zh.relative_to(repo_root)}",
+            )
+        text_en = manifest_en.read_text(encoding="utf-8")
+        text_zh = manifest_zh.read_text(encoding="utf-8")
+        actual_pkg_count = get_admitted_package_count(repo_root)
 
     # Verify release identifier appears in manifest
     if tag not in text_en or tag not in text_zh:
         return VerificationResult(
             passed=False,
             status="METADATA_MISMATCH",
-            message=f"Tag '{tag}' not found in manifest files at {evidence_dir.relative_to(repo_root)}",
+            message=f"Tag '{tag}' not found in manifest files for {tag}",
         )
 
     # Verify admitted package count matches
@@ -268,7 +291,7 @@ def check_release_manifest_consistency(tag: str, repo_root: Path = REPO_ROOT) ->
                 passed=False,
                 status="COUNT_MISMATCH",
                 message=(
-                    f"Package count mismatch in {manifest_en.relative_to(repo_root)}: "
+                    f"Package count mismatch in {rel_manifest_en}: "
                     f"manifest claims {claimed_count}, but repository has {actual_pkg_count} admitted packages."
                 ),
             )
@@ -278,7 +301,7 @@ def check_release_manifest_consistency(tag: str, repo_root: Path = REPO_ROOT) ->
         return VerificationResult(
             passed=False,
             status="METADATA_MISMATCH",
-            message=f"Expected tag reference for '{tag}' not found in {manifest_en.relative_to(repo_root)}",
+            message=f"Expected tag reference for '{tag}' not found in {rel_manifest_en}",
         )
 
     # Verify policy status
@@ -286,7 +309,7 @@ def check_release_manifest_consistency(tag: str, repo_root: Path = REPO_ROOT) ->
         return VerificationResult(
             passed=False,
             status="POLICY_STATUS_MISSING",
-            message=f"Policy status field missing in {manifest_en.relative_to(repo_root)}",
+            message=f"Policy status field missing in {rel_manifest_en}",
         )
 
     return VerificationResult(
@@ -296,7 +319,11 @@ def check_release_manifest_consistency(tag: str, repo_root: Path = REPO_ROOT) ->
     )
 
 
-def check_manifest_navigation(tag: str, repo_root: Path = REPO_ROOT) -> VerificationResult:
+def check_manifest_navigation(
+    tag: str,
+    revision: str | None = None,
+    repo_root: Path = REPO_ROOT,
+) -> VerificationResult:
     """Verify that release manifest does not contain relative links to candidate receipts (v0.2.4+)."""
     # Historical tags through v0.2.3 are preserved as immutable legacy artifacts
     version_match = re.match(r"v?(\d+)\.(\d+)\.(\d+)", tag)
@@ -309,21 +336,36 @@ def check_manifest_navigation(tag: str, repo_root: Path = REPO_ROOT) -> Verifica
                 message=f"Release {tag} is a known legacy lifecycle artifact with historical manifest navigation.",
             )
 
-    evidence_dir = repo_root / "docs" / "evidence" / "releases" / tag
-    for manifest_name in ["RELEASE_MANIFEST.md", "RELEASE_MANIFEST.zh-CN.md"]:
-        p = evidence_dir / manifest_name
-        if p.is_file():
-            text = p.read_text(encoding="utf-8")
-            if re.search(r"\[[^\]]+\]\(\s*RELEASE_RECEIPT(?:\.zh-CN)?\.md\s*\)", text):
-                return VerificationResult(
-                    passed=False,
-                    status="RELATIVE_RECEIPT_LINK_FORBIDDEN",
-                    message=(
-                        f"Manifest {p.relative_to(repo_root)} contains a relative link to RELEASE_RECEIPT.md. "
-                        "Manifest must not navigate to candidate receipts in immutable tags; "
-                        "post-publication attestation lives on main."
-                    ),
-                )
+    manifest_names = ["RELEASE_MANIFEST.md", "RELEASE_MANIFEST.zh-CN.md"]
+    for manifest_name in manifest_names:
+        rel_path = f"docs/evidence/releases/{tag}/{manifest_name}"
+        if revision:
+            if git_path_exists(revision, rel_path, cwd=repo_root):
+                text = git_read_text(revision, rel_path, cwd=repo_root) or ""
+                if re.search(r"\[[^\]]+\]\(\s*RELEASE_RECEIPT(?:\.zh-CN)?\.md\s*\)", text):
+                    return VerificationResult(
+                        passed=False,
+                        status="RELATIVE_RECEIPT_LINK_FORBIDDEN",
+                        message=(
+                            f"Manifest in revision '{revision}' at {rel_path} contains a relative link to RELEASE_RECEIPT.md. "
+                            "Manifest must not navigate to candidate receipts in immutable tags; "
+                            "post-publication attestation lives on main."
+                        ),
+                    )
+        else:
+            p = repo_root / rel_path
+            if p.is_file():
+                text = p.read_text(encoding="utf-8")
+                if re.search(r"\[[^\]]+\]\(\s*RELEASE_RECEIPT(?:\.zh-CN)?\.md\s*\)", text):
+                    return VerificationResult(
+                        passed=False,
+                        status="RELATIVE_RECEIPT_LINK_FORBIDDEN",
+                        message=(
+                            f"Manifest {p.relative_to(repo_root)} contains a relative link to RELEASE_RECEIPT.md. "
+                            "Manifest must not navigate to candidate receipts in immutable tags; "
+                            "post-publication attestation lives on main."
+                        ),
+                    )
 
     return VerificationResult(
         passed=True,
@@ -332,24 +374,43 @@ def check_manifest_navigation(tag: str, repo_root: Path = REPO_ROOT) -> Verifica
     )
 
 
-def check_release_notes_consistency(tag: str, repo_root: Path = REPO_ROOT) -> VerificationResult:
+def check_release_notes_consistency(
+    tag: str,
+    revision: str | None = None,
+    repo_root: Path = REPO_ROOT,
+) -> VerificationResult:
     """Verify dual release notes exist."""
-    evidence_dir = repo_root / "docs" / "evidence" / "releases" / tag
-    notes_en = evidence_dir / "RELEASE_NOTES.md"
-    notes_zh = evidence_dir / "RELEASE_NOTES.zh-CN.md"
+    rel_notes_en = f"docs/evidence/releases/{tag}/RELEASE_NOTES.md"
+    rel_notes_zh = f"docs/evidence/releases/{tag}/RELEASE_NOTES.zh-CN.md"
 
-    if not notes_en.is_file():
-        return VerificationResult(
-            passed=False,
-            status="NOTES_MISSING",
-            message=f"English release notes missing at {notes_en.relative_to(repo_root)}",
-        )
-    if not notes_zh.is_file():
-        return VerificationResult(
-            passed=False,
-            status="NOTES_MISSING",
-            message=f"Chinese release notes missing at {notes_zh.relative_to(repo_root)}",
-        )
+    if revision:
+        if not git_path_exists(revision, rel_notes_en, cwd=repo_root):
+            return VerificationResult(
+                passed=False,
+                status="NOTES_MISSING",
+                message=f"English release notes missing in git revision '{revision}' at {rel_notes_en}",
+            )
+        if not git_path_exists(revision, rel_notes_zh, cwd=repo_root):
+            return VerificationResult(
+                passed=False,
+                status="NOTES_MISSING",
+                message=f"Chinese release notes missing in git revision '{revision}' at {rel_notes_zh}",
+            )
+    else:
+        notes_en = repo_root / rel_notes_en
+        notes_zh = repo_root / rel_notes_zh
+        if not notes_en.is_file():
+            return VerificationResult(
+                passed=False,
+                status="NOTES_MISSING",
+                message=f"English release notes missing at {notes_en.relative_to(repo_root)}",
+            )
+        if not notes_zh.is_file():
+            return VerificationResult(
+                passed=False,
+                status="NOTES_MISSING",
+                message=f"Chinese release notes missing at {notes_zh.relative_to(repo_root)}",
+            )
     return VerificationResult(
         passed=True,
         status="PASS",
@@ -357,8 +418,12 @@ def check_release_notes_consistency(tag: str, repo_root: Path = REPO_ROOT) -> Ve
     )
 
 
-def check_receipt_absence_in_candidate(tag: str, repo_root: Path = REPO_ROOT) -> VerificationResult:
-    """Verify that candidate/pre-tag directories do not contain pre-publication candidate receipts (v0.2.4+)."""
+def check_receipt_absence_in_candidate(
+    tag: str,
+    revision: str | None = None,
+    repo_root: Path = REPO_ROOT,
+) -> VerificationResult:
+    """Verify that candidate/pre-tag directories and git trees do not contain pre-publication candidate receipts (v0.2.4+)."""
     version_match = re.match(r"v?(\d+)\.(\d+)\.(\d+)", tag)
     if version_match:
         major, minor, patch = map(int, version_match.groups())
@@ -369,16 +434,30 @@ def check_receipt_absence_in_candidate(tag: str, repo_root: Path = REPO_ROOT) ->
                 message=f"Release {tag} is a known legacy lifecycle artifact.",
             )
 
-    evidence_dir = repo_root / "docs" / "evidence" / "releases" / tag
-    receipt_en = evidence_dir / "RELEASE_RECEIPT.md"
-    receipt_zh = evidence_dir / "RELEASE_RECEIPT.zh-CN.md"
+    rel_receipt_en = f"docs/evidence/releases/{tag}/RELEASE_RECEIPT.md"
+    rel_receipt_zh = f"docs/evidence/releases/{tag}/RELEASE_RECEIPT.zh-CN.md"
 
+    # Check git revision tree if specified
+    if revision:
+        if git_path_exists(revision, rel_receipt_en, cwd=repo_root) or git_path_exists(revision, rel_receipt_zh, cwd=repo_root):
+            return VerificationResult(
+                passed=False,
+                status="CANDIDATE_RECEIPT_FORBIDDEN",
+                message=(
+                    f"Git revision '{revision}' contains premature release receipt(s) at docs/evidence/releases/{tag}. "
+                    "Receipts may only be created on main during stage ATTESTED following publication."
+                ),
+            )
+
+    # Check filesystem
+    receipt_en = repo_root / rel_receipt_en
+    receipt_zh = repo_root / rel_receipt_zh
     if receipt_en.is_file() or receipt_zh.is_file():
         return VerificationResult(
             passed=False,
             status="CANDIDATE_RECEIPT_FORBIDDEN",
             message=(
-                f"Candidate release directory {evidence_dir.relative_to(repo_root)} contains pre-publication receipt(s). "
+                f"Candidate release directory docs/evidence/releases/{tag} contains pre-publication receipt(s). "
                 "Receipts may only be created on main during stage ATTESTED following publication."
             ),
         )
@@ -433,6 +512,7 @@ def extract_checklist_status(text: str, gate_label: str) -> str | None:
 def check_release_receipt_consistency(
     tag: str,
     release_commit: str | None = None,
+    revision: str | None = None,
     repo_root: Path = REPO_ROOT,
 ) -> VerificationResult:
     """Verify mechanical consistency of release receipt and evidence files."""
@@ -449,27 +529,47 @@ def check_release_receipt_consistency(
                 ),
             )
 
-    evidence_dir = repo_root / "docs" / "evidence" / "releases" / tag
-    receipt_en = evidence_dir / "RELEASE_RECEIPT.md"
-    receipt_zh = evidence_dir / "RELEASE_RECEIPT.zh-CN.md"
+    rel_receipt_en = f"docs/evidence/releases/{tag}/RELEASE_RECEIPT.md"
+    rel_receipt_zh = f"docs/evidence/releases/{tag}/RELEASE_RECEIPT.zh-CN.md"
 
-    if not receipt_en.is_file():
-        return VerificationResult(
-            passed=False,
-            status="RECEIPT_MISSING",
-            message=f"English release receipt missing at {receipt_en.relative_to(repo_root)}",
-        )
+    if revision:
+        if not git_path_exists(revision, rel_receipt_en, cwd=repo_root):
+            return VerificationResult(
+                passed=False,
+                status="RECEIPT_MISSING",
+                message=f"English release receipt missing in git revision '{revision}' at {rel_receipt_en}",
+            )
+        if not git_path_exists(revision, rel_receipt_zh, cwd=repo_root):
+            return VerificationResult(
+                passed=False,
+                status="RECEIPT_MISSING",
+                message=f"Chinese release receipt missing in git revision '{revision}' at {rel_receipt_zh}",
+            )
+        text_en = git_read_text(revision, rel_receipt_en, cwd=repo_root) or ""
+        text_zh = git_read_text(revision, rel_receipt_zh, cwd=repo_root) or ""
+        actual_pkg_count = get_admitted_package_count(repo_root, revision=revision)
+    else:
+        evidence_dir = repo_root / "docs" / "evidence" / "releases" / tag
+        receipt_en = evidence_dir / "RELEASE_RECEIPT.md"
+        receipt_zh = evidence_dir / "RELEASE_RECEIPT.zh-CN.md"
 
-    if not receipt_zh.is_file():
-        return VerificationResult(
-            passed=False,
-            status="RECEIPT_MISSING",
-            message=f"Chinese release receipt missing at {receipt_zh.relative_to(repo_root)}",
-        )
+        if not receipt_en.is_file():
+            return VerificationResult(
+                passed=False,
+                status="RECEIPT_MISSING",
+                message=f"English release receipt missing at {receipt_en.relative_to(repo_root)}",
+            )
 
-    text_en = receipt_en.read_text(encoding="utf-8")
-    text_zh = receipt_zh.read_text(encoding="utf-8")
-    actual_pkg_count = get_admitted_package_count(repo_root)
+        if not receipt_zh.is_file():
+            return VerificationResult(
+                passed=False,
+                status="RECEIPT_MISSING",
+                message=f"Chinese release receipt missing at {receipt_zh.relative_to(repo_root)}",
+            )
+
+        text_en = receipt_en.read_text(encoding="utf-8")
+        text_zh = receipt_zh.read_text(encoding="utf-8")
+        actual_pkg_count = get_admitted_package_count(repo_root)
 
     # Legacy policy check: <= v0.2.3 uses historical format
     version_match = re.match(r"v?(\d+)\.(\d+)\.(\d+)", tag)
@@ -783,8 +883,8 @@ def check_release_receipt_consistency(
     )
 
 
-def check_working_tree(repo_root: Path = REPO_ROOT) -> VerificationResult:
-    """Verify git diff and whitespace cleanliness."""
+def check_working_tree(repo_root: Path = REPO_ROOT, tag: str | None = None) -> VerificationResult:
+    """Verify git diff, whitespace cleanliness, and absence of uncommitted release evidence."""
     code_ws, _, err_ws = run_git(["diff", "--check"], cwd=repo_root)
     if code_ws != 0:
         return VerificationResult(
@@ -793,7 +893,7 @@ def check_working_tree(repo_root: Path = REPO_ROOT) -> VerificationResult:
             message=f"Whitespace errors detected: {err_ws}",
         )
 
-    code_st, out_st, _ = run_git(["status", "--porcelain"], cwd=repo_root)
+    code_st, out_st, _ = run_git(["status", "--porcelain", "-uall"], cwd=repo_root)
     # Check tracked modifications (ignore untracked files like .scratch/)
     tracked_mods = [line for line in out_st.splitlines() if line and not line.startswith("??")]
     if tracked_mods:
@@ -802,6 +902,27 @@ def check_working_tree(repo_root: Path = REPO_ROOT) -> VerificationResult:
             status="DIRTY_TREE",
             message=f"Uncommitted tracked changes detected:\n" + "\n".join(tracked_mods[:5]),
         )
+
+    # Check for release-critical untracked files
+    if tag:
+        target_prefix = f"docs/evidence/releases/{tag}/"
+        untracked_release_files = []
+        for line in out_st.splitlines():
+            if line.startswith("?? "):
+                path_str = line[3:].strip()
+                if path_str.startswith(target_prefix):
+                    untracked_release_files.append(path_str)
+
+        if untracked_release_files:
+            return VerificationResult(
+                passed=False,
+                status="UNTRACKED_RELEASE_EVIDENCE_FORBIDDEN",
+                message=(
+                    f"Untracked release evidence detected for {tag}:\n"
+                    + "\n".join(untracked_release_files[:5])
+                    + "\nRelease evidence must be committed into git before verification."
+                ),
+            )
 
     return VerificationResult(
         passed=True,
@@ -851,10 +972,13 @@ def main() -> int:
 
     # Auto-resolve stage if auto
     if stage == "auto":
-        evidence_dir = repo_root / "docs" / "evidence" / "releases" / tag
-        receipt_file = evidence_dir / "RELEASE_RECEIPT.md"
-        if receipt_file.is_file():
+        tag_peel = resolve_tag_sha(tag, cwd=repo_root)
+        receipt_rel = f"docs/evidence/releases/{tag}/RELEASE_RECEIPT.md"
+        receipt_exists = (repo_root / receipt_rel).is_file() or git_path_exists("HEAD", receipt_rel, cwd=repo_root)
+        if tag_peel and receipt_exists:
             stage = "attested"
+        elif tag_peel:
+            stage = "tagged"
         else:
             stage = "prepared"
 
@@ -901,7 +1025,7 @@ def main() -> int:
 
     # 1. Working tree check (always run against current working tree / HEAD)
     if not args.allow_dirty:
-        res_tree = check_working_tree(repo_root)
+        res_tree = check_working_tree(repo_root, tag=tag)
         print(f"[{res_tree.status}] Working Tree: {res_tree.message}")
         if not res_tree.passed:
             all_passed = False
@@ -927,17 +1051,22 @@ def main() -> int:
             if not res_tag.passed:
                 all_passed = False
 
-        res_absence = check_receipt_absence_in_candidate(tag, repo_root=repo_root)
+        res_absence = check_receipt_absence_in_candidate(tag, revision=candidate_sha, repo_root=repo_root)
         print(f"[{res_absence.status}] Candidate Receipt Absence: {res_absence.message}")
         if not res_absence.passed:
             all_passed = False
 
-        res_manifest = check_release_manifest_consistency(tag, repo_root=repo_root)
+        res_manifest = check_release_manifest_consistency(tag, revision=candidate_sha, repo_root=repo_root)
         print(f"[{res_manifest.status}] Manifest Consistency: {res_manifest.message}")
         if not res_manifest.passed:
             all_passed = False
 
-        res_notes = check_release_notes_consistency(tag, repo_root=repo_root)
+        res_nav = check_manifest_navigation(tag, revision=candidate_sha, repo_root=repo_root)
+        print(f"[{res_nav.status}] Manifest Navigation: {res_nav.message}")
+        if not res_nav.passed:
+            all_passed = False
+
+        res_notes = check_release_notes_consistency(tag, revision=candidate_sha, repo_root=repo_root)
         print(f"[{res_notes.status}] Notes Consistency: {res_notes.message}")
         if not res_notes.passed:
             all_passed = False
@@ -954,22 +1083,24 @@ def main() -> int:
             if not res_tag.passed:
                 all_passed = False
 
-        res_absence = check_receipt_absence_in_candidate(tag, repo_root=repo_root)
+        tag_ref = f"refs/tags/{tag}"
+
+        res_absence = check_receipt_absence_in_candidate(tag, revision=tag_ref, repo_root=repo_root)
         print(f"[{res_absence.status}] Candidate Receipt Absence: {res_absence.message}")
         if not res_absence.passed:
             all_passed = False
 
-        res_manifest = check_release_manifest_consistency(tag, repo_root=repo_root)
+        res_manifest = check_release_manifest_consistency(tag, revision=tag_ref, repo_root=repo_root)
         print(f"[{res_manifest.status}] Manifest Consistency: {res_manifest.message}")
         if not res_manifest.passed:
             all_passed = False
 
-        res_nav = check_manifest_navigation(tag, repo_root=repo_root)
+        res_nav = check_manifest_navigation(tag, revision=tag_ref, repo_root=repo_root)
         print(f"[{res_nav.status}] Manifest Navigation: {res_nav.message}")
         if not res_nav.passed:
             all_passed = False
 
-        res_notes = check_release_notes_consistency(tag, repo_root=repo_root)
+        res_notes = check_release_notes_consistency(tag, revision=tag_ref, repo_root=repo_root)
         print(f"[{res_notes.status}] Notes Consistency: {res_notes.message}")
         if not res_notes.passed:
             all_passed = False
@@ -981,22 +1112,27 @@ def main() -> int:
             if not res_tag.passed:
                 all_passed = False
 
-        res_manifest = check_release_manifest_consistency(tag, repo_root=repo_root)
+        # Manifest and notes are verified from the immutable tag snapshot
+        tag_ref = f"refs/tags/{tag}" if resolve_tag_sha(tag, cwd=repo_root) else (candidate_sha or "HEAD")
+
+        res_manifest = check_release_manifest_consistency(tag, revision=tag_ref, repo_root=repo_root)
         print(f"[{res_manifest.status}] Manifest Consistency: {res_manifest.message}")
         if not res_manifest.passed:
             all_passed = False
 
-        res_nav = check_manifest_navigation(tag, repo_root=repo_root)
+        res_nav = check_manifest_navigation(tag, revision=tag_ref, repo_root=repo_root)
         print(f"[{res_nav.status}] Manifest Navigation: {res_nav.message}")
         if not res_nav.passed:
             all_passed = False
 
-        res_notes = check_release_notes_consistency(tag, repo_root=repo_root)
+        res_notes = check_release_notes_consistency(tag, revision=tag_ref, repo_root=repo_root)
         print(f"[{res_notes.status}] Notes Consistency: {res_notes.message}")
         if not res_notes.passed:
             all_passed = False
 
-        res_receipt = check_release_receipt_consistency(tag, release_commit=candidate_sha, repo_root=repo_root)
+        # Release receipt is verified from committed HEAD
+        head_sha = resolve_commit_sha("HEAD", cwd=repo_root)
+        res_receipt = check_release_receipt_consistency(tag, release_commit=candidate_sha, revision=head_sha, repo_root=repo_root)
         print(f"[{res_receipt.status}] Receipt Consistency: {res_receipt.message}")
         if not res_receipt.passed:
             all_passed = False
