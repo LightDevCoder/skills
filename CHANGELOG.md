@@ -4,7 +4,19 @@
 
 All notable changes are recorded here. A release entry must be tied to an actual version or tag and must not be created merely because a document was drafted.
 
-## Unreleased — target v0.2.3
+## Unreleased — target v0.2.4
+
+### Changed — Release Integrity Hardening & Git-Object Verification
+
+- **Git-Object Release Artifact Binding:** Bound release manifest and release notes verification directly to immutable git tree snapshots (`candidate_commit` and `refs/tags/vX.Y.Z^{commit}`), preventing uncommitted or untracked working-tree artifacts from satisfying release gates.
+- **Post-Publication Receipt Snapshot Isolation:** Bound the admitted package count verification of release receipts to the immutable candidate release snapshot (`release_revision`), preventing post-publication inventory drift on `main` from corrupting published release facts.
+- **Fail-Closed Unidirectional Tag Preflight:** Tag preflight checks `origin` by default, treating remote network or authorization failures as `BLOCKED`. Enforces unidirectional tag creation where pre-existing local or remote tags unconditionally block tag creation.
+- **Annotated Tag Enforcement:** Enforces annotated tag objects for releases (`git cat-file -t` must return `tag`), strictly rejecting lightweight tags across all release verification stages.
+- **Independent TAGGED Re-Audit:** Ensured `check_receipt_absence_in_candidate` strictly inspects the tag snapshot when `revision` is specified, allowing post-attestation re-auditing of `stage=tagged` without filesystem receipt leakage.
+- **Traceback-Free Structured Verification:** Audited all verification branches in `scripts/verify_release_integrity.py` to ensure canonical display path formatting and zero Python tracebacks on validation failures.
+- **Public Documentation Quality Gate:** Aligned bilingual terminology across `README.md`, `CATALOG.md`, and `INSTALLATION.md`, eliminating AI writing artifacts and ensuring invocation and status parity between English and Chinese catalogs.
+
+## 0.2.3 — 2026-09-21
 
 ### Changed — Release Evidence Lifecycle & Manifest Architecture
 

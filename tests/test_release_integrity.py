@@ -47,7 +47,7 @@ class ReleaseIntegrityTests(unittest.TestCase):
     def test_detect_candidate_tag(self) -> None:
         """Infers latest candidate release tag from docs/evidence/releases/."""
         tag = detect_candidate_tag(ROOT)
-        self.assertEqual(tag, "v0.2.3")
+        self.assertEqual(tag, "v0.2.4")
 
     def test_new_tag_passes_ready_for_creation(self) -> None:
         """A tag that does not exist locally or remotely passes ready for creation."""

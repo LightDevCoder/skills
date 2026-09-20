@@ -4,7 +4,19 @@
 
 所有变更都必须记录在实际版本/tag 对应的条目中，不能因为文档已起草就提前宣称 release。
 
-## Unreleased — target v0.2.3
+## Unreleased — target v0.2.4
+
+### 变更 — 发布完整性加固与 Git 对象严格绑定
+
+- **Git 对象发布证据绑定：** 将发布清单与发布说明的校验直接绑定至不可变的 Git tree 对象快照（`candidate_commit` 与 `refs/tags/vX.Y.Z^{commit}`），彻底防止工作区未提交或未跟踪文件穿透门禁。
+- **发布后收据快照严格隔离：** 发布收据中的准入包总数校验强制绑定至发布时不可变候选快照（`release_revision`），防止后续 `main` 分支包增减漂移污染已发布版本的事实证明。
+- **Fail-Closed 单向 Tag Preflight 门禁：** Tag 预检默认校验 `origin` 远端状态，网络或鉴权失败时严格阻塞（`BLOCKED`）；本地或远端已存在 Tag 时严格阻断，确保单向、安全发布。
+- **严格 Annotated Tag 校验：** 强制要求发布 Tag 必须为 Annotated Tag 对象（`git cat-file -t` 返回 `tag`），全生命周期拒绝 lightweight tag。
+- **独立 TAGGED 阶段复审支持：** 明确 `check_receipt_absence_in_candidate` 在传入 `revision` 时仅检查 Git 快照，允许在完成 post-publication attestation 后重新执行 `stage=tagged` 复核通过，杜绝工作区收据干扰。
+- **零 Traceback 结构化失败机制：** 审计校验分支与规范显示路径，确保所有异常或错误均以标准 `VerificationResult` 结构化返回，杜绝 Python 未定义变量 traceback。
+- **公开文档质量门禁：** 全面统一 `README.md`、`CATALOG.md`、`INSTALLATION.md` 中英文术语及调用/状态对称性，去除 AI 写作痕迹。
+
+## 0.2.3 — 2026-09-21
 
 ### 变更 — 发布证据生命周期与清单架构解耦
 
