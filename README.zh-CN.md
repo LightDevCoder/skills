@@ -106,7 +106,7 @@ export TYPESAFE_API_KEY="your-api-key"
 
 ```text
 $ask-light next        # 根据当前上下文推荐合适的 Skill
-$project-init          # 初始化项目基础结构与任务契约
+$project-init          # 初始化项目基础结构与任务跟踪
 $clarify               # 通过针对性提问澄清模糊需求
 $project-clarify       # 结合已有代码与文档澄清项目决策
 $implement             # 执行明确的开发任务并完成验证
@@ -135,12 +135,12 @@ release-workflow
 project-retro（Agent 评估摩擦信号）
 ```
 
-- `project-init`：创建任务契约与基础配置。
-- `project-clarify → project-spec → project-tickets`：理清需求细节、固化 SPEC 文档并拆分为可执行任务。
+- `project-init`：初始化项目基础结构与任务跟踪配置。
+- `project-clarify → project-spec → project-tickets`：澄清模糊需求、编写技术规格并拆分为可执行任务清单。
 - `implement`：逐个执行任务并运行自动化测试。
-- `project-review`：对照冻结基线验证质量；`review-loop` 负责多轮修复。
+- `project-review`：对照验收基准验证交付质量；由 `review-loop` 驱动多轮修复。
 - `release-workflow`：执行发布验证、打 tag 并完成发布。
-- `project-retro`：在流程终点由 Agent 自主评估执行摩擦（导航、守护线、规范、工具经济性）并输出改进建议。
+- `project-retro`：在流程终点由 Agent 自主评估执行摩擦（导航、自动化检查、规范、工具开销）并输出改进建议。
 
 常用单项任务路径：
 

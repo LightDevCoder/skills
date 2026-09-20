@@ -21,10 +21,10 @@
 
 | 角色 | Skill | 调用 | 保证 |
 | --- | --- | --- | --- |
-| Reviewer | [`generic-review`](../../../skills/review/generic-review/SKILL.md) | model-invoked 只读 | 归一化 `id`/`severity`/`location`/`problem`/`reason` findings；不修复不裁决 |
-| Reviewer | [`code-review`](../../../skills/review/code-review/SKILL.md) | model-invoked 只读 | 有界 `git diff` 的 Standards + Spec findings |
-| Engine | [`review-loop`](../../../skills/review/review-loop/SKILL.md) | model-invoked（支持手动） | 解析 reviewer → 调用 → 收 findings → 交 Producer → 重跑；干净或达上限即停 |
-| Acceptance | [`project-review`](../../../skills/review/project-review/SKILL.md) | model-invoked（支持手动） | 冻结 Charter/baseline、组合 reviewer、经 `review-loop` 驱动并签发最终 `PASS`/`FAIL`/`BLOCKED` |
+| Reviewer | [`generic-review`](../../../skills/review/generic-review/SKILL.md) | model-invoked 只读 | 输出包含严重级别、具体位置与原因的结构化问题清单；仅做检查，不修复、不做最终裁决 |
+| Reviewer | [`code-review`](../../../skills/review/code-review/SKILL.md) | model-invoked 只读 | 针对变更代码（`git diff`），从规范标准与业务规格两个维度检查潜在问题 |
+| Engine | [`review-loop`](../../../skills/review/review-loop/SKILL.md) | model-invoked（支持手动） | 确定适用的审查角色并调用，收集问题清单后指导修复，随后重新复查；全部通过或达轮次上限时停止 |
+| Acceptance | [`project-review`](../../../skills/review/project-review/SKILL.md) | model-invoked（支持手动） | 确认验收范围与准则，组合多个审查角色并驱动修复循环，最终给出明确的 `PASS`、`FAIL` 或 `BLOCKED` 验收结论 |
 
 见 [运行时 reviewer 契约](../../../skills/review/review-loop/references/reviewer-contract.md)（人类摘要：[Reviewer 契约](../../REVIEWER_CONTRACT.zh-CN.md)）的归一化输入包（`Target`·`Requirements`·`Relevant context`·`Previous findings`）与结果（`Findings: []`）。
 
@@ -32,9 +32,9 @@
 
 | 场景 | 入口 | 路径 | 停止点 |
 | --- | --- | --- | --- |
-| 普通制品（无 specialist） | `generic-review` 经 `review-loop` | `review-loop` → `generic-review` → findings → Producer 修复 → 复检 | `Findings: []` 或有界 `persists`；引擎不发最终 verdict |
-| 有界代码 diff | `code-review` 经 `review-loop` | `review-loop` → `code-review`（并行 Standards + Spec） → findings | 仅 findings，verdict 在他处 |
-| 项目需最终验收 | [`project-review`](../../../skills/review/project-review/SKILL.md) | `project-review init`（冻结 Charter/Profile） → `review`（组合 reviewer 经 `review-loop`） → `resume` → fresh Evaluator → `PASS`/`FAIL`/`BLOCKED` | 持久 verdict + 证据后停止 |
+| 通用文档或配置（非代码制品） | `generic-review` 经 `review-loop` | `review-loop` → `generic-review` → 发现问题 → 指导修复 → 复检 | 问题全部清空或达到重试上限；引擎自身不发布最终裁决 |
+| 代码变更（git diff） | `code-review` 经 `review-loop` | `review-loop` → `code-review`（规范与规格双轴并行检查） → 问题清单 | 仅产出问题清单，由外层决定处理 |
+| 项目需最终验收 | [`project-review`](../../../skills/review/project-review/SKILL.md) | `project-review init`（确认验收基准） → `review`（组合各 reviewer 并由 `review-loop` 驱动） → 评估结果 → `PASS`/`FAIL`/`BLOCKED` | 输出不可变验收结论与证据后停止 |
 
 ## 与 `implement` 的关系
 

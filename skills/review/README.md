@@ -2,15 +2,15 @@
 
 [简体中文](README.zh-CN.md)
 
-Separate read-only findings, repair convergence, and final project acceptance.
+Separate read-only checks, iterative repair loops, and final project acceptance.
 
-Categories organize browsing; they add no workflow or approval gates. Each package’s `SKILL.md` is the behavior authority.
+Categories help you browse related skills; they do not enforce a rigid pipeline. The behavior of each package is defined in its `SKILL.md`.
 
 ## Model- or user-invoked
 
-- **[code-review](code-review/SKILL.md)** — Read-only specialist reviewer for a bounded `git diff` along Standards and Spec axes.
-- **[generic-review](generic-review/SKILL.md)** — Read-only default reviewer for ordinary artifacts — finds omissions, wrong output, contradictions, usability gaps.
-- **[review-loop](review-loop/SKILL.md)** — Lightweight review/repair engine — resolve reviewer, invoke, receive findings, return repair, re-run.
-- **[project-review](project-review/SKILL.md)** — Project-level final acceptance — freeze a baseline, compose reviewers, issue `PASS`/`FAIL`/`BLOCKED`.
+- **[code-review](code-review/SKILL.md)** — Specialist code reviewer that inspects a git diff against standards and specifications without making edits or issuing verdicts.
+- **[generic-review](generic-review/SKILL.md)** — General-purpose reviewer for non-code artifacts (docs, configs, plans) to find omissions, contradictions, and clarity gaps.
+- **[review-loop](review-loop/SKILL.md)** — Review and repair engine: dispatches artifacts to the right reviewer, collects findings, guides fixes, and repeats until clean.
+- **[project-review](project-review/SKILL.md)** — Final project acceptance: evaluates deliverables against agreed requirements to issue a clear `PASS`, `FAIL`, or `BLOCKED` decision.
 
 [All categories](../README.md) · [Full catalog](../../CATALOG.md)

@@ -18,10 +18,10 @@ All are first-party and self-contained; no install of `mattpocock/skills` or `so
 
 | Situation | Entry | Typical path | Handoff / Stop |
 | --- | --- | --- | --- |
-| One clear ticket / SPEC slice | [`implement`](../../skills/project/implement/SKILL.md) — user-invoked | `implement` → inspect context → *optional* `agent-config` offer (when profile routing, review isolation, or topology materially helps) → execute → verify → hand to `review-loop` with the right reviewer | bounded diff + focused tests + verification evidence; stop at ticket scope |
-| Need to configure model, effort, or execution topology | [`agent-config`](../../skills/engineering/agent-config/SKILL.md) — model-invoked | requires: bounded task or ticket graph + acceptance authority + current host evidence + confirmed profile; determines provider mode and task shape, right-sizes model tier & effort across four execution modes (Cases A, B, C, D) | profile-driven execution plan, not execution; executor performs work per plan |
-| Code feature/fix should be test-first | [`tdd`](../../skills/engineering/tdd/SKILL.md) — model-invoked | `red → green → refactor` with real tests | tests + implementation slice |
-| Hard bug / regression | [`diagnosing-bugs`](../../skills/engineering/diagnosing-bugs/SKILL.md) — model-invoked | build a tight `pass/fail` signal → reproduce → hypothesize → instrument → fix → cleanup | fix with feedback loop evidence |
+| One clear ticket / SPEC slice | [`implement`](../../skills/project/implement/SKILL.md) — user-invoked | `implement` → inspect context → *optional* `agent-config` offer (when profile routing, review isolation, or topology materially helps) → execute → verify → hand to `review-loop` with the right reviewer | clear code diff + focused tests + verification evidence; stop at ticket scope |
+| Need to configure model, effort, or execution topology | [`agent-config`](../../skills/engineering/agent-config/SKILL.md) — model-invoked | requires: bounded task description + acceptance criteria + current host evidence + confirmed profile; determines provider mode and task complexity, right-sizes model tier & effort across execution modes | execution plan, not direct execution; executor performs work per plan |
+| Code feature/fix should be test-first | [`tdd`](../../skills/engineering/tdd/SKILL.md) — model-invoked | `red → green → refactor` test-first cycle | test suite + implementation slice |
+| Hard bug / regression | [`diagnosing-bugs`](../../skills/engineering/diagnosing-bugs/SKILL.md) — model-invoked | build a tight `pass/fail` signal → reproduce → hypothesize → instrument → fix → cleanup | fix accompanied by diagnostic evidence |
 | Merge/rebase conflict | [`resolving-merge-conflicts`](../../skills/engineering/resolving-merge-conflicts/SKILL.md) — model-invoked | resolve conflicted files per git guidance | clean working tree ready for verification |
 
 ## Two-Repository Architecture: Skill and Companion

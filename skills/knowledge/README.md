@@ -2,19 +2,19 @@
 
 [简体中文](README.zh-CN.md)
 
-Learn a subject, explain ideas, turn sources into reusable methods, and initialize knowledge libraries.
+Learn new topics, explain complex concepts simply, extract reusable patterns from sessions, and build knowledge vaults.
 
-Categories organize browsing; they add no workflow or approval gates. Each package’s `SKILL.md` is the behavior authority.
+Categories help you browse related skills; they do not enforce a rigid pipeline. The behavior of each package is defined in its `SKILL.md`.
 
 ## User-invoked
 
-- **[kb-init](kb-init/SKILL.md)** — Design and initialize a maintainable knowledge base via interview, then implement only after approval.
-- **[language-learning](language-learning/SKILL.md)** — Tutor any language through six modes — lessons, flashcards, conversation, grammar, quizzes, translation.
-- **[learn-anything](learn-anything/SKILL.md)** — Turn sufficiently evidenced conversations, notes, or workflows into reusable Agent Skill methods.
-- **[teach](teach/SKILL.md)** — Teach a new skill or concept within the workspace.
+- **[kb-init](kb-init/SKILL.md)** — Design and bootstrap a structured, maintainable knowledge base or vault through an interactive interview.
+- **[language-learning](language-learning/SKILL.md)** — Practice any foreign language across six interactive modes: lessons, vocabulary cards, conversation, grammar, quizzes, and immersion.
+- **[learn-anything](learn-anything/SKILL.md)** — Extract proven methods, troubleshooting steps, and workflows from real conversations into reusable skill guides.
+- **[teach](teach/SKILL.md)** — Guide you through learning a new technical concept or framework directly within the workspace.
 
 ## Model- or user-invoked
 
-- **[eli5](eli5/SKILL.md)** — Explain any topic, code, or error at a chosen audience level.
+- **[eli5](eli5/SKILL.md)** — Explain any technical topic, code snippet, or error message in simple language tailored to your chosen audience.
 
 [All categories](../README.md) · [Full catalog](../../CATALOG.md)

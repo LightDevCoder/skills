@@ -2,19 +2,19 @@
 
 [English](README.md)
 
-用于学习、分层解释、语言练习、来源方法提炼和知识库初始化。
+用于系统学习、通俗解释复杂概念、语言练习、工作经验沉淀和个人知识库搭建。
 
-分类只用于浏览，不新增流程或批准要求。技能自身的 `SKILL.md` 是行为权威。
+分类仅用于组织浏览，不设强制流水线。每个技能的具体行为以其 `SKILL.md` 为准。
 
 ## 用户显式调用
 
-- **[kb-init](kb-init/SKILL.md)** — 通过专属访谈设计并初始化可维护知识库，获批后才实施。
-- **[language-learning](language-learning/SKILL.md)** — 通过六种模式辅导任意语言——课程、卡片、对话、语法、测验与沉浸。
-- **[learn-anything](learn-anything/SKILL.md)** — 将证据充分的对话/笔记/workflow 提炼为可复用 Agent Skill 方法。
-- **[teach](teach/SKILL.md)** — 在当前 workspace 内教授新 Skill 或概念。
+- **[kb-init](kb-init/SKILL.md)** — 通过针对性问答梳理需求，为你规划并搭建结构清晰、易于维护的个人知识库。
+- **[language-learning](language-learning/SKILL.md)** — 学习与练习外语，提供课时学习、单词卡片、情景对话、语法解析、测试练习与沉浸模式。
+- **[learn-anything](learn-anything/SKILL.md)** — 将会话中解决问题的有效经验、笔记或工作流提炼为可复用的技能操作指南。
+- **[teach](teach/SKILL.md)** — 在当前工作区中循序渐进地向你讲解新工具、框架或工程概念。
 
 ## Agent 或用户调用
 
-- **[eli5](eli5/SKILL.md)** — 按指定受众水平解释任意主题、代码或错误。
+- **[eli5](eli5/SKILL.md)** — 用通俗易懂的语言为你解释任何专业概念、代码逻辑或报错信息，可指定受众背景（如面向外行或非技术同事）。
 
 [全部分类](../README.zh-CN.md) · [完整目录](../../CATALOG.zh-CN.md)

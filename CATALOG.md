@@ -26,7 +26,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### agent-config
 
-- **Purpose:** Profile-driven cross-harness execution configurator: inspect current Host capabilities, match user-confirmed model-tier profiles and task shape, and right-size execution topology, model tier, and effort with optional companion MCP support across primary coding-agent harnesses (10 native adapters + 1 generic fallback), safe single-model peer mode, and optional TypeSafe Jev abstract task profiling.
+- **Purpose:** Inspect current host capabilities and task requirements to configure appropriate model tiers, reasoning effort, and execution topology, with optional MCP support across 10 agent harnesses.
 - **When to use:** Execution configuration or setup intent where model tier, reasoning effort, or execution topology affects the result.
 - **Invocation:** Model-invoked.
 - **Package:** [skills/engineering/agent-config/](skills/engineering/agent-config)
@@ -46,7 +46,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### clarify
 
-- **Purpose:** One-invocation continuous clarification for a vague idea, requirement, or process — no formal SPEC or project workflow. Asks the current frontier as a round of independent questions and accepts batch replies.
+- **Purpose:** Clarify vague ideas or feature proposals in a conversational round of targeted choices, without setting up a full project.
 - **When to use:** Idea/brainstorm is foggy and no project context is required.
 - **Invocation:** User-invoked only.
 - **Package:** [skills/thinking/clarify/](skills/thinking/clarify)
@@ -196,7 +196,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### project-clarify
 
-- **Purpose:** Clarify a real project's unresolved decisions from inspected project facts; returns a bounded handoff for `project-spec`. Uses the same frontier-round interaction as `clarify` with project-aware evidence.
+- **Purpose:** Inspect repository files and ask targeted questions only about remaining open decisions before writing a spec.
 - **When to use:** Existing project has unclear requirements; facts already in repo should not be re-asked.
 - **Invocation:** User-invoked only.
 - **Package:** [skills/project/project-clarify/](skills/project/project-clarify)
@@ -206,7 +206,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### project-init
 
-- **Purpose:** Idempotently bootstrap the stable Light project and tracker contracts consumed by downstream Project Skills.
+- **Purpose:** Set up workspace layout and task tracker settings for a new or existing project so planning and coding start from a shared foundation.
 - **When to use:** New project needs a minimal, confirmed starting point.
 - **Invocation:** User-invoked only.
 - **Package:** [skills/project/project-init/](skills/project/project-init)
@@ -216,7 +216,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### project-review
 
-- **Purpose:** Project-level final acceptance — freeze a baseline, compose reviewers, issue `PASS`/`FAIL`/`BLOCKED`.
+- **Purpose:** Project-level final acceptance — evaluate deliverables against agreed requirements to issue a clear `PASS`, `FAIL`, or `BLOCKED` decision.
 - **When to use:** Completed project needs acceptance before `release-workflow`.
 - **Invocation:** Model-invoked; manual entry supported.
 - **Package:** [skills/review/project-review/](skills/review/project-review)
@@ -226,7 +226,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### project-retro
 
-- **Purpose:** Conduct a retrospective on a completed project or coding session, identifying environment, guardrail, navigation, tool economy, and workflow improvements.
+- **Purpose:** Review completed sessions to find friction in project layout, automated checks, instruction clarity, or tool usage, then suggest concrete fixes.
 - **When to use:** Workflow final step (Agent self-evaluates whether friction occurred) or user-invoked for a session post-mortem.
 - **Invocation:** Model-invoked (Agent self-evaluation at workflow conclusion); manual entry supported.
 - **Package:** [skills/project/project-retro/](skills/project/project-retro)
@@ -236,7 +236,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### project-spec
 
-- **Purpose:** Turn already-clarified outputs into a formal project SPEC without reopening an interview.
+- **Purpose:** Turn clarified decisions into a technical specification (SPEC) without re-asking settled questions.
 - **When to use:** Decisions are clarified and a SPEC is needed for `project-tickets`.
 - **Invocation:** User-invoked only.
 - **Package:** [skills/project/project-spec/](skills/project/project-spec)
@@ -246,7 +246,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### project-tickets
 
-- **Purpose:** Turn an approved SPEC into a dependency-ordered, tracer-bullet ticket graph.
+- **Purpose:** Break an approved specification into an ordered list of standalone tasks with clear dependencies, ready for implementation.
 - **When to use:** SPEC is approved and executable tasks are needed.
 - **Invocation:** User-invoked only.
 - **Package:** [skills/project/project-tickets/](skills/project/project-tickets)
@@ -306,7 +306,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### review-loop
 
-- **Purpose:** Lightweight review/repair engine — resolve reviewer, invoke, receive findings, return repair, re-run.
+- **Purpose:** Review and repair engine: dispatches artifacts to the right reviewer, collects findings, guides fixes, and repeats until clean.
 - **When to use:** Any artifact with a reviewer and a bounded repair window.
 - **Invocation:** Model-invoked; manual entry supported.
 - **Package:** [skills/review/review-loop/](skills/review/review-loop)
@@ -316,7 +316,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### socratic
 
-- **Purpose:** Core clarification engine — internal decision frontier with rounds of independent questions, options, recommendations, batch replies, and shared-understanding confirmation.
+- **Purpose:** Questioning engine: presents independent choices, provides recommendations, and confirms shared understanding step by step.
 - **When to use:** Underlies `clarify`, `project-clarify`, `decision-map`; not a standalone project workflow.
 - **Invocation:** Model-invoked (engine for other Skills).
 - **Package:** [skills/thinking/socratic/](skills/thinking/socratic)

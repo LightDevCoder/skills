@@ -106,7 +106,7 @@ See [Installation](docs/INSTALLATION.md) for advanced options (explicit agent ta
 
 ```text
 $ask-light next        # Suggest the next appropriate Skill from current context
-$project-init          # Bootstrap project structure and tracker contracts
+$project-init          # Bootstrap project workspace and task tracker settings
 $clarify               # Clarify requirements through targeted questions
 $project-clarify       # Clarify project decisions using repository context
 $implement             # Execute a ready ticket with verification
@@ -135,12 +135,12 @@ release-workflow
 project-retro (agent evaluates friction)
 ```
 
-- `project-init`: sets up tracker contracts and initial configuration.
+- `project-init`: sets up project layout and task tracker settings.
 - `project-clarify → project-spec → project-tickets`: clarifies requirements, writes the specification, and splits work into executable tickets.
 - `implement`: implements one ticket at a time with automated checks.
-- `project-review`: verifies quality against frozen baselines; `review-loop` handles iterative fixes.
+- `project-review`: verifies quality against acceptance criteria; `review-loop` handles iterative fixes.
 - `release-workflow`: runs release validation, tagging, and publication.
-- `project-retro`: evaluates session friction (navigation, guardrails, standards, tool economy) and proposes actionable improvements at the conclusion of the workflow.
+- `project-retro`: evaluates session friction (navigation, automated checks, instruction clarity, tool usage) and proposes concrete improvements at the conclusion of the workflow.
 
 Direct paths for common tasks:
 

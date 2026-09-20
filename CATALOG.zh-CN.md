@@ -26,7 +26,7 @@
 
 ### agent-config
 
-- **作用：** Profile 驱动的跨 Harness 执行配置器：检查当前宿主真实执行能力，匹配用户确认的模型档位 Profile 与任务形态，精准配置执行拓扑、模型等级与 effort，支持可选 companion MCP（原生支持 primary coding-agent harnesses [10 native adapters + 1 generic fallback]）、单模型对等一等模式及可选 TypeSafe Jev 抽象任务画像。
+- **作用：** 探测当前 Agent 宿主环境与任务要求，为任务配置合适的模型梯队、推理强度与执行拓扑，支持 10 款主流 Agent 框架及伴随 MCP。
 - **调用：** Model-invoked。
 - **包：** [skills/engineering/agent-config/](skills/engineering/agent-config)
 - **状态：** 第一方已准入；REFACTOR（参照 Sol Advisor 设计理念，Profile 驱动跨 Harness 执行配置器，覆盖主要编码 Agent Harness [10 种原生适配器 + 1 种通用回退]）。
@@ -44,7 +44,7 @@
 
 ### clarify
 
-- **作用：** 一次调用启动面向模糊想法/需求/流程的连续澄清，不产生正式 SPEC。以一轮多问题形式询问当前 frontier，并接受批量回复。
+- **作用：** 针对模糊的想法、设想或流程开展多轮问答，每次给出几个针对性选项供你选择，快速理清思路（无需建立完整项目）。
 - **调用：** 仅 user-invoked。
 - **包：** [skills/thinking/clarify/](skills/thinking/clarify)
 - **状态：** 第一方已准入；ADAPT（Matt `grill-me` → Light，经 `socratic`）。
@@ -53,7 +53,7 @@
 
 ### code-review
 
-- **作用：** 针对有界 `git diff` 的只读 specialist 审查（Standards + Spec 双轴）。
+- **作用：** 代码审查专员：对比变更代码（`git diff`），从规范标准与业务规格两个维度检查潜在问题，仅输出问题清单而不直接修改代码。
 - **调用：** Model-invoked；只读，不修复也不裁决。
 - **包：** [skills/review/code-review/](skills/review/code-review)
 - **状态：** 第一方已准入；ADAPT（保留 Matt `code-review` 的双轴方法）。
@@ -62,7 +62,7 @@
 
 ### decision-map
 
-- **作用：** 将大型、模糊、跨会话的工作规划为可持久化的决策地图 tickets。
+- **作用：** 当任务庞大且跨多轮会话时，将待决策事项梳理为一张有依赖关系的决策图谱。
 - **调用：** 仅 user-invoked。
 - **包：** [skills/thinking/decision-map/](skills/thinking/decision-map)
 - **状态：** 第一方已准入；ADAPT（Matt `wayfinder`）。
@@ -71,7 +71,7 @@
 
 ### diagnosing-bugs
 
-- **作用：** 针对难 bug 与性能回退的诊断环，需紧反馈信号。
+- **作用：** 针对复杂 Bug 和性能回退进行系统性排查，通过建立紧凑反馈信号快速定位根因。
 - **调用：** Model-invoked。
 - **包：** [skills/engineering/diagnosing-bugs/](skills/engineering/diagnosing-bugs)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
@@ -89,7 +89,7 @@
 
 ### generic-review
 
-- **作用：** 针对普通制品的只读默认 reviewer，找遗漏、错误、矛盾与可用性问题。
+- **作用：** 通用文档与制品审阅：检查非代码产物（文档、配置、计划）中的遗漏、事实矛盾、格式错误或体验缺陷。
 - **调用：** Model-invoked；只读，不裁决。
 - **包：** [skills/review/generic-review/](skills/review/generic-review)
 - **状态：** 第一方已准入；NEW。
@@ -116,7 +116,7 @@
 
 ### implement
 
-- **作用：** 执行一个已决策、有边界的工作项（代码、文档、配置、Skill）。
+- **作用：** 执行单个已确认的任务（代码、文档或配置），完成本地验证并提交审查。
 - **调用：** 仅 user-invoked。
 - **包：** [skills/project/implement/](skills/project/implement)
 - **状态：** 第一方已准入；ADAPT（Matt `implement` → 通用执行器）。
@@ -125,7 +125,7 @@
 
 ### kanban-worker
 
-- **作用：** 每次定时运行领取并执行一张 Light-Kanban 任务；先继续持有任务与 `reviewFeedback`。
+- **作用：** 在定时运行中认领并执行一张看板任务，优先处理已有修改意见或进行中的工作。
 - **调用：** Model-invoked；支持手动入口。
 - **包：** [skills/project/kanban-worker/](skills/project/kanban-worker)
 - **状态：** 第一方已准入；经完整路径（`review-loop agent-skill` PASS）；v0.1.6 由 `light-kanban-worker` 改名。
@@ -180,7 +180,7 @@
 
 ### project-clarify
 
-- **作用：** 基于已检查的项目事实澄清真实未决决策，输出给 `project-spec` 的有界 handoff。采用与 `clarify` 相同的 frontier-round 交互，并注入项目证据。
+- **作用：** 读取已有代码和文档资料，只追问尚未确定的关键决策，并将确认结果交给技术规格编写。
 - **调用：** 仅 user-invoked。
 - **包：** [skills/project/project-clarify/](skills/project/project-clarify)
 - **状态：** 第一方已准入；ADAPT（Matt `grill-with-docs`）。
@@ -189,7 +189,7 @@
 
 ### project-init
 
-- **作用：** 幂等建立下游 Project Skills 消费的稳定 Light 项目与 tracker 契约。
+- **作用：** 为新项目或已有项目建立基础结构与任务跟踪配置，让后续澄清、拆任务和执行可以直接接上。
 - **调用：** 仅 user-invoked。
 - **包：** [skills/project/project-init/](skills/project/project-init)
 - **状态：** 第一方已准入；REFACTOR（仓库 bootstrap；完整澄清仍归 `project-clarify`）。
@@ -198,7 +198,7 @@
 
 ### project-review
 
-- **作用：** 项目级最终验收——冻结 baseline、组合 reviewer、签发 `PASS`/`FAIL`/`BLOCKED`。
+- **作用：** 项目最终验收：基于已确认的验收基准，组合各项审查结果，给出最终的验收判定（`PASS` / `FAIL` / `BLOCKED`）。
 - **调用：** Model-invoked；支持手动入口。
 - **包：** [skills/review/project-review/](skills/review/project-review)
 - **状态：** 第一方已准入；NEW（从旧 `review-loop` 迁移 final-acceptance 逻辑）。
@@ -207,7 +207,7 @@
 
 ### project-retro
 
-- **作用：** 对已完成的项目或编码会话进行复盘，识别环境、守护线、导航、工具经济性与工作流改进点。
+- **作用：** 在项目或长会话结束后进行复盘，分析环境阻力、自动化检查、导航效率与命令开销，提出具体改进建议。
 - **调用：** Model-invoked（工作流终点由 Agent 自主评估是否需要调用）；支持手动入口。
 - **包：** [skills/project/project-retro/](skills/project/project-retro)
 - **状态：** 第一方已准入；PORT 与 Light 工作流适配（Matt Pocock `retro`）。
@@ -216,7 +216,7 @@
 
 ### project-spec
 
-- **作用：** 将已澄清的输出整理为正式 SPEC，不再重做访谈。
+- **作用：** 把已澄清的需求与决策整理成正式的开发规格（SPEC），避免在编写阶段重新提问。
 - **调用：** 仅 user-invoked。
 - **包：** [skills/project/project-spec/](skills/project/project-spec)
 - **状态：** 第一方已准入；ADAPT（Matt `to-spec`）。
@@ -225,7 +225,7 @@
 
 ### project-tickets
 
-- **作用：** 将已批准 SPEC 转为按依赖排序的 tracer-bullet ticket 图。
+- **作用：** 把已确认的技术规格拆解为有先后依赖关系的任务清单，方便逐步独立执行。
 - **调用：** 仅 user-invoked。
 - **包：** [skills/project/project-tickets/](skills/project/project-tickets)
 - **状态：** 第一方已准入；ADAPT（Matt `to-tickets`）。
@@ -279,7 +279,7 @@
 
 ### review-loop
 
-- **作用：** 轻量 review/repair 引擎——解析 reviewer、调用、收 findings、回 Producer、重跑。
+- **作用：** 审查与修复循环引擎：将产物提交给对应的审查技能，收集发现的问题并指导修复，直到通过或达到轮次上限。
 - **调用：** Model-invoked；支持手动入口。
 - **包：** [skills/review/review-loop/](skills/review/review-loop)
 - **状态：** 第一方已准入；REFACTOR + SPLIT（final acceptance 已移至 `project-review`）。
@@ -288,7 +288,7 @@
 
 ### socratic
 
-- **作用：** 核心澄清引擎——内部 decision frontier 以一轮多问题呈现，含选项、建议、批量回复与共同理解确认。
+- **作用：** 启发式问答引擎：提出相互独立的选择题并给出倾向建议，逐步梳理决策并形成共识，供上层澄清技能调用。
 - **调用：** Model-invoked（供其他 Skill 调用的引擎）。
 - **包：** [skills/thinking/socratic/](skills/thinking/socratic)
 - **状态：** 第一方已准入；ADAPT（Matt `grilling`）。
@@ -297,7 +297,7 @@
 
 ### tdd
 
-- **作用：** 测试驱动开发—— red → green → refactor 真测试循环。
+- **作用：** 测试驱动开发（红-绿-重构）：先编写失败的测试用例，再补充实现使其通过，最后优化重构。
 - **调用：** Model-invoked。
 - **包：** [skills/engineering/tdd/](skills/engineering/tdd)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。

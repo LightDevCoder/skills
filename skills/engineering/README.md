@@ -2,16 +2,16 @@
 
 [简体中文](README.zh-CN.md)
 
-Configure execution, diagnose bugs, explore implementations, write tests, and resolve merge conflicts.
+Inspect host capabilities, configure models, diagnose bugs, build prototypes, write tests, and resolve merge conflicts.
 
-Categories organize browsing; they add no workflow or approval gates. Each package’s `SKILL.md` is the behavior authority.
+Categories help you browse related skills; they do not enforce a rigid pipeline. The behavior of each package is defined in its `SKILL.md`.
 
 ## Model- or user-invoked
 
-- **[agent-config](agent-config/SKILL.md)** — Profile-driven cross-harness execution configurator: inspect current Host capabilities, match user-confirmed model-tier profiles and task shape, and right-size execution topology, model tier, and effort with optional companion MCP support across primary coding-agent harnesses (10 native adapters + 1 generic fallback) and safe single-model peer mode.
-- **[diagnosing-bugs](diagnosing-bugs/SKILL.md)** — Diagnosis loop for hard bugs and performance regressions with a tight feedback signal.
-- **[prototype](prototype/SKILL.md)** — Build a throwaway prototype to answer a design question.
-- **[resolving-merge-conflicts](resolving-merge-conflicts/SKILL.md)** — Resolve an in-progress `git` merge or rebase conflict.
-- **[tdd](tdd/SKILL.md)** — Test-driven development — red → green → refactor loop with real tests.
+- **[agent-config](agent-config/SKILL.md)** — Inspect current host capabilities and task requirements to configure appropriate model tiers, reasoning effort, and execution topology, with optional MCP support across 10 agent harnesses.
+- **[diagnosing-bugs](diagnosing-bugs/SKILL.md)** — Investigate difficult bugs and performance regressions with hypothesis testing and immediate feedback loops.
+- **[prototype](prototype/SKILL.md)** — Build throwaway code or UI mockups to test an idea or answer a technical design question quickly.
+- **[resolving-merge-conflicts](resolving-merge-conflicts/SKILL.md)** — Resolve git merge or rebase conflicts cleanly using repository context.
+- **[tdd](tdd/SKILL.md)** — Practice test-driven development through test-first cycles: write a failing test, make it pass, then refactor.
 
 [All categories](../README.md) · [Full catalog](../../CATALOG.md)

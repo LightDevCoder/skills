@@ -2,15 +2,15 @@
 
 [English](README.md)
 
-区分只读审阅、修复收敛和项目最终验收；选择与当前检查范围相符的技能。
+区分只读检查、迭代修复循环与项目最终验收，确保审查职责清晰。
 
-分类只用于浏览，不新增流程或批准要求。技能自身的 `SKILL.md` 是行为权威。
+分类仅用于组织浏览，不设强制流水线。每个技能的具体行为以其 `SKILL.md` 为准。
 
 ## Agent 或用户调用
 
-- **[code-review](code-review/SKILL.md)** — 针对有界 `git diff` 的只读 specialist 审查（Standards + Spec 双轴）。
-- **[generic-review](generic-review/SKILL.md)** — 针对普通制品的只读默认 reviewer，找遗漏、错误、矛盾与可用性问题。
-- **[review-loop](review-loop/SKILL.md)** — 轻量 review/repair 引擎——解析 reviewer、调用、收 findings、回 Producer、重跑。
-- **[project-review](project-review/SKILL.md)** — 项目级最终验收——冻结 baseline、组合 reviewer、签发 `PASS`/`FAIL`/`BLOCKED`。
+- **[code-review](code-review/SKILL.md)** — 代码审查专员：对比变更代码（`git diff`），从规范标准与业务规格两个维度检查潜在问题，仅输出问题清单而不直接修改代码。
+- **[generic-review](generic-review/SKILL.md)** — 通用文档与制品审阅：检查非代码产物（文档、配置、计划）中的遗漏、事实矛盾、格式错误或体验缺陷。
+- **[review-loop](review-loop/SKILL.md)** — 审查与修复循环引擎：将产物提交给对应的审查技能，收集发现的问题并指导修复，直到通过或达到轮次上限。
+- **[project-review](project-review/SKILL.md)** — 项目最终验收：基于已确认的验收基准，组合各项审查结果，给出最终的验收判定（`PASS` / `FAIL` / `BLOCKED`）。
 
 [全部分类](../README.zh-CN.md) · [完整目录](../../CATALOG.zh-CN.md)

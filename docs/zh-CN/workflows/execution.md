@@ -18,11 +18,11 @@
 
 | 场景 | 入口 | 典型路径 | Handoff / 停止 |
 | --- | --- | --- | --- |
-| 单个清晰 ticket/SPEC 切片 | [`implement`](../../../skills/project/implement/SKILL.md) — user-invoked | `implement` → 查上下文 → 当 Profile 路由/隔离性/拓扑重要时提供可选 `agent-config` → 执行 → 验证 → 交 `review-loop` 配对应 reviewer | 有界 diff + 聚焦测试 + 验证证据；止于 ticket 范围 |
-| 需配置模型、effort 或执行拓扑 | [`agent-config`](../../../skills/engineering/agent-config/SKILL.md) — model-invoked | 需：有界任务或 ticket 图 + 验收权威 + 当前宿主证据 + 确认 Profile；判断 Provider 模式与任务形态，在四种执行模式（Case A、B、C、D）下精准适配模型层级与 effort | 产出 Profile 驱动的执行计划，不直接执行；执行者依计划实施 |
-| 代码功能应测试先行 | [`tdd`](../../../skills/engineering/tdd/SKILL.md) — model-invoked | `red → green → refactor` 真测试循环 | 测试 + 实现切片 |
-| 难 bug / 回退 | [`diagnosing-bugs`](../../../skills/engineering/diagnosing-bugs/SKILL.md) — model-invoked | 建紧 `pass/fail` 信号 → 复现 → 假设 → 埋点 → 修复 → 清理 | 带反馈环的修复 |
-| 合并/变基冲突 | [`resolving-merge-conflicts`](../../../skills/engineering/resolving-merge-conflicts/SKILL.md) — model-invoked | 按 git 指引解决冲突文件 | 干净工作区待验证 |
+| 单个清晰 ticket/SPEC 切片 | [`implement`](../../../skills/project/implement/SKILL.md) — user-invoked | `implement` → 查上下文 → 当环境配置、模型档位或多模型协作有明显帮助时提供可选 `agent-config` → 执行 → 验证 → 交 `review-loop` 配对应 reviewer | 清晰的代码变更 + 针对性测试 + 验证证据；止于当前任务范围 |
+| 需配置模型、effort 或执行拓扑 | [`agent-config`](../../../skills/engineering/agent-config/SKILL.md) — model-invoked | 需：明确的任务描述 + 验收标准 + 当前宿主环境信息 + 确认的 Profile；判断环境模式与任务复杂度，在多种模式下精准适配模型层级与推理强度 | 产出可落地的执行计划，不直接执行；执行者依计划实施 |
+| 代码功能应测试先行 | [`tdd`](../../../skills/engineering/tdd/SKILL.md) — model-invoked | `red → green → refactor` 测试先行循环 | 测试用例 + 功能代码实现 |
+| 难 bug / 回退 | [`diagnosing-bugs`](../../../skills/engineering/diagnosing-bugs/SKILL.md) — model-invoked | 建立明确的 pass/fail 判定 → 复现 → 提出假设 → 打印排查 → 修复 → 清理 | 带诊断过程与复现证据的修复代码 |
+| 合并/变基冲突 | [`resolving-merge-conflicts`](../../../skills/engineering/resolving-merge-conflicts/SKILL.md) — model-invoked | 按 git 指引理清冲突并逐步解决 | 干净的工作区，准备提交验证 |
 
 ## 双仓架构：Skill 与 Companion
 

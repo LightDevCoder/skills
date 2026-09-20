@@ -2,22 +2,22 @@
 
 [English](README.md)
 
-从项目初始化、需求确认和任务拆分，到执行、发布与复盘。分类不改变各阶段的授权或交接边界。
+涵盖项目初始化、需求澄清、任务拆解、功能实现、版本发布到会话复盘的完整过程。
 
-分类只用于浏览，不新增流程或批准要求。技能自身的 `SKILL.md` 是行为权威。
+分类仅用于组织浏览，不设强制流水线。每个技能的具体行为以其 `SKILL.md` 为准。
 
 ## 用户显式调用
 
-- **[project-init](project-init/SKILL.md)** — 幂等建立下游 Project Skills 消费的稳定 Light 项目与 tracker 契约。
-- **[project-clarify](project-clarify/SKILL.md)** — 基于已检查的项目事实澄清真实未决决策，输出给 `project-spec` 的有界 handoff。采用与 `clarify` 相同的 frontier-round 交互，并注入项目证据。
-- **[project-spec](project-spec/SKILL.md)** — 将已澄清的输出整理为正式 SPEC，不再重做访谈。
-- **[project-tickets](project-tickets/SKILL.md)** — 将已批准 SPEC 转为按依赖排序的 tracer-bullet ticket 图。
-- **[implement](implement/SKILL.md)** — 执行一个已决策、有边界的工作项（代码、文档、配置、Skill）。
+- **[project-init](project-init/SKILL.md)** — 为新项目或已有项目建立基础结构与任务跟踪配置，让后续澄清、拆任务和执行可以直接接上。
+- **[project-clarify](project-clarify/SKILL.md)** — 读取已有代码和文档资料，只追问尚未确定的关键决策，并将确认结果交给技术规格编写。
+- **[project-spec](project-spec/SKILL.md)** — 把已澄清的需求与决策整理成正式的开发规格（SPEC），避免在编写阶段重新提问。
+- **[project-tickets](project-tickets/SKILL.md)** — 把已确认的技术规格拆解为有先后依赖关系的任务清单，方便逐步独立执行。
+- **[implement](implement/SKILL.md)** — 执行单个已确认的任务（代码、文档或配置），完成本地验证并提交审查。
 
 ## Agent 或用户调用
 
-- **[kanban-worker](kanban-worker/SKILL.md)** — 每次定时运行领取并执行一张 Light-Kanban 任务；先继续持有任务与 `reviewFeedback`。
-- **[release-workflow](release-workflow/SKILL.md)** — 发布已完成项目——同步文档、执行质量门、打 tag、发布。
-- **[project-retro](project-retro/SKILL.md)** — 对已完成的项目或编码会话进行复盘，识别环境、守护线、导航、工具经济性与工作流改进点。
+- **[kanban-worker](kanban-worker/SKILL.md)** — 在定时运行中认领并执行一张看板任务，优先处理已有修改意见或进行中的工作。
+- **[release-workflow](release-workflow/SKILL.md)** — 负责项目的受控发布，涵盖文档同步、质量检查、标签打标和正式发布。
+- **[project-retro](project-retro/SKILL.md)** — 在项目或长会话结束后进行复盘，分析环境阻力、自动化检查、导航效率与命令开销，提出具体改进建议。
 
 [全部分类](../README.zh-CN.md) · [完整目录](../../CATALOG.zh-CN.md)

@@ -2,20 +2,20 @@
 
 [English](README.md)
 
-查找合适技能、交接任务、简短回顾会话、指导手动步骤，以及制作旅行页面。
+寻找合适技能、交接会话上下文、一句话总结进展、引导手动操作，以及生成旅行计划页面。
 
-分类只用于浏览，不新增流程或批准要求。技能自身的 `SKILL.md` 是行为权威。
+分类仅用于组织浏览，不设强制流水线。每个技能的具体行为以其 `SKILL.md` 为准。
 
 ## 用户显式调用
 
-- **[ask-light](ask-light/SKILL.md)** — 作为 Light 工作流顾问、导航器与路由入口：检查项目与工作流状态，推荐下一步 Skill 并给出理由，用户批准后安全转换。
-- **[handoff](handoff/SKILL.md)** — 将当前会话压缩为下一 agent 的交接文档。
-- **[recap](recap/SKILL.md)** — 用一句简洁文本展示当前 session，不替换或压缩对话历史。
-- **[wait-what](wait-what/SKILL.md)** — 重讲上一条未被理解的消息。
+- **[ask-light](ask-light/SKILL.md)** — 工作流顾问与导航助手：根据当前项目与对话状态，推荐最合适的下一步技能并说明理由。
+- **[handoff](handoff/SKILL.md)** — 将当前会话的核心背景与进展浓缩为交接文档，方便下一位 Agent 接力。
+- **[recap](recap/SKILL.md)** — 输出当前会话的一句话进展摘要，不改动也不压缩原有对话历史。
+- **[wait-what](wait-what/SKILL.md)** — 当上一条回复不够清晰或理解有偏差时，换一个通俗视角重新解释。
 
 ## Agent 或用户调用
 
-- **[wizard](wizard/SKILL.md)** — 为只能人做的步骤生成交互式 bash 向导（置备、密钥、第三方控制台、割接）。
-- **[light-travelpage](light-travelpage/SKILL.md)** — 从资料生成或更新中英双语手机旅行网页，提供航班/住宿卡片、地区地图导航，共享同行人、账单、币种设置、待办与门票状态。
+- **[wizard](wizard/SKILL.md)** — 生成交互式终端向导，引导人类完成只有人才能操作的步骤（如云控制台配置、密钥填写、生产环境割接）。
+- **[light-travelpage](light-travelpage/SKILL.md)** — 将旅行行程与预订资料生成为中英双语手机网页，支持航班住宿卡片、地图导航、费用记账与待办清单。
 
 [全部分类](../README.zh-CN.md) · [完整目录](../../CATALOG.zh-CN.md)

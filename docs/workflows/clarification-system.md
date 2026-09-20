@@ -27,7 +27,7 @@ This document explains the **Clarification & Research** composition: entry, hand
 
 | Skill | Entry | How it uses `socratic` | Handoff | Stop |
 | --- | --- | --- | --- | --- |
-| [`project-clarify`](../../skills/project/project-clarify/SKILL.md) — user-invoked | Existing project with genuine unresolved decisions | **Inspects first:** `README`, `AGENTS.md`, `CLAUDE.md`, existing docs/specs/source. *Then* calls `socratic` for only the gaps that need user-owned decisions | bounded handoff for `project-spec` (or back to `decision-map` if still foggy) | stop without creating SPEC/tickets or auto-starting another user-invoked Skill |
+| [`project-clarify`](../../skills/project/project-clarify/SKILL.md) — user-invoked | Existing project with genuine unresolved decisions | **Inspects first:** `README`, `AGENTS.md`, `CLAUDE.md`, existing docs/specs/source. *Then* calls `socratic` for only the gaps that need user-owned decisions | clarified decisions summary for `project-spec` (or back to `decision-map` if still foggy) | stop without creating SPEC/tickets or auto-starting another user-invoked Skill |
 | [`decision-map`](../../skills/thinking/decision-map/SKILL.md) — user-invoked | Large, foggy, multi-session, many dependent decisions | Maintains a persistent map under `.scratch/<effort>/map.md` + child tickets; may call `socratic` and, per unknown routing, `research` / `prototype` / `to-questionnaire` | decision tickets resolved → hand to `project-spec` | stop at map updates; work stays on the tracker, not in execution |
 
 ## Unknown routing

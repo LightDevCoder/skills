@@ -27,7 +27,7 @@
 
 | Skill | 入口 | 如何用 `socratic` | Handoff | 停止点 |
 | --- | --- | --- | --- | --- |
-| [`project-clarify`](../../../skills/project/project-clarify/SKILL.md) — user-invoked | 现有项目仍有未决决策 | **先检查：** `README`、`AGENTS.md`、`CLAUDE.md`、既有文档/SPEC/源码；*再* 对仅需用户决策的缺口调 `socratic` | 供 `project-spec` 的有界 handoff（仍模糊则回 `decision-map`） | 止于澄清 summary，不建 SPEC/tickets |
+| [`project-clarify`](../../../skills/project/project-clarify/SKILL.md) — user-invoked | 现有项目仍有未决决策 | **先检查：** `README`、`AGENTS.md`、`CLAUDE.md`、既有文档/SPEC/源码；*再* 对仅需用户决策的缺口调 `socratic` | 已澄清的需求决策清单（若仍极度模糊则转由 `decision-map` 梳理） | 止于澄清 summary，不建 SPEC/tickets |
 | [`decision-map`](../../../skills/thinking/decision-map/SKILL.md) — user-invoked | 大型、模糊、跨会话、依赖多 | 在 `.scratch/<effort>/map.md` 及子 tickets 上维护决策地图，可按 unknown 路由调 `socratic` 与 `research`/`prototype`/`to-questionnaire` | 决策收敛后交 `project-spec` | 止于地图更新；工作留痕于 tracker |
 
 ## Unknown 路由

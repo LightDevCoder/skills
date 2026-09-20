@@ -2,20 +2,20 @@
 
 [简体中文](README.zh-CN.md)
 
-Find the right skill, hand off work, summarize a session, guide manual steps, or prepare a travel page.
+Find skills, hand off context, summarize sessions, guide manual steps, or generate travel itineraries.
 
-Categories organize browsing; they add no workflow or approval gates. Each package’s `SKILL.md` is the behavior authority.
+Categories help you browse related skills; they do not enforce a rigid pipeline. The behavior of each package is defined in its `SKILL.md`.
 
 ## User-invoked
 
-- **[ask-light](ask-light/SKILL.md)** — Act as the Light workflow advisor, navigator, and router: inspect project/workflow state, recommend the next Skill with reasoning, and transition safely after user approval.
-- **[handoff](handoff/SKILL.md)** — Compact the current conversation into a handoff document for the next agent.
-- **[recap](recap/SKILL.md)** — Show one concise line about the current session without replacing or compacting conversation history.
-- **[wait-what](wait-what/SKILL.md)** — Re-pitch the last message that did not land.
+- **[ask-light](ask-light/SKILL.md)** — Advisor and navigator for Light Skills: inspects project context, recommends the most relevant next skill, and explains why.
+- **[handoff](handoff/SKILL.md)** — Summarize the current conversation into a concise handoff briefing for the next agent session.
+- **[recap](recap/SKILL.md)** — Provide a one-line summary of what happened so far without altering or compacting conversation history.
+- **[wait-what](wait-what/SKILL.md)** — Rephrase the previous explanation from a fresh angle when it was unclear or missed the mark.
 
 ## Model- or user-invoked
 
-- **[wizard](wizard/SKILL.md)** — Interactive bash wizard for human-only steps (provisioning, secrets, dashboards, cutovers).
-- **[light-travelpage](light-travelpage/SKILL.md)** — Generate or update a bilingual mobile travel page with flight/stay cards, regional map navigation, shared members, expenses, currency settings, tasks and ticket status.
+- **[wizard](wizard/SKILL.md)** — Interactive bash wizard that walks you step by step through manual tasks only humans can perform (credentials, cloud consoles, cutovers).
+- **[light-travelpage](light-travelpage/SKILL.md)** — Generate or update a bilingual mobile travel itinerary page with flights, lodging, maps, expenses, and shared tasks.
 
 [All categories](../README.md) · [Full catalog](../../CATALOG.md)

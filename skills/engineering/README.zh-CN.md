@@ -2,16 +2,16 @@
 
 [English](README.md)
 
-处理执行配置、故障诊断、原型验证、测试驱动开发与合并冲突。
+涵盖执行环境配置、故障诊断、原型设计、测试驱动开发与代码合并冲突处理。
 
-分类只用于浏览，不新增流程或批准要求。技能自身的 `SKILL.md` 是行为权威。
+分类仅用于组织浏览，不设强制流水线。每个技能的具体行为以其 `SKILL.md` 为准。
 
 ## Agent 或用户调用
 
-- **[agent-config](agent-config/SKILL.md)** — Profile 驱动的跨 Harness 执行配置器：检查当前宿主真实执行能力，匹配用户确认的模型档位 Profile 与任务形态，精准配置执行拓扑、模型等级与 effort，支持可选 companion MCP（原生支持 primary coding-agent harnesses [10 native adapters + 1 generic fallback]）并提供单模型对等一等模式。
-- **[diagnosing-bugs](diagnosing-bugs/SKILL.md)** — 针对难 bug 与性能回退的诊断环，需紧反馈信号。
-- **[prototype](prototype/SKILL.md)** — 为设计问题构建一次性原型。
-- **[resolving-merge-conflicts](resolving-merge-conflicts/SKILL.md)** — 解决进行中的 `git` merge/rebase 冲突。
-- **[tdd](tdd/SKILL.md)** — 测试驱动开发—— red → green → refactor 真测试循环。
+- **[agent-config](agent-config/SKILL.md)** — 探测当前 Agent 宿主环境与任务要求，为任务配置合适的模型梯队、推理强度与执行拓扑，支持 10 款主流 Agent 框架及伴随 MCP。
+- **[diagnosing-bugs](diagnosing-bugs/SKILL.md)** — 针对复杂 Bug 和性能回退进行系统性排查，通过建立紧凑反馈信号快速定位根因。
+- **[prototype](prototype/SKILL.md)** — 为设计决策快速搭建一次性原型或界面样例，验证技术可行性。
+- **[resolving-merge-conflicts](resolving-merge-conflicts/SKILL.md)** — 结合分支上下文理清代码差异，解决进行中的 git merge 或 rebase 冲突。
+- **[tdd](tdd/SKILL.md)** — 测试驱动开发（红-绿-重构）：先编写失败的测试用例，再补充实现使其通过，最后优化重构。
 
 [全部分类](../README.zh-CN.md) · [完整目录](../../CATALOG.zh-CN.md)

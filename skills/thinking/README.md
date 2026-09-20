@@ -2,19 +2,19 @@
 
 [简体中文](README.zh-CN.md)
 
-Resolve user-owned decisions and gather the evidence needed to make them.
+Clarify ideas, explore open decisions through structured dialogue, map multi-session efforts, and gather primary-source evidence.
 
-Categories organize browsing; they add no workflow or approval gates. Each package’s `SKILL.md` is the behavior authority.
+Categories help you browse related skills; they do not enforce a rigid pipeline. The behavior of each package is defined in its `SKILL.md`.
 
 ## User-invoked
 
-- **[clarify](clarify/SKILL.md)** — One-invocation continuous clarification for a vague idea, requirement, or process — no formal SPEC or project workflow. Asks the current frontier as a round of independent questions and accepts batch replies.
-- **[decision-map](decision-map/SKILL.md)** — Plan a large, foggy, multi-session effort as a persistent decision map of tickets.
-- **[to-questionnaire](to-questionnaire/SKILL.md)** — Turn an undecided question into a questionnaire for the person who holds the information.
+- **[clarify](clarify/SKILL.md)** — Clarify vague ideas or feature proposals in a conversational round of targeted choices, without setting up a full project.
+- **[decision-map](decision-map/SKILL.md)** — Map out complex multi-session initiatives into a structured dependency graph of decisions before writing formal specs.
+- **[to-questionnaire](to-questionnaire/SKILL.md)** — Convert open questions into a clear questionnaire for stakeholders or teammates who hold the answers.
 
 ## Model- or user-invoked
 
-- **[socratic](socratic/SKILL.md)** — Core clarification engine — internal decision frontier with rounds of independent questions, options, recommendations, batch replies, and shared-understanding confirmation.
-- **[research](research/SKILL.md)** — Investigate an external question against high-trust primary sources and capture findings.
+- **[socratic](socratic/SKILL.md)** — Questioning engine: presents independent choices, provides recommendations, and confirms shared understanding step by step.
+- **[research](research/SKILL.md)** — Investigate technical or factual questions against reliable primary sources and summarize findings in markdown.
 
 [All categories](../README.md) · [Full catalog](../../CATALOG.md)

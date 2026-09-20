@@ -8,13 +8,13 @@ This document explains how the **Project Workflow** Skills compose. It shows ent
 
 ```text
 project-init
-      ↓  (stable Light project + tracker contracts)
+      ↓  (project workspace layout + task tracker settings)
 project-clarify
-      ↓  (bounded clarification handoff: understanding / resolved / unresolved / gaps)
+      ↓  (clarified requirements: confirmed decisions / remaining open questions)
 project-spec
       ↓  (frozen SPEC + acceptance source)
 project-tickets
-      ↓  (tracer-bullet ticket graph with dependencies)
+      ↓  (ordered task list with dependencies)
 implement
       ↓  (bounded diff + focused tests + verification)
 project-review
@@ -30,10 +30,10 @@ This is a *recommended* flow, not a required pipeline. Enter mid-stream when the
 
 | Step | Entry condition | Skill & invocation | Output / Handoff | Stop |
 | --- | --- | --- | --- | --- |
-| 1 | New project needs a stable, confirmed starting point | [`project-init`](../../skills/project/project-init/SKILL.md) — user-invoked | `docs/agents/light-project.md` + tracker contract + instruction pointer | stop; user chooses next |
-| 2 | Real project has unresolved decisions; repo facts should not be re-asked | [`project-clarify`](../../skills/project/project-clarify/SKILL.md) — user-invoked → `socratic` engine | bounded handoff artifact for `project-spec` | stop at clarification summary; do not create SPEC |
+| 1 | New project needs a stable, confirmed starting point | [`project-init`](../../skills/project/project-init/SKILL.md) — user-invoked | `docs/agents/light-project.md` + task tracker settings + instruction pointer | stop; user chooses next |
+| 2 | Real project has unresolved decisions; repo facts should not be re-asked | [`project-clarify`](../../skills/project/project-clarify/SKILL.md) — user-invoked → `socratic` engine | clarified requirements and open decision summary for `project-spec` | stop at clarification summary; do not create SPEC |
 | 3 | Decisions are clarified and a formal SPEC is needed | [`project-spec`](../../skills/project/project-spec/SKILL.md) — user-invoked | frozen SPEC with acceptance source | stop for approval; if blocked, return to `project-clarify` |
-| 4 | SPEC is approved | [`project-tickets`](../../skills/project/project-tickets/SKILL.md) — user-invoked | dependency-ordered ticket graph (vertical/tracer-bullet slices) | stop; do not auto-start `implement` |
+| 4 | SPEC is approved | [`project-tickets`](../../skills/project/project-tickets/SKILL.md) — user-invoked | ordered tasks with clear dependencies ready for implementation | stop; do not auto-start `implement` |
 | 5 | One ticket is unblocked and unambiguous | [`implement`](../../skills/project/implement/SKILL.md) — user-invoked, may offer `agent-config` / call `tdd` internally | bounded diff + tests + local verification | stop at ticket scope; hand to review when appropriate |
 | 6 | Artifact needs final acceptance | [`project-review`](../../skills/review/project-review/SKILL.md) — model-invoked (or manual) via `review-loop` | frozen Charter + reviewer findings + final verdict `PASS`/`FAIL`/`BLOCKED` | stop at verdict |
 | 7 | Project passed acceptance | [`release-workflow`](../../skills/project/release-workflow/SKILL.md) — model-invoked | synchronized docs/catalog/tests, tag, release | stop |
