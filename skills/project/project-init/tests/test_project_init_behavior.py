@@ -612,7 +612,7 @@ class ProjectInitBehaviorTest(unittest.TestCase):
             self.assertTrue(report["jev"]["enabled"])
             self.assertTrue(report["jev"]["keyDetected"])
             self.assertEqual(report["jev"]["keySource"], "os.environ")
-            self.assertEqual(report["jev"]["skillLocation"], "global")
+            self.assertIn(report["jev"]["skillLocation"], ("canonical-global", "global"))
 
     def test_jev_opt_in_without_global_skill_installs_local_skill(self) -> None:
         with tempfile.TemporaryDirectory(prefix="project-init-jev-local-") as tmp:
@@ -790,27 +790,192 @@ class ProjectInitBehaviorTest(unittest.TestCase):
                 self.assertNotIn("npx", cmd)
 
     def test_installer_invokes_correct_agent_flags(self) -> None:
-        """P0 (Section 3 & 32): Installer commands must include exact --agent and --yes without real execution."""
+        """P0: Installer commands must include exact --agent <cli_agent> and --yes without real execution."""
         with tempfile.TemporaryDirectory(prefix="project-init-cmd-") as tmp:
             root = Path(tmp)
 
-            # Test Pi target
+            # Test Pi target -> --agent pi
             with mock.patch("subprocess.run") as mock_sub:
                 mock_sub.return_value = mock.MagicMock(returncode=0)
                 BOOTSTRAP.install_official_typesafe_skill(root, agent_target="pi")
                 mock_sub.assert_called_once()
                 called_cmd = mock_sub.call_args[0][0]
                 self.assertIn("--agent", called_cmd)
-                self.assertIn("pi", called_cmd)
+                self.assertEqual(called_cmd[called_cmd.index("--agent") + 1], "pi")
                 self.assertIn("--yes", called_cmd)
 
-            # Test Claude target
+            # Test Claude target -> --agent claude-code
             with mock.patch("subprocess.run") as mock_sub:
                 mock_sub.return_value = mock.MagicMock(returncode=0)
                 BOOTSTRAP.install_official_typesafe_skill(root, agent_target="claude")
                 called_cmd = mock_sub.call_args[0][0]
                 self.assertIn("--agent", called_cmd)
-                self.assertIn("claude", called_cmd)
+                self.assertEqual(called_cmd[called_cmd.index("--agent") + 1], "claude-code")
+
+    def test_pi_cli_mapping(self) -> None:
+        """Mapping contract: Pi maps to official --agent pi."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)) as mock_sub:
+                BOOTSTRAP.install_official_typesafe_skill(root, agent_target="pi")
+                cmd = mock_sub.call_args[0][0]
+                self.assertEqual(cmd[cmd.index("--agent") + 1], "pi")
+
+    def test_codex_cli_mapping(self) -> None:
+        """Mapping contract: Codex maps to official --agent codex with canonical project path .agents/skills."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)) as mock_sub:
+                BOOTSTRAP.install_official_typesafe_skill(root, agent_target="codex")
+                cmd = mock_sub.call_args[0][0]
+                self.assertEqual(cmd[cmd.index("--agent") + 1], "codex")
+            self.assertEqual(
+                BOOTSTRAP.AGENT_TARGETS["codex"]["canonical_project_paths"],
+                [Path(".agents/skills")],
+            )
+
+    def test_cursor_cli_mapping(self) -> None:
+        """Mapping contract: Cursor maps to official --agent cursor with canonical project path .agents/skills."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)) as mock_sub:
+                BOOTSTRAP.install_official_typesafe_skill(root, agent_target="cursor")
+                cmd = mock_sub.call_args[0][0]
+                self.assertEqual(cmd[cmd.index("--agent") + 1], "cursor")
+            self.assertEqual(
+                BOOTSTRAP.AGENT_TARGETS["cursor"]["canonical_project_paths"],
+                [Path(".agents/skills")],
+            )
+
+    def test_claude_code_cli_mapping(self) -> None:
+        """Mapping contract: Claude maps to official --agent claude-code."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)) as mock_sub:
+                BOOTSTRAP.install_official_typesafe_skill(root, agent_target="claude")
+                cmd = mock_sub.call_args[0][0]
+                self.assertEqual(cmd[cmd.index("--agent") + 1], "claude-code")
+
+    def test_antigravity_cli_mapping(self) -> None:
+        """Mapping contract: Antigravity (agy) maps to official --agent antigravity."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)) as mock_sub:
+                BOOTSTRAP.install_official_typesafe_skill(root, agent_target="agy")
+                cmd = mock_sub.call_args[0][0]
+                self.assertEqual(cmd[cmd.index("--agent") + 1], "antigravity")
+
+    def test_grok_build_cli_mapping(self) -> None:
+        """Mapping contract: Grok Build (grok-build) maps to official --agent grok."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)) as mock_sub:
+                BOOTSTRAP.install_official_typesafe_skill(root, agent_target="grok-build")
+                cmd = mock_sub.call_args[0][0]
+                self.assertEqual(cmd[cmd.index("--agent") + 1], "grok")
+
+    def test_hermes_cli_mapping(self) -> None:
+        """Mapping contract: Hermes (hermes) maps to official --agent hermes-agent."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)) as mock_sub:
+                BOOTSTRAP.install_official_typesafe_skill(root, agent_target="hermes")
+                cmd = mock_sub.call_args[0][0]
+                self.assertEqual(cmd[cmd.index("--agent") + 1], "hermes-agent")
+
+    def test_dsh_fails_closed(self) -> None:
+        """P0 (Sections 9, 32): DSH is unsupported by official skills CLI and must fail closed with 0 installer calls."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            with mock.patch("subprocess.run") as mock_sub:
+                ok, path, msg = BOOTSTRAP.install_official_typesafe_skill(root, agent_target="dsh")
+                self.assertFalse(ok)
+                self.assertIsNone(path)
+                self.assertIn("TARGET_UNRESOLVED", msg)
+                # Must not call installer
+                mock_sub.assert_not_called()
+
+            # Resolver must fail closed
+            self.assertIsNone(BOOTSTRAP.resolve_active_agent_target(root, explicit_target="dsh"))
+            self.assertIsNone(BOOTSTRAP.normalize_agent_target("dsh"))
+
+    def test_internal_host_key_differs_from_cli_agent(self) -> None:
+        """P0 (Sections 3, 5, 40): Enforce abstraction contract internal_host != cli_agent."""
+        expected_mappings = {
+            "claude": "claude-code",
+            "cursor": "cursor",
+            "pi": "pi",
+            "codex": "codex",
+            "agy": "antigravity",
+            "grok-build": "grok",
+            "hermes": "hermes-agent",
+        }
+        for internal_host, expected_cli_agent in expected_mappings.items():
+            self.assertIn(internal_host, BOOTSTRAP.AGENT_TARGETS)
+            self.assertEqual(BOOTSTRAP.AGENT_TARGETS[internal_host]["cli_agent"], expected_cli_agent)
+
+    def test_cursor_canonical_and_legacy_path_scope_verification(self) -> None:
+        """P0 (Sections 7, 12): Cursor canonical project path is .agents/skills, NOT .cursor/skills."""
+        with tempfile.TemporaryDirectory(prefix="cursor-scope-") as tmp:
+            root = Path(tmp)
+
+            # 1. Non-canonical/legacy path only: .cursor/skills
+            legacy_cursor_skill = root / ".cursor" / "skills" / "typesafe-ai"
+            legacy_cursor_skill.mkdir(parents=True)
+            (legacy_cursor_skill / "SKILL.md").write_text("---\nname: typesafe-ai\n---\n# TypeSafe\n", encoding="utf-8")
+
+            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)):
+                ok, path, msg = BOOTSTRAP.install_official_typesafe_skill(root, agent_target="cursor")
+                # Canonical install verification must NOT falsely pass on legacy path
+                self.assertFalse(ok)
+                self.assertIsNone(path)
+                self.assertIn("expected agent scope", msg)
+
+            # 2. Canonical path: .agents/skills
+            canonical_cursor_skill = root / ".agents" / "skills" / "typesafe-ai"
+            canonical_cursor_skill.mkdir(parents=True)
+            (canonical_cursor_skill / "SKILL.md").write_text("---\nname: typesafe-ai\n---\n# TypeSafe\n", encoding="utf-8")
+
+            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)):
+                ok, path, msg = BOOTSTRAP.install_official_typesafe_skill(root, agent_target="cursor")
+                self.assertTrue(ok)
+                self.assertEqual(path, canonical_cursor_skill)
+
+    def test_global_reuse_distinguishes_canonical_from_legacy(self) -> None:
+        """P0 (Section 13): Distinguish canonical global install from legacy discoverable global."""
+        with tempfile.TemporaryDirectory(prefix="global-scope-") as tmp:
+            fake_home = Path(tmp) / "user_home"
+            fake_home.mkdir()
+
+            # Create skill in legacy global location (.agents/skills)
+            legacy_skill = fake_home / ".agents" / "skills" / "typesafe-ai"
+            legacy_skill.mkdir(parents=True)
+            (legacy_skill / "SKILL.md").write_text("---\nname: typesafe-ai\n---\n# TypeSafe\n", encoding="utf-8")
+
+            # Canonical only should NOT find it for Claude
+            path_can, scope_can = BOOTSTRAP.find_global_skill(
+                "typesafe-ai", agent_target="claude", home=fake_home, include_scope=True, canonical_only=True
+            )
+            self.assertIsNone(path_can)
+            self.assertEqual(scope_can, "none")
+
+            # Non-canonical allowed should find it as legacy-global
+            path_leg, scope_leg = BOOTSTRAP.find_global_skill(
+                "typesafe-ai", agent_target="claude", home=fake_home, include_scope=True, canonical_only=False
+            )
+            self.assertEqual(path_leg, legacy_skill)
+            self.assertEqual(scope_leg, "legacy-global")
+
+            # Now create in canonical Claude global (~/.claude/skills)
+            can_skill = fake_home / ".claude" / "skills" / "typesafe-ai"
+            can_skill.mkdir(parents=True)
+            (can_skill / "SKILL.md").write_text("---\nname: typesafe-ai\n---\n# TypeSafe\n", encoding="utf-8")
+
+            path_found, scope_found = BOOTSTRAP.find_global_skill(
+                "typesafe-ai", agent_target="claude", home=fake_home, include_scope=True
+            )
+            self.assertEqual(path_found, can_skill)
+            self.assertEqual(scope_found, "canonical-global")
 
     def test_target_scope_verification(self) -> None:
         """P0 (Section 5): Installation must verify expected agent scope only."""

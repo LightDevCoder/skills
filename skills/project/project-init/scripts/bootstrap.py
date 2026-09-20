@@ -37,40 +37,135 @@ MARKER_TOKENS = (START, END, POINTER_START, POINTER_END)
 JEV_SKILL_NAME = "typesafe-ai"
 JEV_CONSTRAINT = "TypeSafe Jev System One semantic acceleration"
 
-SUPPORTED_AGENT_TARGETS: dict[str, dict[str, Any]] = {
+# ==============================================================================
+# Canonical Agent Mappings for official Skills CLI (npx skills add ...)
+# Source: official vercel-labs/skills agent registry / README.md / cli.mjs
+# Verified revision: vercel-labs/skills v1.7.0 (2026-09-20)
+#
+# Core distinction:
+#   internal_host_id (e.g., "claude", "cursor", "agy", "grok-build", "hermes")
+#   ≠
+#   skills_cli_agent_id (e.g., "claude-code", "cursor", "antigravity", "grok", "hermes-agent")
+#
+# DeepSeek Harness (DSH):
+#   Unsupported by official skills CLI. Fails closed (TARGET_UNRESOLVED).
+#   No installer calls, no guessed CLI IDs.
+# ==============================================================================
+
+AGENT_TARGETS: dict[str, dict[str, Any]] = {
     "pi": {
         "cli_agent": "pi",
-        "local_paths": [Path(".pi/skills"), Path(".pi/agent/skills")],
-        "global_subpaths": [Path(".pi/agent/skills"), Path(".pi/skills")],
+        "canonical_project_paths": [Path(".pi/skills")],
+        "canonical_global_subpaths": [Path(".pi/agent/skills")],
+        "legacy_global_subpaths": [Path(".pi/skills"), Path(".agents/skills")],
     },
     "claude": {
-        "cli_agent": "claude",
-        "local_paths": [Path(".claude/skills"), Path(".agents/skills")],
-        "global_subpaths": [Path(".claude/skills"), Path(".agents/skills")],
+        "cli_agent": "claude-code",
+        "canonical_project_paths": [Path(".claude/skills")],
+        "canonical_global_subpaths": [Path(".claude/skills")],
+        "legacy_global_subpaths": [Path(".agents/skills")],
     },
     "cursor": {
         "cli_agent": "cursor",
-        "local_paths": [Path(".cursor/skills")],
-        "global_subpaths": [Path(".cursor/skills")],
+        "canonical_project_paths": [Path(".agents/skills")],
+        "canonical_global_subpaths": [Path(".cursor/skills")],
+        "legacy_global_subpaths": [Path(".agents/skills")],
     },
     "codex": {
         "cli_agent": "codex",
-        "local_paths": [Path(".codex/skills"), Path(".agents/skills")],
-        "global_subpaths": [Path(".codex/skills"), Path(".agents/skills")],
+        "canonical_project_paths": [Path(".agents/skills")],
+        "canonical_global_subpaths": [Path(".codex/skills")],
+        "legacy_global_subpaths": [Path(".agents/skills")],
+    },
+    "agy": {
+        "cli_agent": "antigravity",
+        "canonical_project_paths": [Path(".agents/skills")],
+        "canonical_global_subpaths": [Path(".gemini/antigravity/skills")],
+        "legacy_global_subpaths": [Path(".agents/skills")],
+    },
+    "grok-build": {
+        "cli_agent": "grok",
+        "canonical_project_paths": [Path(".grok/skills")],
+        "canonical_global_subpaths": [Path(".grok/skills")],
+        "legacy_global_subpaths": [Path(".agents/skills")],
+    },
+    "hermes": {
+        "cli_agent": "hermes-agent",
+        "canonical_project_paths": [Path(".hermes/skills")],
+        "canonical_global_subpaths": [Path(".hermes/skills")],
+        "legacy_global_subpaths": [Path(".agents/skills")],
     },
 }
 
+AGENT_TARGET_ALIASES: dict[str, str] = {
+    "claude-code": "claude",
+    "antigravity": "agy",
+    "grok": "grok-build",
+    "hermes-agent": "hermes",
+}
 
-def get_agent_global_paths(agent_target: Optional[str] = None, home: Optional[Path] = None) -> list[Path]:
-    """Dynamically resolve global skill search roots relative to current or specified home."""
+# Compatibility alias for existing callers
+SUPPORTED_AGENT_TARGETS = AGENT_TARGETS
+
+
+def normalize_agent_target(target: Optional[str]) -> Optional[str]:
+    """Normalize agent target to internal canonical key or None if unsupported."""
+    if not target:
+        return None
+    cleaned = str(target).strip().lower()
+    if cleaned in AGENT_TARGET_ALIASES:
+        cleaned = AGENT_TARGET_ALIASES[cleaned]
+    if cleaned in AGENT_TARGETS:
+        return cleaned
+    return None
+
+
+def get_agent_canonical_global_paths(agent_target: Optional[str] = None, home: Optional[Path] = None) -> list[Path]:
+    """Dynamically resolve official canonical global skill search roots for active Agent."""
     h = home or Path.home()
-    if agent_target and agent_target in SUPPORTED_AGENT_TARGETS:
-        return [h / p for p in SUPPORTED_AGENT_TARGETS[agent_target]["global_subpaths"]]
+    norm = normalize_agent_target(agent_target)
+    if norm and norm in AGENT_TARGETS:
+        # Check official environment variable overrides
+        if norm == "claude" and os.environ.get("CLAUDE_CONFIG_DIR"):
+            return [Path(os.environ["CLAUDE_CONFIG_DIR"].strip()) / "skills"]
+        elif norm == "codex" and os.environ.get("CODEX_HOME"):
+            return [Path(os.environ["CODEX_HOME"].strip()) / "skills"]
+        elif norm == "grok-build" and os.environ.get("GROK_HOME"):
+            return [Path(os.environ["GROK_HOME"].strip()) / "skills"]
+        elif norm == "hermes" and os.environ.get("HERMES_HOME"):
+            return [Path(os.environ["HERMES_HOME"].strip()) / "skills"]
+        return [h / p for p in AGENT_TARGETS[norm]["canonical_global_subpaths"]]
     return [
         h / ".pi" / "agent" / "skills",
-        h / ".pi" / "skills",
-        h / ".agents" / "skills",
+        h / ".claude" / "skills",
+        h / ".cursor" / "skills",
+        h / ".codex" / "skills",
     ]
+
+
+def get_agent_legacy_global_paths(agent_target: Optional[str] = None, home: Optional[Path] = None) -> list[Path]:
+    """Resolve legacy-discoverable global skill paths for backward-compatible reuse."""
+    h = home or Path.home()
+    norm = normalize_agent_target(agent_target)
+    if norm and norm in AGENT_TARGETS:
+        return [h / p for p in AGENT_TARGETS[norm]["legacy_global_subpaths"]]
+    return [
+        h / ".agents" / "skills",
+        h / ".pi" / "skills",
+    ]
+
+
+def get_agent_global_paths(agent_target: Optional[str] = None, home: Optional[Path] = None, include_legacy: bool = True) -> list[Path]:
+    """Dynamically resolve global skill search roots relative to current or specified home."""
+    canonical = get_agent_canonical_global_paths(agent_target, home=home)
+    if include_legacy:
+        legacy = get_agent_legacy_global_paths(agent_target, home=home)
+        combined: list[Path] = []
+        for p in canonical + legacy:
+            if p not in combined:
+                combined.append(p)
+        return combined
+    return canonical
 
 
 def resolve_active_agent_target(
@@ -81,18 +176,21 @@ def resolve_active_agent_target(
     """Resolve canonical active-Agent target for skills installer.
 
     Order:
-      1. explicit_target argument
-      2. config.get("agentTarget") or config.get("hostAgent")
-      3. os.environ["SKILLS_AGENT_TARGET"]
+      1. explicit_target argument (normalized; unsupported like 'dsh' fails closed)
+      2. config.get("agentTarget") or config.get("hostAgent") (normalized)
+      3. os.environ["SKILLS_AGENT_TARGET"] (normalized)
       4. Evidenced host environment:
          - PI_* env vars -> "pi"
          - CLAUDE_CODE_ENTRY or CLAUDE_PROJECT_DIR -> "claude"
          - CURSOR_AGENT or CURSOR_PROJECT_DIR -> "cursor"
          - CODEX_AGENT or CODEX_DIR -> "codex"
+         - ANTIGRAVITY_AGENT or GEMINI_AGENT -> "agy"
+         - GROK_AGENT or GROK_BUILD -> "grok-build"
+         - HERMES_AGENT -> "hermes"
       5. Evidenced instruction file:
          - CLAUDE.md -> "claude"
          - AGENTS.md with evidenced Pi environment -> "pi"
-      6. Fails closed (returns None) if agent is unknown or unverified.
+      6. Fails closed (returns None) if agent is unknown or unverified (e.g. DSH).
     """
     candidates = [
         explicit_target,
@@ -101,8 +199,12 @@ def resolve_active_agent_target(
         os.environ.get("SKILLS_AGENT_TARGET"),
     ]
     for cand in candidates:
-        if cand and str(cand).strip().lower() in SUPPORTED_AGENT_TARGETS:
-            return str(cand).strip().lower()
+        if cand and str(cand).strip().lower() in ("dsh", "deepseek", "deepseek-harness"):
+            # Explicitly unsupported agent fails closed immediately
+            return None
+        norm = normalize_agent_target(cand)
+        if norm:
+            return norm
 
     if any(k.startswith("PI_") for k in os.environ):
         return "pi"
@@ -112,6 +214,12 @@ def resolve_active_agent_target(
         return "cursor"
     if os.environ.get("CODEX_AGENT") or os.environ.get("CODEX_DIR"):
         return "codex"
+    if os.environ.get("ANTIGRAVITY_AGENT") or os.environ.get("GEMINI_AGENT"):
+        return "agy"
+    if os.environ.get("GROK_AGENT") or os.environ.get("GROK_BUILD"):
+        return "grok-build"
+    if os.environ.get("HERMES_AGENT"):
+        return "hermes"
 
     if config:
         inst_file = str(config.get("instructionFile", "")).lower()
@@ -204,26 +312,53 @@ def find_global_skill(
     agent_target: Optional[str] = None,
     search_roots: Optional[list[Path]] = None,
     home: Optional[Path] = None,
-) -> Optional[Path]:
-    """Locate official typesafe-ai skill in global agent skill directories matching target."""
+    include_scope: bool = False,
+    canonical_only: bool = False,
+) -> Any:
+    """Locate official typesafe-ai skill in global agent skill directories matching target.
+
+    If include_scope is True: returns (path, scope_type) where scope_type is
+    "canonical-global", "legacy-global", or "none".
+    If include_scope is False: returns path or None.
+    """
     if search_roots is not None:
-        roots = search_roots
-    else:
-        roots = get_agent_global_paths(agent_target, home=home)
-    for root in roots:
+        for root in search_roots:
+            skill_dir = root / skill_name
+            if is_valid_typesafe_skill(skill_dir):
+                return (skill_dir, "canonical-global") if include_scope else skill_dir
+        return (None, "none") if include_scope else None
+
+    # 1. Check canonical global paths first
+    canonical_roots = get_agent_canonical_global_paths(agent_target, home=home)
+    for root in canonical_roots:
         skill_dir = root / skill_name
         if is_valid_typesafe_skill(skill_dir):
-            return skill_dir
-    return None
+            return (skill_dir, "canonical-global") if include_scope else skill_dir
+
+    # 2. Check legacy discoverable paths
+    if not canonical_only:
+        legacy_roots = get_agent_legacy_global_paths(agent_target, home=home)
+        for root in legacy_roots:
+            skill_dir = root / skill_name
+            if is_valid_typesafe_skill(skill_dir):
+                return (skill_dir, "legacy-global") if include_scope else skill_dir
+
+    return (None, "none") if include_scope else None
 
 
 def check_global_skill(
     skill_name: str = JEV_SKILL_NAME,
     agent_target: Optional[str] = None,
     search_roots: Optional[list[Path]] = None,
+    canonical_only: bool = False,
 ) -> bool:
     """Check if valid official skill is present in global skills directories for agent target."""
-    return find_global_skill(skill_name, agent_target=agent_target, search_roots=search_roots) is not None
+    return find_global_skill(
+        skill_name=skill_name,
+        agent_target=agent_target,
+        search_roots=search_roots,
+        canonical_only=canonical_only,
+    ) is not None
 
 
 def ensure_gitignored(project_root: Path, entry: str = ".env") -> bool:
@@ -319,15 +454,21 @@ def install_official_typesafe_skill(
 ) -> tuple[bool, Optional[Path], str]:
     """Install official typesafe-ai skill via official package installer targeting active Agent.
 
-    Fails closed if agent_target is unknown. Never calls installer without --agent.
+    Uses canonical cli_agent for --agent flag, NOT internal host key.
+    Fails closed if agent_target is unknown or unsupported (e.g. DSH).
+    Never calls installer without --agent.
     """
-    if not agent_target or agent_target not in SUPPORTED_AGENT_TARGETS:
+    norm = normalize_agent_target(agent_target)
+    if not norm or norm not in AGENT_TARGETS:
         return False, None, "JEV_SKILL_TARGET_UNRESOLVED: unable to determine active Agent target for skills installer"
+
+    target_info = AGENT_TARGETS[norm]
+    cli_agent_id = target_info["cli_agent"]
 
     cmd = installer_cmd or [
         "npx", "skills", "add", "typesafe-ai/skills",
         "--skill", JEV_SKILL_NAME,
-        "--agent", agent_target,
+        "--agent", cli_agent_id,
         "--yes",
     ]
     try:
@@ -344,9 +485,8 @@ def install_official_typesafe_skill(
     except Exception as exc:
         return False, None, f"JEV_SKILL_SETUP_INCOMPLETE: installer execution failed ({type(exc).__name__})"
 
-    # Verify strictly in expected scope of the target agent
-    target_info = SUPPORTED_AGENT_TARGETS[agent_target]
-    for rel_path in target_info["local_paths"]:
+    # Verify strictly in CANONICAL project scope of the target agent
+    for rel_path in target_info["canonical_project_paths"]:
         candidate = project_root / rel_path / JEV_SKILL_NAME
         if is_valid_typesafe_skill(candidate):
             return True, candidate, "installed-local"
@@ -889,11 +1029,15 @@ def bootstrap(
     if not active_agent:
         jev_skill_status = "TARGET_UNRESOLVED"
     else:
-        is_global = check_global_skill(JEV_SKILL_NAME, agent_target=active_agent, search_roots=capability_roots)
-        global_path = find_global_skill(JEV_SKILL_NAME, agent_target=active_agent, search_roots=capability_roots) if is_global else None
-        if is_global and global_path is not None:
+        global_path, global_scope = find_global_skill(
+            JEV_SKILL_NAME,
+            agent_target=active_agent,
+            search_roots=capability_roots,
+            include_scope=True,
+        )
+        if global_path is not None:
             skill_verified = True
-            jev_skill_status = "global"
+            jev_skill_status = global_scope
         else:
             installed, local_path, install_msg = install_official_typesafe_skill(
                 project_root=root,
@@ -1014,7 +1158,7 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--config-json", required=True)
     parser.add_argument("--capability-roots-json", default="[]")
     parser.add_argument("--unavailable-capabilities-json", default="[]")
-    parser.add_argument("--agent-target", default=None, help="Target Agent identifier for skills installation (pi, claude, cursor, codex)")
+    parser.add_argument("--agent-target", default=None, help="Target Agent identifier for skills installation (pi, claude, cursor, codex, agy, grok-build, hermes)")
     parser.add_argument("--auto-install-sdk", action="store_true", default=False, help="Automatically install typesafe-sdk into active python runtime if missing")
     parser.add_argument("--jev", dest="jev", action="store_true", default=None, help="Enable TypeSafe Jev semantic acceleration")
     parser.add_argument("--no-jev", dest="jev", action="store_false", help="Disable TypeSafe Jev semantic acceleration")

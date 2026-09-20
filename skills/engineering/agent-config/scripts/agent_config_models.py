@@ -40,6 +40,7 @@ class TaskCharacteristics:
     shape: str = "single-pass"  # "single-pass", "decomposed"
     formal_tickets_exist: bool = True
     difficulty: str = "standard"  # "routine", "standard", "high", "critical"
+    difficulty_source: str = "unknown"  # "explicit-user", "verified-ticket", "deterministic-policy", "heuristic", "unknown"
     reasoning_policy: Optional[str] = None  # "highest-supported", "standard", "minimal", etc.
     cost_sensitive: bool = False
     latency_sensitive: bool = False

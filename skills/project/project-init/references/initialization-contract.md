@@ -78,25 +78,30 @@ onboarding gate for TypeSafe Jev ecosystem integration (`typesafe-ai`):
      explicit `--jev`, defaults safely to standard flow with zero Jev side-effects.
 
 3. **Official TypeSafe skill installation & global reuse:**
-   - Targets the explicit active Agent via `--agent-target <target>` (`pi`, `claude`, `cursor`, `codex`).
-   - If the active agent is unresolved or unsupported, halts Jev onboarding safely (`TARGET_UNRESOLVED`).
+   - Targets the explicit active Agent via `--agent-target <target>` (`pi`, `claude`, `cursor`, `codex`, `agy`, `grok-build`, `hermes`).
+   - `bootstrap.py` canonical mapping is authoritative and distinguishes internal host identity from official Skills CLI `--agent` IDs.
+   - If the active agent is unresolved or unsupported (e.g. DeepSeek Harness / DSH), halts Jev onboarding safely (`TARGET_UNRESOLVED`) with 0 installer calls.
    - Checks whether the official `typesafe-ai` skill is already available to the
-     active Agent globally (valid `SKILL.md` with `name: typesafe-ai`).
+     active Agent globally (valid `SKILL.md` with `name: typesafe-ai`). Distinguishes canonical global from legacy discoverable global reuse.
    - If present globally: reuses the official global installation directly without
      duplicating files into the project.
    - If absent globally: installs through the official installer
-     (`npx skills add typesafe-ai/skills --skill typesafe-ai --agent <target> --yes`).
-   - Strictly validates that the installed skill landed inside the expected agent directory.
+     (`npx skills add typesafe-ai/skills --skill typesafe-ai --agent <cli_agent> --yes`).
+   - Strictly validates that the installed skill landed inside the canonical project scope of the target agent.
    - Strictly rejects and never generates fake stubs, stubs with fabricated content,
      or arbitrary local tree copies. If installation fails, reports
      `JEV_SKILL_SETUP_INCOMPLETE`.
 
-   | Light Host Identity | Evidenced Indicators | Skills CLI Agent ID | Supported? | Install Strategy |
-   | --- | --- | --- | --- | --- |
-   | `pi` | `PI_*` env vars, `.pi/` directory | `pi` | YES | `npx skills add ... --agent pi --yes` into `.pi/skills` |
-   | `claude` | `CLAUDE_CODE_ENTRY`, `CLAUDE_PROJECT_DIR`, `CLAUDE.md` | `claude` | YES | `npx skills add ... --agent claude --yes` into `.claude/skills` |
-   | `cursor` | `CURSOR_AGENT`, `CURSOR_PROJECT_DIR`, `.cursor/` | `cursor` | YES | `npx skills add ... --agent cursor --yes` into `.cursor/skills` |
-   | `codex` | `CODEX_AGENT`, `CODEX_DIR`, `.codex/` | `codex` | YES | `npx skills add ... --agent codex --yes` into `.codex/skills` |
+   | Light Host Identity | Evidenced Indicators | Skills CLI Agent ID | Supported? | Canonical Project Path | Canonical Global Path |
+   | --- | --- | --- | --- | --- | --- |
+   | `pi` | `PI_*` env vars, `.pi/` directory | `pi` | YES | `.pi/skills` | `~/.pi/agent/skills` |
+   | `claude` | `CLAUDE_CODE_ENTRY`, `CLAUDE_PROJECT_DIR`, `CLAUDE.md` | `claude-code` | YES | `.claude/skills` | `~/.claude/skills` (or `$CLAUDE_CONFIG_DIR/skills`) |
+   | `cursor` | `CURSOR_AGENT`, `CURSOR_PROJECT_DIR` | `cursor` | YES | `.agents/skills` | `~/.cursor/skills` |
+   | `codex` | `CODEX_AGENT`, `CODEX_DIR` | `codex` | YES | `.agents/skills` | `~/.codex/skills` (or `$CODEX_HOME/skills`) |
+   | `agy` | `ANTIGRAVITY_AGENT`, `GEMINI_AGENT` | `antigravity` | YES | `.agents/skills` | `~/.gemini/antigravity/skills` |
+   | `grok-build` | `GROK_AGENT`, `GROK_BUILD` | `grok` | YES | `.grok/skills` | `~/.grok/skills` (or `$GROK_HOME/skills`) |
+   | `hermes` | `HERMES_AGENT` | `hermes-agent` | YES | `.hermes/skills` | `~/.hermes/skills` (or `$HERMES_HOME/skills`) |
+   | `dsh` | DeepSeek Harness | None | NO | UNSUPPORTED / fail-closed (`TARGET_UNRESOLVED`). Do not call installer. |
    | Unrecognized | No evidenced host target | None | NO | Fail-closed (`TARGET_UNRESOLVED`). Do not call installer. |
 
 4. **Environment & key detection:**

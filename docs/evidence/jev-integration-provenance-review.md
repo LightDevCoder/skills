@@ -18,6 +18,8 @@ This review inspects the release history, tag targets, and release evidence inco
 | **Reviewed Hardening Baseline** | `a990aa4` | `a990aa471ffc700a27d8f4b00a374624a7548eeb` | 2026-09-20 | `feat(jev): harden TypeSafe Jev integration across project-init, ask-light, and agent-config` (Reviewed: CHANGES REQUIRED) |
 | **Initial Reviewed Repair** | `703039e` | `703039e737eb2e16f6c932ea39fa5c0d83e61d11` | 2026-09-20 | `feat(jev): resolve human review findings with active agent targeting, canonical credentials, and query planning` (Reviewed: CHANGES REQUIRED) |
 | **Final Verification Repair** | `c975647` | `c9756478f480dda422510a8368491e22292ce5b5` | 2026-09-20 | Final hermetic verification repair (host independence, boundary guard, tri-state semantic evaluation, query consumer planning) |
+| **Live Calibration Baseline** | `936653c` | `936653cdadf04036d39eefec988db356943dbce0` | 2026-09-20 | `docs(evidence): update live Jev evaluation report and calibration evidence` (Reviewed: CHANGES REQUIRED due to P0 mapping and P1 label leakage) |
+| **Release-Gate Repair Pass** | `e66b856` | `e66b8563928fc349583a3387b6eeba1fd40e1bed` | 2026-09-20 | Final release-gate repair: canonical Skills CLI agent ID mappings and scopes, elimination of declared_difficulty label leakage, runtime input / ground truth separation, fixture isolation enforcement |
 | **Current Tag `v0.2.1` Target** | `v0.2.1` | `6f9d173e1038e3d25c44fd8a42af52a2f14406e2` | 2026-09-20 | Annotated tag object `318d32a602e10f452e39974010aa03abb50aff33` pointing to commit `6f9d173` |
 
 ---

@@ -36,9 +36,9 @@ tickets, or run later workflow stages.
    Supports optional `--jev` and `--no-jev` flags for TypeSafe Jev onboarding (key detection, gitignore protection, and global skill reuse).
    When Jev onboarding is selected:
    - Inspect the active Agent host environment.
-   - Resolve the canonical Skills CLI agent target (`pi`, `claude`, `cursor`, `codex`).
+   - Resolve the supported canonical installer target (`bootstrap.py` canonical mapping is authoritative: `pi` → `pi`, `claude` → `claude-code`, `cursor` → `cursor`, `codex` → `codex`, `agy` → `antigravity`, `grok-build` → `grok`, `hermes` → `hermes-agent`).
    - Pass it explicitly via `--agent-target <target>` to `bootstrap.py`.
-   - Never rely on the installer to infer all Agents; if the host target is unresolved, stop Jev onboarding with `TARGET_UNRESOLVED` (the core project bootstrap still succeeds).
+   - Never guess unsupported CLI targets; if the host target is unresolved or unsupported (e.g. DeepSeek Harness / DSH), fail closed with `TARGET_UNRESOLVED` (the core project bootstrap still succeeds with 0 installer calls).
    - SDK Policy (`--auto-install-sdk`): Use `--auto-install-sdk` only when the user has explicitly authorized automated dependency installation in non-interactive workflows. In interactive sessions, prompt the user for permission before running `pip install` in the active Python runtime.
 
    Preserve manual additions and previously valid decisions; revise only confirmed fields. The current local-markdown adapter uses `.scratch/<effort>/issues`; other tracker locators fail closed until an adapter exists.
