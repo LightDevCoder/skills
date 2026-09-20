@@ -2,7 +2,7 @@
 
 [中文安装说明](INSTALLATION.zh-CN.md)
 
-The public first-party collection's current stable release is [v0.2.3](https://github.com/LightDevCoder/skills/releases/tag/v0.2.3), published at tag `v0.2.3` (release manifest in [evidence/releases/v0.2.3/RELEASE_MANIFEST.md](evidence/releases/v0.2.3/RELEASE_MANIFEST.md), post-publication receipt in [evidence/releases/v0.2.3/RELEASE_RECEIPT.md](evidence/releases/v0.2.3/RELEASE_RECEIPT.md)). It provides **36 admitted first-party Skills** across 7 purpose-based categories. Package contracts remain inside `skills/<category>/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
+The public first-party collection's current stable release is [v0.2.4](https://github.com/LightDevCoder/skills/releases/tag/v0.2.4), published at tag `v0.2.4` (release manifest in [evidence/releases/v0.2.4/RELEASE_MANIFEST.md](evidence/releases/v0.2.4/RELEASE_MANIFEST.md), post-publication receipt in [evidence/releases/v0.2.4/RELEASE_RECEIPT.md](evidence/releases/v0.2.4/RELEASE_RECEIPT.md)). It provides **36 admitted first-party Skills** across 7 purpose-based categories. Package contracts remain inside `skills/<category>/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
 
 The standard install command is the generic `latest` form: it follows the repository's default revision, so `npx skills add LightDevCoder/skills` is the recommended interactive entry point to select the desired Skills and Agent hosts. Pinned release commands select published tags for reproducible installs. Historical verification commands (which tested full-collection installations across all supported agents) are documented below alongside historical evidence.
 
@@ -40,13 +40,15 @@ npx skills add LightDevCoder/skills --skill project-retro
 To install from a specific published release tag (recommended for reproducible setups):
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.3 -y
-npx skills add LightDevCoder/skills#v0.2.3 --skill project-retro -y
+npx skills add LightDevCoder/skills#v0.2.4 -y
+npx skills add LightDevCoder/skills#v0.2.4 --skill project-retro -y
 ```
 
-Previous releases (such as `#v0.2.2`, `#v0.2.1`, and `#v0.2.0`) remain available for reproducible historical installs:
+Previous releases (such as `#v0.2.3`, `#v0.2.2`, `#v0.2.1`, and `#v0.2.0`) remain available for reproducible historical installs:
 
 ```bash
+npx skills add LightDevCoder/skills#v0.2.3
+npx skills add LightDevCoder/skills#v0.2.3 --skill project-retro
 npx skills add LightDevCoder/skills#v0.2.2
 npx skills add LightDevCoder/skills#v0.2.2 --skill project-retro
 npx skills add LightDevCoder/skills#v0.2.1

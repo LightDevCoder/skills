@@ -6,7 +6,7 @@
 
 `LightDevCoder/skills` 包含 36 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<category>/<name>/`，由包内的 `SKILL.md` 统领具体行为。
 
-> **发布版本：** [v0.2.3](https://github.com/LightDevCoder/skills/releases/tag/v0.2.3) 发布自 `v0.2.3` tag——发布线承载全部 36 个第一方 Skill，为当前最新稳定版本。发布前规格见[发布清单](docs/evidence/releases/v0.2.3/RELEASE_MANIFEST.zh-CN.md)，发布后验证事实见[发布收据](docs/evidence/releases/v0.2.3/RELEASE_RECEIPT.zh-CN.md)。
+> **发布版本：** [v0.2.4](https://github.com/LightDevCoder/skills/releases/tag/v0.2.4) 发布自 `v0.2.4` tag——发布线承载全部 36 个第一方 Skill，为当前最新稳定版本。发布前规格见[发布清单](docs/evidence/releases/v0.2.4/RELEASE_MANIFEST.zh-CN.md)，发布后验证事实见[发布收据](docs/evidence/releases/v0.2.4/RELEASE_RECEIPT.zh-CN.md)。
 
 ## 按分类浏览
 
@@ -55,13 +55,13 @@ npx skills add LightDevCoder/skills --skill research
 
 > **说明：** 不带 fragment 的仓库源（`LightDevCoder/skills`）将跟随默认分支 `main`，获取最新的已准入特性与集成。
 
-### 稳定版本快照（v0.2.3）
+### 稳定版本快照（v0.2.4）
 
-若需安装可复现的历史稳定发布快照，请锁定 `#v0.2.3` tag：
+若需安装可复现的历史稳定发布快照，请锁定 `#v0.2.4` tag：
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.3
-npx skills add LightDevCoder/skills#v0.2.3 --skill project-retro
+npx skills add LightDevCoder/skills#v0.2.4
+npx skills add LightDevCoder/skills#v0.2.4 --skill project-retro
 ```
 
 历史版本（如 `#v0.2.2`、`#v0.2.1` 与 `#v0.2.0`）依然保留供复现：

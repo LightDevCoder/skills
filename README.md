@@ -6,7 +6,7 @@
 
 `LightDevCoder/skills` provides 36 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<category>/<name>/` and defines its own behavior in `SKILL.md`.
 
-> **Release:** [v0.2.3](https://github.com/LightDevCoder/skills/releases/tag/v0.2.3) is published from the `v0.2.3` tag — the release line carries the full 36 first-party Skills — and is the current stable release. The pre-release specification is recorded in the [release manifest](docs/evidence/releases/v0.2.3/RELEASE_MANIFEST.md), and post-publication verification is attested in the [release receipt](docs/evidence/releases/v0.2.3/RELEASE_RECEIPT.md).
+> **Release:** [v0.2.4](https://github.com/LightDevCoder/skills/releases/tag/v0.2.4) is published from the `v0.2.4` tag — the release line carries the full 36 first-party Skills — and is the current stable release. The pre-release specification is recorded in the [release manifest](docs/evidence/releases/v0.2.4/RELEASE_MANIFEST.md), and post-publication verification is attested in the [release receipt](docs/evidence/releases/v0.2.4/RELEASE_RECEIPT.md).
 
 ## Browse by category
 
@@ -55,13 +55,13 @@ npx skills add LightDevCoder/skills --skill research
 
 > **Note:** An unqualified repository source (`LightDevCoder/skills`) follows the default branch `main`, delivering the latest admitted features and integrations.
 
-### Stable release snapshot (v0.2.3)
+### Stable release snapshot (v0.2.4)
 
-To install the reproducible historical stable release snapshot, pin the `#v0.2.3` tag:
+To install the reproducible historical stable release snapshot, pin the `#v0.2.4` tag:
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.3
-npx skills add LightDevCoder/skills#v0.2.3 --skill project-retro
+npx skills add LightDevCoder/skills#v0.2.4
+npx skills add LightDevCoder/skills#v0.2.4 --skill project-retro
 ```
 
 Previous releases (such as `#v0.2.2`, `#v0.2.1`, and `#v0.2.0`) remain available for reproducible installs:

@@ -122,6 +122,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.2\.1", installation)), "Installation guide is missing the pinned v0.2.1 release command.")
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.2\.2", installation)), "Installation guide is missing the pinned v0.2.2 release command.")
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.2\.3", installation)), "Installation guide is missing the pinned v0.2.3 release command.")
+    c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.2\.4", installation)), "Installation guide is missing the pinned v0.2.4 release command.")
     c.check(bool(re.search(r"#ref|fragment|default revision", installation)), "Installation guide must explain revision semantics rather than overclaim shorthand immutability.")
     c.check("commands target the immutable v0.1.0 release" not in installation, "Installation guide must not claim the old shorthand is permanently immutable.")
     c.check(not re.search(r"not a verified command|<owner>/<repository>", installation), "Installation guide still contains unresolved pre-release command wording.")
@@ -130,7 +131,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         all(token in installation for token in ("source_root", "skill_name", "destination_root")),
         "Manual fallback must use valid shell variables.",
     )
-    c.check(bool(re.search(r"(?is)v0\.2\.3.{0,160}is published from", readme)), "README must present v0.2.3 as the published release.")
+    c.check(bool(re.search(r"(?is)v0\.2\.[34].{0,160}is published from", readme)), "README must present v0.2.4 as the published release.")
     c.check("33" in catalog and "admitted" in catalog, "Catalog must present the 36-package collection (historical 33 at the original v0.2.0 publication).")
     c.check("v0.2.1" in catalog, "Catalog must mention v0.2.1.")
     c.check("v0.2.2" in catalog, "Catalog must mention v0.2.2.")

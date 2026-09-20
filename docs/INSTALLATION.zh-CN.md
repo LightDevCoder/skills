@@ -2,7 +2,7 @@
 
 [English installation guide](INSTALLATION.md)
 
-公开第一方集合当前稳定版本是 [v0.2.3](https://github.com/LightDevCoder/skills/releases/tag/v0.2.3)，发布于 `v0.2.3` tag（发布前规格见[发布清单](evidence/releases/v0.2.3/RELEASE_MANIFEST.zh-CN.md)，发布后验证事实见[发布收据](evidence/releases/v0.2.3/RELEASE_RECEIPT.zh-CN.md)）。它提供 **36 个已准入的第一方 Skill**，涵盖七大按职责划分的分类目录。`skills/<category>/<name>/` 内的包契约仍是行为权威；本页规定安装方法与验证记录。
+公开第一方集合当前稳定版本是 [v0.2.4](https://github.com/LightDevCoder/skills/releases/tag/v0.2.4)，发布于 `v0.2.4` tag（发布前规格见[发布清单](evidence/releases/v0.2.4/RELEASE_MANIFEST.zh-CN.md)，发布后验证事实见[发布收据](evidence/releases/v0.2.4/RELEASE_RECEIPT.zh-CN.md)）。它提供 **36 个已准入的第一方 Skill**，涵盖七大按职责划分的分类目录。`skills/<category>/<name>/` 内的包契约仍是行为权威；本页规定安装方法与验证记录。
 
 标准安装命令是通用 `latest` 形式：它跟随仓库默认 revision，因此 `npx skills add LightDevCoder/skills` 是推荐的交互式安装入口，可按需选择 Skill 与目标 Agent。pinned release 命令选择已发布的 tag，用于可复现安装。历史验证命令（曾用于在隔离环境中跨所有受支持 Agent 测试完整集合）与历史证据一同记录在下方。
 
@@ -40,13 +40,15 @@ npx skills add LightDevCoder/skills --skill project-retro
 通过指定发布的 Release Tag 进行确定性安装（推荐用于可复现环境）：
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.3 -y
-npx skills add LightDevCoder/skills#v0.2.3 --skill project-retro -y
+npx skills add LightDevCoder/skills#v0.2.4 -y
+npx skills add LightDevCoder/skills#v0.2.4 --skill project-retro -y
 ```
 
-历史版本（如 `#v0.2.2`、`#v0.2.1` 与 `#v0.2.0`）依然保留供复现：
+历史版本（如 `#v0.2.3`、`#v0.2.2`、`#v0.2.1` 与 `#v0.2.0`）依然保留供复现：
 
 ```bash
+npx skills add LightDevCoder/skills#v0.2.3
+npx skills add LightDevCoder/skills#v0.2.3 --skill project-retro
 npx skills add LightDevCoder/skills#v0.2.2
 npx skills add LightDevCoder/skills#v0.2.2 --skill project-retro -y
 npx skills add LightDevCoder/skills#v0.2.1
