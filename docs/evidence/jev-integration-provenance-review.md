@@ -16,7 +16,8 @@ This review inspects the release history, tag targets, and release evidence inco
 | **Jev Project-Init Feature** | `9163a34` | `9163a34bddf8d0b149522c6940447d8c766cea19` | 2026-09-20 | `feat(project-init): add optional TypeSafe Jev ecosystem onboarding and .gitignore protection` |
 | **Jev Project-Init Docs** | `6f9d173` | `6f9d173e1038e3d25c44fd8a42af52a2f14406e2` | 2026-09-20 | `docs(project-init): document Jev onboarding in contract references and release evidence` |
 | **Reviewed Hardening Baseline** | `a990aa4` | `a990aa471ffc700a27d8f4b00a374624a7548eeb` | 2026-09-20 | `feat(jev): harden TypeSafe Jev integration across project-init, ask-light, and agent-config` (Reviewed: CHANGES REQUIRED) |
-| **Final Repair Pass** | `HEAD` | Current branch `main` HEAD | 2026-09-20 | Final repair addressing human review findings across all 14 phases |
+| **Initial Reviewed Repair** | `703039e` | `703039e737eb2e16f6c932ea39fa5c0d83e61d11` | 2026-09-20 | `feat(jev): resolve human review findings with active agent targeting, canonical credentials, and query planning` (Reviewed: CHANGES REQUIRED) |
+| **Final Verification Repair** | `c975647` | `c9756478f480dda422510a8368491e22292ce5b5` | 2026-09-20 | Final hermetic verification repair (host independence, boundary guard, tri-state semantic evaluation, query consumer planning) |
 | **Current Tag `v0.2.1` Target** | `v0.2.1` | `6f9d173e1038e3d25c44fd8a42af52a2f14406e2` | 2026-09-20 | Annotated tag object `318d32a602e10f452e39974010aa03abb50aff33` pointing to commit `6f9d173` |
 
 ---
