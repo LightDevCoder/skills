@@ -2,7 +2,7 @@
 
 Connects TypeSafe Jev System One judgments with deterministic fallbacks:
   1. Choice: Constrained strictly to code-computed legal candidates when >1 candidate exists.
-  2. Noul: Execution intent calibration (advisory only; never grants transition authority) & ambiguity detection.
+  2. Noul: Bounded ambiguity detection and reasoning escalation queries where an active consumer exists.
   3. Conditional query planning: Skips Choice for singleton candidate sets; tracks query reasons.
   4. Defense-in-depth: Unauthorized selections rejected; fails closed on hard bounds.
   5. Soft dependency: Graceful fallback when typesafe-sdk is not installed or TYPESAFE_API_KEY is unset.
