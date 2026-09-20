@@ -149,6 +149,88 @@ def check_tag_immutability(
     )
 
 
+def check_release_manifest_consistency(tag: str, repo_root: Path = REPO_ROOT) -> VerificationResult:
+    """Verify mechanical consistency of release manifest for v0.2.3+."""
+    # Manifest architecture introduced in v0.2.3
+    # Check if this tag version is < v0.2.3
+    version_match = re.match(r"v?(\d+)\.(\d+)\.(\d+)", tag)
+    if version_match:
+        major, minor, patch = map(int, version_match.groups())
+        if (major, minor, patch) < (0, 2, 3):
+            return VerificationResult(
+                passed=True,
+                status="SKIPPED_HISTORICAL",
+                message=f"Release {tag} precedes immutable manifest architecture (introduced in v0.2.3).",
+            )
+
+    evidence_dir = repo_root / "docs" / "evidence" / "releases" / tag
+    manifest_en = evidence_dir / "RELEASE_MANIFEST.md"
+    manifest_zh = evidence_dir / "RELEASE_MANIFEST.zh-CN.md"
+
+    if not manifest_en.is_file():
+        return VerificationResult(
+            passed=False,
+            status="MANIFEST_MISSING",
+            message=f"English release manifest missing at {manifest_en.relative_to(repo_root)}",
+        )
+
+    if not manifest_zh.is_file():
+        return VerificationResult(
+            passed=False,
+            status="MANIFEST_MISSING",
+            message=f"Chinese release manifest missing at {manifest_zh.relative_to(repo_root)}",
+        )
+
+    text_en = manifest_en.read_text(encoding="utf-8")
+    text_zh = manifest_zh.read_text(encoding="utf-8")
+    actual_pkg_count = get_admitted_package_count(repo_root)
+
+    # Verify release identifier appears in manifest
+    if tag not in text_en or tag not in text_zh:
+        return VerificationResult(
+            passed=False,
+            status="METADATA_MISMATCH",
+            message=f"Tag '{tag}' not found in manifest files at {evidence_dir.relative_to(repo_root)}",
+        )
+
+    # Verify admitted package count matches
+    pkg_pattern = re.compile(r"(\d+)\s+admitted\s+packages", re.IGNORECASE)
+    match = pkg_pattern.search(text_en)
+    if match:
+        claimed_count = int(match.group(1))
+        if claimed_count != actual_pkg_count:
+            return VerificationResult(
+                passed=False,
+                status="COUNT_MISMATCH",
+                message=(
+                    f"Package count mismatch in {manifest_en.relative_to(repo_root)}: "
+                    f"manifest claims {claimed_count}, but repository has {actual_pkg_count} admitted packages."
+                ),
+            )
+
+    # Verify expected tag / release identity ref
+    if f"refs/tags/{tag}" not in text_en and tag not in text_en:
+        return VerificationResult(
+            passed=False,
+            status="METADATA_MISMATCH",
+            message=f"Expected tag reference for '{tag}' not found in {manifest_en.relative_to(repo_root)}",
+        )
+
+    # Verify policy status
+    if "Policy status" not in text_en and "Policy Status" not in text_en:
+        return VerificationResult(
+            passed=False,
+            status="POLICY_STATUS_MISSING",
+            message=f"Policy status field missing in {manifest_en.relative_to(repo_root)}",
+        )
+
+    return VerificationResult(
+        passed=True,
+        status="PASS",
+        message=f"Release manifest for {tag} verified: valid dual manifests, verified {actual_pkg_count} packages, and policy status confirmed.",
+    )
+
+
 def check_release_receipt_consistency(tag: str, repo_root: Path = REPO_ROOT) -> VerificationResult:
     """Verify mechanical consistency of release receipt and evidence files."""
     evidence_dir = repo_root / "docs" / "evidence" / "releases" / tag
@@ -193,6 +275,31 @@ def check_release_receipt_consistency(tag: str, repo_root: Path = REPO_ROOT) -> 
                     f"Package count mismatch in {receipt_en.relative_to(repo_root)}: "
                     f"receipt claims {claimed_count}, but repository has {actual_pkg_count} admitted packages."
                 ),
+            )
+
+    # If post-publication receipt specifies an exact tag target commit, verify against local tag if present
+    target_match = re.search(r"Tag target commit\s*\|\s*`?([0-9a-f]{40})`?", text_en, re.IGNORECASE)
+    if target_match:
+        receipt_target_sha = target_match.group(1)
+        local_tag_sha = resolve_tag_sha(tag, cwd=repo_root)
+        if local_tag_sha and local_tag_sha != receipt_target_sha:
+            return VerificationResult(
+                passed=False,
+                status="RECEIPT_TARGET_MISMATCH",
+                message=(
+                    f"Receipt target commit {receipt_target_sha} does not match local tag {tag} target commit {local_tag_sha}."
+                ),
+            )
+
+    # Verify release URL format if present
+    url_match = re.search(r"https://github\.com/LightDevCoder/skills/releases/tag/([^\s\)\`\|]+)", text_en)
+    if url_match:
+        url_tag = url_match.group(1)
+        if url_tag != tag:
+            return VerificationResult(
+                passed=False,
+                status="RECEIPT_URL_MISMATCH",
+                message=f"Release URL tag '{url_tag}' does not match release tag '{tag}'.",
             )
 
     return VerificationResult(
@@ -276,7 +383,13 @@ def main() -> int:
     if not res_tag.passed:
         all_passed = False
 
-    # 3. Release receipt consistency check
+    # 3. Release manifest consistency check
+    res_manifest = check_release_manifest_consistency(tag, repo_root=REPO_ROOT)
+    print(f"[{res_manifest.status}] Manifest Consistency: {res_manifest.message}")
+    if not res_manifest.passed:
+        all_passed = False
+
+    # 4. Release receipt consistency check
     res_receipt = check_release_receipt_consistency(tag, repo_root=REPO_ROOT)
     print(f"[{res_receipt.status}] Receipt Consistency: {res_receipt.message}")
     if not res_receipt.passed:
