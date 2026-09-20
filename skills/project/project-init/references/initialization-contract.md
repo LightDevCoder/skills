@@ -78,15 +78,26 @@ onboarding gate for TypeSafe Jev ecosystem integration (`typesafe-ai`):
      explicit `--jev`, defaults safely to standard flow with zero Jev side-effects.
 
 3. **Official TypeSafe skill installation & global reuse:**
+   - Targets the explicit active Agent via `--agent-target <target>` (`pi`, `claude`, `cursor`, `codex`).
+   - If the active agent is unresolved or unsupported, halts Jev onboarding safely (`TARGET_UNRESOLVED`).
    - Checks whether the official `typesafe-ai` skill is already available to the
      active Agent globally (valid `SKILL.md` with `name: typesafe-ai`).
    - If present globally: reuses the official global installation directly without
      duplicating files into the project.
    - If absent globally: installs through the official installer
-     (`npx skills add typesafe-ai/skills --skill typesafe-ai`).
+     (`npx skills add typesafe-ai/skills --skill typesafe-ai --agent <target> --yes`).
+   - Strictly validates that the installed skill landed inside the expected agent directory.
    - Strictly rejects and never generates fake stubs, stubs with fabricated content,
      or arbitrary local tree copies. If installation fails, reports
      `JEV_SKILL_SETUP_INCOMPLETE`.
+
+   | Light Host Identity | Evidenced Indicators | Skills CLI Agent ID | Supported? | Install Strategy |
+   | --- | --- | --- | --- | --- |
+   | `pi` | `PI_*` env vars, `.pi/` directory | `pi` | YES | `npx skills add ... --agent pi --yes` into `.pi/skills` |
+   | `claude` | `CLAUDE_CODE_ENTRY`, `CLAUDE_PROJECT_DIR`, `CLAUDE.md` | `claude` | YES | `npx skills add ... --agent claude --yes` into `.claude/skills` |
+   | `cursor` | `CURSOR_AGENT`, `CURSOR_PROJECT_DIR`, `.cursor/` | `cursor` | YES | `npx skills add ... --agent cursor --yes` into `.cursor/skills` |
+   | `codex` | `CODEX_AGENT`, `CODEX_DIR`, `.codex/` | `codex` | YES | `npx skills add ... --agent codex --yes` into `.codex/skills` |
+   | Unrecognized | No evidenced host target | None | NO | Fail-closed (`TARGET_UNRESOLVED`). Do not call installer. |
 
 4. **Environment & key detection:**
    - Auto-detects `TYPESAFE_API_KEY` from `os.environ` and local `.env`.

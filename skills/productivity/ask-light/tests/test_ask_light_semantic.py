@@ -166,14 +166,11 @@ class AskLightSemanticTest(unittest.TestCase):
             self.assertIn("unavailable", rec.fallback_reason.lower())
 
     def test_mock_jev_system_one_response(self) -> None:
-        """Verify multi-primitive Jev judgments: Noul (execution & ambiguity), Escalation."""
+        """Verify multi-primitive Jev judgments: Ambiguity & Escalation with active consumers."""
         mock_choice = MagicMock()
         mock_choice.choice = "implement"
         mock_choice.confidence = 0.95
         mock_choice.probabilities = {"implement": 0.95}
-
-        mock_noul_exec = MagicMock()
-        mock_noul_exec.noul = 0.92
 
         mock_noul_ambig = MagicMock()
         mock_noul_ambig.noul = 0.10
@@ -184,7 +181,6 @@ class AskLightSemanticTest(unittest.TestCase):
         mock_resp = MagicMock()
         mock_resp.choices = {"next_action": mock_choice}
         mock_resp.nouls = {
-            "wants_immediate_execution": mock_noul_exec,
             "has_material_ambiguity": mock_noul_ambig,
             "needs_deep_reasoning_escalation": mock_noul_escala,
         }
@@ -198,14 +194,15 @@ class AskLightSemanticTest(unittest.TestCase):
 
         with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
             with patch("semantic_router.TYPESAFE_AVAILABLE", True):
-                rec = route_with_jev(legal, "Should we implement now?", client=mock_client)
+                # Request contains complexity keywords -> triggers escalation check with consumer
+                rec = route_with_jev(legal, "Should we refactor the consensus engine now?", client=mock_client)
                 self.assertEqual(rec.primary_skill, "implement")
                 self.assertFalse(rec.fallback_used)
-                # Hard invariant: Jev execution intent (0.92) does NOT grant TRANSITION authority
+                # Hard invariant: Jev output cannot grant TRANSITION authority
                 self.assertEqual(rec.status, "RECOMMEND")
                 self.assertTrue(rec.escalated)  # Escalation detected
+                self.assertEqual(rec.alternative_skill, "agent-config")
                 self.assertIsNotNone(rec.semantic_judgments)
-                self.assertEqual(rec.semantic_judgments.execution_intent_probability, 0.92)
                 self.assertNotIn("next_action", rec.semantic_judgments.questions_sent)  # singleton candidate skips Choice
 
     def test_defense_in_depth_unauthorized_action_rejected(self) -> None:
@@ -239,13 +236,10 @@ class AskLightSemanticTest(unittest.TestCase):
                 self.assertIn("unauthorized", rec.fallback_reason.lower())
 
     def test_jev_cannot_grant_transition_authority(self) -> None:
-        """Hard Invariant (Section 12): Jev execution intent = 0.99 cannot change status to TRANSITION."""
-        mock_noul_exec = MagicMock()
-        mock_noul_exec.noul = 0.99
-
+        """Hard Invariant (Section 12): Jev cannot change status to TRANSITION without deterministic authorization."""
         mock_resp = MagicMock()
         mock_resp.choices = {}
-        mock_resp.nouls = {"wants_immediate_execution": mock_noul_exec}
+        mock_resp.nouls = {}
         mock_resp.scores = {}
 
         mock_client = MagicMock()
@@ -259,7 +253,6 @@ class AskLightSemanticTest(unittest.TestCase):
             with patch("semantic_router.TYPESAFE_AVAILABLE", True):
                 rec = route_with_jev(legal, "Advice only, do not run.", client=mock_client)
                 self.assertEqual(rec.status, "RECOMMEND")
-                self.assertEqual(rec.semantic_judgments.execution_intent_probability, 0.99)
 
     def test_single_legal_action_causes_zero_choice_request(self) -> None:
         """Section 13: len(allowed_actions) == 1 must skip Choice."""
@@ -387,8 +380,8 @@ class AskLightSemanticTest(unittest.TestCase):
                 self.assertEqual(rec.semantic_judgments.questions_sent, [])
 
     def test_query_planner_sends_ambiguity_when_ambiguous_phrasing_present(self) -> None:
-        """P1 (Section 14): Ambiguous user phrasing triggers ambiguity question."""
-        state = CompactProjectState(initialized=True, spec_exists=False)
+        """P1 (Section 14 & 18): Ambiguous user phrasing on implementable state triggers ambiguity question with consumer."""
+        state = CompactProjectState(initialized=True, spec_exists=True, spec_active=True, tickets_exist=True, ready_tickets=["01.md"])
         legal = compute_legal_actions(state)
 
         mock_resp = MagicMock()
@@ -401,7 +394,16 @@ class AskLightSemanticTest(unittest.TestCase):
             with patch("semantic_router.TYPESAFE_AVAILABLE", True):
                 rec = route_with_jev(legal, "Maybe we should redesign auth or database first?", client=mock_client)
                 self.assertIn("has_material_ambiguity", rec.semantic_judgments.questions_sent)
-                self.assertEqual(rec.primary_skill, "project-clarify")
+                self.assertEqual(rec.alternative_skill, "project-clarify")
+
+        # Invariant (Section 17): Unambiguous query on project-clarify sends 0 questions
+        state_no_spec = CompactProjectState(initialized=True, spec_exists=False)
+        legal_clarify = compute_legal_actions(state_no_spec)
+        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+            with patch("semantic_router.TYPESAFE_AVAILABLE", True):
+                rec2 = route_with_jev(legal_clarify, "What is the next step?", client=mock_client)
+                self.assertEqual(rec2.primary_skill, "project-clarify")
+                self.assertEqual(rec2.semantic_judgments.questions_sent, [])
 
     def test_adversarial_linguistic_cases_distinguish_intent_from_authorization(self) -> None:
         """P1 (Sections 35-37): Natural language adversarial cases separate semantic intent from deterministic authority."""

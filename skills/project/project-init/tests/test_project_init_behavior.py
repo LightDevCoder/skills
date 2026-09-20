@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import subprocess
 import tempfile
 import unittest
 from unittest import mock
@@ -34,6 +35,37 @@ def config(goal: str = "Ship a parser") -> dict:
 
 
 class ProjectInitBehaviorTest(unittest.TestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self._temp_home = tempfile.TemporaryDirectory(prefix="fake-test-home-")
+        self._orig_env = dict(os.environ)
+        os.environ["HOME"] = self._temp_home.name
+        # Sanitize host environment
+        for k in list(os.environ.keys()):
+            if k.startswith("PI_") or k.startswith("CLAUDE_") or k.startswith("CURSOR_") or k.startswith("CODEX_"):
+                del os.environ[k]
+        os.environ.pop("TYPESAFE_API_KEY", None)
+        os.environ.pop("SKILLS_AGENT_TARGET", None)
+
+        # Network and external installer guard
+        self._orig_subprocess_run = subprocess.run
+        def guarded_subprocess_run(cmd, *args, **kwargs):
+            cmd_str = " ".join(str(c) for c in (cmd if isinstance(cmd, (list, tuple)) else [cmd]))
+            for blocked in ("npx", "npm", "pip install", "curl", "wget"):
+                if blocked in cmd_str:
+                    raise AssertionError(f"BLOCKED: Real external command '{cmd_str}' was invoked in regression tests without being mocked!")
+            return self._orig_subprocess_run(cmd, *args, **kwargs)
+
+        self._sub_patcher = mock.patch("subprocess.run", side_effect=guarded_subprocess_run)
+        self._sub_patcher.start()
+
+    def tearDown(self) -> None:
+        self._sub_patcher.stop()
+        os.environ.clear()
+        os.environ.update(self._orig_env)
+        self._temp_home.cleanup()
+        super().tearDown()
+
     def test_empty_repository_bootstraps_all_downstream_contracts(self) -> None:
         with tempfile.TemporaryDirectory(prefix="project-init-") as tmp:
             root = Path(tmp)
@@ -564,6 +596,7 @@ class ProjectInitBehaviorTest(unittest.TestCase):
                     config(),
                     capability_roots=[global_skills],
                     jev=True,
+                    agent_target="pi",
                 )
 
             project = (root / "docs/agents/light-project.md").read_text(encoding="utf-8")
@@ -594,7 +627,7 @@ class ProjectInitBehaviorTest(unittest.TestCase):
             with mock.patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key-local"}):
                 with mock.patch.object(BOOTSTRAP, "check_global_skill", return_value=False):
                     with mock.patch.object(BOOTSTRAP, "install_official_typesafe_skill", side_effect=fake_installer):
-                        report = BOOTSTRAP.bootstrap(root, config(), jev=True)
+                        report = BOOTSTRAP.bootstrap(root, config(), jev=True, agent_target="pi")
 
             local_skill = root / ".pi" / "skills" / "typesafe-ai" / "SKILL.md"
             self.assertTrue(local_skill.is_file())
@@ -611,7 +644,7 @@ class ProjectInitBehaviorTest(unittest.TestCase):
             with mock.patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
                 with mock.patch.object(BOOTSTRAP, "check_global_skill", return_value=False):
                     with mock.patch.object(BOOTSTRAP, "install_official_typesafe_skill", return_value=(False, None, "JEV_SKILL_SETUP_INCOMPLETE")):
-                        report = BOOTSTRAP.bootstrap(root, config(), jev=True)
+                        report = BOOTSTRAP.bootstrap(root, config(), jev=True, agent_target="pi")
 
             self.assertFalse((root / ".pi" / "skills" / "typesafe-ai").exists())
             self.assertFalse((root / ".agents" / "skills" / "typesafe-ai").exists())
@@ -625,7 +658,7 @@ class ProjectInitBehaviorTest(unittest.TestCase):
             with mock.patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
                 with mock.patch.object(BOOTSTRAP, "check_global_skill", return_value=False):
                     with mock.patch.object(BOOTSTRAP, "install_official_typesafe_skill", return_value=(False, None, "JEV_SKILL_SETUP_INCOMPLETE")):
-                        report = BOOTSTRAP.bootstrap(root, config(), jev=True)
+                        report = BOOTSTRAP.bootstrap(root, config(), jev=True, agent_target="pi")
 
             self.assertEqual(report["jev"]["status"], "SKILL_INCOMPLETE")
             self.assertEqual(report["jev"]["skillLocation"], "JEV_SKILL_SETUP_INCOMPLETE")
@@ -639,7 +672,7 @@ class ProjectInitBehaviorTest(unittest.TestCase):
             with mock.patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
                 with mock.patch.object(BOOTSTRAP, "check_global_skill", return_value=False):
                     with mock.patch.object(BOOTSTRAP, "install_official_typesafe_skill", return_value=(False, None, "JEV_SKILL_SETUP_INCOMPLETE")):
-                        report = BOOTSTRAP.bootstrap(root, config(), jev=True)
+                        report = BOOTSTRAP.bootstrap(root, config(), jev=True, agent_target="pi")
             project_content = (root / "docs/agents/light-project.md").read_text(encoding="utf-8")
             self.assertNotIn("typesafe-ai", project_content)
 
@@ -647,7 +680,7 @@ class ProjectInitBehaviorTest(unittest.TestCase):
             global_skills = Path(tmp) / "global_skills"
             (global_skills / "typesafe-ai").mkdir(parents=True)
             (global_skills / "typesafe-ai" / "SKILL.md").write_text("---\nname: typesafe-ai\n---\n# Valid\n", encoding="utf-8")
-            report2 = BOOTSTRAP.bootstrap(root, config(), capability_roots=[global_skills], jev=True)
+            report2 = BOOTSTRAP.bootstrap(root, config(), capability_roots=[global_skills], jev=True, agent_target="pi")
             project_content2 = (root / "docs/agents/light-project.md").read_text(encoding="utf-8")
             self.assertIn("typesafe-ai", project_content2)
 
@@ -657,7 +690,7 @@ class ProjectInitBehaviorTest(unittest.TestCase):
             root = Path(tmp)
             with mock.patch.object(BOOTSTRAP, "check_global_skill", return_value=False):
                 with mock.patch.object(BOOTSTRAP, "install_official_typesafe_skill", return_value=(False, None, "JEV_SKILL_SETUP_INCOMPLETE")):
-                    report = BOOTSTRAP.bootstrap(root, config(), jev=True)
+                    report = BOOTSTRAP.bootstrap(root, config(), jev=True, agent_target="pi")
 
             self.assertTrue((root / "docs/agents/light-project.md").is_file())
             self.assertTrue((root / "docs/agents/issue-tracker.md").is_file())
@@ -672,7 +705,7 @@ class ProjectInitBehaviorTest(unittest.TestCase):
             BOOTSTRAP.configure_typesafe_key(root, secret)
 
             with mock.patch.object(BOOTSTRAP, "check_global_skill", return_value=True):
-                report = BOOTSTRAP.bootstrap(root, config(), jev=True)
+                report = BOOTSTRAP.bootstrap(root, config(), jev=True, agent_target="pi")
             report_str = json.dumps(report)
             self.assertNotIn(secret, report_str)
 

@@ -327,7 +327,3 @@ def extract_abstract_task_profile(
     except Exception as exc:
         fallback_profile = build_deterministic_profile(task)
         return fallback_profile, None, True, f"Jev call failed ({type(exc).__name__}: {exc})"
-
-    except Exception as exc:
-        fallback_profile = build_deterministic_profile(task)
-        return fallback_profile, None, True, f"Jev call failed ({type(exc).__name__}: {exc})"

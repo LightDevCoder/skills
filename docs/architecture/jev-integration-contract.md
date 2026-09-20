@@ -65,20 +65,23 @@ Token-efficient, sanitized dictionary:
 - Omit repository source code, whole directories, and raw Git diffs.
 
 ### Stage 3: Choose Only Necessary Primitives
+- **Inference Economy & Consumer Requirement:** Semantic questions are planned ONLY when an active consumer exists.
 - If legal candidate actions $\le 1$: omit `Choice(next_action)` entirely.
-- If semantic ambiguity is plausible: query `Noul(has_material_ambiguity)`.
-- If architectural complexity is possible: query `Noul(needs_deep_reasoning_escalation)`.
+- If unambiguous / plain status query: send 0 Jev questions.
+- If multiple candidates or implementable state with requirement ambiguity phrasing: query `Noul(has_material_ambiguity)` (consumer: recommends clarify alternative).
+- If implementation candidate with architectural complexity phrasing: query `Noul(needs_deep_reasoning_escalation)` (consumer: recommends agent-config alternative).
+- Authorization is 100% deterministic code; Jev is never queried for execution permission.
 - For task profiling: query `Score(task_complexity)` and `Score(reasoning_need)`.
 
 ### Stage 4: Make Jev Request
 Invoke `ts_client.system_one(state=compact_state, questions=questions)` with graceful exception handling.
 
 ### Stage 5: Retain Raw Probabilities & Confidence
-Store raw outputs: `execution_intent_probability`, `ambiguity_probability`, `escalation_probability`, `complexity_score`, `complexity_confidence`, `reasoning_score`, `reasoning_confidence`.
+Store raw outputs: `ambiguity_probability`, `escalation_probability`, `complexity_score`, `complexity_confidence`, `reasoning_score`, `reasoning_confidence`.
 
 ### Stage 6: Apply Explicit Deterministic Policy
-- Calibrated thresholds from `JevPolicy`.
-- Execution intent annotations do NOT change status to `TRANSITION`.
+- Calibrated thresholds from `JevPolicy` (provisional).
+- Deterministic code owns authorization; Jev cannot grant TRANSITION authority.
 - Cost sensitivity selects cost-effective candidate within required tier, never downgrades capability.
 - Precedence for effort: Explicit user request > confirmed profile policy > Jev reasoning need > host capability bounds.
 
@@ -127,5 +130,6 @@ Score primitives evaluate ordered dimensions according to explicit boundaries:
   - `[1.5, 2.0]` $\to$ `high`
 
 Evaluation suites explicitly distinguish:
-- **Workflow Safety Accuracy:** Deterministic legal action computation, authorization defense-in-depth, and fail-closed gates.
-- **Semantic Judgment Accuracy:** Noul ambiguity detection, reasoning escalation, and Choice preference against labeled ground truth, recorded with full confusion matrix metrics.
+- **Workflow Safety Accuracy:** Deterministic legal action computation, authorization defense-in-depth, and fail-closed gates. Workflow safety can PASS even when Jev is completely offline or unconfigured.
+- **Semantic Judgment Accuracy:** Tri-state (`PASS`, `FAIL`, `NOT_EVALUATED`). Fallback never counts as semantic PASS (reports `NOT_EVALUATED`). Denominator includes only evaluated questions (`PASS / (PASS + FAIL)`). Evaluates Noul ambiguity detection, reasoning escalation, Choice preference, and Score profiling against labeled ground truth, recorded with full confusion matrix metrics.
+- **Hermetic Regression Test Boundary:** Regression suites must run with zero network calls, zero public installer calls, fake HOME isolation, and sanitized host environment variables. Real external commands (`npx`, `npm`, `pip install`, `curl`, `wget`) are trapped by an active execution guard.

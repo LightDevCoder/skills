@@ -30,14 +30,19 @@ tickets, or run later workflow stages.
 4. **Bootstrap idempotently.** Use
    [bootstrap.py](scripts/bootstrap.py) to write or update
    `docs/agents/light-project.md`, `docs/agents/issue-tracker.md`, and one
-   instruction pointer in the inspected host target. Supports optional `--jev`
-   and `--no-jev` flags for TypeSafe Jev onboarding (key detection, gitignore
-   protection, and global skill reuse). Preserve manual additions and previously
-   valid decisions; revise only confirmed fields. The current local-markdown
-   adapter uses `.scratch/<effort>/issues`; other tracker locators fail closed
-   until an adapter exists.
-   The helper requires Python 3.9 or newer; if unavailable, report `BLOCKED`
-   before any write instead of emulating the transaction manually.
+   instruction pointer in the inspected host target.
+   
+   **TypeSafe Jev Onboarding Contract:**
+   Supports optional `--jev` and `--no-jev` flags for TypeSafe Jev onboarding (key detection, gitignore protection, and global skill reuse).
+   When Jev onboarding is selected:
+   - Inspect the active Agent host environment.
+   - Resolve the canonical Skills CLI agent target (`pi`, `claude`, `cursor`, `codex`).
+   - Pass it explicitly via `--agent-target <target>` to `bootstrap.py`.
+   - Never rely on the installer to infer all Agents; if the host target is unresolved, stop Jev onboarding with `TARGET_UNRESOLVED` (the core project bootstrap still succeeds).
+   - SDK Policy (`--auto-install-sdk`): Use `--auto-install-sdk` only when the user has explicitly authorized automated dependency installation in non-interactive workflows. In interactive sessions, prompt the user for permission before running `pip install` in the active Python runtime.
+
+   Preserve manual additions and previously valid decisions; revise only confirmed fields. The current local-markdown adapter uses `.scratch/<effort>/issues`; other tracker locators fail closed until an adapter exists.
+   The helper requires Python 3.9 or newer; if unavailable, report `BLOCKED` before any write instead of emulating the transaction manually.
 5. **Validate and report.** Confirm every created path is inside the target
    root, the managed blocks are unique, existing text is preserved, and each
    declared relevant capability is classified as `available`, `unavailable`,

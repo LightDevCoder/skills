@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-09-20T04:48:02Z",
-  "mode": "live",
-  "model_version": "jev-latest",
+  "timestamp": "2026-09-20T05:39:12Z",
+  "mode": "mock-baseline",
+  "model_version": "offline-deterministic",
   "total_scenarios": 36,
   "total_passed": 36,
   "total_failed": 0,
   "overall_accuracy": 1.0,
-  "duration_seconds": 12.478,
+  "duration_seconds": 0.0,
   "suites": {
     "ask-light": {
       "suite": "ask-light",
@@ -16,29 +16,25 @@
       "accuracy": 1.0,
       "workflow_safety_passed": 22,
       "workflow_safety_accuracy": 1.0,
-      "semantic_passed": 22,
-      "semantic_accuracy": 1.0,
+      "semantic_evaluated": 0,
+      "semantic_not_evaluated": 22,
+      "semantic_passed": 0,
+      "semantic_failed": 0,
+      "semantic_accuracy": null,
       "confusion_matrices": {
         "ambiguity": {
-          "tp": 1,
-          "fp": 0,
-          "tn": 4,
-          "fn": 0,
-          "total": 5
-        },
-        "escalation": {
-          "tp": 1,
-          "fp": 0,
-          "tn": 4,
-          "fn": 0,
-          "total": 5
-        },
-        "execution_intent": {
           "tp": 0,
           "fp": 0,
-          "tn": 3,
+          "tn": 0,
           "fn": 0,
-          "total": 3
+          "total": 0
+        },
+        "escalation": {
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "total": 0
         }
       },
       "results": [
@@ -47,49 +43,37 @@
           "name": "Standard frontier query: ready ticket exists",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "RECOMMEND",
           "observed_primary_skill": "implement",
-          "fallback_used": false,
+          "fallback_used": true,
           "escalated": false,
-          "semantic_judgments": {
-            "action_choice": null,
-            "action_confidence": null,
-            "action_probabilities": {},
-            "execution_intent_probability": null,
-            "ambiguity_probability": null,
-            "escalation_probability": null,
-            "questions_sent": [],
-            "reason_each_question_needed": {},
-            "wants_immediate_execution_prob": null,
-            "has_material_ambiguity_prob": null,
-            "escalation_prob": null
-          }
+          "semantic_judgments": null
         },
         {
           "id": "AL-02",
           "name": "Progress inquiry / where is project now",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "EXPLAIN",
           "observed_primary_skill": null,
           "fallback_used": false,
@@ -101,16 +85,16 @@
           "name": "Workflow explanation request",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "EXPLAIN",
           "observed_primary_skill": null,
           "fallback_used": false,
@@ -122,364 +106,226 @@
           "name": "Explicit execution command: Go ahead",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "TRANSITION",
           "observed_primary_skill": "implement",
-          "fallback_used": false,
+          "fallback_used": true,
           "escalated": false,
-          "semantic_judgments": {
-            "action_choice": null,
-            "action_confidence": null,
-            "action_probabilities": {},
-            "execution_intent_probability": null,
-            "ambiguity_probability": null,
-            "escalation_probability": null,
-            "questions_sent": [],
-            "reason_each_question_needed": {},
-            "wants_immediate_execution_prob": null,
-            "has_material_ambiguity_prob": null,
-            "escalation_prob": null
-          }
+          "semantic_judgments": null
         },
         {
           "id": "AL-05",
           "name": "Hesitant inquiry: Should we start implementing?",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "RECOMMEND",
           "observed_primary_skill": "implement",
-          "fallback_used": false,
+          "fallback_used": true,
           "escalated": false,
-          "semantic_judgments": {
-            "action_choice": null,
-            "action_confidence": null,
-            "action_probabilities": {},
-            "execution_intent_probability": 0.12,
-            "ambiguity_probability": 0.76,
-            "escalation_probability": 0.0,
-            "questions_sent": [
-              "has_material_ambiguity",
-              "wants_immediate_execution"
-            ],
-            "reason_each_question_needed": {
-              "has_material_ambiguity": "Detect semantic ambiguity or conflicting requirements requiring clarification.",
-              "wants_immediate_execution": "Assess user execution intent probability for advisory presentation."
-            },
-            "wants_immediate_execution_prob": 0.12,
-            "has_material_ambiguity_prob": 0.76,
-            "escalation_prob": 0.0
-          }
+          "semantic_judgments": null
         },
         {
           "id": "AL-06",
           "name": "Advice only constraint: I only want advice",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "RECOMMEND",
           "observed_primary_skill": "implement",
-          "fallback_used": false,
+          "fallback_used": true,
           "escalated": false,
-          "semantic_judgments": {
-            "action_choice": null,
-            "action_confidence": null,
-            "action_probabilities": {},
-            "execution_intent_probability": 0.01,
-            "ambiguity_probability": 0.0,
-            "escalation_probability": 0.0,
-            "questions_sent": [
-              "wants_immediate_execution"
-            ],
-            "reason_each_question_needed": {
-              "wants_immediate_execution": "Assess user execution intent probability for advisory presentation."
-            },
-            "wants_immediate_execution_prob": 0.01,
-            "has_material_ambiguity_prob": 0.0,
-            "escalation_prob": 0.0
-          }
+          "semantic_judgments": null
         },
         {
           "id": "AL-07",
           "name": "Initial project state: No SPEC exists",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "RECOMMEND",
           "observed_primary_skill": "project-clarify",
-          "fallback_used": false,
+          "fallback_used": true,
           "escalated": false,
-          "semantic_judgments": {
-            "action_choice": null,
-            "action_confidence": null,
-            "action_probabilities": {},
-            "execution_intent_probability": 0.0,
-            "ambiguity_probability": 0.9,
-            "escalation_probability": 0.0,
-            "questions_sent": [
-              "has_material_ambiguity"
-            ],
-            "reason_each_question_needed": {
-              "has_material_ambiguity": "Detect semantic ambiguity or conflicting requirements requiring clarification."
-            },
-            "wants_immediate_execution_prob": 0.0,
-            "has_material_ambiguity_prob": 0.9,
-            "escalation_prob": 0.0
-          }
+          "semantic_judgments": null
         },
         {
           "id": "AL-08",
           "name": "Clarification complete: Clarification is ready",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "RECOMMEND",
           "observed_primary_skill": "project-spec",
-          "fallback_used": false,
+          "fallback_used": true,
           "escalated": false,
-          "semantic_judgments": {
-            "action_choice": null,
-            "action_confidence": null,
-            "action_probabilities": {},
-            "execution_intent_probability": null,
-            "ambiguity_probability": null,
-            "escalation_probability": null,
-            "questions_sent": [],
-            "reason_each_question_needed": {},
-            "wants_immediate_execution_prob": null,
-            "has_material_ambiguity_prob": null,
-            "escalation_prob": null
-          }
+          "semantic_judgments": null
         },
         {
           "id": "AL-09",
           "name": "Active SPEC exists but tickets do not",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "RECOMMEND",
           "observed_primary_skill": "project-tickets",
-          "fallback_used": false,
+          "fallback_used": true,
           "escalated": false,
-          "semantic_judgments": {
-            "action_choice": null,
-            "action_confidence": null,
-            "action_probabilities": {},
-            "execution_intent_probability": null,
-            "ambiguity_probability": null,
-            "escalation_probability": null,
-            "questions_sent": [],
-            "reason_each_question_needed": {},
-            "wants_immediate_execution_prob": null,
-            "has_material_ambiguity_prob": null,
-            "escalation_prob": null
-          }
+          "semantic_judgments": null
         },
         {
           "id": "AL-10",
           "name": "Ready ticket exists at frontier",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "RECOMMEND",
           "observed_primary_skill": "implement",
-          "fallback_used": false,
+          "fallback_used": true,
           "escalated": false,
-          "semantic_judgments": {
-            "action_choice": null,
-            "action_confidence": null,
-            "action_probabilities": {},
-            "execution_intent_probability": null,
-            "ambiguity_probability": null,
-            "escalation_probability": null,
-            "questions_sent": [],
-            "reason_each_question_needed": {},
-            "wants_immediate_execution_prob": null,
-            "has_material_ambiguity_prob": null,
-            "escalation_prob": null
-          }
+          "semantic_judgments": null
         },
         {
           "id": "AL-11",
           "name": "All tickets resolved",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "RECOMMEND",
           "observed_primary_skill": "project-review",
-          "fallback_used": false,
+          "fallback_used": true,
           "escalated": false,
-          "semantic_judgments": {
-            "action_choice": null,
-            "action_confidence": null,
-            "action_probabilities": {},
-            "execution_intent_probability": 0.03,
-            "ambiguity_probability": 0.0,
-            "escalation_probability": 0.0,
-            "questions_sent": [
-              "wants_immediate_execution"
-            ],
-            "reason_each_question_needed": {
-              "wants_immediate_execution": "Assess user execution intent probability for advisory presentation."
-            },
-            "wants_immediate_execution_prob": 0.03,
-            "has_material_ambiguity_prob": 0.0,
-            "escalation_prob": 0.0
-          }
+          "semantic_judgments": null
         },
         {
           "id": "AL-12",
           "name": "Stale review verdict",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "RECOMMEND",
           "observed_primary_skill": "project-review",
-          "fallback_used": false,
+          "fallback_used": true,
           "escalated": false,
-          "semantic_judgments": {
-            "action_choice": null,
-            "action_confidence": null,
-            "action_probabilities": {},
-            "execution_intent_probability": null,
-            "ambiguity_probability": null,
-            "escalation_probability": null,
-            "questions_sent": [],
-            "reason_each_question_needed": {},
-            "wants_immediate_execution_prob": null,
-            "has_material_ambiguity_prob": null,
-            "escalation_prob": null
-          }
+          "semantic_judgments": null
         },
         {
           "id": "AL-13",
           "name": "Dirty working tree invalidating review",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "RECOMMEND",
           "observed_primary_skill": "project-review",
-          "fallback_used": false,
+          "fallback_used": true,
           "escalated": false,
-          "semantic_judgments": {
-            "action_choice": null,
-            "action_confidence": null,
-            "action_probabilities": {},
-            "execution_intent_probability": null,
-            "ambiguity_probability": null,
-            "escalation_probability": null,
-            "questions_sent": [],
-            "reason_each_question_needed": {},
-            "wants_immediate_execution_prob": null,
-            "has_material_ambiguity_prob": null,
-            "escalation_prob": null
-          }
+          "semantic_judgments": null
         },
         {
           "id": "AL-14",
           "name": "Unknown ticket requested (fail-closed)",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "BLOCKED",
           "observed_primary_skill": null,
           "fallback_used": false,
@@ -491,16 +337,16 @@
           "name": "Multiple active efforts without explicit target (fail-closed)",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "NEED_INPUT",
           "observed_primary_skill": null,
           "fallback_used": false,
@@ -512,94 +358,58 @@
           "name": "Ambiguous user request with trade-offs",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "RECOMMEND",
-          "observed_primary_skill": "project-clarify",
-          "fallback_used": false,
+          "observed_primary_skill": "implement",
+          "fallback_used": true,
           "escalated": false,
-          "semantic_judgments": {
-            "action_choice": null,
-            "action_confidence": null,
-            "action_probabilities": {},
-            "execution_intent_probability": 0.05,
-            "ambiguity_probability": 0.96,
-            "escalation_probability": 0.0,
-            "questions_sent": [
-              "has_material_ambiguity",
-              "wants_immediate_execution"
-            ],
-            "reason_each_question_needed": {
-              "has_material_ambiguity": "Detect semantic ambiguity or conflicting requirements requiring clarification.",
-              "wants_immediate_execution": "Assess user execution intent probability for advisory presentation."
-            },
-            "wants_immediate_execution_prob": 0.05,
-            "has_material_ambiguity_prob": 0.96,
-            "escalation_prob": 0.0
-          }
+          "semantic_judgments": null
         },
         {
           "id": "AL-17",
           "name": "Complex architectural overhaul request",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "RECOMMEND",
           "observed_primary_skill": "implement",
-          "fallback_used": false,
-          "escalated": true,
-          "semantic_judgments": {
-            "action_choice": null,
-            "action_confidence": null,
-            "action_probabilities": {},
-            "execution_intent_probability": 0.68,
-            "ambiguity_probability": 0.0,
-            "escalation_probability": 0.87,
-            "questions_sent": [
-              "needs_deep_reasoning_escalation",
-              "wants_immediate_execution"
-            ],
-            "reason_each_question_needed": {
-              "needs_deep_reasoning_escalation": "Assess whether implementation task warrants reasoning escalation to agent-config.",
-              "wants_immediate_execution": "Assess user execution intent probability for advisory presentation."
-            },
-            "wants_immediate_execution_prob": 0.68,
-            "has_material_ambiguity_prob": 0.0,
-            "escalation_prob": 0.87
-          }
+          "fallback_used": true,
+          "escalated": false,
+          "semantic_judgments": null
         },
         {
           "id": "AL-18",
           "name": "Clear status question negative case (no false ambiguity)",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "EXPLAIN",
           "observed_primary_skill": null,
           "fallback_used": false,
@@ -608,130 +418,82 @@
         },
         {
           "id": "AL-19",
-          "name": "Adversarial: don't implement, advice only",
+          "name": "Negative ambiguity case: unambiguous disjunction query",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "RECOMMEND",
           "observed_primary_skill": "implement",
-          "fallback_used": false,
+          "fallback_used": true,
           "escalated": false,
-          "semantic_judgments": {
-            "action_choice": null,
-            "action_confidence": null,
-            "action_probabilities": {},
-            "execution_intent_probability": 0.02,
-            "ambiguity_probability": 0.0,
-            "escalation_probability": 0.0,
-            "questions_sent": [
-              "wants_immediate_execution"
-            ],
-            "reason_each_question_needed": {
-              "wants_immediate_execution": "Assess user execution intent probability for advisory presentation."
-            },
-            "wants_immediate_execution_prob": 0.02,
-            "has_material_ambiguity_prob": 0.0,
-            "escalation_prob": 0.0
-          }
+          "semantic_judgments": null
         },
         {
           "id": "AL-20",
-          "name": "Adversarial: hesitant question is not authorization",
+          "name": "Negative escalation case: simple refactor task",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "RECOMMEND",
           "observed_primary_skill": "implement",
-          "fallback_used": false,
+          "fallback_used": true,
           "escalated": false,
-          "semantic_judgments": {
-            "action_choice": null,
-            "action_confidence": null,
-            "action_probabilities": {},
-            "execution_intent_probability": 0.1,
-            "ambiguity_probability": 0.0,
-            "escalation_probability": 0.0,
-            "questions_sent": [
-              "wants_immediate_execution"
-            ],
-            "reason_each_question_needed": {
-              "wants_immediate_execution": "Assess user execution intent probability for advisory presentation."
-            },
-            "wants_immediate_execution_prob": 0.1,
-            "has_material_ambiguity_prob": 0.0,
-            "escalation_prob": 0.0
-          }
+          "semantic_judgments": null
         },
         {
           "id": "AL-21",
           "name": "Adversarial: what is next, do not execute",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "RECOMMEND",
           "observed_primary_skill": "implement",
-          "fallback_used": false,
+          "fallback_used": true,
           "escalated": false,
-          "semantic_judgments": {
-            "action_choice": null,
-            "action_confidence": null,
-            "action_probabilities": {},
-            "execution_intent_probability": 0.02,
-            "ambiguity_probability": 0.0,
-            "escalation_probability": 0.0,
-            "questions_sent": [
-              "wants_immediate_execution"
-            ],
-            "reason_each_question_needed": {
-              "wants_immediate_execution": "Assess user execution intent probability for advisory presentation."
-            },
-            "wants_immediate_execution_prob": 0.02,
-            "has_material_ambiguity_prob": 0.0,
-            "escalation_prob": 0.0
-          }
+          "semantic_judgments": null
         },
         {
           "id": "AL-22",
           "name": "Adversarial: explain whether implementation is next",
           "passed": true,
           "workflow_safety_passed": true,
-          "semantic_passed": true,
+          "semantic_status": "NOT_EVALUATED",
+          "semantic_passed": false,
           "legal_actions_matched": true,
           "fallback_action_matched": true,
           "status_matched": true,
           "primary_skill_matched": true,
           "authority_invariant_held": true,
           "choice_skipped_for_singleton": true,
-          "ambiguity_matched": true,
-          "escalation_matched": true,
-          "execution_intent_matched": true,
+          "ambiguity_matched": null,
+          "escalation_matched": null,
           "observed_status": "EXPLAIN",
           "observed_primary_skill": null,
           "fallback_used": false,
@@ -739,7 +501,7 @@
           "semantic_judgments": null
         }
       ],
-      "duration_seconds": 8.251
+      "duration_seconds": 0.0
     },
     "agent-config": {
       "suite": "agent-config",
@@ -747,11 +509,26 @@
       "passed": 14,
       "failed": 0,
       "accuracy": 1.0,
+      "config_correctness_passed": 14,
+      "config_correctness_accuracy": 1.0,
+      "complexity_evaluated": 0,
+      "complexity_not_evaluated": 14,
+      "complexity_passed": 0,
+      "complexity_failed": 0,
+      "complexity_accuracy": null,
+      "reasoning_evaluated": 0,
+      "reasoning_not_evaluated": 14,
+      "reasoning_passed": 0,
+      "reasoning_failed": 0,
+      "reasoning_accuracy": null,
       "results": [
         {
           "id": "AC-01",
           "name": "Routine documentation edit",
           "passed": true,
+          "config_correctness_passed": true,
+          "complexity_semantic": "NOT_EVALUATED",
+          "reasoning_semantic": "NOT_EVALUATED",
           "readiness_matched": true,
           "topology_matched": true,
           "model_matched": true,
@@ -761,13 +538,34 @@
           "observed_model": "gpt-4o-mini",
           "observed_effort": null,
           "observed_topology": "Case C",
-          "fallback_used": false,
-          "approval_state": "approved"
+          "observed_tier": "routine",
+          "observed_reasoning": "low",
+          "fallback_used": true,
+          "approval_state": "approved",
+          "raw_evidence": {
+            "complexity_score": null,
+            "complexity_confidence": null,
+            "complexity_source": "deterministic-fallback",
+            "expected_complexity_range": [
+              0.0,
+              0.5
+            ],
+            "reasoning_score": null,
+            "reasoning_confidence": null,
+            "reasoning_source": "deterministic-fallback",
+            "expected_reasoning_range": [
+              0.0,
+              0.8
+            ]
+          }
         },
         {
           "id": "AC-02",
           "name": "Small bug fix",
           "passed": true,
+          "config_correctness_passed": true,
+          "complexity_semantic": "NOT_EVALUATED",
+          "reasoning_semantic": "NOT_EVALUATED",
           "readiness_matched": true,
           "topology_matched": true,
           "model_matched": true,
@@ -777,13 +575,34 @@
           "observed_model": "claude-3-5-sonnet",
           "observed_effort": null,
           "observed_topology": "Case A",
-          "fallback_used": false,
-          "approval_state": "approved"
+          "observed_tier": "standard",
+          "observed_reasoning": "medium",
+          "fallback_used": true,
+          "approval_state": "approved",
+          "raw_evidence": {
+            "complexity_score": null,
+            "complexity_confidence": null,
+            "complexity_source": "deterministic-fallback",
+            "expected_complexity_range": [
+              0.5,
+              1.5
+            ],
+            "reasoning_score": null,
+            "reasoning_confidence": null,
+            "reasoning_source": "deterministic-fallback",
+            "expected_reasoning_range": [
+              0.0,
+              1.5
+            ]
+          }
         },
         {
           "id": "AC-03",
           "name": "Standard feature implementation",
           "passed": true,
+          "config_correctness_passed": true,
+          "complexity_semantic": "NOT_EVALUATED",
+          "reasoning_semantic": "NOT_EVALUATED",
           "readiness_matched": true,
           "topology_matched": true,
           "model_matched": true,
@@ -793,13 +612,34 @@
           "observed_model": "claude-3-5-sonnet",
           "observed_effort": null,
           "observed_topology": "Case A",
-          "fallback_used": false,
-          "approval_state": "approved"
+          "observed_tier": "standard",
+          "observed_reasoning": "medium",
+          "fallback_used": true,
+          "approval_state": "approved",
+          "raw_evidence": {
+            "complexity_score": null,
+            "complexity_confidence": null,
+            "complexity_source": "deterministic-fallback",
+            "expected_complexity_range": [
+              0.5,
+              1.5
+            ],
+            "reasoning_score": null,
+            "reasoning_confidence": null,
+            "reasoning_source": "deterministic-fallback",
+            "expected_reasoning_range": [
+              0.5,
+              1.5
+            ]
+          }
         },
         {
           "id": "AC-04",
           "name": "Large refactor",
           "passed": true,
+          "config_correctness_passed": true,
+          "complexity_semantic": "NOT_EVALUATED",
+          "reasoning_semantic": "NOT_EVALUATED",
           "readiness_matched": true,
           "topology_matched": true,
           "model_matched": true,
@@ -809,13 +649,34 @@
           "observed_model": "o3-mini",
           "observed_effort": "high",
           "observed_topology": "Case C",
-          "fallback_used": false,
-          "approval_state": "approved"
+          "observed_tier": "high",
+          "observed_reasoning": "high",
+          "fallback_used": true,
+          "approval_state": "approved",
+          "raw_evidence": {
+            "complexity_score": null,
+            "complexity_confidence": null,
+            "complexity_source": "deterministic-fallback",
+            "expected_complexity_range": [
+              1.5,
+              3.0
+            ],
+            "reasoning_score": null,
+            "reasoning_confidence": null,
+            "reasoning_source": "deterministic-fallback",
+            "expected_reasoning_range": [
+              1.5,
+              2.0
+            ]
+          }
         },
         {
           "id": "AC-05",
           "name": "Security-critical change",
           "passed": true,
+          "config_correctness_passed": true,
+          "complexity_semantic": "NOT_EVALUATED",
+          "reasoning_semantic": "NOT_EVALUATED",
           "readiness_matched": true,
           "topology_matched": true,
           "model_matched": true,
@@ -825,13 +686,34 @@
           "observed_model": "o3-mini",
           "observed_effort": "high",
           "observed_topology": "Case C",
-          "fallback_used": false,
-          "approval_state": "approved"
+          "observed_tier": "high",
+          "observed_reasoning": "high",
+          "fallback_used": true,
+          "approval_state": "approved",
+          "raw_evidence": {
+            "complexity_score": null,
+            "complexity_confidence": null,
+            "complexity_source": "deterministic-fallback",
+            "expected_complexity_range": [
+              1.5,
+              3.0
+            ],
+            "reasoning_score": null,
+            "reasoning_confidence": null,
+            "reasoning_source": "deterministic-fallback",
+            "expected_reasoning_range": [
+              1.5,
+              2.0
+            ]
+          }
         },
         {
           "id": "AC-06",
           "name": "Complex concurrency work",
           "passed": true,
+          "config_correctness_passed": true,
+          "complexity_semantic": "NOT_EVALUATED",
+          "reasoning_semantic": "NOT_EVALUATED",
           "readiness_matched": true,
           "topology_matched": true,
           "model_matched": true,
@@ -841,13 +723,34 @@
           "observed_model": "o3-mini",
           "observed_effort": "high",
           "observed_topology": "Case C",
-          "fallback_used": false,
-          "approval_state": "approved"
+          "observed_tier": "high",
+          "observed_reasoning": "high",
+          "fallback_used": true,
+          "approval_state": "approved",
+          "raw_evidence": {
+            "complexity_score": null,
+            "complexity_confidence": null,
+            "complexity_source": "deterministic-fallback",
+            "expected_complexity_range": [
+              1.5,
+              3.0
+            ],
+            "reasoning_score": null,
+            "reasoning_confidence": null,
+            "reasoning_source": "deterministic-fallback",
+            "expected_reasoning_range": [
+              1.5,
+              2.0
+            ]
+          }
         },
         {
           "id": "AC-07",
           "name": "Cost-sensitive complex work",
           "passed": true,
+          "config_correctness_passed": true,
+          "complexity_semantic": "NOT_EVALUATED",
+          "reasoning_semantic": "NOT_EVALUATED",
           "readiness_matched": true,
           "topology_matched": true,
           "model_matched": true,
@@ -857,13 +760,34 @@
           "observed_model": "o3-mini",
           "observed_effort": "high",
           "observed_topology": "Case C",
-          "fallback_used": false,
-          "approval_state": "approved"
+          "observed_tier": "high",
+          "observed_reasoning": "high",
+          "fallback_used": true,
+          "approval_state": "approved",
+          "raw_evidence": {
+            "complexity_score": null,
+            "complexity_confidence": null,
+            "complexity_source": "deterministic-fallback",
+            "expected_complexity_range": [
+              1.5,
+              3.0
+            ],
+            "reasoning_score": null,
+            "reasoning_confidence": null,
+            "reasoning_source": "deterministic-fallback",
+            "expected_reasoning_range": [
+              1.5,
+              2.0
+            ]
+          }
         },
         {
           "id": "AC-08",
           "name": "Latency-sensitive routine work",
           "passed": true,
+          "config_correctness_passed": true,
+          "complexity_semantic": "NOT_EVALUATED",
+          "reasoning_semantic": "NOT_EVALUATED",
           "readiness_matched": true,
           "topology_matched": true,
           "model_matched": true,
@@ -873,13 +797,34 @@
           "observed_model": "gpt-4o-mini",
           "observed_effort": null,
           "observed_topology": "Case C",
-          "fallback_used": false,
-          "approval_state": "approved"
+          "observed_tier": "routine",
+          "observed_reasoning": "low",
+          "fallback_used": true,
+          "approval_state": "approved",
+          "raw_evidence": {
+            "complexity_score": null,
+            "complexity_confidence": null,
+            "complexity_source": "deterministic-fallback",
+            "expected_complexity_range": [
+              0.0,
+              0.5
+            ],
+            "reasoning_score": null,
+            "reasoning_confidence": null,
+            "reasoning_source": "deterministic-fallback",
+            "expected_reasoning_range": [
+              0.0,
+              0.8
+            ]
+          }
         },
         {
           "id": "AC-09",
           "name": "Fixed-model harness",
           "passed": true,
+          "config_correctness_passed": true,
+          "complexity_semantic": "NOT_EVALUATED",
+          "reasoning_semantic": "NOT_EVALUATED",
           "readiness_matched": true,
           "topology_matched": true,
           "model_matched": true,
@@ -889,13 +834,34 @@
           "observed_model": "fixed-sonnet",
           "observed_effort": null,
           "observed_topology": "Case A",
-          "fallback_used": false,
-          "approval_state": "approved"
+          "observed_tier": "high",
+          "observed_reasoning": "high",
+          "fallback_used": true,
+          "approval_state": "approved",
+          "raw_evidence": {
+            "complexity_score": null,
+            "complexity_confidence": null,
+            "complexity_source": "deterministic-fallback",
+            "expected_complexity_range": [
+              1.5,
+              3.0
+            ],
+            "reasoning_score": null,
+            "reasoning_confidence": null,
+            "reasoning_source": "deterministic-fallback",
+            "expected_reasoning_range": [
+              1.5,
+              2.0
+            ]
+          }
         },
         {
           "id": "AC-10",
           "name": "Multi-model decomposed harness",
           "passed": true,
+          "config_correctness_passed": true,
+          "complexity_semantic": "NOT_EVALUATED",
+          "reasoning_semantic": "NOT_EVALUATED",
           "readiness_matched": true,
           "topology_matched": true,
           "model_matched": true,
@@ -905,13 +871,34 @@
           "observed_model": "o3-mini",
           "observed_effort": null,
           "observed_topology": "Case D",
-          "fallback_used": false,
-          "approval_state": "approved"
+          "observed_tier": "high",
+          "observed_reasoning": "high",
+          "fallback_used": true,
+          "approval_state": "approved",
+          "raw_evidence": {
+            "complexity_score": null,
+            "complexity_confidence": null,
+            "complexity_source": "deterministic-fallback",
+            "expected_complexity_range": [
+              1.5,
+              3.0
+            ],
+            "reasoning_score": null,
+            "reasoning_confidence": null,
+            "reasoning_source": "deterministic-fallback",
+            "expected_reasoning_range": [
+              1.5,
+              2.0
+            ]
+          }
         },
         {
           "id": "AC-11",
           "name": "Host with no effort selector",
           "passed": true,
+          "config_correctness_passed": true,
+          "complexity_semantic": "NOT_EVALUATED",
+          "reasoning_semantic": "NOT_EVALUATED",
           "readiness_matched": true,
           "topology_matched": true,
           "model_matched": true,
@@ -921,13 +908,34 @@
           "observed_model": "gpt-4o",
           "observed_effort": null,
           "observed_topology": "Case A",
-          "fallback_used": false,
-          "approval_state": "approved"
+          "observed_tier": "high",
+          "observed_reasoning": "high",
+          "fallback_used": true,
+          "approval_state": "approved",
+          "raw_evidence": {
+            "complexity_score": null,
+            "complexity_confidence": null,
+            "complexity_source": "deterministic-fallback",
+            "expected_complexity_range": [
+              1.5,
+              3.0
+            ],
+            "reasoning_score": null,
+            "reasoning_confidence": null,
+            "reasoning_source": "deterministic-fallback",
+            "expected_reasoning_range": [
+              1.5,
+              2.0
+            ]
+          }
         },
         {
           "id": "AC-12",
           "name": "Limited effort selector bounds Jev output",
           "passed": true,
+          "config_correctness_passed": true,
+          "complexity_semantic": "NOT_EVALUATED",
+          "reasoning_semantic": "NOT_EVALUATED",
           "readiness_matched": true,
           "topology_matched": true,
           "model_matched": true,
@@ -937,13 +945,34 @@
           "observed_model": "model-x",
           "observed_effort": "medium",
           "observed_topology": "Case A",
+          "observed_tier": "high",
+          "observed_reasoning": "high",
           "fallback_used": true,
-          "approval_state": "approved"
+          "approval_state": "approved",
+          "raw_evidence": {
+            "complexity_score": null,
+            "complexity_confidence": null,
+            "complexity_source": "deterministic-fallback",
+            "expected_complexity_range": [
+              1.5,
+              3.0
+            ],
+            "reasoning_score": null,
+            "reasoning_confidence": null,
+            "reasoning_source": "deterministic-fallback",
+            "expected_reasoning_range": [
+              1.5,
+              2.0
+            ]
+          }
         },
         {
           "id": "AC-13",
           "name": "User explicitly requests high effort (overrides Jev)",
           "passed": true,
+          "config_correctness_passed": true,
+          "complexity_semantic": "NOT_EVALUATED",
+          "reasoning_semantic": "NOT_EVALUATED",
           "readiness_matched": true,
           "topology_matched": true,
           "model_matched": true,
@@ -953,13 +982,34 @@
           "observed_model": "model-x",
           "observed_effort": "high",
           "observed_topology": "Case A",
-          "fallback_used": false,
-          "approval_state": "approved"
+          "observed_tier": "routine",
+          "observed_reasoning": "low",
+          "fallback_used": true,
+          "approval_state": "approved",
+          "raw_evidence": {
+            "complexity_score": null,
+            "complexity_confidence": null,
+            "complexity_source": "deterministic-fallback",
+            "expected_complexity_range": [
+              0.0,
+              0.5
+            ],
+            "reasoning_score": null,
+            "reasoning_confidence": null,
+            "reasoning_source": "deterministic-fallback",
+            "expected_reasoning_range": [
+              0.0,
+              0.8
+            ]
+          }
         },
         {
           "id": "AC-14",
           "name": "User rejects configuration change preview",
           "passed": true,
+          "config_correctness_passed": true,
+          "complexity_semantic": "NOT_EVALUATED",
+          "reasoning_semantic": "NOT_EVALUATED",
           "readiness_matched": true,
           "topology_matched": true,
           "model_matched": true,
@@ -969,11 +1019,29 @@
           "observed_model": "active-stay",
           "observed_effort": null,
           "observed_topology": "Case A",
+          "observed_tier": "high",
+          "observed_reasoning": "high",
           "fallback_used": true,
-          "approval_state": "declined"
+          "approval_state": "declined",
+          "raw_evidence": {
+            "complexity_score": null,
+            "complexity_confidence": null,
+            "complexity_source": "deterministic-fallback",
+            "expected_complexity_range": [
+              1.5,
+              3.0
+            ],
+            "reasoning_score": null,
+            "reasoning_confidence": null,
+            "reasoning_source": "deterministic-fallback",
+            "expected_reasoning_range": [
+              1.5,
+              2.0
+            ]
+          }
         }
       ],
-      "duration_seconds": 4.209
+      "duration_seconds": 0.0
     }
   }
 }

@@ -41,24 +41,36 @@ SUPPORTED_AGENT_TARGETS: dict[str, dict[str, Any]] = {
     "pi": {
         "cli_agent": "pi",
         "local_paths": [Path(".pi/skills"), Path(".pi/agent/skills")],
-        "global_paths": [Path.home() / ".pi" / "agent" / "skills", Path.home() / ".pi" / "skills"],
+        "global_subpaths": [Path(".pi/agent/skills"), Path(".pi/skills")],
     },
     "claude": {
         "cli_agent": "claude",
         "local_paths": [Path(".claude/skills"), Path(".agents/skills")],
-        "global_paths": [Path.home() / ".claude" / "skills", Path.home() / ".agents" / "skills"],
+        "global_subpaths": [Path(".claude/skills"), Path(".agents/skills")],
     },
     "cursor": {
         "cli_agent": "cursor",
         "local_paths": [Path(".cursor/skills")],
-        "global_paths": [Path.home() / ".cursor" / "skills"],
+        "global_subpaths": [Path(".cursor/skills")],
     },
     "codex": {
         "cli_agent": "codex",
         "local_paths": [Path(".codex/skills"), Path(".agents/skills")],
-        "global_paths": [Path.home() / ".codex" / "skills", Path.home() / ".agents" / "skills"],
+        "global_subpaths": [Path(".codex/skills"), Path(".agents/skills")],
     },
 }
+
+
+def get_agent_global_paths(agent_target: Optional[str] = None, home: Optional[Path] = None) -> list[Path]:
+    """Dynamically resolve global skill search roots relative to current or specified home."""
+    h = home or Path.home()
+    if agent_target and agent_target in SUPPORTED_AGENT_TARGETS:
+        return [h / p for p in SUPPORTED_AGENT_TARGETS[agent_target]["global_subpaths"]]
+    return [
+        h / ".pi" / "agent" / "skills",
+        h / ".pi" / "skills",
+        h / ".agents" / "skills",
+    ]
 
 
 def resolve_active_agent_target(
@@ -191,18 +203,13 @@ def find_global_skill(
     skill_name: str = JEV_SKILL_NAME,
     agent_target: Optional[str] = None,
     search_roots: Optional[list[Path]] = None,
+    home: Optional[Path] = None,
 ) -> Optional[Path]:
     """Locate official typesafe-ai skill in global agent skill directories matching target."""
     if search_roots is not None:
         roots = search_roots
-    elif agent_target and agent_target in SUPPORTED_AGENT_TARGETS:
-        roots = SUPPORTED_AGENT_TARGETS[agent_target]["global_paths"]
     else:
-        roots = [
-            Path.home() / ".pi" / "agent" / "skills",
-            Path.home() / ".pi" / "skills",
-            Path.home() / ".agents" / "skills",
-        ]
+        roots = get_agent_global_paths(agent_target, home=home)
     for root in roots:
         skill_dir = root / skill_name
         if is_valid_typesafe_skill(skill_dir):
@@ -393,7 +400,20 @@ def verify_jev_runtime(
 
     Verifies authentication, basic System One request, and typed response.
     Never exposes raw API keys in exceptions or returned diagnostics.
+    If client is injected, avoids importing typesafe_sdk so offline tests are hermetic.
     """
+    if client is not None:
+        try:
+            resp = client.system_one(
+                state="Project initialization Jev runtime smoke test.",
+                questions={"readiness_check": "readiness verification check"},
+            )
+            if resp and hasattr(resp, "nouls") and "readiness_check" in resp.nouls:
+                return True, "verified"
+            return False, "JEV_RUNTIME_UNVERIFIED: unexpected response structure"
+        except Exception as exc:
+            return False, f"JEV_RUNTIME_UNVERIFIED: {type(exc).__name__}"
+
     try:
         from typesafe_sdk import Noul, TypeSafeClient
     except ImportError:
@@ -403,11 +423,11 @@ def verify_jev_runtime(
     if not resolved_key:
         resolved_key, _ = resolve_typesafe_credentials(project_root)
 
-    if not resolved_key and client is None:
+    if not resolved_key:
         return False, "JEV_RUNTIME_UNVERIFIED: TYPESAFE_API_KEY missing"
 
     try:
-        ts_client = client or TypeSafeClient(api_key=resolved_key)
+        ts_client = TypeSafeClient(api_key=resolved_key)
         resp = ts_client.system_one(
             state="Project initialization Jev runtime smoke test.",
             questions={"readiness_check": Noul(instructions="Is this a readiness verification check?")},
@@ -979,13 +999,6 @@ def bootstrap(
             "recommendations": stack_recommendations,
         },
     }
-    if installed_skill_path is not None:
-        try:
-            report["jev"]["installedSkillPath"] = str(installed_skill_path.relative_to(root))
-        except ValueError:
-            report["jev"]["installedSkillPath"] = str(installed_skill_path)
-
-    return report
     if installed_skill_path is not None:
         try:
             report["jev"]["installedSkillPath"] = str(installed_skill_path.relative_to(root))

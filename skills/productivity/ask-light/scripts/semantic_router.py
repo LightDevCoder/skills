@@ -93,23 +93,31 @@ def plan_semantic_queries(
     legal_result: LegalActionsResult,
     user_request: str,
     enable_expanded_judgments: bool = True,
-) -> tuple[Dict[str, Any], List[str], Dict[str, str]]:
-    """Plan minimal necessary Jev questions based on deterministic facts and request phrasing.
+) -> tuple[Dict[str, Any], List[str], Dict[str, str], Dict[str, str]]:
+    """Plan minimal necessary Jev questions based on deterministic facts, active consumers, and request phrasing.
 
     Invariants:
       1. Non-executable queries (BLOCKED, NEED_INPUT, EXPLAIN) send 0 questions.
       2. Choice is sent ONLY when len(allowed_actions) > 1.
-      3. Ambiguity Noul is sent ONLY when clarify is legal or user phrasing contains ambiguity signals.
-      4. Escalation Noul is sent ONLY when implement is legal and task complexity warrants agent-config.
-      5. Execution intent Noul is sent ONLY when presentation wording benefits from advisory intent.
+      3. Ambiguity Noul is sent ONLY when an active consumer exists:
+         - If len(allowed_actions) > 1 and "project-clarify" is a candidate (selects clarify over others).
+         - If allowed_actions == ["implement"] and user phrasing contains explicit ambiguity keywords (recommends clarify alternative).
+         - If allowed_actions == ["project-clarify"] alone, NO question is sent (clarify is already the only action; zero-value inference).
+      4. Escalation Noul is sent ONLY when "implement" is in allowed_actions and task complexity warrants agent-config alternative.
+      5. Execution intent Noul is REMOVED: authorization is 100% deterministic code; Jev output cannot grant transition authority.
     """
     questions: Dict[str, Any] = {}
     questions_sent: List[str] = []
     reasons_needed: Dict[str, str] = {}
+    consumers: Dict[str, str] = {}
 
     req_lower = user_request.lower()
 
-    # 1. Choice: Multiple legal alternatives
+    # 1. Non-executable queries send 0 questions
+    if legal_result.status in ("BLOCKED", "NEED_INPUT", "EXPLAIN"):
+        return questions, questions_sent, reasons_needed, consumers
+
+    # 2. Choice: Multiple legal alternatives
     if len(legal_result.allowed_actions) > 1:
         criteria = {
             action: legal_result.candidate_descriptions.get(action, f"Execute {action} workflow step")
@@ -121,51 +129,48 @@ def plan_semantic_queries(
         )
         questions_sent.append("next_action")
         reasons_needed["next_action"] = "Multiple legal candidate actions available; semantic preference needed."
+        consumers["next_action"] = "Selects primary recommended action among legal candidates."
 
     if not enable_expanded_judgments:
-        return questions, questions_sent, reasons_needed
+        return questions, questions_sent, reasons_needed, consumers
 
-    # 2. Material Ambiguity
-    ambiguity_keywords = ["maybe", "perhaps", " or ", "not sure", "whether", "should we", "tradeoff", "redesign", "unclear", "ambiguous", "confused"]
+    # 3. Material Ambiguity
+    # Consumer check: does answering this materially change behavior?
+    ambiguity_keywords = ["maybe", "perhaps", " or ", "not sure", "whether", "tradeoff", "redesign", "unclear", "ambiguous", "confused"]
     has_ambiguity_phrasing = any(kw in req_lower for kw in ambiguity_keywords)
-    clarify_relevant = "project-clarify" in legal_result.allowed_actions
-    if clarify_relevant or has_ambiguity_phrasing:
+
+    if len(legal_result.allowed_actions) > 1 and "project-clarify" in legal_result.allowed_actions:
+        # Consumer: pick project-clarify over other legal paths
         questions["has_material_ambiguity"] = Noul(
             instructions="Does the request or project state have material ambiguity or unsettled decisions requiring clarification?",
         )
         questions_sent.append("has_material_ambiguity")
-        reasons_needed["has_material_ambiguity"] = "Detect semantic ambiguity or conflicting requirements requiring clarification."
+        reasons_needed["has_material_ambiguity"] = "Disambiguate between clarification and other legal actions."
+        consumers["has_material_ambiguity"] = "Selects project-clarify over other candidates when ambiguity is material."
+    elif legal_result.allowed_actions == ["implement"] and has_ambiguity_phrasing:
+        # Consumer: recommend project-clarify as alternative skill
+        questions["has_material_ambiguity"] = Noul(
+            instructions="Does the user request express material ambiguity or conflicting requirements requiring clarification before implementation?",
+        )
+        questions_sent.append("has_material_ambiguity")
+        reasons_needed["has_material_ambiguity"] = "Ambiguity phrasing detected on implementable state."
+        consumers["has_material_ambiguity"] = "Recommends project-clarify as alternative skill to resolve requirement ambiguity."
 
-    # 3. Deep Reasoning Escalation
+    # 4. Deep Reasoning Escalation
     complexity_keywords = [
         "architecture", "overhaul", "distributed", "consensus", "raft", "concurrency",
-        "lock-free", "refactor", "security", "cryptographic", "rework", "performance",
+        "lock-free", "refactor", "security", "cryptographic", "performance",
     ]
     has_complexity_phrasing = any(kw in req_lower for kw in complexity_keywords)
-    implement_relevant = "implement" in legal_result.allowed_actions
-    if implement_relevant and has_complexity_phrasing:
+    if "implement" in legal_result.allowed_actions and has_complexity_phrasing:
         questions["needs_deep_reasoning_escalation"] = Noul(
             instructions="Does this request involve high architectural complexity or conflicting requirements requiring deep reasoning escalation rather than fast routing?",
         )
         questions_sent.append("needs_deep_reasoning_escalation")
         reasons_needed["needs_deep_reasoning_escalation"] = "Assess whether implementation task warrants reasoning escalation to agent-config."
+        consumers["needs_deep_reasoning_escalation"] = "Recommends agent-config as alternative skill for deep reasoning escalation."
 
-    # 4. Immediate Execution Intent
-    if legal_result.status == "RECOMMEND":
-        exec_keywords = ["start", "go ahead", "run", "do it", "execute", "implement", "now", "开始", "执行", "should we"]
-        if any(kw in req_lower for kw in exec_keywords):
-            questions["wants_immediate_execution"] = Noul(
-                instructions=(
-                    "Does the user request command or authorize immediate execution right now "
-                    "(e.g. '立刻开始', 'go ahead and run it', 'start executing now'), "
-                    "as opposed to asking a question, asking for advice, or asking for confirmation "
-                    "(e.g. '现在开始做吗？', '下一步做什么？', 'what should I do next?')?"
-                ),
-            )
-            questions_sent.append("wants_immediate_execution")
-            reasons_needed["wants_immediate_execution"] = "Assess user execution intent probability for advisory presentation."
-
-    return questions, questions_sent, reasons_needed
+    return questions, questions_sent, reasons_needed, consumers
 
 
 def route_with_jev(
@@ -254,7 +259,7 @@ def route_with_jev(
     compact_state = build_compact_jev_state(legal_result, user_request)
 
     # Query planning: Only ask what is needed
-    questions, questions_sent, reasons_needed = plan_semantic_queries(
+    questions, questions_sent, reasons_needed, consumers = plan_semantic_queries(
         legal_result,
         user_request,
         enable_expanded_judgments=enable_expanded_judgments,
@@ -299,17 +304,13 @@ def route_with_jev(
             confidence = 1.0
             probabilities = {baseline_skill: 1.0}
 
-        wants_exec_prob = 0.0
         ambiguity_prob = 0.0
         escalation_prob = 0.0
 
         if enable_expanded_judgments and hasattr(response, "nouls") and response.nouls:
-            noul_exec = response.nouls.get("wants_immediate_execution")
             noul_ambig = response.nouls.get("has_material_ambiguity")
             noul_escala = response.nouls.get("needs_deep_reasoning_escalation")
 
-            if noul_exec and hasattr(noul_exec, "noul") and isinstance(noul_exec.noul, (int, float)):
-                wants_exec_prob = float(noul_exec.noul)
             if noul_ambig and hasattr(noul_ambig, "noul") and isinstance(noul_ambig.noul, (int, float)):
                 ambiguity_prob = float(noul_ambig.noul)
             if noul_escala and hasattr(noul_escala, "noul") and isinstance(noul_escala.noul, (int, float)):
@@ -319,9 +320,9 @@ def route_with_jev(
             action_choice=selected_skill if need_choice else None,
             action_confidence=confidence if need_choice else None,
             action_probabilities=probabilities if need_choice else {},
-            execution_intent_probability=wants_exec_prob,
-            ambiguity_probability=ambiguity_prob,
-            escalation_probability=escalation_prob,
+            execution_intent_probability=None,
+            ambiguity_probability=ambiguity_prob if "has_material_ambiguity" in questions_sent else None,
+            escalation_probability=escalation_prob if "needs_deep_reasoning_escalation" in questions_sent else None,
             questions_sent=questions_sent,
             reason_each_question_needed=reasons_needed,
         )
@@ -352,16 +353,15 @@ def route_with_jev(
             if selected_skill == "implement":
                 alternative_skill = "agent-config"
 
-        # Material ambiguity routing: if high ambiguity detected and clarify is an option
-        if ambiguity_prob >= effective_policy.ambiguity_threshold and "project-clarify" in legal_result.allowed_actions:
-            selected_skill = "project-clarify"
+        # Material ambiguity routing: if high ambiguity detected and clarify is an option or alternative
+        if ambiguity_prob >= effective_policy.ambiguity_threshold:
+            if "project-clarify" in legal_result.allowed_actions:
+                selected_skill = "project-clarify"
+            elif "implement" in legal_result.allowed_actions:
+                alternative_skill = "project-clarify"
 
         # HARD INVARIANT (Section 12): Jev output cannot grant TRANSITION authority!
-        # Transition authority requires deterministic authorization (e.g. explicit command).
         final_status = legal_result.status
-        intent_note = ""
-        if wants_exec_prob >= effective_policy.execution_intent_threshold and legal_result.status == "RECOMMEND":
-            intent_note = f" (Execution intent noted p={wants_exec_prob:.2f}; awaiting explicit command or confirmed approval)."
 
         # Shadow mode evaluation: record judgments, return deterministic baseline
         if shadow_mode:
@@ -396,14 +396,14 @@ def route_with_jev(
                 escalated=escalated,
                 escalation_reason=escalation_reason,
                 fail_closed=legal_result.fail_closed,
-                justification=f"Borderline Jev confidence ({confidence:.2f}); safely preserved baseline {baseline_skill}.{intent_note}",
+                justification=f"Borderline Jev confidence ({confidence:.2f}); safely preserved baseline {baseline_skill}.",
             )
 
         # Success: Bounded Jev judgment accepted
         if need_choice:
-            justification_msg = f"Jev selected {selected_skill} (confidence {confidence:.2f}) from legal candidates.{intent_note}"
+            justification_msg = f"Jev selected {selected_skill} (confidence {confidence:.2f}) from legal candidates."
         else:
-            justification_msg = f"Deterministic action {selected_skill} selected (single legal candidate).{intent_note}"
+            justification_msg = f"Deterministic action {selected_skill} selected (single legal candidate)."
 
         if escalated:
             justification_msg += f" Note: Escalation recommended ({escalation_reason}); recommend higher reasoning effort or agent-config."
