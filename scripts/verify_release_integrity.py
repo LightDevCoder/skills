@@ -261,13 +261,13 @@ def check_release_manifest_consistency(
             return VerificationResult(
                 passed=False,
                 status="MANIFEST_MISSING",
-                message=f"English release manifest missing at {manifest_en.relative_to(repo_root)}",
+                message=f"English release manifest missing at {rel_manifest_en}",
             )
         if not manifest_zh.is_file():
             return VerificationResult(
                 passed=False,
                 status="MANIFEST_MISSING",
-                message=f"Chinese release manifest missing at {manifest_zh.relative_to(repo_root)}",
+                message=f"Chinese release manifest missing at {rel_manifest_zh}",
             )
         text_en = manifest_en.read_text(encoding="utf-8")
         text_zh = manifest_zh.read_text(encoding="utf-8")
@@ -361,7 +361,7 @@ def check_manifest_navigation(
                         passed=False,
                         status="RELATIVE_RECEIPT_LINK_FORBIDDEN",
                         message=(
-                            f"Manifest {p.relative_to(repo_root)} contains a relative link to RELEASE_RECEIPT.md. "
+                            f"Manifest {rel_path} contains a relative link to RELEASE_RECEIPT.md. "
                             "Manifest must not navigate to candidate receipts in immutable tags; "
                             "post-publication attestation lives on main."
                         ),
@@ -403,13 +403,13 @@ def check_release_notes_consistency(
             return VerificationResult(
                 passed=False,
                 status="NOTES_MISSING",
-                message=f"English release notes missing at {notes_en.relative_to(repo_root)}",
+                message=f"English release notes missing at {rel_notes_en}",
             )
         if not notes_zh.is_file():
             return VerificationResult(
                 passed=False,
                 status="NOTES_MISSING",
-                message=f"Chinese release notes missing at {notes_zh.relative_to(repo_root)}",
+                message=f"Chinese release notes missing at {rel_notes_zh}",
             )
     return VerificationResult(
         passed=True,
@@ -448,8 +448,13 @@ def check_receipt_absence_in_candidate(
                     "Receipts may only be created on main during stage ATTESTED following publication."
                 ),
             )
+        return VerificationResult(
+            passed=True,
+            status="PASS",
+            message=f"No premature candidate receipts found in revision '{revision}' for {tag}.",
+        )
 
-    # Check filesystem
+    # Check filesystem ONLY if revision is None
     receipt_en = repo_root / rel_receipt_en
     receipt_zh = repo_root / rel_receipt_zh
     if receipt_en.is_file() or receipt_zh.is_file():
@@ -512,10 +517,30 @@ def extract_checklist_status(text: str, gate_label: str) -> str | None:
 def check_release_receipt_consistency(
     tag: str,
     release_commit: str | None = None,
+    receipt_revision: str | None = None,
+    release_revision: str | None = None,
     revision: str | None = None,
     repo_root: Path = REPO_ROOT,
 ) -> VerificationResult:
     """Verify mechanical consistency of release receipt and evidence files."""
+    # Backwards compatibility: if receipt_revision is None and revision is provided
+    if receipt_revision is None and revision is not None:
+        receipt_revision = revision
+
+    # Release scope authority: release_revision defaults to release_commit or tag snapshot
+    if release_revision is None:
+        if release_commit:
+            release_revision = release_commit
+        else:
+            tag_peel = resolve_tag_sha(tag, cwd=repo_root)
+            if tag_peel:
+                release_revision = f"refs/tags/{tag}"
+
+    # Canonical relative paths for deterministic diagnostics
+    rel_evidence_dir = f"docs/evidence/releases/{tag}"
+    rel_receipt_en = f"docs/evidence/releases/{tag}/RELEASE_RECEIPT.md"
+    rel_receipt_zh = f"docs/evidence/releases/{tag}/RELEASE_RECEIPT.zh-CN.md"
+
     # Release receipts must only attest real annotated tags (fail closed on lightweight tags)
     tag_ident = resolve_annotated_tag_identity(tag, cwd=repo_root)
     if tag_ident.tag_type:
@@ -529,46 +554,46 @@ def check_release_receipt_consistency(
                 ),
             )
 
-    rel_receipt_en = f"docs/evidence/releases/{tag}/RELEASE_RECEIPT.md"
-    rel_receipt_zh = f"docs/evidence/releases/{tag}/RELEASE_RECEIPT.zh-CN.md"
-
-    if revision:
-        if not git_path_exists(revision, rel_receipt_en, cwd=repo_root):
+    if receipt_revision:
+        if not git_path_exists(receipt_revision, rel_receipt_en, cwd=repo_root):
             return VerificationResult(
                 passed=False,
                 status="RECEIPT_MISSING",
-                message=f"English release receipt missing in git revision '{revision}' at {rel_receipt_en}",
+                message=f"English release receipt missing in git revision '{receipt_revision}' at {rel_receipt_en}",
             )
-        if not git_path_exists(revision, rel_receipt_zh, cwd=repo_root):
+        if not git_path_exists(receipt_revision, rel_receipt_zh, cwd=repo_root):
             return VerificationResult(
                 passed=False,
                 status="RECEIPT_MISSING",
-                message=f"Chinese release receipt missing in git revision '{revision}' at {rel_receipt_zh}",
+                message=f"Chinese release receipt missing in git revision '{receipt_revision}' at {rel_receipt_zh}",
             )
-        text_en = git_read_text(revision, rel_receipt_en, cwd=repo_root) or ""
-        text_zh = git_read_text(revision, rel_receipt_zh, cwd=repo_root) or ""
-        actual_pkg_count = get_admitted_package_count(repo_root, revision=revision)
+        text_en = git_read_text(receipt_revision, rel_receipt_en, cwd=repo_root) or ""
+        text_zh = git_read_text(receipt_revision, rel_receipt_zh, cwd=repo_root) or ""
     else:
-        evidence_dir = repo_root / "docs" / "evidence" / "releases" / tag
-        receipt_en = evidence_dir / "RELEASE_RECEIPT.md"
-        receipt_zh = evidence_dir / "RELEASE_RECEIPT.zh-CN.md"
+        receipt_en_path = repo_root / rel_receipt_en
+        receipt_zh_path = repo_root / rel_receipt_zh
 
-        if not receipt_en.is_file():
+        if not receipt_en_path.is_file():
             return VerificationResult(
                 passed=False,
                 status="RECEIPT_MISSING",
-                message=f"English release receipt missing at {receipt_en.relative_to(repo_root)}",
+                message=f"English release receipt missing at {rel_receipt_en}",
             )
 
-        if not receipt_zh.is_file():
+        if not receipt_zh_path.is_file():
             return VerificationResult(
                 passed=False,
                 status="RECEIPT_MISSING",
-                message=f"Chinese release receipt missing at {receipt_zh.relative_to(repo_root)}",
+                message=f"Chinese release receipt missing at {rel_receipt_zh}",
             )
 
-        text_en = receipt_en.read_text(encoding="utf-8")
-        text_zh = receipt_zh.read_text(encoding="utf-8")
+        text_en = receipt_en_path.read_text(encoding="utf-8")
+        text_zh = receipt_zh_path.read_text(encoding="utf-8")
+
+    # Package count authority comes strictly from release_revision (the immutable release snapshot)
+    if release_revision:
+        actual_pkg_count = get_admitted_package_count(repo_root, revision=release_revision)
+    else:
         actual_pkg_count = get_admitted_package_count(repo_root)
 
     # Legacy policy check: <= v0.2.3 uses historical format
@@ -584,7 +609,7 @@ def check_release_receipt_consistency(
         return VerificationResult(
             passed=False,
             status="METADATA_MISMATCH",
-            message=f"Tag '{tag}' not found in release receipts under {evidence_dir.relative_to(repo_root)}",
+            message=f"Tag '{tag}' not found in release receipts under {rel_evidence_dir}",
         )
 
     # 2. Verify admitted package count matches
@@ -597,15 +622,15 @@ def check_release_receipt_consistency(
                 passed=False,
                 status="COUNT_MISMATCH",
                 message=(
-                    f"Package count mismatch in {receipt_en.relative_to(repo_root)}: "
-                    f"receipt claims {claimed_count}, but repository has {actual_pkg_count} admitted packages."
+                    f"Package count mismatch in {rel_receipt_en}: "
+                    f"receipt claims {claimed_count}, but release snapshot has {actual_pkg_count} admitted packages."
                 ),
             )
     elif not is_legacy:
         return VerificationResult(
             passed=False,
             status="COUNT_MISMATCH",
-            message=f"Collection package count field missing in {receipt_en.relative_to(repo_root)}",
+            message=f"Collection package count field missing in {rel_receipt_en}",
         )
 
     pkg_pattern_zh = re.compile(r"(\d+)\s*(?:admitted\s+packages|个(?:已准入)?包)", re.IGNORECASE)
@@ -617,15 +642,15 @@ def check_release_receipt_consistency(
                 passed=False,
                 status="COUNT_MISMATCH",
                 message=(
-                    f"Package count mismatch in {receipt_zh.relative_to(repo_root)}: "
-                    f"receipt claims {claimed_count_zh}, but repository has {actual_pkg_count} admitted packages."
+                    f"Package count mismatch in {rel_receipt_zh}: "
+                    f"receipt claims {claimed_count_zh}, but release snapshot has {actual_pkg_count} admitted packages."
                 ),
             )
     elif not is_legacy:
         return VerificationResult(
             passed=False,
             status="COUNT_MISMATCH",
-            message=f"Collection package count field missing in {receipt_zh.relative_to(repo_root)}",
+            message=f"Collection package count field missing in {rel_receipt_zh}",
         )
 
     # 3. Check tag target commit against local tag and supplied release commit
@@ -727,13 +752,13 @@ def check_release_receipt_consistency(
         return VerificationResult(
             passed=False,
             status="RECEIPT_TAG_OBJECT_MISSING",
-            message=f"Annotated Tag Object SHA missing or invalid in {receipt_en.relative_to(repo_root)}",
+            message=f"Annotated Tag Object SHA missing or invalid in {rel_receipt_en}",
         )
     if not obj_m_zh:
         return VerificationResult(
             passed=False,
             status="RECEIPT_TAG_OBJECT_MISSING",
-            message=f"Annotated Tag 对象 SHA missing or invalid in {receipt_zh.relative_to(repo_root)}",
+            message=f"Annotated Tag 对象 SHA missing or invalid in {rel_receipt_zh}",
         )
     if obj_m_en.group(1) != obj_m_zh.group(1):
         return VerificationResult(
@@ -755,13 +780,13 @@ def check_release_receipt_consistency(
         return VerificationResult(
             passed=False,
             status="RECEIPT_TAG_TARGET_MISSING",
-            message=f"Tag Target Commit SHA missing in {receipt_en.relative_to(repo_root)}",
+            message=f"Tag Target Commit SHA missing in {rel_receipt_en}",
         )
     if not tgt_m_zh:
         return VerificationResult(
             passed=False,
             status="RECEIPT_TAG_TARGET_MISSING",
-            message=f"Tag 目标 Commit SHA missing in {receipt_zh.relative_to(repo_root)}",
+            message=f"Tag 目标 Commit SHA missing in {rel_receipt_zh}",
         )
     if tgt_m_en.group(1) != tgt_m_zh.group(1):
         return VerificationResult(
@@ -812,13 +837,13 @@ def check_release_receipt_consistency(
         return VerificationResult(
             passed=False,
             status="RECEIPT_TIMESTAMP_MISSING",
-            message=f"Publication timestamp missing or pending in {receipt_en.relative_to(repo_root)}",
+            message=f"Publication timestamp missing or pending in {rel_receipt_en}",
         )
     if not ts_m_zh or not ts_m_zh.group(1).strip() or "PENDING" in ts_m_zh.group(1).upper():
         return VerificationResult(
             passed=False,
             status="RECEIPT_TIMESTAMP_MISSING",
-            message=f"公开发布时间戳 missing or pending in {receipt_zh.relative_to(repo_root)}",
+            message=f"公开发布时间戳 missing or pending in {rel_receipt_zh}",
         )
 
     # 11. Required Evidence Gates
@@ -834,19 +859,19 @@ def check_release_receipt_consistency(
             return VerificationResult(
                 passed=False,
                 status="RECEIPT_EVIDENCE_MISSING",
-                message=f"Required evidence row '{gate_name}' ({gate_desc}) missing in {receipt_en.relative_to(repo_root)}",
+                message=f"Required evidence row '{gate_name}' ({gate_desc}) missing in {rel_receipt_en}",
             )
         if st in ("PENDING", "TODO", "CANDIDATE"):
             return VerificationResult(
                 passed=False,
                 status="RECEIPT_EVIDENCE_PENDING",
-                message=f"Evidence row '{gate_name}' in {receipt_en.relative_to(repo_root)} is '{st}', not final PASS/SUCCESS.",
+                message=f"Evidence row '{gate_name}' in {rel_receipt_en} is '{st}', not final PASS/SUCCESS.",
             )
         if st not in ("PASS", "SUCCESS"):
             return VerificationResult(
                 passed=False,
                 status="RECEIPT_EVIDENCE_INCOMPLETE",
-                message=f"Evidence row '{gate_name}' in {receipt_en.relative_to(repo_root)} has non-passing status '{st}'.",
+                message=f"Evidence row '{gate_name}' in {rel_receipt_en} has non-passing status '{st}'.",
             )
 
     zh_gates = [
@@ -861,19 +886,19 @@ def check_release_receipt_consistency(
             return VerificationResult(
                 passed=False,
                 status="RECEIPT_EVIDENCE_MISSING",
-                message=f"Required evidence row '{gate_name}' ({gate_desc}) missing in {receipt_zh.relative_to(repo_root)}",
+                message=f"Required evidence row '{gate_name}' ({gate_desc}) missing in {rel_receipt_zh}",
             )
         if st in ("PENDING", "TODO", "CANDIDATE"):
             return VerificationResult(
                 passed=False,
                 status="RECEIPT_EVIDENCE_PENDING",
-                message=f"Evidence row '{gate_name}' in {receipt_zh.relative_to(repo_root)} is '{st}', not final PASS/SUCCESS.",
+                message=f"Evidence row '{gate_name}' in {rel_receipt_zh} is '{st}', not final PASS/SUCCESS.",
             )
         if st not in ("PASS", "SUCCESS"):
             return VerificationResult(
                 passed=False,
                 status="RECEIPT_EVIDENCE_INCOMPLETE",
-                message=f"Evidence row '{gate_name}' in {receipt_zh.relative_to(repo_root)} has non-passing status '{st}'.",
+                message=f"Evidence row '{gate_name}' in {rel_receipt_zh} has non-passing status '{st}'.",
             )
 
     return VerificationResult(
@@ -1130,9 +1155,17 @@ def main() -> int:
         if not res_notes.passed:
             all_passed = False
 
-        # Release receipt is verified from committed HEAD
+        # Release receipt is verified from committed HEAD (receipt_revision)
+        # against the immutable candidate/tag snapshot (release_revision)
         head_sha = resolve_commit_sha("HEAD", cwd=repo_root)
-        res_receipt = check_release_receipt_consistency(tag, release_commit=candidate_sha, revision=head_sha, repo_root=repo_root)
+        rel_rev = candidate_sha or tag_ref
+        res_receipt = check_release_receipt_consistency(
+            tag,
+            release_commit=candidate_sha,
+            receipt_revision=head_sha,
+            release_revision=rel_rev,
+            repo_root=repo_root,
+        )
         print(f"[{res_receipt.status}] Receipt Consistency: {res_receipt.message}")
         if not res_receipt.passed:
             all_passed = False

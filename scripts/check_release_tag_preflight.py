@@ -8,8 +8,7 @@ Pre-action validation executed before creating a release tag:
 4. Target tag does NOT exist locally (blocks premature creation or collisions).
 5. Target tag does NOT exist remotely on origin (blocks remote tag overwrite).
 
-Unless explicit --allow-retry is enabled, existing tags cause BLOCKED to ensure
-safe, unidirectional tag creation.
+Any existing local or remote tag causes BLOCKED to ensure safe, unidirectional tag creation.
 """
 
 from __future__ import annotations
@@ -203,7 +202,6 @@ def run_tag_preflight(
     fixture: str | None = None,
     check_remote_tag: bool = True,
     skip_remote: bool = False,
-    allow_retry: bool = False,
     repo_root: Path = REPO_ROOT,
 ) -> PreflightResult:
     """Execute all tag preflight gates."""
@@ -267,34 +265,14 @@ def run_tag_preflight(
     # 4. Local tag existence check
     local_ident = resolve_annotated_tag_identity(tag, cwd=repo_root)
     if local_ident.tag_type:
-        if allow_retry:
-            if not local_ident.is_annotated:
-                return PreflightResult(
-                    passed=False,
-                    status="BLOCKED",
-                    message=(
-                        f"Local tag '{tag}' exists as a lightweight tag (type: {local_ident.tag_type}). "
-                        "Release tags must be annotated tags."
-                    ),
-                )
-            if local_ident.peeled_commit_sha != cand_sha:
-                return PreflightResult(
-                    passed=False,
-                    status="BLOCKED",
-                    message=(
-                        f"Local tag '{tag}' points to commit {local_ident.peeled_commit_sha}, "
-                        f"which differs from candidate commit {cand_sha}."
-                    ),
-                )
-        else:
-            return PreflightResult(
-                passed=False,
-                status="BLOCKED",
-                message=(
-                    f"Local tag '{tag}' already exists pointing to {local_ident.peeled_commit_sha}. "
-                    "For new releases, the tag must not exist prior to creation."
-                ),
-            )
+        return PreflightResult(
+            passed=False,
+            status="BLOCKED",
+            message=(
+                f"Local tag '{tag}' already exists pointing to {local_ident.peeled_commit_sha}. "
+                "Release tags must not exist prior to creation."
+            ),
+        )
 
     # 5. Remote tag existence check (default enabled)
     if check_remote_tag:
@@ -306,35 +284,14 @@ def run_tag_preflight(
                 message=f"Could not verify remote tag state on origin: {remote_res.error}",
             )
         elif remote_res.status == RemoteTagStatus.EXISTS:
-            if allow_retry:
-                if not remote_res.is_annotated:
-                    return PreflightResult(
-                        passed=False,
-                        status="BLOCKED",
-                        message=(
-                            f"Remote tag '{tag}' already exists on origin as a lightweight tag pointing to {remote_res.peeled_commit_sha}. "
-                            "Release tags must be annotated tags; retrying against lightweight tag is forbidden."
-                        ),
-                    )
-                if remote_res.peeled_commit_sha != cand_sha:
-                    return PreflightResult(
-                        passed=False,
-                        status="BLOCKED",
-                        message=(
-                            f"Remote tag '{tag}' already exists on origin pointing to commit {remote_res.peeled_commit_sha}, "
-                            f"which differs from candidate commit {cand_sha}. Cannot overwrite remote tag."
-                        ),
-                    )
-                # Idempotent retry allowed: remote tag is annotated and peeled commit matches candidate
-            else:
-                return PreflightResult(
-                    passed=False,
-                    status="BLOCKED",
-                    message=(
-                        f"Remote tag '{tag}' already exists on origin pointing to {remote_res.peeled_commit_sha}. "
-                        "Cannot overwrite an existing remote release tag."
-                    ),
-                )
+            return PreflightResult(
+                passed=False,
+                status="BLOCKED",
+                message=(
+                    f"Remote tag '{tag}' already exists on origin pointing to {remote_res.peeled_commit_sha}. "
+                    "Cannot overwrite an existing remote release tag."
+                ),
+            )
 
     return PreflightResult(
         passed=True,
@@ -352,7 +309,6 @@ def main() -> int:
     parser.add_argument("--fixture", help="Path to ruleset JSON fixture for offline/hermetic testing.")
     parser.add_argument("--skip-remote", action="store_true", help="Skip remote tag existence check (default: remote check enabled).")
     parser.add_argument("--check-remote", action="store_true", help="Deprecated: remote tag check is enabled by default.")
-    parser.add_argument("--allow-retry", action="store_true", help="Allow tag creation preflight if existing tag matches candidate.")
     parser.add_argument("--root", default=None, help="Repository root path.")
 
     args = parser.parse_args()
@@ -374,7 +330,6 @@ def main() -> int:
         fixture=args.fixture,
         check_remote_tag=check_remote,
         skip_remote=args.skip_remote,
-        allow_retry=args.allow_retry,
         repo_root=repo_root,
     )
 

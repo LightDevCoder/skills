@@ -1812,11 +1812,11 @@ class RemoteTagPreflightTests(unittest.TestCase):
             self.assertEqual(res_remote.status, RemoteTagStatus.ABSENT)
 
 
-class AnnotatedTagRetryTests(unittest.TestCase):
-    """MEDIUM: --allow-retry must correctly compare peeled commit SHA for annotated tags."""
+class RemoteTagUnidirectionalProtectionTests(unittest.TestCase):
+    """MEDIUM: Existing remote tags must fail closed and block tag preflight unconditionally."""
 
     def setUp(self) -> None:
-        self.tmp = tempfile.TemporaryDirectory(prefix="retry-test-")
+        self.tmp = tempfile.TemporaryDirectory(prefix="remote-tag-test-")
         self.tmp_root = Path(self.tmp.name)
         self.bare_remote = self.tmp_root / "origin.git"
         self.client_dir = self.tmp_root / "client"
@@ -1853,25 +1853,43 @@ class AnnotatedTagRetryTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.tmp.cleanup()
 
-    def test_remote_annotated_tag_retry_same_candidate_passes(self) -> None:
-        """Remote annotated tag pointing to same candidate commit passes with --allow-retry."""
+    def test_local_tag_existing_blocks_preflight(self) -> None:
+        """Local tag existing blocks preflight even if remote check is skipped."""
         subprocess.run(["git", "tag", "-a", "v9.9.9", "-m", "v9.9.9"], cwd=self.client_dir, capture_output=True, check=True)
-        subprocess.run(["git", "push", "origin", "v9.9.9"], cwd=self.client_dir, capture_output=True, check=True)
 
         res = run_tag_preflight(
             tag="v9.9.9",
             release_commit=self.candidate_sha,
             fixture=str(self.fixture_file),
-            allow_retry=True,
+            skip_remote=True,
             repo_root=self.client_dir,
         )
-        self.assertTrue(res.passed)
-        self.assertEqual(res.status, "PASS")
+        self.assertFalse(res.passed)
+        self.assertEqual(res.status, "BLOCKED")
+        self.assertIn("Local tag 'v9.9.9' already exists", res.message)
 
-    def test_remote_annotated_tag_retry_different_candidate_blocks(self) -> None:
-        """Remote annotated tag pointing to a different commit blocks even with --allow-retry."""
+    def test_remote_annotated_tag_existing_blocks_preflight(self) -> None:
+        """Remote annotated tag pointing to same candidate commit blocks preflight (unidirectional creation)."""
         subprocess.run(["git", "tag", "-a", "v9.9.9", "-m", "v9.9.9"], cwd=self.client_dir, capture_output=True, check=True)
         subprocess.run(["git", "push", "origin", "v9.9.9"], cwd=self.client_dir, capture_output=True, check=True)
+        # Delete local tag so Gate 5 (remote tag check) is specifically exercised
+        subprocess.run(["git", "tag", "-d", "v9.9.9"], cwd=self.client_dir, capture_output=True, check=True)
+
+        res = run_tag_preflight(
+            tag="v9.9.9",
+            release_commit=self.candidate_sha,
+            fixture=str(self.fixture_file),
+            repo_root=self.client_dir,
+        )
+        self.assertFalse(res.passed)
+        self.assertEqual(res.status, "BLOCKED")
+        self.assertIn("already exists on origin", res.message)
+
+    def test_remote_annotated_tag_different_candidate_blocks(self) -> None:
+        """Remote annotated tag pointing to a different commit blocks preflight."""
+        subprocess.run(["git", "tag", "-a", "v9.9.9", "-m", "v9.9.9"], cwd=self.client_dir, capture_output=True, check=True)
+        subprocess.run(["git", "push", "origin", "v9.9.9"], cwd=self.client_dir, capture_output=True, check=True)
+        subprocess.run(["git", "tag", "-d", "v9.9.9"], cwd=self.client_dir, capture_output=True, check=True)
 
         # Create a second commit
         (self.client_dir / "README.md").write_text("# Repo V2\n", encoding="utf-8")
@@ -1883,31 +1901,30 @@ class AnnotatedTagRetryTests(unittest.TestCase):
             tag="v9.9.9",
             release_commit=candidate_b,
             fixture=str(self.fixture_file),
-            allow_retry=True,
             repo_root=self.client_dir,
         )
         self.assertFalse(res.passed)
         self.assertEqual(res.status, "BLOCKED")
-        self.assertIn("differs from candidate commit", res.message)
+        self.assertIn("already exists on origin", res.message)
 
-    def test_remote_lightweight_tag_retry_blocks(self) -> None:
-        """Remote lightweight tag blocks retry because release tags must be annotated."""
+    def test_remote_lightweight_tag_blocks(self) -> None:
+        """Remote lightweight tag blocks preflight."""
         subprocess.run(["git", "tag", "v9.9.9"], cwd=self.client_dir, capture_output=True, check=True)
         subprocess.run(["git", "push", "origin", "v9.9.9"], cwd=self.client_dir, capture_output=True, check=True)
+        subprocess.run(["git", "tag", "-d", "v9.9.9"], cwd=self.client_dir, capture_output=True, check=True)
 
         res = run_tag_preflight(
             tag="v9.9.9",
             release_commit=self.candidate_sha,
             fixture=str(self.fixture_file),
-            allow_retry=True,
             repo_root=self.client_dir,
         )
         self.assertFalse(res.passed)
         self.assertEqual(res.status, "BLOCKED")
-        self.assertIn("lightweight tag", res.message)
+        self.assertIn("already exists on origin", res.message)
 
-    def test_remote_tag_object_sha_must_not_be_compared_to_candidate_commit(self) -> None:
-        """Remote annotated tag has tag object T != candidate A; retry must compare peeled commit A == A."""
+    def test_remote_tag_object_sha_distinguished_from_peeled_commit(self) -> None:
+        """Remote annotated tag resolves tag object T != candidate A and peeled commit == A."""
         subprocess.run(["git", "tag", "-a", "v9.9.9", "-m", "v9.9.9"], cwd=self.client_dir, capture_output=True, check=True)
         subprocess.run(["git", "push", "origin", "v9.9.9"], cwd=self.client_dir, capture_output=True, check=True)
 
@@ -1918,18 +1935,8 @@ class AnnotatedTagRetryTests(unittest.TestCase):
         self.assertNotEqual(remote_res.tag_object_sha, self.candidate_sha)
         self.assertEqual(remote_res.peeled_commit_sha, self.candidate_sha)
 
-        res = run_tag_preflight(
-            tag="v9.9.9",
-            release_commit=self.candidate_sha,
-            fixture=str(self.fixture_file),
-            allow_retry=True,
-            repo_root=self.client_dir,
-        )
-        self.assertTrue(res.passed)
-        self.assertEqual(res.status, "PASS")
-
-    def test_remote_retry_query_failure_blocks(self) -> None:
-        """Even with --allow-retry, query failure blocks preflight."""
+    def test_remote_query_failure_blocks(self) -> None:
+        """Query failure blocks preflight."""
         import check_release_tag_preflight
         from unittest.mock import patch
 
@@ -1945,7 +1952,6 @@ class AnnotatedTagRetryTests(unittest.TestCase):
                 tag="v9.9.9",
                 release_commit=self.candidate_sha,
                 fixture=str(self.fixture_file),
-                allow_retry=True,
                 repo_root=self.client_dir,
             )
             self.assertFalse(res.passed)
@@ -1953,8 +1959,412 @@ class AnnotatedTagRetryTests(unittest.TestCase):
             self.assertIn("Could not verify remote tag state", res.message)
 
 
+class ReceiptGitObjectDriftTests(unittest.TestCase):
+    """BLOCKER: Receipt package count must be bound to immutable release snapshot, not attestation HEAD drift."""
+
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory(prefix="drift-test-")
+        self.tmp_root = Path(self.tmp.name)
+        subprocess.run(["git", "init", str(self.tmp_root)], capture_output=True, check=True)
+        subprocess.run(["git", "config", "user.name", "Test User"], cwd=self.tmp_root, capture_output=True, check=True)
+        subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=self.tmp_root, capture_output=True, check=True)
+
+        # Candidate A: 1 admitted package
+        create_admitted_packages(self.tmp_root, 1)
+        (self.tmp_root / "README.md").write_text("# Repo\n", encoding="utf-8")
+        self.rel_dir = self.tmp_root / "docs" / "evidence" / "releases" / "v9.9.9"
+        self.rel_dir.mkdir(parents=True)
+        (self.rel_dir / "RELEASE_MANIFEST.md").write_text(
+            "# Manifest\nRelease: `v9.9.9`\nCollection package count: 1 admitted packages\nPolicy status: `PROVISIONAL`\nrefs/tags/v9.9.9\n",
+            encoding="utf-8",
+        )
+        (self.rel_dir / "RELEASE_MANIFEST.zh-CN.md").write_text(
+            "# Manifest\n发布版本：`v9.9.9`\n集合包总数：1 个\n政策状态：`PROVISIONAL`\nrefs/tags/v9.9.9\n",
+            encoding="utf-8",
+        )
+        (self.rel_dir / "RELEASE_NOTES.md").write_text("# Notes\n", encoding="utf-8")
+        (self.rel_dir / "RELEASE_NOTES.zh-CN.md").write_text("# Notes\n", encoding="utf-8")
+
+        subprocess.run(["git", "add", "."], cwd=self.tmp_root, capture_output=True, check=True)
+        subprocess.run(["git", "commit", "-m", "candidate A"], cwd=self.tmp_root, capture_output=True, check=True)
+        self.candidate_a = resolve_commit_sha("HEAD", cwd=self.tmp_root)
+
+        # Annotated tag v9.9.9 -> Candidate A
+        subprocess.run(["git", "tag", "-a", "v9.9.9", "-m", "v9.9.9"], cwd=self.tmp_root, capture_output=True, check=True)
+        self.tag_ident = resolve_annotated_tag_identity("v9.9.9", cwd=self.tmp_root)
+        self.tag_obj_a = self.tag_ident.tag_object_sha
+
+        # Post-publication drift: add a 2nd admitted package in commit B
+        create_admitted_packages(self.tmp_root, 2)
+        # Commit B also carries the Receipt for v9.9.9
+        # Case 1: Receipt correctly records Candidate A package count (1)
+        self.receipt_en_1 = make_valid_receipt_en(
+            tag="v9.9.9",
+            tag_obj=self.tag_obj_a,
+            tag_target=self.candidate_a,
+            pkg_count=1,
+        )
+        self.receipt_zh_1 = make_valid_receipt_zh(
+            tag="v9.9.9",
+            tag_obj=self.tag_obj_a,
+            tag_target=self.candidate_a,
+            pkg_count=1,
+        )
+        (self.rel_dir / "RELEASE_RECEIPT.md").write_text(self.receipt_en_1, encoding="utf-8")
+        (self.rel_dir / "RELEASE_RECEIPT.zh-CN.md").write_text(self.receipt_zh_1, encoding="utf-8")
+        subprocess.run(["git", "add", "."], cwd=self.tmp_root, capture_output=True, check=True)
+        subprocess.run(["git", "commit", "-m", "commit B: add 2nd pkg and receipt saying 1"], cwd=self.tmp_root, capture_output=True, check=True)
+        self.commit_b_1 = resolve_commit_sha("HEAD", cwd=self.tmp_root)
+
+    def tearDown(self) -> None:
+        self.tmp.cleanup()
+
+    def test_attested_head_package_drift_does_not_change_release_count(self) -> None:
+        """Attestation commit B has 2 packages, but receipt says 1 (matching candidate A); passes."""
+        res = check_release_receipt_consistency(
+            tag="v9.9.9",
+            release_commit=self.candidate_a,
+            receipt_revision="HEAD",
+            release_revision=self.candidate_a,
+            repo_root=self.tmp_root,
+        )
+        self.assertTrue(res.passed, f"Expected PASS but got: {res.message}")
+        self.assertEqual(res.status, "PASS")
+
+        # Also verify CLI in attested stage
+        proc = subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "scripts" / "verify_release_integrity.py"),
+                "--tag", "v9.9.9",
+                "--release-commit", self.candidate_a,
+                "--stage", "attested",
+                "--root", str(self.tmp_root),
+            ],
+            cwd=self.tmp_root,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        self.assertEqual(proc.returncode, 0, f"Expected CLI PASS but got:\n{proc.stdout}\n{proc.stderr}")
+        self.assertIn("RESULT: PASS", proc.stdout)
+
+    def test_receipt_count_must_match_candidate_snapshot(self) -> None:
+        """Candidate A has 1 package; if receipt in B claims 2 packages (the HEAD count), it fails."""
+        receipt_en_2 = make_valid_receipt_en(
+            tag="v9.9.9",
+            tag_obj=self.tag_obj_a,
+            tag_target=self.candidate_a,
+            pkg_count=2,  # wrong for v9.9.9 release snapshot!
+        )
+        receipt_zh_2 = make_valid_receipt_zh(
+            tag="v9.9.9",
+            tag_obj=self.tag_obj_a,
+            tag_target=self.candidate_a,
+            pkg_count=2,
+        )
+        (self.rel_dir / "RELEASE_RECEIPT.md").write_text(receipt_en_2, encoding="utf-8")
+        (self.rel_dir / "RELEASE_RECEIPT.zh-CN.md").write_text(receipt_zh_2, encoding="utf-8")
+        subprocess.run(["git", "add", "."], cwd=self.tmp_root, capture_output=True, check=True)
+        subprocess.run(["git", "commit", "-m", "commit C: receipt saying 2"], cwd=self.tmp_root, capture_output=True, check=True)
+
+        res = check_release_receipt_consistency(
+            tag="v9.9.9",
+            release_commit=self.candidate_a,
+            receipt_revision="HEAD",
+            release_revision=self.candidate_a,
+            repo_root=self.tmp_root,
+        )
+        self.assertFalse(res.passed)
+        self.assertEqual(res.status, "COUNT_MISMATCH")
+        self.assertIn("receipt claims 2, but release snapshot has 1 admitted packages", res.message)
+
+    def test_receipt_count_must_match_tag_snapshot(self) -> None:
+        """Tag snapshot has 1 package; release_revision resolving to refs/tags/v9.9.9 enforces 1."""
+        res = check_release_receipt_consistency(
+            tag="v9.9.9",
+            release_commit=self.candidate_a,
+            receipt_revision="HEAD",
+            release_revision="refs/tags/v9.9.9",
+            repo_root=self.tmp_root,
+        )
+        self.assertTrue(res.passed)
+
+    def test_receipt_count_cannot_match_head_only(self) -> None:
+        """Receipt count cannot match HEAD package count if HEAD has drifted past release snapshot."""
+        receipt_en_head_count = make_valid_receipt_en(
+            tag="v9.9.9",
+            tag_obj=self.tag_obj_a,
+            tag_target=self.candidate_a,
+            pkg_count=2,
+        )
+        receipt_zh_head_count = make_valid_receipt_zh(
+            tag="v9.9.9",
+            tag_obj=self.tag_obj_a,
+            tag_target=self.candidate_a,
+            pkg_count=2,
+        )
+        (self.rel_dir / "RELEASE_RECEIPT.md").write_text(receipt_en_head_count, encoding="utf-8")
+        (self.rel_dir / "RELEASE_RECEIPT.zh-CN.md").write_text(receipt_zh_head_count, encoding="utf-8")
+        subprocess.run(["git", "add", "."], cwd=self.tmp_root, capture_output=True, check=True)
+        subprocess.run(["git", "commit", "-m", "commit D: receipt claiming HEAD count"], cwd=self.tmp_root, capture_output=True, check=True)
+
+        proc = subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "scripts" / "verify_release_integrity.py"),
+                "--tag", "v9.9.9",
+                "--release-commit", self.candidate_a,
+                "--stage", "attested",
+                "--root", str(self.tmp_root),
+            ],
+            cwd=self.tmp_root,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn("[COUNT_MISMATCH]", proc.stdout)
+
+    def test_manifest_and_receipt_release_count_must_agree(self) -> None:
+        """Manifest in tag snapshot and Receipt in B must agree on the package count of candidate A."""
+        # Manifest in candidate A says 1
+        res_m = check_release_manifest_consistency("v9.9.9", revision=self.candidate_a, repo_root=self.tmp_root)
+        self.assertTrue(res_m.passed)
+
+        # Receipt in B says 1 -> agrees with Manifest
+        res_r = check_release_receipt_consistency(
+            tag="v9.9.9",
+            release_commit=self.candidate_a,
+            receipt_revision=self.commit_b_1,
+            release_revision=self.candidate_a,
+            repo_root=self.tmp_root,
+        )
+        self.assertTrue(res_r.passed)
+
+
+class CommittedMalformedReceiptNegativeTests(unittest.TestCase):
+    """HIGH: Committed malformed receipts in revision mode must return structured failure without traceback."""
+
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory(prefix="committed-neg-")
+        self.tmp_root = Path(self.tmp.name)
+        subprocess.run(["git", "init", str(self.tmp_root)], capture_output=True, check=True)
+        subprocess.run(["git", "config", "user.name", "Test User"], cwd=self.tmp_root, capture_output=True, check=True)
+        subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=self.tmp_root, capture_output=True, check=True)
+
+        create_admitted_packages(self.tmp_root, 1)
+        (self.tmp_root / "README.md").write_text("# Repo\n", encoding="utf-8")
+        self.rel_dir = self.tmp_root / "docs" / "evidence" / "releases" / "v9.9.9"
+        self.rel_dir.mkdir(parents=True)
+        (self.rel_dir / "RELEASE_MANIFEST.md").write_text(
+            "# Manifest\nRelease: `v9.9.9`\nCollection package count: 1 admitted packages\nPolicy status: `PROVISIONAL`\nrefs/tags/v9.9.9\n",
+            encoding="utf-8",
+        )
+        (self.rel_dir / "RELEASE_MANIFEST.zh-CN.md").write_text(
+            "# Manifest\n发布版本：`v9.9.9`\n集合包总数：1 个\n政策状态：`PROVISIONAL`\nrefs/tags/v9.9.9\n",
+            encoding="utf-8",
+        )
+        (self.rel_dir / "RELEASE_NOTES.md").write_text("# Notes\n", encoding="utf-8")
+        (self.rel_dir / "RELEASE_NOTES.zh-CN.md").write_text("# Notes\n", encoding="utf-8")
+
+        subprocess.run(["git", "add", "."], cwd=self.tmp_root, capture_output=True, check=True)
+        subprocess.run(["git", "commit", "-m", "candidate A"], cwd=self.tmp_root, capture_output=True, check=True)
+        self.candidate_a = resolve_commit_sha("HEAD", cwd=self.tmp_root)
+
+        subprocess.run(["git", "tag", "-a", "v9.9.9", "-m", "v9.9.9"], cwd=self.tmp_root, capture_output=True, check=True)
+        self.tag_ident = resolve_annotated_tag_identity("v9.9.9", cwd=self.tmp_root)
+        self.tag_obj_a = self.tag_ident.tag_object_sha
+
+    def tearDown(self) -> None:
+        self.tmp.cleanup()
+
+    def _commit_receipt_and_verify(self, en_text: str, zh_text: str) -> subprocess.CompletedProcess[str]:
+        (self.rel_dir / "RELEASE_RECEIPT.md").write_text(en_text, encoding="utf-8")
+        (self.rel_dir / "RELEASE_RECEIPT.zh-CN.md").write_text(zh_text, encoding="utf-8")
+        subprocess.run(["git", "add", "."], cwd=self.tmp_root, capture_output=True, check=True)
+        subprocess.run(["git", "commit", "-m", "attest receipt"], cwd=self.tmp_root, capture_output=True, check=True)
+
+        return subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "scripts" / "verify_release_integrity.py"),
+                "--tag", "v9.9.9",
+                "--release-commit", self.candidate_a,
+                "--stage", "attested",
+                "--root", str(self.tmp_root),
+            ],
+            cwd=self.tmp_root,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+
+    def test_attested_committed_candidate_status_returns_structured_failure(self) -> None:
+        en = make_valid_receipt_en(tag="v9.9.9", tag_obj=self.tag_obj_a, tag_target=self.candidate_a, status="CANDIDATE")
+        zh = make_valid_receipt_zh(tag="v9.9.9", tag_obj=self.tag_obj_a, tag_target=self.candidate_a, status="CANDIDATE")
+        proc = self._commit_receipt_and_verify(en, zh)
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertNotIn("Traceback", proc.stderr)
+        self.assertIn("RECEIPT_STATUS_INVALID", proc.stdout)
+
+    def test_attested_committed_missing_tag_object_returns_structured_failure(self) -> None:
+        en = make_valid_receipt_en(tag="v9.9.9", tag_obj=self.tag_obj_a, tag_target=self.candidate_a).replace(
+            f"| **Annotated Tag Object** | `{self.tag_obj_a}` |\n", ""
+        )
+        zh = make_valid_receipt_zh(tag="v9.9.9", tag_obj=self.tag_obj_a, tag_target=self.candidate_a)
+        proc = self._commit_receipt_and_verify(en, zh)
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertNotIn("Traceback", proc.stderr)
+        self.assertIn("RECEIPT_TAG_OBJECT_MISSING", proc.stdout)
+
+    def test_attested_committed_wrong_tag_object_returns_structured_failure(self) -> None:
+        bogus_obj = "0000000000000000000000000000000000000000"
+        en = make_valid_receipt_en(tag="v9.9.9", tag_obj=bogus_obj, tag_target=self.candidate_a)
+        zh = make_valid_receipt_zh(tag="v9.9.9", tag_obj=bogus_obj, tag_target=self.candidate_a)
+        proc = self._commit_receipt_and_verify(en, zh)
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertNotIn("Traceback", proc.stderr)
+        self.assertIn("RECEIPT_TAG_OBJECT_MISMATCH", proc.stdout)
+
+    def test_attested_committed_wrong_tag_target_returns_structured_failure(self) -> None:
+        bogus_target = "0000000000000000000000000000000000000000"
+        en = make_valid_receipt_en(tag="v9.9.9", tag_obj=self.tag_obj_a, tag_target=bogus_target)
+        zh = make_valid_receipt_zh(tag="v9.9.9", tag_obj=self.tag_obj_a, tag_target=bogus_target)
+        proc = self._commit_receipt_and_verify(en, zh)
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertNotIn("Traceback", proc.stderr)
+        self.assertIn("RECEIPT_TAG_TARGET_MISMATCH", proc.stdout)
+
+    def test_attested_committed_wrong_package_count_returns_structured_failure(self) -> None:
+        en = make_valid_receipt_en(tag="v9.9.9", tag_obj=self.tag_obj_a, tag_target=self.candidate_a, pkg_count=99)
+        zh = make_valid_receipt_zh(tag="v9.9.9", tag_obj=self.tag_obj_a, tag_target=self.candidate_a, pkg_count=99)
+        proc = self._commit_receipt_and_verify(en, zh)
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertNotIn("Traceback", proc.stderr)
+        self.assertIn("COUNT_MISMATCH", proc.stdout)
+
+    def test_attested_committed_pending_ci_returns_structured_failure(self) -> None:
+        en = make_valid_receipt_en(tag="v9.9.9", tag_obj=self.tag_obj_a, tag_target=self.candidate_a, ci_status="PENDING")
+        zh = make_valid_receipt_zh(tag="v9.9.9", tag_obj=self.tag_obj_a, tag_target=self.candidate_a, ci_status="PENDING")
+        proc = self._commit_receipt_and_verify(en, zh)
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertNotIn("Traceback", proc.stderr)
+        self.assertIn("RECEIPT_EVIDENCE_PENDING", proc.stdout)
+
+    def test_attested_committed_missing_timestamp_returns_structured_failure(self) -> None:
+        en = make_valid_receipt_en(tag="v9.9.9", tag_obj=self.tag_obj_a, tag_target=self.candidate_a, timestamp="")
+        zh = make_valid_receipt_zh(tag="v9.9.9", tag_obj=self.tag_obj_a, tag_target=self.candidate_a, timestamp="")
+        proc = self._commit_receipt_and_verify(en, zh)
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertNotIn("Traceback", proc.stderr)
+        self.assertIn("RECEIPT_TIMESTAMP_MISSING", proc.stdout)
+
+
+class TaggedSnapshotVerificationTests(unittest.TestCase):
+    """MEDIUM: TAGGED verification must strictly inspect tag snapshot, never mixing in filesystem."""
+
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory(prefix="tagged-snapshot-")
+        self.tmp_root = Path(self.tmp.name)
+        subprocess.run(["git", "init", str(self.tmp_root)], capture_output=True, check=True)
+        subprocess.run(["git", "config", "user.name", "Test User"], cwd=self.tmp_root, capture_output=True, check=True)
+        subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=self.tmp_root, capture_output=True, check=True)
+
+        create_admitted_packages(self.tmp_root, 1)
+        (self.tmp_root / "README.md").write_text("# Repo\n", encoding="utf-8")
+        self.rel_dir = self.tmp_root / "docs" / "evidence" / "releases" / "v9.9.9"
+        self.rel_dir.mkdir(parents=True)
+        (self.rel_dir / "RELEASE_MANIFEST.md").write_text(
+            "# Manifest\nRelease: `v9.9.9`\nCollection package count: 1 admitted packages\nPolicy status: `PROVISIONAL`\nrefs/tags/v9.9.9\n",
+            encoding="utf-8",
+        )
+        (self.rel_dir / "RELEASE_MANIFEST.zh-CN.md").write_text(
+            "# Manifest\n发布版本：`v9.9.9`\n集合包总数：1 个\n政策状态：`PROVISIONAL`\nrefs/tags/v9.9.9\n",
+            encoding="utf-8",
+        )
+        (self.rel_dir / "RELEASE_NOTES.md").write_text("# Notes\n", encoding="utf-8")
+        (self.rel_dir / "RELEASE_NOTES.zh-CN.md").write_text("# Notes\n", encoding="utf-8")
+
+        # Candidate A: Manifest + Notes only, no Receipt
+        subprocess.run(["git", "add", "."], cwd=self.tmp_root, capture_output=True, check=True)
+        subprocess.run(["git", "commit", "-m", "candidate A"], cwd=self.tmp_root, capture_output=True, check=True)
+        self.candidate_a = resolve_commit_sha("HEAD", cwd=self.tmp_root)
+
+        # Tag -> A
+        subprocess.run(["git", "tag", "-a", "v9.9.9", "-m", "v9.9.9"], cwd=self.tmp_root, capture_output=True, check=True)
+        self.tag_ident = resolve_annotated_tag_identity("v9.9.9", cwd=self.tmp_root)
+        self.tag_obj_a = self.tag_ident.tag_object_sha
+
+    def tearDown(self) -> None:
+        self.tmp.cleanup()
+
+    def test_tagged_reaudit_after_attestation_passes(self) -> None:
+        """After release attestation on main (Receipt exists on HEAD/worktree), re-auditing TAGGED passes."""
+        # Commit B: create Receipt on main
+        receipt_en = make_valid_receipt_en(tag="v9.9.9", tag_obj=self.tag_obj_a, tag_target=self.candidate_a, pkg_count=1)
+        receipt_zh = make_valid_receipt_zh(tag="v9.9.9", tag_obj=self.tag_obj_a, tag_target=self.candidate_a, pkg_count=1)
+        (self.rel_dir / "RELEASE_RECEIPT.md").write_text(receipt_en, encoding="utf-8")
+        (self.rel_dir / "RELEASE_RECEIPT.zh-CN.md").write_text(receipt_zh, encoding="utf-8")
+        subprocess.run(["git", "add", "."], cwd=self.tmp_root, capture_output=True, check=True)
+        subprocess.run(["git", "commit", "-m", "commit B: attest receipt"], cwd=self.tmp_root, capture_output=True, check=True)
+
+        # Receipt now exists in working tree and HEAD!
+        self.assertTrue((self.rel_dir / "RELEASE_RECEIPT.md").is_file())
+
+        # Re-running TAGGED verification must ONLY inspect tag snapshot (which has no Receipt), and PASS!
+        res_absence = check_receipt_absence_in_candidate("v9.9.9", revision="refs/tags/v9.9.9", repo_root=self.tmp_root)
+        self.assertTrue(res_absence.passed, f"Absence check failed: {res_absence.message}")
+
+        proc = subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "scripts" / "verify_release_integrity.py"),
+                "--tag", "v9.9.9",
+                "--release-commit", self.candidate_a,
+                "--stage", "tagged",
+                "--root", str(self.tmp_root),
+            ],
+            cwd=self.tmp_root,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        self.assertEqual(proc.returncode, 0, f"Expected re-audit PASS but got:\n{proc.stdout}\n{proc.stderr}")
+        self.assertIn("RESULT: PASS", proc.stdout)
+
+    def test_receipt_in_tag_snapshot_still_fails_tagged(self) -> None:
+        """If a tag snapshot actually contains a Receipt, TAGGED stage fails."""
+        with tempfile.TemporaryDirectory(prefix="tagged-fail-") as tmp_fail:
+            tf = Path(tmp_fail)
+            subprocess.run(["git", "init", str(tf)], capture_output=True, check=True)
+            subprocess.run(["git", "config", "user.name", "Test User"], cwd=tf, capture_output=True, check=True)
+            subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=tf, capture_output=True, check=True)
+
+            create_admitted_packages(tf, 1)
+            (tf / "README.md").write_text("# Repo\n", encoding="utf-8")
+            rel_dir = tf / "docs" / "evidence" / "releases" / "v9.9.9"
+            rel_dir.mkdir(parents=True)
+            (rel_dir / "RELEASE_MANIFEST.md").write_text("# Manifest\nrefs/tags/v9.9.9\n", encoding="utf-8")
+            (rel_dir / "RELEASE_MANIFEST.zh-CN.md").write_text("# Manifest\nrefs/tags/v9.9.9\n", encoding="utf-8")
+            (rel_dir / "RELEASE_NOTES.md").write_text("# Notes\n", encoding="utf-8")
+            (rel_dir / "RELEASE_NOTES.zh-CN.md").write_text("# Notes\n", encoding="utf-8")
+            # Erroneously add receipt to candidate
+            (rel_dir / "RELEASE_RECEIPT.md").write_text("# Receipt\n", encoding="utf-8")
+            (rel_dir / "RELEASE_RECEIPT.zh-CN.md").write_text("# Receipt\n", encoding="utf-8")
+
+            subprocess.run(["git", "add", "."], cwd=tf, capture_output=True, check=True)
+            subprocess.run(["git", "commit", "-m", "bad candidate with receipt"], cwd=tf, capture_output=True, check=True)
+            bad_cand = resolve_commit_sha("HEAD", cwd=tf)
+            subprocess.run(["git", "tag", "-a", "v9.9.9", "-m", "v9.9.9"], cwd=tf, capture_output=True, check=True)
+
+            res_absence = check_receipt_absence_in_candidate("v9.9.9", revision="refs/tags/v9.9.9", repo_root=tf)
+            self.assertFalse(res_absence.passed)
+            self.assertEqual(res_absence.status, "CANDIDATE_RECEIPT_FORBIDDEN")
+
+
 class ReleaseLifecycleHermeticE2ETests(unittest.TestCase):
-    """Full lifecycle hermetic E2E executing exact release-workflow/SKILL.md sequence."""
+    """Full lifecycle hermetic E2E executing exact six-stage release-workflow/SKILL.md sequence."""
 
     def test_release_lifecycle_hermetic_e2e(self) -> None:
         with tempfile.TemporaryDirectory(prefix="lifecycle-e2e-") as tmp:
@@ -1978,6 +2388,7 @@ class ReleaseLifecycleHermeticE2ETests(unittest.TestCase):
             subprocess.run(["git", "push", "-u", "origin", "main"], cwd=work_dir, capture_output=True, check=True)
 
             base_sha = resolve_commit_sha("HEAD", cwd=work_dir)
+            self.assertIsNotNone(base_sha)
 
             # 2. Stage PREPARED: Candidate files created (Manifest + Notes; NO receipt)
             rel_dir = work_dir / "docs" / "evidence" / "releases" / "v9.9.9"
@@ -2004,11 +2415,12 @@ class ReleaseLifecycleHermeticE2ETests(unittest.TestCase):
             (rel_dir / "RELEASE_NOTES.md").write_text(notes_en, encoding="utf-8")
             (rel_dir / "RELEASE_NOTES.zh-CN.md").write_text(notes_zh, encoding="utf-8")
 
-            # Candidate commit
+            # Candidate commit A
             subprocess.run(["git", "add", "."], cwd=work_dir, capture_output=True, check=True)
             subprocess.run(["git", "commit", "-m", "release: prepare v9.9.9"], cwd=work_dir, capture_output=True, check=True)
             candidate_a = resolve_commit_sha("HEAD", cwd=work_dir)
             self.assertIsNotNone(candidate_a)
+            self.assertNotEqual(base_sha, candidate_a)
 
             # Verify PREPARED stage
             proc_prep = subprocess.run(
@@ -2023,11 +2435,27 @@ class ReleaseLifecycleHermeticE2ETests(unittest.TestCase):
                 cwd=work_dir,
                 capture_output=True,
                 text=True,
+                timeout=30,
             )
             self.assertEqual(proc_prep.returncode, 0, f"PREPARED verification failed:\n{proc_prep.stdout}\n{proc_prep.stderr}")
             self.assertIn("RESULT: PASS", proc_prep.stdout)
 
-            # 3. Stage TAGGED preflight (remote check enabled, ruleset fixture)
+            # 3. Stage CI_VERIFIED: Push candidate A to origin/main and verify remote CI
+            subprocess.run(["git", "push", "origin", "main"], cwd=work_dir, capture_output=True, check=True)
+            origin_main_sha_before = resolve_commit_sha("origin/main", cwd=work_dir)
+            self.assertEqual(origin_main_sha_before, candidate_a, "origin/main must equal candidate commit A before tag creation.")
+
+            ci_evidence = {
+                "candidate_sha": candidate_a,
+                "tag": "v9.9.9",
+                "workflow": "collection-quality",
+                "ci_status": "SUCCESS",
+                "run_id": "9988776655",
+            }
+            self.assertEqual(ci_evidence["ci_status"], "SUCCESS")
+            self.assertEqual(ci_evidence["candidate_sha"], candidate_a)
+
+            # 4. Stage TAGGED: Preflight, annotated tag creation, and tag verification
             fixture_file = tmp_root / "ruleset_fixture.json"
             fixture_file.write_text(
                 json.dumps([{
@@ -2055,11 +2483,12 @@ class ReleaseLifecycleHermeticE2ETests(unittest.TestCase):
                 cwd=work_dir,
                 capture_output=True,
                 text=True,
+                timeout=30,
             )
             self.assertEqual(proc_preflight.returncode, 0, f"Preflight failed:\n{proc_preflight.stdout}\n{proc_preflight.stderr}")
             self.assertIn("RESULT: PASS", proc_preflight.stdout)
 
-            # 4. Create annotated tag pointing to candidate A
+            # Create annotated tag pointing to candidate A
             subprocess.run(["git", "tag", "-a", "v9.9.9", "-m", "v9.9.9 — Test Release"], cwd=work_dir, capture_output=True, check=True)
             tag_ident = resolve_annotated_tag_identity("v9.9.9", cwd=work_dir)
             self.assertTrue(tag_ident.is_annotated)
@@ -2081,11 +2510,12 @@ class ReleaseLifecycleHermeticE2ETests(unittest.TestCase):
                 cwd=work_dir,
                 capture_output=True,
                 text=True,
+                timeout=30,
             )
             self.assertEqual(proc_tagged.returncode, 0, f"TAGGED verification failed:\n{proc_tagged.stdout}\n{proc_tagged.stderr}")
             self.assertIn("RESULT: PASS", proc_tagged.stdout)
 
-            # 5. Push tag to remote
+            # Push tag to remote
             subprocess.run(["git", "push", "origin", "v9.9.9"], cwd=work_dir, capture_output=True, check=True)
             remote_tag_res = resolve_remote_tag("v9.9.9", remote="origin", cwd=work_dir)
             self.assertEqual(remote_tag_res.status, RemoteTagStatus.EXISTS)
@@ -2093,18 +2523,53 @@ class ReleaseLifecycleHermeticE2ETests(unittest.TestCase):
             self.assertEqual(remote_tag_res.tag_object_sha, tag_object_sha)
             self.assertEqual(remote_tag_res.peeled_commit_sha, candidate_a)
 
-            # 6. Stage ATTESTED: Create verified Receipts on main
+            # 5. Stage INSTALL_VERIFIED: Record synthetic install verification evidence
+            install_evidence = {
+                "candidate_sha": candidate_a,
+                "tag": "v9.9.9",
+                "pinned_install_ref": "v9.9.9",
+                "pinned_install_status": "PASS",
+                "latest_install_status": "PASS",
+                "package_count": 36,
+            }
+            self.assertEqual(install_evidence["pinned_install_status"], "PASS")
+            self.assertEqual(install_evidence["latest_install_status"], "PASS")
+            self.assertEqual(install_evidence["package_count"], 36)
+
+            # 6. Stage PUBLISHED: Record synthetic release publication evidence
+            pub_evidence = {
+                "published_tag": "v9.9.9",
+                "publication_status": "PASS",
+                "release_url": "https://github.com/LightDevCoder/skills/releases/tag/v9.9.9",
+                "timestamp": "2026-09-21T00:00:00Z",
+            }
+            self.assertEqual(pub_evidence["publication_status"], "PASS")
+            self.assertEqual(pub_evidence["published_tag"], "v9.9.9")
+
+            # 7. Stage ATTESTED: Create verified Receipts on main from bound evidence facts
             receipt_en = make_valid_receipt_en(
                 tag="v9.9.9",
                 tag_obj=tag_object_sha,
                 tag_target=candidate_a,
-                pkg_count=36,
+                pkg_count=install_evidence["package_count"],
+                ci_status=ci_evidence["ci_status"],
+                pinned_status=install_evidence["pinned_install_status"],
+                latest_status=install_evidence["latest_install_status"],
+                release_pub_status=pub_evidence["publication_status"],
+                release_url=pub_evidence["release_url"],
+                timestamp=pub_evidence["timestamp"],
             )
             receipt_zh = make_valid_receipt_zh(
                 tag="v9.9.9",
                 tag_obj=tag_object_sha,
                 tag_target=candidate_a,
-                pkg_count=36,
+                pkg_count=install_evidence["package_count"],
+                ci_status=ci_evidence["ci_status"],
+                pinned_status=install_evidence["pinned_install_status"],
+                latest_status=install_evidence["latest_install_status"],
+                release_pub_status=pub_evidence["publication_status"],
+                release_url=pub_evidence["release_url"],
+                timestamp=pub_evidence["timestamp"],
             )
             (rel_dir / "RELEASE_RECEIPT.md").write_text(receipt_en, encoding="utf-8")
             (rel_dir / "RELEASE_RECEIPT.zh-CN.md").write_text(receipt_zh, encoding="utf-8")
@@ -2128,14 +2593,18 @@ class ReleaseLifecycleHermeticE2ETests(unittest.TestCase):
                 cwd=work_dir,
                 capture_output=True,
                 text=True,
+                timeout=30,
             )
             self.assertEqual(proc_attested.returncode, 0, f"ATTESTED verification failed:\n{proc_attested.stdout}\n{proc_attested.stderr}")
             self.assertIn("RESULT: PASS", proc_attested.stdout)
 
-            # 7. CRITICAL ARCHITECTURAL ASSERTIONS
+            # 8. CRITICAL ARCHITECTURAL ASSERTIONS
             # Commit A != Commit B
             self.assertNotEqual(candidate_a, attestation_b)
-            # Tag -> A
+            # origin/main was at candidate A before attestation
+            self.assertEqual(origin_main_sha_before, candidate_a)
+            # Tag is annotated and points to A
+            self.assertTrue(tag_ident.is_annotated)
             self.assertEqual(tag_ident.peeled_commit_sha, candidate_a)
             # Manifest exists in A and Tag snapshot
             self.assertTrue(git_path_exists(candidate_a, "docs/evidence/releases/v9.9.9/RELEASE_MANIFEST.md", cwd=work_dir))
@@ -2146,11 +2615,68 @@ class ReleaseLifecycleHermeticE2ETests(unittest.TestCase):
             # Receipt exists in B
             self.assertTrue(git_path_exists(attestation_b, "docs/evidence/releases/v9.9.9/RELEASE_RECEIPT.md", cwd=work_dir))
 
+            # 9. Post-release drift on B does not change Receipt release facts
+            # Add 37th package on main in commit C
+            extra_pkg_dir = work_dir / "skills" / "general" / "extra-package"
+            extra_pkg_dir.mkdir(parents=True)
+            (extra_pkg_dir / "SKILL.md").write_text("# Extra Package\n", encoding="utf-8")
+            subprocess.run(["git", "add", "."], cwd=work_dir, capture_output=True, check=True)
+            subprocess.run(["git", "commit", "-m", "feat: post-release drift package 37"], cwd=work_dir, capture_output=True, check=True)
+
+            # Re-verify ATTESTED: must continue to PASS because receipt matches release snapshot A (36)
+            proc_attested_drift = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts" / "verify_release_integrity.py"),
+                    "--tag", "v9.9.9",
+                    "--release-commit", candidate_a,
+                    "--stage", "attested",
+                    "--root", str(work_dir),
+                ],
+                cwd=work_dir,
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+            self.assertEqual(proc_attested_drift.returncode, 0, f"ATTESTED post-drift verification failed:\n{proc_attested_drift.stdout}")
+            self.assertIn("RESULT: PASS", proc_attested_drift.stdout)
+
+            # Negative control: if Receipt is modified to state 37 packages, verification fails
+            (rel_dir / "RELEASE_RECEIPT.md").write_text(
+                make_valid_receipt_en(tag="v9.9.9", tag_obj=tag_object_sha, tag_target=candidate_a, pkg_count=37),
+                encoding="utf-8",
+            )
+            (rel_dir / "RELEASE_RECEIPT.zh-CN.md").write_text(
+                make_valid_receipt_zh(tag="v9.9.9", tag_obj=tag_object_sha, tag_target=candidate_a, pkg_count=37),
+                encoding="utf-8",
+            )
+            subprocess.run(["git", "add", "."], cwd=work_dir, capture_output=True, check=True)
+            subprocess.run(["git", "commit", "-m", "commit D: wrong receipt count 37"], cwd=work_dir, capture_output=True, check=True)
+
+            proc_fail_drift = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts" / "verify_release_integrity.py"),
+                    "--tag", "v9.9.9",
+                    "--release-commit", candidate_a,
+                    "--stage", "attested",
+                    "--root", str(work_dir),
+                ],
+                cwd=work_dir,
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+            self.assertNotEqual(proc_fail_drift.returncode, 0)
+            self.assertIn("[COUNT_MISMATCH]", proc_fail_drift.stdout)
+
             print("\n=== LIFECYCLE E2E EVIDENCE ===")
-            print(f"Candidate Commit SHA:        {candidate_a}")
-            print(f"Attestation Commit SHA:      {attestation_b}")
-            print(f"Synthetic Tag Object SHA:    {tag_object_sha}")
-            print(f"Synthetic Tag Peeled Commit: {tag_ident.peeled_commit_sha}")
+            print(f"BASE Commit SHA:                 {base_sha}")
+            print(f"Candidate Commit A SHA:          {candidate_a}")
+            print(f"Attestation Commit B SHA:        {attestation_b}")
+            print(f"Synthetic Tag Object SHA:        {tag_object_sha}")
+            print(f"Synthetic Tag Peeled Commit SHA: {tag_ident.peeled_commit_sha}")
+            print(f"origin/main before attestation:  {origin_main_sha_before}")
             print("===============================\n")
 
 
