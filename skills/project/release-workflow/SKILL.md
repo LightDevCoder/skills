@@ -74,7 +74,7 @@ release manifest:
    may enter candidate commits or tag snapshots.
 6. Execute local verification gates:
    ```bash
-   python3 scripts/verify_release_integrity.py --tag vX.Y.Z --commit HEAD --stage prepared
+   python3 scripts/verify_release_integrity.py --tag vX.Y.Z --release-commit HEAD --stage prepared
    python3 scripts/check_public_docs.py
    python3 -m pytest -q
    python3 -m unittest discover -s tests
@@ -117,7 +117,7 @@ Create the annotated tag pointing to the exact CI-verified commit:
    report `BLOCKED` and halt tag publication.
 2. Verify tag immutability guard:
    ```bash
-   python3 scripts/verify_release_integrity.py --tag vX.Y.Z --commit HEAD --stage tagged
+   python3 scripts/verify_release_integrity.py --tag vX.Y.Z --release-commit <candidate-sha> --stage tagged
    ```
 3. Create annotated tag (tag snapshot contains Manifest + Notes; Receipt does NOT exist):
    ```bash
@@ -154,7 +154,9 @@ independent of the source checkout:
 Create the formal GitHub Release:
 
 1. Prepare release body linking English Release Notes, Chinese Release Notes,
-   Release Manifest, and Release Receipt.
+   and Release Manifest. Note in the body that post-publication verification facts
+   are attested on `main` in `RELEASE_RECEIPT.md` during stage `ATTESTED` (do not link
+   uncreated receipts).
 2. Publish release:
    ```bash
    gh release create vX.Y.Z --title "vX.Y.Z — <title>" --notes-file <notes.md>
@@ -172,12 +174,15 @@ Record verified publication facts into `RELEASE_RECEIPT.md`:
    - Exact CI run ID and conclusion
    - Pinned and generic fresh install verification counts
    - GitHub Release URL and publication timestamp
-   Receipts may link back to `RELEASE_MANIFEST.md`.
+   Receipts may link back to `RELEASE_MANIFEST.md` and `RELEASE_NOTES.md`.
 2. Update documentation and catalog to reflect the new stable release.
-3. Verify release integrity guard passes across all evidence artifacts:
+3. Commit attestation to `main`: `docs(release): attest vX.Y.Z publication`.
+4. On the clean working tree on `main`, run the full ATTESTED integrity gate:
    ```bash
-   python3 scripts/verify_release_integrity.py --tag vX.Y.Z --commit HEAD --stage attested
+   python3 scripts/verify_release_integrity.py \
+     --tag vX.Y.Z \
+     --release-commit <candidate-sha> \
+     --stage attested
    ```
-4. Commit attestation to `main`: `docs(release): attest vX.Y.Z publication`.
-5. Push attestation commit to `origin/main`.
+5. Only after `verify_release_integrity.py` passes, push the attestation commit to `origin/main`.
 6. **Transition:** Transition lifecycle state to `ATTESTED`.

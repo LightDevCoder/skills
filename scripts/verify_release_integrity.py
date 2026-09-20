@@ -53,6 +53,14 @@ def resolve_commit_sha(commit_ref: str, cwd: Path = REPO_ROOT) -> str | None:
     return None
 
 
+def resolve_tag_object_sha(tag: str, cwd: Path = REPO_ROOT) -> str | None:
+    """Resolve an annotated tag to its underlying tag object SHA."""
+    code, out, _ = run_git(["rev-parse", f"refs/tags/{tag}"], cwd=cwd)
+    if code == 0 and len(out) == 40:
+        return out
+    return None
+
+
 def resolve_tag_sha(tag: str, cwd: Path = REPO_ROOT) -> str | None:
     """Resolve an existing tag to its underlying peeled commit SHA."""
     # First check if tag exists locally
@@ -92,6 +100,7 @@ def check_tag_immutability(
     tag: str,
     target_commit_ref: str = "HEAD",
     check_remote: bool = False,
+    stage: str = "auto",
     cwd: Path = REPO_ROOT,
 ) -> VerificationResult:
     """Verify tag immutability: idempotent pass if target matches, fail if different."""
@@ -110,7 +119,7 @@ def check_tag_immutability(
             return VerificationResult(
                 passed=True,
                 status="IDEMPOTENT_PASS",
-                message=f"Local tag '{tag}' already exists pointing to target commit {target_sha}. Safe for CI retry.",
+                message=f"Local tag '{tag}' already exists pointing to candidate commit {target_sha}. Safe for CI retry.",
             )
         else:
             return VerificationResult(
@@ -118,9 +127,16 @@ def check_tag_immutability(
                 status="HARD_FAIL",
                 message=(
                     f"Tag immutability violation! Local tag '{tag}' points to {local_tag_sha}, "
-                    f"which differs from target commit {target_sha}. Tag retargeting/force-moving is strictly forbidden."
+                    f"which differs from candidate commit {target_sha}. Tag retargeting/force-moving is strictly forbidden."
                 ),
             )
+
+    if stage in ("tagged", "attested"):
+        return VerificationResult(
+            passed=False,
+            status="TAG_MISSING",
+            message=f"Tag '{tag}' does not exist locally, but is required for stage '{stage}'.",
+        )
 
     # 2. Check remote tag if requested
     if check_remote:
@@ -130,7 +146,7 @@ def check_tag_immutability(
                 return VerificationResult(
                     passed=True,
                     status="IDEMPOTENT_PASS",
-                    message=f"Remote tag '{tag}' already exists pointing to target commit {target_sha}. Safe for CI retry.",
+                    message=f"Remote tag '{tag}' already exists pointing to candidate commit {target_sha}. Safe for CI retry.",
                 )
             else:
                 return VerificationResult(
@@ -138,14 +154,14 @@ def check_tag_immutability(
                     status="HARD_FAIL",
                     message=(
                         f"Tag immutability violation! Remote tag '{tag}' points to {remote_tag_sha}, "
-                        f"which differs from target commit {target_sha}. Tag retargeting/force-moving is strictly forbidden."
+                        f"which differs from candidate commit {target_sha}. Tag retargeting/force-moving is strictly forbidden."
                     ),
                 )
 
     return VerificationResult(
         passed=True,
         status="PASS",
-        message=f"Tag '{tag}' does not exist yet. Ready for creation on target commit {target_sha}.",
+        message=f"Tag '{tag}' does not exist yet. Ready for creation on candidate commit {target_sha}.",
     )
 
 
@@ -325,7 +341,23 @@ def check_receipt_absence_in_candidate(tag: str, repo_root: Path = REPO_ROOT) ->
     )
 
 
-def check_release_receipt_consistency(tag: str, repo_root: Path = REPO_ROOT) -> VerificationResult:
+def extract_checklist_status(text: str, gate_label: str) -> str | None:
+    """Extract gate status from a markdown table row: | **Gate** | `Status` | ... |."""
+    pattern = re.compile(
+        r"\|\s*(?:\*\*)?" + re.escape(gate_label) + r"(?:\*\*)?[^\|]*\|\s*`?([A-Z_]+)`?\s*\|",
+        re.IGNORECASE,
+    )
+    m = pattern.search(text)
+    if m:
+        return m.group(1).upper()
+    return None
+
+
+def check_release_receipt_consistency(
+    tag: str,
+    release_commit: str | None = None,
+    repo_root: Path = REPO_ROOT,
+) -> VerificationResult:
     """Verify mechanical consistency of release receipt and evidence files."""
     evidence_dir = repo_root / "docs" / "evidence" / "releases" / tag
     receipt_en = evidence_dir / "RELEASE_RECEIPT.md"
@@ -346,21 +378,30 @@ def check_release_receipt_consistency(tag: str, repo_root: Path = REPO_ROOT) -> 
         )
 
     text_en = receipt_en.read_text(encoding="utf-8")
+    text_zh = receipt_zh.read_text(encoding="utf-8")
     actual_pkg_count = get_admitted_package_count(repo_root)
 
-    # Verify release identifier appears in receipt
-    if tag not in text_en:
+    # Legacy policy check: <= v0.2.3 uses historical format
+    version_match = re.match(r"v?(\d+)\.(\d+)\.(\d+)", tag)
+    if version_match:
+        version_tuple = (int(version_match.group(1)), int(version_match.group(2)), int(version_match.group(3)))
+    else:
+        version_tuple = (999, 999, 999)
+    is_legacy = version_tuple <= (0, 2, 3)
+
+    # 1. Verify release identifier appears in both receipts
+    if tag not in text_en or tag not in text_zh:
         return VerificationResult(
             passed=False,
             status="METADATA_MISMATCH",
-            message=f"Tag '{tag}' not found in {receipt_en.relative_to(repo_root)}",
+            message=f"Tag '{tag}' not found in release receipts under {evidence_dir.relative_to(repo_root)}",
         )
 
-    # Verify admitted package count matches
-    pkg_pattern = re.compile(r"(\d+)\s+admitted\s+packages", re.IGNORECASE)
-    match = pkg_pattern.search(text_en)
-    if match:
-        claimed_count = int(match.group(1))
+    # 2. Verify admitted package count matches
+    pkg_pattern_en = re.compile(r"(\d+)\s+admitted\s+packages", re.IGNORECASE)
+    match_en = pkg_pattern_en.search(text_en)
+    if match_en:
+        claimed_count = int(match_en.group(1))
         if claimed_count != actual_pkg_count:
             return VerificationResult(
                 passed=False,
@@ -370,8 +411,34 @@ def check_release_receipt_consistency(tag: str, repo_root: Path = REPO_ROOT) -> 
                     f"receipt claims {claimed_count}, but repository has {actual_pkg_count} admitted packages."
                 ),
             )
+    elif not is_legacy:
+        return VerificationResult(
+            passed=False,
+            status="COUNT_MISMATCH",
+            message=f"Collection package count field missing in {receipt_en.relative_to(repo_root)}",
+        )
 
-    # If post-publication receipt specifies an exact tag target commit, verify against local tag if present
+    pkg_pattern_zh = re.compile(r"(\d+)\s*(?:admitted\s+packages|个(?:已准入)?包)", re.IGNORECASE)
+    match_zh = pkg_pattern_zh.search(text_zh)
+    if match_zh:
+        claimed_count_zh = int(match_zh.group(1))
+        if claimed_count_zh != actual_pkg_count:
+            return VerificationResult(
+                passed=False,
+                status="COUNT_MISMATCH",
+                message=(
+                    f"Package count mismatch in {receipt_zh.relative_to(repo_root)}: "
+                    f"receipt claims {claimed_count_zh}, but repository has {actual_pkg_count} admitted packages."
+                ),
+            )
+    elif not is_legacy:
+        return VerificationResult(
+            passed=False,
+            status="COUNT_MISMATCH",
+            message=f"Collection package count field missing in {receipt_zh.relative_to(repo_root)}",
+        )
+
+    # 3. Check tag target commit against local tag and supplied release commit
     target_match = re.search(r"Tag target commit\s*\|\s*`?([0-9a-f]{40})`?", text_en, re.IGNORECASE)
     if target_match:
         receipt_target_sha = target_match.group(1)
@@ -384,8 +451,17 @@ def check_release_receipt_consistency(tag: str, repo_root: Path = REPO_ROOT) -> 
                     f"Receipt target commit {receipt_target_sha} does not match local tag {tag} target commit {local_tag_sha}."
                 ),
             )
+        if release_commit and release_commit != receipt_target_sha:
+            return VerificationResult(
+                passed=False,
+                status="RECEIPT_TARGET_MISMATCH",
+                message=(
+                    f"Receipt target commit {receipt_target_sha} does not match supplied release commit {release_commit}."
+                ),
+            )
 
-    # Verify release URL format if present
+    # 4. Check release URL format if present
+    expected_url = f"https://github.com/LightDevCoder/skills/releases/tag/{tag}"
     url_match = re.search(r"https://github\.com/LightDevCoder/skills/releases/tag/([^\s\)\`\|]+)", text_en)
     if url_match:
         url_tag = url_match.group(1)
@@ -396,10 +472,221 @@ def check_release_receipt_consistency(tag: str, repo_root: Path = REPO_ROOT) -> 
                 message=f"Release URL tag '{url_tag}' does not match release tag '{tag}'.",
             )
 
+    # If legacy release (<= v0.2.3), skip new strict structural requirements
+    if is_legacy:
+        return VerificationResult(
+            passed=True,
+            status="PASS",
+            message=f"Release receipt for {tag} verified: valid dual receipts and verified {actual_pkg_count} packages.",
+        )
+
+    # --- Strict Required-Field Contract for v0.2.4+ ---
+    # 5. Status must be VERIFIED (Fail closed on CANDIDATE, PREPARED, PENDING)
+    status_m_en = re.search(r"^Status:\s*`?([A-Z_]+)`?", text_en, re.MULTILINE)
+    status_m_zh = re.search(r"^(?:状态|Status)[：:]\s*`?([A-Z_]+)`?", text_zh, re.MULTILINE)
+    status_en = status_m_en.group(1) if status_m_en else None
+    status_zh = status_m_zh.group(1) if status_m_zh else None
+
+    if status_en != "VERIFIED":
+        return VerificationResult(
+            passed=False,
+            status="RECEIPT_STATUS_INVALID",
+            message=f"English receipt status must be 'VERIFIED', got '{status_en}'.",
+        )
+    if status_zh != "VERIFIED":
+        return VerificationResult(
+            passed=False,
+            status="RECEIPT_STATUS_INVALID",
+            message=f"Chinese receipt status must be 'VERIFIED', got '{status_zh}'.",
+        )
+
+    # 6. Release & Release Tag identity fields
+    rel_m_en = re.search(r"\|\s*\*\*Release\*\*\s*\|\s*`?([^\s\`\|]+)`?", text_en)
+    rel_m_zh = re.search(r"\|\s*\*\*发布版本\*\*\s*\|\s*`?([^\s\`\|]+)`?", text_zh)
+    if not rel_m_en or rel_m_en.group(1) not in (tag, tag.lstrip("v")):
+        return VerificationResult(
+            passed=False,
+            status="RECEIPT_RELEASE_MISMATCH",
+            message=f"Release field in English receipt must match '{tag}'.",
+        )
+    if not rel_m_zh or rel_m_zh.group(1) not in (tag, tag.lstrip("v")):
+        return VerificationResult(
+            passed=False,
+            status="RECEIPT_RELEASE_MISMATCH",
+            message=f"发布版本 field in Chinese receipt must match '{tag}'.",
+        )
+
+    tag_m_en = re.search(r"\|\s*\*\*Release Tag\*\*\s*\|\s*`?([^\s\`\|]+)`?", text_en)
+    tag_m_zh = re.search(r"\|\s*\*\*发布 Tag\*\*\s*\|\s*`?([^\s\`\|]+)`?", text_zh)
+    if not tag_m_en or tag_m_en.group(1) != tag:
+        return VerificationResult(
+            passed=False,
+            status="RECEIPT_TAG_MISMATCH",
+            message=f"Release Tag field in English receipt must match '{tag}'.",
+        )
+    if not tag_m_zh or tag_m_zh.group(1) != tag:
+        return VerificationResult(
+            passed=False,
+            status="RECEIPT_TAG_MISMATCH",
+            message=f"发布 Tag field in Chinese receipt must match '{tag}'.",
+        )
+
+    # 7. Annotated Tag Object
+    obj_m_en = re.search(r"\|\s*\*\*Annotated Tag Object\*\*\s*\|\s*`?([0-9a-f]{40})`?", text_en, re.IGNORECASE)
+    obj_m_zh = re.search(r"\|\s*\*\*Annotated Tag 对象\*\*\s*\|\s*`?([0-9a-f]{40})`?", text_zh, re.IGNORECASE)
+    if not obj_m_en:
+        return VerificationResult(
+            passed=False,
+            status="RECEIPT_TAG_OBJECT_MISSING",
+            message=f"Annotated Tag Object SHA missing or invalid in {receipt_en.relative_to(repo_root)}",
+        )
+    if not obj_m_zh:
+        return VerificationResult(
+            passed=False,
+            status="RECEIPT_TAG_OBJECT_MISSING",
+            message=f"Annotated Tag 对象 SHA missing or invalid in {receipt_zh.relative_to(repo_root)}",
+        )
+    if obj_m_en.group(1) != obj_m_zh.group(1):
+        return VerificationResult(
+            passed=False,
+            status="RECEIPT_TAG_OBJECT_MISMATCH",
+            message="Annotated Tag Object SHA differs between English and Chinese receipts.",
+        )
+    actual_tag_obj = resolve_tag_object_sha(tag, cwd=repo_root)
+    if actual_tag_obj and obj_m_en.group(1) != actual_tag_obj:
+        return VerificationResult(
+            passed=False,
+            status="RECEIPT_TAG_OBJECT_MISMATCH",
+            message=f"Receipt tag object {obj_m_en.group(1)} does not match actual annotated tag object {actual_tag_obj}.",
+        )
+
+    # 8. Tag Target Commit
+    tgt_m_en = re.search(r"\|\s*\*\*Tag Target Commit\*\*\s*\|\s*`?([0-9a-f]{40})`?", text_en, re.IGNORECASE)
+    tgt_m_zh = re.search(r"\|\s*\*\*Tag 目标 Commit\*\*\s*\|\s*`?([0-9a-f]{40})`?", text_zh, re.IGNORECASE)
+    if not tgt_m_en:
+        return VerificationResult(
+            passed=False,
+            status="RECEIPT_TAG_TARGET_MISSING",
+            message=f"Tag Target Commit SHA missing in {receipt_en.relative_to(repo_root)}",
+        )
+    if not tgt_m_zh:
+        return VerificationResult(
+            passed=False,
+            status="RECEIPT_TAG_TARGET_MISSING",
+            message=f"Tag 目标 Commit SHA missing in {receipt_zh.relative_to(repo_root)}",
+        )
+    if tgt_m_en.group(1) != tgt_m_zh.group(1):
+        return VerificationResult(
+            passed=False,
+            status="RECEIPT_TAG_TARGET_MISMATCH",
+            message="Tag Target Commit SHA differs between English and Chinese receipts.",
+        )
+    target_sha_val = tgt_m_en.group(1)
+    if release_commit and target_sha_val != release_commit:
+        return VerificationResult(
+            passed=False,
+            status="RECEIPT_TAG_TARGET_MISMATCH",
+            message=f"Receipt tag target commit {target_sha_val} does not match supplied release commit {release_commit}.",
+        )
+    actual_peel = resolve_tag_sha(tag, cwd=repo_root)
+    if actual_peel and target_sha_val != actual_peel:
+        return VerificationResult(
+            passed=False,
+            status="RECEIPT_TAG_TARGET_MISMATCH",
+            message=f"Receipt tag target commit {target_sha_val} does not match actual local tag peeled commit {actual_peel}.",
+        )
+
+    # 9. Release URL
+    url_m_en = re.search(r"\|\s*\*\*Release URL\*\*\s*\|\s*(https://github\.com/[^\s\`\|\)]+)", text_en)
+    url_m_zh = re.search(r"\|\s*\*\*发布 URL\*\*\s*\|\s*(https://github\.com/[^\s\`\|\)]+)", text_zh)
+    if not url_m_en or url_m_en.group(1) != expected_url:
+        return VerificationResult(
+            passed=False,
+            status="RECEIPT_URL_MISMATCH",
+            message=f"Release URL in English receipt must be '{expected_url}'.",
+        )
+    if not url_m_zh or url_m_zh.group(1) != expected_url:
+        return VerificationResult(
+            passed=False,
+            status="RECEIPT_URL_MISMATCH",
+            message=f"Release URL in Chinese receipt must be '{expected_url}'.",
+        )
+
+    # 10. Publication Timestamp
+    ts_m_en = re.search(r"\|\s*\*\*Publication Timestamp\*\*\s*\|\s*`?([^\`\|\n]+)`?", text_en)
+    ts_m_zh = re.search(r"\|\s*\*\*公开发布时间戳\*\*\s*\|\s*`?([^\`\|\n]+)`?", text_zh)
+    if not ts_m_en or not ts_m_en.group(1).strip() or "PENDING" in ts_m_en.group(1).upper():
+        return VerificationResult(
+            passed=False,
+            status="RECEIPT_TIMESTAMP_MISSING",
+            message=f"Publication timestamp missing or pending in {receipt_en.relative_to(repo_root)}",
+        )
+    if not ts_m_zh or not ts_m_zh.group(1).strip() or "PENDING" in ts_m_zh.group(1).upper():
+        return VerificationResult(
+            passed=False,
+            status="RECEIPT_TIMESTAMP_MISSING",
+            message=f"公开发布时间戳 missing or pending in {receipt_zh.relative_to(repo_root)}",
+        )
+
+    # 11. Required Evidence Gates
+    en_gates = [
+        ("GitHub Actions CI", "CI"),
+        ("Pinned Fresh Install", "pinned install"),
+        ("Generic Latest Fresh Install", "latest install"),
+        ("GitHub Release Publication", "GitHub release publication"),
+    ]
+    for gate_name, gate_desc in en_gates:
+        st = extract_checklist_status(text_en, gate_name)
+        if not st:
+            return VerificationResult(
+                passed=False,
+                status="RECEIPT_EVIDENCE_MISSING",
+                message=f"Required evidence row '{gate_name}' ({gate_desc}) missing in {receipt_en.relative_to(repo_root)}",
+            )
+        if st in ("PENDING", "TODO", "CANDIDATE"):
+            return VerificationResult(
+                passed=False,
+                status="RECEIPT_EVIDENCE_PENDING",
+                message=f"Evidence row '{gate_name}' in {receipt_en.relative_to(repo_root)} is '{st}', not final PASS/SUCCESS.",
+            )
+        if st not in ("PASS", "SUCCESS"):
+            return VerificationResult(
+                passed=False,
+                status="RECEIPT_EVIDENCE_INCOMPLETE",
+                message=f"Evidence row '{gate_name}' in {receipt_en.relative_to(repo_root)} has non-passing status '{st}'.",
+            )
+
+    zh_gates = [
+        ("GitHub Actions CI", "CI"),
+        ("锁定版本全量全新安装", "pinned install"),
+        ("最新主干全量全新安装", "latest install"),
+        ("GitHub Release 发布", "GitHub release publication"),
+    ]
+    for gate_name, gate_desc in zh_gates:
+        st = extract_checklist_status(text_zh, gate_name)
+        if not st:
+            return VerificationResult(
+                passed=False,
+                status="RECEIPT_EVIDENCE_MISSING",
+                message=f"Required evidence row '{gate_name}' ({gate_desc}) missing in {receipt_zh.relative_to(repo_root)}",
+            )
+        if st in ("PENDING", "TODO", "CANDIDATE"):
+            return VerificationResult(
+                passed=False,
+                status="RECEIPT_EVIDENCE_PENDING",
+                message=f"Evidence row '{gate_name}' in {receipt_zh.relative_to(repo_root)} is '{st}', not final PASS/SUCCESS.",
+            )
+        if st not in ("PASS", "SUCCESS"):
+            return VerificationResult(
+                passed=False,
+                status="RECEIPT_EVIDENCE_INCOMPLETE",
+                message=f"Evidence row '{gate_name}' in {receipt_zh.relative_to(repo_root)} has non-passing status '{st}'.",
+            )
+
     return VerificationResult(
         passed=True,
         status="PASS",
-        message=f"Release receipt for {tag} verified: valid dual receipts and verified {actual_pkg_count} packages.",
+        message=f"Release receipt for {tag} verified: valid dual receipts, verified {actual_pkg_count} packages, and all required evidence confirmed.",
     )
 
 
@@ -440,82 +727,159 @@ def detect_candidate_tag(repo_root: Path = REPO_ROOT) -> str:
         )
         if versions:
             return versions[-1]
-    return "v0.2.2"
+    return "v0.2.3"
+
+
+def get_repo_root(root_arg: str | None = None) -> Path:
+    """Resolve repository root from CLI argument, git root, or script location."""
+    if root_arg:
+        return Path(root_arg).resolve()
+    code, out, _ = run_git(["rev-parse", "--show-toplevel"], cwd=Path.cwd())
+    if code == 0 and out:
+        return Path(out).resolve()
+    return REPO_ROOT
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Verify release integrity and tag immutability.")
-    parser.add_argument("--tag", help="Release tag to verify (e.g. v0.2.2). Default: latest candidate tag.")
-    parser.add_argument("--commit", default="HEAD", help="Target commit ref (default: HEAD).")
-    parser.add_argument("--stage", choices=["auto", "prepared", "candidate", "tagged", "attested"], default="auto", help="Lifecycle stage to verify (default: auto).")
+    parser.add_argument("--root", default=None, help="Repository root path.")
+    parser.add_argument("--tag", help="Release tag to verify (e.g. v0.2.3). Default: latest candidate tag.")
+    parser.add_argument("--release-commit", "--commit", dest="release_commit", default=None,
+                        help="Release candidate / tag target commit SHA. (Default: HEAD for prepared/candidate/tagged stages).")
+    parser.add_argument("--stage", choices=["auto", "prepared", "candidate", "tagged", "attested"], default="auto",
+                        help="Lifecycle stage to verify (default: auto).")
     parser.add_argument("--check-remote", action="store_true", help="Also query git remote for tag status.")
     parser.add_argument("--allow-dirty", action="store_true", help="Allow uncommitted tracked changes.")
 
     args = parser.parse_args()
-    tag = args.tag or detect_candidate_tag(REPO_ROOT)
-    commit = args.commit
+    repo_root = get_repo_root(args.root)
+    tag = args.tag or detect_candidate_tag(repo_root)
     stage = args.stage
 
     # Auto-resolve stage if auto
     if stage == "auto":
-        evidence_dir = REPO_ROOT / "docs" / "evidence" / "releases" / tag
+        evidence_dir = repo_root / "docs" / "evidence" / "releases" / tag
         receipt_file = evidence_dir / "RELEASE_RECEIPT.md"
         if receipt_file.is_file():
             stage = "attested"
         else:
             stage = "prepared"
 
+    # Resolve candidate commit ref according to stage contract
+    if stage == "attested":
+        if args.release_commit:
+            candidate_ref = args.release_commit
+            candidate_sha = resolve_commit_sha(candidate_ref, cwd=repo_root)
+        else:
+            # In attested stage, NEVER implicitly use HEAD!
+            # Infer candidate SHA from local tag if present
+            tag_peel = resolve_tag_sha(tag, cwd=repo_root)
+            if tag_peel:
+                candidate_ref = tag_peel
+                candidate_sha = tag_peel
+            else:
+                candidate_ref = "UNKNOWN"
+                candidate_sha = None
+    else:
+        candidate_ref = args.release_commit or "HEAD"
+        candidate_sha = resolve_commit_sha(candidate_ref, cwd=repo_root)
+
     print(f"=== Release Integrity Guard ===")
-    print(f"Target Tag:    {tag}")
-    print(f"Target Commit: {commit}")
-    print(f"Stage:         {stage}")
-    print(f"Repository:    {REPO_ROOT}")
+    print(f"Target Tag:     {tag}")
+    print(f"Release Commit: {candidate_sha or candidate_ref}")
+    print(f"Stage:          {stage}")
+    print(f"Repository:     {repo_root}")
     print("--------------------------------")
 
     all_passed = True
 
-    # 1. Working tree check
+    # 1. Working tree check (always run against current working tree / HEAD)
     if not args.allow_dirty:
-        res_tree = check_working_tree(REPO_ROOT)
+        res_tree = check_working_tree(repo_root)
         print(f"[{res_tree.status}] Working Tree: {res_tree.message}")
         if not res_tree.passed:
             all_passed = False
     else:
         print("[SKIPPED] Working Tree check bypassed via --allow-dirty.")
 
-    # 2. Tag immutability check
-    if stage in ("tagged", "attested", "auto"):
-        res_tag = check_tag_immutability(tag, commit, check_remote=args.check_remote, cwd=REPO_ROOT)
-        print(f"[{res_tag.status}] Tag Immutability: {res_tag.message}")
-        if not res_tag.passed:
-            all_passed = False
-
-    # 3. Release manifest consistency check
-    res_manifest = check_release_manifest_consistency(tag, repo_root=REPO_ROOT)
-    print(f"[{res_manifest.status}] Manifest Consistency: {res_manifest.message}")
-    if not res_manifest.passed:
+    # 2. Candidate commit resolution check
+    if not candidate_sha:
+        print(f"[ERROR] Release Candidate Commit: Could not resolve '{candidate_ref}' to a 40-character SHA.")
         all_passed = False
 
-    # 4. Manifest navigation check
-    res_nav = check_manifest_navigation(tag, repo_root=REPO_ROOT)
-    print(f"[{res_nav.status}] Manifest Navigation: {res_nav.message}")
-    if not res_nav.passed:
-        all_passed = False
+    # 3. Stage-specific checks:
+    if stage in ("prepared", "candidate"):
+        if candidate_sha:
+            res_tag = check_tag_immutability(tag, candidate_sha, check_remote=args.check_remote, stage=stage, cwd=repo_root)
+            print(f"[{res_tag.status}] Tag Status: {res_tag.message}")
+            if not res_tag.passed:
+                all_passed = False
 
-    # 5. Release notes consistency check
-    res_notes = check_release_notes_consistency(tag, repo_root=REPO_ROOT)
-    print(f"[{res_notes.status}] Notes Consistency: {res_notes.message}")
-    if not res_notes.passed:
-        all_passed = False
-
-    # 6. Stage-specific receipt check
-    if stage in ("prepared", "candidate", "tagged"):
-        res_absence = check_receipt_absence_in_candidate(tag, repo_root=REPO_ROOT)
+        res_absence = check_receipt_absence_in_candidate(tag, repo_root=repo_root)
         print(f"[{res_absence.status}] Candidate Receipt Absence: {res_absence.message}")
         if not res_absence.passed:
             all_passed = False
-    else:
-        res_receipt = check_release_receipt_consistency(tag, repo_root=REPO_ROOT)
+
+        res_manifest = check_release_manifest_consistency(tag, repo_root=repo_root)
+        print(f"[{res_manifest.status}] Manifest Consistency: {res_manifest.message}")
+        if not res_manifest.passed:
+            all_passed = False
+
+        res_notes = check_release_notes_consistency(tag, repo_root=repo_root)
+        print(f"[{res_notes.status}] Notes Consistency: {res_notes.message}")
+        if not res_notes.passed:
+            all_passed = False
+
+    elif stage == "tagged":
+        if candidate_sha:
+            res_tag = check_tag_immutability(tag, candidate_sha, check_remote=args.check_remote, stage="tagged", cwd=repo_root)
+            print(f"[{res_tag.status}] Tag Immutability: {res_tag.message}")
+            if not res_tag.passed:
+                all_passed = False
+
+        res_absence = check_receipt_absence_in_candidate(tag, repo_root=repo_root)
+        print(f"[{res_absence.status}] Candidate Receipt Absence: {res_absence.message}")
+        if not res_absence.passed:
+            all_passed = False
+
+        res_manifest = check_release_manifest_consistency(tag, repo_root=repo_root)
+        print(f"[{res_manifest.status}] Manifest Consistency: {res_manifest.message}")
+        if not res_manifest.passed:
+            all_passed = False
+
+        res_nav = check_manifest_navigation(tag, repo_root=repo_root)
+        print(f"[{res_nav.status}] Manifest Navigation: {res_nav.message}")
+        if not res_nav.passed:
+            all_passed = False
+
+        res_notes = check_release_notes_consistency(tag, repo_root=repo_root)
+        print(f"[{res_notes.status}] Notes Consistency: {res_notes.message}")
+        if not res_notes.passed:
+            all_passed = False
+
+    elif stage == "attested":
+        if candidate_sha:
+            res_tag = check_tag_immutability(tag, candidate_sha, check_remote=args.check_remote, stage="attested", cwd=repo_root)
+            print(f"[{res_tag.status}] Tag Immutability: {res_tag.message}")
+            if not res_tag.passed:
+                all_passed = False
+
+        res_manifest = check_release_manifest_consistency(tag, repo_root=repo_root)
+        print(f"[{res_manifest.status}] Manifest Consistency: {res_manifest.message}")
+        if not res_manifest.passed:
+            all_passed = False
+
+        res_nav = check_manifest_navigation(tag, repo_root=repo_root)
+        print(f"[{res_nav.status}] Manifest Navigation: {res_nav.message}")
+        if not res_nav.passed:
+            all_passed = False
+
+        res_notes = check_release_notes_consistency(tag, repo_root=repo_root)
+        print(f"[{res_notes.status}] Notes Consistency: {res_notes.message}")
+        if not res_notes.passed:
+            all_passed = False
+
+        res_receipt = check_release_receipt_consistency(tag, release_commit=candidate_sha, repo_root=repo_root)
         print(f"[{res_receipt.status}] Receipt Consistency: {res_receipt.message}")
         if not res_receipt.passed:
             all_passed = False

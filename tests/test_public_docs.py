@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import sys
 import tempfile
 import unittest
@@ -102,6 +103,96 @@ class PublicDocsQualityTests(unittest.TestCase):
 
             errors = check_category_readmes(tmp_root)
             self.assertTrue(any("missing link to mock-pkg/SKILL.md" in err for err in errors))
+
+    def test_root_readme_stable_package_count_matches_catalog(self) -> None:
+        """Root READMEs package count claim must match catalog inventory and admitted packages."""
+        admitted = {p.parent.name for p in ROOT.glob("skills/*/*/SKILL.md")}
+        admitted_count = len(admitted)
+
+        readme_en = (ROOT / "README.md").read_text(encoding="utf-8")
+        readme_zh = (ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
+
+        m_en = re.search(r"provides\s+(\d+)\s+first-party\s+Agent\s+Skills", readme_en)
+        self.assertIsNotNone(m_en, "README.md missing package count statement.")
+        self.assertEqual(int(m_en.group(1)), admitted_count)
+
+        m_zh = re.search(r"包含\s*(\d+)\s*个第一方\s*Agent\s*Skill", readme_zh)
+        self.assertIsNotNone(m_zh, "README.zh-CN.md missing package count statement.")
+        self.assertEqual(int(m_zh.group(1)), admitted_count)
+
+    def test_root_readme_has_no_unreleased_claim_for_tagged_packages(self) -> None:
+        """Root READMEs must not claim that admitted tagged packages are unreleased."""
+        readme_en = (ROOT / "README.md").read_text(encoding="utf-8")
+        readme_zh = (ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
+
+        self.assertNotRegex(
+            readme_en,
+            r"available on `?main`? as an unreleased addition",
+            "README.md contains stale unreleased claim.",
+        )
+        self.assertNotIn("尚未包含在版本标签中", readme_zh, "README.zh-CN.md contains stale unreleased claim.")
+        self.assertNotIn("尚未发布版本标签", readme_zh, "README.zh-CN.md contains stale unreleased claim.")
+
+    def test_english_chinese_skill_inventory_matches(self) -> None:
+        """CATALOG.md, CATALOG.zh-CN.md, and skills/*/*/SKILL.md must list identical package sets."""
+        admitted = {p.parent.name for p in ROOT.glob("skills/*/*/SKILL.md")}
+
+        cat_en = (ROOT / "CATALOG.md").read_text(encoding="utf-8")
+        cat_zh = (ROOT / "CATALOG.zh-CN.md").read_text(encoding="utf-8")
+
+        skills_en = set(re.findall(r"^###\s+([a-zA-Z0-9_-]+)", cat_en, re.MULTILINE))
+        skills_zh = set(re.findall(r"^###\s+([a-zA-Z0-9_-]+)", cat_zh, re.MULTILINE))
+
+        self.assertEqual(skills_en, admitted)
+        self.assertEqual(skills_zh, admitted)
+
+    def test_english_chinese_agent_config_adapter_count_matches(self) -> None:
+        """EN and ZH README adapter counts must match each other and the canonical authority."""
+        # Canonical authority: harness-support.md
+        harness_doc = (ROOT / "skills" / "engineering" / "agent-config" / "references" / "harness-support.md").read_text(encoding="utf-8")
+        m_auth = re.search(r"native host adapters for\s+(\d+)\s+primary coding-agent harnesses", harness_doc)
+        self.assertIsNotNone(m_auth, "Authority doc harness-support.md missing adapter count.")
+        canonical_count = int(m_auth.group(1))
+
+        readme_en = (ROOT / "README.md").read_text(encoding="utf-8")
+        readme_zh = (ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
+
+        m_en = re.search(r"(\d+)\s+native\s+adapters", readme_en)
+        self.assertIsNotNone(m_en, "README.md missing native adapters count.")
+        self.assertEqual(int(m_en.group(1)), canonical_count)
+
+        m_zh = re.search(r"(\d+)\s*种原生适配器", readme_zh)
+        self.assertIsNotNone(m_zh, "README.zh-CN.md missing native adapters count.")
+        self.assertEqual(int(m_zh.group(1)), canonical_count)
+
+    def test_catalog_en_zh_entries_have_equivalent_required_fields(self) -> None:
+        """Every skill entry in English and Chinese catalogs must provide equivalent required fields."""
+        cat_en = (ROOT / "CATALOG.md").read_text(encoding="utf-8")
+        cat_zh = (ROOT / "CATALOG.zh-CN.md").read_text(encoding="utf-8")
+
+        skills = re.findall(r"^###\s+([a-zA-Z0-9_-]+)", cat_en, re.MULTILINE)
+        self.assertEqual(len(skills), 36)
+
+        en_fields = ["Purpose", "When to use", "Invocation", "Package", "Status"]
+        zh_fields = ["作用", "什么时候用", "调用方式", "包位置", "状态"]
+
+        for skill in skills:
+            block_en = re.search(r"^###\s+" + skill + r"\n(.*?)(?=\n###|\Z)", cat_en, re.DOTALL | re.MULTILINE).group(1)
+            block_zh = re.search(r"^###\s+" + skill + r"\n(.*?)(?=\n###|\Z)", cat_zh, re.DOTALL | re.MULTILINE).group(1)
+
+            for ef in en_fields:
+                self.assertIn(
+                    f"**{ef}:**",
+                    block_en,
+                    f"CATALOG.md entry '{skill}' is missing required field '**{ef}:**'",
+                )
+
+            for zf in zh_fields:
+                self.assertIn(
+                    f"**{zf}：**",
+                    block_zh,
+                    f"CATALOG.zh-CN.md entry '{skill}' is missing required field '**{zf}：**'",
+                )
 
 
 if __name__ == "__main__":

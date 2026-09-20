@@ -171,14 +171,12 @@ $ask-light workflow
 | --- | --- | --- |
 | **项目流程** | `project-init`、`project-clarify`、`project-spec`、`project-tickets`、`implement`、`project-review`、`release-workflow` | [CATALOG.zh-CN.md](CATALOG.zh-CN.md) |
 | **澄清与调研** | `socratic`（引擎）、`clarify`、`project-clarify`、`decision-map`、`research`、`prototype`、`to-questionnaire` | [clarification-system](docs/zh-CN/workflows/clarification-system.md) |
-| **任务执行** | `implement`、`agent-config`（原生支持主要编码 Harness：9 种原生适配器与通用回退）、`tdd`、`diagnosing-bugs`、`resolving-merge-conflicts` | [execution](docs/zh-CN/workflows/execution.md) |
+| **任务执行** | `implement`、`agent-config`（原生支持主要编码 Harness：10 种原生适配器与通用回退）、`tdd`、`diagnosing-bugs`、`resolving-merge-conflicts` | [execution](docs/zh-CN/workflows/execution.md) |
 | **质量审阅** | `review-loop`（引擎）、`generic-review`、`code-review`、`project-review`（验收） | [review-system](docs/zh-CN/workflows/review-system.md) |
 | **专项工具** | `manuscript-ops`、`kb-init`、`learn-anything`、`language-learning`、`kanban-worker`、`eli5`、`recap` | [specialized-workflows](docs/zh-CN/workflows/specialized-workflows.md) |
-| **协作效率** | `handoff`、`humanizer`、`wizard`、`wait-what`、`writing-for-agents` | [CATALOG.zh-CN.md](CATALOG.zh-CN.md) |
+| **协作效率** | `handoff`、`humanizer`、`wizard`、`wait-what`、`writing-for-agents`、`light-travelpage` | [CATALOG.zh-CN.md](CATALOG.zh-CN.md) |
 
 每个 Skill 的完整功能、使用时机与调用方式见 [CATALOG.zh-CN.md](CATALOG.zh-CN.md)。
-
-`light-travelpage` 已收录到 `main`，尚未包含在版本标签中：从旅行资料生成和维护手机网页，通过 GitHub 与 Cloudflare Pages/D1 共享账单、成员、待办和票券状态。见 [Skill 入口](skills/productivity/light-travelpage/SKILL.md)和[准入证据](docs/evidence/admissions/light-travelpage/README.md)。 支持中英切换、航班与住宿卡片、细衬线字体和按目的地选择地图服务。
 
 ## 溯源与归属
 

@@ -174,11 +174,9 @@ See [ask-light](skills/productivity/ask-light/SKILL.md) and [docs/workflows/](do
 | **Execution** | `implement`, `agent-config` (primary harnesses: 10 native adapters + fallback), `tdd`, `diagnosing-bugs`, `resolving-merge-conflicts` | [execution](docs/workflows/execution.md) |
 | **Review** | `review-loop` (engine), `generic-review`, `code-review`, `project-review` (acceptance) | [review-system](docs/workflows/review-system.md) |
 | **Specialized** | `manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `eli5`, `recap` | [specialized-workflows](docs/workflows/specialized-workflows.md) |
-| **Productivity** | `handoff`, `humanizer`, `wizard`, `wait-what`, `writing-for-agents` | [CATALOG.md](CATALOG.md) |
+| **Productivity** | `handoff`, `humanizer`, `wizard`, `wait-what`, `writing-for-agents`, `light-travelpage` | [CATALOG.md](CATALOG.md) |
 
 See [CATALOG.md](CATALOG.md) for full descriptions, invocation modes, and package paths.
-
-`light-travelpage` is available on `main` as an unreleased addition. It generates and maintains shared mobile travel pages with GitHub and Cloudflare Pages/D1. See the [package](skills/productivity/light-travelpage/SKILL.md) and [admission evidence](docs/evidence/admissions/light-travelpage/README.md). It supports Chinese/English switching, flight and stay cards, fine serif typography, and destination-specific map services.
 
 ## Provenance and Attribution
 

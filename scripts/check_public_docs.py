@@ -162,12 +162,105 @@ def check_anti_patterns(
     return errors
 
 
+def get_canonical_adapter_count(repo_root: Path = REPO_ROOT) -> int:
+    """Retrieve canonical native harness adapter count from agent-config documentation."""
+    harness_doc = repo_root / "skills" / "engineering" / "agent-config" / "references" / "harness-support.md"
+    if harness_doc.is_file():
+        text = harness_doc.read_text(encoding="utf-8")
+        m = re.search(r"native host adapters for\s+(\d+)\s+primary coding-agent harnesses", text, re.IGNORECASE)
+        if m:
+            return int(m.group(1))
+    return 10
+
+
+def check_readme_facts(repo_root: Path = REPO_ROOT) -> list[str]:
+    """Validate root README facts against repository canonical state."""
+    errors: list[str] = []
+    admitted = get_admitted_packages(repo_root)
+    pkg_count = len(admitted)
+    canonical_adapters = get_canonical_adapter_count(repo_root)
+
+    readme_en = repo_root / "README.md"
+    readme_zh = repo_root / "README.zh-CN.md"
+
+    if readme_en.is_file():
+        text_en = readme_en.read_text(encoding="utf-8")
+        # Check package count claim
+        m_count = re.search(r"provides\s+(\d+)\s+first-party\s+Agent\s+Skills", text_en, re.IGNORECASE)
+        if m_count and int(m_count.group(1)) != pkg_count:
+            errors.append(f"README.md package count claim {m_count.group(1)} differs from admitted count {pkg_count}.")
+        # Check unreleased claims for tagged packages
+        if re.search(r"available on `?main`? as an unreleased addition", text_en, re.IGNORECASE):
+            errors.append("README.md contains stale claim stating admitted package is an unreleased addition.")
+        # Check adapter count
+        m_adapt = re.search(r"(\d+)\s+native\s+adapters", text_en, re.IGNORECASE)
+        if m_adapt and int(m_adapt.group(1)) != canonical_adapters:
+            errors.append(f"README.md reports {m_adapt.group(1)} native adapters, expected {canonical_adapters}.")
+
+    if readme_zh.is_file():
+        text_zh = readme_zh.read_text(encoding="utf-8")
+        # Check package count claim
+        m_count = re.search(r"包含\s*(\d+)\s*个第一方\s*Agent\s*Skill", text_zh, re.IGNORECASE)
+        if m_count and int(m_count.group(1)) != pkg_count:
+            errors.append(f"README.zh-CN.md package count claim {m_count.group(1)} differs from admitted count {pkg_count}.")
+        # Check unreleased claims
+        if "尚未包含在版本标签中" in text_zh or "尚未发布版本标签" in text_zh:
+            errors.append("README.zh-CN.md contains stale claim stating admitted package is not included in version tag.")
+        # Check adapter count
+        m_adapt = re.search(r"(\d+)\s*种原生适配器", text_zh)
+        if m_adapt and int(m_adapt.group(1)) != canonical_adapters:
+            errors.append(f"README.zh-CN.md reports {m_adapt.group(1)} native adapters, expected {canonical_adapters}.")
+
+    return errors
+
+
+def check_catalog_parity(repo_root: Path = REPO_ROOT) -> list[str]:
+    """Validate that English and Chinese catalogs provide equivalent required fields for each skill."""
+    errors: list[str] = []
+    cat_en_path = repo_root / "CATALOG.md"
+    cat_zh_path = repo_root / "CATALOG.zh-CN.md"
+
+    if not cat_en_path.is_file() or not cat_zh_path.is_file():
+        return errors
+
+    cat_en = cat_en_path.read_text(encoding="utf-8")
+    cat_zh = cat_zh_path.read_text(encoding="utf-8")
+
+    skills_en = re.findall(r"^###\s+([a-zA-Z0-9_-]+)", cat_en, re.MULTILINE)
+    skills_zh = re.findall(r"^###\s+([a-zA-Z0-9_-]+)", cat_zh, re.MULTILINE)
+
+    if set(skills_en) != set(skills_zh):
+        errors.append(f"Catalog skill sets differ between EN and ZH: {set(skills_en) ^ set(skills_zh)}")
+
+    en_required = ["Purpose", "When to use", "Invocation", "Package", "Status"]
+    zh_required = ["作用", "什么时候用", "调用", "包", "状态"]
+
+    for s in skills_en:
+        block_en_m = re.search(r"^###\s+" + s + r"\n(.*?)(?=\n###|\Z)", cat_en, re.DOTALL | re.MULTILINE)
+        if block_en_m:
+            block = block_en_m.group(1)
+            for req in en_required:
+                if f"**{req}:**" not in block:
+                    errors.append(f"CATALOG.md entry '{s}' missing required field: **{req}:**")
+
+        block_zh_m = re.search(r"^###\s+" + s + r"\n(.*?)(?=\n###|\Z)", cat_zh, re.DOTALL | re.MULTILINE)
+        if block_zh_m:
+            block = block_zh_m.group(1)
+            for req in zh_required:
+                if f"**{req}" not in block:
+                    errors.append(f"CATALOG.zh-CN.md entry '{s}' missing required field: **{req}**")
+
+    return errors
+
+
 def run_checks(repo_root: Path = REPO_ROOT) -> PublicDocCheckResult:
     """Execute all public doc checks."""
     errors: list[str] = []
     errors.extend(check_catalog_inventory(repo_root))
     errors.extend(check_category_readmes(repo_root))
     errors.extend(check_anti_patterns(repo_root))
+    errors.extend(check_readme_facts(repo_root))
+    errors.extend(check_catalog_parity(repo_root))
     return PublicDocCheckResult(passed=len(errors) == 0, errors=errors)
 
 
@@ -183,7 +276,7 @@ def main() -> int:
 
     result = run_checks(repo_root)
     if result.passed:
-        print("RESULT: PASS — Public documentation is consistent and human-facing.")
+        print("RESULT: PASS — Public documentation structural and terminology checks passed.")
         return 0
 
     print(f"RESULT: FAIL — {len(result.errors)} documentation issues detected:")

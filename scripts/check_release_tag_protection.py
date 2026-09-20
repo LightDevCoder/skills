@@ -33,10 +33,16 @@ class ProtectionCheckResult(NamedTuple):
     details: dict[str, Any] | None = None
 
 
-def pattern_covers_tag_ref(patterns: list[str], test_ref: str = "refs/tags/v0.2.4") -> bool:
-    """Check if any included pattern matches the test tag reference."""
-    for pat in patterns:
-        if pat == test_ref or fnmatch.fnmatch(test_ref, pat):
+def pattern_excludes_release_namespace(pattern: str, target_pattern: str = "refs/tags/v*") -> bool:
+    """Check if an exclude pattern removes any tags from the target release namespace."""
+    if pattern == target_pattern or pattern == "refs/tags/*" or pattern == "*":
+        return True
+    if pattern.startswith("refs/tags/v"):
+        return True
+    # Test sample release tags across common version forms
+    sample_tags = ["refs/tags/v0.0.0", "refs/tags/v0.2.3", "refs/tags/v0.2.4", "refs/tags/v1.0.0", "refs/tags/v9.9.9"]
+    for sample in sample_tags:
+        if fnmatch.fnmatch(sample, pattern):
             return True
     return False
 
@@ -84,11 +90,24 @@ def verify_ruleset_payload(
         conditions = rs.get("conditions", {})
         ref_name = conditions.get("ref_name", {})
         includes = ref_name.get("include", [])
+        excludes = ref_name.get("exclude", [])
 
-        # Verify pattern covers refs/tags/v*
-        covers = target_pattern in includes or pattern_covers_tag_ref(includes, "refs/tags/v0.2.4")
-        if not covers:
+        # Strict canonical namespace check: requires explicit target_pattern
+        if target_pattern not in includes:
             continue
+
+        # Exclude check: forbid any exclusion that impacts release namespace
+        for ex in excludes:
+            if pattern_excludes_release_namespace(ex, target_pattern):
+                return ProtectionCheckResult(
+                    passed=False,
+                    status="BLOCKED",
+                    message=(
+                        f"Ruleset '{rs.get('name', 'unnamed')}' (id: {rs.get('id')}) contains exclude pattern '{ex}' "
+                        f"which excludes tags from protected namespace '{target_pattern}'. Release tag namespace must be immutable."
+                    ),
+                    details=rs,
+                )
 
         # Check rules: update and deletion restrictions
         rules = rs.get("rules", [])
@@ -114,14 +133,46 @@ def verify_ruleset_payload(
                 details=rs,
             )
 
+        # Check bypass policy
+        bypass_actors = rs.get("bypass_actors")
+        if bypass_actors:
+            return ProtectionCheckResult(
+                passed=False,
+                status="BLOCKED",
+                message=(
+                    f"Ruleset '{rs.get('name', 'unnamed')}' (id: {rs.get('id')}) allows bypass actors: {bypass_actors}. "
+                    "Release tags must be permanently immutable with zero bypass actors."
+                ),
+                details=rs,
+            )
+
+        current_user_bypass = rs.get("current_user_can_bypass")
+        if current_user_bypass is not None and current_user_bypass != "never":
+            return ProtectionCheckResult(
+                passed=False,
+                status="BLOCKED",
+                message=(
+                    f"Ruleset '{rs.get('name', 'unnamed')}' (id: {rs.get('id')}) permits current user bypass ('{current_user_bypass}'). "
+                    "Release tags must not allow bypass."
+                ),
+                details=rs,
+            )
+
         # All requirements satisfied!
+        bypass_verified = (
+            "none (enforced)"
+            if (bypass_actors == [] and current_user_bypass == "never")
+            else ("unverified" if (bypass_actors is None and current_user_bypass is None) else "bypassed")
+        )
         details = {
             "id": rs.get("id"),
             "name": rs.get("name"),
             "target": target,
             "enforcement": enforcement,
             "patterns": includes,
+            "excludes": excludes,
             "rules": sorted(rule_types),
+            "bypass": bypass_verified,
             "updated_at": rs.get("updated_at") or rs.get("created_at"),
         }
         return ProtectionCheckResult(
