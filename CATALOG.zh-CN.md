@@ -80,7 +80,7 @@
 - **什么时候用：** 出现代码报错、测试失败、行为异常或性能回退，且根因尚不明显时。
 - **调用方式：** Model-invoked。
 - **包位置：** [skills/engineering/diagnosing-bugs/](skills/engineering/diagnosing-bugs)
-- **状态：** 第一方已准入；PORT — NO REDESIGN。
+- **状态：** 第一方已准入；PORT — NO REDESIGN（保留 Matt 基线）。
 - **证据：** [SKILL.md](skills/engineering/diagnosing-bugs/SKILL.md)。
 - **安装路径：** `<skills-root>/diagnosing-bugs/`。
 
@@ -138,9 +138,9 @@
 
 - **作用：** 在定时运行中认领并执行一张看板任务，优先处理已有修改意见或进行中的工作。
 - **什么时候用：** 调度执行 Light-Kanban 看板任务时。
-- **调用方式：** 仅 user-invoked（定时触发或按需调用）。
+- **调用方式：** Model-invoked；支持手动入口。
 - **包位置：** [skills/project/kanban-worker/](skills/project/kanban-worker)
-- **状态：** 第一方已准入；NEW。
+- **状态：** 第一方已准入（通过 full path review-loop agent-skill PASS）；在 v0.1.6 中自 light-kanban-worker 更名。
 - **证据：** [SKILL.md](skills/project/kanban-worker/SKILL.md)。
 - **安装路径：** `<skills-root>/kanban-worker/`。
 
@@ -150,7 +150,7 @@
 - **什么时候用：** 需要新建或重构项目知识库、参考资料库或研究归档时。
 - **调用方式：** 仅 user-invoked。
 - **包位置：** [skills/knowledge/kb-init/](skills/knowledge/kb-init)
-- **状态：** 第一方已准入；NEW。
+- **状态：** 第一方已准入（通过 full path review-loop agent-skill PASS）；随 v0.1.6 发布。
 - **证据：** [SKILL.md](skills/knowledge/kb-init/SKILL.md)。
 - **安装路径：** `<skills-root>/kb-init/`。
 
@@ -160,7 +160,7 @@
 - **什么时候用：** 学习或练习外语（如精读、语法分析、表达润色、听说测试）时。
 - **调用方式：** 仅 user-invoked。
 - **包位置：** [skills/knowledge/language-learning/](skills/knowledge/language-learning)
-- **状态：** 第一方已准入；NEW。
+- **状态：** 第一方已准入（通过 prompt-only fast-track PASS）；随 v0.1.2 发布。
 - **证据：** [skills/knowledge/language-learning/tests/](skills/knowledge/language-learning/tests)。
 - **安装路径：** `<skills-root>/language-learning/`。
 
@@ -308,9 +308,9 @@
 
 - **作用：** 审查与修复循环引擎：将产物提交给对应的审查技能，收集发现的问题并指导修复，直到通过或达到轮次上限。
 - **什么时候用：** 任何具有指定审阅者且具备有限轮次修复窗口的产物审阅与修复循环。
-- **调用方式：** 仅 user-invoked。
+- **调用方式：** Model-invoked；支持手动入口。
 - **包位置：** [skills/review/review-loop/](skills/review/review-loop)
-- **状态：** 第一方已准入；NEW。
+- **状态：** 第一方已准入；REFACTOR + SPLIT（终审验收移至 project-review）。
 - **证据：** [SKILL.md](skills/review/review-loop/SKILL.md)。
 - **安装路径：** `<skills-root>/review-loop/`。
 
@@ -320,7 +320,7 @@
 - **什么时候用：** 作为 `clarify`、`project-clarify`、`decision-map` 的底层提问引擎（非独立项目入口）。
 - **调用方式：** Model-invoked（由 clarify 等技能调用）。
 - **包位置：** [skills/thinking/socratic/](skills/thinking/socratic)
-- **状态：** 第一方已准入；NEW。
+- **状态：** 第一方已准入；ADAPT（Matt grilling）。
 - **证据：** [SKILL.md](skills/thinking/socratic/SKILL.md)。
 - **安装路径：** `<skills-root>/socratic/`。
 
@@ -328,7 +328,7 @@
 
 - **作用：** 测试驱动开发（红-绿-重构）：先编写失败的测试用例，再补充实现使其通过，最后优化重构。
 - **什么时候用：** 采用测试驱动开发模式编写代码新功能，或在修复 Bug 时增加回归测试时。
-- **调用方式：** 仅 user-invoked。
+- **调用方式：** Model-invoked。
 - **包位置：** [skills/engineering/tdd/](skills/engineering/tdd)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
 - **证据：** [SKILL.md](skills/engineering/tdd/SKILL.md)。
@@ -348,7 +348,7 @@
 
 - **作用：** 将未决问题转为面向持信息人的问卷。
 - **什么时候用：** 所需关键信息掌握在他人手中，需要将澄清问题转为适合外部填写的问卷时。
-- **调用方式：** Model-invoked。
+- **调用方式：** 仅 user-invoked。
 - **包位置：** [skills/thinking/to-questionnaire/](skills/thinking/to-questionnaire)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
 - **证据：** [SKILL.md](skills/thinking/to-questionnaire/SKILL.md)。
@@ -378,7 +378,7 @@
 
 - **作用：** 为 agent 编写或改进面向模型的文档（Skills、AGENTS.md、CLAUDE.md）。
 - **什么时候用：** 编写或优化 Agent 指令（AGENTS.md、CLAUDE.md）或 Skill 包时。
-- **调用方式：** 仅 user-invoked。
+- **调用方式：** Model-invoked。
 - **包位置：** [skills/writing/writing-for-agents/](skills/writing/writing-for-agents)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
 - **证据：** [SKILL.md](skills/writing/writing-for-agents/SKILL.md)。

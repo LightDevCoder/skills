@@ -45,6 +45,47 @@ def run_git(cmd: list[str], cwd: Path = REPO_ROOT) -> tuple[int, str, str]:
     return proc.returncode, proc.stdout.strip(), proc.stderr.strip()
 
 
+class AnnotatedTagIdentity(NamedTuple):
+    tag_type: str | None
+    tag_object_sha: str | None
+    peeled_commit_sha: str | None
+    is_annotated: bool
+
+
+def resolve_annotated_tag_identity(tag: str, cwd: Path = REPO_ROOT) -> AnnotatedTagIdentity:
+    """Resolve tag identity using git cat-file -t and git rev-parse.
+
+    For annotated tags, git cat-file -t returns 'tag'.
+    For lightweight tags, git cat-file -t returns 'commit' and is_annotated is False.
+    """
+    code_type, out_type, _ = run_git(["cat-file", "-t", f"refs/tags/{tag}"], cwd=cwd)
+    if code_type != 0 or not out_type:
+        return AnnotatedTagIdentity(tag_type=None, tag_object_sha=None, peeled_commit_sha=None, is_annotated=False)
+
+    tag_type = out_type.strip()
+    if tag_type != "tag":
+        code_rev, out_rev, _ = run_git(["rev-parse", f"refs/tags/{tag}"], cwd=cwd)
+        sha = out_rev if code_rev == 0 and len(out_rev) == 40 else None
+        return AnnotatedTagIdentity(
+            tag_type=tag_type,
+            tag_object_sha=sha,
+            peeled_commit_sha=sha,
+            is_annotated=False,
+        )
+
+    code_obj, out_obj, _ = run_git(["rev-parse", f"refs/tags/{tag}"], cwd=cwd)
+    code_peel, out_peel, _ = run_git(["rev-parse", f"refs/tags/{tag}^{{commit}}"], cwd=cwd)
+    obj_sha = out_obj if code_obj == 0 and len(out_obj) == 40 else None
+    peel_sha = out_peel if code_peel == 0 and len(out_peel) == 40 else None
+
+    return AnnotatedTagIdentity(
+        tag_type="tag",
+        tag_object_sha=obj_sha,
+        peeled_commit_sha=peel_sha,
+        is_annotated=True,
+    )
+
+
 def resolve_commit_sha(commit_ref: str, cwd: Path = REPO_ROOT) -> str | None:
     """Resolve a commit reference to its full 40-character SHA."""
     code, out, _ = run_git(["rev-parse", f"{commit_ref}^{{commit}}"], cwd=cwd)
@@ -55,21 +96,17 @@ def resolve_commit_sha(commit_ref: str, cwd: Path = REPO_ROOT) -> str | None:
 
 def resolve_tag_object_sha(tag: str, cwd: Path = REPO_ROOT) -> str | None:
     """Resolve an annotated tag to its underlying tag object SHA."""
-    code, out, _ = run_git(["rev-parse", f"refs/tags/{tag}"], cwd=cwd)
-    if code == 0 and len(out) == 40:
-        return out
+    ident = resolve_annotated_tag_identity(tag, cwd=cwd)
+    if ident.is_annotated:
+        return ident.tag_object_sha
     return None
 
 
 def resolve_tag_sha(tag: str, cwd: Path = REPO_ROOT) -> str | None:
     """Resolve an existing tag to its underlying peeled commit SHA."""
-    # First check if tag exists locally
-    code, out, _ = run_git(["tag", "-l", tag], cwd=cwd)
-    if code == 0 and out == tag:
-        # Peel annotated tag to underlying commit
-        code_peel, out_peel, _ = run_git(["rev-parse", f"{tag}^{{commit}}"], cwd=cwd)
-        if code_peel == 0 and len(out_peel) == 40:
-            return out_peel
+    ident = resolve_annotated_tag_identity(tag, cwd=cwd)
+    if ident.tag_type:
+        return ident.peeled_commit_sha
     return None
 
 
@@ -113,8 +150,20 @@ def check_tag_immutability(
         )
 
     # 1. Check local tag
-    local_tag_sha = resolve_tag_sha(tag, cwd=cwd)
-    if local_tag_sha:
+    tag_ident = resolve_annotated_tag_identity(tag, cwd=cwd)
+    if tag_ident.tag_type:
+        # For tagged and attested stages, release tags MUST be annotated
+        if stage in ("tagged", "attested") and not tag_ident.is_annotated:
+            return VerificationResult(
+                passed=False,
+                status="LIGHTWEIGHT_TAG_FORBIDDEN",
+                message=(
+                    f"Tag '{tag}' is not an annotated tag (git cat-file -t returned '{tag_ident.tag_type}'). "
+                    "Lightweight tags are strictly forbidden for release tags; tags must be created with 'git tag -a'."
+                ),
+            )
+
+        local_tag_sha = tag_ident.peeled_commit_sha
         if local_tag_sha == target_sha:
             return VerificationResult(
                 passed=True,
@@ -341,6 +390,34 @@ def check_receipt_absence_in_candidate(tag: str, repo_root: Path = REPO_ROOT) ->
     )
 
 
+def check_public_candidate_docs(repo_root: Path = REPO_ROOT) -> VerificationResult:
+    """Verify that public documentation is internally consistent during candidate stages."""
+    if (repo_root / "CATALOG.md").is_file() and (repo_root / "README.md").is_file():
+        scripts_dir = repo_root / "scripts"
+        if str(scripts_dir) not in sys.path:
+            sys.path.insert(0, str(scripts_dir))
+        try:
+            import check_public_docs
+            res = check_public_docs.run_checks(repo_root)
+            if not res.passed:
+                return VerificationResult(
+                    passed=False,
+                    status="PUBLIC_DOCS_INCONSISTENT",
+                    message="Public candidate docs inconsistent: " + "; ".join(res.errors[:3]),
+                )
+        except Exception as e:
+            return VerificationResult(
+                passed=False,
+                status="PUBLIC_DOCS_ERROR",
+                message=f"Error executing public documentation checks: {e}",
+            )
+    return VerificationResult(
+        passed=True,
+        status="PASS",
+        message="Public candidate docs internally consistent.",
+    )
+
+
 def extract_checklist_status(text: str, gate_label: str) -> str | None:
     """Extract gate status from a markdown table row: | **Gate** | `Status` | ... |."""
     pattern = re.compile(
@@ -359,6 +436,19 @@ def check_release_receipt_consistency(
     repo_root: Path = REPO_ROOT,
 ) -> VerificationResult:
     """Verify mechanical consistency of release receipt and evidence files."""
+    # Release receipts must only attest real annotated tags (fail closed on lightweight tags)
+    tag_ident = resolve_annotated_tag_identity(tag, cwd=repo_root)
+    if tag_ident.tag_type:
+        if not tag_ident.is_annotated or tag_ident.tag_type != "tag":
+            return VerificationResult(
+                passed=False,
+                status="RELEASE_TAG_NOT_ANNOTATED",
+                message=(
+                    f"Release tag '{tag}' is not an annotated tag (git cat-file -t returned '{tag_ident.tag_type}'). "
+                    "Release receipts may only attest annotated release tags."
+                ),
+            )
+
     evidence_dir = repo_root / "docs" / "evidence" / "releases" / tag
     receipt_en = evidence_dir / "RELEASE_RECEIPT.md"
     receipt_zh = evidence_dir / "RELEASE_RECEIPT.zh-CN.md"
@@ -442,13 +532,12 @@ def check_release_receipt_consistency(
     target_match = re.search(r"Tag target commit\s*\|\s*`?([0-9a-f]{40})`?", text_en, re.IGNORECASE)
     if target_match:
         receipt_target_sha = target_match.group(1)
-        local_tag_sha = resolve_tag_sha(tag, cwd=repo_root)
-        if local_tag_sha and local_tag_sha != receipt_target_sha:
+        if tag_ident.peeled_commit_sha and tag_ident.peeled_commit_sha != receipt_target_sha:
             return VerificationResult(
                 passed=False,
                 status="RECEIPT_TARGET_MISMATCH",
                 message=(
-                    f"Receipt target commit {receipt_target_sha} does not match local tag {tag} target commit {local_tag_sha}."
+                    f"Receipt target commit {receipt_target_sha} does not match local tag {tag} target commit {tag_ident.peeled_commit_sha}."
                 ),
             )
         if release_commit and release_commit != receipt_target_sha:
@@ -552,12 +641,11 @@ def check_release_receipt_consistency(
             status="RECEIPT_TAG_OBJECT_MISMATCH",
             message="Annotated Tag Object SHA differs between English and Chinese receipts.",
         )
-    actual_tag_obj = resolve_tag_object_sha(tag, cwd=repo_root)
-    if actual_tag_obj and obj_m_en.group(1) != actual_tag_obj:
+    if tag_ident.is_annotated and tag_ident.tag_object_sha and obj_m_en.group(1) != tag_ident.tag_object_sha:
         return VerificationResult(
             passed=False,
             status="RECEIPT_TAG_OBJECT_MISMATCH",
-            message=f"Receipt tag object {obj_m_en.group(1)} does not match actual annotated tag object {actual_tag_obj}.",
+            message=f"Receipt tag object {obj_m_en.group(1)} does not match actual annotated tag object {tag_ident.tag_object_sha}.",
         )
 
     # 8. Tag Target Commit
@@ -588,12 +676,17 @@ def check_release_receipt_consistency(
             status="RECEIPT_TAG_TARGET_MISMATCH",
             message=f"Receipt tag target commit {target_sha_val} does not match supplied release commit {release_commit}.",
         )
-    actual_peel = resolve_tag_sha(tag, cwd=repo_root)
-    if actual_peel and target_sha_val != actual_peel:
+    if tag_ident.is_annotated and tag_ident.peeled_commit_sha and target_sha_val != tag_ident.peeled_commit_sha:
         return VerificationResult(
             passed=False,
             status="RECEIPT_TAG_TARGET_MISMATCH",
-            message=f"Receipt tag target commit {target_sha_val} does not match actual local tag peeled commit {actual_peel}.",
+            message=f"Receipt tag target commit {target_sha_val} does not match actual local tag peeled commit {tag_ident.peeled_commit_sha}.",
+        )
+    if release_commit and tag_ident.is_annotated and tag_ident.peeled_commit_sha and tag_ident.peeled_commit_sha != release_commit:
+        return VerificationResult(
+            passed=False,
+            status="RECEIPT_TAG_TARGET_MISMATCH",
+            message=f"Actual tag peeled commit {tag_ident.peeled_commit_sha} does not match supplied release commit {release_commit}.",
         )
 
     # 9. Release URL
@@ -780,6 +873,19 @@ def main() -> int:
             else:
                 candidate_ref = "UNKNOWN"
                 candidate_sha = None
+    elif stage == "tagged":
+        if args.release_commit:
+            candidate_ref = args.release_commit
+            candidate_sha = resolve_commit_sha(candidate_ref, cwd=repo_root)
+        else:
+            # In tagged stage, tag target != arbitrary HEAD inference
+            tag_peel = resolve_tag_sha(tag, cwd=repo_root)
+            if tag_peel:
+                candidate_ref = tag_peel
+                candidate_sha = tag_peel
+            else:
+                candidate_ref = "UNKNOWN"
+                candidate_sha = None
     else:
         candidate_ref = args.release_commit or "HEAD"
         candidate_sha = resolve_commit_sha(candidate_ref, cwd=repo_root)
@@ -809,6 +915,12 @@ def main() -> int:
 
     # 3. Stage-specific checks:
     if stage in ("prepared", "candidate"):
+        # In prepared/candidate stage, HEAD must match supplied candidate commit
+        head_sha = resolve_commit_sha("HEAD", cwd=repo_root)
+        if candidate_sha and head_sha and head_sha != candidate_sha:
+            print(f"[HEAD_NOT_CANDIDATE] In stage '{stage}', HEAD ({head_sha}) must match candidate commit ({candidate_sha}).")
+            all_passed = False
+
         if candidate_sha:
             res_tag = check_tag_immutability(tag, candidate_sha, check_remote=args.check_remote, stage=stage, cwd=repo_root)
             print(f"[{res_tag.status}] Tag Status: {res_tag.message}")
@@ -828,6 +940,11 @@ def main() -> int:
         res_notes = check_release_notes_consistency(tag, repo_root=repo_root)
         print(f"[{res_notes.status}] Notes Consistency: {res_notes.message}")
         if not res_notes.passed:
+            all_passed = False
+
+        res_docs = check_public_candidate_docs(repo_root=repo_root)
+        print(f"[{res_docs.status}] Public Candidate Docs: {res_docs.message}")
+        if not res_docs.passed:
             all_passed = False
 
     elif stage == "tagged":

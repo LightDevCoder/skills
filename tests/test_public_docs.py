@@ -16,6 +16,10 @@ from check_public_docs import (
     check_anti_patterns,
     check_catalog_inventory,
     check_category_readmes,
+    check_catalog_parity,
+    normalize_invocation,
+    extract_status_tokens,
+    get_skill_invocation_authority,
     get_public_surface_files,
     FORBIDDEN_PATTERNS,
 )
@@ -193,6 +197,91 @@ class PublicDocsQualityTests(unittest.TestCase):
                     block_zh,
                     f"CATALOG.zh-CN.md entry '{skill}' is missing required field '**{zf}：**'",
                 )
+
+    def test_catalog_en_zh_invocation_semantic_parity(self) -> None:
+        """Every skill must have identical invocation semantics across EN, ZH, and authority."""
+        cat_en = (ROOT / "CATALOG.md").read_text(encoding="utf-8")
+        cat_zh = (ROOT / "CATALOG.zh-CN.md").read_text(encoding="utf-8")
+
+        skills = re.findall(r"^###\s+([a-zA-Z0-9_-]+)", cat_en, re.MULTILINE)
+        self.assertEqual(len(skills), 36)
+
+        mismatches: list[str] = []
+        for s in skills:
+            auth_inv = get_skill_invocation_authority(s, ROOT)
+
+            block_en = re.search(r"^###\s+" + s + r"\n(.*?)(?=\n###|\Z)", cat_en, re.DOTALL | re.MULTILINE).group(1)
+            m_inv_en = re.search(r"-\s+\*\*Invocation:\*\s*(.*?)$", block_en, re.MULTILINE)
+            inv_en = normalize_invocation(m_inv_en.group(1).strip() if m_inv_en else "")
+
+            block_zh = re.search(r"^###\s+" + s + r"\n(.*?)(?=\n###|\Z)", cat_zh, re.DOTALL | re.MULTILINE).group(1)
+            m_inv_zh = re.search(r"-\s+\*\*调用(?:方式)?(?:\*\*：|\*\*:\s*|：\*\*)\s*(.*?)$", block_zh, re.MULTILINE)
+            inv_zh = normalize_invocation(m_inv_zh.group(1).strip() if m_inv_zh else "")
+
+            if not (auth_inv == inv_en == inv_zh):
+                mismatches.append(f"{s}: authority='{auth_inv}', EN='{inv_en}', ZH='{inv_zh}'")
+
+        self.assertEqual(mismatches, [], f"Invocation semantic mismatches found: {mismatches}")
+
+    def test_catalog_en_zh_status_semantic_parity(self) -> None:
+        """Every skill must have identical status semantic tokens between English and Chinese catalogs."""
+        cat_en = (ROOT / "CATALOG.md").read_text(encoding="utf-8")
+        cat_zh = (ROOT / "CATALOG.zh-CN.md").read_text(encoding="utf-8")
+
+        skills = re.findall(r"^###\s+([a-zA-Z0-9_-]+)", cat_en, re.MULTILINE)
+        self.assertEqual(len(skills), 36)
+
+        mismatches: list[str] = []
+        for s in skills:
+            block_en = re.search(r"^###\s+" + s + r"\n(.*?)(?=\n###|\Z)", cat_en, re.DOTALL | re.MULTILINE).group(1)
+            m_stat_en = re.search(r"-\s+\*\*Status:\*\*\s*(.*?)$", block_en, re.MULTILINE)
+            stat_en = m_stat_en.group(1).strip() if m_stat_en else ""
+            tok_en = extract_status_tokens(stat_en)
+
+            block_zh = re.search(r"^###\s+" + s + r"\n(.*?)(?=\n###|\Z)", cat_zh, re.DOTALL | re.MULTILINE).group(1)
+            m_stat_zh = re.search(r"-\s+\*\*状态(?:\*\*：|\*\*:\s*|：\*\*)\s*(.*?)$", block_zh, re.MULTILINE)
+            stat_zh = m_stat_zh.group(1).strip() if m_stat_zh else ""
+            tok_zh = extract_status_tokens(stat_zh)
+
+            if tok_en != tok_zh:
+                mismatches.append(f"{s}: EN={sorted(tok_en)} vs ZH={sorted(tok_zh)}")
+
+        self.assertEqual(mismatches, [], f"Status semantic token mismatches found: {mismatches}")
+
+    def test_structured_facts_protected_from_humanizer(self) -> None:
+        """Structured facts (Invocation, Status, package counts) are protected from prose alteration."""
+        # 1. Negative test: changing invocation in catalog causes check_catalog_parity to fail
+        with tempfile.TemporaryDirectory(prefix="parity-guard-") as tmp:
+            tmp_root = Path(tmp)
+            # Copy real catalogs into temp dir
+            (tmp_root / "CATALOG.md").write_text((ROOT / "CATALOG.md").read_text(encoding="utf-8"), encoding="utf-8")
+            # Mutate Chinese catalog to change kanban-worker invocation to 'user'
+            zh_corrupted = (ROOT / "CATALOG.zh-CN.md").read_text(encoding="utf-8").replace(
+                "### kanban-worker\n\n- **作用：** 在定时运行中认领并执行一张看板任务，优先处理已有修改意见或进行中的工作。\n- **什么时候用：** 调度执行 Light-Kanban 看板任务时。\n- **调用方式：** Model-invoked；支持手动入口。",
+                "### kanban-worker\n\n- **作用：** 在定时运行中认领并执行一张看板任务，优先处理已有修改意见或进行中的工作。\n- **什么时候用：** 调度执行 Light-Kanban 看板任务时。\n- **调用方式：** 仅 user-invoked。",
+            )
+            (tmp_root / "CATALOG.zh-CN.md").write_text(zh_corrupted, encoding="utf-8")
+            # Symlink skills directory for authority discovery
+            (tmp_root / "skills").symlink_to(ROOT / "skills", target_is_directory=True)
+
+            errs = check_catalog_parity(tmp_root)
+            self.assertTrue(any("kanban-worker" in e and "contradicts authority" in e for e in errs),
+                            f"Expected invocation mismatch error, got: {errs}")
+
+        # 2. Negative test: degrading status to 'NEW' causes check_catalog_parity to fail
+        with tempfile.TemporaryDirectory(prefix="parity-guard-status-") as tmp:
+            tmp_root = Path(tmp)
+            (tmp_root / "CATALOG.md").write_text((ROOT / "CATALOG.md").read_text(encoding="utf-8"), encoding="utf-8")
+            zh_status_degraded = (ROOT / "CATALOG.zh-CN.md").read_text(encoding="utf-8").replace(
+                "- **状态：** 第一方已准入（通过 full path review-loop agent-skill PASS）；随 v0.1.6 发布。",
+                "- **状态：** 第一方已准入；NEW。",
+            )
+            (tmp_root / "CATALOG.zh-CN.md").write_text(zh_status_degraded, encoding="utf-8")
+            (tmp_root / "skills").symlink_to(ROOT / "skills", target_is_directory=True)
+
+            errs = check_catalog_parity(tmp_root)
+            self.assertTrue(any("kb-init" in e and "mismatch" in e for e in errs),
+                            f"Expected status mismatch error, got: {errs}")
 
 
 if __name__ == "__main__":

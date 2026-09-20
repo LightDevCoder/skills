@@ -133,9 +133,20 @@ def verify_ruleset_payload(
                 details=rs,
             )
 
-        # Check bypass policy
-        bypass_actors = rs.get("bypass_actors")
-        if bypass_actors:
+        # Check bypass policy - must fail closed if bypass info is missing or non-compliant
+        if "bypass_actors" not in rs or not isinstance(rs["bypass_actors"], list):
+            return ProtectionCheckResult(
+                passed=False,
+                status="BLOCKED",
+                message=(
+                    f"Ruleset '{rs.get('name', 'unnamed')}' (id: {rs.get('id')}) is missing bypass_actors information. "
+                    "Release tags require verified empty bypass_actors ([])."
+                ),
+                details=rs,
+            )
+
+        bypass_actors = rs["bypass_actors"]
+        if bypass_actors != []:
             return ProtectionCheckResult(
                 passed=False,
                 status="BLOCKED",
@@ -146,24 +157,19 @@ def verify_ruleset_payload(
                 details=rs,
             )
 
-        current_user_bypass = rs.get("current_user_can_bypass")
-        if current_user_bypass is not None and current_user_bypass != "never":
+        if "current_user_can_bypass" not in rs or rs["current_user_can_bypass"] != "never":
+            current_user_bypass = rs.get("current_user_can_bypass")
             return ProtectionCheckResult(
                 passed=False,
                 status="BLOCKED",
                 message=(
-                    f"Ruleset '{rs.get('name', 'unnamed')}' (id: {rs.get('id')}) permits current user bypass ('{current_user_bypass}'). "
-                    "Release tags must not allow bypass."
+                    f"Ruleset '{rs.get('name', 'unnamed')}' (id: {rs.get('id')}) has invalid current_user_can_bypass ('{current_user_bypass}'). "
+                    "Release tags require current_user_can_bypass='never'."
                 ),
                 details=rs,
             )
 
         # All requirements satisfied!
-        bypass_verified = (
-            "none (enforced)"
-            if (bypass_actors == [] and current_user_bypass == "never")
-            else ("unverified" if (bypass_actors is None and current_user_bypass is None) else "bypassed")
-        )
         details = {
             "id": rs.get("id"),
             "name": rs.get("name"),
@@ -172,7 +178,7 @@ def verify_ruleset_payload(
             "patterns": includes,
             "excludes": excludes,
             "rules": sorted(rule_types),
-            "bypass": bypass_verified,
+            "bypass": "none (enforced)",
             "updated_at": rs.get("updated_at") or rs.get("created_at"),
         }
         return ProtectionCheckResult(
@@ -180,7 +186,7 @@ def verify_ruleset_payload(
             status="PASS",
             message=(
                 f"Active tag protection ruleset confirmed (id: {rs.get('id')}, name: '{rs.get('name')}'): "
-                f"enforces update and deletion restrictions on {includes}."
+                f"enforces update and deletion restrictions on {includes} with zero bypass actors and current_user_can_bypass='never'."
             ),
             details=details,
         )

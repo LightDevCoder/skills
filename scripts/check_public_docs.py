@@ -214,8 +214,87 @@ def check_readme_facts(repo_root: Path = REPO_ROOT) -> list[str]:
     return errors
 
 
+def normalize_invocation(text: str) -> str:
+    """Normalize invocation text into canonical 'model' or 'user' classification."""
+    t = text.lower()
+    if "user-invoked only" in t or "仅 user-invoked" in t or "仅用户" in t or "user-invoked" in t and "model-invoked" not in t:
+        return "user"
+    if "model-invoked" in t or "agent 或用户" in t:
+        return "model"
+    return "unknown"
+
+
+def extract_status_tokens(text: str) -> set[str]:
+    """Extract canonical semantic status tokens from English or Chinese status prose."""
+    tokens: set[str] = set()
+    t = text.upper()
+
+    if "ADMITTED" in t or "第一方已准入" in text or "实质性转换的第一方能力" in text:
+        tokens.add("ADMITTED")
+    if "PASS" in t:
+        tokens.add("PASS")
+    if "PORT" in t:
+        tokens.add("PORT")
+    if "ADAPT" in t or "适配" in text:
+        tokens.add("ADAPT")
+    if "REFACTOR" in t or "重构" in text:
+        tokens.add("REFACTOR")
+    if "SPLIT" in t or "拆分" in text:
+        tokens.add("SPLIT")
+    if "MIGRATE" in t or "迁移" in text:
+        tokens.add("MIGRATE")
+    if "PRESERVE" in t or "保留" in text:
+        tokens.add("PRESERVE")
+    if "NO REWRITE" in t or "NO-REWRITE" in t or "无需重写" in text:
+        tokens.add("NO_REWRITE")
+    if "NO REDESIGN" in t or "NO-REDESIGN" in t or "无需重新设计" in text:
+        tokens.add("NO_REDESIGN")
+    if re.search(r"\bNEW\b", t) or "新建" in text or "新增" in text:
+        tokens.add("NEW")
+
+    for m in re.finditer(r"RELEASED\s+(?:IN|ON\s+THE)\s+(V\d+\.\d+\.\d+)", t):
+        tokens.add(f"RELEASED:{m.group(1)}")
+    for m in re.finditer(r"随\s*(V\d+\.\d+\.\d+)\s*发布", t):
+        tokens.add(f"RELEASED:{m.group(1)}")
+    for m in re.finditer(r"(V\d+\.\d+\.\d+)\s*(?:线)?发布", t):
+        tokens.add(f"RELEASED:{m.group(1)}")
+
+    for m in re.finditer(r"RENAMED\s+FROM\s+.*?IN\s+(V\d+\.\d+\.\d+)", t):
+        tokens.add(f"RENAMED:{m.group(1)}")
+    for m in re.finditer(r"在\s*(V\d+\.\d+\.\d+)\s*中(?:自.*?)?更名", t):
+        tokens.add(f"RENAMED:{m.group(1)}")
+
+    return tokens
+
+
+def get_skill_invocation_authority(skill_name: str, repo_root: Path = REPO_ROOT) -> str:
+    """Determine authoritative invocation classification from package metadata and SKILL.md.
+
+    Priority:
+    1. agents/openai.yaml policy.allow_implicit_invocation
+    2. SKILL.md frontmatter/body
+    """
+    matches = list(repo_root.glob(f"skills/*/{skill_name}/SKILL.md"))
+    if not matches:
+        return "unknown"
+    skill_dir = matches[0].parent
+
+    yaml_file = skill_dir / "agents" / "openai.yaml"
+    if yaml_file.is_file():
+        text = yaml_file.read_text(encoding="utf-8")
+        m = re.search(r"allow_implicit_invocation:\s*(true|false)", text, re.IGNORECASE)
+        if m:
+            return "model" if m.group(1).lower() == "true" else "user"
+
+    # Fallback to SKILL.md frontmatter (e.g. eli5 which is a model-invoked explain capability)
+    skill_text = matches[0].read_text(encoding="utf-8")
+    if re.search(r"^disable-model-invocation:\s*true\s*$", skill_text, re.MULTILINE):
+        return "user"
+    return "model"
+
+
 def check_catalog_parity(repo_root: Path = REPO_ROOT) -> list[str]:
-    """Validate that English and Chinese catalogs provide equivalent required fields for each skill."""
+    """Validate that English and Chinese catalogs provide equivalent required fields and exact semantic parity."""
     errors: list[str] = []
     cat_en_path = repo_root / "CATALOG.md"
     cat_zh_path = repo_root / "CATALOG.zh-CN.md"
@@ -237,18 +316,56 @@ def check_catalog_parity(repo_root: Path = REPO_ROOT) -> list[str]:
 
     for s in skills_en:
         block_en_m = re.search(r"^###\s+" + s + r"\n(.*?)(?=\n###|\Z)", cat_en, re.DOTALL | re.MULTILINE)
-        if block_en_m:
-            block = block_en_m.group(1)
-            for req in en_required:
-                if f"**{req}:**" not in block:
-                    errors.append(f"CATALOG.md entry '{s}' missing required field: **{req}:**")
-
         block_zh_m = re.search(r"^###\s+" + s + r"\n(.*?)(?=\n###|\Z)", cat_zh, re.DOTALL | re.MULTILINE)
-        if block_zh_m:
-            block = block_zh_m.group(1)
-            for req in zh_required:
-                if f"**{req}" not in block:
-                    errors.append(f"CATALOG.zh-CN.md entry '{s}' missing required field: **{req}**")
+
+        if not block_en_m:
+            errors.append(f"Missing block in CATALOG.md for '{s}'")
+            continue
+        if not block_zh_m:
+            errors.append(f"Missing block in CATALOG.zh-CN.md for '{s}'")
+            continue
+
+        block_en = block_en_m.group(1)
+        block_zh = block_zh_m.group(1)
+
+        # 1. Structural required fields check
+        for req in en_required:
+            if f"**{req}:**" not in block_en:
+                errors.append(f"CATALOG.md entry '{s}' missing required field: **{req}:**")
+
+        for req in zh_required:
+            if f"**{req}" not in block_zh:
+                errors.append(f"CATALOG.zh-CN.md entry '{s}' missing required field: **{req}**")
+
+        # 2. Invocation Semantic Parity: EN == ZH == Authority
+        auth_inv = get_skill_invocation_authority(s, repo_root)
+
+        m_inv_en = re.search(r"-\s+\*\*Invocation:\*\*\s*(.*?)$", block_en, re.MULTILINE)
+        inv_en_raw = m_inv_en.group(1).strip() if m_inv_en else ""
+        norm_inv_en = normalize_invocation(inv_en_raw)
+
+        m_inv_zh = re.search(r"-\s+\*\*调用(?:方式)?(?:\*\*：|\*\*:\s*|：\*\*)\s*(.*?)$", block_zh, re.MULTILINE)
+        inv_zh_raw = m_inv_zh.group(1).strip() if m_inv_zh else ""
+        norm_inv_zh = normalize_invocation(inv_zh_raw)
+
+        if norm_inv_en != auth_inv:
+            errors.append(f"CATALOG.md entry '{s}' invocation '{norm_inv_en}' contradicts authority '{auth_inv}' (raw: '{inv_en_raw}').")
+        if norm_inv_zh != auth_inv:
+            errors.append(f"CATALOG.zh-CN.md entry '{s}' invocation '{norm_inv_zh}' contradicts authority '{auth_inv}' (raw: '{inv_zh_raw}').")
+
+        # 3. Status Semantic Parity: tokens(EN) == tokens(ZH)
+        m_stat_en = re.search(r"-\s+\*\*Status:\*\*\s*(.*?)$", block_en, re.MULTILINE)
+        stat_en_raw = m_stat_en.group(1).strip() if m_stat_en else ""
+        tokens_en = extract_status_tokens(stat_en_raw)
+
+        m_stat_zh = re.search(r"-\s+\*\*状态(?:\*\*：|\*\*:\s*|：\*\*)\s*(.*?)$", block_zh, re.MULTILINE)
+        stat_zh_raw = m_stat_zh.group(1).strip() if m_stat_zh else ""
+        tokens_zh = extract_status_tokens(stat_zh_raw)
+
+        if tokens_en != tokens_zh:
+            errors.append(
+                f"Catalog status semantic mismatch for '{s}': EN={sorted(tokens_en)} vs ZH={sorted(tokens_zh)}."
+            )
 
     return errors
 

@@ -72,18 +72,28 @@ release manifest:
 4. Create candidate `RELEASE_NOTES.md` and `RELEASE_NOTES.zh-CN.md`.
 5. **Do NOT create `RELEASE_RECEIPT*.md`** in `PREPARED`. No candidate receipts
    may enter candidate commits or tag snapshots.
-6. Execute local verification gates:
+6. Execute pre-commit content and quality verification:
    ```bash
-   python3 scripts/verify_release_integrity.py --tag vX.Y.Z --release-commit HEAD --stage prepared
-   python3 scripts/check_public_docs.py
    python3 -m pytest -q
    python3 -m unittest discover -s tests
-   python3 -m compileall -q skills tests
+   python3 -m compileall -q skills tests scripts
+   python3 scripts/check_public_docs.py
    git diff --check
-   git status --short
    ```
-7. Commit candidate changes: `release: prepare vX.Y.Z`.
-8. **Transition:** Transition lifecycle state to `PREPARED`.
+7. Commit candidate changes:
+   ```bash
+   git add <candidate-files>
+   git commit -m "release: prepare vX.Y.Z"
+   CANDIDATE_SHA="$(git rev-parse HEAD)"
+   ```
+8. On the clean working tree, validate the `PREPARED` state:
+   ```bash
+   python3 scripts/verify_release_integrity.py \
+     --tag vX.Y.Z \
+     --release-commit "$CANDIDATE_SHA" \
+     --stage prepared
+   ```
+9. **Transition:** Transition lifecycle state to `PREPARED`.
 
 ### 2. Stage CI_VERIFIED (Remote CI Verification on Main)
 
@@ -113,23 +123,41 @@ Create the annotated tag pointing to the exact CI-verified commit:
    python3 scripts/check_release_tag_protection.py
    ```
    Requires: target is `tag`, enforcement is `active`, pattern covers `refs/tags/v*`,
-   and both `deletion` and `update` restrictions are present. If missing or inactive,
-   report `BLOCKED` and halt tag publication.
-2. Verify tag immutability guard:
+   both `deletion` and `update` restrictions are present, `bypass_actors` is empty `[]`,
+   and `current_user_can_bypass` is `never`. If missing or inactive, report `BLOCKED` and halt tag publication.
+2. Verify tag creation preconditions (tag preflight):
    ```bash
-   python3 scripts/verify_release_integrity.py --tag vX.Y.Z --release-commit <candidate-sha> --stage tagged
+   python3 scripts/check_release_tag_preflight.py \
+     --tag vX.Y.Z \
+     --release-commit "$CANDIDATE_SHA"
    ```
-3. Create annotated tag (tag snapshot contains Manifest + Notes; Receipt does NOT exist):
+   Requires: candidate commit exists, working tree is clean, remote ruleset PASS,
+   and target tag does not exist locally or on origin.
+3. Create annotated tag pointing to CI-verified candidate commit (tag snapshot contains Manifest + Notes; Receipt does NOT exist):
    ```bash
    git tag -a vX.Y.Z -m "vX.Y.Z — <title>"
+   ```
+4. Validate `TAGGED` state:
+   ```bash
+   python3 scripts/verify_release_integrity.py \
+     --tag vX.Y.Z \
+     --release-commit "$CANDIDATE_SHA" \
+     --stage tagged
+   ```
+   If `stage=tagged` verification fails, pushing the tag is strictly forbidden.
+   Delete the erroneous unpushed local tag immediately (`git tag -d vX.Y.Z`) and fix the cause.
+5. Push the verified annotated tag to origin:
+   ```bash
    git push origin vX.Y.Z
    ```
-4. Confirm tag resolution:
+6. Confirm tag resolution:
    ```bash
    git rev-parse refs/tags/vX.Y.Z
    git rev-parse refs/tags/vX.Y.Z^{commit}
+   git cat-file -t refs/tags/vX.Y.Z
    ```
-5. **Transition:** Transition lifecycle state to `TAGGED`.
+   Must confirm object type is `tag` (annotated tag object), not `commit`.
+7. **Transition:** Transition lifecycle state to `TAGGED`.
 
 ### 4. Stage INSTALL_VERIFIED (Fresh Install Verification)
 
