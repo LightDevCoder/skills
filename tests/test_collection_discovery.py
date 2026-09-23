@@ -131,7 +131,13 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         all(token in installation for token in ("source_root", "skill_name", "destination_root")),
         "Manual fallback must use valid shell variables.",
     )
-    c.check(bool(re.search(r"(?is)v0\.2\.[34].{0,160}is published from", readme)), "README must present v0.2.4 as the published release.")
+    stable = re.search(r"\| Stable release \| \[(v\d+\.\d+\.\d+)\]", catalog)
+    c.check(stable is not None, "Catalog must name a stable release.")
+    if stable:
+        version = stable.group(1)
+        c.check(f"https://github.com/LightDevCoder/skills/releases/tag/{version}" in readme, "README must link to the catalog's stable release.")
+        c.check(f"npx skills add LightDevCoder/skills#{version}" in installation, "Installation guide must document the stable pinned release.")
+        c.check((root / f"docs/evidence/releases/{version}/RELEASE_RECEIPT.md").is_file(), "Stable release must have a post-publication receipt.")
     c.check("33" in catalog and "admitted" in catalog, "Catalog must present the 36-package collection (historical 33 at the original v0.2.0 publication).")
     c.check("v0.2.1" in catalog, "Catalog must mention v0.2.1.")
     c.check("v0.2.2" in catalog, "Catalog must mention v0.2.2.")
