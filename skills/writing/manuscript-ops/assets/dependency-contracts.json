@@ -1,138 +1,95 @@
 {
-  "schema_version": "1",
-  "observed_at": "2026-08-27",
+  "schema_version": "2",
   "dependencies": [
     {
       "name": "clarify",
-      "repository": "LightDevCoder/skills",
-      "repository_commit": "b671a90ac10b5777a50ca897a03242cc51949478",
-      "path": "skills/clarify",
-      "blob_sha": "ac3856edfeb53742db22717caa761bf1922457f8",
-      "package_files": [
-        "SKILL.md",
-        "ATTRIBUTION.md",
-        "agents/openai.yaml",
-        "references/EXAMPLES.md",
-        "references/WORKFLOW.md",
-        "scripts/session_state.py",
-        "tests/test_clarify_contract.py"
-      ],
+      "path": "skills/thinking/clarify",
       "required": true,
       "layer": "discovery",
-      "required_mentions": [],
-      "strict_agent_skills_compatible": false,
-      "compatibility_note": "First-party package in LightDevCoder/skills."
+      "invocation_type": "user-invoked",
+      "required_files": [
+        "SKILL.md",
+        "references/WORKFLOW.md",
+        "scripts/session_state.py"
+      ],
+      "interface_tokens": {
+        "scripts/session_state.py": [
+          "transition"
+        ]
+      },
+      "repository": "LightDevCoder/skills"
     },
     {
       "name": "socratic",
-      "repository": "LightDevCoder/skills",
-      "repository_commit": "b671a90ac10b5777a50ca897a03242cc51949478",
-      "path": "skills/socratic",
-      "blob_sha": "04a698e107163fe39debfb37c353102444b28238",
-      "package_files": [
-        "SKILL.md",
-        "ATTRIBUTION.md",
-        "agents/openai.yaml",
-        "references/EXAMPLES.md",
-        "references/ROUTING.md",
-        "references/WORKFLOW.md",
-        "references/conversation-contract.json",
-        "tests/test_socratic_behavior.py",
-        "tests/test_socratic_contract.py"
-      ],
+      "path": "skills/thinking/socratic",
       "required": true,
       "layer": "discovery",
-      "required_mentions": [],
-      "strict_agent_skills_compatible": true,
-      "compatibility_note": "First-party package in LightDevCoder/skills."
+      "invocation_type": "model-invoked",
+      "required_files": [
+        "SKILL.md",
+        "references/conversation-contract.json",
+        "scripts/frontier.py"
+      ],
+      "interface_tokens": {
+        "scripts/frontier.py": [
+          "compute_frontier",
+          "apply_answers"
+        ]
+      },
+      "repository": "LightDevCoder/skills"
     },
     {
       "name": "decision-map",
-      "repository": "LightDevCoder/skills",
-      "repository_commit": "b671a90ac10b5777a50ca897a03242cc51949478",
-      "path": "skills/decision-map",
-      "blob_sha": "2d26e569da4e5c30a147de64e201b7b93bbef798",
-      "package_files": [
-        "SKILL.md",
-        "ATTRIBUTION.md",
-        "agents/openai.yaml",
-        "references/EXAMPLES.md",
-        "references/MAP-CONTRACT.md",
-        "references/WORKFLOW.md",
-        "tests/test_decision_map_behavior.py",
-        "tests/test_decision_map_contract.py"
-      ],
+      "path": "skills/thinking/decision-map",
       "required": true,
       "layer": "discovery",
-      "required_mentions": [],
-      "strict_agent_skills_compatible": false,
-      "compatibility_note": "First-party package in LightDevCoder/skills."
+      "invocation_type": "user-invoked",
+      "required_files": [
+        "SKILL.md",
+        "references/MAP-CONTRACT.md"
+      ],
+      "interface_tokens": {
+        "references/MAP-CONTRACT.md": [
+          "## Child ticket file"
+        ]
+      },
+      "repository": "LightDevCoder/skills"
     },
     {
       "name": "prototype",
-      "repository": "LightDevCoder/skills",
-      "repository_commit": "b671a90ac10b5777a50ca897a03242cc51949478",
-      "path": "skills/prototype",
-      "blob_sha": "094571156140f5993cce8557dc31383c82817f3e",
-      "package_files": [
-        "SKILL.md",
-        "ATTRIBUTION.md",
-        "LOGIC.md",
-        "UI.md",
-        "agents/openai.yaml"
-      ],
+      "path": "skills/engineering/prototype",
       "required": false,
       "layer": "decision-map-optional-branch",
-      "required_mentions": [],
-      "strict_agent_skills_compatible": true,
-      "compatibility_note": "First-party package in LightDevCoder/skills."
+      "invocation_type": "model-invoked",
+      "required_files": [
+        "SKILL.md",
+        "LOGIC.md"
+      ],
+      "interface_tokens": {},
+      "repository": "LightDevCoder/skills"
     },
     {
       "name": "project-review",
-      "repository": "LightDevCoder/skills",
-      "repository_commit": "b671a90ac10b5777a50ca897a03242cc51949478",
-      "path": "skills/project-review",
-      "blob_sha": "aed8a63791cb8ba88e798b6eed9a366d22b277a9",
-      "package_files": [
-        "SKILL.md",
-        "agents/openai.yaml",
-        "references/WORKFLOW.md",
-        "references/acceptance-charter.md",
-        "references/attribution.md",
-        "references/evidence-protocol.md",
-        "references/finding-schema.md",
-        "references/migration.md",
-        "references/mission-center-compatibility.md",
-        "references/profiles/agent-skill.md",
-        "references/profiles/generic.md",
-        "references/profiles/manuscript.md",
-        "references/profiles/software.md",
-        "references/profiles/specification.md",
-        "references/review-rubric.md",
-        "references/stopping-rules.md",
-        "references/subagent-protocol.md",
-        "tests/review_protocol_helpers.py",
-        "tests/test_agent_skill_profile_behavior.py",
-        "tests/test_agent_skill_profile_contract.py",
-        "tests/test_generic_profile_behavior.py",
-        "tests/test_generic_profile_contract.py",
-        "tests/test_manuscript_profile_behavior.py",
-        "tests/test_manuscript_profile_contract.py",
-        "tests/test_software_profile_behavior.py",
-        "tests/test_software_profile_contract.py",
-        "tests/test_specification_profile_behavior.py",
-        "tests/test_specification_profile_contract.py"
-      ],
+      "path": "skills/review/project-review",
       "required": true,
       "layer": "independent-acceptance",
-      "required_mentions": [],
-      "strict_agent_skills_compatible": true,
-      "compatibility_note": "First-party package in LightDevCoder/skills."
+      "invocation_type": "model-invoked",
+      "required_files": [
+        "SKILL.md",
+        "references/WORKFLOW.md",
+        "references/profiles/manuscript.md"
+      ],
+      "interface_tokens": {
+        "references/profiles/manuscript.md": [
+          "manuscript"
+        ]
+      },
+      "repository": "LightDevCoder/skills"
     }
   ],
   "host_invocation": {
     "codex": "$<skill-name> <arguments>",
     "slash-command-clients": "/<skill-name> <arguments>",
-    "generic": "Explicitly activate <skill-name> with <arguments> using the host's documented Skill mechanism."
+    "generic": "Explicitly activate <skill-name> with <arguments> using the host documented Skill mechanism."
   }
 }

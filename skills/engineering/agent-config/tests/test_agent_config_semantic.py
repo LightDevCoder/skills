@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import unittest
+from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 from pathlib import Path
 
@@ -46,6 +47,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
 
         # 1. highest-supported mapping
         self.assertEqual(resolve_reasoning_effort(host_with_efforts, "highest-supported"), "high")
+        self.assertEqual(resolve_reasoning_effort(HostCapabilities(supported_effort=["low", "medium", "high", "xhigh", "max"]), "highest-supported"), "max")
 
         # 2. minimal mapping
         self.assertEqual(resolve_reasoning_effort(host_with_efforts, "minimal"), "low")
@@ -57,7 +59,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
         self.assertIsNone(resolve_reasoning_effort(host_without_efforts, "highest-supported"))
 
         # 5. unverified literal 'max' is not emitted unless explicitly supported by host
-        self.assertEqual(resolve_reasoning_effort(host_with_efforts, "max"), "high")
+        self.assertIsNone(resolve_reasoning_effort(host_with_efforts, "max"))
 
     def test_discover_valid_candidates(self) -> None:
         """Verify candidates are strictly intersected with confirmed profile tiers."""
@@ -65,6 +67,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
         fixed_host = HostCapabilities(
             has_model_selector=False,
             active_model="claude-3-5-sonnet",
+            available_models=["claude-3-5-sonnet"],
         )
         self.assertEqual(discover_valid_candidates(fixed_host), ["claude-3-5-sonnet"])
 
@@ -87,7 +90,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
 
         # Gate 1: Setup intent
         res_setup = select_configuration(host, TaskCharacteristics(), profile, setup_intent=True)
-        self.assertEqual(res_setup.readiness, "READY")
+        self.assertEqual(res_setup.readiness, "NEED_INPUT")
         self.assertEqual(res_setup.handoff, "setup")
         self.assertIsNone(res_setup.execution_config)
 
@@ -123,7 +126,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
         profile = AbstractTaskProfile(recommended_tier="high")
 
         # Case A: Fixed single model, single pass
-        host_a = HostCapabilities(has_model_selector=False, active_model="sonnet")
+        host_a = HostCapabilities(has_model_selector=False, active_model="sonnet", available_models=["sonnet"])
         task_a = TaskCharacteristics(shape="single-pass")
         res_a = select_configuration(host_a, task_a, profile)
         self.assertEqual(res_a.execution_config.topology, "Case A")
@@ -219,8 +222,10 @@ class AgentConfigSemanticTest(unittest.TestCase):
     def test_explicit_user_effort_overrides_jev(self) -> None:
         """Section 22 & 25: Explicit user effort policy takes strict precedence over Jev."""
         host = HostCapabilities(
+            has_model_selector=True,
             supported_effort=["low", "medium", "high"],
             profile_tiers={"high": "o3-mini"},
+            available_models=["o3-mini"],
         )
         # User explicitly requested minimal effort; Jev says high
         task = TaskCharacteristics(shape="single-pass", reasoning_policy="minimal")
@@ -232,8 +237,10 @@ class AgentConfigSemanticTest(unittest.TestCase):
     def test_host_supported_effort_bounds_jev_output(self) -> None:
         """Section 22 & 30: Host supported effort strictly bounds Jev output; never invents unsupported values."""
         host = HostCapabilities(
+            has_model_selector=True,
             supported_effort=["low", "medium"],  # No 'high' supported
             profile_tiers={"high": "model-tier"},
+            available_models=["model-tier"],
         )
         task = TaskCharacteristics(reasoning_policy=None)
         profile = AbstractTaskProfile(recommended_tier="high", reasoning_need="high")
@@ -529,12 +536,17 @@ class AgentConfigSemanticTest(unittest.TestCase):
         failing_client = MagicMock()
         failing_client.system_one.side_effect = RuntimeError("Simulated API failure")
 
-        host = HostCapabilities(
-            has_model_selector=True,
-            active_model="active-model",
-            available_models=["active-model", "tier-high"],
-            profile_tiers={"high": "tier-high"},
-        )
+        fixtures = Path(__file__).resolve().parent / "fixtures"
+        host = json.loads((fixtures / "case-a-tiered-single-pass.json").read_text())
+        confirmed_profile = json.loads((fixtures / "profile-multi-model.json").read_text())
+        now = datetime.now(timezone.utc).isoformat()
+        host["workspace"] = confirmed_profile["scope"]["workspace"]
+        host["observed_at"] = now
+        for model in host["available_models"]:
+            model["evidence"]["observed_at"] = now
+        for capability in host["capabilities"].values():
+            if capability.get("evidence"):
+                capability["evidence"]["observed_at"] = now
         task = TaskCharacteristics(
             title="Critical bug",
             description="Fix critical vulnerability",
@@ -547,11 +559,12 @@ class AgentConfigSemanticTest(unittest.TestCase):
                 res = agent_config_recommend(
                     host=host,
                     task=task,
+                    profile=confirmed_profile,
                     approval="approved",
                     client=failing_client,
                 )
                 self.assertEqual(res.readiness, "READY")
-                self.assertEqual(res.execution_config.model, "tier-high")
+                self.assertEqual(res.execution_config.model, "model-gamma")
                 self.assertTrue(res.fallback_used)
 
     def test_downgrade_policy_rejects_marginal_confidence_downgrade(self) -> None:

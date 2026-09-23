@@ -8,6 +8,8 @@
 
 > **Release:** [v0.2.4](https://github.com/LightDevCoder/skills/releases/tag/v0.2.4) is published from the `v0.2.4` tag — the release line carries the full 36 first-party Skills — and is the current stable release. The pre-release specification is recorded in the [release manifest](docs/evidence/releases/v0.2.4/RELEASE_MANIFEST.md), and post-publication verification is attested in the [release receipt](docs/evidence/releases/v0.2.4/RELEASE_RECEIPT.md).
 
+`v0.2.5` is a release candidate until its exact commit passes remote CI, the tag and fresh installs are verified, and the GitHub Release is published.
+
 ## Browse by category
 
 [All categories and collection guides](skills/README.md). The 36 source packages are grouped by purpose; names and invocation modes are unchanged.
@@ -203,5 +205,5 @@ Adapted origin (2 packages): `humanizer` is a substantially transformed first-pa
 - [Review Policy](docs/REVIEW_POLICY.md) · [Reviewer Contract](docs/REVIEWER_CONTRACT.md)
 - [Catalog](CATALOG.md) · [Changelog](CHANGELOG.md)
 - [Workflow Guides](docs/workflows)
-- [Release Receipt](docs/evidence/releases/v0.2.0/RELEASE_RECEIPT.md)
+- [Release Receipt](docs/evidence/releases/v0.2.4/RELEASE_RECEIPT.md)
 - [Collection Discovery Tests](tests/test_collection_discovery.py) · [Composition Tests](tests/test_composition.py)

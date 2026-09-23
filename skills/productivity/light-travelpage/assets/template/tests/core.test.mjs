@@ -83,13 +83,13 @@ function database() {
   };
 }
 
-async function setup() {
+async function setup(seedData = fixture()) {
   const env = {
     TRIP_ID: "fixture",
     SESSION_SECRET: "test-session-secret-".repeat(3),
     ACCESS_CODE_HASH: await digest("fictional-access-code"),
     DB: database(),
-    ASSETS: { fetch: async () => Response.json(fixture()) },
+    ASSETS: { fetch: async () => Response.json(seedData) },
   };
   const login = await authenticate({
     env,
@@ -130,6 +130,47 @@ test("calendar and null draft handling", () => {
   d.trip.endDate = null;
   d.days[0].date = null;
   assert.equal(validateTrip(d, root).ok, true);
+});
+test("todo seed contract matches first sync GET", async () => {
+  const valid = fixture();
+  valid.preTrip.packingItems = [{ id: "packing", text: "x".repeat(1000), completed: false }];
+  assert.equal(validateTrip(valid, root).ok, true);
+  const s = await setup(valid);
+  const response = await s.call();
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).todos[0].text.length, 1000);
+  s.env.DB.close();
+  for (const change of [
+    { text: "x".repeat(1001) }, { text: "  " },
+    { id: "bad id" }, { completed: "no" },
+  ]) {
+    const invalid = fixture();
+    invalid.preTrip.packingItems = [{ id: "packing", text: "valid", completed: false, ...change }];
+    assert.equal(validateTrip(invalid, root).ok, false);
+    if (change.completed === "no") {
+      const badSeed = await setup(invalid);
+      assert.equal((await badSeed.call()).status, 503);
+      badSeed.env.DB.close();
+    }
+  }
+  const duplicate = fixture();
+  duplicate.preTrip.packingItems = [
+    { id: "packing", text: "first", completed: false },
+    { id: "packing", text: "second", completed: true },
+  ];
+  assert.equal(validateTrip(duplicate, root).ok, false);
+  const duplicateSeed = await setup(duplicate);
+  assert.equal((await duplicateSeed.call()).status, 503);
+  duplicateSeed.env.DB.close();
+  for (const items of [null, undefined]) {
+    const malformed = fixture();
+    if (items === undefined) delete malformed.preTrip.packingItems;
+    else malformed.preTrip.packingItems = items;
+    assert.equal(validateTrip(malformed, root).ok, false);
+    const invalidSeed = await setup(malformed);
+    assert.equal((await invalidSeed.call()).status, 503);
+    invalidSeed.env.DB.close();
+  }
 });
 test("bad dates, backwards span and dangling references fail", () => {
   const d = fixture();

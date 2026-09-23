@@ -12,11 +12,13 @@ This catalog is synchronized from the 36 admitted package directories under `ski
 | --- | --- |
 | Collection | Light Skills — Composable Agent Workflows |
 | Package count | 36 admitted first-party Skills |
-| Current state | 36 packages on main; v0.2.3 is the current stable release |
-| Stable release | [v0.2.3](https://github.com/LightDevCoder/skills/releases/tag/v0.2.3) (36 packages; previous stable was v0.2.2) |
+| Current state | 36 packages on main; v0.2.4 is the current stable release |
+| Stable release | [v0.2.4](https://github.com/LightDevCoder/skills/releases/tag/v0.2.4) (36 packages; previous stable was v0.2.3) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
-| Evidence | [v0.2.3 release manifest](docs/evidence/releases/v0.2.3/RELEASE_MANIFEST.md) · [v0.2.3 release receipt](docs/evidence/releases/v0.2.3/RELEASE_RECEIPT.md) |
+| Evidence | [v0.2.4 release manifest](docs/evidence/releases/v0.2.4/RELEASE_MANIFEST.md) · [v0.2.4 release receipt](docs/evidence/releases/v0.2.4/RELEASE_RECEIPT.md) |
+
+`v0.2.5` is the current candidate; package count remains 36 until publication is verified.
 
 `v0.1.1` shipped five packages; `v0.1.2` added `recap` and `language-learning` (seven); `v0.1.3` migrated the test toolchain; `v0.1.4` added `kanban-worker`; `v0.1.5` tightened kanban scheduling and identity; `v0.1.6` added `kb-init` (nine). `v0.2.0` released the full 33-package architecture across project workflow, clarification, execution, review, and specialized tools, and the v0.2.0 line was extended with the `humanizer` admission (34 packages; see [CHANGELOG.md](CHANGELOG.md)). `v0.2.1` added `light-travelpage` and `project-retro` (36 packages). `v0.2.2` finalized TypeSafe Jev semantic acceleration, category layout, and immutable release integrity. `v0.2.3` separated immutable release manifests from post-publication receipts, added v0.2.2 historical attestation, refactored project-retro into positive state-driven instructions, and formalized the six-stage release lifecycle.
 

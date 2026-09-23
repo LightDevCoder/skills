@@ -20,6 +20,7 @@ class CompactProjectState:
     tickets_exist: bool = False
     ready_tickets: List[str] = field(default_factory=list)
     blocked_tickets: List[str] = field(default_factory=list)
+    claimed_tickets: List[str] = field(default_factory=list)
     resolved_tickets: List[str] = field(default_factory=list)
     unknown_tickets: List[str] = field(default_factory=list)
     all_tickets_resolved: bool = False

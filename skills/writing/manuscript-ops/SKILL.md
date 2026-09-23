@@ -61,11 +61,11 @@ and the selected route is justified by evidence.
 3. Verify that the resulting `ManuscriptBrief` is approved and contains no
    unresolved scope, acceptance, or authority decisions.
 4. Read [project-init-boundary.md](references/project-init-boundary.md). Check
-   that project initialization has produced the exact root mapping, applicable
-   project rules, a Project Profile, and resumable manuscript state. If any
-   result is missing, report `BLOCKED` at the exact root, state the required
-   initialization outcome, recommend explicit `project-init` activation, and
-   stop. Do not automatically invoke another user-invoked Skill.
+   that `project-init` has produced the exact root mapping and applicable
+   generic project rules. If these are missing, recommend explicit
+   `project-init` activation and stop. Do not automatically invoke another
+   user-invoked Skill. After that generic bootstrap and the approved Brief,
+   `manuscript-ops` owns its Project Profile and resumable manuscript state.
 5. Ask for the fixed initialization gate. After explicit approval, initialize
    or inherit local version control, create the Project Profile and project
    structure, and freeze a dated baseline.

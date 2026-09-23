@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { validTodoRecords } from "../todo-contract.js";
 export function validDate(value) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value || "")) return false;
   const date = new Date(`${value}T00:00:00Z`);
@@ -161,7 +162,7 @@ export function validateTrip(data, root, { allowEmpty = false } = {}) {
   for (const journey of data.flightJourneys || []) for(const id of journey.ticketIds || []) check(tickets.has(id), "Unknown flight ticket");
   for(const id of data.demoNavigationPlaceIds || []) check(data.config.demo === true && places.has(id), "Demo navigation requires demo mode and existing place");
   unique(data.flights, "flights");
-  unique(data.preTrip?.packingItems, "todos");
+  check(validTodoRecords(data.preTrip?.packingItems), "Todo IDs, text, or completed state invalid or duplicated");
   const schedules = new Set();
   days.forEach((day, i) => {
     check(day.day === i + 1, "Days must be ordered consecutively");

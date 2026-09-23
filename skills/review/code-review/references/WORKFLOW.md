@@ -67,7 +67,9 @@ no documented standards still get a Standards-axis read.
 ### 4. Spawn both sub-agents in parallel
 
 Sub-agents share no context. Both briefs include the fixed diff command and
-the commit list. Neither brief permits a further delegation:
+the commit list, approved requirements, and `Previous findings` (canonical
+records with IDs, or `none` on a first review). Neither brief permits a
+further delegation:
 
 > `Do not invoke /code-review or spawn additional agents — perform this review
 > directly.`
@@ -86,7 +88,10 @@ the commit list. Neither brief permits a further delegation:
   > Distinguish hard violations from judgement calls — documented-standard
   > breaches can be hard, but baseline smells are always judgement calls,
   > and a documented repo standard overrides the baseline. Skip anything
-  > tooling enforces. Under 400 words.
+  > tooling enforces. For each actionable finding return the reviewer-contract
+  > fields `id`, `state`, `severity`, `location`, `problem`, `reason`, and optional
+  > `suggestion`. Reuse a prior ID on recheck; mark fixed/duplicate explicitly.
+  > Under 400 words.
 
 #### Spec sub-agent prompt — include:
 
@@ -97,16 +102,22 @@ the commit list. Neither brief permits a further delegation:
   > Report: (a) requirements the Spec asked for that are missing or partial;
   > (b) behaviour in the diff that was not asked for (scope creep);
   > (c) requirements that look implemented but where the implementation
-  > looks wrong. Quote the Spec line for each finding. Under 400 words.
+  > looks wrong. Quote the Spec line for each finding. Use the same normalized
+  > fields and prior IDs as the Standards axis. Under 400 words.
 
 When the Spec is missing, skip the Spec sub-agent instantiation and record
 `Spec: no spec available` in the final report.
 
 ### 5. Aggregate
 
-Present the two reports under `## Standards` and `## Spec` headings, verbatim
-or lightly cleaned. Do **not** merge or rerank findings — the two axes are
-deliberately separate (see _Why two axes_ in [EXAMPLES.md](EXAMPLES.md)).
+Present the two reports under `## Standards` and `## Spec` headings. Keep
+the axes separate; normalize each actionable finding to the fields in
+`review-loop/references/reviewer-contract.md`, assigning globally unique
+`F-###` IDs to new findings across both axes and preserving prior IDs for
+rechecks. Reject a malformed candidate as `REVIEW-ERROR` with its missing
+fields; it is not a finding. An empty report says `Findings: []`. Do **not**
+merge or rerank findings — the two axes are deliberately separate (see _Why
+two axes_ in [EXAMPLES.md](EXAMPLES.md)).
 
 End with a one-line per-axis summary: total findings on that axis and the
 worst issue **within** that axis (if any). Do not pick a single winner across
@@ -132,4 +143,3 @@ Example aggregate shape is shown in [EXAMPLES.md](EXAMPLES.md).
   a citation.
 - A change can pass one axis and fail the other. Report that faithfully;
   do not soften the failing axis.
-

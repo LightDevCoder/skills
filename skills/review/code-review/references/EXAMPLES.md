@@ -11,27 +11,37 @@ Direct invocation: `$code-review main`
 Standards sources found: none documented (fallback to smell baseline only).
 Spec source: `.scratch/auth/spec.md` — section `Session middleware must
 reject expired tokens with 401` (line 22).
+Previous findings: none.
 
 Report:
 
 ```markdown
 ## Standards
 
-- possible Mysterious Name in `src/auth/middleware.ts:14` — `handle(input)`
-  does not reveal the token→session mapping; rename to
-  `authenticateWithToken` or isolate the session mapping the name cannot name.
-  Quoted hunk: `function handle(input) { … }`
-- Duplicated Code — `if (!token) return 401` shape appears in
-  `middleware.ts:18` and `api/routes.ts:44`; extract to `requireToken()`.
+- id: F-001
+  state: new
+  severity: low
+  location: src/auth/middleware.ts:14
+  problem: possible Mysterious Name — `handle(input)` hides token-to-session mapping
+  reason: smell baseline; quoted hunk `function handle(input) { … }`
+  suggestion: rename or isolate the mapping
+- id: F-002
+  state: new
+  severity: low
+  location: src/auth/middleware.ts:18
+  problem: duplicate token guard also appears in api/routes.ts:44
+  reason: Duplicated Code baseline; quoted hunk `if (!token) return 401`
 
 Under 400 words.
 
 ## Spec
 
-- Missing / partial: Spec line 22 — "expired tokens must return 401 with
-  `code: EXPIRED`" — the diff returns bare `401` with no JSON body (partial).
-- Scope creep: none observed.
-- Looks wrong: none beyond the missing body.
+- id: F-003
+  state: new
+  severity: medium
+  location: src/auth/middleware.ts:27
+  problem: expired tokens return bare 401 without `code: EXPIRED`
+  reason: Spec line 22 requires a 401 body with `code: EXPIRED`
 
 Under 400 words.
 
@@ -54,6 +64,7 @@ required; no single winner was picked.
 
 ## Spec
 
+Findings: []
 No spec available — skipped.
 
 Standards: 1 finding; worst: … Spec: 0 findings; no spec available.
@@ -84,4 +95,3 @@ stop. Do not expand the window to manufacture a diff.
 > Fixed point `branch/does-not-exist` fails `git rev-parse branch/does-not-exist`.
 
 Outcome: report the bad ref and stop. Do not retry inside sub-agents.
-

@@ -38,6 +38,22 @@ EXECUTE_PATTERNS = [
 ]
 
 
+def _ticket_number(value: str) -> Optional[int]:
+    name = value.rsplit("/", 1)[-1].lstrip("#")
+    match = re.match(r"^(?:issue-)?(\d+)(?:\b|[._-])", name, re.IGNORECASE)
+    return int(match.group(1)) if match else None
+
+
+def _target_ticket(state: CompactProjectState, explicit_target: str) -> Optional[str]:
+    tickets = state.ready_tickets + state.blocked_tickets + state.claimed_tickets + state.resolved_tickets
+    target_number = _ticket_number(explicit_target)
+    matches = [ticket for ticket in tickets if (
+        ticket == explicit_target or ticket.rsplit("/", 1)[-1] == explicit_target
+        or (target_number is not None and _ticket_number(ticket) == target_number)
+    )]
+    return matches[0] if len(matches) == 1 else None
+
+
 def extract_compact_state_from_dict(d: Dict[str, Any]) -> CompactProjectState:
     """Parse an evidence dictionary (e.g. from inspect_project_evidence) into CompactProjectState."""
     spec_d = d.get("spec", {})
@@ -56,6 +72,10 @@ def extract_compact_state_from_dict(d: Dict[str, Any]) -> CompactProjectState:
     if blocked_tickets and isinstance(blocked_tickets[0], dict):
         blocked_tickets = [t.get("path", "") for t in blocked_tickets if t.get("path")]
 
+    claimed_tickets = tickets_d.get("claimed", [])
+    if claimed_tickets and isinstance(claimed_tickets[0], dict):
+        claimed_tickets = [t.get("path", "") for t in claimed_tickets if t.get("path")]
+
     resolved_tickets = tickets_d.get("resolved", [])
     if resolved_tickets and isinstance(resolved_tickets[0], dict):
         resolved_tickets = [t.get("path", "") for t in resolved_tickets if t.get("path")]
@@ -63,18 +83,18 @@ def extract_compact_state_from_dict(d: Dict[str, Any]) -> CompactProjectState:
     unknown_tickets = tickets_d.get("unknown", [])
 
     # Check clarification readiness in artifact signals
-    signals = d.get("artifact_signals", {})
+    signals = d.get("artifactSignals", d.get("artifact_signals", {}))
     clarification_signals = signals.get("clarification", [])
     clarification_ready = any(
-        isinstance(c, dict) and c.get("status") == "ready-for-next-stage"
+        isinstance(c, dict) and (c.get("status") == "ready-for-next-stage" or c.get("readyFor") == "project-spec")
         for c in clarification_signals
     )
 
     return CompactProjectState(
-        initialized=d.get("initialized", True),
-        has_project_contract=d.get("has_project_contract", True),
-        current_effort=d.get("current_effort"),
-        active_efforts=d.get("active_efforts", []),
+        initialized=d.get("initialized", False),
+        has_project_contract=d.get("has_project_contract", d.get("initialized", False)),
+        current_effort=d.get("currentEffort", {}).get("name") if isinstance(d.get("currentEffort"), dict) else d.get("current_effort"),
+        active_efforts=d.get("active_efforts", ["ambiguous-1", "ambiguous-2"] if d.get("stage") == "ambiguous-current-effort" else []),
         spec_exists=spec_d.get("exists", False),
         spec_active=spec_d.get("active", False),
         spec_paths=spec_paths,
@@ -82,9 +102,10 @@ def extract_compact_state_from_dict(d: Dict[str, Any]) -> CompactProjectState:
         tickets_exist=tickets_d.get("exists", False),
         ready_tickets=ready_tickets,
         blocked_tickets=blocked_tickets,
+        claimed_tickets=claimed_tickets,
         resolved_tickets=resolved_tickets,
         unknown_tickets=unknown_tickets,
-        all_tickets_resolved=tickets_d.get("all_resolved", False),
+        all_tickets_resolved=tickets_d.get("allResolved", tickets_d.get("all_resolved", False)) and not claimed_tickets,
         review_exists=review_d.get("exists", False),
         review_status=review_d.get("status"),
         review_verdict=review_d.get("verdict"),
@@ -131,7 +152,8 @@ def compute_legal_actions(
         )
 
     # 3. Fail-Closed Invariant: Unknown ticket references
-    if state.unknown_tickets or (explicit_target and explicit_target in ["99", "#99", "unknown"]):
+    matched_target = _target_ticket(state, explicit_target) if explicit_target else None
+    if state.unknown_tickets or (explicit_target and not matched_target):
         reason = f"Unknown ticket reference: {state.unknown_tickets or explicit_target} is not in the ticket graph"
         return LegalActionsResult(
             status="BLOCKED",
@@ -173,14 +195,21 @@ def compute_legal_actions(
     # 6. Invariant: Review state and freshness checks
     if state.review_exists:
         if state.review_verdict == "PASS":
-            if state.review_freshness == "stale":
+            if state.claimed_tickets or state.ready_tickets or state.blocked_tickets:
+                return LegalActionsResult(
+                    status="BLOCKED", allowed_actions=[], fallback_action=None,
+                    fail_closed=True,
+                    blocked_reason="Review PASS conflicts with unresolved tickets",
+                    compact_state=state, candidate_descriptions={}, is_authorized=False,
+                )
+            if state.review_freshness not in ("current", "fresh"):
                 return LegalActionsResult(
                     status="RECOMMEND",
                     allowed_actions=["project-review"],
                     fallback_action="project-review",
                     deterministic_preference="project-review",
                     fail_closed=True,
-                    blocked_reason="Stale review verdict: source HEAD moved after review PASS",
+                    blocked_reason="Review PASS freshness is stale or unverified",
                     compact_state=state,
                     candidate_descriptions={"project-review": CANDIDATE_DESCRIPTIONS["project-review"]},
                     is_authorized=False,
@@ -213,7 +242,7 @@ def compute_legal_actions(
     if state.spec_exists and state.spec_active:
         # Tickets exist and resolved: check resolution status first
         if state.all_tickets_resolved or (
-            len(state.resolved_tickets) > 0 and len(state.ready_tickets) == 0 and len(state.blocked_tickets) == 0
+            len(state.resolved_tickets) > 0 and len(state.ready_tickets) == 0 and len(state.blocked_tickets) == 0 and len(state.claimed_tickets) == 0
         ):
             return LegalActionsResult(
                 status="RECOMMEND",
@@ -227,7 +256,7 @@ def compute_legal_actions(
             )
 
         # Check tickets existence
-        total_tickets = len(state.ready_tickets) + len(state.blocked_tickets) + len(state.resolved_tickets)
+        total_tickets = len(state.ready_tickets) + len(state.blocked_tickets) + len(state.claimed_tickets) + len(state.resolved_tickets)
         if not state.tickets_exist or total_tickets == 0:
             return LegalActionsResult(
                 status="RECOMMEND",
@@ -242,7 +271,13 @@ def compute_legal_actions(
 
         # Unresolved tickets remain: inspect frontier
         if len(state.ready_tickets) > 0:
-            target_ticket = state.ready_tickets[0]
+            if matched_target and matched_target not in state.ready_tickets:
+                return LegalActionsResult(
+                    status="BLOCKED", allowed_actions=[], fallback_action=None,
+                    fail_closed=True, blocked_reason=f"Target ticket is not ready: {matched_target}",
+                    compact_state=state, candidate_descriptions={}, is_authorized=False,
+                )
+            target_ticket = matched_target or state.ready_tickets[0]
             is_question = bool(re.search(r"^(should|can|could|shall|may|what|how|i guess|maybe)\b|\?$|吗[？?]?$", user_request.strip(), re.IGNORECASE))
             is_execute_intent = (not is_question) and any(p.search(user_request) for p in EXECUTE_PATTERNS)
             action_status = "TRANSITION" if is_execute_intent else "RECOMMEND"

@@ -14,6 +14,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from check_public_docs import (
     run_checks,
     check_anti_patterns,
+    check_release_link_labels,
     check_catalog_inventory,
     check_category_readmes,
     check_catalog_parity,
@@ -26,6 +27,16 @@ from check_public_docs import (
 
 
 class PublicDocsQualityTests(unittest.TestCase):
+    def test_release_link_label_must_match_target_tag(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="release-link-test-") as tmp:
+            root = Path(tmp)
+            doc = root / "CATALOG.md"
+            doc.write_text("| Stable release | [v0.2.3](https://github.com/LightDevCoder/skills/releases/tag/v0.2.4) |\n", encoding="utf-8")
+            errors = check_release_link_labels(root, files=[doc])
+            self.assertEqual(len(errors), 1)
+            doc.write_text("| Stable release | [v0.2.4](https://github.com/LightDevCoder/skills/releases/tag/v0.2.4) |\n", encoding="utf-8")
+            self.assertEqual(check_release_link_labels(root, files=[doc]), [])
+
     def test_current_repo_passes_public_doc_checks(self) -> None:
         """The repository's public documentation passes all consistency and style gates."""
         result = run_checks(ROOT)

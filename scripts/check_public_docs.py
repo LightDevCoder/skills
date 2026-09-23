@@ -162,6 +162,22 @@ def check_anti_patterns(
     return errors
 
 
+def check_release_link_labels(
+    repo_root: Path = REPO_ROOT,
+    files: list[Path] | None = None,
+) -> list[str]:
+    """Keep visible release version labels aligned with their GitHub tag links."""
+    errors: list[str] = []
+    target_files = files if files is not None else get_public_surface_files(repo_root)
+    pattern = re.compile(r"\[(v\d+\.\d+\.\d+)\]\(https://github\.com/LightDevCoder/skills/releases/tag/(v\d+\.\d+\.\d+)\)")
+    for path in target_files:
+        for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            for match in pattern.finditer(line):
+                if match.group(1) != match.group(2):
+                    errors.append(f"{path.relative_to(repo_root)}:{line_number} release link label {match.group(1)} differs from target {match.group(2)}")
+    return errors
+
+
 def get_canonical_adapter_count(repo_root: Path = REPO_ROOT) -> int:
     """Retrieve canonical native harness adapter count from agent-config documentation."""
     harness_doc = repo_root / "skills" / "engineering" / "agent-config" / "references" / "harness-support.md"
@@ -376,6 +392,7 @@ def run_checks(repo_root: Path = REPO_ROOT) -> PublicDocCheckResult:
     errors.extend(check_catalog_inventory(repo_root))
     errors.extend(check_category_readmes(repo_root))
     errors.extend(check_anti_patterns(repo_root))
+    errors.extend(check_release_link_labels(repo_root))
     errors.extend(check_readme_facts(repo_root))
     errors.extend(check_catalog_parity(repo_root))
     return PublicDocCheckResult(passed=len(errors) == 0, errors=errors)

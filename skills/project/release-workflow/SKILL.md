@@ -157,6 +157,7 @@ Create the annotated tag pointing to the exact CI-verified commit:
    git cat-file -t refs/tags/vX.Y.Z
    ```
    Must confirm object type is `tag` (annotated tag object), not `commit`.
+   Re-run `verify_release_integrity.py --tag vX.Y.Z --release-commit "$CANDIDATE_SHA" --stage tagged --check-remote` after the push; this must bind the remote annotated tag object and peeled commit to the local candidate.
 7. **Transition:** Transition lifecycle state to `TAGGED`.
 
 ### 4. Stage INSTALL_VERIFIED (Fresh Install Verification)
@@ -223,7 +224,8 @@ Record verified publication facts into `RELEASE_RECEIPT.md`:
    python3 scripts/verify_release_integrity.py \
      --tag vX.Y.Z \
      --release-commit <candidate-sha> \
-     --stage attested
+     --stage attested \
+     --check-remote
    ```
 5. Only after `verify_release_integrity.py` passes, push the attestation commit to `origin/main`.
 6. **Transition:** Transition lifecycle state to `ATTESTED`.

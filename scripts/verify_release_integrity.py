@@ -138,6 +138,21 @@ def check_tag_immutability(
 
     # 1. Check local tag
     tag_ident = resolve_annotated_tag_identity(tag, cwd=cwd)
+    remote_res = resolve_remote_tag(tag, remote="origin", cwd=cwd) if check_remote else None
+    if remote_res is not None:
+        if remote_res.status == RemoteTagStatus.QUERY_FAILED:
+            return VerificationResult(False, "QUERY_FAILED", f"Could not verify remote tag state for '{tag}': {remote_res.error}")
+        if stage in ("prepared", "candidate") and remote_res.status != RemoteTagStatus.ABSENT:
+            return VerificationResult(False, "REMOTE_TAG_EXISTS", f"Candidate tag '{tag}' already exists on origin.")
+        if stage in ("tagged", "attested") and remote_res.status != RemoteTagStatus.EXISTS:
+            return VerificationResult(False, "REMOTE_TAG_MISSING", f"Published tag '{tag}' is missing on origin.")
+        if remote_res.status == RemoteTagStatus.EXISTS:
+            if not remote_res.is_annotated:
+                return VerificationResult(False, "LIGHTWEIGHT_TAG_FORBIDDEN", f"Remote tag '{tag}' is not annotated.")
+            if remote_res.peeled_commit_sha != target_sha:
+                return VerificationResult(False, "HARD_FAIL", f"Remote tag '{tag}' targets {remote_res.peeled_commit_sha}, not {target_sha}.")
+            if tag_ident.tag_type and remote_res.tag_object_sha != tag_ident.tag_object_sha:
+                return VerificationResult(False, "HARD_FAIL", f"Remote tag object for '{tag}' differs from the local annotated tag.")
     if tag_ident.tag_type:
         # For tagged and attested stages, release tags MUST be annotated
         if stage in ("tagged", "attested") and not tag_ident.is_annotated:
@@ -174,40 +189,8 @@ def check_tag_immutability(
             message=f"Tag '{tag}' does not exist locally, but is required for stage '{stage}'.",
         )
 
-    # 2. Check remote tag if requested
-    if check_remote:
-        remote_res = resolve_remote_tag(tag, remote="origin", cwd=cwd)
-        if remote_res.status == RemoteTagStatus.QUERY_FAILED:
-            return VerificationResult(
-                passed=False,
-                status="QUERY_FAILED",
-                message=f"Could not verify remote tag state for '{tag}': {remote_res.error}",
-            )
-        elif remote_res.status == RemoteTagStatus.EXISTS:
-            if stage in ("tagged", "attested") and not remote_res.is_annotated:
-                return VerificationResult(
-                    passed=False,
-                    status="LIGHTWEIGHT_TAG_FORBIDDEN",
-                    message=(
-                        f"Remote tag '{tag}' is not an annotated tag. "
-                        "Lightweight tags are strictly forbidden for release tags."
-                    ),
-                )
-            if remote_res.peeled_commit_sha == target_sha:
-                return VerificationResult(
-                    passed=True,
-                    status="IDEMPOTENT_PASS",
-                    message=f"Remote tag '{tag}' already exists pointing to candidate commit {target_sha}. Safe for CI retry.",
-                )
-            else:
-                return VerificationResult(
-                    passed=False,
-                    status="HARD_FAIL",
-                    message=(
-                        f"Tag immutability violation! Remote tag '{tag}' points to {remote_res.peeled_commit_sha}, "
-                        f"which differs from candidate commit {target_sha}. Tag retargeting/force-moving is strictly forbidden."
-                    ),
-                )
+    if remote_res is not None and remote_res.status == RemoteTagStatus.EXISTS:
+        return VerificationResult(True, "IDEMPOTENT_PASS", f"Remote annotated tag '{tag}' matches candidate commit {target_sha} and local tag object.")
 
     return VerificationResult(
         passed=True,
@@ -345,8 +328,8 @@ def check_github_release_navigation(
     )
     if proc.returncode != 0:
         return VerificationResult(
-            passed=True,
-            status="SKIPPED_REMOTE",
+            passed=False,
+            status="REMOTE_RELEASE_UNAVAILABLE",
             message=f"Could not query GitHub Release body via gh CLI ({proc.stderr.strip() or 'gh unavailable'}).",
         )
 

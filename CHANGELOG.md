@@ -4,7 +4,17 @@
 
 All notable changes are recorded here. A release entry must be tied to an actual version or tag and must not be created merely because a document was drafted.
 
-## Unreleased — target v0.2.4
+## Unreleased — target v0.2.5
+
+### Changed — Reliable Routing and Release Verification
+
+- `agent-config` Python routing now requires canonical, fresh Host evidence and a matching user-confirmed Profile; unavailable tiers stop instead of downgrading, and `highest-supported` uses the Host's evidenced effort ordering.
+- `ask-light --mode semantic` shares evidence constraints and final validation with the primary route. Duplicate ticket numbers, claimed work, ambiguous efforts, and unknown review freshness fail closed.
+- Project ticket producers share one numeric namespace. `manuscript-ops` now owns its manuscript Profile/state after generic `project-init` bootstrap and checks runtime dependency interfaces without stale byte locks.
+- `code-review` emits normalized two-axis findings; travel-page seed validation and first sync share a todo contract.
+- Remote release/tag failures block attestation. CI discovers the full Python suite and runs Node runtime tests plus a generated-trip build. Bilingual collection documentation is synchronized.
+
+## 0.2.4 — 2026-09-21
 
 ### Changed — Release Integrity Hardening & Git-Object Verification
 

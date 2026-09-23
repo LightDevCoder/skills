@@ -21,7 +21,9 @@ files, runs a repair loop, or issues the final `PASS` / `FAIL` / `BLOCKED`.
    sub-agents share no context and may not re-invoke `code-review` or spawn
    further agents.
 4. **Aggregate separately.** Present `## Standards` and `## Spec` reports with
-   a one-line per-axis summary. Do not merge or rerank across axes.
+   globally unique normalized finding IDs, or `Findings: []` when clean, and a
+   one-line per-axis summary. Preserve prior IDs on recheck. Do not merge or
+   rerank across axes.
 
 Every finding carries a citation: standards file + rule or smell name + quoted
 hunk, or the Spec line. Tooling-enforced style is skipped; repo standards

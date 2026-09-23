@@ -47,7 +47,7 @@ class ReleaseIntegrityTests(unittest.TestCase):
     def test_detect_candidate_tag(self) -> None:
         """Infers latest candidate release tag from docs/evidence/releases/."""
         tag = detect_candidate_tag(ROOT)
-        self.assertEqual(tag, "v0.2.4")
+        self.assertEqual(tag, "v0.2.5")
 
     def test_new_tag_passes_ready_for_creation(self) -> None:
         """A tag that does not exist locally or remotely passes ready for creation."""
@@ -75,6 +75,36 @@ class ReleaseIntegrityTests(unittest.TestCase):
             self.assertTrue(res.passed)
             self.assertEqual(res.status, "IDEMPOTENT_PASS")
             self.assertIn("Safe for CI retry", res.message)
+
+    def test_local_tag_does_not_hide_remote_query_failure(self) -> None:
+        from unittest.mock import patch
+        sha = resolve_tag_sha("v0.2.4", cwd=ROOT)
+        with patch("verify_release_integrity.resolve_remote_tag", return_value=RemoteTagResult(status=RemoteTagStatus.QUERY_FAILED, error="offline")):
+            result = check_tag_immutability("v0.2.4", sha, check_remote=True, stage="attested", cwd=ROOT)
+        self.assertFalse(result.passed)
+        self.assertEqual(result.status, "QUERY_FAILED")
+
+    def test_attested_requires_remote_annotated_tag(self) -> None:
+        from unittest.mock import patch
+        sha = resolve_tag_sha("v0.2.4", cwd=ROOT)
+        for remote, status in [
+            (RemoteTagResult(status=RemoteTagStatus.ABSENT), "REMOTE_TAG_MISSING"),
+            (RemoteTagResult(status=RemoteTagStatus.EXISTS, peeled_commit_sha=sha, is_annotated=False), "LIGHTWEIGHT_TAG_FORBIDDEN"),
+        ]:
+            with self.subTest(status=status), patch("verify_release_integrity.resolve_remote_tag", return_value=remote):
+                result = check_tag_immutability("v0.2.4", sha, check_remote=True, stage="attested", cwd=ROOT)
+                self.assertFalse(result.passed)
+                self.assertEqual(result.status, status)
+
+    def test_remote_tag_object_must_match_local_object_even_if_commit_matches(self) -> None:
+        from unittest.mock import patch
+        sha = resolve_tag_sha("v0.2.4", cwd=ROOT)
+        moved = RemoteTagResult(status=RemoteTagStatus.EXISTS, peeled_commit_sha=sha,
+                                tag_object_sha="0" * 40, is_annotated=True)
+        with patch("verify_release_integrity.resolve_remote_tag", return_value=moved):
+            result = check_tag_immutability("v0.2.4", sha, check_remote=True, stage="attested", cwd=ROOT)
+        self.assertFalse(result.passed)
+        self.assertEqual(result.status, "HARD_FAIL")
 
     def test_existing_tag_different_target_is_hard_fail(self) -> None:
         """An existing tag pointing to a different commit returns HARD_FAIL, blocking retargeting."""
@@ -2411,6 +2441,14 @@ class ReleaseBodyLinkHardeningTests(unittest.TestCase):
             res = verify_release_integrity.check_github_release_navigation("v9.9.9")
             self.assertFalse(res.passed)
             self.assertEqual(res.status, "RELEASE_BODY_RELATIVE_LINK_FORBIDDEN")
+
+    def test_attested_missing_github_release_blocks(self) -> None:
+        from unittest.mock import patch
+        import verify_release_integrity
+        with patch("subprocess.run", return_value=subprocess.CompletedProcess(args=["gh"], returncode=1, stdout="", stderr="release not found")):
+            result = verify_release_integrity.check_github_release_navigation("v9.9.9")
+        self.assertFalse(result.passed)
+        self.assertEqual(result.status, "REMOTE_RELEASE_UNAVAILABLE")
 
 
 class ReleaseLifecycleHermeticE2ETests(unittest.TestCase):

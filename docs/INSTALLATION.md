@@ -4,6 +4,8 @@
 
 The public first-party collection's current stable release is [v0.2.4](https://github.com/LightDevCoder/skills/releases/tag/v0.2.4), published at tag `v0.2.4` (release manifest in [evidence/releases/v0.2.4/RELEASE_MANIFEST.md](evidence/releases/v0.2.4/RELEASE_MANIFEST.md), post-publication receipt in [evidence/releases/v0.2.4/RELEASE_RECEIPT.md](evidence/releases/v0.2.4/RELEASE_RECEIPT.md)). It provides **36 admitted first-party Skills** across 7 purpose-based categories. Package contracts remain inside `skills/<category>/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
 
+The `v0.2.5` candidate is not a verified installation source until publication and fresh-install evidence are complete.
+
 The standard install command is the generic `latest` form: it follows the repository's default revision, so `npx skills add LightDevCoder/skills` is the recommended interactive entry point to select the desired Skills and Agent hosts. Pinned release commands select published tags for reproducible installs. Historical verification commands (which tested full-collection installations across all supported agents) are documented below alongside historical evidence.
 
 ## Categorized sources and installed packages

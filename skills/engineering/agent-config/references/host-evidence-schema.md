@@ -2,6 +2,9 @@
 
 Supply a current, structured observation from the host runtime rather than a remembered inventory.
 This represents the output of Companion `inspect_host` and conforms strictly to `host-capabilities.schema.json`.
+The standalone Python route accepts observations no more than 24 hours old;
+an explicitly timestamped model or capability observation must meet the same
+window. An unknown or unobserved capability does not authorize execution.
 
 ```json
 {

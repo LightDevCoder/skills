@@ -35,15 +35,27 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from test_agent_config_behavior import (
-    load,
-    route_execution,
-    evaluate_setup_gate,
-    classify_task_shape,
-    resolve_effort,
-    capability,
-    check_profile_stale,
-)
+sys.path.insert(0, str(ROOT / "scripts"))
+from agent_config import agent_config_recommend
+from datetime import datetime, timezone
+
+
+def load(name: str) -> dict:
+    return json.loads((FIXTURES / name).read_text(encoding="utf-8"))
+
+
+def fresh_host(name: str, workspace: str) -> dict:
+    host = load(name)
+    now = datetime.now(timezone.utc).isoformat()
+    host["observed_at"] = now
+    host["workspace"] = workspace
+    for model in host.get("available_models", []):
+        if model.get("evidence"):
+            model["evidence"]["observed_at"] = now
+    for capability in host.get("capabilities", {}).values():
+        if capability.get("evidence"):
+            capability["evidence"]["observed_at"] = now
+    return host
 
 
 class CompanionContractIntegrationTest(unittest.TestCase):
@@ -226,252 +238,81 @@ console.log('ALL_SCHEMAS_PASS');
         self.assertIn("ALL_SCHEMAS_PASS", result.stdout)
 
 
-class BehavioralAcceptanceMatrixTest(unittest.TestCase):
-    """Layer 2: Mandatory Behavioral Acceptance Matrix (§8)."""
+class ProductionRoutingMatrixTest(unittest.TestCase):
+    """Exercise the actual Skill entry point with canonical companion fixtures."""
 
     def setUp(self) -> None:
-        self.single_profile = load("profile-single-model.json")
-        self.multi_profile = load("profile-multi-model.json")
-        self.host_case_a = load("case-c-fixed-single-pass.json")  # Single-model host
-        self.host_case_b = load("case-d-fixed-decomposed.json")   # Single-model decomposed host
-        self.host_case_c = load("case-a-tiered-single-pass.json")  # Multi-model host
-        self.host_case_d = load("case-b-tiered-decomposed.json")   # Multi-model decomposed host
+        self.multi = load("profile-multi-model.json")
+        self.single = load("profile-single-model.json")
+        workspace = self.multi["scope"]["workspace"]
+        self.tiered = fresh_host("case-a-tiered-single-pass.json", workspace)
+        self.fixed = fresh_host("case-c-fixed-single-pass.json", workspace)
 
-    def test_scenario_01_multi_model_small_spec(self) -> None:
-        """Scenario 1: Multi-model / small SPEC -> minimal topology + lowest sufficient authorized model."""
-        task = {"difficulty": "routine", "word_count": 500}
-        plan = route_execution(self.multi_profile, task, self.host_case_c)
+    def route(self, host: dict, profile: dict | None, **task: object):
+        return agent_config_recommend(host, task, profile=profile, use_jev=False)
 
-        self.assertEqual(plan["readiness"], "READY")
-        self.assertEqual(plan["handoff"], "implement")
-        self.assertIsNotNone(plan["execution_config"])
-        self.assertEqual(plan["task_shape"], "single-pass")
-        self.assertEqual(plan["mode_title"], "Case C (Tiered Multi-model + Single-pass)")
-        self.assertEqual(plan["topology"], "minimal")
-        self.assertEqual(plan["execution"]["tier"], "routine")
-        self.assertEqual(plan["execution"]["model"], "model-alpha")
-        self.assertEqual(plan["execution"]["effort"], "low")
+    def test_routine_uses_confirmed_tier(self) -> None:
+        result = self.route(self.tiered, self.multi, difficulty="routine", difficulty_source="explicit-user")
+        self.assertEqual(result.readiness, "READY")
+        self.assertEqual(result.execution_config.model, "model-alpha")
 
-        exec_cfg = plan["execution_config"]
-        self.assertEqual(exec_cfg["task_shape"], "single-pass")
-        self.assertEqual(exec_cfg["model_mode"], "multi")
-        self.assertEqual(exec_cfg["topology"]["concurrency"], 1)
-        self.assertEqual(exec_cfg["execution"]["model"], "model-alpha")
+    def test_high_uses_confirmed_high_tier(self) -> None:
+        result = self.route(self.tiered, self.multi, difficulty="high", difficulty_source="explicit-user")
+        self.assertEqual(result.execution_config.model, "model-gamma")
+        self.assertEqual(result.execution_config.resolved_effort, "high")
 
-    def test_scenario_02_multi_model_demanding_small_task(self) -> None:
-        """Scenario 2: Multi-model / demanding small task -> stronger implementation model and review."""
-        task = {"difficulty": "demanding", "word_count": 800}
-        plan = route_execution(self.multi_profile, task, self.host_case_c)
+    def test_decomposed_multimodel_uses_case_d_when_evidenced(self) -> None:
+        result = self.route(self.tiered, self.multi, shape="decomposed", formal_tickets_exist=True)
+        self.assertEqual(result.readiness, "READY")
+        self.assertEqual(result.execution_config.topology, "Case D")
 
-        self.assertEqual(plan["readiness"], "READY")
-        self.assertEqual(plan["handoff"], "implement")
-        self.assertIsNotNone(plan["execution_config"])
-        self.assertEqual(plan["task_shape"], "single-pass")
-        self.assertEqual(plan["execution"]["tier"], "high")
-        self.assertEqual(plan["execution"]["model"], "model-gamma")
-        self.assertEqual(plan["execution"]["effort"], "high")
-        self.assertEqual(plan["review"]["tier"], "review")
-        self.assertEqual(plan["review"]["model"], "model-gamma")
+    def test_decomposed_without_tickets_stops(self) -> None:
+        result = self.route(self.tiered, self.multi, shape="decomposed", formal_tickets_exist=False)
+        self.assertEqual(result.readiness, "NEED_PROJECT_TICKETS")
+        self.assertIsNone(result.execution_config)
 
-        exec_cfg = plan["execution_config"]
-        self.assertEqual(exec_cfg["execution"]["model"], "model-gamma")
-        self.assertEqual(exec_cfg["review"]["strategy"], "independent-review")
+    def test_fixed_single_model_uses_case_a(self) -> None:
+        result = self.route(self.fixed, self.single, difficulty="routine")
+        self.assertEqual(result.readiness, "READY")
+        self.assertEqual(result.execution_config.topology, "Case A")
+        self.assertEqual(result.execution_config.model, "model-alpha")
 
-    def test_scenario_03_multi_model_tickets(self) -> None:
-        """Scenario 3: Multi-model / tickets -> per-ticket tier routing + bounded execution topology."""
-        tickets = [
-            {"id": "01", "difficulty": "routine", "blocked_by": []},
-            {"id": "02", "difficulty": "moderate", "blocked_by": []},
-            {"id": "03", "difficulty": "demanding", "blocked_by": ["01"]},
-        ]
-        task = {"tickets": tickets}
-        plan = route_execution(self.multi_profile, task, self.host_case_d)
+    def test_fixed_decomposed_uses_case_b(self) -> None:
+        result = self.route(self.fixed, self.single, shape="decomposed", formal_tickets_exist=True)
+        self.assertEqual(result.readiness, "READY")
+        self.assertEqual(result.execution_config.topology, "Case B")
 
-        self.assertEqual(plan["readiness"], "READY")
-        self.assertEqual(plan["handoff"], "implement")
-        self.assertIsNotNone(plan["execution_config"])
-        self.assertEqual(plan["task_shape"], "decomposed")
-        self.assertEqual(plan["mode_title"], "Case D (Tiered Multi-model + Decomposed)")
-        self.assertEqual(plan["concurrency_cap"], 3)
-        self.assertEqual(plan["controller"]["model"], "model-gamma")
+    def test_unavailable_profile_model_stops(self) -> None:
+        host = json.loads(json.dumps(self.tiered))
+        host["available_models"] = [m for m in host["available_models"] if m["id"] != "model-gamma"]
+        self.assertEqual(self.route(host, self.multi, difficulty="critical").readiness, "NEED_INPUT")
 
-        # Per-ticket tier routing
-        workers = plan["workers"]
-        self.assertEqual(workers[0]["model"], "model-alpha")
-        self.assertEqual(workers[0]["tier"], "routine")
-        self.assertEqual(workers[1]["model"], "model-beta")
-        self.assertEqual(workers[1]["tier"], "standard")
-        self.assertEqual(workers[2]["model"], "model-gamma")
-        self.assertEqual(workers[2]["tier"], "high")
+    def test_highest_supported_uses_host_max(self) -> None:
+        host = json.loads(json.dumps(self.tiered))
+        host["supported_effort_values"] += ["xhigh", "max"]
+        result = self.route(host, self.multi, difficulty="high", difficulty_source="explicit-user")
+        self.assertEqual(result.execution_config.resolved_effort, "max")
 
-        # Canonical execution config matches
-        exec_cfg = plan["execution_config"]
-        self.assertEqual(exec_cfg["topology"]["type"], "controller-workers")
-        self.assertEqual(len(exec_cfg["work_items"]), 3)
+    def test_unprofiled_host_stops(self) -> None:
+        self.assertEqual(self.route(self.tiered, None).readiness, "NEED_INPUT")
 
-    def test_scenario_04_complex_no_tickets(self) -> None:
-        """Scenario 4: Complex / no tickets -> NEED_PROJECT_TICKETS handoff."""
-        task = {"requires_ticket_decomposition": True}
-        self.assertEqual(classify_task_shape(task), "decomposed")
+    def test_extra_host_model_is_not_promoted_to_tier(self) -> None:
+        host = json.loads(json.dumps(self.tiered))
+        extra = json.loads(json.dumps(host["available_models"][0]))
+        extra["id"] = "unprofiled-extra"
+        host["available_models"].append(extra)
+        result = self.route(host, self.multi, difficulty="standard", difficulty_source="explicit-user")
+        self.assertEqual(result.execution_config.model, "model-beta")
 
-        plan = route_execution(self.multi_profile, task, self.host_case_d)
-        self.assertEqual(plan["readiness"], "NEED_PROJECT_TICKETS")
-        self.assertEqual(plan["handoff"], "project-tickets")
-        self.assertIsNone(plan["execution_config"])
-        self.assertIn("formal ticket breakdown", plan["reason"])
+    def test_harness_mismatch_stops(self) -> None:
+        host = json.loads(json.dumps(self.tiered))
+        host["adapter_id"] = "other-adapter"
+        self.assertEqual(self.route(host, self.multi).readiness, "NEED_INPUT")
 
-    def test_scenario_05_single_model_small(self) -> None:
-        """Scenario 5: Single-model / small -> same model, no fake tier routing."""
-        task = {"difficulty": "routine", "word_count": 300}
-        plan = route_execution(self.single_profile, task, self.host_case_a)
-
-        self.assertEqual(plan["readiness"], "READY")
-        self.assertEqual(plan["handoff"], "implement")
-        self.assertIsNotNone(plan["execution_config"])
-        self.assertEqual(plan["mode_title"], "Case A (Fixed Single-model + Single-pass)")
-        self.assertEqual(plan["execution"]["model"], "model-alpha")
-        self.assertEqual(plan["review"]["model"], "model-alpha")
-        self.assertEqual(plan["review"]["strategy"], "self-check")
-        self.assertFalse(plan["fake_roles"])
-
-    def test_scenario_06_single_model_tickets(self) -> None:
-        """Scenario 6: Single-model / tickets -> same model + Host-supported context/topology."""
-        tickets = [
-            {"id": "01", "difficulty": "routine"},
-            {"id": "02", "difficulty": "moderate"},
-        ]
-        task = {"tickets": tickets}
-        plan = route_execution(self.single_profile, task, self.host_case_b)
-
-        self.assertEqual(plan["readiness"], "READY")
-        self.assertEqual(plan["handoff"], "implement")
-        self.assertIsNotNone(plan["execution_config"])
-        self.assertEqual(plan["mode_title"], "Case B (Fixed Single-model + Decomposed)")
-        self.assertEqual(plan["controller"]["model"], "model-alpha")
-        self.assertEqual(plan["concurrency_cap"], 2)
-
-        for w in plan["workers"]:
-            self.assertEqual(w["model"], "model-alpha")
-            self.assertEqual(w["context"], "subagent")
-
-        self.assertFalse(plan["model_tier_assignment"])
-
-    def test_scenario_07_no_subagents_parallelism_serial_fallback(self) -> None:
-        """Scenario 7: No subagents/parallelism -> serial safe fallback."""
-        host_serial = json.loads(json.dumps(self.host_case_b))
-        host_serial["capabilities"]["subagents"]["state"] = "unavailable"
-        host_serial["capabilities"]["threads"]["state"] = "unavailable"
-        host_serial["capabilities"]["parallelism"]["state"] = "unavailable"
-        host_serial["capabilities"]["concurrency"]["max_concurrency"] = 1
-
-        tickets = [{"id": "01"}, {"id": "02"}]
-        task = {"tickets": tickets}
-        plan = route_execution(self.single_profile, task, host_serial)
-
-        self.assertEqual(plan["concurrency_cap"], 1)
-        for w in plan["workers"]:
-            self.assertEqual(w["context"], "serial-main-session")
-
-    def test_scenario_08_capability_unknown_fail_closed(self) -> None:
-        """Scenario 8: Capability unknown -> no unsupported topology (fail closed)."""
-        host_unknown = json.loads(json.dumps(self.host_case_a))
-        host_unknown["capabilities"]["subagents"]["state"] = "unknown"
-        host_unknown["capabilities"]["threads"]["state"] = "unknown"
-        host_unknown["capabilities"]["parallelism"]["state"] = "unknown"
-
-        self.assertEqual(capability(host_unknown, "subagents"), "unknown")
-        self.assertEqual(capability(host_unknown, "threads"), "unknown")
-        self.assertEqual(capability(host_unknown, "parallelism"), "unknown")
-
-        # Routing does not fabricate parallel subagent execution when capability is unknown
-        tickets = [{"id": "01"}, {"id": "02"}]
-        task = {"tickets": tickets}
-        plan = route_execution(self.single_profile, task, host_unknown)
-        for w in plan["workers"]:
-            self.assertNotEqual(w["context"], "subagent")
-            self.assertEqual(w["context"], "serial-main-session")
-
-    def test_scenario_09_profile_authorizes_subset(self) -> None:
-        """Scenario 9: Profile authorizes subset -> only authorized models selectable."""
-        # Host exposes model-alpha, model-beta, model-gamma, model-delta
-        host_with_extra = json.loads(json.dumps(self.host_case_d))
-        host_with_extra["available_models"].append({
-            "id": "model-delta",
-            "state": "available",
-            "evidence": {"kind": "host-runtime", "locator": "test", "observed_at": "2026-08-24T00:00:00Z"},
-        })
-
-        # Profile only assigns alpha, beta, gamma
-        tickets = [
-            {"id": "01", "difficulty": "routine"},
-            {"id": "02", "difficulty": "moderate"},
-            {"id": "03", "difficulty": "critical"},
-        ]
-        task = {"tickets": tickets}
-        plan = route_execution(self.multi_profile, task, host_with_extra)
-
-        # Ensure model-delta is never assigned
-        assigned_models = {w["model"] for w in plan["workers"]}
-        assigned_models.add(plan["controller"]["model"])
-        self.assertNotIn("model-delta", assigned_models)
-        self.assertTrue(assigned_models.issubset({"model-alpha", "model-beta", "model-gamma"}))
-
-    def test_scenario_10_companion_absent(self) -> None:
-        """Scenario 10: Companion absent -> setup offer or session-local/plan-only."""
-        # Unprofiled session
-        gate_unprofiled = evaluate_setup_gate("normal", None, None)
-        self.assertEqual(gate_unprofiled["action"], "plan-only-fallback")
-        self.assertEqual(gate_unprofiled["companion"], "absent")
-
-        # Session-local confirmed profile available
-        gate_session_local = evaluate_setup_gate("normal", None, self.single_profile)
-        self.assertEqual(gate_session_local["action"], "proceed-to-assessment")
-        self.assertEqual(gate_session_local["apply_mode"], "plan-only")
-        self.assertEqual(gate_session_local["companion"], "absent")
-
-    def test_scenario_11_unsupported_harness_generic_behavior(self) -> None:
-        """Scenario 11: Unsupported harness -> Generic/manual behavior in plan-only mode."""
-        # Host with generic adapter
-        host_generic = json.loads(json.dumps(self.host_case_a))
-        host_generic["adapter_id"] = "generic"
-        host_generic["capabilities"]["configuration_mutation"] = {"state": "unavailable"}
-
-        gate = evaluate_setup_gate("normal", {"configured": True, "stale": False}, self.single_profile, ["model-alpha"])
-        self.assertEqual(gate["action"], "proceed-to-assessment")
-        self.assertEqual(gate["apply_mode"], "plan-only")
-
-    def test_scenario_12_user_rejects_agent_config_in_implement(self) -> None:
-        """Scenario 12: User rejects agent-config in implement -> normal implement continues."""
-        def consume_result(agent_config_result: dict[str, Any], user_setup_response: str | None = None) -> dict[str, Any]:
-            readiness = agent_config_result.get("readiness")
-            if readiness == "READY":
-                exec_cfg = agent_config_result.get("execution_config")
-                if exec_cfg is None:
-                    return {"action": "BLOCKED", "halted": True}
-                return {"action": "execute_with_agent_config", "execution_config": exec_cfg}
-            if readiness == "NEED_INPUT":
-                if user_setup_response == "decline":
-                    return {"action": "execute_direct", "halted": False}
-                if user_setup_response == "accept":
-                    return {"action": "handoff_to_setup", "handoff": "setup"}
-                return {"action": "offer_setup", "handoff": "setup"}
-            if readiness == "NEED_PROJECT_TICKETS":
-                return {"action": "handoff_to_project_tickets", "halted": True}
-            return {"action": "stop", "halted": True}
-
-        agent_config_res = {
-            "readiness": "NEED_INPUT",
-            "mode": "plan-only",
-            "setup_state": {"companion": "ready", "profile": "missing"},
-            "handoff": "setup",
-            "execution_config": None,
-        }
-        dispatch = consume_result(
-            agent_config_res,
-            user_setup_response="decline",
-        )
-        self.assertEqual(dispatch["action"], "execute_direct")
-        self.assertFalse(dispatch.get("halted", False))
+    def test_declined_preview_without_active_model_stops(self) -> None:
+        result = agent_config_recommend(self.tiered, {}, profile=self.multi, approval="declined", use_jev=False)
+        self.assertEqual(result.readiness, "NEED_INPUT")
+        self.assertIsNone(result.execution_config)
 
 
 if __name__ == "__main__":

@@ -65,7 +65,7 @@ def select_configuration(
     # Gate 1: Explicit setup intent
     if setup_intent:
         return AgentConfigResult(
-            readiness="READY",
+            readiness="NEED_INPUT",
             mode="plan-only",
             approval=norm_approval,
             setup_state={"companion": host.companion_status, "profile": host.profile_status},
@@ -90,6 +90,13 @@ def select_configuration(
 
     # Gate 3: Host without model selector
     if not host.has_model_selector:
+        if not host.active_model or host.active_model not in host.available_models:
+            return AgentConfigResult(
+                readiness="NEED_INPUT", mode="plan-only", approval=norm_approval,
+                setup_state={"companion": host.companion_status, "profile": host.profile_status},
+                justification="Fixed Host active model has no confirmed availability evidence.",
+                abstract_profile=profile,
+            )
         topology = "Case B" if task.shape == "decomposed" else "Case A"
         effort = resolve_reasoning_effort(host, task.reasoning_policy, profile.reasoning_need)
         return AgentConfigResult(
@@ -112,6 +119,13 @@ def select_configuration(
 
     # Gate 4: User rejected configuration preview
     if norm_approval == "declined":
+        if not host.active_model or host.active_model not in host.available_models:
+            return AgentConfigResult(
+                readiness="NEED_INPUT", mode="plan-only", approval="declined",
+                setup_state={"companion": host.companion_status, "profile": host.profile_status},
+                justification="Current active model is not evidenced; cannot fall back after preview rejection.",
+                abstract_profile=profile,
+            )
         topology = "Case B" if task.shape == "decomposed" else "Case A"
         return AgentConfigResult(
             readiness="READY",
@@ -138,23 +152,32 @@ def select_configuration(
     # Resolve target model from profile tiers
     target_model = host.profile_tiers.get(tier)
 
-    # Candidate safety invariant: selected_model must be in valid_candidates
+    # A tier is a user-confirmed capability choice, not permission to downgrade.
     if not target_model or target_model not in valid_candidates:
-        if host.active_model in valid_candidates:
-            target_model = host.active_model
-        elif valid_candidates:
-            target_model = valid_candidates[0]
-        else:
-            target_model = host.active_model
+        return AgentConfigResult(
+            readiness="NEED_INPUT",
+            mode="plan-only",
+            approval=norm_approval,
+            setup_state={"companion": host.companion_status, "profile": host.profile_status},
+            justification=f"No confirmed, available model for {tier} tier; refresh Host evidence or confirm the Profile.",
+            abstract_profile=profile,
+        )
+    if target_model != host.active_model and "current-session" not in host.selector_scopes and host.profile_mode:
+        return AgentConfigResult(
+            readiness="NEED_INPUT", mode="plan-only", approval=norm_approval,
+            setup_state={"companion": host.companion_status, "profile": host.profile_status},
+            justification="Host cannot select the target model in the current session, and the current model is unverified or different.",
+            abstract_profile=profile,
+        )
 
     # Resolve reasoning effort (explicit policy > Jev profile.reasoning_need > host bounds)
     effort = resolve_reasoning_effort(host, task.reasoning_policy, profile.reasoning_need)
 
     # Determine topology
     if task.shape == "decomposed":
-        topology = "Case D" if (host.per_agent_config and len(valid_candidates) > 1) else "Case B"
+        topology = "Case B" if host.profile_mode == "single" else ("Case D" if (host.per_agent_config and len(valid_candidates) > 1) else "Case B")
     else:
-        topology = "Case C" if (target_model != host.active_model and host.has_model_selector) else "Case A"
+        topology = "Case A" if host.profile_mode == "single" else ("Case C" if host.profile_mode == "multi" or (target_model != host.active_model and host.has_model_selector) else "Case A")
 
     cost_note = ""
     if task.cost_sensitive:

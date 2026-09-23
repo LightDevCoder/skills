@@ -6,6 +6,7 @@ import os
 import subprocess
 import tempfile
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 from pathlib import Path
 from typing import Any
@@ -179,6 +180,78 @@ def write_project_state(
             )
         else:
             write_project_review_state(root, reviewed_effort="effort", verdict=acceptance_verdict)
+
+
+class SemanticEvidenceRegressionTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory(prefix="ask-light-semantic-")
+        self.addCleanup(self.temp.cleanup)
+        self.project = Path(self.temp.name) / "project"
+        self.roots = install_host_fixture_skills(Path(self.temp.name) / "installed")
+
+    def route(self) -> dict[str, Any]:
+        return ASK_LIGHT.route(self.roots, {"projectRoot": str(self.project), "goal": "下一步做什么？", "scope": "current-workflow"}, "codex", "semantic")
+
+    def test_ambiguous_efforts_need_input(self) -> None:
+        write_project_state(self.project, initialized=True, spec=True)
+        write_effort_state(self.project, "alpha", spec_status="active")
+        write_effort_state(self.project, "beta", spec_status="active")
+        result = self.route()
+        self.assertEqual(result["status"], "NEED_INPUT")
+        self.assertTrue(result["fail_closed"])
+
+    def test_duplicate_ticket_numbers_block_all_frontiers(self) -> None:
+        write_project_state(self.project, initialized=True, spec=True)
+        issues = self.project / ".scratch/effort/issues"
+        issues.mkdir(parents=True)
+        (issues / "01-decision.md").write_text("- Status: resolved\n")
+        (issues / "01-implementation.md").write_text("- Status: open\n")
+        (issues / "02-next.md").write_text("- Status: open\n- Blocked by: 01\n")
+        evidence = ASK_LIGHT.inspect_project_evidence(self.project)
+        self.assertEqual(evidence["stage"], "tickets-unknown")
+        self.assertFalse(evidence["tickets"]["frontierReady"])
+        self.assertEqual(self.route()["status"], "BLOCKED")
+
+    def test_claimed_ticket_cannot_be_treated_as_resolved(self) -> None:
+        write_project_state(self.project, initialized=True, spec=True, ticket_status="claimed")
+        result = self.route()
+        self.assertNotEqual(result.get("primary_skill"), "project-review")
+        self.assertTrue(result["fail_closed"])
+
+    def test_independent_ready_ticket_survives_other_claim(self) -> None:
+        write_project_state(self.project, initialized=True, spec=True, ticket_statuses=["claimed", "open"])
+        result = self.route()
+        self.assertEqual(result["status"], "RECOMMEND")
+        self.assertEqual(result["primary_skill"], "implement")
+        self.assertEqual(result["validation"]["status"], "VALIDATED")
+
+    def test_clarification_signal_routes_to_spec(self) -> None:
+        write_project_state(self.project, initialized=True, spec=False)
+        (self.project / "docs/agents/clarification-handoff.md").write_text(
+            "Project clarification handoff\n- Status: ready-for-next-stage\n- Recommended next explicit invocation: project-spec\n"
+        )
+        result = self.route()
+        self.assertEqual(result["primary_skill"], "project-spec")
+        self.assertEqual(result["validation"]["status"], "VALIDATED")
+
+    def test_unknown_review_freshness_cannot_release(self) -> None:
+        write_project_state(self.project, initialized=True, spec=True, ticket_status="resolved")
+        write_project_review_state(self.project, reviewed_effort="effort", verdict="PASS", revision_identity="0123456789abcdef0123456789abcdef01234567")
+        evidence = ASK_LIGHT.inspect_project_evidence(self.project)
+        self.assertEqual(evidence["stage"], "review-freshness-unknown")
+        result = self.route()
+        self.assertNotEqual(result.get("primary_skill"), "release-workflow")
+        self.assertTrue(result["fail_closed"])
+
+    def test_semantic_choice_is_rejected_by_final_validation(self) -> None:
+        write_project_state(self.project, initialized=True, spec=True)
+        write_effort_state(self.project, "alpha", spec_status="active")
+        write_effort_state(self.project, "beta", spec_status="active")
+        unsafe = SimpleNamespace(primary_skill="implement", model_dump=lambda: {"status": "RECOMMEND", "primary_skill": "implement"})
+        with patch.object(ASK_LIGHT, "ask_light_semantic_recommend", return_value=unsafe):
+            result = self.route()
+        self.assertEqual(result["status"], "BLOCKED")
+        self.assertEqual(result["validation"]["status"], "BLOCKED")
 
 
 def write_project_review_state(

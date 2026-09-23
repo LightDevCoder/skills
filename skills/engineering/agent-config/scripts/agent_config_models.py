@@ -10,14 +10,17 @@ from typing import Any, Dict, List, Literal, Optional
 class HostCapabilities:
     """Deterministic host capability evidence."""
     harness: str = "generic"
-    has_model_selector: bool = True
+    has_model_selector: bool = False
+    selector_scopes: List[str] = field(default_factory=list)
     supported_effort: List[str] = field(default_factory=list)
+    default_effort: Optional[str] = None
     per_agent_config: bool = False
-    active_model: str = "default-model"
+    active_model: str = ""
     available_models: List[str] = field(default_factory=list)
-    companion_status: str = "ready"  # "ready", "missing", "stale"
-    profile_status: str = "persisted"  # "persisted", "session-local", "missing"
+    companion_status: str = "missing"  # "ready", "missing", "stale"
+    profile_status: str = "missing"  # "persisted", "session-local", "missing"
     profile_tiers: Dict[str, str] = field(default_factory=dict)
+    profile_mode: str = ""  # canonical Profile mode, when validated at the public entry
 
     def model_dump(self) -> Dict[str, Any]:
         return asdict(self)
@@ -118,7 +121,7 @@ class AgentConfigResult:
     mode: str = "plan-only"  # "persisted", "session-local", "plan-only"
     approval: str = "unknown"  # "unknown", "approved", "declined"
     setup_state: Dict[str, str] = field(
-        default_factory=lambda: {"companion": "ready", "profile": "persisted"}
+        default_factory=lambda: {"companion": "missing", "profile": "missing"}
     )
     handoff: Optional[str] = None
     execution_config: Optional[ExecutionConfig] = None

@@ -101,8 +101,12 @@ do not reorder or rewrite it silently before publishing.
 Publish the approved tickets in **dependency order** (blockers first) so each
 ticket's `Blocked by` references resolve to real files.
 
-- **Path**: `.scratch/<feature>/issues/<NN>-<slug>.md`, numbered from `01`,
-  zero-padded. Create `.scratch/<feature>/issues/` if needed.
+- **Path**: `.scratch/<feature>/issues/<NN>-<slug>.md`, zero-padded in the
+  effort's single number namespace. Scan every existing file in that issues
+  directory before drafting: start at one greater than the greatest existing
+  numeric prefix (or `01` only when empty). Stop and report duplicate numeric
+  prefixes for explicit migration; never overwrite or silently renumber old
+  decision-map tickets. Create the directory if needed.
 - **One ticket per file** — never a single combined tickets file.
 - **Header lines near the top**: `**Blocked by:**` and `**Status:**` per
   `TICKET-CONTRACT.md`.

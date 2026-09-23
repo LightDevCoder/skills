@@ -4,20 +4,22 @@
 them. Read `assets/dependency-contracts.json` before a Project handoff and run:
 
 ```text
-python scripts/check_dependencies.py --catalog <active-skill-catalog>
+python scripts/check_dependencies.py --catalog <thinking-catalog> --catalog <review-catalog> --catalog <engineering-catalog>
 ```
 
-For a provenance-complete check, add `--online`; `READY` is required before a
-Project handoff. If Decision-map selects an optional branch, also pass
+Runtime checks require only the current interfaces and return `READY` before a
+Project handoff. At release verification, add `--online --ref <exact-tag-or-sha>`
+to compare the installed whole packages with an immutable published ref. If
+Decision-map selects an optional branch, also pass
 `--require-optional prototype` as applicable. An unselected
 optional branch is not a missing dependency.
 
-Repository maintainers use `--online --audit-all` to audit every optional
+Repository maintainers use `--online --ref <exact-tag-or-sha> --audit-all` to audit every optional
 contract as well. Do not use `--audit-all` in an ordinary manuscript handoff;
 it changes audit scope, not the selected workflow branch.
 
 Use `--strict-agent-skills` on a client that rejects non-standard frontmatter.
-The pinned `clarify` user entry starts the underlying `socratic` capability;
+The `clarify` user entry starts the underlying `socratic` capability;
 the `clarify` and `decision-map` contracts currently use
 `disable-model-invocation`; a strict client must return `BLOCKED` unless it has
 compatible releases or an explicit host extension.
@@ -68,22 +70,23 @@ user to repeat a same-session request that already satisfies that contract.
 
 ## Project initialization recommendation
 
-After Brief approval, check the exact target root for the project-initialization
-outcome required by this Skill: applicable project rules, a mapped Project
-Profile, a `.manuscript-ops/` state directory, and a resumable baseline path.
-If that outcome is missing, recommend the user activate `project-init` with the
-exact root. In Codex:
+After Brief approval, check the exact target root for generic `project-init`
+outputs: `docs/agents/light-project.md`, issue tracker, and applicable
+instruction pointer. If that generic bootstrap is missing, recommend the user
+activate `project-init` with the exact root. In Codex:
 
 ```text
 $project-init init in <exact-project-root>
 ```
 
-`manuscript-ops` must stop after stating the missing outcome and the expected
-validation evidence. It must not automatically invoke the user-invoked
-initializer. The user resumes with:
+`manuscript-ops` must stop after stating the missing generic outcome and its
+evidence. It must not automatically invoke the user-invoked initializer. On
+resume, it checks the generic outputs and then owns Project Profile,
+`.manuscript-ops/` state, and baseline creation under the approved Brief and
+fixed initialization gate. The user resumes with:
 
 ```text
-$manuscript-ops resume from <exact-project-root>/.manuscript-ops/state.json
+$manuscript-ops resume for <exact-project-root> using <approved-brief-path>
 ```
 
 ## Independent acceptance
@@ -140,10 +143,10 @@ Select the exact closure above. Use the installer's global flag only when the
 user intentionally wants a global catalog; otherwise keep project scope.
 These generic commands follow the repository's current default branch; they do
 not by themselves prove the reviewed commit. Refresh the host's Skill catalog
-and rerun `check_dependencies.py --catalog <catalog> --online`. Online checking
-compares the complete pinned directory tree, every installed package file byte,
-and whole-package default-branch drift; unregistered extra files block. Use the
-Codex or manual method below when the installer cannot select an exact commit.
+and rerun `check_dependencies.py` with the relevant catalogs. For release
+verification, add `--online --ref <published-tag>`; this compares whole-package
+bytes to that exact tag and blocks any missing or extra files. Use the Codex
+or manual method below when the installer cannot select an exact commit.
 
 ### Codex installer
 
@@ -154,8 +157,8 @@ $codexHome = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $HOME '.c
 $installer = Join-Path $codexHome 'skills\.system\skill-installer\scripts\install-skill-from-github.py'
 python $installer `
   --repo LightDevCoder/skills `
-  --ref b671a90ac10b5777a50ca897a03242cc51949478 `
-  --path skills/clarify skills/socratic skills/decision-map skills/project-review
+  --ref <published-tag-or-commit> `
+  --path skills/thinking/clarify skills/thinking/socratic skills/thinking/decision-map skills/review/project-review
 ```
 
 Install `skills/prototype` only if the chosen Decision-map branch
@@ -163,9 +166,9 @@ requires it. Start a fresh Codex session after installation.
 
 ### Manual portable installation
 
-Clone `LightDevCoder/skills` at
-`b671a90ac10b5777a50ca897a03242cc51949478`. Copy every selected
-`skills/<name>` folder so it ends at `.agents/skills/<name>/SKILL.md`. For
+Clone `LightDevCoder/skills` at the selected published tag or commit. Copy every
+selected `skills/<category>/<name>` folder so it ends at
+`.agents/skills/<name>/SKILL.md`. For
 example:
 
 ```text

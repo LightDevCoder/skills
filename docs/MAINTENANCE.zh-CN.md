@@ -10,7 +10,7 @@
 
 ## 当前同步基线
 
-准入集合包含 `skills/` 下 **36 个第一方 Skill**（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)）。当前稳定版本为 `v0.2.3`（36 个包；上一稳定版为 `v0.2.2`）。
+准入集合包含 `skills/` 下 **36 个第一方 Skill**（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)）。当前稳定版本为 `v0.2.4`（36 个包；上一稳定版为 `v0.2.3`）；`v0.2.5` 在正式发布前仍为候选版。
 
 历史：`v0.1.1` 五个、`v0.1.2` 七个、`v0.1.3` 工具链迁移、`v0.1.4`（`light-kanban-worker`）、`v0.1.5` 调度与身份加固、`v0.1.6`（`kb-init`）。结构发现检查在 [tests/test_collection_discovery.py](../tests/test_collection_discovery.py) 与 [tests/test_composition.py](../tests/test_composition.py)，仅为结构证据，不是 fresh-install 证明。
 

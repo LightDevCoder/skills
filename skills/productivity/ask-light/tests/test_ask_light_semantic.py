@@ -114,6 +114,19 @@ class AskLightSemanticTest(unittest.TestCase):
         self.assertEqual(res.status, "BLOCKED")
         self.assertTrue(res.fail_closed)
 
+        state = CompactProjectState(
+            initialized=True, spec_exists=True, spec_active=True, tickets_exist=True,
+            ready_tickets=["issue-01.md", "issue-02.md"], claimed_tickets=["issue-03.md"],
+        )
+        unknown = compute_legal_actions(state, "开始执行", explicit_target="42")
+        self.assertEqual(unknown.status, "BLOCKED")
+        self.assertTrue(unknown.fail_closed)
+        claimed = compute_legal_actions(state, "开始执行", explicit_target="03")
+        self.assertEqual(claimed.status, "BLOCKED")
+        selected = compute_legal_actions(state, "开始执行", explicit_target="02")
+        self.assertEqual(selected.status, "TRANSITION")
+        self.assertEqual(selected.target_item, "issue-02.md")
+
         # Multiple active efforts
         res = compute_legal_actions(
             CompactProjectState(initialized=True, active_efforts=["feat-a", "feat-b"], current_effort=None)

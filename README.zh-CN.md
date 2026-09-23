@@ -8,6 +8,8 @@
 
 > **发布版本：** [v0.2.4](https://github.com/LightDevCoder/skills/releases/tag/v0.2.4) 发布自 `v0.2.4` tag——发布线承载全部 36 个第一方 Skill，为当前最新稳定版本。发布前规格见[发布清单](docs/evidence/releases/v0.2.4/RELEASE_MANIFEST.zh-CN.md)，发布后验证事实见[发布收据](docs/evidence/releases/v0.2.4/RELEASE_RECEIPT.zh-CN.md)。
 
+`v0.2.5` 在候选提交通过对应远端 CI、标签和全新安装完成验证，并发布 GitHub Release 前仍是候选版。
+
 ## 按分类浏览
 
 [全部分类与集合说明](skills/README.zh-CN.md)。36 个技能的源文件已按用途分类，名称和调用方式不变。

@@ -4,7 +4,17 @@
 
 所有变更都必须记录在实际版本/tag 对应的条目中，不能因为文档已起草就提前宣称 release。
 
-## Unreleased — target v0.2.4
+## Unreleased — target v0.2.5
+
+### 变更 — 路由可靠性与发布验证
+
+- `agent-config` Python 路由要求规范、未过期的 Host 证据和匹配的用户确认 Profile；目标档位不可用时停止，`highest-supported` 遵循 Host 已证实的推理强度顺序。
+- `ask-light --mode semantic` 与主路由共用证据约束和最终校验；重复工单编号、已领取工作、项目歧义和未知审阅新鲜度均失败关闭。
+- 工单生产者共用编号空间。`manuscript-ops` 在通用 `project-init` 初始化后负责自己的 Profile/状态，运行时只检查依赖接口。
+- `code-review` 输出双轴规范 Findings；旅行页生成校验与首次同步共用待办契约。
+- 远端标签或 Release 查询失败阻断事实证明。CI 发现完整 Python 测试，运行 Node 测试和生成旅程构建；同步中英文集合文档。
+
+## 0.2.4 — 2026-09-21
 
 ### 变更 — 发布完整性加固与 Git 对象严格绑定
 

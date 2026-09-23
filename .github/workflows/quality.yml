@@ -20,36 +20,30 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Run collection and package checks (cross-platform python)
+      - name: Run all collection and package tests
         shell: bash
         run: |
           set -euo pipefail
-          python -m unittest discover -s tests -p "test_*.py"
-          python -m compileall -q skills tests
-          for f in \
-            skills/productivity/ask-light/tests/test_ask_light_contract.py \
-            skills/knowledge/kb-init/tests/test_kb_init_contract.py \
-            skills/project/project-init/tests/test_project_init_contract.py \
-            skills/project/project-init/tests/test_project_init_behavior.py \
-            skills/knowledge/language-learning/tests/test_language_learning_contract.py \
-            skills/project/kanban-worker/tests/test_kanban_worker_contract.py \
-            skills/project/kanban-worker/tests/test_kanban_worker_behavior.py \
-            skills/review/review-loop/tests/test_review_loop_contract.py \
-            skills/review/review-loop/tests/test_review_loop_behavior.py \
-            skills/engineering/agent-config/tests/test_agent_config_contract.py \
-            skills/engineering/agent-config/tests/test_agent_config_behavior.py \
-          ; do
-            python "$f"
-          done
-      - name: Run ask-light router behavior
-        shell: bash
-        run: |
-          set -euo pipefail
-          python skills/productivity/ask-light/tests/test_ask_light_behavior.py
+          python -m pip install 'pytest==8.4.2'
+          python -m pytest -q
+          python -m compileall -q skills tests scripts
+          python scripts/check_public_docs.py
       - name: Set up Node.js for companion checks
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
+      - name: Run travel page runtime tests and build
+        shell: bash
+        run: |
+          set -euo pipefail
+          site=$(mktemp -d)
+          node skills/productivity/light-travelpage/scripts/create.mjs "$site/site"
+          cd "$site/site"
+          npm ci
+          npm test
+          node tests/prepare-build-fixture.mjs
+          npm run validate
+          npm run build
       - name: Cross-repo Agent Config compatibility check
         shell: bash
         run: |

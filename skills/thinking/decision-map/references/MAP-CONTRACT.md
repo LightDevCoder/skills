@@ -43,7 +43,10 @@ Open tickets are **not** listed here; they are the open child files under
 
 ## Child ticket file
 
-Path: `.scratch/<effort>/issues/NN-<slug>.md` (NN from `01`, zero-padded)
+Path: `.scratch/<effort>/issues/NN-<slug>.md` (one shared, zero-padded sequence
+for this effort; start after the highest existing numeric prefix, or `01` when
+empty). Duplicate prefixes block routing until explicitly migrated. Never
+overwrite or silently renumber a sibling ticket.
 
 Header lines near the top:
 

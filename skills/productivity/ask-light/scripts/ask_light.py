@@ -1626,6 +1626,23 @@ def _classify_ticket_frontier(ticket_paths: list[Path], root: Path) -> dict[str,
             "blockedByParseOk": parse_ok,
             "number": str(int(stem_match.group(1))) if stem_match else "",
         })
+    number_paths: dict[str, list[str]] = {}
+    for entry in entries:
+        if entry["number"]:
+            number_paths.setdefault(entry["number"], []).append(str(entry["path"].relative_to(root)))
+    duplicate_numbers = {number: paths for number, paths in number_paths.items() if len(paths) > 1}
+    if duplicate_numbers:
+        unknown = [
+            {"path": path, "status": "", "blockedBy": [],
+             "detail": f"duplicate ticket number {number}; assign unique numbers before routing: {', '.join(paths)}"}
+            for number, paths in sorted(duplicate_numbers.items()) for path in paths
+        ]
+        return {
+            "exists": True, "ready": [], "blocked": [], "claimed": [], "resolved": [], "unknown": unknown,
+            "readyTicketPaths": [], "blockedTicketPaths": [], "claimedTicketPaths": [],
+            "resolvedTicketPaths": [], "unknownTicketPaths": [item["path"] for item in unknown],
+            "frontierReady": False, "allResolved": False,
+        }
     resolved_numbers = {
         entry["number"]
         for entry in entries
@@ -2896,7 +2913,18 @@ def route(roots: list[dict[str, Any]] | None, context: dict[str, Any], host: str
             scope=str(context.get("scope", "current-workflow")),
             explicit_target=context.get("target"),
         )
-        return rec.model_dump()
+        result = rec.model_dump()
+        if rec.primary_skill:
+            validation = validate_recommendation(
+                rec.primary_skill, evidence=evidence, roots=roots, host=host,
+                skill_map=skill_map, scope=str(context.get("scope", "current-workflow")),
+                context=context,
+            )
+            result["validation"] = validation
+            if validation["status"] != "VALIDATED":
+                result.update(status="BLOCKED", fail_closed=True,
+                              justification=validation["reason"])
+        return result
     return next_evidence(roots, context, host, skill_map)
 
 

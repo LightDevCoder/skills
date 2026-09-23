@@ -37,61 +37,57 @@ def resolve_reasoning_effort(
         return None
 
     efforts = [e.lower() for e in host.supported_effort]
+    def exact_host_value(value: str) -> str:
+        return host.supported_effort[efforts.index(value)]
 
     # Precedence 1: Explicit user reasoning policy
     if policy:
         if policy == "highest-supported":
-            for preferred in ["high", "medium", "low"]:
-                if preferred in efforts:
-                    return preferred
+            # The host's ordered inventory is authoritative, including xhigh/max.
             return host.supported_effort[-1]
 
-        if policy == "minimal":
-            for preferred in ["low", "minimal", "medium"]:
-                if preferred in efforts:
-                    return preferred
+        if policy in ("lowest-supported", "minimal"):
             return host.supported_effort[0]
+
+        if policy == "default":
+            return host.default_effort if host.default_effort in host.supported_effort else None
 
         if policy == "standard":
             if "medium" in efforts:
-                return "medium"
+                return exact_host_value("medium")
             if "standard" in efforts:
-                return "standard"
+                return exact_host_value("standard")
             return host.supported_effort[0]
 
         # If policy matches an exact host effort string
         if policy.lower() in efforts:
-            return policy.lower()
+            return exact_host_value(policy.lower())
 
-        # If policy requested 'max' or unsupported literal, never emit unverified literal 'max';
-        # fall back safely to highest verified level.
-        for preferred in ["high", "medium", "low"]:
-            if preferred in efforts:
-                return preferred
-        return host.supported_effort[-1]
+        # Unknown explicit values require confirmation at the public entry point.
+        return None
 
     # Precedence 2: Jev semantic reasoning judgment
     if profile_reasoning_need:
         need = profile_reasoning_need.lower()
         if need == "high":
             if "high" in efforts:
-                return "high"
+                return exact_host_value("high")
             if "medium" in efforts:
-                return "medium"
+                return exact_host_value("medium")
             return host.supported_effort[-1]
         elif need == "medium":
             if "medium" in efforts:
-                return "medium"
+                return exact_host_value("medium")
             if "standard" in efforts:
-                return "standard"
+                return exact_host_value("standard")
             if "low" in efforts:
-                return "low"
+                return exact_host_value("low")
             return host.supported_effort[0]
         elif need == "low":
             if "low" in efforts:
-                return "low"
+                return exact_host_value("low")
             if "minimal" in efforts:
-                return "minimal"
+                return exact_host_value("minimal")
             return host.supported_effort[0]
 
     return None
@@ -100,7 +96,7 @@ def resolve_reasoning_effort(
 def discover_valid_candidates(host: HostCapabilities) -> List[str]:
     """Return strictly legal candidate models supported by this harness and confirmed in profile."""
     if not host.has_model_selector:
-        return [host.active_model]
+        return [host.active_model] if host.active_model in host.available_models else []
 
     valid: List[str] = []
     # Intersect available models with confirmed profile tiers
@@ -108,7 +104,7 @@ def discover_valid_candidates(host: HostCapabilities) -> List[str]:
         if model in host.available_models and model not in valid:
             valid.append(model)
 
-    if not valid and host.active_model:
+    if not valid and host.active_model in host.available_models:
         valid.append(host.active_model)
 
     return valid

@@ -1,5 +1,6 @@
 import {CURRENCY_CODES} from "../currencies.js";
 import { digest, sessionValid, sameOrigin } from "./auth.js";
+import { validTodoRecord, validTodoRecords } from "../todo-contract.js";
 const collections = new Set([
   "todos",
   "tickets",
@@ -24,13 +25,7 @@ export function validateRecord(collection, value) {
   if (collection !== "settings" && !idPattern.test(value.id || ""))
     throw new Error("记录 ID 无效");
   if (JSON.stringify(value).length > 20000) throw new Error("单条记录过大");
-  if (
-    collection === "todos" &&
-    (typeof value.text !== "string" ||
-      !value.text.trim() ||
-      value.text.length > 1000 ||
-      typeof value.completed !== "boolean")
-  )
+  if (collection === "todos" && !validTodoRecord(value))
     throw new Error("待办内容无效");
   if (collection === "tickets" && typeof value.completed !== "boolean")
     throw new Error("门票状态无效");
@@ -150,10 +145,12 @@ export async function handleTrip(context) {
       const data = await dataResponse.json();
       if (data.metadata?.tripId !== tripId)
         throw new Error("Trip identity mismatch");
-      seed.todos = (data.preTrip?.packingItems || []).map((x) => ({
+      if (!validTodoRecords(data.preTrip?.packingItems))
+        throw new Error("Invalid todo seed");
+      seed.todos = data.preTrip.packingItems.map((x) => ({
         id: x.id,
         text: x.text,
-        completed: Boolean(x.completed),
+        completed: x.completed,
       }));
       seed.tickets = (data.ticketPlanning?.items || [])
         .filter((x) => x.purchaseStatus === "purchased")

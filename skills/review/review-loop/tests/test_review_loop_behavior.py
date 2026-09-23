@@ -21,11 +21,8 @@ def parse_report(text: str) -> tuple[bool, list[str]]:
         if not re.search(r"Findings:", text):
             errors.append("missing Findings marker")
             return False, errors
-    if re.search(r"(?im)\b(PASS|FAIL|BLOCKED)\b", text):
-        # Engine must not see final verdict in reviewer output
-        # But reviewer report itself must not contain verdict; check
-        if "Result:" not in text and re.search(r"(?im)\bPASS\b", text):
-            errors.append("report contains forbidden final verdict")
+    if re.search(r"(?im)^\s*(?:Verdict:\s*)?(?:PASS|FAIL|BLOCKED)\s*$", text):
+        errors.append("report contains forbidden final verdict")
     if "Findings: []" in text:
         if "REVIEW-ERROR" in text:
             errors.append("findings and review-error both present")
@@ -142,11 +139,8 @@ class ReviewLoopBehaviorTest(unittest.TestCase):
         # Engine should treat containing PASS outside Result as error (reviewer must not send verdict)
         self.assertRegex(malicious, r"(?im)\bPASS\b")
         valid, errors = parse_report(malicious)
-        # Our simple parser rejects reports containing forbidden verdict when not in expected Result field
-        # For this fixture, we assert that a reviewer attempting to send PASS would be caught by engine boundary
-        self.assertTrue("PASS" in malicious)
-        # The engine boundary says reviewer never writes PASS/FAIL/BLOCKED; so engine would reject
-        self.assertTrue(valid or not valid)  # placeholder: engine would not accept verdict
+        self.assertFalse(valid)
+        self.assertIn("report contains forbidden final verdict", errors)
 
     def test_clean_installed_copy_is_self_contained(self) -> None:
         with tempfile.TemporaryDirectory(prefix="review-loop-install-") as tmp:
