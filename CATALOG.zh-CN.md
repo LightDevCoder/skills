@@ -12,13 +12,13 @@
 | --- | --- |
 | 集合 | Light Skills — Composable Agent Workflows |
 | 包数量 | 36 个已准入第一方 Skill |
-| 当前状态 | main 包含 36 个包；v0.2.4 为当前最新稳定版本 |
-| 稳定版本 | [v0.2.4](https://github.com/LightDevCoder/skills/releases/tag/v0.2.4)（36 个包；上一稳定版为 v0.2.3） |
+| 当前状态 | main 包含 36 个包；v0.2.5 为当前最新稳定版本 |
+| 稳定版本 | [v0.2.5](https://github.com/LightDevCoder/skills/releases/tag/v0.2.5)（36 个包；上一稳定版为 v0.2.4） |
 | 安装权威 | [docs/INSTALLATION.zh-CN.md](docs/INSTALLATION.zh-CN.md) |
 | 发现检查 | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
-| 证据 | [v0.2.4 发布清单](docs/evidence/releases/v0.2.4/RELEASE_MANIFEST.zh-CN.md) · [v0.2.4 发布收据](docs/evidence/releases/v0.2.4/RELEASE_RECEIPT.zh-CN.md) |
+| 证据 | [v0.2.5 发布清单](docs/evidence/releases/v0.2.5/RELEASE_MANIFEST.zh-CN.md) · [v0.2.5 发布收据](docs/evidence/releases/v0.2.5/RELEASE_RECEIPT.zh-CN.md) |
 
-`v0.2.5` 是当前候选版本；完成发布验证前，稳定版本仍为 v0.2.4，包数量仍为 36。
+`v0.2.5` 的公开发布与全新安装已验证；包数量仍为 36。
 
 `v0.1.1` 发布五个包；`v0.1.2` 增加 `recap` 与 `language-learning`（七个）；`v0.1.3` 迁移测试工具链；`v0.1.4` 增加 `kanban-worker`；`v0.1.5` 收紧看板调度与身份；`v0.1.6` 增加 `kb-init`（九个）。`v0.2.0` 正式发布涵盖项目工作流、澄清、执行、审阅与专项工具的完整 33 包架构，随后 v0.2.0 发布线扩展了 `humanizer` 准入（34 个包；见 [CHANGELOG.zh-CN.md](CHANGELOG.zh-CN.md)）。`v0.2.1` 增加 `light-travelpage` 与 `project-retro`（36 个包）。`v0.2.2` 最终收敛 TypeSafe Jev 语义加速、分类目录架构与不可变发布完整性。`v0.2.3` 拆分发布前不可变清单与发布后验证收据，追加 v0.2.2 历史事实证明，完成 project-retro 正向状态驱动重构，并形式化六阶段发布生命周期。
 

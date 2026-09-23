@@ -4,7 +4,7 @@
 
 All notable changes are recorded here. A release entry must be tied to an actual version or tag and must not be created merely because a document was drafted.
 
-## Unreleased — target v0.2.5
+## 0.2.5 — 2026-09-24
 
 ### Changed — Reliable Routing and Release Verification
 
