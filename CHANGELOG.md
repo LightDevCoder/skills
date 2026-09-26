@@ -4,6 +4,10 @@
 
 All notable changes are recorded here. A release entry must be tied to an actual version or tag and must not be created merely because a document was drafted.
 
+## Unreleased
+
+- `light-travelpage`: Build authenticated first-page PNG previews for PDF tickets and display them with zoom and an original-PDF link in the shared dialog. Google and Apple navigation now prefer readable local names and addresses over coordinate-only searches. Add mobile interaction, map fallback, and PDF build fixture coverage.
+
 ## 0.2.5 — 2026-09-24
 
 ### Changed — Reliable Routing and Release Verification

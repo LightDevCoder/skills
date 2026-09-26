@@ -43,7 +43,9 @@ jobs:
           npm test
           node tests/prepare-build-fixture.mjs
           npm run validate
+          if ! command -v pdftoppm >/dev/null; then sudo apt-get update && sudo apt-get install -y poppler-utils; fi
           npm run build
+          test -s dist/assets/tickets/fixture.png
       - name: Cross-repo Agent Config compatibility check
         shell: bash
         run: |

@@ -28,3 +28,26 @@ test('map URLs encode labels, respect coordinate systems, and reject unsafe dest
  assert.equal(maps.safeUrl('https://www.google.com/maps/search/?api=1&query=museum&code=secret','google').includes('secret'),false);
  maps.choose('KR','apple'); assert.equal(new URL(maps.resolve({countryCode:'KR',name:'Kakao',geo}).url).searchParams.get('ll'),'37.3952969470752,127.110449292622');
 });
+test('Google and Apple search by readable place and address while Apple retains WGS84 ll',t=>{
+ const maps=setup(t);
+ const place={countryCode:'JP',localName:'大通公園',name:'Odori Park',address:'北海道札幌市中央区大通西1-12丁目',cityOrArea:'札幌',geo:{lat:43.0599,lng:141.3475,coordinateSystem:'WGS84',source:'Verified map'},navigation:{services:{google:{url:'https://www.google.com/maps/search/?api=1&query=43.0599%2C141.3475'}}}};
+ const google=maps.resolve(place);
+ assert.equal(google.kind,'search');
+ assert.equal(new URL(google.url).searchParams.get('query'),'大通公園, 北海道札幌市中央区大通西1-12丁目, 札幌');
+ maps.choose('JP','apple');
+ const apple=new URL(maps.resolve(place).url);
+ assert.equal(apple.searchParams.get('q'),'大通公園, 北海道札幌市中央区大通西1-12丁目');
+ assert.equal(apple.searchParams.get('ll'),'43.0599,141.3475');
+});
+test('coordinates are a search fallback when no readable name or address exists',t=>{
+ const maps=setup(t);
+ const place={countryCode:'JP',geo:{lat:43.0599,lng:141.3475,coordinateSystem:'WGS84',source:'Verified map'}};
+ assert.equal(new URL(maps.resolve(place).url).searchParams.get('query'),'43.0599,141.3475');
+ maps.choose('JP','apple');
+ const apple=new URL(maps.resolve(place).url);
+ assert.equal(apple.searchParams.get('q'),'43.0599,141.3475');
+ assert.equal(apple.searchParams.get('ll'),'43.0599,141.3475');
+ assert.equal(new URL(maps.resolve({...place,cityOrArea:'Sapporo'}).url).searchParams.get('q'),'Sapporo');
+ maps.choose('JP','google');
+ assert.equal(new URL(maps.resolve({...place,cityOrArea:'Sapporo'}).url).searchParams.get('query'),'43.0599,141.3475');
+});

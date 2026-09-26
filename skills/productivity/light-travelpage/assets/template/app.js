@@ -875,11 +875,14 @@ function openTicketDialog(ticketId, opener) {
   let preview = "";
   if (localDocument && ["png", "jpg", "jpeg", "webp", "gif", "svg"].includes(extension)) {
     preview = `<img class="ticket-dialog__preview" src="${escapeHtml(localDocument)}" alt="${escapeHtml(ticketTitle(ticket))}">`;
+  } else if (localDocument && extension === "pdf") {
+    const image = localDocument.replace(/\.pdf$/i, ".png");
+    preview = `<button type="button" class="ticket-dialog__zoom" data-ticket-zoom aria-pressed="false">放大票据</button><img class="ticket-dialog__preview" src="${escapeHtml(image)}" alt="${escapeHtml(ticketTitle(ticket))}票面预览">`;
   } else if (localDocument) {
     preview = `<iframe class="ticket-dialog__preview" src="${escapeHtml(localDocument)}" title="${escapeHtml(ticketTitle(ticket))}" sandbox="allow-same-origin" referrerpolicy="no-referrer"></iframe>`;
   }
   const links = [
-    localDocument ? `<a href="${escapeHtml(localDocument)}" target="_blank" rel="noopener noreferrer">在新窗口打开票据 ↗</a>` : "",
+    localDocument ? `<a href="${escapeHtml(localDocument)}" target="_blank" rel="noopener noreferrer">${extension === "pdf" ? "在新窗口打开 PDF 原件 ↗" : "在新窗口打开票据 ↗"}</a>` : "",
     externalDocument ? `<a href="${escapeHtml(externalDocument)}" target="_blank" rel="noopener noreferrer">${escapeHtml(document?.label || "查看票据")} ↗</a>` : "",
     officialUrl ? `<a href="${escapeHtml(officialUrl)}" target="_blank" rel="noopener noreferrer">打开官方页面 ↗</a>` : ""
   ].filter(Boolean).join("");
@@ -895,6 +898,14 @@ function openTicketDialog(ticketId, opener) {
 
 function setupTicketDialog() {
   document.addEventListener("click", event => {
+    const zoom = event.target.closest("[data-ticket-zoom]");
+    if (zoom) {
+      const image = $("#ticket-dialog img.ticket-dialog__preview");
+      const enlarged = image.classList.toggle("is-zoomed");
+      zoom.setAttribute("aria-pressed", String(enlarged));
+      zoom.textContent = enlarged ? "缩小票据" : "放大票据";
+      return;
+    }
     const button = event.target.closest("[data-ticket-open]");
     if (button) openTicketDialog(button.dataset.ticketOpen, button);
   });
@@ -907,8 +918,7 @@ function setupTicketDialog() {
   $("#ticket-dialog-close").onclick = close;
   dialog.addEventListener("click", (event) => { if (event.target === dialog) close(); });
   dialog.addEventListener("close", () => {
-    const body = $("#ticket-dialog-body");
-    if (!body.querySelector(".ticket-dialog__preview--pdf")) body.replaceChildren();
+    $("#ticket-dialog-body").replaceChildren();
     ticketDialogOpener?.focus({ preventScroll: true });
     ticketDialogOpener = null;
   });

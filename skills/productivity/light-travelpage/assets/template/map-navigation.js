@@ -29,10 +29,14 @@
     if(!provider) return {provider:null,kind:'unavailable',url:''};
     const source=place.navigation?.services?.[provider] || {};
     const legacy=provider==='google' ? place.googleMapsUrl || place.navigation?.url : '';
-    const direct=safeUrl(source.url || legacy,provider);
-    if(direct) return {provider,kind:/search|[?&](q|query|text|keyword)=/.test(direct)?'search':'place',url:direct};
     const label=place.localName || place.name || place.nameZh || '';
     const query=[label,place.address,place.cityOrArea].filter(Boolean).join(', ');
+    const readable=Boolean(label || place.address);
+    const direct=safeUrl(source.url || legacy,provider);
+    const directQuery=direct && provider==='google' ? new URL(direct).searchParams : null;
+    const searchTerm=directQuery?.get('query') || directQuery?.get('q') || '';
+    const coordinateOnly=/^\s*[+-]?(?:\d+(?:\.\d*)?|\.\d+)\s*,\s*[+-]?(?:\d+(?:\.\d*)?|\.\d+)\s*$/.test(searchTerm);
+    if(direct && !(provider==='google' && readable && coordinateOnly)) return {provider,kind:/search|[?&](q|query|text|keyword)=/.test(direct)?'search':'place',url:direct};
     const geo=place.geo;
     const coordinate=geo && geo.source && Number.isFinite(geo.lat)&&Math.abs(geo.lat)<=90&&Number.isFinite(geo.lng)&&Math.abs(geo.lng)<=180 && geo.coordinateSystem===(provider==='amap'?'GCJ02':'WGS84');
     const id=typeof source.placeId==='string' && /^[\w-]+$/.test(source.placeId) ? source.placeId : '';
@@ -47,11 +51,11 @@
       const target=id || (coordinate?`${geo.lat},${geo.lng}`:encodeURIComponent(query));
       return {provider,kind:id?'place':kind,url:query||coordinate||id?`https://map.kakao.com/link/${id||coordinate?'map':'search'}/${target}`:''};
     } else if(provider==='google') {
-      base='https://www.google.com/maps/search/';params.set('api','1');params.set('query',coordinate?`${geo.lat},${geo.lng}`:query);
+      base='https://www.google.com/maps/search/';params.set('api','1');params.set('query',readable?query:(coordinate?`${geo.lat},${geo.lng}`:query));kind=id?'place':'search';
       if(id){params.set('query_place_id',id);kind='place';}
     } else if(provider==='apple') {
-      base='https://maps.apple.com/';params.set('q',label||query);
-      if(coordinate)params.set('ll',`${geo.lat},${geo.lng}`);else params.set('q',query);
+      base='https://maps.apple.com/';params.set('q',[label,place.address].filter(Boolean).join(', ')||query||(coordinate?`${geo.lat},${geo.lng}`:''));
+      if(coordinate)params.set('ll',`${geo.lat},${geo.lng}`);
     } else {
       base='https://yandex.com/maps/';
       if(id){params.set('oid',id);kind='place';}

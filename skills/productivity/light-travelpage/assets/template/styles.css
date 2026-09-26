@@ -328,8 +328,9 @@ main { overflow: hidden; }
 .ticket-dialog__body { min-height: 0; padding: 18px; overflow: auto; flex: 1 1 auto; }
 .ticket-dialog__status { margin: 0; color: var(--terracotta); font-size: 11px; font-weight: 400; }
 .ticket-dialog__guidance { margin: 8px 0 16px; color: #47575b; font-size: 13px; line-height: 1.65; }
-.ticket-dialog__preview { width: 100%; min-height: min(58dvh,520px); max-height: 62dvh; border: 1px solid var(--line); border-radius: 12px; background: white; object-fit: contain; }
-.ticket-dialog__preview--pdf { display: block; height: min(68dvh,680px); max-height: none; object-fit: initial; }
+.ticket-dialog__zoom { display: block; margin: 12px 0 8px auto; padding: 7px 12px; border: 1px solid #c8dadc; border-radius: 999px; color: var(--lake); background: #edf6f5; cursor: pointer; }
+.ticket-dialog__preview { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 12px; background: white; }
+.ticket-dialog__preview.is-zoomed { width: max(100%, 620px); max-width: none; }
 .ticket-dialog__empty { margin: 18px 0; padding: 24px 16px; border: 1px dashed var(--line); border-radius: 12px; color: var(--muted); text-align: center; font-size: 12px; line-height: 1.6; }
 .ticket-dialog__links { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
 .ticket-dialog__links a { min-height: 42px; padding: 0 13px; display: inline-flex; align-items: center; border: 1px solid #c8dadc; border-radius: 999px; color: #205e6b; background: #edf6f5; text-decoration: none; font-size: 12px; font-weight: 400; }

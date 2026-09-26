@@ -31,7 +31,6 @@ const files = [
   "overview-map.js",
   "route-ui.js",
   "site-navigation.js",
-  "ticket-pdf-preview.js",
   "ledger.js",
   "currencies.js",
   "runtime-storage.js",
@@ -56,6 +55,19 @@ for (const relative of assets) {
     dest = path.join(stage, relative);
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   fs.copyFileSync(src, dest);
+}
+for (const url of new Set((trip.ticketPlanning.items || [])
+  .map((ticket) => ticket.document?.url)
+  .filter((url) => typeof url === "string" && /\.pdf$/i.test(url)))) {
+  const pdf = assetPath(root, url);
+  const preview = path.join(stage, url.replace(/\.pdf$/i, ".png"));
+  fs.mkdirSync(path.dirname(preview), { recursive: true });
+  const rendered = spawnSync("pdftoppm", ["-f", "1", "-singlefile", "-r", "220", "-png", pdf, preview.slice(0, -4)], {
+    cwd: root,
+    stdio: "inherit",
+  });
+  if (rendered.error || rendered.status !== 0)
+    throw new Error(`Could not render ticket preview for ${url}; pdftoppm is required`);
 }
 fs.writeFileSync(
   path.join(stage, "_routes.json"),
