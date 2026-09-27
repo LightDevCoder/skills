@@ -9,6 +9,8 @@ Frozen test file.
 
 import subprocess
 import sys
+import re
+import shlex
 from pathlib import Path
 import pytest
 
@@ -22,17 +24,56 @@ collect_ignore = [
 ]
 
 
+def _is_external_argv(words):
+    if not words:
+        return False
+    executable = Path(words[0]).name.lower()
+    if executable in {"npx", "npm", "curl", "wget"}:
+        return True
+    if re.fullmatch(r"pip(?:\d+(?:\.\d+)?)?", executable):
+        return len(words) > 1 and words[1] == "install"
+    if re.fullmatch(r"python(?:\d+(?:\.\d+)?)?", executable):
+        return words[1:4] == ["-m", "pip", "install"]
+    if executable in {"env", "sudo"}:
+        rest = words[1:]
+        while rest and (rest[0].startswith("-") or (executable == "env" and "=" in rest[0])):
+            rest = rest[1:]
+        return _is_external_argv(rest)
+    if executable in {"bash", "sh", "zsh"} and "-c" in words[1:]:
+        index = words.index("-c")
+        return index + 1 < len(words) and is_external_command(words[index + 1])
+    return False
+
+
+def is_external_command(cmd):
+    """Identify installer/network executables without scanning path arguments."""
+    if isinstance(cmd, (list, tuple)):
+        return _is_external_argv([str(part) for part in cmd])
+    try:
+        lexer = shlex.shlex(str(cmd), posix=True, punctuation_chars=";&|")
+        lexer.whitespace_split = True
+        tokens = list(lexer)
+    except ValueError:
+        return True
+    segment = []
+    for token in [*tokens, ";"]:
+        if token and all(char in ";&|" for char in token):
+            if _is_external_argv(segment):
+                return True
+            segment = []
+        else:
+            segment.append(token)
+    return False
+
+
 @pytest.fixture(autouse=True)
 def guard_external_boundaries(monkeypatch):
     """Guard against un-mocked external network and installer calls in regression suite."""
     orig_run = subprocess.run
 
     def guarded_run(cmd, *args, **kwargs):
-        cmd_str = " ".join(str(c) for c in (cmd if isinstance(cmd, (list, tuple)) else [cmd]))
-        for blocked in ("npx", "npm", "pip install", "curl", "wget"):
-            if blocked in cmd_str:
-                raise AssertionError(f"GUARD FAILED: Real external command '{cmd_str}' was invoked in regression suite without being mocked!")
+        if is_external_command(cmd):
+            raise AssertionError(f"GUARD FAILED: Real external command {cmd!r} was invoked in regression suite without being mocked!")
         return orig_run(cmd, *args, **kwargs)
 
     monkeypatch.setattr(subprocess, "run", guarded_run)
-
