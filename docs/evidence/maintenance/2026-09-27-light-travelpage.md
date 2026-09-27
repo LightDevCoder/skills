@@ -1,0 +1,13 @@
+# Light-TravelPage map and flight controls — 2026-09-27
+
+Source: Hokkaido page at `2fc364feeb752f6ce9e572a21e3a6d8b667b06c4`; Skill implementation at `4e35eda3d9a522842ab33d2f6a53437c582070f2`, reviewed from fixed point `7a98ed9574e6ffb69f533cdcbdf16a22633ef0e6`. This is a `main` update with no new version tag or release.
+
+Scope: desktop flight pagination through visible controls, dots, keyboard and mouse wheel; responsive scroll remains available. The Hokkaido page uses a sourced Natural Earth `JP-01` coastline and a central itinerary inset. Markers follow WGS84 coordinates, while colored curves show visit order rather than roads. The Skill now directs agents to select a matching real geographic boundary by default for known-coordinate destinations, without asking travelers to choose a map style. Fictional or unavailable geography retains a clearly labeled schematic fallback.
+
+Evidence: The project build passed 38 Node tests and zero-error validation. A freshly generated Skill template site with `npm ci`, prepared fixture and `npm run build` passed 40 Node tests, including an out-of-bounds coordinate rejection, replacement of the blank template's schematic disclaimer, and right-side mobile zoom positioning. `quick_validate.py` reported `Skill is valid!`; final focused collection discovery/composition tests passed 15/15. The initial broad collection run passed 515/515 before bounded repair; the final source behavior was checked by the 40 template and 15 collection tests. An isolated `npx skills add <local-package> --skill light-travelpage --agent codex --yes --copy` installation was discovered by `npx skills list` and matched all source package files with `diff -qr`.
+
+Manual browser checks at desktop width showed the next button and wheel each reach flight `2 / 2`. The mobile-width map preview showed the real coastline; its expanded view opened on the itinerary inset. English controls were rechecked after versioning the changed assets. This was a browser viewport check, not a physical-phone touch test.
+
+Review: independent Standards/Spec code-review found two Medium issues and then verified both repairs with no active findings. The first independent Agent-Skill Evaluator found a Chinese catalog/changelog synchronization gap; those records were corrected before final acceptance. See [review record](2026-09-27-light-travelpage-review/charter.md) and its [verdict](2026-09-27-light-travelpage-review/verdict.md) once closed.
+
+Published-main installation and running-host reload are separate from this local candidate check. No release-tag verification is claimed.

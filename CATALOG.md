@@ -184,7 +184,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Package:** [skills/productivity/light-travelpage/](skills/productivity/light-travelpage)
 - **Installation path:** `<skills-root>/light-travelpage/`.
 - **Status:** Admitted first-party transformation; included in the current stable collection. Default deployment: GitHub + Cloudflare Pages, Functions and D1; one equal-access group per deployment.
-- **Evidence:** [Admission](docs/evidence/admissions/light-travelpage/README.md) · [Latest update](docs/evidence/maintenance/2026-09-15-light-travelpage.md) · [Attribution](skills/productivity/light-travelpage/ATTRIBUTION.md).
+- **Evidence:** [Admission](docs/evidence/admissions/light-travelpage/README.md) · [Latest update](docs/evidence/maintenance/2026-09-27-light-travelpage.md) · [Attribution](skills/productivity/light-travelpage/ATTRIBUTION.md).
 
 ### manuscript-ops
 
