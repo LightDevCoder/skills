@@ -111,7 +111,7 @@ function travelMapMarkup(source, route) {
     return `<button class="transport-pin" type="button" style="${position(pin.x, pin.y)}" data-map-region="${escapeHtml(source.id)}" data-transport-day="${day.day}" data-transport-group="${index}" aria-expanded="false" aria-haspopup="dialog" aria-label="查看${escapeHtml(transportNames[item.type] || "交通")}：${escapeHtml(item.text)}">${transportIcon(item.type)}</button>`;
   }).join("") : "";
   const mapNote = source.disclaimer || "本图为模板化行程示意图，仅表达地点的相对方位与路线顺序，不代表真实比例或精确地理边界。如需使用真实国家或城市地图，可在生成后自行调整。";
-  return `<div class="travel-map-block ${route ? "is-daily" : "is-overview"}" ${route ? `style="--route-color:${route.color}"` : ""}>
+  return `<div class="travel-map-block ${route ? "is-daily" : "is-overview"}" data-map-mode="${escapeHtml(source.mapMode || "")}" ${route ? `style="--route-color:${route.color}"` : ""}>
     <div class="travel-map-scroll"><div class="travel-map-canvas" id="${id}">${mapArtwork(source, route, id, viewport)}${places}${transport}</div></div>
     <div class="map-utility"><span>${route ? "点圆点看地图 · 点图标看交通" : escapeHtml(mapNote)}</span><button type="button" data-expand-map="${id}">放大 ↗</button></div>
   </div>`;
@@ -200,7 +200,10 @@ function setupRouteExplorer() {
       copy.removeAttribute("id"); copy.classList.toggle("daily-fullscreen", Boolean(source.closest(".is-daily")));
       copy.style.setProperty("--route-color", getComputedStyle(source).getPropertyValue("--route-color"));
       $("#map-dialog-content").replaceChildren(copy); dialog.showModal();
-      const viewport = $("#map-dialog-content"); viewport.scrollLeft = Math.max(0, (copy.scrollWidth - viewport.clientWidth) / 2);
+      const viewport = $("#map-dialog-content");
+      viewport.scrollLeft = source.closest('.is-overview[data-map-mode="geographic-inset"]')
+        ? 0
+        : Math.max(0, (copy.scrollWidth - viewport.clientWidth) / 2);
     }
     const link = event.target.closest("[data-open-day]");
     if (link) {

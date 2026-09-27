@@ -558,7 +558,9 @@ async function buildRegion(mapData, manifest) {
     title: mapData.region.title || mapData.title || `${mapData.region.label} · 旅行路线`,
     ariaLabel: geographic ? `${mapData.region.label}真实地理轮廓和地点路线图，共${days.length}天` : `${mapData.region.label}模板化旅行路线示意图，共${days.length}天`,
     description: mapData.region.description,
-    disclaimer: mapData.disclaimer || manifest.disclaimer,
+    disclaimer: mapData.disclaimer || (geographic
+      ? "地理轮廓来自配置的边界数据；地点按提供坐标绘制。连线仅表示行程顺序，不代表实际道路或航线。"
+      : manifest.disclaimer),
     heading: { text: mapData.region.heading || mapData.region.label, x: 33, y: 105, size: 40 },
     legend: { x: 35, y: 168, gap: 43 },
     annotations: [],

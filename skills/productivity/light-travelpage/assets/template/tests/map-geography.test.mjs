@@ -39,6 +39,8 @@ test('geographic map builds a sourced outline and keeps coordinates fixed', (t) 
   assert.equal(positive.status, 0, positive.stderr);
   const result = JSON.parse(readFileSync(tripPath, 'utf8')).routeMap.regions[0];
   assert.equal(result.mapMode, 'geographic-inset');
+  assert.match(result.disclaimer, /地理轮廓来自配置的边界数据/);
+  assert.doesNotMatch(result.disclaimer, /不代表真实比例或精确地理边界/);
   assert.ok(result.places[0].x < result.places[1].x);
   assert.ok(result.places[0].y > result.places[1].y);
   assert.match(readFileSync(path.join(root, result.baseImage), 'utf8'), /<path d="M/);
