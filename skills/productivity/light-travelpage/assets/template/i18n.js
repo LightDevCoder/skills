@@ -7,6 +7,7 @@
   "模板化旅行路线示意图，共": " schematic itinerary, days: ",
   "原创虚构底图、旅行路线、地点标记和日期图例。": "Fictional schematic base, itinerary, places and dates.",
   "地理轮廓来自配置的边界数据；地点按提供坐标绘制。连线仅表示行程顺序，不代表实际道路或航线。": "The outline uses the supplied geographic boundary, and places follow their provided coordinates. Lines show visit order, not roads or flight paths.",
+  "地理轮廓与行程地点；彩色连线只表示行程顺序。": "Geographic outline and itinerary places; colored lines show visit order.",
   "航班行程": "Flights",
   "住宿安排": "Stays",
   "路线为行程示意；点击地点，使用当地地图导航。": "Schematic itinerary. Select a place to navigate with a local map.",

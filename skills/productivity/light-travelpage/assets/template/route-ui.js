@@ -117,6 +117,13 @@ function travelMapMarkup(source, route) {
   </div>`;
 }
 
+function mapZoomScrollLeft(region, canvasWidth, viewportWidth, geographicOverview) {
+  const centered = Math.max(0, (canvasWidth - viewportWidth) / 2);
+  const frame = region?.projection?.frame;
+  if (!geographicOverview || !frame || !Number.isFinite(frame.x) || !Number.isFinite(frame.width)) return centered;
+  return Math.max(0, (frame.x + frame.width / 2) / (region.canvas?.width || 1448) * canvasWidth - viewportWidth / 2);
+}
+
 function activateDayMaps(root) {
   $$(".is-daily .travel-map-scroll", root).forEach((view) => {
     if (view.dataset.positioned || !view.clientWidth) return;
@@ -201,9 +208,9 @@ function setupRouteExplorer() {
       copy.style.setProperty("--route-color", getComputedStyle(source).getPropertyValue("--route-color"));
       $("#map-dialog-content").replaceChildren(copy); dialog.showModal();
       const viewport = $("#map-dialog-content");
-      viewport.scrollLeft = source.closest('.is-overview[data-map-mode="geographic-inset"]')
-        ? 0
-        : Math.max(0, (copy.scrollWidth - viewport.clientWidth) / 2);
+      const region = travelMapSource(state.data?.routeMap, $("#route-explorer").dataset.region);
+      viewport.scrollLeft = mapZoomScrollLeft(region, copy.scrollWidth, viewport.clientWidth,
+        Boolean(source.closest('.is-overview[data-map-mode="geographic-inset"]')));
     }
     const link = event.target.closest("[data-open-day]");
     if (link) {

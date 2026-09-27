@@ -11,6 +11,8 @@ const GOLDEN = Object.freeze({
   routeColors: ["#397dc1", "#e77e22", "#618344", "#209aaa", "#8865a5", "#df6185"],
   maxOverviewPlaces: 10
 });
+const TEMPLATE_MAP_DISCLAIMER = "本图仅表达地点的相对方位与路线顺序，不代表真实比例或精确地理边界。";
+const GEOGRAPHIC_MAP_DISCLAIMER = "地理轮廓来自配置的边界数据；地点按提供坐标绘制。连线仅表示行程顺序，不代表实际道路或航线。";
 
 function argsFrom(argv) {
   const supported = new Set(["trip", "config", "map", "out"]);
@@ -557,10 +559,10 @@ async function buildRegion(mapData, manifest) {
     baseImage: geographic ? geographic.baseImage : template.file,
     title: mapData.region.title || mapData.title || `${mapData.region.label} · 旅行路线`,
     ariaLabel: geographic ? `${mapData.region.label}真实地理轮廓和地点路线图，共${days.length}天` : `${mapData.region.label}模板化旅行路线示意图，共${days.length}天`,
-    description: mapData.region.description,
-    disclaimer: mapData.disclaimer || (geographic
-      ? "地理轮廓来自配置的边界数据；地点按提供坐标绘制。连线仅表示行程顺序，不代表实际道路或航线。"
-      : manifest.disclaimer),
+    description: mapData.region.description || (geographic ? "地理轮廓与行程地点；彩色连线只表示行程顺序。" : undefined),
+    disclaimer: geographic && (!mapData.disclaimer || mapData.disclaimer === TEMPLATE_MAP_DISCLAIMER)
+      ? GEOGRAPHIC_MAP_DISCLAIMER
+      : mapData.disclaimer || manifest.disclaimer,
     heading: { text: mapData.region.heading || mapData.region.label, x: 33, y: 105, size: 40 },
     legend: { x: 35, y: 168, gap: 43 },
     annotations: [],
