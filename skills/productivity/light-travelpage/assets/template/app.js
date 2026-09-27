@@ -334,29 +334,65 @@ function flightCard(journey, index) {
 
 function renderFlights() {
   const journeys = state.data.flightJourneys;
-  $("#flight-carousel").innerHTML = journeys.map(flightCard).join("");
-  $("#flight-dots").innerHTML = journeys.map((_, index) => `<span class="carousel-dot${index === 0 ? " is-active" : ""}"></span>`).join("");
-  $("#flight-index").textContent = `1 / ${journeys.length}`;
-
   const carousel = $("#flight-carousel");
+  const previous = $("#flight-prev");
+  const next = $("#flight-next");
+  const dots = $("#flight-dots");
+  carousel.innerHTML = journeys.map(flightCard).join("");
+  dots.innerHTML = journeys.map((_, index) => `<button type="button" class="carousel-dot${index === 0 ? " is-active" : ""}" data-flight-index="${index}" aria-label="航班 ${index + 1}" aria-current="${index === 0 ? "true" : "false"}"></button>`).join("");
+  const cards = $$(".flight-card", carousel);
+  let activeIndex = 0;
+  const setActive = (index) => {
+    activeIndex = index;
+    $("#flight-index").textContent = `${index + 1} / ${journeys.length}`;
+    previous.disabled = index <= 0;
+    next.disabled = index >= journeys.length - 1;
+    $$(".carousel-dot", dots).forEach((dot, dotIndex) => {
+      dot.classList.toggle("is-active", dotIndex === index);
+      dot.setAttribute("aria-current", String(dotIndex === index));
+    });
+  };
+  const show = (index) => {
+    if (!cards.length) return;
+    const target = Math.max(0, Math.min(cards.length - 1, index));
+    setActive(target);
+    carousel.scrollTo({ left: cards[target].offsetLeft, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  };
+  previous.onclick = () => show(activeIndex - 1);
+  next.onclick = () => show(activeIndex + 1);
+  dots.onclick = (event) => {
+    const dot = event.target.closest("[data-flight-index]");
+    if (dot) show(Number(dot.dataset.flightIndex));
+  };
+  carousel.addEventListener("keydown", (event) => {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    event.preventDefault();
+    show(activeIndex + (event.key === "ArrowRight" ? 1 : -1));
+  });
+  carousel.addEventListener("wheel", (event) => {
+    if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+    const target = Math.max(0, Math.min(carousel.scrollWidth - carousel.clientWidth, carousel.scrollLeft + event.deltaY));
+    if (target === carousel.scrollLeft) return;
+    event.preventDefault();
+    carousel.scrollLeft = target;
+  }, { passive: false });
+  setActive(0);
   let scheduled = false;
   carousel.addEventListener("scroll", () => {
     if (scheduled) return;
     scheduled = true;
     requestAnimationFrame(() => {
-      const cards = $$(".flight-card", carousel);
       const center = carousel.scrollLeft + carousel.clientWidth / 2;
-      let activeIndex = 0;
+      let nearestIndex = 0;
       let distance = Infinity;
       cards.forEach((card, index) => {
         const cardCenter = card.offsetLeft + card.offsetWidth / 2;
         if (Math.abs(cardCenter - center) < distance) {
           distance = Math.abs(cardCenter - center);
-          activeIndex = index;
+          nearestIndex = index;
         }
       });
-      $$(".carousel-dot", $("#flight-dots")).forEach((dot, index) => dot.classList.toggle("is-active", index === activeIndex));
-      $("#flight-index").textContent = `${activeIndex + 1} / ${journeys.length}`;
+      setActive(nearestIndex);
       scheduled = false;
     });
   }, { passive: true });

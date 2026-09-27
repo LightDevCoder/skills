@@ -36,3 +36,21 @@ test('rental locations use canonical references or address-search fallbacks',t=>
  assert.equal(w.document.querySelector('dialog').open,true);
  assert.match(w.document.querySelector('dialog').textContent,/Public road/);
 });
+
+test('flight carousel controls reach the second card and return to the first',t=>{
+ const w=new Window({url:'http://localhost/'});t.after(()=>w.happyDOM.abort());
+ w.document.body.innerHTML='<div id="flight-index"></div><button id="flight-prev"></button><button id="flight-next"></button><div id="flight-carousel"></div><div id="flight-dots"></div>';
+ const carousel=w.document.querySelector('#flight-carousel');
+ carousel.scrollTo=({left})=>{carousel.scrollLeft=left;};
+ w.eval(read('app.js').replace('document.addEventListener("DOMContentLoaded", init);','')+`\nstate.data={flightJourneys:[{id:'out',placeholder:true},{id:'back',placeholder:true}],flights:[]};renderFlights();`);
+ const cards=carousel.querySelectorAll('.flight-card');
+ Object.defineProperty(cards[1],'offsetLeft',{value:600});
+ assert.equal(w.document.querySelector('#flight-prev').disabled,true);
+ w.document.querySelector('#flight-next').click();
+ assert.equal(carousel.scrollLeft,600);
+ assert.equal(w.document.querySelector('#flight-index').textContent,'2 / 2');
+ assert.equal(w.document.querySelector('#flight-next').disabled,true);
+ w.document.querySelector('#flight-prev').click();
+ assert.equal(carousel.scrollLeft,0);
+ assert.equal(w.document.querySelector('#flight-index').textContent,'1 / 2');
+});

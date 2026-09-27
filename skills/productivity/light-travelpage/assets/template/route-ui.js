@@ -70,7 +70,7 @@ function mapArtwork(source, selected, id, viewport) {
   ["overview-date-legend", "overview-markers", "overview-geographic-names"].forEach((key) => svg.querySelector(`#${key}`)?.remove());
   svg.querySelectorAll('[id^="overview-label-"]').forEach((label) => {
     const placeId = label.id.replace("overview-label-", "");
-    if (!layout?.places.includes(placeId)) { label.remove(); return; }
+    if (!layout?.places.includes(placeId)) { label.remove(); svg.querySelector(`#map-leader-${placeId}`)?.remove(); return; }
     const place = placeLayersFor(source).find((item) => item.id === placeId);
     const labelLayout = layout.labels?.[placeId] || { x: place?.tx, y: place?.ty, anchor: place?.anchor };
     if (!Number.isFinite(Number(labelLayout.x)) || !Number.isFinite(Number(labelLayout.y))) { label.remove(); return; }

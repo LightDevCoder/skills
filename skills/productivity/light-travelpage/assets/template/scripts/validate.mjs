@@ -281,7 +281,7 @@ export function validateTrip(data, root, { allowEmpty = false } = {}) {
     const map = data.map || {},
       ids = unique(map.places, "map places");
     check(
-      map.mapMode === "template-auto" && ids.size > 0,
+      ["template-auto", "geographic-outline"].includes(map.mapMode) && ids.size > 0,
       "Map input required",
     );
     for (const place of map.places || [])

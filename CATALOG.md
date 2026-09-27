@@ -178,7 +178,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### light-travelpage
 
-- **Purpose:** Generate or update a bilingual mobile travel page with flight/stay cards, regional map navigation, shared members, expenses, currency settings, tasks and ticket status.
+- **Purpose:** Generate or update a bilingual mobile travel page with desktop and touch flight cards, region-matched geographic outlines and map navigation, shared members, expenses, currency settings, tasks and ticket status.
 - **When to use:** Create or maintain a travel webpage from supplied materials; not ordinary travel advice or booking purchases.
 - **Invocation:** Model-invoked.
 - **Package:** [skills/productivity/light-travelpage/](skills/productivity/light-travelpage)

@@ -6,7 +6,7 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
-- `light-travelpage`: Build authenticated first-page PNG previews for PDF tickets and display them with zoom and an original-PDF link in the shared dialog. Google and Apple navigation now prefer readable local names and addresses over coordinate-only searches. Add mobile interaction, map fallback, and PDF build fixture coverage.
+- `light-travelpage`: Build authenticated first-page PNG previews for PDF tickets and display them with zoom and an original-PDF link in the shared dialog. Google and Apple navigation now prefer readable local names and addresses over coordinate-only searches. Add mobile interaction, map fallback, and PDF build fixture coverage. Add desktop flight paging controls. Known destinations with verified WGS84 places now use a sourced, matching geographic outline by default; template shapes are reserved for fictional or unavailable geography and are labelled schematic.
 
 ## 0.2.5 — 2026-09-24
 
