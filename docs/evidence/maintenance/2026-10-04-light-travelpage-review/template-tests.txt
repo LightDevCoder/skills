@@ -1,0 +1,58 @@
+npm notice run light-travelpage-site@0.1.0 test
+npm notice run node --test tests/*.test.mjs
+✔ accommodation dates and itinerary references are checked while legacy trips remain valid (3.24225ms)
+✔ flight, stay and itinerary PDF tickets share an image preview, zoom and source link (19.146667ms)
+✔ rental locations use canonical references or address-search fallbacks (4.036583ms)
+✔ flight carousel controls reach the second card and return to the first (4.545667ms)
+✔ calendar and null draft handling (3.4065ms)
+Shared state operation failed Error
+Shared state operation failed Error
+Shared state operation failed Error
+Shared state operation failed Error
+✔ todo seed contract matches first sync GET (35.221708ms)
+✔ bad dates, backwards span and dangling references fail (0.348ms)
+✔ ticket asset traversal and invalid map coordinates fail (0.442875ms)
+✔ fail closed for missing auth and private assets (1.438042ms)
+✔ signed session, code rotation, bad login and cross-origin writes (1.444417ms)
+✔ server rejects other trips and unauthenticated direct handler (1.113167ms)
+✔ D1 contract: persist, retry, conflict and changed duplicate ID (3.388834ms)
+✔ shared settings persist and invalid bill cannot mutate state (5.885959ms)
+✔ valid integer-cent bill and member references (0.396292ms)
+✔ client preserves exact uncertain request, including after reload (1.453792ms)
+✔ client requires observed revision and does not leak to cross-origin API (0.875333ms)
+✔ damaged backup is rejected before any network operation (0.250625ms)
+✔ unsupported currencies fail atomically in bills and settings (0.114166ms)
+✔ Pages catch-all array route is accepted for exactly one trip segment (1.608458ms)
+✔ journal cleanup failure cannot roll back a confirmed server save (0.8565ms)
+✔ uncertain request survives expired login and retries the identical body (0.486958ms)
+✔ batch recovery delivers successful snapshots when another adapter still fails (0.582209ms)
+✔ only the translation runtime is publicly readable for bilingual sign-in (0.543583ms)
+✔ chapters and deep stay links retain drafts and respect disabled modules (56.874417ms)
+✔ material-only draft remains useful when all travel modules are disabled (3.755958ms)
+✔ date selection shows the supplied day without rebuilding original ticket controls (16.331042ms)
+✔ pocket and material entries derive from supplied records and escape their values (4.362916ms)
+✔ switch language in place without resetting form, user text or expanded state (21.554667ms)
+✔ authored missing translations retain both source languages including blank entries (3.572542ms)
+✔ actual stay cards mark missing cancellation and navigation translations both ways (6.636416ms)
+✔ member conflict refresh preserves form and permits explicit retry (82.536666ms)
+✔ unrelated task retry leaves new bill draft untouched (19.346625ms)
+✔ failed bill retry preserves newer edits and clears only the submitted draft (50.266417ms)
+✔ member retry preserves newer DOM input and refreshes saved members after closing (37.167208ms)
+✔ unchanged member retry renders the confirmed server snapshot immediately (32.981291ms)
+✔ confirmed retry is consumed even when subsequent GET fails (48.920417ms)
+✔ save rejected by pending guard cannot replace the original recovery draft generation (43.279375ms)
+✔ bilingual ledger keeps the real form draft through switching and forced refresh (18.170375ms)
+✔ mobile map zoom starts at the configured itinerary inset (9.471667ms)
+✔ geographic map builds a sourced outline and keeps coordinates fixed (70.85ms)
+✔ navigation follows destination region and per-region choice, preserving unknown coordinates as search (13.338083ms)
+✔ map URLs encode labels, respect coordinate systems, and reject unsafe destinations (1.9115ms)
+✔ Google and Apple search by readable place and address while Apple retains WGS84 ll (2.157208ms)
+✔ coordinates are a search fallback when no readable name or address exists (3.018333ms)
+ℹ tests 44
+ℹ suites 0
+ℹ pass 44
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 613.841958

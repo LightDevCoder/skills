@@ -178,12 +178,12 @@
 
 ### light-travelpage
 
-- **作用：** 从资料生成或更新中英双语旅行网页，提供电脑和手机均可翻页的航班卡片、匹配目的地真实轮廓的地区地图与导航，以及共享同行人、账单、币种设置、待办与门票状态。
+- **作用：** 从资料生成或更新中英双语旅行手册网页，提供章节导航、衬线标题和日期，以及电脑和手机均可翻页的航班卡片、匹配目的地真实轮廓的地区地图与导航，以及共享同行人、账单、币种设置、待办与门票状态。
 - **什么时候用：** 需要根据已有行程资料生成或维护手机旅行网页（含账单、待办、地图），而非普通旅行咨询或票务购买时。
 - **调用方式：** Model-invoked。
 - **包位置：** [skills/productivity/light-travelpage/](skills/productivity/light-travelpage)
 - **状态：** 实质性转换的第一方能力，已收录于当前稳定版本集合；默认 GitHub + Cloudflare Pages、Functions 与 D1，每个部署一个同权限小组。
-- **证据：** [准入](docs/evidence/admissions/light-travelpage/README.md) · [本次更新](docs/evidence/maintenance/2026-09-27-light-travelpage.md) · [来源](skills/productivity/light-travelpage/ATTRIBUTION.md)。
+- **证据：** [准入](docs/evidence/admissions/light-travelpage/README.md) · [本次更新](docs/evidence/maintenance/2026-10-04-light-travelpage.md) · [来源](skills/productivity/light-travelpage/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/light-travelpage/`。
 
 ### manuscript-ops

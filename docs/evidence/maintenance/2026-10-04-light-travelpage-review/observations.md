@@ -1,0 +1,12 @@
+# Producer browser and fixture observations
+
+- Generated the site with `node skills/productivity/light-travelpage/scripts/create.mjs <new-project>` using this package, then copied only supplied demo itinerary data into `trip-data.json`. Runtime files matched the package source; `npm run build` succeeded.
+- `npm test` in the generated project: 44 pass, 0 fail. The new four tests cover existing DOM retention, deep stay links, disabled-module boundaries, date selection and source/escape handling. Raw receipt: [template-tests.txt](template-tests.txt).
+- `python3 -m pytest -q tests/test_collection_discovery.py tests/test_composition.py`: 15 pass. [Collection receipt](collection-tests.txt).
+- `python3 <skill-creator>/scripts/quick_validate.py skills/productivity/light-travelpage`: Skill is valid. [Structural receipt](skill-validation.txt).
+- Actual browser at 1440 × 900: title uses Georgia / Songti SC / CJK serif; language control uses system UI; body is 14px; document width and scrollWidth both 1440. Chapter layout and selected date: [desktop](desktop.jpg).
+- Date 08 displays the supplied lunch at 12:00 and walk at 15:00, without replacing original schedule nodes. The pocket's booking link reaches `#stay-stay` and shows supplied dates while missing booking fields remain pending.
+- Ledger amount 128 and note “切换章节后保留的草稿” remained in the actual form after Materials → Ledger → English. These are unsaved local-preview fields; no production ledger was edited.
+- Actual English browser at 390 × 844: document clientWidth and scrollWidth both 390; handbook pages use one 356px column. [Mobile](mobile.jpg). Missing authored translations are labeled, not invented. The full-page capture includes sticky controls captured at their current scroll position; DOM geometry confirmed the skip link remained offscreen unless focused.
+- A second fresh project used the existing `tests/prepare-build-fixture.mjs`; its validated build retained fixture.pdf and generated fixture.png. Materials → View ticket details opened the existing dialog. The loaded PNG had naturalWidth 367 and the original-PDF link remained reachable. [Ticket](ticket.jpg). Poppler emitted fontconfig cache warnings on this machine; the build succeeded.
+- Browser previews alone use a local-mode override of the built D1 fixture. No remote D1 synchronization, deployment, physical-phone touch behavior or third-party map App behavior is claimed.

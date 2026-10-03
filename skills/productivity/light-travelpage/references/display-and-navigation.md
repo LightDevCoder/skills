@@ -8,7 +8,7 @@ The template updates display text in place. It does not rebuild forms or write l
 
 The first visit uses Chinese or English browser preference, otherwise `config.language` (default `zh-CN`). An explicit choice is stored in local storage. Missing English authored content remains visible with a `Chinese only` marker; English source content without Chinese retains the source with `暂无中文`. Blank translations are invalid and runtime fallback still preserves the source. Original addresses and local names remain available; runtime traveler names, notes and tasks are deliberately not translated. PDFs remain original. Mark new user-content nodes with `data-no-translate`; register source display content for fallback handling. Translate accessibility labels without translating embedded user names.
 
-Both languages use a fine serif system font stack: Baskerville / Iowan Old Style for Latin, Songti SC / Noto Serif CJK SC / Source Han Serif SC / STSong / SimSun for Chinese. Availability depends on the device; no proprietary font files are redistributed. Retain adequate contrast and readable size for secondary text.
+Chapter layout and typography are defined in [handbook-design.md](handbook-design.md). Both languages retain their source text and readable controls under that design.
 
 ## Cards
 
