@@ -14,7 +14,10 @@ async function setup(t) {
   window.confirm=()=>false;
   window.eval(await readFile(new URL('../i18n.js',import.meta.url),'utf8'));
   window.testCurrencies = CURRENCY_CATALOG;
-  window.document.body.innerHTML = '<div id="ledger-root"></div>';
+  window.document.body.innerHTML = '<div id="ledger-root"></div><aside id="handbook-pocket"></aside>';
+  window.TRAVEL_PLAN_CONFIG = { modules: { ledger: true } };
+  window.TRAVEL_PLAN_DATA = { config: window.TRAVEL_PLAN_CONFIG, ticketPlanning: { items: [] } };
+  window.eval(await readFile(new URL('../handbook.js',import.meta.url),'utf8'));
   let remote = initial(), fail = null, calls = 0;
   const adapter = {mode:'d1',pending:false, load:async()=>structuredClone(remote),
     save:async(next)=>{calls++; if(fail) {adapter.pending=!fail.status || fail.status>=500; const error=fail; fail=null; throw error;} remote=structuredClone(next);}};
@@ -27,6 +30,36 @@ async function setup(t) {
   return {window,$,input,submit,adapter, get remote(){return remote;},set remote(value){remote=value;},
     set fail(value){fail=value;},get calls(){return calls;}};
 }
+
+test('pocket follows initialized and refreshed ledger snapshots without clearing bill drafts', async t => {
+  const h=await setup(t);
+  const pocket=()=>h.$('#handbook-pocket').textContent;
+  assert.match(pocket(), /Alice/);
+  assert.match(pocket(), /0 bills/);
+  h.input('[name="originalAmount"]','123.45');
+  h.input('[data-ledger-form="bill"] [name="note"]','Unsent draft');
+  h.remote.travelers.push({id:'bob',name:'Bob',color:'#234567'});
+  h.remote.bills.push({id:'bill-one',note:'Shared lunch',originalAmountCents:2000,baseAmountCents:2000,currency:'CNY',payerId:'alice',participantIds:['alice','bob'],category:'餐饮'});
+  await h.window.TravelLedger.refresh();
+  assert.equal(h.window.TravelLedger.getSnapshot().bills.length,1);
+  assert.match(pocket(), /1 bills/);
+  assert.match(pocket(), /Alice · Bob/);
+  assert.equal(h.$('[name="originalAmount"]').value,'123.45');
+  assert.equal(h.$('[data-ledger-form="bill"] [name="note"]').value,'Unsent draft');
+});
+
+test('forced ledger refresh updates pocket and retains the open member form', async t => {
+  const h=await setup(t);
+  h.$('[data-ledger-action="open-members"]').click();
+  h.input('[data-ledger-form="member-add"] input[name="name"]','Unsent member');
+  h.remote.travelers.push({id:'carol',name:'Carol',color:'#234567'});
+  assert.equal(await h.window.TravelLedger.refresh(),false);
+  assert.doesNotMatch(h.$('#handbook-pocket').textContent,/Carol/);
+  await h.window.TravelLedger.refresh(true);
+  assert.match(h.$('#handbook-pocket').textContent,/Carol/);
+  assert.equal(h.$('[data-ledger-form="member-add"] input[name="name"]').value,'Unsent member');
+  assert.equal(h.calls,0);
+});
 
 test('member conflict refresh preserves form and permits explicit retry', async t => {
   const h=await setup(t);

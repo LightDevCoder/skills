@@ -1,0 +1,43 @@
+{
+  "candidate": "3f6cb55c9f0abcfda8d0f6d46da5d7d48753e1b6",
+  "round": 2,
+  "standards": {
+    "findings": [],
+    "previous": {
+      "F-001": "fixed"
+    },
+    "agent": "/root/standards_recheck",
+    "checks": "61 package hashes, 2 input hashes, 314 local links and 6 handbook tests verified; no edits."
+  },
+  "spec": {
+    "findings": [
+      {
+        "id": "F-005",
+        "sourceId": "SPEC-R2-001",
+        "axis": "Spec",
+        "severity": "medium",
+        "location": "assets/template/handbook.css:140; handbook.css:27",
+        "problem": "Task body is 13px and travel dropdown links are 11px.",
+        "reason": "Charter criterion 2: body >=14px, secondary >=12px. The task selector used a nonexistent class and the menu rule lost CSS specificity.",
+        "disposition": "Confirmed; target .todo-text and .topbar .travel-navigation-menu a. Real 390px browser measures 14px and 13px respectively."
+      },
+      {
+        "id": "F-006",
+        "sourceId": "SPEC-R2-002",
+        "axis": "Spec",
+        "severity": "medium",
+        "location": "assets/template/handbook.js:57-60; ledger.js:1796-1809",
+        "problem": "Pocket page keeps old bill count and travelers after shared-ledger refresh.",
+        "reason": "Charter criterion 1 and handbook-design.md require source-derived pocket content. Runtime refresh redraws the pocket before ledger refresh and the latter lacked a data-change notification.",
+        "disposition": "Confirmed; ledger emits existing change notification after init, refreshed snapshots, confirmed retries and local edits. Integration tests verify updated pocket, bill drafts and open member form; no production D1 claim."
+      }
+    ],
+    "previous": {
+      "F-002": "fixed",
+      "F-003": "fixed",
+      "F-004": "fixed"
+    },
+    "agent": "/root/spec_recheck",
+    "checks": "12 focused tests passed. Typography observed in real IAB; stale pocket reproduced with real runtime in synthetic Happy DOM adapter. No edits; check tab closed."
+  }
+}

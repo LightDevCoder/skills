@@ -26,6 +26,7 @@ button { cursor: pointer; }
 .topbar { height: auto; min-height: 52px; padding: 5px max(24px, calc((100vw - 1160px)/2)); background: #e0ddd2; border-color: var(--line); backdrop-filter: none; }
 .wordmark, #language-toggle, .topbar nav a, .travel-navigation summary { font: 13px/1.5 var(--handbook-ui); }
 .travel-navigation-menu { background: var(--surface); box-shadow: 0 8px 20px #2b2e2715; }
+.topbar .travel-navigation-menu a { font: 13px/1.5 var(--handbook-ui); }
 .sync-panel { max-width: 1160px; margin: 0 auto; background: transparent; border: 0; font: 12px/1.5 var(--handbook-ui); }
 .sync-panel button, .sync-panel label { font-size: 12px; }
 html[data-persistence="local"] .sync-panel { display: none; }
@@ -137,7 +138,7 @@ body[data-active-view="ledger"] .topbar { background: #e0ddd2; }
 .stay-card p, .stay-card dd { font-size: 14px; }
 .stay-card dt { font-size: 12px; }
 .route-section { margin: 0; transform: none; max-width: none; }
-.todo-form input, .todo-form button, .todo-item, .todo-item__text { font-family: var(--handbook-ui); font-size: 14px; }
+.todo-form input, .todo-form button, .todo-item, .todo-text { font-family: var(--handbook-ui); font-size: 14px; }
 .material-record { padding: 18px 0; border-top: 1px solid var(--line); }
 .material-record h3 { font-size: 22px; margin: 0 0 7px; }
 .material-record p { margin: 5px 0; font-size: 13px; color: var(--muted); }
