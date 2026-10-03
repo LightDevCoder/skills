@@ -1,0 +1,4 @@
+npm notice run light-travelpage-site@0.1.0 build
+npm notice run node scripts/build.mjs
+Skipped map build for trip-data.json because the map module is disabled.
+Built protected site at /Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skill-generated/dist

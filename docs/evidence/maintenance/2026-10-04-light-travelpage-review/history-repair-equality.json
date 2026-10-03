@@ -1,0 +1,13 @@
+{
+  "packageFiles": 61,
+  "templateFilesExcludingAuthoredInput": 49,
+  "allRuntimeSourceFilesEqual": true,
+  "authoredInputHash": "9caa5b1c89f90e20abcb83bd793d1b6c2e63ee9728cecc30c64accc75e3b8868",
+  "authoredInputEqual": true,
+  "changes": [
+    "assets/template/site-navigation.js",
+    "assets/template/tests/handbook.test.mjs"
+  ],
+  "builtPreviewOnlyOverride": "dist/trip-data.json config.persistence={mode:local}",
+  "independentReview": "pending user-authorized one-round extension"
+}

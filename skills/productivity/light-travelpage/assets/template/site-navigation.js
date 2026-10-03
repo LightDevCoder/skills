@@ -24,8 +24,9 @@
     };
     const hashChapters = { "#itinerary": "itinerary", "#flights": "bookings", "#stays": "bookings", "#route": "overview", "#drive": "driving", "#prep": "todo", "#materials": "materials" };
     let chapter = isLedgerHash(hash) && modules.ledger ? "ledger" : hash.startsWith("#stay-") ? "bookings" : hashChapters[hash];
-    if (["#main", "#top"].includes(hash) && enabled[document.body.dataset.chapter]) {
-      chapter = document.body.dataset.chapter;
+    if (["#main", "#top"].includes(hash)) {
+      const previousChapter = history.state?.handbookChapter || document.body.dataset.chapter;
+      if (enabled[previousChapter]) chapter = previousChapter;
     }
     if (!chapter || (chapter !== "ledger" && !enabled[chapter])) {
       chapter = ["itinerary", "bookings", "overview", "driving", "todo", "materials"].find(name => enabled[name]);
@@ -71,6 +72,9 @@
     ledgerView.toggleAttribute("inert", !ledgerActive);
     document.body.dataset.activeView = nextView;
     showHandbookChapter(location.hash);
+    if (document.body.dataset.layout === "handbook" && document.body.dataset.chapter) {
+      history.replaceState({ ...history.state, handbookChapter: document.body.dataset.chapter }, "");
+    }
     if (travelTrigger) {
       if (ledgerActive) travelTrigger.removeAttribute("aria-current");
       else travelTrigger.setAttribute("aria-current", "page");

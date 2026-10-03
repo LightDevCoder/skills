@@ -128,3 +128,26 @@ test("demo navigation remains in the travel main when the handbook footer is out
   assert.equal(w.document.querySelector("#map-examples [data-place]").dataset.place, "demo-place");
   assert.match(w.document.querySelector(".demo-notice").textContent, /虚构示例/);
 });
+
+
+test("browser history restores the chapter belonging to a content-anchor entry", async t => {
+  const w = page(t, { itinerary: true, accommodations: true, flights: false, ledger: false, todo: true, overview: false, driving: false });
+  w.document.querySelector("#bookings-navigation-link").click();
+  w.location.hash = "#main";
+  w.dispatchEvent(new w.Event("hashchange"));
+  await new Promise(resolve => setTimeout(resolve, 40));
+  assert.equal(w.document.body.dataset.chapter, "bookings");
+  const mainEntry = structuredClone(w.history.state);
+  assert.equal(mainEntry.handbookChapter, "bookings");
+  const tasks = w.document.createElement("a");
+  tasks.href = "#prep";
+  w.document.querySelector(".handbook-tabs").append(tasks);
+  tasks.click();
+  assert.equal(w.document.body.dataset.chapter, "todo");
+  w.history.replaceState(mainEntry, "", "#main");
+  w.dispatchEvent(new w.Event("popstate"));
+  await new Promise(resolve => setTimeout(resolve, 40));
+  assert.equal(w.document.body.dataset.chapter, "bookings");
+  assert.equal(w.document.querySelector("#stays").hidden, false);
+  assert.equal(w.document.querySelector("#prep").hidden, true);
+});
