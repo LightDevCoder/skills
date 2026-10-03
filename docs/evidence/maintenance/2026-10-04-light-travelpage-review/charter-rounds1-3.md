@@ -1,10 +1,10 @@
 # Travel handbook UI maintenance acceptance
 
-- Charter revision: travel-handbook-2026-10-03-v2
+- Charter revision: travel-handbook-2026-10-03-v1
 - Profile: software with agent-skill package checks
 - Fixed point: 49e7cbe8be1b978bfbe5f22745b0c0dfefbb89a7
 - Implementation scope: skills/productivity/light-travelpage/
-- Review limit: 4 rounds; the user explicitly approved one additional final round on 2026-10-04. Prior three rounds remain preserved.
+- Review limit: 3 rounds
 
 Approved source: user selected direction C and requested serif typography plus remote push on 2026-10-03. The C draft is at /Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/outputs/design-demos/C.html; decision at outputs/direction-approved.md in that workspace. This maintenance target is the reusable Skill package; the separate local MVP is checked in its own workspace.
 
