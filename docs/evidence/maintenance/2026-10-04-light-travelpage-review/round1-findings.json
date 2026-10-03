@@ -1,0 +1,46 @@
+{
+  "candidate": "e1f1f4b84088f5d8bfd6b5f15431d2b81a403191",
+  "round": 1,
+  "findings": [
+    {
+      "id": "F-001",
+      "sourceId": "STD-001",
+      "axis": "Standards",
+      "severity": "medium",
+      "location": "observations.md:3",
+      "problem": "Producer evidence abbreviates commands and omits exact environment, inputs and revisions.",
+      "reason": "docs/REVIEW_POLICY.md Evidence and independence requires exact commands, environment, inputs, outputs, revisions, scope and limitations.",
+      "disposition": "Confirmed; add context.md, fixtures, hashes and exact receipts for both rounds."
+    },
+    {
+      "id": "F-002",
+      "sourceId": "SPEC-001",
+      "axis": "Spec",
+      "severity": "medium",
+      "location": "assets/template/handbook.css:63",
+      "problem": "Existing ledger category labels are 10px and live feedback 11px.",
+      "reason": "Charter criterion 2 requires secondary text >=12px.",
+      "disposition": "Confirmed; handbook overrides set UI 14px and helpers 12px; 390px actual browser observed category 14px, feedback 12px."
+    },
+    {
+      "id": "F-003",
+      "sourceId": "SPEC-002",
+      "axis": "Spec",
+      "severity": "medium",
+      "location": "assets/template/site-navigation.js:25",
+      "problem": "Skip-to-main from bookings switches to itinerary and hides current content.",
+      "reason": "Charter criterion 4 requires navigation to preserve actual content and drafts.",
+      "disposition": "Confirmed; #main and #top retain current enabled travel chapter. Also disabled ledger hashes fall back to an enabled travel chapter. Assertion test added and browser skip from bookings observed."
+    },
+    {
+      "id": "F-004",
+      "sourceId": "SPEC-003",
+      "axis": "Spec",
+      "severity": "medium",
+      "location": "assets/template/travel-cards.js:19",
+      "problem": "Demo map insertion expects a footer inside #main, but new footer lives outside #main; null.before prevents examples and demo notice.",
+      "reason": "Charter criteria 3 and 5 preserve map and source/demo behavior.",
+      "disposition": "Confirmed; insert before materials/legacy footer or append to main. Assertion test uses actual template HTML, verifies map button and notice."
+    }
+  ]
+}

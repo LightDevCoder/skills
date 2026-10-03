@@ -1,0 +1,60 @@
+npm notice run light-travelpage-site@0.1.0 test
+npm notice run node --test tests/*.test.mjs
+✔ accommodation dates and itinerary references are checked while legacy trips remain valid (3.527166ms)
+✔ flight, stay and itinerary PDF tickets share an image preview, zoom and source link (19.230875ms)
+✔ rental locations use canonical references or address-search fallbacks (5.386917ms)
+✔ flight carousel controls reach the second card and return to the first (4.948125ms)
+✔ calendar and null draft handling (2.641083ms)
+Shared state operation failed Error
+Shared state operation failed Error
+Shared state operation failed Error
+Shared state operation failed Error
+✔ todo seed contract matches first sync GET (42.128917ms)
+✔ bad dates, backwards span and dangling references fail (0.3055ms)
+✔ ticket asset traversal and invalid map coordinates fail (0.2815ms)
+✔ fail closed for missing auth and private assets (1.759125ms)
+✔ signed session, code rotation, bad login and cross-origin writes (3.188625ms)
+✔ server rejects other trips and unauthenticated direct handler (1.842792ms)
+✔ D1 contract: persist, retry, conflict and changed duplicate ID (4.225875ms)
+✔ shared settings persist and invalid bill cannot mutate state (3.019625ms)
+✔ valid integer-cent bill and member references (0.404084ms)
+✔ client preserves exact uncertain request, including after reload (1.372625ms)
+✔ client requires observed revision and does not leak to cross-origin API (0.516292ms)
+✔ damaged backup is rejected before any network operation (0.18675ms)
+✔ unsupported currencies fail atomically in bills and settings (0.1045ms)
+✔ Pages catch-all array route is accepted for exactly one trip segment (1.490833ms)
+✔ journal cleanup failure cannot roll back a confirmed server save (0.975709ms)
+✔ uncertain request survives expired login and retries the identical body (0.472667ms)
+✔ batch recovery delivers successful snapshots when another adapter still fails (0.529833ms)
+✔ only the translation runtime is publicly readable for bilingual sign-in (0.5365ms)
+✔ chapters and deep stay links retain drafts and respect disabled modules (55.513959ms)
+✔ material-only draft remains useful when all travel modules are disabled (3.097834ms)
+✔ date selection shows the supplied day without rebuilding original ticket controls (16.055333ms)
+✔ pocket and material entries derive from supplied records and escape their values (4.506541ms)
+✔ content anchor preserves the visible chapter and disabled ledger hashes retain a travel chapter (86.303791ms)
+✔ demo navigation remains in the travel main when the handbook footer is outside it (7.294958ms)
+✔ switch language in place without resetting form, user text or expanded state (22.105709ms)
+✔ authored missing translations retain both source languages including blank entries (2.666375ms)
+✔ actual stay cards mark missing cancellation and navigation translations both ways (4.967542ms)
+✔ member conflict refresh preserves form and permits explicit retry (95.774375ms)
+✔ unrelated task retry leaves new bill draft untouched (22.454875ms)
+✔ failed bill retry preserves newer edits and clears only the submitted draft (51.331208ms)
+✔ member retry preserves newer DOM input and refreshes saved members after closing (39.544709ms)
+✔ unchanged member retry renders the confirmed server snapshot immediately (35.416208ms)
+✔ confirmed retry is consumed even when subsequent GET fails (51.787542ms)
+✔ save rejected by pending guard cannot replace the original recovery draft generation (44.025ms)
+✔ bilingual ledger keeps the real form draft through switching and forced refresh (17.35175ms)
+✔ mobile map zoom starts at the configured itinerary inset (10.299416ms)
+✔ geographic map builds a sourced outline and keeps coordinates fixed (73.621542ms)
+✔ navigation follows destination region and per-region choice, preserving unknown coordinates as search (14.68675ms)
+✔ map URLs encode labels, respect coordinate systems, and reject unsafe destinations (2.231209ms)
+✔ Google and Apple search by readable place and address while Apple retains WGS84 ll (2.830583ms)
+✔ coordinates are a search fallback when no readable name or address exists (2.763584ms)
+ℹ tests 46
+ℹ suites 0
+ℹ pass 46
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 631.029541

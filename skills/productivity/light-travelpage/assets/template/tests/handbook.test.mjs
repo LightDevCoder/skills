@@ -95,3 +95,36 @@ test("pocket and material entries derive from supplied records and escape their 
   assert.equal(w.document.querySelectorAll("[data-ticket-open]").length, 0);
   assert.match(w.document.querySelector("#handbook-materials").textContent, /当前没有附件/);
 });
+
+
+test("content anchor preserves the visible chapter and disabled ledger hashes retain a travel chapter", async t => {
+  const modules = { itinerary: true, accommodations: true, flights: false, ledger: false, todo: true, overview: false, driving: false };
+  const w = page(t, modules);
+  w.document.querySelector("#ledger-navigation-link").hidden = true;
+  w.document.querySelector("#bookings-navigation-link").click();
+  w.location.hash = "#main";
+  w.dispatchEvent(new w.Event("hashchange"));
+  await new Promise(resolve => setTimeout(resolve, 40));
+  assert.equal(w.document.body.dataset.chapter, "bookings");
+  assert.equal(w.document.querySelector("#stays").hidden, false);
+  w.location.hash = "#ledger-stats";
+  w.dispatchEvent(new w.Event("hashchange"));
+  await new Promise(resolve => setTimeout(resolve, 40));
+  assert.equal(w.document.querySelector("#main").hidden, false);
+  assert.equal(w.document.querySelector("#itinerary").hidden, false);
+});
+
+test("demo navigation remains in the travel main when the handbook footer is outside it", t => {
+  const w = new Window({ url: "http://localhost/" });
+  t.after(() => w.happyDOM.abort());
+  w.document.body.innerHTML = read("index.html").split(/<body[^>]*>/)[1].split("</body>")[0];
+  w.TravelMaps = { button: id => `<button data-place="${id}">Map</button>` };
+  w.eval(read("travel-cards.js"));
+  w.document.dispatchEvent(new w.CustomEvent("travel-data-ready", { detail: {
+    config: { demo: true, modules: { accommodations: false } }, accommodations: [],
+    places: [{ id: "demo-place", name: "Public test place" }], demoNavigationPlaceIds: ["demo-place"], ticketPlanning: { items: [] }
+  } }));
+  assert.equal(w.document.querySelector("#map-examples").parentElement.id, "main");
+  assert.equal(w.document.querySelector("#map-examples [data-place]").dataset.place, "demo-place");
+  assert.match(w.document.querySelector(".demo-notice").textContent, /虚构示例/);
+});

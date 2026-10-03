@@ -1,5 +1,5 @@
 (() => {
-  const TRAVEL_HASHES = new Set(["", "#top", "#flights", "#stays", "#route", "#itinerary", "#drive", "#prep", "#materials"]);
+  const TRAVEL_HASHES = new Set(["", "#top", "#flights", "#stays", "#route", "#itinerary", "#drive", "#prep", "#materials", "#main"]);
   const isLedgerHash = (hash) => hash === "#ledger" || hash.startsWith("#ledger-");
   const ledgerEnabled = () => !document.querySelector("#ledger-navigation-link")?.hidden;
   const viewForHash = (hash) => isLedgerHash(hash) && ledgerEnabled() ? "ledger" : "travel";
@@ -23,7 +23,10 @@
       overview: modules.overview, driving: modules.driving, todo: modules.todo, materials: true
     };
     const hashChapters = { "#itinerary": "itinerary", "#flights": "bookings", "#stays": "bookings", "#route": "overview", "#drive": "driving", "#prep": "todo", "#materials": "materials" };
-    let chapter = isLedgerHash(hash) ? "ledger" : hash.startsWith("#stay-") ? "bookings" : hashChapters[hash];
+    let chapter = isLedgerHash(hash) && modules.ledger ? "ledger" : hash.startsWith("#stay-") ? "bookings" : hashChapters[hash];
+    if (["#main", "#top"].includes(hash) && enabled[document.body.dataset.chapter]) {
+      chapter = document.body.dataset.chapter;
+    }
     if (!chapter || (chapter !== "ledger" && !enabled[chapter])) {
       chapter = ["itinerary", "bookings", "overview", "driving", "todo", "materials"].find(name => enabled[name]);
     }
