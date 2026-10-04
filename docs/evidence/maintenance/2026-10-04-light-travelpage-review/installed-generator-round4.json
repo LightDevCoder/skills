@@ -1,0 +1,20 @@
+{
+  "candidate": "06b0e64c0d99c5bce5de2dd1bf776e82d3c9df72",
+  "entry": "/Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skill-local-round4/.agents/skills/light-travelpage/scripts/create.mjs",
+  "destination": "/Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skill-install-generated-round4",
+  "success": {
+    "exit": 0,
+    "files": 50,
+    "all_template_files_equal": true,
+    "stdout": "Created /Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skill-install-generated-round4. Fill trip-data.json, npm ci, then npm run build. Cloudflare setup is described in references/deployment.md.\n"
+  },
+  "existing_destination": {
+    "exit": 1,
+    "hashes_unchanged": true,
+    "stderr": "file:///Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skill-local-round4/.agents/skills/light-travelpage/scripts/create.mjs:9\n  throw new Error(\n        ^\n\nError: Destination already exists; use update.mjs for an existing trip\n    at file:///Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skill-local-round4/.agents/skills/light-travelpage/scripts/create.mjs:9:9\n    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)\n    at async node:internal/modules/esm/loader:650:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v26.7.0\n"
+  },
+  "missing_argument": {
+    "exit": 1,
+    "stderr": "file:///Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skill-local-round4/.agents/skills/light-travelpage/scripts/create.mjs:6\n  throw new Error(\"Usage: node create.mjs <new-project-directory>\");\n        ^\n\nError: Usage: node create.mjs <new-project-directory>\n    at file:///Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skill-local-round4/.agents/skills/light-travelpage/scripts/create.mjs:6:9\n    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)\n    at async node:internal/modules/esm/loader:650:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v26.7.0\n"
+  }
+}
