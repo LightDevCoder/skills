@@ -515,7 +515,6 @@ function dayCard(day) {
       <span class="day-dot" aria-hidden="true"></span>
       <button class="day-toggle" type="button" aria-expanded="${expanded}" aria-controls="day-detail-${day.day}">
         <span>
-          ${$("#handbook-dates") ? `<span class="handbook-date-number" aria-hidden="true">${escapeHtml(day.date?.slice(-2) || String(day.day).padStart(2,"0"))}</span>` : ""}
           <span class="day-meta">DAY ${String(day.day).padStart(2, "0")} · ${escapeHtml(formatCompactDate(day.date))}${isToday ? " · 今天" : ""}</span>
           <span class="day-title">${escapeHtml(day.title)}</span>
           <span class="day-locations">${escapeHtml(day.locations.join(" → "))}</span>
@@ -604,39 +603,17 @@ function currentTripDay() {
   return state.data.days.find((day) => day.date === today)?.day || null;
 }
 
-function updateHandbookDays() {
-  const navigation = $("#handbook-dates");
-  if (!navigation) return;
-  $$(".day-card", $("#timeline")).forEach(card => { card.hidden = Number(card.dataset.day) !== state.expandedDay; });
-  $$("[data-handbook-day]", navigation).forEach(button => {
-    button.setAttribute("aria-pressed", String(Number(button.dataset.handbookDay) === state.expandedDay));
-  });
-}
-
 function renderTimeline() {
   const today = currentTripDay();
-  const handbook = Boolean($("#handbook-dates"));
-  state.expandedDay = today || (handbook ? state.data.days[0]?.day ?? null : null);
+  state.expandedDay = today;
   $("#day-count").textContent = `${state.data.days.length} DAYS`;
   $("#timeline").innerHTML = state.data.days.map(dayCard).join("");
-  const navigation = $("#handbook-dates");
-  if (navigation) {
-    navigation.innerHTML = state.data.days.map(day => `<button type="button" data-handbook-day="${day.day}" aria-pressed="${state.expandedDay === day.day}" aria-controls="day-detail-${day.day}"><strong>${escapeHtml(day.date?.slice(-2) || String(day.day).padStart(2,"0"))}</strong><span>${escapeHtml(day.date ? formatCompactDate(day.date) : `DAY ${day.day}`)}</span></button>`).join("");
-    navigation.onclick = event => {
-      const button = event.target.closest("[data-handbook-day]");
-      if (!button) return;
-      const toggle = $(`.day-card[data-day="${Number(button.dataset.handbookDay)}"] .day-toggle`, $("#timeline"));
-      if (toggle?.getAttribute("aria-expanded") !== "true") toggle?.click();
-    };
-    updateHandbookDays();
-  }
   $("#timeline").onclick = (event) => {
     const toggle = event.target.closest(".day-toggle");
     if (!toggle) return;
     const card = toggle.closest(".day-card");
     const dayNumber = Number(card.dataset.day);
     const wasExpanded = toggle.getAttribute("aria-expanded") === "true";
-    if (handbook && wasExpanded) return;
     $$(".day-toggle", $("#timeline")).forEach((button) => button.setAttribute("aria-expanded", "false"));
     $$(".day-detail", $("#timeline")).forEach((detail) => { detail.hidden = true; });
     if (!wasExpanded) {
@@ -646,7 +623,6 @@ function renderTimeline() {
     } else {
       state.expandedDay = null;
     }
-    if (handbook) updateHandbookDays();
   };
   $("#timeline").onchange = async (event) => {
     const checkbox = event.target.closest(".schedule-ticket input[type='checkbox']");
@@ -895,7 +871,6 @@ window.LightTravelRefresh = async function () {
   await loadSharedState();
   if (moduleEnabled("todo")) renderTodoList();
   if (moduleEnabled("itinerary")) for (const ticket of state.data.ticketPlanning.items) updateInlineTicketState(ticket.id, state.purchasedTickets.has(ticket.id));
-  window.dispatchEvent(new CustomEvent("travel-runtime:ready", { detail: { todos: state.todos } }));
 };
 
 function safeExternalUrl(value) {
@@ -1038,7 +1013,6 @@ async function init() {
     }
     startCountdowns();
     window.TravelI18n?.apply();
-    window.dispatchEvent(new CustomEvent("travel-runtime:ready", { detail: { todos: state.todos } }));
   } catch (error) {
     console.error("Travel data could not be loaded", error);
     $("#loading-error").hidden = false;

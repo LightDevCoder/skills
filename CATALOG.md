@@ -178,13 +178,13 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### light-travelpage
 
-- **Purpose:** Generate or update a bilingual mobile travel handbook with chapter navigation, serif headings and dates, desktop and touch flight cards, region-matched geographic outlines and map navigation, shared members, expenses, currency settings, tasks and ticket status.
+- **Purpose:** Generate or update a bilingual mobile travel page with desktop and touch flight cards, region-matched geographic outlines and map navigation, shared members, expenses, currency settings, tasks and ticket status.
 - **When to use:** Create or maintain a travel webpage from supplied materials; not ordinary travel advice or booking purchases.
 - **Invocation:** Model-invoked.
 - **Package:** [skills/productivity/light-travelpage/](skills/productivity/light-travelpage)
 - **Installation path:** `<skills-root>/light-travelpage/`.
 - **Status:** Admitted first-party transformation; included in the current stable collection. Default deployment: GitHub + Cloudflare Pages, Functions and D1; one equal-access group per deployment.
-- **Evidence:** [Admission](docs/evidence/admissions/light-travelpage/README.md) · [Latest update](docs/evidence/maintenance/2026-10-04-light-travelpage.md) · [Attribution](skills/productivity/light-travelpage/ATTRIBUTION.md).
+- **Evidence:** [Admission](docs/evidence/admissions/light-travelpage/README.md) · [Latest update](docs/evidence/maintenance/2026-10-04-light-travelpage-rollback.md) · [Attribution](skills/productivity/light-travelpage/ATTRIBUTION.md).
 
 ### manuscript-ops
 
