@@ -8,7 +8,7 @@
 
 > **Release:** [v0.2.5](https://github.com/LightDevCoder/skills/releases/tag/v0.2.5) is the current stable release of all 36 first-party Skills. Its immutable [release manifest](docs/evidence/releases/v0.2.5/RELEASE_MANIFEST.md) and post-publication [release receipt](docs/evidence/releases/v0.2.5/RELEASE_RECEIPT.md) record the scope and verification.
 
-> **Local release candidate:** v0.2.6 focuses on the `light-travelpage` handbook and optional AI. Read the [English notes](docs/evidence/releases/v0.2.6/RELEASE_NOTES.md) or [中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md). Final review and publication checks are pending; the stable release above remains unchanged.
+> **Local release candidate:** v0.2.6 focuses on the `light-travelpage` handbook and optional AI. Read the [English notes](docs/evidence/releases/v0.2.6/RELEASE_NOTES.md) or [中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md). Independent source acceptance passed; publication checks remain pending and the stable release above remains unchanged.
 
 ## Browse by category
 

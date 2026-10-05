@@ -20,7 +20,7 @@
 
 `v0.2.5` 的公开发布与全新安装已验证；包数量仍为 36。
 
-本地 v0.2.6 候选优化 `light-travelpage`，[候选发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md)记录范围。独立终检和发布检查待完成。
+本地 v0.2.6 候选优化 `light-travelpage`，[候选发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md)记录范围。独立源码验收已通过，发布检查仍待完成。
 
 `v0.1.1` 发布五个包；`v0.1.2` 增加 `recap` 与 `language-learning`（七个）；`v0.1.3` 迁移测试工具链；`v0.1.4` 增加 `kanban-worker`；`v0.1.5` 收紧看板调度与身份；`v0.1.6` 增加 `kb-init`（九个）。`v0.2.0` 正式发布涵盖项目工作流、澄清、执行、审阅与专项工具的完整 33 包架构，随后 v0.2.0 发布线扩展了 `humanizer` 准入（34 个包；见 [CHANGELOG.zh-CN.md](CHANGELOG.zh-CN.md)）。`v0.2.1` 增加 `light-travelpage` 与 `project-retro`（36 个包）。`v0.2.2` 最终收敛 TypeSafe Jev 语义加速、分类目录架构与不可变发布完整性。`v0.2.3` 拆分发布前不可变清单与发布后验证收据，追加 v0.2.2 历史事实证明，完成 project-retro 正向状态驱动重构，并形式化六阶段发布生命周期。
 

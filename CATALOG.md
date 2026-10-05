@@ -20,7 +20,7 @@ This catalog is synchronized from the 36 admitted package directories under `ski
 
 `v0.2.5` publication and fresh installation are verified; package count remains 36.
 
-The local v0.2.6 candidate updates `light-travelpage`; [candidate notes](docs/evidence/releases/v0.2.6/RELEASE_NOTES.md) describe its scope. Final review and publication checks are pending.
+The local v0.2.6 candidate updates `light-travelpage`; [candidate notes](docs/evidence/releases/v0.2.6/RELEASE_NOTES.md) describe its scope. Independent source acceptance passed; publication checks remain pending.
 
 `v0.1.1` shipped five packages; `v0.1.2` added `recap` and `language-learning` (seven); `v0.1.3` migrated the test toolchain; `v0.1.4` added `kanban-worker`; `v0.1.5` tightened kanban scheduling and identity; `v0.1.6` added `kb-init` (nine). `v0.2.0` released the full 33-package architecture across project workflow, clarification, execution, review, and specialized tools, and the v0.2.0 line was extended with the `humanizer` admission (34 packages; see [CHANGELOG.md](CHANGELOG.md)). `v0.2.1` added `light-travelpage` and `project-retro` (36 packages). `v0.2.2` finalized TypeSafe Jev semantic acceleration, category layout, and immutable release integrity. `v0.2.3` separated immutable release manifests from post-publication receipts, added v0.2.2 historical attestation, refactored project-retro into positive state-driven instructions, and formalized the six-stage release lifecycle.
 

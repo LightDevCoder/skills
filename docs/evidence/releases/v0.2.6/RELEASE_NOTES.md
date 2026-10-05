@@ -36,4 +36,4 @@ The local candidate passes 80 template tests, 4 generator tests and builds for A
 
 Collection checks pass 528 pytest tests, 156 unittest tests, compilation and public documentation checks. Candidate-version detection is tested with isolated version folders instead of a fixed previous-release number.
 
-Independent final review, exact-commit CI, published-tag installation and publication checks are pending. This file describes the local release candidate until those gates complete.
+Independent source acceptance passed in the owner-authorized fourth round, with separate Standards/Spec checks and a fresh whole-package Evaluator. Exact-commit CI, protected annotated tags and pinned/latest fresh installations are separate release-workflow gates. The manifest records the pre-publication snapshot; verified publication facts are attested on `main` after release.
