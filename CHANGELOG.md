@@ -4,7 +4,7 @@
 
 All notable changes are recorded here. A release entry must be tied to an actual version or tag and must not be created merely because a document was drafted.
 
-## Unreleased — v0.2.6 candidate
+## 0.2.6 — 2026-10-05
 
 - `light-travelpage`: Use the approved travel handbook with system serif headings, instant daily pages and a visible Route chapter. Keep each daily map with its schedule; expand the selected place's full group, preserve other points and reset expansion when changing dates. Show Materials directly when it is the only secondary section.
 - `light-travelpage`: Unify sign-in, map/ticket dialogs, ledger controls and optional AI surfaces; use to-do consistently while preserving authored travel text, bilingual drafts, flight/stay cards, protected original materials and shared record IDs.

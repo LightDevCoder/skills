@@ -6,9 +6,7 @@
 
 `LightDevCoder/skills` provides 36 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<category>/<name>/` and defines its own behavior in `SKILL.md`.
 
-> **Release:** [v0.2.5](https://github.com/LightDevCoder/skills/releases/tag/v0.2.5) is the current stable release of all 36 first-party Skills. Its immutable [release manifest](docs/evidence/releases/v0.2.5/RELEASE_MANIFEST.md) and post-publication [release receipt](docs/evidence/releases/v0.2.5/RELEASE_RECEIPT.md) record the scope and verification.
-
-> **Local release candidate:** v0.2.6 focuses on the `light-travelpage` handbook and optional AI. Read the [English notes](docs/evidence/releases/v0.2.6/RELEASE_NOTES.md) or [中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md). Independent source acceptance passed; publication checks remain pending and the stable release above remains unchanged.
+> **Release:** [v0.2.6](https://github.com/LightDevCoder/skills/releases/tag/v0.2.6) is the current stable release of all 36 first-party Skills. Its immutable [release manifest](docs/evidence/releases/v0.2.6/RELEASE_MANIFEST.md) and post-publication [release receipt](docs/evidence/releases/v0.2.6/RELEASE_RECEIPT.md) record the scope and verification.
 
 ## Browse by category
 
@@ -57,13 +55,13 @@ npx skills add LightDevCoder/skills --skill research
 
 > **Note:** An unqualified repository source (`LightDevCoder/skills`) follows the default branch `main`, delivering the latest admitted features and integrations.
 
-### Stable release snapshot (v0.2.5)
+### Stable release snapshot (v0.2.6)
 
-To install the reproducible stable release snapshot, pin the `#v0.2.5` tag:
+To install the reproducible stable release snapshot, pin the `#v0.2.6` tag:
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.5
-npx skills add LightDevCoder/skills#v0.2.5 --skill project-retro
+npx skills add LightDevCoder/skills#v0.2.6
+npx skills add LightDevCoder/skills#v0.2.6 --skill project-retro
 ```
 
 Previous releases (such as `#v0.2.4`, `#v0.2.2`, `#v0.2.1`, and `#v0.2.0`) remain available for reproducible installs:
@@ -206,5 +204,5 @@ Adapted origin (2 packages): `humanizer` is a substantially transformed first-pa
 - [Review Policy](docs/REVIEW_POLICY.md) · [Reviewer Contract](docs/REVIEWER_CONTRACT.md)
 - [Catalog](CATALOG.md) · [Changelog](CHANGELOG.md)
 - [Workflow Guides](docs/workflows)
-- [Release Receipt](docs/evidence/releases/v0.2.5/RELEASE_RECEIPT.md)
+- [Release Receipt](docs/evidence/releases/v0.2.6/RELEASE_RECEIPT.md)
 - [Collection Discovery Tests](tests/test_collection_discovery.py) · [Composition Tests](tests/test_composition.py)

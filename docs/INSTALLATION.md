@@ -2,11 +2,11 @@
 
 [中文安装说明](INSTALLATION.zh-CN.md)
 
-The public first-party collection's current stable release is [v0.2.5](https://github.com/LightDevCoder/skills/releases/tag/v0.2.5), published at tag `v0.2.5` (immutable [release manifest](evidence/releases/v0.2.5/RELEASE_MANIFEST.md) and post-publication [release receipt](evidence/releases/v0.2.5/RELEASE_RECEIPT.md)). It provides **36 admitted first-party Skills** across 7 purpose-based categories. Package contracts remain inside `skills/<category>/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
+The public first-party collection's current stable release is [v0.2.6](https://github.com/LightDevCoder/skills/releases/tag/v0.2.6), published at tag `v0.2.6` (immutable [release manifest](evidence/releases/v0.2.6/RELEASE_MANIFEST.md) and post-publication [release receipt](evidence/releases/v0.2.6/RELEASE_RECEIPT.md)). It provides **36 admitted first-party Skills** across 7 purpose-based categories. Package contracts remain inside `skills/<category>/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
 
 The standard install command is the generic `latest` form: it follows the repository's default revision, so `npx skills add LightDevCoder/skills` is the recommended interactive entry point to select the desired Skills and Agent hosts. Pinned release commands select published tags for reproducible installs. Historical verification commands (which tested full-collection installations across all supported agents) are documented below alongside historical evidence.
 
-The local v0.2.6 candidate updates `light-travelpage` with a handbook UI and default-off AI choice. Its [candidate notes](evidence/releases/v0.2.6/RELEASE_NOTES.md) describe the changes; no published-v0.2.6 installation is verified yet. Keep using the published source examples below until release verification completes.
+v0.2.6 updates `light-travelpage` with a handbook UI and default-off AI choice. Its [release notes](evidence/releases/v0.2.6/RELEASE_NOTES.md) describe the changes. The [release receipt](evidence/releases/v0.2.6/RELEASE_RECEIPT.md) records pinned/latest installations in separate disposable directories: 36 packages and 385 package files in each, byte-identical to the release snapshot; Skills CLI 1.7.0 discovered all 36 Skills.
 
 ## Categorized sources and installed packages
 
@@ -42,13 +42,14 @@ npx skills add LightDevCoder/skills --skill project-retro
 To install from a specific published release tag (recommended for reproducible setups):
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.5 -y
-npx skills add LightDevCoder/skills#v0.2.5 --skill project-retro -y
+npx skills add LightDevCoder/skills#v0.2.6 -y
+npx skills add LightDevCoder/skills#v0.2.6 --skill project-retro -y
 ```
 
-Previous releases (such as `#v0.2.4`, `#v0.2.3`, `#v0.2.2`, `#v0.2.1`, and `#v0.2.0`) remain available for reproducible historical installs:
+Previous releases (such as `#v0.2.5`, `#v0.2.4`, `#v0.2.3`, `#v0.2.2`, `#v0.2.1`, and `#v0.2.0`) remain available for reproducible historical installs:
 
 ```bash
+npx skills add LightDevCoder/skills#v0.2.5
 npx skills add LightDevCoder/skills#v0.2.4
 npx skills add LightDevCoder/skills#v0.2.3
 npx skills add LightDevCoder/skills#v0.2.3 --skill project-retro

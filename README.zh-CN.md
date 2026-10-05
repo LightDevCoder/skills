@@ -6,9 +6,7 @@
 
 `LightDevCoder/skills` 包含 36 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<category>/<name>/`，由包内的 `SKILL.md` 统领具体行为。
 
-> **发布版本：** v0.2.5 是包含全部 36 个第一方 Skill 的当前稳定版本。阅读[中文发布说明](docs/evidence/releases/v0.2.5/RELEASE_NOTES.zh-CN.md)或[English GitHub Release](https://github.com/LightDevCoder/skills/releases/tag/v0.2.5)；不可变的[发布清单](docs/evidence/releases/v0.2.5/RELEASE_MANIFEST.zh-CN.md)与发布后的[发布收据](docs/evidence/releases/v0.2.5/RELEASE_RECEIPT.zh-CN.md)记录范围和验证事实。
-
-> **本地发布候选：** v0.2.6 主要优化 `light-travelpage` 的旅行手册与可选 AI。阅读[中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md)或[English notes](docs/evidence/releases/v0.2.6/RELEASE_NOTES.md)。独立源码验收已通过，发布检查仍待完成，上述稳定版本保持不变。
+> **发布版本：** v0.2.6 是包含全部 36 个第一方 Skill 的当前稳定版本。阅读[中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md)或[English GitHub Release](https://github.com/LightDevCoder/skills/releases/tag/v0.2.6)；不可变的[发布清单](docs/evidence/releases/v0.2.6/RELEASE_MANIFEST.zh-CN.md)与发布后的[发布收据](docs/evidence/releases/v0.2.6/RELEASE_RECEIPT.zh-CN.md)记录范围和验证事实。
 
 ## 按分类浏览
 
@@ -57,13 +55,13 @@ npx skills add LightDevCoder/skills --skill research
 
 > **说明：** 不带 fragment 的仓库源（`LightDevCoder/skills`）将跟随默认分支 `main`，获取最新的已准入特性与集成。
 
-### 稳定版本快照（v0.2.5）
+### 稳定版本快照（v0.2.6）
 
-若需安装可复现的稳定发布快照，请锁定 `#v0.2.5` tag：
+若需安装可复现的稳定发布快照，请锁定 `#v0.2.6` tag：
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.5
-npx skills add LightDevCoder/skills#v0.2.5 --skill project-retro
+npx skills add LightDevCoder/skills#v0.2.6
+npx skills add LightDevCoder/skills#v0.2.6 --skill project-retro
 ```
 
 历史版本（如 `#v0.2.4`、`#v0.2.2`、`#v0.2.1` 与 `#v0.2.0`）依然保留供复现：
@@ -206,5 +204,5 @@ $ask-light workflow
 - [审阅策略](docs/REVIEW_POLICY.zh-CN.md) · [Reviewer 契约](docs/REVIEWER_CONTRACT.zh-CN.md)
 - [目录](CATALOG.zh-CN.md) · [变更记录](CHANGELOG.zh-CN.md)
 - [工作流指南](docs/zh-CN/workflows)
-- [发布收据](docs/evidence/releases/v0.2.5/RELEASE_RECEIPT.zh-CN.md)
+- [发布收据](docs/evidence/releases/v0.2.6/RELEASE_RECEIPT.zh-CN.md)
 - [集合发现测试](tests/test_collection_discovery.py) · [组合测试](tests/test_composition.py)
