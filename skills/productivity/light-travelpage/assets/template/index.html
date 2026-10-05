@@ -3,52 +3,61 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f3f6f2">
+  <meta name="theme-color" content="#eeeae0">
   <meta name="format-detection" content="telephone=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>Light-TravelPage</title>
   <link rel="stylesheet" href="styles.css?v=20260927-1">
   <link rel="stylesheet" href="ledger.css?v=20260910-2">
+  <link rel="stylesheet" href="handbook.css?v=20261005-5">
   <script src="i18n.js?v=20260927-1" defer></script>
   <script src="map-navigation.js" defer></script>
-  <script src="travel-cards.js" defer></script>
+  <script src="travel-cards.js?v=20261003-1" defer></script>
   <script src="runtime-storage.js?v=20260910-2" defer></script>
   <script src="overview-map.js?v=20260927-1" defer></script>
-  <script src="route-ui.js?v=20260927-1" defer></script>
-  <script src="app.js?v=20260927-1" defer></script>
-  <script type="module" src="ledger.js?v=20260910-3" defer></script>
-  <script src="site-navigation.js?v=20260910-2" defer></script>
+  <script src="route-ui.js?v=20261005-5" defer></script>
+  <script src="app.js?v=20261005-5" defer></script>
+  <script type="module" src="ledger.js?v=20261003-1" defer></script>
+  <script src="site-navigation.js?v=20261005-5" defer></script>
   <script src="sync-ui.js" defer></script>
+  <script src="handbook.js?v=20261005-2" defer></script>
+  <!-- optional-ai:head -->
 </head>
-<body>
+<body data-layout="handbook">
   <a class="skip-link" id="skip-link" href="#main">跳到主要内容</a>
   <header class="topbar" id="topbar">
     <a class="wordmark" id="wordmark" href="#top" aria-label="返回顶部"></a>
     <button type="button" id="language-toggle" data-no-translate aria-label="中文 / English">中文 / EN</button>
     <nav class="primary-navigation" aria-label="主要模块">
+      <a id="materials-navigation-link" href="#materials" data-chapter="materials" hidden>材料</a>
       <details class="travel-navigation" id="travel-navigation" hidden>
-        <summary id="travel-navigation-trigger">旅行信息</summary>
+        <summary id="travel-navigation-trigger">更多</summary>
         <div class="travel-navigation-menu" role="menu" aria-label="旅行信息栏目">
-          <a href="#flights" role="menuitem" data-module="flights" hidden>航班</a>
-          <a href="#stays" role="menuitem" data-module="accommodations" hidden>住宿</a>
-          <a href="#route" role="menuitem" data-module="overview" hidden>路线</a>
-          <a href="#itinerary" role="menuitem" data-module="itinerary" hidden>行程</a>
-          <a href="#drive" role="menuitem" data-module="driving" hidden>自驾</a>
-          <a href="#prep" role="menuitem" data-module="todo" hidden>Todo</a>
+          <a href="#materials" role="menuitem" data-chapter="materials">材料</a>
+          <a href="#drive" role="menuitem" data-chapter="driving" data-module="driving" hidden>自驾</a>
         </div>
       </details>
-      <a class="primary-navigation__ledger" id="ledger-navigation-link" href="#ledger" data-module="ledger" hidden>记账</a>
     </nav>
   </header>
 
   <aside class="sync-panel" aria-label="共享状态"><div id="sync-message" role="status">正在读取共享旅程…</div><div class="sync-actions"><button id="sync-refresh">刷新共享数据</button><button id="sync-retry" hidden>重试保存</button><button id="sync-export">导出备份</button><label>恢复备份<input id="sync-import" type="file" accept="application/json" hidden></label><form method="post" action="/auth/logout"><button>退出小组</button></form></div></aside>
-  <main id="main" data-site-view="travel">
+  <div class="handbook-shell">
     <section class="hero" id="top" aria-labelledby="trip-title">
       <div class="hero__eyebrow" id="trip-eyebrow"></div>
       <h1 id="trip-title">正在载入旅程</h1>
       <p class="hero__date" id="trip-date"></p>
     </section>
+
+    <nav class="handbook-tabs" aria-label="旅行手册章节">
+      <a href="#itinerary" data-chapter="itinerary" data-module="itinerary" hidden><span aria-hidden="true">01</span> 行程</a>
+      <a href="#stays" data-chapter="bookings" id="bookings-navigation-link" hidden><span aria-hidden="true">02</span> 预订</a>
+      <a id="ledger-navigation-link" href="#ledger" data-chapter="ledger" data-module="ledger" hidden><span aria-hidden="true">03</span> 账本</a>
+      <a href="#prep" data-chapter="todo" data-module="todo" hidden><span aria-hidden="true">04</span> to-do</a>
+      <a href="#route" data-chapter="overview" data-module="overview" hidden><span aria-hidden="true">05</span> 路线</a>
+    </nav>
+    <div class="handbook-pages">
+  <main id="main" data-site-view="travel">
 
     <section class="section flights-section" id="flights" aria-labelledby="flights-title" data-module="flights" hidden>
       <div class="section-heading">
@@ -88,6 +97,7 @@
         </div>
         <span class="soft-label" id="day-count"></span>
       </div>
+      <div class="handbook-dates" id="handbook-dates" aria-label="选择旅行日期"></div>
       <div class="timeline" id="timeline"></div>
     </section>
 
@@ -107,26 +117,30 @@
       <div class="section-heading">
         <div>
           <p class="section-kicker">BEFORE WE GO</p>
-          <h2 id="prep-title">旅行前准备</h2>
+          <h2 id="prep-title">to-do</h2>
         </div>
         <span class="soft-label" id="todo-progress">0 / 0</span>
       </div>
       <form class="todo-form" id="todo-form">
-        <input id="todo-input" type="text" maxlength="80" placeholder="添加一项准备事项" aria-label="准备事项">
+        <input id="todo-input" type="text" maxlength="80" placeholder="添加 to-do" aria-label="to-do">
         <button type="submit">添加</button>
       </form>
       <div class="todo-list" id="todo-list"></div>
     </section>
 
-    <footer class="footer">
-      <p id="footer-mark"></p>
-      <a href="#top">回到顶部 ↑</a>
-    </footer>
+    <section class="section" id="materials" aria-labelledby="materials-title" hidden>
+      <div class="section-heading"><div><p class="section-kicker">ORIGINALS</p><h2 id="materials-title">原始材料</h2></div></div>
+      <div id="handbook-materials"></div>
+    </section>
   </main>
 
   <main class="ledger-view" id="ledger-view" data-site-view="ledger" data-module="ledger" hidden>
     <div id="ledger-root"></div>
   </main>
+    <aside class="handbook-pocket" id="handbook-pocket" aria-labelledby="pocket-title"></aside>
+    </div>
+    <footer class="footer"><p id="footer-mark"></p><a href="#top">回到顶部 ↑</a></footer>
+  </div>
 
   <dialog class="map-dialog" id="map-dialog">
     <button type="button" class="dialog-close" id="map-close" aria-label="关闭路线图">关闭</button>
@@ -148,5 +162,6 @@
     <strong>行程暂时无法载入</strong>
     <span>请确认 trip-data.json 已通过生成校验，并与网页位于同一目录。</span>
   </div>
+  <!-- optional-ai:body -->
 </body>
 </html>

@@ -4,11 +4,13 @@
 
 All notable changes are recorded here. A release entry must be tied to an actual version or tag and must not be created merely because a document was drafted.
 
-## Unreleased
+## Unreleased — v0.2.6 candidate
 
-- `light-travelpage`: Withdraw the 2026-10-04 handbook UI change at the owner's request. Restore the pre-change package (`49e7cbe`); keep the experimental design local pending further testing.
-
-- `light-travelpage`: Build authenticated first-page PNG previews for PDF tickets and display them with zoom and an original-PDF link in the shared dialog. Google and Apple navigation now prefer readable local names and addresses over coordinate-only searches. Add mobile interaction, map fallback, and PDF build fixture coverage. Add desktop flight paging controls. Known destinations with verified WGS84 places now use a sourced, matching geographic outline by default; template shapes are reserved for fictional or unavailable geography and are labelled schematic.
+- `light-travelpage`: Use the approved travel handbook with system serif headings, instant daily pages and a visible Route chapter. Keep each daily map with its schedule; expand the selected place's full group, preserve other points and reset expansion when changing dates. Show Materials directly when it is the only secondary section.
+- `light-travelpage`: Unify sign-in, map/ticket dialogs, ledger controls and optional AI surfaces; use to-do consistently while preserving authored travel text, bilingual drafts, flight/stay cards, protected original materials and shared record IDs.
+- `light-travelpage`: Ask about AI before generation when the choice is unknown; default off. Enabled pages use a protected server-side Chat Completions/Responses connection for available to-do, ticket-status and ledger actions. Keep source travel content and merchant orders read-only. Preserve exact-request retry, unsent/new drafts and visible initialization errors.
+- `light-travelpage`: Initialize validated undated drafts with DAY labels. Retain sourced geographic outlines, accessible desktop flight paging and authenticated PNG ticket previews with original PDFs. Preserve the earlier rollback and exact historical review records.
+- Release checks: detect the latest candidate using an isolated version-directory fixture, so preparing a new version does not fail a test pinned to the previous release.
 
 ## 0.2.5 — 2026-09-24
 

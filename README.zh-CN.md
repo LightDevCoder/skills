@@ -8,6 +8,8 @@
 
 > **发布版本：** v0.2.5 是包含全部 36 个第一方 Skill 的当前稳定版本。阅读[中文发布说明](docs/evidence/releases/v0.2.5/RELEASE_NOTES.zh-CN.md)或[English GitHub Release](https://github.com/LightDevCoder/skills/releases/tag/v0.2.5)；不可变的[发布清单](docs/evidence/releases/v0.2.5/RELEASE_MANIFEST.zh-CN.md)与发布后的[发布收据](docs/evidence/releases/v0.2.5/RELEASE_RECEIPT.zh-CN.md)记录范围和验证事实。
 
+> **本地发布候选：** v0.2.6 主要优化 `light-travelpage` 的旅行手册与可选 AI。阅读[中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md)或[English notes](docs/evidence/releases/v0.2.6/RELEASE_NOTES.md)。独立终检和发布检查待完成，上述稳定版本保持不变。
+
 ## 按分类浏览
 
 [全部分类与集合说明](skills/README.zh-CN.md)。36 个技能的源文件已按用途分类，名称和调用方式不变。

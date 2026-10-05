@@ -1,0 +1,8 @@
+<button class="ai-launcher" type="button" id="ai-open" aria-haspopup="dialog" aria-controls="ai-dialog">AI 旅程助手</button>
+<dialog class="ai-dialog" id="ai-dialog" aria-labelledby="ai-title">
+  <header><h2 id="ai-title">AI 旅程助手</h2><button type="button" id="ai-close">关闭</button></header>
+  <p id="ai-capabilities">读取行程与预订；to-do、票据和账本操作按本页内容提供。行程、预订与原始附件仅供查看。不会更改商家订单。</p>
+  <div class="ai-conversation" id="ai-conversation" role="log" aria-live="polite" data-no-translate></div>
+  <form id="ai-form"><label for="ai-input">想查看或记录什么？</label><textarea id="ai-input" maxlength="2000" rows="3" placeholder="例如：添加 to-do，出发前带上雨衣" required></textarea><div class="ai-actions"><button id="ai-submit" type="submit">发送</button><button id="ai-retry" type="button" hidden>重试同一请求</button></div></form>
+  <p id="ai-status" role="status" data-no-translate></p>
+</dialog>

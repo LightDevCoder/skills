@@ -6,6 +6,8 @@ The public first-party collection's current stable release is [v0.2.5](https://g
 
 The standard install command is the generic `latest` form: it follows the repository's default revision, so `npx skills add LightDevCoder/skills` is the recommended interactive entry point to select the desired Skills and Agent hosts. Pinned release commands select published tags for reproducible installs. Historical verification commands (which tested full-collection installations across all supported agents) are documented below alongside historical evidence.
 
+The local v0.2.6 candidate updates `light-travelpage` with a handbook UI and default-off AI choice. Its [candidate notes](evidence/releases/v0.2.6/RELEASE_NOTES.md) describe the changes; no published-v0.2.6 installation is verified yet. Keep using the published source examples below until release verification completes.
+
 ## Categorized sources and installed packages
 
 Current `main` uses `skills/<category>/<name>/`. Host installations remain `<skills-root>/<name>/`; do not install a category directory as one Skill. Selection with `--skill <name>` is unchanged. Published v0.2.1 and earlier tags retain their flat layout; when manually copying from those tags, set `source_package` to `skills/$skill_name`.

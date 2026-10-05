@@ -20,6 +20,8 @@
 
 `v0.2.5` 的公开发布与全新安装已验证；包数量仍为 36。
 
+本地 v0.2.6 候选优化 `light-travelpage`，[候选发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md)记录范围。独立终检和发布检查待完成。
+
 `v0.1.1` 发布五个包；`v0.1.2` 增加 `recap` 与 `language-learning`（七个）；`v0.1.3` 迁移测试工具链；`v0.1.4` 增加 `kanban-worker`；`v0.1.5` 收紧看板调度与身份；`v0.1.6` 增加 `kb-init`（九个）。`v0.2.0` 正式发布涵盖项目工作流、澄清、执行、审阅与专项工具的完整 33 包架构，随后 v0.2.0 发布线扩展了 `humanizer` 准入（34 个包；见 [CHANGELOG.zh-CN.md](CHANGELOG.zh-CN.md)）。`v0.2.1` 增加 `light-travelpage` 与 `project-retro`（36 个包）。`v0.2.2` 最终收敛 TypeSafe Jev 语义加速、分类目录架构与不可变发布完整性。`v0.2.3` 拆分发布前不可变清单与发布后验证收据，追加 v0.2.2 历史事实证明，完成 project-retro 正向状态驱动重构，并形式化六阶段发布生命周期。
 
 本表无未修改的上游复制。获批的 Matt PORT 均带 `ATTRIBUTION.md` 且无需上游运行时依赖。
@@ -178,12 +180,12 @@
 
 ### light-travelpage
 
-- **作用：** 从资料生成或更新中英双语旅行网页，提供电脑和手机均可翻页的航班卡片、匹配目的地真实轮廓的地区地图与导航，以及共享同行人、账单、币种设置、待办与门票状态。
+- **作用：** 生成或更新双语旅行手册，包含每天一页及可见路线、航班与酒店卡片、原始材料、共同费用、to-do 和票据状态；可选择加入受保护的服务端 AI 接入。
 - **什么时候用：** 需要根据已有行程资料生成或维护手机旅行网页（含账单、待办、地图），而非普通旅行咨询或票务购买时。
 - **调用方式：** Model-invoked。
 - **包位置：** [skills/productivity/light-travelpage/](skills/productivity/light-travelpage)
 - **状态：** 实质性转换的第一方能力，已收录于当前稳定版本集合；默认 GitHub + Cloudflare Pages、Functions 与 D1，每个部署一个同权限小组。
-- **证据：** [准入](docs/evidence/admissions/light-travelpage/README.md) · [本次更新](docs/evidence/maintenance/2026-10-04-light-travelpage-rollback.md) · [来源](skills/productivity/light-travelpage/ATTRIBUTION.md)。
+- **证据：** [准入](docs/evidence/admissions/light-travelpage/README.md) · [本地候选](docs/evidence/maintenance/2026-10-05-light-travelpage-candidate.md) · [此前撤回](docs/evidence/maintenance/2026-10-04-light-travelpage-rollback.md) · [来源](skills/productivity/light-travelpage/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/light-travelpage/`。
 
 ### manuscript-ops

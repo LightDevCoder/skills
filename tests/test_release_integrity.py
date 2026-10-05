@@ -46,8 +46,14 @@ class ReleaseIntegrityTests(unittest.TestCase):
 
     def test_detect_candidate_tag(self) -> None:
         """Infers latest candidate release tag from docs/evidence/releases/."""
-        tag = detect_candidate_tag(ROOT)
-        self.assertEqual(tag, "v0.2.5")
+        with tempfile.TemporaryDirectory(prefix="release-candidate-detection-") as tmp:
+            fixture_root = Path(tmp)
+            releases = fixture_root / "docs" / "evidence" / "releases"
+            releases.mkdir(parents=True)
+            for version in ["v0.2.9", "v0.1.99", "v0.2.10"]:
+                (releases / version).mkdir()
+            (releases / "v9.9.9").write_text("not a release directory", encoding="utf-8")
+            self.assertEqual(detect_candidate_tag(fixture_root), "v0.2.10")
 
     def test_new_tag_passes_ready_for_creation(self) -> None:
         """A tag that does not exist locally or remotely passes ready for creation."""

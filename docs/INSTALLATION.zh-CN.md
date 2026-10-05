@@ -6,6 +6,8 @@
 
 标准安装命令是通用 `latest` 形式：它跟随仓库默认 revision，因此 `npx skills add LightDevCoder/skills` 是推荐的交互式安装入口，可按需选择 Skill 与目标 Agent。pinned release 命令选择已发布的 tag，用于可复现安装。历史验证命令（曾用于在隔离环境中跨所有受支持 Agent 测试完整集合）与历史证据一同记录在下方。
 
+本地 v0.2.6 候选为 `light-travelpage` 增加手册 UI 和默认关闭的 AI 选择，[候选说明](evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md)记录范围。尚未验证已发布 v0.2.6 的安装，发布验证完成前继续使用下方已发布来源示例。
+
 ## 分类源码与安装目录
 
 当前 `main` 使用 `skills/<category>/<name>/`。宿主安装目录仍是 `<skills-root>/<name>/`，不要把分类目录整体当成一个 Skill。`--skill <name>` 的选择方式不变。已发布的 v0.2.1 及更早 tag 保留原平铺结构；使用这些 tag 手动复制时，将 `source_package` 设为 `skills/$skill_name`。

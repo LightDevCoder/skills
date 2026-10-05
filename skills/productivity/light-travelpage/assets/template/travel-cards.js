@@ -16,7 +16,8 @@
     if(data.config.demo && data.demoNavigationPlaceIds?.length){
       const section=document.createElement('section');section.className='section';section.id='map-examples';
       section.innerHTML='<h2>地区地图演示</h2><p>以下是真实公共地点，用于测试地图，不属于本次行程。</p>'+data.demoNavigationPlaceIds.map(id=>data.places.find(p=>p.id===id)).filter(Boolean).map(p=>TravelMaps.button(p.id,p.nameZh||p.name)).join('');
-      document.querySelector('#main .footer').before(section);
+      const anchor=document.querySelector('#main .footer, #main #materials');
+      if(anchor)anchor.before(section);else document.getElementById('main')?.append(section);
     }
     if(data.config.demo){const p=document.createElement('p');p.className='demo-notice';p.textContent='虚构示例，不可用于出行';document.querySelector('.hero').append(p);}
   }

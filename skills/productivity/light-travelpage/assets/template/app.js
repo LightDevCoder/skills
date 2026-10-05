@@ -48,9 +48,17 @@ function applyModuleConfig() {
   document.querySelectorAll("[data-module]").forEach((element) => {
     element.hidden = !moduleEnabled(element.dataset.module);
   });
-  const visibleTravelLinks = [...document.querySelectorAll(".travel-navigation-menu [data-module]")].filter((link) => !link.hidden);
+  const bookingsLink = $("#bookings-navigation-link");
+  if (bookingsLink) {
+    bookingsLink.hidden = !(moduleEnabled("flights") || moduleEnabled("accommodations"));
+    bookingsLink.href = moduleEnabled("flights") ? "#flights" : "#stays";
+  }
+  const visibleTravelLinks = [...document.querySelectorAll(".travel-navigation-menu a")].filter((link) => !link.hidden);
   const travelNavigation = $("#travel-navigation");
-  if (travelNavigation) travelNavigation.hidden = visibleTravelLinks.length === 0;
+  const materialsLink = $("#materials-navigation-link");
+  const materialsOnly = Boolean(materialsLink && visibleTravelLinks.length === 1 && visibleTravelLinks[0].dataset.chapter === "materials");
+  if (materialsLink) materialsLink.hidden = !materialsOnly;
+  if (travelNavigation) travelNavigation.hidden = visibleTravelLinks.length === 0 || materialsOnly;
   document.documentElement.dataset.persistence = state.config.persistence.mode;
 
   const hashModules = {
@@ -59,7 +67,7 @@ function applyModuleConfig() {
   };
   const requestedModule = hashModules[location.hash];
   if (requestedModule && !moduleEnabled(requestedModule)) {
-    const firstVisible = visibleTravelLinks[0]?.getAttribute("href") || "#top";
+    const firstVisible = [...document.querySelectorAll(".handbook-tabs a")].find(link => !link.hidden)?.getAttribute("href") || visibleTravelLinks[0]?.getAttribute("href") || "#top";
     history.replaceState({ view: "travel" }, "", firstVisible);
   }
   window.dispatchEvent(new CustomEvent("travel-config:ready", { detail: { config: state.config } }));
@@ -486,13 +494,14 @@ function inlineTicketMarkup(ticket) {
 function dayCard(day) {
   const today = todayForTrip();
   const isToday = day.date === today;
-  const expanded = state.expandedDay === day.day;
+  const handbook = Boolean($("#handbook-dates"));
+  const expanded = handbook || state.expandedDay === day.day;
   const schedule = day.schedule.map((item) => {
     const destinations = navigationDestinations(item);
     const mapLinks = destinations.map(d => window.TravelMaps.button(d.id, d.label, {id:d.id,name:d.label,address:d.query,googleMapsUrl:d.url})).join("");
     const scheduleTickets = ticketsForSchedule(day, item).map(inlineTicketMarkup).join("");
     return `
-      <li class="schedule-item">
+      <li class="schedule-item" data-schedule-id="${escapeHtml(item.id || "")}" data-schedule-place="${escapeHtml(item.placeId || item.placeIds?.[0] || "")}">
         <span class="schedule-time">${escapeHtml(item.time)}</span>
         <div class="schedule-content">
           <div class="schedule-text">${escapeHtml(item.text)}</div>
@@ -515,6 +524,7 @@ function dayCard(day) {
       <span class="day-dot" aria-hidden="true"></span>
       <button class="day-toggle" type="button" aria-expanded="${expanded}" aria-controls="day-detail-${day.day}">
         <span>
+          ${$("#handbook-dates") ? `<span class="handbook-date-number" aria-hidden="true">${escapeHtml(day.date?.slice(-2) || String(day.day).padStart(2,"0"))}</span>` : ""}
           <span class="day-meta">DAY ${String(day.day).padStart(2, "0")} · ${escapeHtml(formatCompactDate(day.date))}${isToday ? " · 今天" : ""}</span>
           <span class="day-title">${escapeHtml(day.title)}</span>
           <span class="day-locations">${escapeHtml(day.locations.join(" → "))}</span>
@@ -523,21 +533,26 @@ function dayCard(day) {
         <span class="day-chevron" aria-hidden="true">+</span>
       </button>
       <div class="day-detail" id="day-detail-${day.day}" ${expanded ? "" : "hidden"}>
-        <ol class="schedule">${schedule}</ol>
+        ${handbook && moduleEnabled("overview") ? `<aside class="handbook-day-map" data-map-day="${day.day}" aria-label="${escapeHtml(day.title)}路线">${handbookDayMapMarkup(day)}</aside>` : ""}
+        <div class="day-reading"><ol class="schedule">${schedule}</ol>
         ${costs ? `<div class="costs">${costs}</div>` : ""}
-        ${notes.map((note) => `<p class="detail-note">${escapeHtml(note)}</p>`).join("")}
+        ${notes.map((note) => `<p class="detail-note">${escapeHtml(note)}</p>`).join("")}</div>
       </div>
     </article>
   `;
 }
 
-function navigationDestinations(item) {
-  const policy = state.data.mapLinks?.navigationPolicy || { noNavigationTypes: [], selfNavigationTypes: [] };
-  if (policy.noNavigationTypes.includes(item.type)) return [];
-  const referencedPlaceIds = [...new Set([
+function schedulePlaceIds(item) {
+  return [...new Set([
     ...(Array.isArray(item.placeIds) ? item.placeIds : []),
     ...(item.placeId ? [item.placeId] : [])
   ])];
+}
+
+function navigationDestinations(item) {
+  const policy = state.data.mapLinks?.navigationPolicy || { noNavigationTypes: [], selfNavigationTypes: [] };
+  if (policy.noNavigationTypes.includes(item.type)) return [];
+  const referencedPlaceIds = schedulePlaceIds(item);
   if (referencedPlaceIds.length) {
     return referencedPlaceIds.map((placeId) => state.data.places.find((place) => place.id === placeId)).filter(Boolean).map((place) => ({
       id: place.id,
@@ -603,17 +618,50 @@ function currentTripDay() {
   return state.data.days.find((day) => day.date === today)?.day || null;
 }
 
+function updateHandbookDays() {
+  const navigation = $("#handbook-dates");
+  if (!navigation) return;
+  $$(".day-card", $("#timeline")).forEach(card => { card.hidden = Number(card.dataset.day) !== state.expandedDay; });
+  $$("[data-handbook-day]", navigation).forEach(button => {
+    button.setAttribute("aria-pressed", String(Number(button.dataset.handbookDay) === state.expandedDay));
+  });
+  const map = $(".day-card:not([hidden]) .handbook-day-map", $("#timeline"));
+  if (map) refreshHandbookDayMap(map);
+}
+
 function renderTimeline() {
   const today = currentTripDay();
-  state.expandedDay = today;
+  const handbook = Boolean($("#handbook-dates"));
+  const selectedDay = state.data.days.some(day => day.day === state.expandedDay) ? state.expandedDay : null;
+  state.expandedDay = selectedDay ?? today ?? (handbook ? state.data.days[0]?.day ?? null : null);
   $("#day-count").textContent = `${state.data.days.length} DAYS`;
   $("#timeline").innerHTML = state.data.days.map(dayCard).join("");
+  const navigation = $("#handbook-dates");
+  if (navigation) {
+    navigation.innerHTML = state.data.days.map(day => `<button type="button" data-handbook-day="${day.day}" aria-pressed="${state.expandedDay === day.day}" aria-controls="day-detail-${day.day}"><strong>${escapeHtml(day.date?.slice(-2) || String(day.day).padStart(2,"0"))}</strong><span>${escapeHtml(day.date ? formatCompactDate(day.date) : `DAY ${day.day}`)}</span></button>`).join("");
+    navigation.onclick = event => {
+      const button = event.target.closest("[data-handbook-day]");
+      if (!button) return;
+      state.expandedDay = Number(button.dataset.handbookDay);
+      resetHandbookMapExpansions();
+      updateHandbookDays();
+      const pageTop = $("#timeline").getBoundingClientRect().top + window.scrollY - navigation.offsetHeight - 52;
+      window.scrollTo({ top: Math.max(0, pageTop), behavior: "instant" });
+    };
+    updateHandbookDays();
+  }
   $("#timeline").onclick = (event) => {
     const toggle = event.target.closest(".day-toggle");
     if (!toggle) return;
     const card = toggle.closest(".day-card");
     const dayNumber = Number(card.dataset.day);
     const wasExpanded = toggle.getAttribute("aria-expanded") === "true";
+    if (handbook) {
+      state.expandedDay = dayNumber;
+      resetHandbookMapExpansions();
+      updateHandbookDays();
+      return;
+    }
     $$(".day-toggle", $("#timeline")).forEach((button) => button.setAttribute("aria-expanded", "false"));
     $$(".day-detail", $("#timeline")).forEach((detail) => { detail.hidden = true; });
     if (!wasExpanded) {
@@ -623,6 +671,7 @@ function renderTimeline() {
     } else {
       state.expandedDay = null;
     }
+    if (handbook) updateHandbookDays();
   };
   $("#timeline").onchange = async (event) => {
     const checkbox = event.target.closest(".schedule-ticket input[type='checkbox']");
@@ -836,7 +885,7 @@ function renderTodoList() {
         <span class="todo-text" data-no-translate>${escapeHtml(todo.text)}</span>
       </label>
       <button type="button" class="todo-delete" aria-label="删除：${escapeHtml(todo.text)}">删除</button>
-    </div>`).join("") : `<p class="todo-empty">还没有准备事项，添加第一项吧。</p>`;
+    </div>`).join("") : `<p class="todo-empty">还没有 to-do，添加第一项吧。</p>`;
 }
 
 function renderTravelPrep() {
@@ -871,6 +920,7 @@ window.LightTravelRefresh = async function () {
   await loadSharedState();
   if (moduleEnabled("todo")) renderTodoList();
   if (moduleEnabled("itinerary")) for (const ticket of state.data.ticketPlanning.items) updateInlineTicketState(ticket.id, state.purchasedTickets.has(ticket.id));
+  window.dispatchEvent(new CustomEvent("travel-runtime:ready", { detail: { todos: state.todos } }));
 };
 
 function safeExternalUrl(value) {
@@ -1013,6 +1063,7 @@ async function init() {
     }
     startCountdowns();
     window.TravelI18n?.apply();
+    window.dispatchEvent(new CustomEvent("travel-runtime:ready", { detail: { todos: state.todos } }));
   } catch (error) {
     console.error("Travel data could not be loaded", error);
     $("#loading-error").hidden = false;

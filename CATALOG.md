@@ -20,6 +20,8 @@ This catalog is synchronized from the 36 admitted package directories under `ski
 
 `v0.2.5` publication and fresh installation are verified; package count remains 36.
 
+The local v0.2.6 candidate updates `light-travelpage`; [candidate notes](docs/evidence/releases/v0.2.6/RELEASE_NOTES.md) describe its scope. Final review and publication checks are pending.
+
 `v0.1.1` shipped five packages; `v0.1.2` added `recap` and `language-learning` (seven); `v0.1.3` migrated the test toolchain; `v0.1.4` added `kanban-worker`; `v0.1.5` tightened kanban scheduling and identity; `v0.1.6` added `kb-init` (nine). `v0.2.0` released the full 33-package architecture across project workflow, clarification, execution, review, and specialized tools, and the v0.2.0 line was extended with the `humanizer` admission (34 packages; see [CHANGELOG.md](CHANGELOG.md)). `v0.2.1` added `light-travelpage` and `project-retro` (36 packages). `v0.2.2` finalized TypeSafe Jev semantic acceleration, category layout, and immutable release integrity. `v0.2.3` separated immutable release manifests from post-publication receipts, added v0.2.2 historical attestation, refactored project-retro into positive state-driven instructions, and formalized the six-stage release lifecycle.
 
 No package in this table is an unmodified upstream copy. Approved Matt PORTs carry `ATTRIBUTION.md` and no upstream runtime dependency.
@@ -178,13 +180,13 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### light-travelpage
 
-- **Purpose:** Generate or update a bilingual mobile travel page with desktop and touch flight cards, region-matched geographic outlines and map navigation, shared members, expenses, currency settings, tasks and ticket status.
+- **Purpose:** Generate or update a bilingual travel handbook with daily pages and visible routes, flight/stay cards, original materials, shared expenses, to-do and ticket status; optionally include a protected server-side AI connection.
 - **When to use:** Create or maintain a travel webpage from supplied materials; not ordinary travel advice or booking purchases.
 - **Invocation:** Model-invoked.
 - **Package:** [skills/productivity/light-travelpage/](skills/productivity/light-travelpage)
 - **Installation path:** `<skills-root>/light-travelpage/`.
 - **Status:** Admitted first-party transformation; included in the current stable collection. Default deployment: GitHub + Cloudflare Pages, Functions and D1; one equal-access group per deployment.
-- **Evidence:** [Admission](docs/evidence/admissions/light-travelpage/README.md) · [Latest update](docs/evidence/maintenance/2026-10-04-light-travelpage-rollback.md) · [Attribution](skills/productivity/light-travelpage/ATTRIBUTION.md).
+- **Evidence:** [Admission](docs/evidence/admissions/light-travelpage/README.md) · [Local candidate](docs/evidence/maintenance/2026-10-05-light-travelpage-candidate.md) · [Prior rollback](docs/evidence/maintenance/2026-10-04-light-travelpage-rollback.md) · [Attribution](skills/productivity/light-travelpage/ATTRIBUTION.md).
 
 ### manuscript-ops
 
