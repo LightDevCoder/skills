@@ -41,10 +41,10 @@ know their pricing.`
 
 - This contains a fact (pricing) that `light-research` can answer, not a pure user
   tradeoff.
-- Socratic records: `Dependency: DeepL vs Google pricing → research`.
+- Socratic records: `Dependency: DeepL vs Google pricing → light-research`.
 - `clarify` reports:
 ```text
-Dependencies and fact-finding gaps: API pricing (external fact → research
+Dependencies and fact-finding gaps: API pricing (external fact → light-research
 not yet authorized); blocks decision API choice. Current frontier: (blocked)
 Next step: separately authorize fact work or choose to defer the API decision
 ```

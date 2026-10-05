@@ -48,7 +48,7 @@ Needed fact: "Does iOS WebKit allow background sync?"
 
 Ledger:
 ```text
-Capability call: research
+Capability call: light-research
 Question or experiment: WebKit background sync support
 Blocked decision: D3 - background sync feasibility
 Authorization and input: not-authorized
@@ -58,7 +58,7 @@ Result read: none
 ```
 
 Handoff reports `Dependencies and fact-finding gaps: WebKit background sync
-→ research not-authorized; blocks D3; Current frontier: (empty - blocked)`.
+→ light-research not-authorized; blocks D3; Current frontier: (empty - blocked)`.
 Downstream D3 is not asked.
 
 ## Example 4 — Handoff to project-spec

@@ -66,7 +66,7 @@ class ProjectClarifyBehaviorTest(unittest.TestCase):
         combined = skill + ref
 
         for field in (
-            "Capability call: socratic | research | prototype",
+            "Capability call: socratic | light-research | light-prototype",
             "Blocked decision:",
             "Result read: path or artifact identifier | none",
             "Project clarification handoff",

@@ -102,13 +102,13 @@ mechanically:
 No real project / fuzzy standalone idea            → clarify
 Real initialized project, unresolved user decisions → project-clarify
 Large / foggy / multi-session decision space        → decision-map
-Missing external fact                               → research
-Answer requires seeing runnable behavior/UI/state   → prototype
-Information belongs to another person               → to-questionnaire
+Missing external fact                               → light-research
+Answer requires seeing runnable behavior/UI/state   → light-prototype
+Information belongs to another person               → light-to-questionnaire
 Already-clarified project material                  → project-spec
 Active / approved SPEC ready for slicing            → project-tickets
 Ready unblocked ticket                              → light-implement
-Hard bug needing a reproducible loop                → diagnosing-bugs
+Hard bug needing a reproducible loop                → light-diagnosing-bugs
 Implementation/review acceptance needed             → project-review
 Explicit release intent after accepted work         → release-workflow
 ```

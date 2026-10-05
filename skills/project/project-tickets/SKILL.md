@@ -1,6 +1,6 @@
 ---
 name: project-tickets
-description: Turn a formal SPEC into tracer-bullet vertical slices with blocking edges, then publish them as single-file-per-ticket issues on the local markdown tracker. Use only when the user explicitly invokes $project-tickets; it verifies the SPEC handoff, drafts a quiz-able breakdown, and hands execution to the frontier via implement.
+description: Turn a formal SPEC into tracer-bullet vertical slices with blocking edges, then publish them as single-file-per-ticket issues on the local markdown tracker. Use only when the user explicitly invokes $project-tickets; it verifies the SPEC handoff, drafts a quiz-able breakdown, and hands execution to the frontier via light-implement.
 disable-model-invocation: true
 ---
 

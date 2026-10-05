@@ -29,6 +29,16 @@ class ManuscriptDependencyTests(unittest.TestCase):
         self.assertEqual(result["status"], "READY")
         self.assertIn("catalog:socratic", result["checks"])
 
+    def test_selected_optional_branch_requires_canonical_light_name(self) -> None:
+        code, result = self.run_check("--require-optional", "light-prototype")
+        self.assertEqual(code, 0, result)
+        self.assertEqual(result["status"], "READY")
+        self.assertIn("catalog:light-prototype", result["checks"])
+        code, result = self.run_check("--require-optional", "prototype")
+        self.assertEqual(code, 2)
+        self.assertEqual(result["status"], "BLOCKED")
+        self.assertIn("unknown or non-optional dependency", result["errors"][0])
+
     def test_exact_ref_is_required_for_online_byte_comparison(self) -> None:
         code, result = self.run_check("--online")
         self.assertEqual(code, 2)

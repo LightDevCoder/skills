@@ -52,7 +52,7 @@ class ProjectClarifyContractTest(unittest.TestCase):
 
         self.assertIn("research", combined)
         self.assertIn("prototype", combined)
-        self.assertIn("Capability call: socratic | research | prototype", combined)
+        self.assertIn("Capability call: socratic | light-research | light-prototype", combined)
         for status in ("not-authorized", "unavailable", "result-read"):
             self.assertIn(status, combined)
         self.assertIn("Never record `result-read`", combined)

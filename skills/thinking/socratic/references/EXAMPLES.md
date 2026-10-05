@@ -77,7 +77,7 @@ Needed fact: "Does the target sync support frontmatter aliases?"
 - `light-research` would check official Obsidian docs, but is not authorized in this
   turn.
 - Socratic must **not** turn this into: "Do you want to support aliases?"
-- Instead: `Dependencies: alias support → research (not-authorized); blocks
+- Instead: `Dependencies: alias support → light-research (not-authorized); blocks
   D4: alias migration strategy; Current frontier: (empty - blocked)`.
 - Reports `Next step: separately authorize fact work`.
 

@@ -11,7 +11,7 @@ Runtime checks require only the current interfaces and return `READY` before a
 Project handoff. At release verification, add `--online --ref <exact-tag-or-sha>`
 to compare the installed whole packages with an immutable published ref. If
 Decision-map selects an optional branch, also pass
-`--require-optional prototype` as applicable. An unselected
+`--require-optional light-prototype` as applicable. An unselected
 optional branch is not a missing dependency.
 
 Repository maintainers use `--online --ref <exact-tag-or-sha> --audit-all` to audit every optional

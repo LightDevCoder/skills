@@ -65,6 +65,13 @@ class FunctionalClosureBoundaryTest(unittest.TestCase):
             else:
                 self.assertEqual(actual, expected, relative)
 
+    def test_old_names_resolve_only_at_the_historical_read_boundary(self) -> None:
+        canonical = package_dir(ROOT, "light-tdd") / "SKILL.md"
+        self.assertEqual(relocated_path(ROOT, "skills/tdd/SKILL.md"), canonical)
+        self.assertEqual(relocated_path(ROOT, "skills/engineering/tdd/SKILL.md"), canonical)
+        with self.assertRaises(ValueError):
+            package_dir(ROOT, "tdd")
+
     def test_every_local_markdown_pointer_resolves_without_cross_skill_deep_links(self) -> None:
         for name in FULL:
             package = package_dir(ROOT, name)

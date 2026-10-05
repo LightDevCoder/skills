@@ -20,8 +20,8 @@ and traceable through clarification, planning, execution, and review.
 
 ## Notes
 
-Domain: dev-tooling. Skills to consult: socratic, research, prototype,
-to-questionnaire. Preference: keep SKILL.md concise, details in references/.
+Domain: dev-tooling. Skills to consult: socratic, light-research, light-prototype,
+light-to-questionnaire. Preference: keep SKILL.md concise, details in references/.
 
 ## Decisions so far
 

@@ -11,15 +11,15 @@ Unknown
   │     The choice requires judgment about outcome, priority, tradeoff, or risk.
   │     Keep it in open decisions and, when unblocked, in the frontier.
   │
-  ├─ external fact           → research
+  ├─ external fact           → light-research
   │     Primary-source knowledge outside the current working root: official
   │     docs, specs, APIs, papers. Fact-finding step, not a user question.
   │
-  ├─ needs experiment        → prototype
+  ├─ needs experiment        → light-prototype
   │     A cheap, throwaway experiment distinguishes the alternatives (state
   │     model, behavior, UI variation). Non-production, discarded after learning.
   │
-  └─ held by another person  → to-questionnaire
+  └─ held by another person  → light-to-questionnaire
         │  Knowledge the current user does not hold and cannot decide alone.
         │  Capture as a questionnaire for the holder to fill in.
 ```

@@ -74,9 +74,9 @@ authorization or continue the clarification session.
 
 ```text
 user must decide       → socratic (keep in frontier)
-external fact          → research
-needs experiment       → prototype
-held by another person → to-questionnaire
+external fact          → light-research
+needs experiment       → light-prototype
+held by another person → light-to-questionnaire
 ```
 
 If the required capability is not callable, retain the fact as unresolved and

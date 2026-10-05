@@ -43,7 +43,7 @@ record it as attempted/recommended rather than auto-running it.
 For each invoked, attempted, or recommended call, record:
 
 ```text
-Capability call: socratic | research | prototype | to-questionnaire
+Capability call: socratic | light-research | light-prototype | light-to-questionnaire
 Question or experiment:
 Blocked decision:
 Authorization and input:
