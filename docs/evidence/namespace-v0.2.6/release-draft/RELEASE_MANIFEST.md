@@ -2,7 +2,7 @@
 
 [中文清单](RELEASE_MANIFEST.zh-CN.md) · [Release Notes](RELEASE_NOTES.md)
 
-**Preparation status: BLOCKED draft.** The namespace candidate is unpublished; no clean candidate commit or PREPARED integrity result is recorded. v0.2.5 is this checkout’s verified release baseline. Remote v0.2.6 is already occupied; D7 prohibits overwriting it or selecting another version. See the [publication blocker](../publication-blocker.md).
+**Preparation status: BLOCKED draft.** The namespace candidate is unpublished; the local implementation is committed, but no release-ready candidate or PREPARED integrity result exists. v0.2.5 is this checkout’s verified release baseline. Remote v0.2.6 is already occupied; D7 prohibits overwriting it or selecting another version. See the [publication blocker](../publication-blocker.md).
 
 This document is prepared for the immutable candidate snapshot. Post-publication facts belong in a receipt first created on `main` during ATTESTED; no receipt belongs in the candidate or tag snapshot.
 
@@ -22,7 +22,7 @@ This document is prepared for the immutable candidate snapshot. Post-publication
 
 The reviewed local implementation is `79d15fd410f1295f84d9761d66c601895ff9ee31`. It passes 521 pytest and 158 unittest tests, compilation and public documentation checks. Two fresh independent review axes have no outstanding findings. Four local installation combinations preserve complete package identities/content and expected links; final Light manifest digest is `fe58ea6e7af0e7ffa4b52fc484c9b78cdbffc6e8c22cf1a28b0596779c191041`.
 
-[Producer evidence](../producer-evidence.md), [installation and actual Host attempts](../installation-host.md), and [independent review convergence](../review-summary.md) preserve boundaries. A2 Host selector and A9 actual discovery/invocation are unobserved; candidate acceptance remains blocked pending evaluation. R3 is blocked by an existing published version; R4/R5 have not occurred for this candidate.
+[Producer evidence](../producer-evidence.md), [installation and actual Host attempts](../installation-host.md), and [independent review convergence](../review-summary.md) preserve boundaries. A2 Host selector and A9 actual discovery/invocation are unobserved; [final candidate acceptance](../acceptance.md) is BLOCKED after fresh independent evaluation. R3 is blocked by an existing published version; R4/R5 have not occurred for this candidate.
 
 ## Later lifecycle gates
 
