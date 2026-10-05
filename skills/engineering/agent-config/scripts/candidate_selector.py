@@ -104,7 +104,7 @@ def select_configuration(
             mode="plan-only",
             approval=norm_approval,
             setup_state={"companion": host.companion_status, "profile": host.profile_status},
-            handoff="implement",
+            handoff="light-implement",
             execution_config=ExecutionConfig(
                 model=host.active_model,
                 resolved_effort=effort,
@@ -132,7 +132,7 @@ def select_configuration(
             mode="plan-only",
             approval="declined",
             setup_state={"companion": host.companion_status, "profile": host.profile_status},
-            handoff="implement",
+            handoff="light-implement",
             execution_config=ExecutionConfig(
                 model=host.active_model,
                 resolved_effort=None,
@@ -194,7 +194,7 @@ def select_configuration(
         mode="plan-only",
         approval=norm_approval,
         setup_state={"companion": host.companion_status, "profile": host.profile_status},
-        handoff="implement",
+        handoff="light-implement",
         execution_config=ExecutionConfig(
             model=target_model,
             resolved_effort=effort,

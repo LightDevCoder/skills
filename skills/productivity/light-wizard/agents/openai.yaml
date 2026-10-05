@@ -1,0 +1,7 @@
+interface:
+  display_name: "Light · Wizard"
+  short_description: "Generate an interactive setup wizard"
+  default_prompt: "Use $light-wizard to generate an interactive bash wizard that walks a human through steps only they can perform."
+
+policy:
+  allow_implicit_invocation: true

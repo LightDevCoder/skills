@@ -12,8 +12,8 @@ point; this file is the supporting reference.
 
 Never phrase an inspectable or researchable fact as a user decision. If a
 fact is needed, record it as a dependency and note the appropriate
-capability (`research` for external facts, `prototype` for experiments,
-`to-questionnaire` when held by another person, local inspection otherwise).
+capability (`light-research` for external facts, `light-prototype` for experiments,
+`light-to-questionnaire` when held by another person, local inspection otherwise).
 
 Do not claim inspection, research, or a prototype has started or completed
 unless that work actually occurred. If the capability is not callable in the

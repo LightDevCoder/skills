@@ -6,11 +6,15 @@
 
 `LightDevCoder/skills` provides 36 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<category>/<name>/` and defines its own behavior in `SKILL.md`.
 
-> **Release:** [v0.2.5](https://github.com/LightDevCoder/skills/releases/tag/v0.2.5) is the current stable release of all 36 first-party Skills. Its immutable [release manifest](docs/evidence/releases/v0.2.5/RELEASE_MANIFEST.md) and post-publication [release receipt](docs/evidence/releases/v0.2.5/RELEASE_RECEIPT.md) record the scope and verification.
+> **Release:** [v0.2.5](https://github.com/LightDevCoder/skills/releases/tag/v0.2.5) is this checkout’s verified 36-Skill release baseline, rather than the latest remote release. Its immutable [release manifest](docs/evidence/releases/v0.2.5/RELEASE_MANIFEST.md) and post-publication [release receipt](docs/evidence/releases/v0.2.5/RELEASE_RECEIPT.md) record the scope and verification.
+
+> **v0.2.6 candidate:** The local candidate renames 12 Skills with `light-`; the other 24 names and the 36-package total stay unchanged. The v0.2.5 local verified baseline retains the old names; remote v0.2.6 is already occupied by a travel-handbook release. Remote installation and Host invocation checks for the new names are pending. See the [migration guide](docs/MIGRATION-v0.2.6.md) and [candidate notes](docs/evidence/namespace-v0.2.6/release-draft/RELEASE_NOTES.md).
+
+Namespace publication is **BLOCKED**: remote v0.2.6 is occupied by the existing travel-handbook release. D7 prohibits overwriting the tag or choosing another version; see the [publication blocker](docs/evidence/namespace-v0.2.6/publication-blocker.md). New-name remote installation templates must not be executed.
 
 ## Browse by category
 
-[All categories and collection guides](skills/README.md). The 36 source packages are grouped by purpose; names and invocation modes are unchanged.
+[All categories and collection guides](skills/README.md). The 36 source packages are grouped by purpose; invocation modes are unchanged; the candidate names follow the migration guide.
 
 - [project](skills/project/README.md) — 8 skills
 - [engineering](skills/engineering/README.md) — 5 skills
@@ -37,7 +41,7 @@ Skills follow the progressive disclosure patterns of Matt Pocock Skills and the 
 
 ## Installation
 
-### Current main / latest (includes updated Agent Config)
+### Default branch / latest (candidate usage)
 
 Install the latest collection from the default branch `main`:
 
@@ -50,12 +54,12 @@ Install a single Skill from `main` (for example, the updated `agent-config` Skil
 ```bash
 npx skills add LightDevCoder/skills --skill agent-config
 npx skills add LightDevCoder/skills --skill project-review
-npx skills add LightDevCoder/skills --skill research
+# BLOCKED — candidate not on remote main: npx skills add LightDevCoder/skills --skill light-research
 ```
 
 > **Note:** An unqualified repository source (`LightDevCoder/skills`) follows the default branch `main`, delivering the latest admitted features and integrations.
 
-### Stable release snapshot (v0.2.5)
+### Local verified release snapshot (v0.2.5)
 
 To install the reproducible stable release snapshot, pin the `#v0.2.5` tag:
 
@@ -110,7 +114,7 @@ $ask-light next        # Suggest the next appropriate Skill from current context
 $project-init          # Bootstrap project workspace and task tracker settings
 $clarify               # Clarify requirements through targeted questions
 $project-clarify       # Clarify project decisions using repository context
-$implement             # Execute a ready ticket with verification
+$light-implement       # Execute a ready ticket with verification
 $project-review        # Run final acceptance checks: PASS / FAIL / BLOCKED
 ```
 
@@ -127,7 +131,7 @@ project-spec
       ↓
 project-tickets
       ↓
-implement
+light-implement
       ↓
 project-review
       ↓
@@ -138,7 +142,7 @@ project-retro (agent evaluates friction)
 
 - `project-init`: sets up project layout and task tracker settings.
 - `project-clarify → project-spec → project-tickets`: clarifies requirements, writes the specification, and splits work into executable tickets.
-- `implement`: implements one ticket at a time with automated checks.
+- `light-implement`: implements one ticket at a time with automated checks.
 - `project-review`: verifies quality against acceptance criteria; `review-loop` handles iterative fixes.
 - `release-workflow`: runs release validation, tagging, and publication.
 - `project-retro`: evaluates session friction (navigation, automated checks, instruction clarity, tool usage) and proposes concrete improvements at the conclusion of the workflow.
@@ -147,8 +151,8 @@ Direct paths for common tasks:
 
 ```text
 clarify                          # Standalone brainstorming and clarification
-implement                        # Implement a well-defined ticket directly
-diagnosing-bugs → implement      # Diagnose an issue, then apply the fix
+light-implement                        # Implement a well-defined ticket directly
+light-diagnosing-bugs → light-implement      # Diagnose an issue, then apply the fix
 release-workflow                 # Publish an approved release
 $ask-light                       # Route unclear tasks to the right Skill
 ```
@@ -170,12 +174,12 @@ See [ask-light](skills/productivity/ask-light/SKILL.md) and [docs/workflows/](do
 
 | Group | Skills | Details |
 | --- | --- | --- |
-| **Project** | `project-init`, `project-clarify`, `project-spec`, `project-tickets`, `implement`, `project-review`, `release-workflow` | [CATALOG.md](CATALOG.md) |
-| **Clarification & Research** | `socratic` (engine), `clarify`, `project-clarify`, `decision-map`, `research`, `prototype`, `to-questionnaire` | [clarification-system](docs/workflows/clarification-system.md) |
-| **Execution** | `implement`, `agent-config` (primary harnesses: 10 native adapters + fallback), `tdd`, `diagnosing-bugs`, `resolving-merge-conflicts` | [execution](docs/workflows/execution.md) |
-| **Review** | `review-loop` (engine), `generic-review`, `code-review`, `project-review` (acceptance) | [review-system](docs/workflows/review-system.md) |
+| **Project** | `project-init`, `project-clarify`, `project-spec`, `project-tickets`, `light-implement`, `project-review`, `release-workflow` | [CATALOG.md](CATALOG.md) |
+| **Clarification & Research** | `socratic` (engine), `clarify`, `project-clarify`, `decision-map`, `light-research`, `light-prototype`, `light-to-questionnaire` | [clarification-system](docs/workflows/clarification-system.md) |
+| **Execution** | `light-implement`, `agent-config` (primary harnesses: 10 native adapters + fallback), `light-tdd`, `light-diagnosing-bugs`, `resolving-merge-conflicts` | [execution](docs/workflows/execution.md) |
+| **Review** | `review-loop` (engine), `generic-review`, `light-code-review`, `project-review` (acceptance) | [review-system](docs/workflows/review-system.md) |
 | **Specialized** | `manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `eli5`, `recap` | [specialized-workflows](docs/workflows/specialized-workflows.md) |
-| **Productivity** | `handoff`, `humanizer`, `wizard`, `wait-what`, `writing-for-agents`, `light-travelpage` | [CATALOG.md](CATALOG.md) |
+| **Productivity** | `light-handoff`, `humanizer`, `light-wizard`, `light-wait-what`, `light-writing-for-agents`, `light-travelpage` | [CATALOG.md](CATALOG.md) |
 
 See [CATALOG.md](CATALOG.md) for full descriptions, invocation modes, and package paths.
 
@@ -189,7 +193,7 @@ See [CATALOG.md](CATALOG.md) for full descriptions, invocation modes, and packag
 | Modified third-party | Managed in private `LightDevCoder/skills-3rdParty` | Retains full patches, licenses, and sync locks. |
 | Retired standalone | Consolidated into collection | Documented with migration history in release records. |
 
-Approved Matt Ports (11 packages): `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts`. Each package contains `ATTRIBUTION.md` and runs without external runtime dependencies.
+Approved Matt Ports (11 packages): `light-research`, `light-prototype`, `light-tdd`, `light-handoff`, `light-diagnosing-bugs`, `light-wizard`, `light-teach`, `light-wait-what`, `light-to-questionnaire`, `light-writing-for-agents`, `resolving-merge-conflicts`. Each package contains `ATTRIBUTION.md` and runs without external runtime dependencies.
 
 Adapted origin (2 packages): `humanizer` is a substantially transformed first-party capability based on blader/humanizer (2.11.2) with a thin Chinese adaptation layer informed by op7418/Humanizer-zh; both MIT licenses are preserved in its [ATTRIBUTION.md](skills/writing/humanizer/ATTRIBUTION.md).
 

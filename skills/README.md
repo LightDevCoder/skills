@@ -14,4 +14,4 @@
 | [Writing and editing](writing/README.md) | 3 | Publish structured documents, eliminate AI writing tells from text, and write clear instructions for agents. |
 | [Everyday tools](productivity/README.md) | 6 | Find skills, hand off context, summarize sessions, guide manual steps, or generate travel itineraries. |
 
-Source packages live at `skills/<category>/<name>/`. Skill names, invocation modes, and installed `<skills-root>/<name>/` paths are unchanged.
+Source packages live at `skills/<category>/<name>/`. The v0.2.6 candidate renames 12 Skills and their installed directories; invocation modes and the total count are unchanged. See the [name migration guide](../docs/MIGRATION-v0.2.6.md).

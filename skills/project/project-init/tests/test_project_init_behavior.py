@@ -22,7 +22,7 @@ def config(goal: str = "Ship a parser") -> dict:
         "goal": goal,
         "outputs": ["parser", "tests"],
         "preset": "software",
-        "relevantSkills": ["project-spec", "project-tickets", "implement", "project-review"],
+        "relevantSkills": ["project-spec", "project-tickets", "light-implement", "project-review"],
         "issueTracker": {"kind": "local-markdown", "path": ".scratch/<effort>/issues"},
         "domainContext": ["CONTEXT.md", "docs/adr/"],
         "reviewProfile": "software",
@@ -453,7 +453,7 @@ class ProjectInitBehaviorTest(unittest.TestCase):
                 self.assertIn(name, statuses)
             self.assertEqual(statuses["project-spec"], "available")
             self.assertEqual(statuses["project-tickets"], "available")
-            self.assertEqual(statuses["implement"], "unavailable")
+            self.assertEqual(statuses["light-implement"], "unavailable")
             self.assertEqual(statuses["project-review"], "unavailable")
 
     def test_capability_availability_is_unknown_without_a_capability_root(self) -> None:
@@ -487,7 +487,7 @@ class ProjectInitBehaviorTest(unittest.TestCase):
             "decision-map": ("issue-tracker", "working-area"),
             "project-spec": ("goal", "domain-context", "working area"),
             "project-tickets": ("tracker", "working area"),
-            "implement": ("tracker", "domain-context", "review-profile"),
+            "light-implement": ("tracker", "domain-context", "review-profile"),
             "project-review": ("review profile", "acceptance strategy"),
         }
         for name, fields in expected.items():

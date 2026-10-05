@@ -43,7 +43,7 @@ learner producing the language.
   listing every learner mistake, violates the teaching contract.
 
 `language-learning` never invokes another user-invoked Skill. A durable
-continuation record requires a separate user choice such as `handoff`; final
+continuation record requires a separate user choice such as `light-handoff`; final
 acceptance remains owned by `project-review`. An incomplete or `BLOCKED`
 admission does not change the package contract.
 

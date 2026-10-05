@@ -1,0 +1,17 @@
+{
+  "skills/kb-init/references/base-discovery.md": {
+    "baseline_sha256": "cc8d9d0854fd027691c2c6667723427c20608366b426a69e342d6971d2f25e3b",
+    "candidate_sha256": "eadef718dabe48c2b59f59bce0ef34839d1de41689de3a0dc320885921bcfd68",
+    "change": "Only `research` capability tokens become `light-research`; business words and duties unchanged."
+  },
+  "skills/kb-init/references/research-contract.md": {
+    "baseline_sha256": "d5eb17e7d2b0e78ce1971ba35116505fc7acc8bb91f4d4cfa208591b4f033ba3",
+    "candidate_sha256": "3c39147a20629cdad4ac2a1b4cce2d07d5e4d981a9022ecc2fd61050f0a6e54d",
+    "change": "Only `research` capability tokens become `light-research`; business words and duties unchanged."
+  },
+  "skills/kb-init/SKILL.md": {
+    "baseline_sha256": "090b52cca1b870e15d007709348f920b151512e965d1e6b436f08ab3d02d8266",
+    "candidate_sha256": "327ba1956e655e2429ddcbe1085bf7a27004ff1a980f64945dbfe4a922f26f63",
+    "change": "Only `research` capability tokens become `light-research`; business words and duties unchanged."
+  }
+}

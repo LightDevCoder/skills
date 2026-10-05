@@ -66,7 +66,7 @@ Reason: Tiered multi-model profile available; task is a bounded single-pass fix.
 ## Review strategy
 - Review type: Independent Review
 - Review model & effort: model-gamma (review), effort: high, context: fresh session context
-- Review handoff: Hand verified diff to review-loop with code-review
+- Review handoff: Hand verified diff to review-loop with light-code-review
 
 ## Limitations / unknowns
 - No isolated worktree available; implementation runs in working directory.

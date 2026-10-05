@@ -12,7 +12,7 @@ Categories help you browse related skills; they do not enforce a rigid pipeline.
 - **[project-clarify](project-clarify/SKILL.md)** — Read existing repository files and ask targeted questions only about remaining open decisions before writing a spec.
 - **[project-spec](project-spec/SKILL.md)** — Turn clarified decisions into a technical specification (SPEC) without re-asking settled questions.
 - **[project-tickets](project-tickets/SKILL.md)** — Break an approved specification into an ordered list of standalone tasks with clear dependencies, ready for implementation.
-- **[implement](implement/SKILL.md)** — Build or update a single well-defined task (code, documentation, or configuration), verify it locally, and hand it off for review.
+- **[light-implement](light-implement/SKILL.md)** — Build or update a single well-defined task (code, documentation, or configuration), verify it locally, and hand it off for review.
 
 ## Model- or user-invoked
 

@@ -43,7 +43,7 @@ through this engine.
 
 ## Composition and stopping
 
-It composes `generic-review` by default, `code-review` for software diffs, and
+It composes `generic-review` by default, `light-code-review` for software diffs, and
 accepted domain reviewers. `project-review` is the final-acceptance owner. Stop
 at a clean result or at the limit and hand off to the caller; do not invoke
 another user-invoked Skill implicitly.

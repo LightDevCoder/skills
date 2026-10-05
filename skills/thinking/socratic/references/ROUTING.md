@@ -26,7 +26,7 @@ Unknown
 
 ## Rules
 
-- Do not reimplement any of `research`/`prototype`/`to-questionnaire`.
+- Do not reimplement any of `light-research`/`light-prototype`/`light-to-questionnaire`.
 - Record the blocked decision, the question, and the chosen capability.
 - If the capability is not callable or not authorized, retain the fact as
   `unresolved` and report `missing capability: <name>`; do not invent an
@@ -36,6 +36,6 @@ Unknown
 - Do not claim a call has `started` or `completed` unless it actually has.
 
 Cross-reference: `clarify`, `project-clarify`, and `decision-map` all call
-`socratic` for user-owned decisions and optionally invoke `research`/
-`prototype`/`to-questionnaire` per this table.
+`socratic` for user-owned decisions and optionally invoke `light-research`/
+`light-prototype`/`light-to-questionnaire` per this table.
 

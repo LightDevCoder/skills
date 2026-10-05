@@ -3,7 +3,7 @@
 Covers: clarify→socratic, project-clarify→socratic,
 decision-map→socratic/research/prototype/to-questionnaire,
 project-spec→project-tickets, implement→review path,
-review-loop→generic-review/code-review, project-review→review-loop+reviewers,
+review-loop→generic-review/light-code-review, project-review→review-loop+reviewers,
 ask-light→existing first-party Skills.
 """
 
@@ -37,11 +37,11 @@ class CompositionTests(unittest.TestCase):
 
     def test_decision_map_composition(self):
         text = read_skill("decision-map")
-        for dep in ("socratic", "research", "prototype", "to-questionnaire"):
+        for dep in ("socratic", "light-research", "light-prototype", "light-to-questionnaire"):
             self.assertIn(dep, text, f"decision-map must mention {dep} per unknown-routing")
         # workflow doc should also mention them
         wf = read_doc("docs/workflows/clarification-system.md")
-        for dep in ("socratic", "research", "prototype", "to-questionnaire"):
+        for dep in ("socratic", "light-research", "light-prototype", "light-to-questionnaire"):
             self.assertIn(dep, wf, f"clarification-system workflow must mention {dep}")
 
     def test_project_spec_to_tickets(self):
@@ -52,12 +52,12 @@ class CompositionTests(unittest.TestCase):
         self.assertIn("project-tickets", wf)
 
     def test_implement_review_path(self):
-        text = read_skill("implement")
+        text = read_skill("light-implement")
         self.assertIn("review-loop", text, "implement must hand to review-loop")
         # Should mention at least one reviewer
-        self.assertTrue("generic-review" in text or "code-review" in text, "implement must mention appropriate reviewer path")
+        self.assertTrue("generic-review" in text or "light-code-review" in text, "implement must mention appropriate reviewer path")
         wf = read_doc("docs/workflows/execution.md")
-        self.assertIn("implement", wf)
+        self.assertIn("light-implement", wf)
         self.assertIn("review-loop", wf)
         # agent-config is optional routing
         self.assertIn("agent-config", text, "implement should reference agent-config as optional routing")
@@ -86,7 +86,7 @@ class CompositionTests(unittest.TestCase):
     def test_review_loop_to_reviewers(self):
         text = read_skill("review-loop")
         self.assertIn("generic-review", text, "review-loop must reference generic-review")
-        self.assertIn("code-review", text, "review-loop must reference code-review")
+        self.assertIn("light-code-review", text, "review-loop must reference light-code-review")
         # review-loop must not present itself as the final acceptance owner; project-review owns verdicts
         self.assertIn("project-review", text, "review-loop must point final acceptance to project-review")
         self.assertIn("never writes", text, "review-loop must state it never writes PASS/FAIL/BLOCKED")
@@ -94,13 +94,13 @@ class CompositionTests(unittest.TestCase):
         wf = read_doc("docs/workflows/review-system.md")
         self.assertIn("review-loop", wf)
         self.assertIn("generic-review", wf)
-        self.assertIn("code-review", wf)
+        self.assertIn("light-code-review", wf)
 
     def test_project_review_to_loop_and_reviewers(self):
         text = read_skill("project-review")
         self.assertIn("review-loop", text, "project-review must use review-loop as engine")
         self.assertIn("generic-review", text, "project-review must compose generic-review")
-        self.assertIn("code-review", text, "project-review must compose code-review")
+        self.assertIn("light-code-review", text, "project-review must compose light-code-review")
         # Must own verdict
         self.assertIn("PASS", text)
         self.assertIn("FAIL", text)
@@ -113,7 +113,7 @@ class CompositionTests(unittest.TestCase):
         import json
         skill_map = json.loads(read_doc("skills/productivity/ask-light/references/light-skill-map.json"))
         names = {entry["name"] for entry in skill_map["skills"]}
-        real_skills = {"project-init", "project-clarify", "project-spec", "project-tickets", "implement", "project-review", "clarify", "socratic", "research", "prototype", "review-loop"}
+        real_skills = {"project-init", "project-clarify", "project-spec", "project-tickets", "light-implement", "project-review", "clarify", "socratic", "light-research", "light-prototype", "review-loop"}
         self.assertTrue(real_skills.issubset(names))
         # Ensure it does not promise to execute
         self.assertIn("read-only", text.lower(), "ask-light must be read-only router")

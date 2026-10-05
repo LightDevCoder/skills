@@ -101,9 +101,9 @@ def plan_semantic_queries(
       2. Choice is sent ONLY when len(allowed_actions) > 1.
       3. Ambiguity Noul is sent ONLY when an active consumer exists:
          - If len(allowed_actions) > 1 and "project-clarify" is a candidate (selects clarify over others).
-         - If allowed_actions == ["implement"] and user phrasing contains explicit ambiguity keywords (recommends clarify alternative).
+         - If allowed_actions == ["light-implement"] and user phrasing contains explicit ambiguity keywords (recommends clarify alternative).
          - If allowed_actions == ["project-clarify"] alone, NO question is sent (clarify is already the only action; zero-value inference).
-      4. Escalation Noul is sent ONLY when "implement" is in allowed_actions and task complexity warrants agent-config alternative.
+      4. Escalation Noul is sent ONLY when "light-implement" is in allowed_actions and task complexity warrants agent-config alternative.
       5. Execution intent Noul is REMOVED: authorization is 100% deterministic code; Jev output cannot grant transition authority.
     """
     questions: Dict[str, Any] = {}
@@ -147,7 +147,7 @@ def plan_semantic_queries(
         questions_sent.append("has_material_ambiguity")
         reasons_needed["has_material_ambiguity"] = "Disambiguate between clarification and other legal actions."
         consumers["has_material_ambiguity"] = "Selects project-clarify over other candidates when ambiguity is material."
-    elif legal_result.allowed_actions == ["implement"] and has_ambiguity_phrasing:
+    elif legal_result.allowed_actions == ["light-implement"] and has_ambiguity_phrasing:
         # Consumer: recommend project-clarify as alternative skill
         questions["has_material_ambiguity"] = Noul(
             instructions="Does the user request express material ambiguity or conflicting requirements requiring clarification before implementation?",
@@ -162,7 +162,7 @@ def plan_semantic_queries(
         "lock-free", "refactor", "security", "cryptographic", "performance",
     ]
     has_complexity_phrasing = any(kw in req_lower for kw in complexity_keywords)
-    if "implement" in legal_result.allowed_actions and has_complexity_phrasing:
+    if "light-implement" in legal_result.allowed_actions and has_complexity_phrasing:
         questions["needs_deep_reasoning_escalation"] = Noul(
             instructions="Does this request involve high architectural complexity or conflicting requirements requiring deep reasoning escalation rather than fast routing?",
         )
@@ -350,14 +350,14 @@ def route_with_jev(
         if escalation_prob >= effective_policy.escalation_threshold:
             escalated = True
             escalation_reason = f"High reasoning escalation need detected (p={escalation_prob:.2f})."
-            if selected_skill == "implement":
+            if selected_skill == "light-implement":
                 alternative_skill = "agent-config"
 
         # Material ambiguity routing: if high ambiguity detected and clarify is an option or alternative
         if ambiguity_prob >= effective_policy.ambiguity_threshold:
             if "project-clarify" in legal_result.allowed_actions:
                 selected_skill = "project-clarify"
-            elif "implement" in legal_result.allowed_actions:
+            elif "light-implement" in legal_result.allowed_actions:
                 alternative_skill = "project-clarify"
 
         # HARD INVARIANT (Section 12): Jev output cannot grant TRANSITION authority!

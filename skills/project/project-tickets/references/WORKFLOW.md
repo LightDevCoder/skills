@@ -124,7 +124,7 @@ Do not close or modify the parent SPEC or the map that supplied it.
 
 Report the published paths, the blocker graph, and the current frontier
 (first ready tickets, plus which are parallelizable). Recommend explicit
-`implement` on the chosen ticket and stop — do not auto-invoke it.
+`light-implement` on the chosen ticket and stop — do not auto-invoke it.
 
 ## Wayfinding compatibility
 

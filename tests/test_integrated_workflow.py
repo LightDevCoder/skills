@@ -54,7 +54,7 @@ class IntegratedWorkflowTest(unittest.TestCase):
         )
         ask_rec = ask_light_semantic_recommend(ask_state, user_request="下一步做什么？", use_jev=False)
         self.assertEqual(ask_rec.status, "RECOMMEND")
-        self.assertEqual(ask_rec.primary_skill, "implement")
+        self.assertEqual(ask_rec.primary_skill, "light-implement")
         self.assertEqual(ask_rec.target_item, "issue-01.md")
 
         # Now pass to agent-config

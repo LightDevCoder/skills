@@ -107,7 +107,7 @@ Answer requires seeing runnable behavior/UI/state   → prototype
 Information belongs to another person               → to-questionnaire
 Already-clarified project material                  → project-spec
 Active / approved SPEC ready for slicing            → project-tickets
-Ready unblocked ticket                              → implement
+Ready unblocked ticket                              → light-implement
 Hard bug needing a reproducible loop                → diagnosing-bugs
 Implementation/review acceptance needed             → project-review
 Explicit release intent after accepted work         → release-workflow
@@ -121,12 +121,12 @@ Boundary reasoning that matters most:
   already-clarified material. When goal and outputs are recorded but
   user-owned decisions are not shown as settled, `project-clarify` fits and
   `project-spec` is premature.
-- Canonical project flow is `project-clarify → project-spec → project-tickets → implement → project-review`.
+- Canonical project flow is `project-clarify → project-spec → project-tickets → light-implement → project-review`.
   With an active SPEC and no implementation tickets, the canonical next step is
   `project-tickets` to break the specification into dependency-ordered tracer-bullet tickets.
   Do not insert `project-review` before `project-tickets` merely because a SPEC exists.
 - Ticket frontier: at least one ready unblocked ticket is a strong
-  current-workflow fact for `implement`. Unresolved tickets with **zero**
+  current-workflow fact for `light-implement`. Unresolved tickets with **zero**
   ready frontier items must not be presented as implementable work.
 - An accepted current effort is a terminal fact **for that effort** — answer
   “current effort is complete; no mandatory next workflow step” for a
@@ -137,20 +137,20 @@ Boundary reasoning that matters most:
 - An active review owns the current workflow round (`project-review`); a
   word like “spec” inside the user's sentence does not turn it into
   `project-spec`. The reverse also holds: an explicit independent request
-  (“先不管当前主流程，我只想单独 review 这个 diff”) routes to `code-review`
+  (“先不管当前主流程，我只想单独 review 这个 diff”) routes to `light-code-review`
   even while a project review is active — mention the active review, do not
   hijack the request.
-- `implement` vs `agent-config`: `implement` is the bounded executor;
+- `light-implement` vs `agent-config`: `light-implement` is the bounded executor;
   `agent-config` is an optional execution-planning enhancement. When the
   current project has a ready implementation item, current-workflow next
-  routes to `implement` (even for complex tasks; `implement` decides whether
+  routes to `light-implement` (even for complex tasks; `light-implement` decides whether
   to offer `agent-config` and the user decides whether to accept). Route
   directly to `agent-config` only when execution configuration or setup intent
   itself is the user's explicit goal:
   - setup intent: `agent-config setup`, "配置当前 Harness 模型", "配置模型档位", "重新配置 Agent Config";
   - execution queries: "这个任务用哪个模型", "这些工单怎么分 Agent", "这个 Harness 怎么跑这批 tickets", "哪个模型执行/给多少 effort", "execution topology / model tier routing".
-  Ready unblocked tickets strictly route to `implement`; breaking an active SPEC into tickets strictly routes to `project-tickets`.
-  `implement` remains valid even when `agent-config`, model selectors, or
+  Ready unblocked tickets strictly route to `light-implement`; breaking an active SPEC into tickets strictly routes to `project-tickets`.
+  `light-implement` remains valid even when `agent-config`, model selectors, or
   multi-agent capabilities are unavailable or declined.
 
 ## Reading the evidence

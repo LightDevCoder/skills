@@ -10,8 +10,8 @@ this file summarizes the execution order and references the examples.
 2. **Socratic** — call `socratic` to maintain the frontier; present the
    complete current frontier as a round with numbered questions, choices, a
    recommended option, and a useful short reason. Accept batch replies.
-3. **Fact work (optional)** — `research`/`prototype` only when authorized;
-   use `to-questionnaire` as the handoff branch when the missing information is
+3. **Fact work (optional)** — `light-research`/`light-prototype` only when authorized;
+   use `light-to-questionnaire` as the handoff branch when the missing information is
    held by another person.
 4. **Continue and handoff** — after each normal reply, call `socratic` again
    and present the recomputed frontier. Continue until no meaningful frontier
@@ -21,8 +21,8 @@ this file summarizes the execution order and references the examples.
 ## Composition
 
 - `project-clarify → socratic` (required)
-- optionally `research` / `prototype` per `socratic`'s Unknown routing
-- optionally recommend `to-questionnaire` when another person holds the
+- optionally `light-research` / `light-prototype` per `socratic`'s Unknown routing
+- optionally recommend `light-to-questionnaire` when another person holds the
   blocking information
 - large effort may upgrade to `$decision-map`
 

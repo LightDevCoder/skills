@@ -48,7 +48,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 
     c.require_match("TC-GEN-001 generic profile", skill, r"references/profiles/generic\.md")
     c.require_match("TC-GEN-001 generic profile", profile, r"(?im)^# Generic Profile$")
-    c.require_no_match("TC-GEN-001 generic profile", profile, r"(?i)software|manuscript|agent-skill|specification|code-review")
+    c.require_no_match("TC-GEN-001 generic profile", profile, r"(?i)software|manuscript|agent-skill|specification|light-code-review")
 
     c.require_match("TC-GEN-002 public modes", skill, r"(?im)^- `init`:")
     c.require_match("TC-GEN-002 public modes", skill, r"(?im)^- `review`:")

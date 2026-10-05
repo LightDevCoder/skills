@@ -9,8 +9,8 @@ from check_helpers import package_dir, relocated_path
 
 ROOT = Path(__file__).resolve().parents[1]
 FULL = (
-    "agent-config", "ask-light", "clarify", "code-review", "decision-map",
-    "generic-review", "implement", "project-clarify", "project-init",
+    "agent-config", "ask-light", "clarify", "light-code-review", "decision-map",
+    "generic-review", "light-implement", "project-clarify", "project-init",
     "project-review", "project-spec", "project-tickets", "review-loop", "socratic",
 )
 
@@ -40,8 +40,14 @@ class FunctionalClosureBoundaryTest(unittest.TestCase):
         self.assertFalse(valid("x" * 401))
         self.assertFalse(valid("first line\nsecond line"))
 
-    def test_frozen_hashes_allow_only_the_recap_skill_entry_amendment(self) -> None:
+    def test_frozen_hashes_allow_only_recorded_name_token_amendments(self) -> None:
         baseline = ROOT / ".scratch/light-skills-lean-refactor/frozen-baseline.sha256"
+        amendments = json.loads((ROOT / "docs/evidence/namespace-v0.2.6/frozen-name-amendments.json").read_text())
+        self.assertEqual(set(amendments), {
+            "skills/kb-init/SKILL.md",
+            "skills/kb-init/references/base-discovery.md",
+            "skills/kb-init/references/research-contract.md",
+        })
         for line in baseline.read_text(encoding="utf-8").splitlines():
             match = re.match(r"^\s*([0-9a-f]{64})\s+(.+)$", line)
             if not match:
@@ -50,7 +56,14 @@ class FunctionalClosureBoundaryTest(unittest.TestCase):
             if relative == "skills/recap/SKILL.md":
                 continue
             actual = hashlib.sha256(relocated_path(ROOT, relative).read_bytes()).hexdigest()
-            self.assertEqual(actual, expected, relative)
+            if relative in amendments:
+                record = amendments[relative]
+                self.assertEqual(record["baseline_sha256"], expected, relative)
+                self.assertEqual(actual, record["candidate_sha256"], relative)
+                restored = relocated_path(ROOT, relative).read_bytes().replace(b"`light-research`", b"`research`")
+                self.assertEqual(hashlib.sha256(restored).hexdigest(), expected, relative)
+            else:
+                self.assertEqual(actual, expected, relative)
 
     def test_every_local_markdown_pointer_resolves_without_cross_skill_deep_links(self) -> None:
         for name in FULL:

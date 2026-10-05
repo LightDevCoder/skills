@@ -1,0 +1,7 @@
+interface:
+  display_name: "Light · Prototype"
+  short_description: "Prototype to answer a design question"
+  default_prompt: "Use $light-prototype to build a throwaway prototype to answer a design question."
+
+policy:
+  allow_implicit_invocation: true

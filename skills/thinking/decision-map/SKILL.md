@@ -34,19 +34,19 @@ Exact shapes and tracker operations are in
 ## Execution
 
 - **Charting:** name the destination, surface the frontier/fog breadth-first,
-  create the map and specifiable tickets, wire blocking edges, fire `research`
+  create the map and specifiable tickets, wire blocking edges, fire `light-research`
   tickets in parallel, and stop.
 - **Working:** load the map, claim the chosen frontier ticket, resolve it via
   the ticket's capability, append `## Answer` and update the map, then stop
-  after one ticket (parallel `research` on charting excepted).
+  after one ticket (parallel `light-research` on charting excepted).
 
 Full mode steps are in [WORKFLOW.md](references/WORKFLOW.md); examples are in
 [EXAMPLES.md](references/EXAMPLES.md).
 
 ## Composition
 
-Resolve tickets with the owning capability: `research`, `prototype`,
-`socratic` (human decisions), or `to-questionnaire` (another person). One
+Resolve tickets with the owning capability: `light-research`, `light-prototype`,
+`socratic` (human decisions), or `light-to-questionnaire` (another person). One
 session resolves at most one non-research ticket.
 
 ## Handoff

@@ -17,7 +17,7 @@ This document explains the **Clarification & Research** composition: entry, hand
                        │
             ┌──────────┼──────────┐
             ▼          ▼          ▼
-        research  prototype  to-questionnaire
+        light-research  light-prototype  light-to-questionnaire
 ```
 
 - [`socratic`](../../skills/thinking/socratic/SKILL.md) — core engine: dynamic, decision-owned questioning; no fixed questionnaire; distinguishes facts vs user decisions. Not a project workflow by itself. Other Skills *call* it; they do not reimplement it.
@@ -28,7 +28,7 @@ This document explains the **Clarification & Research** composition: entry, hand
 | Skill | Entry | How it uses `socratic` | Handoff | Stop |
 | --- | --- | --- | --- | --- |
 | [`project-clarify`](../../skills/project/project-clarify/SKILL.md) — user-invoked | Existing project with genuine unresolved decisions | **Inspects first:** `README`, `AGENTS.md`, `CLAUDE.md`, existing docs/specs/source. *Then* calls `socratic` for only the gaps that need user-owned decisions | clarified decisions summary for `project-spec` (or back to `decision-map` if still foggy) | stop without creating SPEC/tickets or auto-starting another user-invoked Skill |
-| [`decision-map`](../../skills/thinking/decision-map/SKILL.md) — user-invoked | Large, foggy, multi-session, many dependent decisions | Maintains a persistent map under `.scratch/<effort>/map.md` + child tickets; may call `socratic` and, per unknown routing, `research` / `prototype` / `to-questionnaire` | decision tickets resolved → hand to `project-spec` | stop at map updates; work stays on the tracker, not in execution |
+| [`decision-map`](../../skills/thinking/decision-map/SKILL.md) — user-invoked | Large, foggy, multi-session, many dependent decisions | Maintains a persistent map under `.scratch/<effort>/map.md` + child tickets; may call `socratic` and, per unknown routing, `light-research` / `light-prototype` / `light-to-questionnaire` | decision tickets resolved → hand to `project-spec` | stop at map updates; work stays on the tracker, not in execution |
 
 ## Unknown routing
 
@@ -37,12 +37,12 @@ When a fact/decision is missing inside clarification:
 ```text
 Unknown
   ├─ user must decide          → socratic
-  ├─ external fact             → research (model-invoked PORT, reads primary sources)
-  ├─ needs experiment          → prototype (throwaway probe)
-  └─ held by another person    → to-questionnaire (user-invoked PORT, builds a questionnaire)
+  ├─ external fact             → light-research (model-invoked PORT, reads primary sources)
+  ├─ needs experiment          → light-prototype (throwaway probe)
+  └─ held by another person    → light-to-questionnaire (user-invoked PORT, builds a questionnaire)
 ```
 
-Call the capability; never guess or copy its instructions into the caller. `research` and `prototype` are read-only investigators; `to-questionnaire` returns the questionnaire for the user to send.
+Call the capability; never guess or copy its instructions into the caller. `light-research` and `light-prototype` are read-only investigators; `light-to-questionnaire` returns the questionnaire for the user to send.
 
 ## Handoff rules
 

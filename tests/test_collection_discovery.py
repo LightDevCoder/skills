@@ -28,14 +28,14 @@ EXPECTED = sorted(
         "agent-config",
         "ask-light",
         "clarify",
-        "code-review",
+        "light-code-review",
         "decision-map",
-        "diagnosing-bugs",
+        "light-diagnosing-bugs",
         "eli5",
         "generic-review",
-        "handoff",
+        "light-handoff",
         "humanizer",
-        "implement",
+        "light-implement",
         "kanban-worker",
         "kb-init",
         "language-learning",
@@ -48,19 +48,19 @@ EXPECTED = sorted(
         "project-review",
         "project-spec",
         "project-tickets",
-        "prototype",
+        "light-prototype",
         "recap",
         "release-workflow",
-        "research",
+        "light-research",
         "resolving-merge-conflicts",
         "review-loop",
         "socratic",
-        "tdd",
-        "teach",
-        "to-questionnaire",
-        "wait-what",
-        "wizard",
-        "writing-for-agents",
+        "light-tdd",
+        "light-teach",
+        "light-to-questionnaire",
+        "light-wait-what",
+        "light-wizard",
+        "light-writing-for-agents",
     ]
 )
 
@@ -131,8 +131,8 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         all(token in installation for token in ("source_root", "skill_name", "destination_root")),
         "Manual fallback must use valid shell variables.",
     )
-    stable = re.search(r"\| Stable release \| \[(v\d+\.\d+\.\d+)\]", catalog)
-    c.check(stable is not None, "Catalog must name a stable release.")
+    stable = re.search(r"\| (?:Stable release|Local verified release baseline) \| \[(v\d+\.\d+\.\d+)\]", catalog)
+    c.check(stable is not None, "Catalog must name a stable release or its local verified release baseline.")
     if stable:
         version = stable.group(1)
         c.check(f"https://github.com/LightDevCoder/skills/releases/tag/{version}" in readme, "README must link to the catalog's stable release.")
@@ -185,7 +185,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         c.check("- **Evidence:**" in section or "- **证据：**" in section, f"{package} catalog evidence field is missing.")
         # README no longer lists all 33 in a table; check that at least representative mention or catalog link covers it
         # Keep soft check: README should at least mention the main workflow skills explicitly
-        if package in ("project-init", "project-clarify", "project-spec", "project-tickets", "implement", "project-review", "ask-light"):
+        if package in ("project-init", "project-clarify", "project-spec", "project-tickets", "light-implement", "project-review", "ask-light"):
             c.check(package in readme, f"{package} is missing from README main workflow.")
 
     # Link resolution — skip local workspace tracker and placeholder example links
@@ -307,7 +307,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         ("docs/MAINTENANCE.md", "docs/MAINTENANCE.zh-CN.md", ["ATTRIBUTION", "review-loop", "Port"]),
         ("docs/REVIEW_POLICY.md", "docs/REVIEW_POLICY.zh-CN.md", ["review-loop", "PASS", "BLOCKED", "project-review"]),
         ("docs/SKILL_ADMISSION.md", "docs/SKILL_ADMISSION.zh-CN.md", ["ATTRIBUTION", "Port", "review-loop"]),
-        ("docs/workflows/project-workflow.md", "docs/zh-CN/workflows/project-workflow.md", ["project-init", "project-spec", "implement"]),
+        ("docs/workflows/project-workflow.md", "docs/zh-CN/workflows/project-workflow.md", ["project-init", "project-spec", "light-implement"]),
         ("docs/workflows/clarification-system.md", "docs/zh-CN/workflows/clarification-system.md", ["socratic", "clarify"]),
         ("docs/workflows/review-system.md", "docs/zh-CN/workflows/review-system.md", ["review-loop", "generic-review", "project-review"]),
     ]
@@ -322,11 +322,11 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         c.check(bool(re.search(r"prompt-only|纯提示型", text)), "Admission/review policy must describe the prompt-only fast track.")
         c.check("fresh independent Evaluator" in text, "Fast-track policy must preserve one fresh independent Evaluator.")
         c.check("Critic" in text, "Fast-track policy must state the separate Critic boundary.")
-        c.check("code-review" in text, "Fast-track policy must state the code-review boundary.")
+        c.check("light-code-review" in text, "Fast-track policy must state the light-code-review boundary.")
 
     semantic_matrix = [
         ("README.md", "README.zh-CN.md", [("Light Skills", "Light Skills"), ("ask-light", "ask-light"), ("Assets/header.png", "Assets/header.png")]),
-        ("CATALOG.md", "CATALOG.zh-CN.md", [("Collection status", "集合状态"), ("Stable release", "稳定版本"), ("Installation authority", "安装权威")]),
+        ("CATALOG.md", "CATALOG.zh-CN.md", [("Collection status", "集合状态"), ("Local verified release baseline", "本地已验证发布基线"), ("Installation authority", "安装权威")]),
         ("CHANGELOG.md", "CHANGELOG.zh-CN.md", [("0.2.0", "0.2.0"), ("ATTRIBUTION", "ATTRIBUTION")]),
         ("docs/INSTALLATION.md", "docs/INSTALLATION.zh-CN.md", [("Revision semantics", "Revision 语义"), ("Historical v0.1.0 verification", "历史 v0.1.0 验证"), ("Manual fallback", "手动 fallback")]),
         ("docs/MAINTENANCE.md", "docs/MAINTENANCE.zh-CN.md", [("Authoritative records", "权威记录"), ("Synchronization matrix", "同步矩阵"), ("closeout", "closeout")]),
@@ -380,10 +380,10 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 
     secondary_parity = [
         ("docs/workflows/first-party-composition.md", "docs/zh-CN/workflows/first-party-composition.md", ["review-loop", "ask-light"]),
-        ("docs/workflows/recipes.md", "docs/zh-CN/workflows/recipes.md", ["review-loop", "ask-light", "PASS", "FAIL", "BLOCKED", "handoff", "stop"]),
-        ("docs/workflows/project-workflow.md", "docs/zh-CN/workflows/project-workflow.md", ["project-clarify", "implement", "project-review"]),
+        ("docs/workflows/recipes.md", "docs/zh-CN/workflows/recipes.md", ["review-loop", "ask-light", "PASS", "FAIL", "BLOCKED", "light-handoff", "stop"]),
+        ("docs/workflows/project-workflow.md", "docs/zh-CN/workflows/project-workflow.md", ["project-clarify", "light-implement", "project-review"]),
         ("docs/workflows/clarification-system.md", "docs/zh-CN/workflows/clarification-system.md", ["socratic", "decision-map"]),
-        ("docs/workflows/execution.md", "docs/zh-CN/workflows/execution.md", ["implement", "agent-config"]),
+        ("docs/workflows/execution.md", "docs/zh-CN/workflows/execution.md", ["light-implement", "agent-config"]),
         ("docs/workflows/review-system.md", "docs/zh-CN/workflows/review-system.md", ["generic-review", "project-review"]),
         ("docs/workflows/specialized-workflows.md", "docs/zh-CN/workflows/specialized-workflows.md", ["manuscript-ops", "kb-init"]),
     ]
@@ -413,7 +413,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.check(bool(re.search(r"allow_implicit_invocation:\s*false", read(root, "skills/productivity/recap/agents/openai.yaml"))), "recap must declare explicit-only metadata policy.")
 
     # Additional SPEC §24 checks: no Matt/sol runtime dependency, ATTRIBUTION, supporting refs resolve
-    for skill in ("research", "prototype", "tdd", "handoff", "diagnosing-bugs", "wizard", "teach", "wait-what", "to-questionnaire", "writing-for-agents", "resolving-merge-conflicts"):
+    for skill in ("light-research", "light-prototype", "light-tdd", "light-handoff", "light-diagnosing-bugs", "light-wizard", "light-teach", "light-wait-what", "light-to-questionnaire", "light-writing-for-agents", "resolving-merge-conflicts"):
         c.check((package_dir(root, skill) / "ATTRIBUTION.md").is_file(), f"PORT {skill} must have ATTRIBUTION.md.")
         text = (package_dir(root, skill) / "SKILL.md").read_text(encoding="utf-8")
         # Ensure no hard requirement to install upstream at runtime
@@ -425,7 +425,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.check("Terra" not in ac_text and "Luna" not in ac_text, "agent-config must not hardcode Sol/Terra/Luna topology.")
 
     # Supporting-file reference resolution for a sample of new skills
-    for pkg in ("clarify", "project-clarify", "decision-map", "project-spec", "project-tickets", "implement", "code-review", "socratic"):
+    for pkg in ("clarify", "project-clarify", "decision-map", "project-spec", "project-tickets", "light-implement", "light-code-review", "socratic"):
         skill_md = (package_dir(root, pkg) / "SKILL.md").read_text(encoding="utf-8")
         for m in re.finditer(r"\[([^\]]+)\]\(([^)]+)\)", skill_md):
             link = m.group(2).split("#")[0].strip()
@@ -437,7 +437,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 
     # Workflow docs must reference real Skills
     workflow_text_all = " ".join(read(root, p) for p in ["docs/workflows/project-workflow.md", "docs/workflows/clarification-system.md", "docs/workflows/execution.md", "docs/workflows/review-system.md", "docs/workflows/specialized-workflows.md"])
-    for required_skill in ("project-init", "project-clarify", "project-spec", "project-tickets", "implement", "project-review", "socratic", "clarify", "decision-map", "research", "prototype", "to-questionnaire", "agent-config", "review-loop", "generic-review", "code-review", "manuscript-ops", "kb-init"):
+    for required_skill in ("project-init", "project-clarify", "project-spec", "project-tickets", "light-implement", "project-review", "socratic", "clarify", "decision-map", "light-research", "light-prototype", "light-to-questionnaire", "agent-config", "review-loop", "generic-review", "light-code-review", "manuscript-ops", "kb-init"):
         c.check(required_skill in workflow_text_all, f"Workflow docs must reference real Skill: {required_skill}")
 
     documentation_files = ["README.md", "CATALOG.md", "CHANGELOG.md", "AGENTS.md"]

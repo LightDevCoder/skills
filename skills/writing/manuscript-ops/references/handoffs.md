@@ -127,7 +127,7 @@ Install and refresh the agent between layers when necessary:
 1. Required first-party discovery closure from `LightDevCoder/skills`:
    `clarify` (the user entry), its underlying `socratic` capability, and
    `decision-map`.
-2. Optional Decision-map branches, before they are selected: `prototype`.
+2. Optional Decision-map branches, before they are selected: `light-prototype`.
 3. Independent acceptance from `LightDevCoder/skills`: `project-review`.
 4. `manuscript-ops`.
 
@@ -161,7 +161,7 @@ python $installer `
   --path skills/thinking/clarify skills/thinking/socratic skills/thinking/decision-map skills/review/project-review
 ```
 
-Install `skills/prototype` only if the chosen Decision-map branch
+Install `light-prototype` only if the chosen Decision-map branch
 requires it. Start a fresh Codex session after installation.
 
 ### Manual portable installation

@@ -10,6 +10,6 @@
 
 - **[humanizer](humanizer/SKILL.md)** — 去除中英文文本中的 AI 腔调与套话，让文字通顺自然，且不改变原意、不捏造事实。
 - **[manuscript-ops](manuscript-ops/SKILL.md)** — 文稿工程管理：负责从简要笔记到技术手册、书籍及多语言多格式输出的写作与质量治理。
-- **[writing-for-agents](writing-for-agents/SKILL.md)** — 编写或改进面向 AI Agent 的指令文档（Skills、`AGENTS.md`、`CLAUDE.md`），让模型能够稳定遵循。
+- **[light-writing-for-agents](light-writing-for-agents/SKILL.md)** — 编写或改进面向 AI Agent 的指令文档（Skills、`AGENTS.md`、`CLAUDE.md`），让模型能够稳定遵循。
 
 [全部分类](../README.zh-CN.md) · [完整目录](../../CATALOG.zh-CN.md)

@@ -6,8 +6,8 @@ These recipes are bounded documentation and validation assets. They describe exp
 
 ## Source legend and common rule
 
-- **First-party (33):** all Skills in this repository — `project-init`, `project-clarify`, `project-spec`, `project-tickets`, `implement`, `project-review`, `release-workflow`, `socratic`, `clarify`, `decision-map`, `research`, `prototype`, `to-questionnaire`, `agent-config`, `tdd`, `diagnosing-bugs`, `resolving-merge-conflicts`, `review-loop`, `generic-review`, `code-review`, `handoff`, `wizard`, `wait-what`, `writing-for-agents`, `teach`, `eli5`, `language-learning`, `recap`, `learn-anything`, `manuscript-ops`, `kb-init`, `kanban-worker`, `ask-light` — installed via `LightDevCoder/skills` (see [CATALOG.md](../../CATALOG.md)).
-- **Approved PORTs:** `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts` are self-contained first-party packages with `ATTRIBUTION.md` and no upstream runtime dependency (Port preserves Matt behavior; Light changes are handoff/decoupling only).
+- **First-party (36):** all Skills in this repository — `project-init`, `project-clarify`, `project-spec`, `project-tickets`, `light-implement`, `project-review`, `release-workflow`, `socratic`, `clarify`, `decision-map`, `light-research`, `light-prototype`, `light-to-questionnaire`, `agent-config`, `light-tdd`, `light-diagnosing-bugs`, `resolving-merge-conflicts`, `review-loop`, `generic-review`, `light-code-review`, `light-handoff`, `light-wizard`, `light-wait-what`, `light-writing-for-agents`, `light-teach`, `eli5`, `language-learning`, `recap`, `learn-anything`, `manuscript-ops`, `kb-init`, `kanban-worker`, `ask-light`, `humanizer`, `light-travelpage`, `project-retro` — installed via `LightDevCoder/skills` (see [CATALOG.md](../../CATALOG.md)).
+- **Approved PORTs:** `light-research`, `light-prototype`, `light-tdd`, `light-handoff`, `light-diagnosing-bugs`, `light-wizard`, `light-teach`, `light-wait-what`, `light-to-questionnaire`, `light-writing-for-agents`, `resolving-merge-conflicts` are self-contained first-party packages with `ATTRIBUTION.md` and no upstream runtime dependency (Port preserves Matt behavior; Light changes are handoff/decoupling only).
 - **Historical Matt names:** `grill-me` → `clarify`, `grilling` → `socratic`, `grill-with-docs` → `project-clarify`, `wayfinder` → `decision-map`, `to-spec` → `project-spec`, `to-tickets` → `project-tickets` — used only for attribution; the Light names above are the canonical workflow steps.
 - **Private modified third-party:** a package in `skills-3rdParty`; an absent private root is an availability gap, not an invitation to invent a fallback.
 
@@ -22,13 +22,13 @@ Each row declares the handoff artifact and stop condition. `user-invoked` means 
 | Order | Skill | Invocation | Input → output | Handoff / stop |
 | --- | --- | --- | --- | --- |
 | 1 | `project-spec` | user-invoked | goal, constraints + clarified decisions → traceable SPEC | SPEC artifact; stop for user approval before ticket slicing. |
-| 2 | `project-tickets` | user-invoked | approved SPEC → dependency-ordered tracer tickets | Ticket graph; do not auto-start `implement`. |
-| 3 | `implement` | user-invoked | one unblocked ticket → bounded diff + tests | Commit evidence; stop at ticket scope. |
-| 4 | `code-review` | model-invoked | fixed diff → Standards/Spec findings | Specialist review; it does not accept the change. |
-| 5 | `project-review` | model-invoked via `review-loop` + `code-review`/`generic-review` | implementation + tests + findings → final verdict | Durable `PASS`/`FAIL`/`BLOCKED`; stop. |
-| 6 | `handoff` | user-invoked | accepted result or blocker → closeout/resume record | Closeout artifact; user decides whether to resume. |
+| 2 | `project-tickets` | user-invoked | approved SPEC → dependency-ordered tracer tickets | Ticket graph; do not auto-start `light-implement`. |
+| 3 | `light-implement` | user-invoked | one unblocked ticket → bounded diff + tests | Commit evidence; stop at ticket scope. |
+| 4 | `light-code-review` | model-invoked | fixed diff → Standards/Spec findings | Specialist review; it does not accept the change. |
+| 5 | `project-review` | model-invoked via `review-loop` + `light-code-review`/`generic-review` | implementation + tests + findings → final verdict | Durable `PASS`/`FAIL`/`BLOCKED`; stop. |
+| 6 | `light-handoff` | user-invoked | accepted result or blocker → closeout/resume record | Closeout artifact; user decides whether to resume. |
 
-**Blocked conditions:** missing acceptance authority, unapproved tickets, unresolved dependencies, or absent independent evaluator. **Evidence:** SPEC, ticket graph, commit, focused tests, specialist findings, `project-review`/`review-loop` state/verdict, and `handoff`.
+**Blocked conditions:** missing acceptance authority, unapproved tickets, unresolved dependencies, or absent independent evaluator. **Evidence:** SPEC, ticket graph, commit, focused tests, specialist findings, `project-review`/`review-loop` state/verdict, and `light-handoff`.
 
 ## 2. New project initialization
 
@@ -65,7 +65,7 @@ Each row declares the handoff artifact and stop condition. `user-invoked` means 
 | --- | --- | --- | --- | --- |
 | 1 | `learn-anything` | user-invoked | source + provenance → internal Method Contract or precise gaps | Stop at `method_contract`, `not_promoted`, or `BLOCKED`. |
 | 2 | deterministic package builder | explicit build step after contract | Method Contract → created/updated/no-op/duplicate/blocked | Stop on exact builder state; do not hide duplicate ownership. |
-| 3 | `writing-for-agents` | optional model-invoked knowledge | approved contract → authoring notes | Knowledge only; never a runtime dependency. |
+| 3 | `light-writing-for-agents` | optional model-invoked knowledge | approved contract → authoring notes | Knowledge only; never a runtime dependency. |
 | 4 | `project-review` (via `review-loop`) | model-invoked | complete package + admission source → acceptance verdict | Stop at verdict before admission. |
 | 5 | Admission and collection sync | explicit maintainer action | accepted package → catalog, tests, release evidence | Stop after fresh install and release gate. |
 
@@ -73,11 +73,11 @@ Each row declares the handoff artifact and stop condition. `user-invoked` means 
 
 ## 5. Skill maintenance and release
 
-See [docs/MAINTENANCE.md](../MAINTENANCE.md) and [docs/REVIEW_POLICY.md](../REVIEW_POLICY.md): ownership/reuse gate → bounded implementation → tests + adversarial fixtures → `code-review` when scripts changed → `project-review` verdict → collection sync → fresh install/discovery → release/tag/closeout.
+See [docs/MAINTENANCE.md](../MAINTENANCE.md) and [docs/REVIEW_POLICY.md](../REVIEW_POLICY.md): ownership/reuse gate → bounded implementation → tests + adversarial fixtures → `light-code-review` when scripts changed → `project-review` verdict → collection sync → fresh install/discovery → release/tag/closeout.
 
 ## 6. Bug diagnosis and final review
 
-`ask-light workflow` also has bounded recipes for a reproducible bug and a final acceptance review. The bug route is `diagnosing-bugs` → `implement` → `code-review` → `project-review` (via `review-loop`); the final-review route is a single `project-review` step. Both stop at missing reproduction/acceptance authority or the final `PASS`/`FAIL`/`BLOCKED` and never auto-invoke a user Skill.
+`ask-light workflow` also has bounded recipes for a reproducible bug and a final acceptance review. The bug route is `light-diagnosing-bugs` → `light-implement` → `light-code-review` → `project-review` (via `review-loop`); the final-review route is a single `project-review` step. Both stop at missing reproduction/acceptance authority or the final `PASS`/`FAIL`/`BLOCKED` and never auto-invoke a user Skill.
 
 ## 7. Standalone session recap
 

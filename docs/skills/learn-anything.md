@@ -47,7 +47,7 @@ with generic Purpose, Workflow, or Quality Checks.
 
 ## Composition and stopping
 
-`writing-for-agents` may provide optional authoring knowledge after the Method
+`light-writing-for-agents` may provide optional authoring knowledge after the Method
 Contract. It is not an implicit runtime dependency. A deterministic package
 build hands to `project-review` (via `review-loop`) with the `agent-skill`
 Profile; admission owns the next gate. Stop at the Method Contract,

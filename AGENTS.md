@@ -13,7 +13,7 @@ The repository may contain only:
 
 Do not import an unmodified upstream or other third-party Skill for convenience. Recommend direct upstream installation when it already satisfies the need. If local modification, compatibility work, repackaging, deliberate version stabilization, or a behaviorally different variant is genuinely needed, evaluate it for the separate `skills-3rdParty` repository instead.
 
-Approved architecture-level PORTs (SPEC §14/§16 — `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts`, `project-retro`) are the exception: they are self-contained first-party packages with `ATTRIBUTION.md` and no upstream runtime dependency.
+Approved architecture-level PORTs (SPEC §14/§16 — `light-research`, `light-prototype`, `light-tdd`, `light-handoff`, `light-diagnosing-bugs`, `light-wizard`, `light-teach`, `light-wait-what`, `light-to-questionnaire`, `light-writing-for-agents`, `resolving-merge-conflicts`, `project-retro`) are the exception: they are self-contained first-party packages with `ATTRIBUTION.md` and no upstream runtime dependency.
 
 `project-workflow` is excluded. Do not add a compatibility shim, dependency, or package bearing that name unless a separately approved change establishes a real external-consumer need.
 
@@ -40,7 +40,7 @@ Long-lived rules for every Agent maintaining this repository:
 2. **Sol Advisor** is the primary design reference for `agent-config` (separates setup from runtime planning; uses setup only for companion/bootstrap/Profile preparation or repair; uses normal `agent-config` for execution planning; does not silently enter setup or mutate Host configuration; treats single-model and multi-model as peer first-class modes; uses user-confirmed Profiles; does not infer model intelligence from model names; relies on real Host evidence; treats unknown capability as unconfirmed; resolves abstract reasoning policies to actual Host-supported values; preserves unrelated Host configuration; uses optional companion MCP for persistence and Host mutation across primary coding-agent harnesses (10 native adapters [Codex, Claude Code, Antigravity, DeepSeek Harness, OpenCode, ZCode, Cursor, Grok Build, Hermes, Pi (MCP extension required)] + 1 generic fallback) while remaining usable in plan-only mode via generic fallback; does not claim universal harness support; treats generic fallback as non-native; does not own formal ticket decomposition, implementation, review convergence, or final acceptance; requires explicit approval before configuration mutation).
 3. Inspect the relevant upstream/reference Skill before modifying a derived Skill.
 4. Do not rewrite mature Light Skills (`manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `recap`, `eli5`, `release-workflow`) unless their actual responsibility must change.
-5. Do not redesign direct Matt PORT Skills (`research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts`, `project-retro`) — Port, then only minimal Light-handoff adaptation.
+5. Do not redesign direct Matt PORT Skills (`light-research`, `light-prototype`, `light-tdd`, `light-handoff`, `light-diagnosing-bugs`, `light-wizard`, `light-teach`, `light-wait-what`, `light-to-questionnaire`, `light-writing-for-agents`, `resolving-merge-conflicts`, `project-retro`) — Port, then only minimal Light-handoff adaptation.
 6. Keep new/refactored `SKILL.md` files concise (when, what, how, where to read more, handoff/stop).
 7. Put detailed workflows, examples, formats, and reusable guidance in supporting files (`references/`, `templates/`, `scripts/`), not in `SKILL.md`.
 8. Do not impose one Skill package shape — each package decides its own structure.
@@ -74,9 +74,9 @@ Do not silently rename, remove, or deprecate. Preserve a migration path, update 
 
 ## Validation and review
 
-Classify each Skill admission under [Skill admission](docs/SKILL_ADMISSION.md). An eligible low-risk prompt-only Skill uses the fast track: bounded structural/install/contract/invocation evidence + one fresh independent Evaluator (no separate Critic or `code-review`). All other new or significant Skill changes use the full evidence path; executable scripts additionally require focused automated + negative tests, adversarial fixtures where appropriate, and `code-review` evidence. Zero-assertion or no-op test is not PASS.
+Classify each Skill admission under [Skill admission](docs/SKILL_ADMISSION.md). An eligible low-risk prompt-only Skill uses the fast track: bounded structural/install/contract/invocation evidence + one fresh independent Evaluator (no separate Critic or `light-code-review`). All other new or significant Skill changes use the full evidence path; executable scripts additionally require focused automated + negative tests, adversarial fixtures where appropriate, and `light-code-review` evidence. Zero-assertion or no-op test is not PASS.
 
-For the full path, `review-loop` with the appropriate Profile (`agent-skill`, `generic`, `software`, `manuscript`, `specification`) is the convergence engine; `project-review` owns the frozen baseline and final `PASS`/`FAIL`/`BLOCKED`. Specialist reviewers (`generic-review`, `code-review`, domain) provide findings only (see [Reviewer contract](docs/REVIEWER_CONTRACT.md)) — not a competing verdict.
+For the full path, `review-loop` with the appropriate Profile (`agent-skill`, `generic`, `software`, `manuscript`, `specification`) is the convergence engine; `project-review` owns the frozen baseline and final `PASS`/`FAIL`/`BLOCKED`. Specialist reviewers (`generic-review`, `light-code-review`, domain) provide findings only (see [Reviewer contract](docs/REVIEWER_CONTRACT.md)) — not a competing verdict.
 
 ## Installation, release, and closeout
 

@@ -56,8 +56,8 @@
       "repository": "LightDevCoder/skills"
     },
     {
-      "name": "prototype",
-      "path": "skills/engineering/prototype",
+      "name": "light-prototype",
+      "path": "skills/engineering/light-prototype",
       "required": false,
       "layer": "decision-map-optional-branch",
       "invocation_type": "model-invoked",

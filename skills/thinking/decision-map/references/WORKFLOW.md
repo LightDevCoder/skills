@@ -22,7 +22,7 @@
    they can reference each other). Wiring sorts them into frontier vs blocked.
 
 5. **Fire research subagents.** For each `research` ticket, spin up a
-   `research` capability in parallel, capturing findings on a throwaway branch
+   `light-research` capability in parallel, capturing findings on a throwaway branch
    or note and linking from the ticket. Leave `Not yet specified` patches that
    are not yet sharp enough to ticket as fog.
 
@@ -40,11 +40,11 @@ and optionally a ticket number.
    sessions skip it.
 4. **Resolve** it — zoom into related/closed tickets on demand; invoke the
    Type's capability:
-   - `research` → `research`
-   - `prototype` → `prototype`
-   - `grilling` → `socratic` (+ `to-questionnaire` if the holder is another person)
+   - `research` → `light-research`
+   - `prototype` → `light-prototype`
+   - `grilling` → `socratic` (+ `light-to-questionnaire` if the holder is another person)
    - `task` → do the work or hand the human a precise checklist
-   Never resolve more than one ticket per session (except parallel `research`
+   Never resolve more than one ticket per session (except parallel `light-research`
    on charting).
 5. **Record**: append `## Answer` to the ticket, set `Status: resolved`,
    append a gist to the map's `Decisions so far` (with title-link, not bare id).

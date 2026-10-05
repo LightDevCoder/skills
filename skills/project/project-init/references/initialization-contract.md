@@ -15,7 +15,7 @@ This reference is loaded when writing or validating a project initialization.
 
 `docs/agents/issue-tracker.md` records the work-item location, SPEC/ticket
 locators, blocking edge, statuses, and frontier rule consumed by
-`decision-map`, `project-spec`, `project-tickets`, and `implement`. Do not create
+`decision-map`, `project-spec`, `project-tickets`, and `light-implement`. Do not create
 `triage-labels.md`: no admitted Light workflow consumes it.
 
 Managed markers allow reruns to update confirmed configuration while preserving
@@ -129,7 +129,7 @@ onboarding gate for TypeSafe Jev ecosystem integration (`typesafe-ai`):
 - `decision-map`: tracker locator and working area.
 - `project-spec`: goal, outputs, domain context, working area.
 - `project-tickets`: issue tracker and working area.
-- `implement`: issue tracker, domain context, and review profile.
+- `light-implement`: issue tracker, domain context, and review profile.
 - `project-review`: review profile and acceptance strategy.
 
 Each consumer reads only these fields when the file exists. The Skill's own
@@ -147,8 +147,8 @@ explicitly.
 ## Capability and invocation boundary
 
 The six lightweight questions are asked directly by this initializer; no
-separate clarification Skill is required. `research` is the only model-invoked
+separate clarification Skill is required. `light-research` is the only model-invoked
 capability allowed, and only for the confirmed fallback. The user remains in
-control of `project-spec`, `project-tickets`, `implement`, `project-review`,
+control of `project-spec`, `project-tickets`, `light-implement`, `project-review`,
 `ask-light`, `learn-anything`, and every other user-invoked Skill. Project-init
 may recommend those names but never executes or orchestrates them.

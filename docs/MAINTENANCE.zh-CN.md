@@ -10,9 +10,13 @@
 
 ## 当前同步基线
 
-准入集合包含 `skills/` 下 **36 个第一方 Skill**（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)）。当前稳定版本为 `v0.2.5`（36 个包；上一稳定版为 `v0.2.4`）。
+准入集合包含 `skills/` 下 **36 个第一方 Skill**（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)）。本 checkout 的已验证发布基线为 `v0.2.5`（36 个包；上一稳定版为 `v0.2.4`）。
 
 历史：`v0.1.1` 五个、`v0.1.2` 七个、`v0.1.3` 工具链迁移、`v0.1.4`（`light-kanban-worker`）、`v0.1.5` 调度与身份加固、`v0.1.6`（`kb-init`）。结构发现检查在 [tests/test_collection_discovery.py](../tests/test_collection_discovery.py) 与 [tests/test_composition.py](../tests/test_composition.py)，仅为结构证据，不是 fresh-install 证明。
+
+v0.2.6 候选按[名称迁移说明](MIGRATION-v0.2.6.zh-CN.md)调整 12 个名称；v0.2.5 为本 checkout 的已验证发布基线。
+
+名称迁移发布已阻断：远端 v0.2.6 被占用，不能覆盖或自行改号；见[发布阻断记录](evidence/namespace-v0.2.6/publication-blocker.md)。
 
 ## 变更流程
 

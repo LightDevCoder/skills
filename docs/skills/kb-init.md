@@ -38,7 +38,7 @@ starts the interview automatically.
   approval violates the contract and must not be presented as a valid
   `kb-init` result.
 
-`kb-init` may call the model-invoked `research` capability when current
+`kb-init` may call the model-invoked `light-research` capability when current
 external facts are needed. It never invokes another user-invoked Skill.
 
 ## Verification and release state

@@ -29,7 +29,7 @@ The user does not need to type `$project-clarify` again between rounds.
    one question at a time by default.
 3. **Resolve fact and experiment gaps deliberately.** For a fact gap, state
    which decision it blocks and record the authorized capability call
-   (`research`, `prototype`, `to-questionnaire`) in the ledger. Never mark a
+   (`light-research`, `light-prototype`, `light-to-questionnaire`) in the ledger. Never mark a
    result as read without a result path actually read; leave unavailable or
    not-authorized gaps unresolved and keep their downstream decisions out of
    the frontier.

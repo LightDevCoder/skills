@@ -19,7 +19,7 @@ class ProjectInitContractTest(unittest.TestCase):
         self.assertIn("Managed markers", contract)
         self.assertIn("Do not create\n`triage-labels.md`", contract)
         self.assertIn("Python 3.9", skill + contract)
-        for consumer in ("project-clarify", "decision-map", "project-spec", "project-tickets", "implement", "project-review"):
+        for consumer in ("project-clarify", "decision-map", "project-spec", "project-tickets", "light-implement", "project-review"):
             self.assertIn(consumer, contract)
         for preset in ("generic", "software", "manuscript", "skill-development", "research", "knowledge-base", "data-analysis"):
             self.assertIn(f"| {preset} |", presets)

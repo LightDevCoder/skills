@@ -94,7 +94,7 @@ than duplicate.
    applicable Profile and record the reason in the Charter.
 4. Freeze the baseline with the source location, revision or immutable identity,
    scope, exclusions, criteria, required evidence, approval state, and Profile.
-   A `software`-Profile review additionally freezes the immutable code-review
+   A `software`-Profile review additionally freezes the immutable light-code-review
    base (`- Fixed point:`, exactly one full commit SHA) and the reviewed
    software target (`- Implementation scope:`, repository-relative literal
    paths — never inferred from changed paths; if the complete target cannot be
@@ -118,14 +118,14 @@ available round, and a writable new round directory.
    inputs, outputs, limitations, and an accurate evidence label using
    [evidence-protocol.md](evidence-protocol.md).
 2. **Invoke reviewers via `review-loop`.** Resolve the reviewer(s) for the
-   bounded packet (`generic-review` for ordinary artifacts, `code-review`
+   bounded packet (`generic-review` for ordinary artifacts, `light-code-review`
    for software diff, domain reviewer when justified) and call them through
    `review-loop` (`resolve reviewer → invoke reviewer → receive findings`).
    A reviewer result is a candidate, not an instruction; its lightweight shape
    follows `review-loop`'s public reviewer contract.
 3. **Validate every candidate.** Assign or reuse its stable Finding ID, then
    record one disposition: `confirmed`, `rejected`, `duplicate`, or
-   `out-of-scope`. For the software Profile, ingest `code-review` Standards
+   `out-of-scope`. For the software Profile, ingest `light-code-review` Standards
    and Spec findings while preserving their source axis. Follow
    [finding-schema.md](finding-schema.md).
 4. **Repair only within the frozen baseline.** Direct only a confirmed,
@@ -165,11 +165,11 @@ closed rather than prematurely accepting an incomplete or prior-round verdict.
 
 ### Software specialist boundary
 
-When the selected Profile is `software`, `code-review` is invoked at the
+When the selected Profile is `software`, `light-code-review` is invoked at the
 frozen fixed point and approved Spec. It returns separate Standards and Spec
 findings as `review` evidence. The Core validates those findings through the
 same generic lifecycle, directs only bounded Producer repairs, and supplies the
-fresh Evaluator with the original and repaired evidence. `code-review` is a
+fresh Evaluator with the original and repaired evidence. `light-code-review` is a
 specialist and never issues the project's final `PASS`, `FAIL`, or `BLOCKED`;
 `project-review` Core owns the final verdict and `review-loop` never runs the
 repair loop on its own.

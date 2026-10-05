@@ -101,7 +101,7 @@ FAMILY_ALIASES = {
     "review": ("review", "reviews", "acceptance", "verdict"),
     "learning": ("learning", "learn", "study", "teaching"),
     "clarification": ("clarification", "clarify", "clarifying"),
-    "implementation": ("implementation", "implement", "building", "coding"),
+    "implementation": ("implementation", "implement", "light-implement", "building", "coding"),
     "research": ("research", "investigation"),
     "knowledge-work": ("knowledge", "writing", "documentation", "docs"),
     "specialized": ("specialized", "domain"),
@@ -1791,7 +1791,7 @@ def _inspect_review_evidence(root: Path, current_effort: str | None) -> dict[str
     """Inspect the durable review state when present (fail-closed).
 
     The canonical software workflow runs project-clarify → project-spec →
-    project-tickets → implement → project-review. The record reports
+    project-tickets → light-implement → project-review. The record reports
     ownership, lifecycle status, verdict, freshness, and profile as facts;
     the model determines what the review applies to using the producer-owned
     review contract.
@@ -2538,16 +2538,16 @@ def navigate_result(skill_map: dict[str, Any], query: str, host: str = "codex") 
             [
                 {"name": entry["name"], "family": families.get(entry["name"], ""), "description": entry.get("patterns", [])[:1], "invocation": invocation(entry["name"], host)}
                 for entry in skill_map["skills"]
-                if entry["name"] == "diagnosing-bugs"
+                if entry["name"] == "light-diagnosing-bugs"
             ],
             key=lambda item: item["name"],
         )
         if diagnostics:
             result = dict(base)
             result.update({
-                "skill": "diagnosing-bugs" if len(diagnostics) == 1 else "",
+                "skill": "light-diagnosing-bugs" if len(diagnostics) == 1 else "",
                 "skills": diagnostics,
-                "reason": "Bug/diagnostic intent matched: diagnosing-bugs owns investigating and repairing regressions.",
+                "reason": "Bug/diagnostic intent matched: light-diagnosing-bugs owns investigating and repairing regressions.",
             })
             return result
 

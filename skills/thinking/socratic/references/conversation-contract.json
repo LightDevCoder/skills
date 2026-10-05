@@ -28,8 +28,8 @@
   },
   "persistenceOwner": "decision-map",
   "factRoutes": {
-    "externalFact": "research",
-    "needsExperiment": "prototype",
-    "heldByAnotherPerson": "to-questionnaire"
+    "externalFact": "light-research",
+    "needsExperiment": "light-prototype",
+    "heldByAnotherPerson": "light-to-questionnaire"
   }
 }

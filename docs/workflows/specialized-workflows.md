@@ -41,7 +41,7 @@ Adding a handoff line is not a redesign.
 | Skill | Typical standalone entry | Natural handoff (optional) | Stop |
 | --- | --- | --- | --- |
 | [`manuscript-ops`](../../skills/writing/manuscript-ops/SKILL.md) | manuscript scope/risk/batches/formats | May call `clarify`/`decision-map` via user choice; may hand its approved brief/Charter to `project-review` (`manuscript` Profile) | stop at routing decision, Charter freeze, or QA'd deliverable |
-| [`kb-init`](../../skills/knowledge/kb-init/SKILL.md) | ` $kb-init` | Interview → approved SPEC → implementation; may call `research` for external facts | stop at design or initialized KB |
+| [`kb-init`](../../skills/knowledge/kb-init/SKILL.md) | ` $kb-init` | Interview → approved SPEC → implementation; may call `light-research` for external facts | stop at design or initialized KB |
 | [`learn-anything`](../../skills/knowledge/learn-anything/SKILL.md) | source with possible repeated method | Internal Method Contract → deterministic package builder → `project-review` (via `review-loop`) → catalog/doc sync | stop at `method_contract` / `not_promoted` / `BLOCKED` |
 | [`language-learning`](../../skills/knowledge/language-learning/SKILL.md) | language-learning request | Lessons/flashcards/conversation/grammar/quiz/translation each return their artifact | stop at lesson or quiz result |
 | [`kanban-worker`](../../skills/project/kanban-worker/SKILL.md) | scheduled wake | `complete` or `block` with reason; next wake picks `reviewFeedback` before new claims | stop after one task |
@@ -52,7 +52,7 @@ Adding a handoff line is not a redesign.
 ## How they meet the main workflow
 
 - A project discovered via `project-clarify` may be routed to `manuscript-ops` or `kb-init` when domain specialization is more appropriate than generic `project-spec`.
-- A reusable method from `learn-anything` may be admitted as a new Skill and then participate in future `implement` work.
+- A reusable method from `learn-anything` may be admitted as a new Skill and then participate in future `light-implement` work.
 - `kanban-worker` decomposes larger work already created by `project-tickets` and reports `complete`/`block`.
 - `release-workflow` is both a specialized closer and the tail of the project workflow.
 - When unsure, [`ask-light`](../../skills/productivity/ask-light/SKILL.md) routes to the appropriate specialized Skill.

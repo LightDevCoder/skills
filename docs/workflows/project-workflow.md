@@ -15,7 +15,7 @@ project-spec
       ↓  (frozen SPEC + acceptance source)
 project-tickets
       ↓  (ordered task list with dependencies)
-implement
+light-implement
       ↓  (bounded diff + focused tests + verification)
 project-review
       ↓  (final PASS / FAIL / BLOCKED)
@@ -33,8 +33,8 @@ This is a *recommended* flow, not a required pipeline. Enter mid-stream when the
 | 1 | New project needs a stable, confirmed starting point | [`project-init`](../../skills/project/project-init/SKILL.md) — user-invoked | `docs/agents/light-project.md` + task tracker settings + instruction pointer | stop; user chooses next |
 | 2 | Real project has unresolved decisions; repo facts should not be re-asked | [`project-clarify`](../../skills/project/project-clarify/SKILL.md) — user-invoked → `socratic` engine | clarified requirements and open decision summary for `project-spec` | stop at clarification summary; do not create SPEC |
 | 3 | Decisions are clarified and a formal SPEC is needed | [`project-spec`](../../skills/project/project-spec/SKILL.md) — user-invoked | frozen SPEC with acceptance source | stop for approval; if blocked, return to `project-clarify` |
-| 4 | SPEC is approved | [`project-tickets`](../../skills/project/project-tickets/SKILL.md) — user-invoked | ordered tasks with clear dependencies ready for implementation | stop; do not auto-start `implement` |
-| 5 | One ticket is unblocked and unambiguous | [`implement`](../../skills/project/implement/SKILL.md) — user-invoked, may offer `agent-config` / call `tdd` internally | bounded diff + tests + local verification | stop at ticket scope; hand to review when appropriate |
+| 4 | SPEC is approved | [`project-tickets`](../../skills/project/project-tickets/SKILL.md) — user-invoked | ordered tasks with clear dependencies ready for implementation | stop; do not auto-start `light-implement` |
+| 5 | One ticket is unblocked and unambiguous | [`light-implement`](../../skills/project/light-implement/SKILL.md) — user-invoked, may offer `agent-config` / call `light-tdd` internally | bounded diff + tests + local verification | stop at ticket scope; hand to review when appropriate |
 | 6 | Artifact needs final acceptance | [`project-review`](../../skills/review/project-review/SKILL.md) — model-invoked (or manual) via `review-loop` | frozen Charter + reviewer findings + final verdict `PASS`/`FAIL`/`BLOCKED` | stop at verdict |
 | 7 | Project passed acceptance | [`release-workflow`](../../skills/project/release-workflow/SKILL.md) — model-invoked | synchronized docs/catalog/tests, tag, release | stop |
 | 8 | Workflow concludes; agent evaluates whether friction occurred | [`project-retro`](../../skills/project/project-retro/SKILL.md) — model-invoked (agent self-evaluation) | structured retrospective findings ordered by severity | stop after presenting findings; require user approval before applying changes |
@@ -51,7 +51,7 @@ At the final step of the workflow (after `project-review` or `release-workflow`)
 
 If friction was detected, the Agent invokes `project-retro` to surface actionable environment improvements. If the run was clean and smooth, the Agent skips `project-retro` cleanly without creating noise.
 
-**Optional / parallel:** `decision-map` may replace/augment `project-clarify` for large, foggy, multi-session work — see [clarification-system](clarification-system.md). `implement` may call `tdd`, `diagnosing-bugs`, `resolving-merge-conflicts` as needed — see [execution](execution.md). Review uses `generic-review`/`code-review`/domain reviewers via `review-loop` — see [review-system](review-system.md).
+**Optional / parallel:** `decision-map` may replace/augment `project-clarify` for large, foggy, multi-session work — see [clarification-system](clarification-system.md). `light-implement` may call `light-tdd`, `light-diagnosing-bugs`, `resolving-merge-conflicts` as needed — see [execution](execution.md). Review uses `generic-review`/`light-code-review`/domain reviewers via `review-loop` — see [review-system](review-system.md).
 
 ## Unknown or specialized entry
 

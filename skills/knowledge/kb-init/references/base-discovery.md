@@ -48,7 +48,7 @@ Do not assume any category exists.
 
 Do not ask the user to supply public links that can be researched.
 
-If the access method is current, unfamiliar, or unverified, use `research` under `research-contract.md`.
+If the access method is current, unfamiliar, or unverified, use `light-research` under `research-contract.md`.
 
 For a third-party software or service base, do not lock a connection route from model memory alone when the official integration surface could have changed. Unless already verified from first-party sources in the current session, research the current supported programmatic access before finalizing whether the implementation should use a connector/MCP-style interface, CLI, API, SDK, import/export route, or another supported mechanism.
 

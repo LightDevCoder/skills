@@ -29,7 +29,7 @@ missing adapter instead of silently writing `.scratch` files.
 
 ## Handoff
 
-After publishing, describe the frontier and recommend explicit `$implement`
+After publishing, describe the frontier and recommend explicit `$light-implement`
 on the chosen ticket, then stop.
 
 ## References

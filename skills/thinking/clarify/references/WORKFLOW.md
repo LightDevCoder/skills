@@ -58,6 +58,6 @@ question per round.
 - If the clarified thread now has enough context to become a project stage,
   recommend `$project-clarify` and stop.
 - If the user wants a questionnaire for another person, recommend
-  `$to-questionnaire` and stop.
+  `$light-to-questionnaire` and stop.
 - Otherwise the user replies normally until the synthesis is confirmed or the
   frontier is blocked.

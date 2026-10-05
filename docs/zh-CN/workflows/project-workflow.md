@@ -15,7 +15,7 @@ project-spec
       ↓  （冻结的 SPEC + 验收来源）
 project-tickets
       ↓  （按依赖排序的任务清单）
-implement
+light-implement
       ↓  （清晰的代码变更 + 针对性测试 + 验证结果）
 project-review
       ↓  （最终 PASS / FAIL / BLOCKED）
@@ -33,8 +33,8 @@ project-retro
 | 1 | 新项目需要稳定且已确认的起点 | [`project-init`](../../../skills/project/project-init/SKILL.md) — user-invoked | `docs/agents/light-project.md` + 任务跟踪配置 + 指令入口 | 停止，由用户选下一步 |
 | 2 | 真实项目存在未决决策，仓库事实不应重问 | [`project-clarify`](../../../skills/project/project-clarify/SKILL.md) — user-invoked → `socratic` 引擎 | 供 `project-spec` 的清晰需求总结与决策清单 | 止于澄清 summary，不建 SPEC |
 | 3 | 决策已澄清，需要正式 SPEC | [`project-spec`](../../../skills/project/project-spec/SKILL.md) — user-invoked | 冻结 SPEC + 验收来源 | 止于待审批；阻塞则返回 `project-clarify` |
-| 4 | SPEC 已批准 | [`project-tickets`](../../../skills/project/project-tickets/SKILL.md) — user-invoked | 按依赖排序的任务清单 | 停止，不自动起 `implement` |
-| 5 | 单个 ticket 已就绪且无歧义 | [`implement`](../../../skills/project/implement/SKILL.md) — user-invoked，必要时可选 `agent-config` / 内部调 `tdd` | 清晰的代码变更 + 测试 + 本地验证 | 止于 ticket 范围；合适时交 review |
+| 4 | SPEC 已批准 | [`project-tickets`](../../../skills/project/project-tickets/SKILL.md) — user-invoked | 按依赖排序的任务清单 | 停止，不自动起 `light-implement` |
+| 5 | 单个 ticket 已就绪且无歧义 | [`light-implement`](../../../skills/project/light-implement/SKILL.md) — user-invoked，必要时可选 `agent-config` / 内部调 `light-tdd` | 清晰的代码变更 + 测试 + 本地验证 | 止于 ticket 范围；合适时交 review |
 | 6 | 产物需最终验收 | [`project-review`](../../../skills/review/project-review/SKILL.md) — model-invoked（支持手动）经 `review-loop` | 冻结 Charter + reviewer findings + 最终 `PASS`/`FAIL`/`BLOCKED` | 止于 verdict |
 | 7 | 项目已通过验收 | [`release-workflow`](../../../skills/project/release-workflow/SKILL.md) — model-invoked | 同步文档/目录/测试、打 tag、发布 | 止于 release 记录 |
 | 8 | 工作流结束；Agent 自主评估是否发生摩擦 | [`project-retro`](../../../skills/project/project-retro/SKILL.md) — model-invoked（自主评估） | 按严重性排序的结构化复盘发现 | 止于输出发现；修改须经用户确认 |
@@ -51,7 +51,7 @@ project-retro
 
 若检测到上述摩擦，Agent 调用 `project-retro` 提出具体改进建议；若流程顺畅无摩擦，则干净跳过，不增加额外干扰。
 
-**可选 / 并行：** 大型模糊任务可用 `decision-map` 替代/增强 `project-clarify`，见 [clarification-system](clarification-system.md)。`implement` 可按需调用 `tdd`、`diagnosing-bugs`、`resolving-merge-conflicts`，见 [execution](execution.md)。Review 经 `generic-review`/`code-review`/领域 reviewer 走 `review-loop`，见 [review-system](review-system.md)。
+**可选 / 并行：** 大型模糊任务可用 `decision-map` 替代/增强 `project-clarify`，见 [clarification-system](clarification-system.md)。`light-implement` 可按需调用 `light-tdd`、`light-diagnosing-bugs`、`resolving-merge-conflicts`，见 [execution](execution.md)。Review 经 `generic-review`/`light-code-review`/领域 reviewer 走 `review-loop`，见 [review-system](review-system.md)。
 
 ## 未知或专业入口
 

@@ -1,6 +1,6 @@
 # KB Init Research Contract
 
-`research` is a supporting capability for `kb-init`.
+`light-research` is a supporting capability for `kb-init`.
 
 Its purpose is to resolve external facts that affect a knowledge-base decision.
 
@@ -8,7 +8,7 @@ It must not become a parallel design process.
 
 ## Before dispatch: frame the decision
 
-Before invoking `research`, internally define:
+Before invoking `light-research`, internally define:
 
 ### Decision being supported
 
@@ -55,7 +55,7 @@ Define what evidence must exist before `kb-init` can resume the paused decision.
 
 ## Dispatch behavior
 
-If a callable `research` skill is available in the current harness, use it for this detour.
+If a callable `light-research` skill is available in the current harness, use it for this detour.
 
 Do not bypass an available research skill with direct web search merely for convenience.
 

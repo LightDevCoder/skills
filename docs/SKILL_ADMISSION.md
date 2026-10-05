@@ -27,7 +27,7 @@ A candidate is eligible only when one of these is true:
 
 Reject an unmodified third-party or upstream copy that is not SPEC-authorized. Point users to the original upstream installation path instead. A modified third-party package that remains principally a third-party capability belongs in `skills-3rdParty` when not SPEC-authorized; it must satisfy that repository's provenance and fork-necessity rules.
 
-**Approved Ports in this repository (SPEC §14):** `research`, `prototype`, `tdd`, `handoff`, `diagnosing-bugs`, `wizard`, `teach`, `wait-what`, `to-questionnaire`, `writing-for-agents`, `resolving-merge-conflicts`, `project-retro` — each is a self-contained first-party package with `ATTRIBUTION.md` and no required install of `mattpocock/skills`. Light-specific changes are limited to runtime decoupling, naming, and handoff wiring; substantive redesign is not permitted.
+**Approved Ports in this repository (SPEC §14):** `light-research`, `light-prototype`, `light-tdd`, `light-handoff`, `light-diagnosing-bugs`, `light-wizard`, `light-teach`, `light-wait-what`, `light-to-questionnaire`, `light-writing-for-agents`, `resolving-merge-conflicts`, `project-retro` — each is a self-contained first-party package with `ATTRIBUTION.md` and no required install of `mattpocock/skills`. Light-specific changes are limited to runtime decoupling, naming, and handoff wiring; substantive redesign is not permitted.
 
 > **Port ≠ arbitrary copying.** An architecture-level import authorization does not waive attribution, license/notice preservation, or the requirement that the Port be self-contained without upstream runtime installation. Arbitrary upstream snapshots without SPEC authorization remain ineligible.
 
@@ -57,7 +57,7 @@ A candidate may use the fast track only when every condition below is true:
 
 Self-contained tests that only validate the static prompt and output contract do not count as runtime executable resources. They must still contain non-zero assertions and positive and negative fixtures.
 
-The fast track requires structure and metadata validation, an isolated per-Skill copy/discovery check, deterministic contract tests, representative explicit-use and non-trigger observations, synchronized catalog/docs/changelog, and one fresh independent Evaluator. It does not require a separate Critic or Standards/Spec `code-review`. The Evaluator records the final `PASS`, `FAIL`, or `BLOCKED` in a compact admission record.
+The fast track requires structure and metadata validation, an isolated per-Skill copy/discovery check, deterministic contract tests, representative explicit-use and non-trigger observations, synchronized catalog/docs/changelog, and one fresh independent Evaluator. It does not require a separate Critic or Standards/Spec `light-code-review`. The Evaluator records the final `PASS`, `FAIL`, or `BLOCKED` in a compact admission record.
 
 Any eligibility doubt, side effect, implicit trigger, runtime executable, external dependency, provenance issue, or confirmed finding that challenges eligibility or product behavior moves the candidate to the full evidence and `review-loop`/`project-review` path below. Documentation or test-label findings may be repaired within the fast track. The fast track cannot waive release or published-install verification.
 
@@ -73,7 +73,7 @@ The candidate must have the following evidence before a final admission verdict.
 | Invocation | A scenario confirms the declared invocation type and proves a user-invoked Skill does not silently or implicitly invoke another user-invoked Skill (an explicitly approved transition into an exact recommended target requires explicit user consent and verified host evidence). | Broader behavior not exercised by the scenario. |
 | Review | For full path, `review-loop` (engine) with the applicable Profile, or `project-review` for project-level acceptance; for fast track, one fresh independent Evaluator — each using Producer evidence and a fresh Evaluator. | Permission to expand the frozen scope. |
 | Attribution | Original or transformed ownership, source, revision, notice or license, and local transformation are inspectable where applicable; Ports carry `ATTRIBUTION.md` and no upstream runtime requirement. | That an unmodified copy became first-party. |
-| Executable scripts, when present | Focused automated tests, negative tests, adversarial or mutation fixtures where appropriate, and `code-review` evidence. The test command must fail when assertions are absent or the fixture is a no-op. | That a passing static validator covers script behavior. |
+| Executable scripts, when present | Focused automated tests, negative tests, adversarial or mutation fixtures where appropriate, and `light-code-review` evidence. The test command must fail when assertions are absent or the fixture is a no-op. | That a passing static validator covers script behavior. |
 
 Static, inferred, simulated, or keyword-only checks must be labeled by their actual evidence class. They must never be reported as runtime proof.
 

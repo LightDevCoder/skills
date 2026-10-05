@@ -13,10 +13,10 @@ specialist finding:
 
 1. **Standards** — conformance to the target repository's documented coding,
    security, dependency, and maintainability standards. The upstream
-   `code-review` Skill supplies this axis's findings.
+   `light-code-review` Skill supplies this axis's findings.
 2. **Spec fidelity** — behavior and interfaces match the approved Spec, ticket,
    or acceptance Charter, including explicit exclusions. The upstream
-   `code-review` Skill supplies this axis's findings.
+   `light-code-review` Skill supplies this axis's findings.
 3. **Behavioral correctness** — focused success, boundary, failure, and
    regression scenarios exercise the changed behavior rather than only its
    file shape.
@@ -34,9 +34,9 @@ The software review packet must include the following, with labels from the
 generic [Evidence Protocol](../evidence-protocol.md):
 
 - the frozen `Fixed point` / `Implementation scope` identities and the
-  non-empty in-scope diff reviewed by `code-review`;
+  non-empty in-scope diff reviewed by `light-code-review`;
 - the approved Spec or equivalent acceptance source and its immutable revision;
-- separate `code-review` reports for **Standards** and **Spec** findings;
+- separate `light-code-review` reports for **Standards** and **Spec** findings;
 - focused automated tests covering changed success, boundary, and failure
   behavior, including a negative or adversarial case where relevant;
 - a representative runtime or integration observation when the software's
@@ -44,7 +44,7 @@ generic [Evidence Protocol](../evidence-protocol.md):
 - limitations such as unavailable dependencies, environments, generated
   outputs, or untestable paths.
 
-`code-review` findings are `review` evidence and candidates only. The Core
+`light-code-review` findings are `review` evidence and candidates only. The Core
 copies each candidate into the generic finding schema, preserving its source
 axis, source finding reference, evidence, severity, and stable `F-###` ID.
 The specialist's own `PASS`/`FAIL` summary is evidence about its axes; it is
@@ -62,7 +62,7 @@ closed instead of selecting a value.
 
 1. **`Fixed point`** — `- Fixed point: <full Git commit SHA>` in the Charter.
    Exactly one full 40-character commit SHA: the immutable base from which
-   `code-review` reviews the software change. This is the *review base*, not
+   `light-code-review` reviews the software change. This is the *review base*, not
    the final accepted implementation. When the caller names a branch or tag,
    freeze the actual effective commit that delimits the review, never the
    mutable ref name. No prose, no second endpoint, no short SHA.
@@ -126,13 +126,13 @@ closed instead of selecting a value.
   in-scope drift and stale the PASS the moment it is issued. Freeze the real
   component scope instead.
 
-## Specialist reviewer: `code-review`
+## Specialist reviewer: `light-code-review`
 
-Invoke the upstream `code-review` capability with the frozen fixed point and
+Invoke the upstream `light-code-review` capability with the frozen fixed point and
 approved Spec. Request the two normal axes separately:
 
 ```text
-code-review (Standards) + code-review (Spec)
+light-code-review (Standards) + light-code-review (Spec)
   -> specialist findings and evidence
   -> Core candidate validation and generic finding lifecycle
 ```
@@ -140,7 +140,7 @@ code-review (Standards) + code-review (Spec)
 The Critic/Core validates every candidate as `confirmed`, `rejected`,
 `duplicate`, or `out-of-scope` using the generic [Finding Schema](../finding-schema.md).
 Do not treat a specialist recommendation as proof, and do not ask
-`code-review` to edit the target. Only the Producer performs an authorized
+`light-code-review` to edit the target. Only the Producer performs an authorized
 bounded repair; a fresh Evaluator rechecks the original finding ID afterward.
 
 ## Severity guidance
@@ -171,7 +171,7 @@ The Core may ask its fresh Evaluator to consider `PASS` only when:
   the reviewed target, and the verdict records the exact implementation
   revision (`Reviewed implementation revision`) the fresh Evaluator judged;
 - every applicable axis has correctly labeled evidence, including both
-  `code-review` axes and required behavioral/operational scenarios;
+  `light-code-review` axes and required behavioral/operational scenarios;
 - each specialist candidate has a generic disposition and every confirmed
   blocking finding is resolved with fresh evidence under the same stable ID;
 - tests are real, assertion-bearing, and relevant to the changed behavior;
@@ -180,7 +180,7 @@ The Core may ask its fresh Evaluator to consider `PASS` only when:
 - the independent Evaluator records the criterion-by-criterion judgment.
 
 The final `PASS`, `FAIL`, or `BLOCKED` is issued and recorded by **project-review
-Core** under the generic stopping rules. A `code-review` report can never close
+Core** under the generic stopping rules. A `light-code-review` report can never close
 the loop by itself.
 
 ## Artifact-specific failure cases
@@ -188,12 +188,12 @@ the loop by itself.
 Return the generic `FAIL` or `BLOCKED` outcome as applicable when:
 
 - the fixed point, implementation scope, approved Spec, or required
-  `code-review` axis is missing, malformed, or cannot be verified;
-- the in-scope diff is empty (out-of-scope-only change), the code-review report is a
+  `light-code-review` axis is missing, malformed, or cannot be verified;
+- the in-scope diff is empty (out-of-scope-only change), the light-code-review report is a
   repository-wide redesign, or the report cannot identify the changed software scope;
 - tests are absent where required, pass without assertions, or cannot exercise
   a required success/boundary/failure scenario;
-- a candidate is accepted solely because `code-review` recommended it, or a
+- a candidate is accepted solely because `light-code-review` recommended it, or a
   specialist summary is presented as the final Program verdict;
 - a proposed repair needs a new requirement, Spec revision, architecture
   decision, access/authority, or multiple new implementation tickets; or

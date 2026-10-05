@@ -1,0 +1,259 @@
+{
+  "baseline": "7a98ed9574e6ffb69f533cdcbdf16a22633ef0e6",
+  "spec_revision": 2,
+  "upstream": "4588b32ecab9ecc9fc8cc6b6c5e7d675b6004b0d",
+  "packages": [
+    {
+      "name": "agent-config",
+      "category": "engineering",
+      "entry": "skills/engineering/agent-config/SKILL.md",
+      "disable_model_invocation": false,
+      "ui": "interface:\n  display_name: \"Agent Config\"\n  short_description: \"Map host capabilities and confirmed profile to execution topology, tier, and effort\"\n  default_prompt: \"Use agent-config to inspect current host capabilities, read confirmed profile tiers, assess task shape, right-size execution tier and actual effort, and choose a safe execution topology.\"\npolicy:\n  allow_implicit_invocation: true\n"
+    },
+    {
+      "name": "diagnosing-bugs",
+      "category": "engineering",
+      "entry": "skills/engineering/diagnosing-bugs/SKILL.md",
+      "disable_model_invocation": false,
+      "ui": "interface:\n  display_name: \"Diagnosing Bugs\"\n  short_description: \"Diagnose hard bugs and regressions\"\n  default_prompt: \"Use $diagnosing-bugs to build a tight feedback loop for a hard bug or performance regression and drive it through reproduce, hypothesise, instrument, fix, and cleanup.\"\n\npolicy:\n  allow_implicit_invocation: true\n"
+    },
+    {
+      "name": "prototype",
+      "category": "engineering",
+      "entry": "skills/engineering/prototype/SKILL.md",
+      "disable_model_invocation": false,
+      "ui": "interface:\n  display_name: \"Prototype\"\n  short_description: \"Prototype to answer a design question\"\n  default_prompt: \"Use $prototype to build a throwaway prototype to answer a design question.\"\n\npolicy:\n  allow_implicit_invocation: true\n"
+    },
+    {
+      "name": "resolving-merge-conflicts",
+      "category": "engineering",
+      "entry": "skills/engineering/resolving-merge-conflicts/SKILL.md",
+      "disable_model_invocation": false,
+      "ui": "interface:\n  display_name: \"Resolving Merge Conflicts\"\n  short_description: \"Resolve merge and rebase conflicts\"\n  default_prompt: \"Use $resolving-merge-conflicts when resolving an in-progress git merge or rebase conflict without aborting.\"\n\npolicy:\n  allow_implicit_invocation: true\n"
+    },
+    {
+      "name": "tdd",
+      "category": "engineering",
+      "entry": "skills/engineering/tdd/SKILL.md",
+      "disable_model_invocation": false,
+      "ui": "interface:\n  display_name: \"TDD\"\n  short_description: \"Test-driven red-green-refactor\"\n  default_prompt: \"Use $tdd to build features or fix bugs test-first with the red-green-refactor loop.\"\n\npolicy:\n  allow_implicit_invocation: true\n"
+    },
+    {
+      "name": "eli5",
+      "category": "knowledge",
+      "entry": "skills/knowledge/eli5/SKILL.md",
+      "disable_model_invocation": false,
+      "ui": null
+    },
+    {
+      "name": "kb-init",
+      "category": "knowledge",
+      "entry": "skills/knowledge/kb-init/SKILL.md",
+      "disable_model_invocation": true,
+      "ui": "interface:\n  display_name: \"KB Init\"\n  short_description: \"Design and initialize a maintainable knowledge base\"\n  default_prompt: \"Use $kb-init to design and initialize a maintainable knowledge base through a knowledge-base-specific interview.\"\n\npolicy:\n  allow_implicit_invocation: false\n"
+    },
+    {
+      "name": "language-learning",
+      "category": "knowledge",
+      "entry": "skills/knowledge/language-learning/SKILL.md",
+      "disable_model_invocation": true,
+      "ui": "interface:\n  display_name: \"Language Learning\"\n  short_description: \"Tutor for any language with six study modes\"\n  default_prompt: \"Use $language-learning to get a lesson, flashcards, conversation practice, grammar help, a quiz, or translation practice in your target language.\"\n\npolicy:\n  allow_implicit_invocation: false\n"
+    },
+    {
+      "name": "learn-anything",
+      "category": "knowledge",
+      "entry": "skills/knowledge/learn-anything/SKILL.md",
+      "disable_model_invocation": true,
+      "ui": "interface:\n  display_name: \"Learn Anything\"\n  short_description: \"Assess sources for reusable agent methods\"\n  default_prompt: \"Use $learn-anything to assess this workflow source and return an internal Method Contract or precise source gaps.\"\n\npolicy:\n  allow_implicit_invocation: false\n"
+    },
+    {
+      "name": "teach",
+      "category": "knowledge",
+      "entry": "skills/knowledge/teach/SKILL.md",
+      "disable_model_invocation": true,
+      "ui": "interface:\n  display_name: \"Teach\"\n  short_description: \"Learn a concept in a guided workspace\"\n  default_prompt: \"Use $teach to teach a topic in a stateful workspace with lessons, references, and learning records.\"\n\npolicy:\n  allow_implicit_invocation: false\n"
+    },
+    {
+      "name": "ask-light",
+      "category": "productivity",
+      "entry": "skills/productivity/ask-light/SKILL.md",
+      "disable_model_invocation": true,
+      "ui": "interface:\n  display_name: \"Ask Light\"\n  short_description: \"Advise, navigate, and route to the next Light Skill; begin it after approval\"\n  default_prompt: \"Use $ask-light to inspect the current project/workflow state, recommend the next Light Skill with reasoning, and begin that Skill after I approve.\"\n\npolicy:\n  allow_implicit_invocation: false\n"
+    },
+    {
+      "name": "handoff",
+      "category": "productivity",
+      "entry": "skills/productivity/handoff/SKILL.md",
+      "disable_model_invocation": true,
+      "ui": "interface:\n  display_name: \"Handoff\"\n  short_description: \"Compact a conversation into a handoff\"\n  default_prompt: \"Use $handoff to compact the current conversation into a handoff document for the next agent.\"\n\npolicy:\n  allow_implicit_invocation: false\n"
+    },
+    {
+      "name": "light-travelpage",
+      "category": "productivity",
+      "entry": "skills/productivity/light-travelpage/SKILL.md",
+      "disable_model_invocation": false,
+      "ui": "interface:\n  display_name: \"Light-TravelPage\"\n  short_description: \"生成和更新手机旅行网页，共享行程、记账、待办与门票状态并部署上线\"\n  default_prompt: \"使用 $light-travelpage 把这些旅行资料生成多人共享网页，并通过 GitHub 和 Cloudflare 部署。\"\npolicy:\n  allow_implicit_invocation: true\n"
+    },
+    {
+      "name": "recap",
+      "category": "productivity",
+      "entry": "skills/productivity/recap/SKILL.md",
+      "disable_model_invocation": true,
+      "ui": "interface:\n  display_name: \"Session Recap\"\n  short_description: \"Summarize the current session in exactly one line\"\n  default_prompt: \"Use $recap to summarize the current session in exactly one line.\"\n\npolicy:\n  allow_implicit_invocation: false\n"
+    },
+    {
+      "name": "wait-what",
+      "category": "productivity",
+      "entry": "skills/productivity/wait-what/SKILL.md",
+      "disable_model_invocation": true,
+      "ui": "interface:\n  display_name: \"Wait What\"\n  short_description: \"Re-pitch that — simpler, with the context I'm missing\"\n  default_prompt: \"Use $wait-what when the last message did not land and you need a simpler re-pitch in ASD-STE100 with context.\"\n\npolicy:\n  allow_implicit_invocation: false\n"
+    },
+    {
+      "name": "wizard",
+      "category": "productivity",
+      "entry": "skills/productivity/wizard/SKILL.md",
+      "disable_model_invocation": false,
+      "ui": "interface:\n  display_name: \"Wizard\"\n  short_description: \"Generate an interactive setup wizard\"\n  default_prompt: \"Use $wizard to generate an interactive bash wizard that walks a human through steps only they can perform.\"\n\npolicy:\n  allow_implicit_invocation: true\n"
+    },
+    {
+      "name": "implement",
+      "category": "project",
+      "entry": "skills/project/implement/SKILL.md",
+      "disable_model_invocation": true,
+      "ui": "interface:\n  display_name: \"Implement\"\n  short_description: \"Execute one bounded work item: code, doc, config, Skill, or generic task\"\n  default_prompt: \"Use $implement to execute one bounded ticket or Spec slice inside a single context window with inspected source, optional agent-config routing, focused verification, and a review-loop handoff.\"\n\npolicy:\n  allow_implicit_invocation: false\n"
+    },
+    {
+      "name": "kanban-worker",
+      "category": "project",
+      "entry": "skills/project/kanban-worker/SKILL.md",
+      "disable_model_invocation": false,
+      "ui": "interface:\n  display_name: \"Kanban Worker\"\n  short_description: \"Pick up and execute work from Light-Kanban\"\n  default_prompt: |\n    Use kanban-worker to process one task from http://127.0.0.1:8641.\n\n    Agent ID: codex-main\n    Agent Name: Codex\n    Agent Avatar: /path/to/codex-icon.png\n\npolicy:\n  allow_implicit_invocation: true\n"
+    },
+    {
+      "name": "project-clarify",
+      "category": "project",
+      "entry": "skills/project/project-clarify/SKILL.md",
+      "disable_model_invocation": true,
+      "ui": "interface:\n  display_name: \"Project Clarify\"\n  short_description: \"Clarify project decisions from inspected facts in frontier rounds\"\n  default_prompt: \"Use $project-clarify to inspect this project's real materials, resolve the current frontier in rounds, and return a bounded clarification handoff.\"\n\npolicy:\n  allow_implicit_invocation: false\n"
+    },
+    {
+      "name": "project-init",
+      "category": "project",
+      "entry": "skills/project/project-init/SKILL.md",
+      "disable_model_invocation": true,
+      "ui": "interface:\n  display_name: \"Project Init\"\n  short_description: \"Bootstrap stable Light project contracts\"\n  default_prompt: \"Use $project-init to inspect this repository and create its confirmed, idempotent Light project configuration.\"\n\npolicy:\n  allow_implicit_invocation: false\n"
+    },
+    {
+      "name": "project-retro",
+      "category": "project",
+      "entry": "skills/project/project-retro/SKILL.md",
+      "disable_model_invocation": false,
+      "ui": "interface:\n  display_name: \"Project Retro\"\n  short_description: \"Conduct a retrospective on a completed project or session\"\n  default_prompt: \"Use $project-retro to analyze session friction, automated checks, and environment improvements.\"\n\npolicy:\n  allow_implicit_invocation: true\n"
+    },
+    {
+      "name": "project-spec",
+      "category": "project",
+      "entry": "skills/project/project-spec/SKILL.md",
+      "disable_model_invocation": true,
+      "ui": "interface:\n  display_name: \"Project Spec\"\n  short_description: \"Turn clarified outputs into a formal project SPEC\"\n  default_prompt: \"Use $project-spec to turn the project-clarify handoff or decision-map outputs into a formal SPEC at .scratch/<feature>/spec.md without reopening the interview.\"\npolicy:\n  allow_implicit_invocation: false\n"
+    },
+    {
+      "name": "project-tickets",
+      "category": "project",
+      "entry": "skills/project/project-tickets/SKILL.md",
+      "disable_model_invocation": true,
+      "ui": "interface:\n  display_name: \"Project Tickets\"\n  short_description: \"Split a formal SPEC into blocked, ready, and parallelizable tickets\"\n  default_prompt: \"Use $project-tickets to turn the SPEC at .scratch/<feature>/spec.md into numbered tracer-bullet tickets under .scratch/<feature>/issues/ with verified Blocked by edges.\"\npolicy:\n  allow_implicit_invocation: false\n"
+    },
+    {
+      "name": "release-workflow",
+      "category": "project",
+      "entry": "skills/project/release-workflow/SKILL.md",
+      "disable_model_invocation": false,
+      "ui": "interface:\n  display_name: \"Release Workflow\"\n  short_description: \"Governance-gated release for the Skills collection\"\n  default_prompt: \"Use release-workflow to run the governance-gated release workflow for a new Skills collection version, tag, or verified release.\"\n\npolicy:\n  allow_implicit_invocation: true\n"
+    },
+    {
+      "name": "code-review",
+      "category": "review",
+      "entry": "skills/review/code-review/SKILL.md",
+      "disable_model_invocation": false,
+      "ui": "interface:\n  display_name: \"Code Review\"\n  short_description: \"Review a bounded diff on Standards and Spec axes, read-only\"\n  default_prompt: \"Use $code-review to review git diff <fixed-point>...HEAD along Standards and Spec axes in parallel read-only sub-agents and report findings as review evidence.\"\n\npolicy:\n  allow_implicit_invocation: true\n"
+    },
+    {
+      "name": "generic-review",
+      "category": "review",
+      "entry": "skills/review/generic-review/SKILL.md",
+      "disable_model_invocation": false,
+      "ui": "interface:\n  display_name: \"Generic Review\"\n  short_description: \"Return normalized read-only findings for ordinary artifacts\"\n  default_prompt: \"Use generic-review on a bounded target with requirements, relevant context, and previous findings; return only read-only normalized findings.\"\n\npolicy:\n  allow_implicit_invocation: true\n"
+    },
+    {
+      "name": "project-review",
+      "category": "review",
+      "entry": "skills/review/project-review/SKILL.md",
+      "disable_model_invocation": false,
+      "ui": "interface:\n  display_name: \"Project Review\"\n  short_description: \"Project final acceptance with frozen baseline and PASS/FAIL/BLOCKED verdict via composed reviewers\"\n  default_prompt: \"Use $project-review to determine whether the completed project satisfies its approved target by freezing a baseline, composing reviewers through review-loop, and issuing a final PASS/FAIL/BLOCKED.\"\n\npolicy:\n  allow_implicit_invocation: true\n"
+    },
+    {
+      "name": "review-loop",
+      "category": "review",
+      "entry": "skills/review/review-loop/SKILL.md",
+      "disable_model_invocation": false,
+      "ui": "interface:\n  display_name: \"Review Loop\"\n  short_description: \"Lightweight review→findings→repair→re-review convergence engine\"\n  default_prompt: \"Use $review-loop to run a lightweight review→findings→repair→re-review loop by resolving a reviewer and converging until clean or bounded limit.\"\n\npolicy:\n  allow_implicit_invocation: true\n"
+    },
+    {
+      "name": "clarify",
+      "category": "thinking",
+      "entry": "skills/thinking/clarify/SKILL.md",
+      "disable_model_invocation": true,
+      "ui": "interface:\n  display_name: \"Clarify\"\n  short_description: \"Continuously clarify an ambiguous idea in frontier rounds\"\n  default_prompt: \"Use $clarify to start one conversational clarification session, ask the current frontier as a round, and continue through normal replies until shared understanding is confirmed.\"\n\npolicy:\n  allow_implicit_invocation: false\n"
+    },
+    {
+      "name": "decision-map",
+      "category": "thinking",
+      "entry": "skills/thinking/decision-map/SKILL.md",
+      "disable_model_invocation": true,
+      "ui": "interface:\n  display_name: \"Decision Map\"\n  short_description: \"Map a large effort as decision tickets\"\n  default_prompt: \"Use $decision-map to chart or work through a .scratch decision map until fog clears for project-spec.\"\n\npolicy:\n  allow_implicit_invocation: false\n"
+    },
+    {
+      "name": "research",
+      "category": "thinking",
+      "entry": "skills/thinking/research/SKILL.md",
+      "disable_model_invocation": false,
+      "ui": "interface:\n  display_name: \"Research\"\n  short_description: \"Research from high-trust sources\"\n  default_prompt: \"Use $research to investigate a question against high-trust primary sources and capture the findings as a Markdown file.\"\n\npolicy:\n  allow_implicit_invocation: true\n"
+    },
+    {
+      "name": "socratic",
+      "category": "thinking",
+      "entry": "skills/thinking/socratic/SKILL.md",
+      "disable_model_invocation": false,
+      "ui": "interface:\n  display_name: \"Socratic\"\n  short_description: \"Maintain a dynamic frontier round of user-owned decisions\"\n  default_prompt: \"Use socratic to update the clarification state, identify the current actionable frontier, and ask it as a round with choices and recommendations.\"\n\npolicy:\n  allow_implicit_invocation: true\n"
+    },
+    {
+      "name": "to-questionnaire",
+      "category": "thinking",
+      "entry": "skills/thinking/to-questionnaire/SKILL.md",
+      "disable_model_invocation": true,
+      "ui": "interface:\n  display_name: \"To Questionnaire\"\n  short_description: \"Front-load questions into a doc for someone to answer\"\n  default_prompt: \"Use $to-questionnaire to turn a decision you can't answer alone into an async questionnaire for the person who holds the knowledge.\"\n\npolicy:\n  allow_implicit_invocation: false\n"
+    },
+    {
+      "name": "humanizer",
+      "category": "writing",
+      "entry": "skills/writing/humanizer/SKILL.md",
+      "disable_model_invocation": false,
+      "ui": "interface:\n  display_name: \"Humanizer\"\n  short_description: \"Remove AI-writing tells from English or Chinese text\"\n  default_prompt: \"Humanize this text: remove AI-generated writing patterns while keeping every claim.\"\n\npolicy:\n  allow_implicit_invocation: true\n"
+    },
+    {
+      "name": "manuscript-ops",
+      "category": "writing",
+      "entry": "skills/writing/manuscript-ops/SKILL.md",
+      "disable_model_invocation": false,
+      "ui": "interface:\n  display_name: \"Manuscript Ops\"\n  short_description: \"Route and govern reproducible manuscript projects\"\n  default_prompt: \"Use $manuscript-ops to assess and run this manuscript project safely.\"\npolicy:\n  allow_implicit_invocation: true\n"
+    },
+    {
+      "name": "writing-for-agents",
+      "category": "writing",
+      "entry": "skills/writing/writing-for-agents/SKILL.md",
+      "disable_model_invocation": false,
+      "ui": "interface:\n  display_name: \"Writing for Agents\"\n  short_description: \"Write documents agents consume\"\n  default_prompt: \"Use $writing-for-agents when creating or editing skills or AGENTS.md/CLAUDE.md with predictable agent-process levers.\"\n\npolicy:\n  allow_implicit_invocation: true\n"
+    }
+  ]
+}

@@ -11,7 +11,7 @@ This document explains the **Review** composition: reviewer vs engine vs accepta
                       │
         ┌─────────────┼─────────────┐
         ▼             ▼             ▼
- generic-review  code-review   domain reviewer
+ generic-review  light-code-review   domain reviewer
         └─────────────┼─────────────┘
                       ▼
                 project-review  (acceptance owner)
@@ -22,7 +22,7 @@ This document explains the **Review** composition: reviewer vs engine vs accepta
 | Role | Skill | Invocation | What it guarantees |
 | --- | --- | --- | --- |
 | Reviewer | [`generic-review`](../../skills/review/generic-review/SKILL.md) | model-invoked, read-only | normalized `id`/`severity`/`location`/`problem`/`reason` findings for ordinary artifacts; never repairs or verdicts |
-| Reviewer | [`code-review`](../../skills/review/code-review/SKILL.md) | model-invoked, read-only | Standards + Spec findings for a bounded `git diff`|
+| Reviewer | [`light-code-review`](../../skills/review/light-code-review/SKILL.md) | model-invoked, read-only | Standards + Spec findings for a bounded `git diff`|
 | Engine | [`review-loop`](../../skills/review/review-loop/SKILL.md) | model-invoked (manual entry ok) | resolves reviewer → invokes → receives findings → returns repair to Producer → re-runs reviewer; stops when clean or at bounded limit |
 | Acceptance | [`project-review`](../../skills/review/project-review/SKILL.md) | model-invoked (manual ok) | freezes Charter/baseline, composes reviewers, drives them through `review-loop`, validates dispositions, issues final `PASS`/`FAIL`/`BLOCKED` |
 
@@ -33,17 +33,17 @@ See the [runtime reviewer contract](../../skills/review/review-loop/references/r
 | Situation | Entry | Path | Stop |
 | --- | --- | --- | --- |
 | Generic artifact (no specialist) | `generic-review` via `review-loop` | `review-loop` → `generic-review` → findings → Producer repair → re-review | `Findings: []` or bounded `persists`; engine never issues final verdict |
-| Bounded code diff | `code-review` via `review-loop` | `review-loop` → `code-review` (parallel Standards + Spec) → findings | findings only; verdict belongs elsewhere |
+| Bounded code diff | `light-code-review` via `review-loop` | `review-loop` → `light-code-review` (parallel Standards + Spec) → findings | findings only; verdict belongs elsewhere |
 | Project needs final acceptance | [`project-review`](../../skills/review/project-review/SKILL.md) | `project-review init` (freeze Charter/Profile) → `review` (compose reviewers, drive through `review-loop`) → `resume` (continue unfinished action) → fresh Evaluator → `PASS`/`FAIL`/`BLOCKED` | durable verdict + evidence; stop |
 
-## Relationship to `implement`
+## Relationship to `light-implement`
 
 ```text
-implement → review-loop + (generic-review | code-review)
-implement (+ project) → project-review → review-loop + reviewers
+light-implement → review-loop + (generic-review | light-code-review)
+light-implement (+ project) → project-review → review-loop + reviewers
 ```
 
-`implement` recommends the handoff to the appropriate review path and stops; the reviewer executes the check, the engine tracks convergence, the acceptance owner decides.
+`light-implement` recommends the handoff to the appropriate review path and stops; the reviewer executes the check, the engine tracks convergence, the acceptance owner decides.
 
 ## Historical note
 

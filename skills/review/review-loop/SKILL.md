@@ -19,7 +19,7 @@ re-review` — and owns no project final acceptance.
 
 ## Core behavior
 
-1. **Resolve reviewer** — `generic-review` by default; `code-review` for a
+1. **Resolve reviewer** — `generic-review` by default; `light-code-review` for a
    bounded software diff; an accepted domain reviewer when one exists. Never
    invent a specialist.
 2. **Invoke reviewer** — send the four-field packet in
@@ -55,4 +55,4 @@ or `BLOCKED`; those verdicts belong to `project-review`.
 - [migration.md](references/migration.md) — historical provenance only; never
   required for current runtime execution.
 - Composition targets (invoke by name, do not copy): `generic-review`,
-  `code-review`, `project-review`.
+  `light-code-review`, `project-review`.

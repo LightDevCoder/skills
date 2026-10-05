@@ -6,8 +6,8 @@
 
 ## 来源与共同规则
 
-- **第一方（33 个）：** 本仓库全部 Skill——`project-init`、`project-clarify`、`project-spec`、`project-tickets`、`implement`、`project-review`、`release-workflow`、`socratic`、`clarify`、`decision-map`、`research`、`prototype`、`to-questionnaire`、`agent-config`、`tdd`、`diagnosing-bugs`、`resolving-merge-conflicts`、`review-loop`、`generic-review`、`code-review`、`handoff`、`wizard`、`wait-what`、`writing-for-agents`、`teach`、`eli5`、`language-learning`、`recap`、`learn-anything`、`manuscript-ops`、`kb-init`、`kanban-worker`、`ask-light`（见 [CATALOG.zh-CN.md](../../../CATALOG.zh-CN.md)）。
-- **已批准 PORT：** `research`、`prototype`、`tdd`、`handoff`、`diagnosing-bugs`、`wizard`、`teach`、`wait-what`、`to-questionnaire`、`writing-for-agents`、`resolving-merge-conflicts` 为带 `ATTRIBUTION.md` 的自包含第一方包，运行时不要求上游。
+- **第一方（36 个）：** 本仓库全部 Skill——`project-init`、`project-clarify`、`project-spec`、`project-tickets`、`light-implement`、`project-review`、`release-workflow`、`socratic`、`clarify`、`decision-map`、`light-research`、`light-prototype`、`light-to-questionnaire`、`agent-config`、`light-tdd`、`light-diagnosing-bugs`、`resolving-merge-conflicts`、`review-loop`、`generic-review`、`light-code-review`、`light-handoff`、`light-wizard`、`light-wait-what`、`light-writing-for-agents`、`light-teach`、`eli5`、`language-learning`、`recap`、`learn-anything`、`manuscript-ops`、`kb-init`、`kanban-worker`、`ask-light`、`humanizer`、`light-travelpage`、`project-retro`（见 [CATALOG.zh-CN.md](../../../CATALOG.zh-CN.md)）。
+- **已批准 PORT：** `light-research`、`light-prototype`、`light-tdd`、`light-handoff`、`light-diagnosing-bugs`、`light-wizard`、`light-teach`、`light-wait-what`、`light-to-questionnaire`、`light-writing-for-agents`、`resolving-merge-conflicts` 为带 `ATTRIBUTION.md` 的自包含第一方包，运行时不要求上游。
 - **历史 Matt 名称：** `grill-me` → `clarify`、`grilling` → `socratic`、`grill-with-docs` → `project-clarify`、`wayfinder` → `decision-map`、`to-spec` → `project-spec`、`to-tickets` → `project-tickets` —— 仅用于归属说明，工作流以 Light 名称为准。
 - **私有第三方修改版：** `skills-3rdParty` 内的包；不可见时属 availability gap，不编造 fallback。
 
@@ -17,7 +17,7 @@
 
 ## 1. 软件项目
 
-入口已明确时，顺序为 `project-spec`（user-invoked）→ `project-tickets`（user-invoked）→ `implement`（user-invoked）→ `code-review`（model-invoked）→ `project-review`（经 `review-loop` 拥有最终 verdict）→ `handoff`（user-invoked）。每步的输入/输出/handoff/停止见[英文版](../../workflows/recipes.md#1-software-feature)。
+入口已明确时，顺序为 `project-spec`（user-invoked）→ `project-tickets`（user-invoked）→ `light-implement`（user-invoked）→ `light-code-review`（model-invoked）→ `project-review`（经 `review-loop` 拥有最终 verdict）→ `light-handoff`（user-invoked）。每步的输入/输出/handoff/停止见[英文版](../../workflows/recipes.md#1-software-feature)。
 
 缺 acceptance authority、未批准 ticket、实现依赖或 independent evaluator 时 `BLOCKED`。证据含 SPEC、ticket 图、commit、focused tests、specialist findings、`project-review`/`review-loop` verdict 与 handoff；到 `PASS`/`FAIL`/`BLOCKED` 停止。
 
@@ -31,15 +31,15 @@
 
 ## 4. 从资料提炼 Skill
 
-`learn-anything`（user-invoked）输出内部 Method Contract/`not_promoted`/精确 `BLOCKED`；随后 deterministic builder 输出 `created`/`updated`/`no-op`/`duplicate`/`blocked`。`writing-for-agents` 仅作 authoring knowledge，非 runtime 依赖。完整包交 `project-review`（经 `review-loop`）至 verdict 后再进入 admission 与 collection sync。
+`learn-anything`（user-invoked）输出内部 Method Contract/`not_promoted`/精确 `BLOCKED`；随后 deterministic builder 输出 `created`/`updated`/`no-op`/`duplicate`/`blocked`。`light-writing-for-agents` 仅作 authoring knowledge，非 runtime 依赖。完整包交 `project-review`（经 `review-loop`）至 verdict 后再进入 admission 与 collection sync。
 
 ## 5. Skill 维护与发布
 
-顺序为 ownership/reuse gate → 有界实现 → 包测试与负向/mutation fixtures → 脚本变更时的 `code-review` → `project-review` verdict → collection sync、双语、fresh 安装、discovery、release/tag/closeout。ownership 模糊、测试失败、独立审查缺失、安装未验证或双语未同步均 `BLOCKED`。结构检查非 runtime proof。
+顺序为 ownership/reuse gate → 有界实现 → 包测试与负向/mutation fixtures → 脚本变更时的 `light-code-review` → `project-review` verdict → collection sync、双语、fresh 安装、discovery、release/tag/closeout。ownership 模糊、测试失败、独立审查缺失、安装未验证或双语未同步均 `BLOCKED`。结构检查非 runtime proof。
 
 ## 6. Bug 与 final review
 
-Bug 路径为 `diagnosing-bugs` → `implement` → `code-review` → `project-review`（经 `review-loop`）；final-review 为单步 `project-review`。两者在复现/authority 缺失或最终 verdict 时停止，不自动调用 user Skill。
+Bug 路径为 `light-diagnosing-bugs` → `light-implement` → `light-code-review` → `project-review`（经 `review-loop`）；final-review 为单步 `project-review`。两者在复现/authority 缺失或最终 verdict 时停止，不自动调用 user Skill。
 
 ## 7. 独立 session recap
 

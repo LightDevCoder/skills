@@ -35,7 +35,7 @@ Review every applicable axis independently and retain the axis on each finding:
 6. **Executable artifact quality** — when the package includes scripts or other
    executable resources, focused assertion-bearing tests cover changed success,
    boundary, and failure behavior, negative or adversarial fixtures cover
-   relevant misuse, and a separate `code-review` supplies Standards and Spec
+   relevant misuse, and a separate `light-code-review` supplies Standards and Spec
    evidence. A package without executables records that this axis is not
    applicable and why.
 
@@ -62,7 +62,7 @@ primary label from the generic [Evidence Protocol](../evidence-protocol.md):
   output, authority owner, stop condition, and preservation of evidence;
 - for executable resources, focused automated tests with non-zero assertions,
   a relevant negative or adversarial result, and separate
-  `code-review` Standards and Spec reports. These specialist reports are
+  `light-code-review` Standards and Spec reports. These specialist reports are
   `review` evidence and candidate findings only;
 - fresh independent Evaluator evidence with its raw Core independence value and
   the Agent-Skill-normalized value preserved. Missing independent context is a
@@ -76,7 +76,7 @@ fixture or static keyword check cannot be relabeled as runtime evidence.
 
 Use read-only specialists as applicable for package structure and links,
 installer/discovery behavior, invocation boundaries, method/interaction
-behavior, and executable code review. `code-review` remains the software
+behavior, and executable code review. `light-code-review` remains the software
 specialist for scripts; it reports separate Standards and Spec findings and
 never edits the package or issues the Program's final verdict. Every specialist
 observation is a candidate for the generic finding schema. Candidate
@@ -120,7 +120,7 @@ The Core may ask its fresh Evaluator to consider `PASS` only when:
   interaction-seam scenarios have accurate evidence labels and expected versus
   observed outcomes;
 - executable packages have assertion-bearing focused tests, relevant negative
-  or adversarial coverage, and separate Standards/Spec `code-review` evidence;
+  or adversarial coverage, and separate Standards/Spec `light-code-review` evidence;
   non-executable packages have an explicit applicability record;
 - every confirmed blocking finding is resolved under its stable ID with fresh
   per-ID repair evidence, and any accepted Medium/Low risk has the user's exact
@@ -144,7 +144,7 @@ Preserve specialist observations and apply the Core's generic `FAIL` or
 - a method is only a passive summary, generic scaffold, or no-op test and does
   not demonstrate reusable success, boundary, and failure behavior;
 - required scripts lack assertion-bearing focused tests, relevant negative or
-  adversarial coverage, or independent `code-review` evidence, or a specialist
+  adversarial coverage, or independent `light-code-review` evidence, or a specialist
   summary is presented as the Program verdict;
 - a dependency, permission, network, or host condition needed for an accepted
   scenario is unavailable and the smallest safe unblock is not recorded; or

@@ -6,10 +6,10 @@
 
 ## 组合文档（SPEC §20）
 
-- [Project Workflow](project-workflow.md) — `project-init → project-clarify → project-spec → project-tickets → implement → project-review → release-workflow`（配合 Agent 自主评估 → `project-retro`）
-- [Clarification System](clarification-system.md) — `socratic` 引擎 + `clarify` / `project-clarify` / `decision-map` + `research` / `prototype` / `to-questionnaire`
-- [Execution](execution.md) — `implement` + `agent-config` + `tdd` / `diagnosing-bugs` / `resolving-merge-conflicts`
-- [Review System](review-system.md) — `review-loop`（引擎）+ `generic-review` / `code-review` + `project-review`（验收拥有者）
+- [Project Workflow](project-workflow.md) — `project-init → project-clarify → project-spec → project-tickets → light-implement → project-review → release-workflow`（配合 Agent 自主评估 → `project-retro`）
+- [Clarification System](clarification-system.md) — `socratic` 引擎 + `clarify` / `project-clarify` / `decision-map` + `light-research` / `light-prototype` / `light-to-questionnaire`
+- [Execution](execution.md) — `light-implement` + `agent-config` + `light-tdd` / `light-diagnosing-bugs` / `resolving-merge-conflicts`
+- [Review System](review-system.md) — `review-loop`（引擎）+ `generic-review` / `light-code-review` + `project-review`（验收拥有者）
 - [Specialized Workflows](specialized-workflows.md) — `manuscript-ops` / `kb-init` / `learn-anything` / `language-learning` / `kanban-worker` / `recap` / `eli5` / `release-workflow`
 
 ## 遗留示例（保留）

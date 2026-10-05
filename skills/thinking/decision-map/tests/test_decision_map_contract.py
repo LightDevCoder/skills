@@ -57,7 +57,7 @@ class DecisionMapContractTest(unittest.TestCase):
     def test_composition_uses_four_capabilities_without_duplication(self) -> None:
         skill, _, _, _ = read_contract()
 
-        for cap in ("research", "prototype", "socratic", "to-questionnaire"):
+        for cap in ("research", "prototype", "socratic", "light-to-questionnaire"):
             self.assertIn(cap, skill)
         # composition before duplication: owning capabilities are named, not copied
         self.assertIn("owning capability", skill)

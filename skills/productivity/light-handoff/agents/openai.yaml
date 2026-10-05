@@ -1,0 +1,7 @@
+interface:
+  display_name: "Light · Handoff"
+  short_description: "Compact a conversation into a handoff"
+  default_prompt: "Use $light-handoff to compact the current conversation into a handoff document for the next agent."
+
+policy:
+  allow_implicit_invocation: false

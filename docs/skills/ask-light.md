@@ -77,10 +77,10 @@ Execution: recommendation phase was read-only; execution begins only after expli
 Do not use it as a discovery/specification engine, installer, scheduler, or
 silent automatic chain. It routes among real first-party Skills, including
 `project-init`, `project-clarify`, `project-spec`, `project-tickets`,
-`implement`, `code-review`, `project-review`, `learn-anything`, or
+`light-implement`, `light-code-review`, `project-review`, `learn-anything`, or
 `manuscript-ops`. Execution begins only after user consent and then only in the
 host-supported way. Canonical project flow is `project-clarify → project-spec →
-project-tickets → implement → project-review`. `project-review` owns final
+project-tickets → light-implement → project-review`. `project-review` owns final
 acceptance. Stop after the recommendation until approval, or at the
 `NEED-INPUT`/`BLOCKED` record.
 

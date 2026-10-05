@@ -1,0 +1,225 @@
+{
+  "baseline": "7a98ed9574e6ffb69f533cdcbdf16a22633ef0e6",
+  "package_count": 36,
+  "renamed_count": 12,
+  "policies": [
+    {
+      "name": "agent-config",
+      "category": "engineering",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "light-diagnosing-bugs",
+      "category": "engineering",
+      "invocation_preserved": true,
+      "ui_source_label": "verified"
+    },
+    {
+      "name": "light-prototype",
+      "category": "engineering",
+      "invocation_preserved": true,
+      "ui_source_label": "verified"
+    },
+    {
+      "name": "resolving-merge-conflicts",
+      "category": "engineering",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "light-tdd",
+      "category": "engineering",
+      "invocation_preserved": true,
+      "ui_source_label": "verified"
+    },
+    {
+      "name": "eli5",
+      "category": "knowledge",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "kb-init",
+      "category": "knowledge",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "language-learning",
+      "category": "knowledge",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "learn-anything",
+      "category": "knowledge",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "light-teach",
+      "category": "knowledge",
+      "invocation_preserved": true,
+      "ui_source_label": "verified"
+    },
+    {
+      "name": "ask-light",
+      "category": "productivity",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "light-handoff",
+      "category": "productivity",
+      "invocation_preserved": true,
+      "ui_source_label": "verified"
+    },
+    {
+      "name": "light-travelpage",
+      "category": "productivity",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "recap",
+      "category": "productivity",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "light-wait-what",
+      "category": "productivity",
+      "invocation_preserved": true,
+      "ui_source_label": "verified"
+    },
+    {
+      "name": "light-wizard",
+      "category": "productivity",
+      "invocation_preserved": true,
+      "ui_source_label": "verified"
+    },
+    {
+      "name": "light-implement",
+      "category": "project",
+      "invocation_preserved": true,
+      "ui_source_label": "verified"
+    },
+    {
+      "name": "kanban-worker",
+      "category": "project",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "project-clarify",
+      "category": "project",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "project-init",
+      "category": "project",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "project-retro",
+      "category": "project",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "project-spec",
+      "category": "project",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "project-tickets",
+      "category": "project",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "release-workflow",
+      "category": "project",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "light-code-review",
+      "category": "review",
+      "invocation_preserved": true,
+      "ui_source_label": "verified"
+    },
+    {
+      "name": "generic-review",
+      "category": "review",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "project-review",
+      "category": "review",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "review-loop",
+      "category": "review",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "clarify",
+      "category": "thinking",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "decision-map",
+      "category": "thinking",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "light-research",
+      "category": "thinking",
+      "invocation_preserved": true,
+      "ui_source_label": "verified"
+    },
+    {
+      "name": "socratic",
+      "category": "thinking",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "light-to-questionnaire",
+      "category": "thinking",
+      "invocation_preserved": true,
+      "ui_source_label": "verified"
+    },
+    {
+      "name": "humanizer",
+      "category": "writing",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "manuscript-ops",
+      "category": "writing",
+      "invocation_preserved": true,
+      "ui_source_label": "not changed"
+    },
+    {
+      "name": "light-writing-for-agents",
+      "category": "writing",
+      "invocation_preserved": true,
+      "ui_source_label": "verified"
+    }
+  ],
+  "existing_release_history": "unchanged",
+  "released_changelog": "unchanged"
+}

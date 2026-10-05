@@ -8,9 +8,9 @@
 
 | 角色 | 是什么 | 做什么 | 绝不做 |
 | --- | --- | --- | --- |
-| **Reviewer**（`generic-review` · `code-review` · 领域 reviewer） | 只读 specialist；见 [运行时 reviewer 契约](../skills/review/review-loop/references/reviewer-contract.md) 或 [人类摘要](REVIEWER_CONTRACT.zh-CN.md) | 检查有界 target + requirements，返回规范化 `Findings: []` | 修复目标、指挥 Producer、改需求或签发 verdict |
+| **Reviewer**（`generic-review` · `light-code-review` · 领域 reviewer） | 只读 specialist；见 [运行时 reviewer 契约](../skills/review/review-loop/references/reviewer-contract.md) 或 [人类摘要](REVIEWER_CONTRACT.zh-CN.md) | 检查有界 target + requirements，返回规范化 `Findings: []` | 修复目标、指挥 Producer、改需求或签发 verdict |
 | **`review-loop`** | 轻量收敛引擎 | 解析 reviewer、调用、收 findings、交回 Producer、重跑，干净或达 repair 上限时停止 | 拥有冻结 baseline 或项目最终 `PASS`/`FAIL`/`BLOCKED`（属 `project-review`） |
-| **`project-review`** | 项目级最终验收拥有者 | 冻结 Charter/baseline、组合 reviewer（`generic-review`/`code-review`/领域）、经 `review-loop` 驱动收敛并签发最终 `PASS`/`FAIL`/`BLOCKED` | 替代 reviewer 方法或捏造缺失的验收标准 |
+| **`project-review`** | 项目级最终验收拥有者 | 冻结 Charter/baseline、组合 reviewer（`generic-review`/`light-code-review`/领域）、经 `review-loop` 驱动收敛并签发最终 `PASS`/`FAIL`/`BLOCKED` | 替代 reviewer 方法或捏造缺失的验收标准 |
 
 不要把最终验收塞回 `review-loop`。 reviewer 的 finding 只有经 acceptance owner 判断后才成为 verdict。
 
@@ -22,14 +22,14 @@
 
 | 变更 | 必需 final acceptance | specialist evidence |
 | --- | --- | --- |
-| 符合条件的低风险纯提示型 Skill | 快速通道单 fresh Evaluator | structure/metadata、隔离 copy/discovery、deterministic 正负 contract tests、显式调用/non-trigger、同步 docs；无 Critic 或 `code-review`。 |
+| 符合条件的低风险纯提示型 Skill | 快速通道单 fresh Evaluator | structure/metadata、隔离 copy/discovery、deterministic 正负 contract tests、显式调用/non-trigger、同步 docs；无 Critic 或 `light-code-review`。 |
 | 新增或实质改变第一方 Skill | `project-review`（`agent-skill` Profile，经 `review-loop`） | structural、fresh-install、behavioral、invocation、attribution。 |
-| 包含 executable script | `project-review`（经 `review-loop` + `code-review`） | focused/negative/adversarial tests 与 `code-review` findings。 |
-| Skill 内的软件 artifact | `project-review` 拥有 verdict，`review-loop` 为引擎 | `code-review` 提供 Standards/Spec findings。 |
+| 包含 executable script | `project-review`（经 `review-loop` + `light-code-review`） | focused/negative/adversarial tests 与 `light-code-review` findings。 |
+| Skill 内的软件 artifact | `project-review` 拥有 verdict，`review-loop` 为引擎 | `light-code-review` 提供 Standards/Spec findings。 |
 | 文稿/specification artifact | `project-review` 选 `manuscript`/`specification` Profile | artifact-specific 证据与 specialist findings。 |
 | Release candidate | 包级验收 + Program 级验收 | verified release installation 与文档同步证据。 |
 
-`generic-review` 为无 specialist 时的默认 reviewer。`code-review` 为有界 `git diff` 的 specialist（Standards + Spec），只读。
+`generic-review` 为无 specialist 时的默认 reviewer。`light-code-review` 为有界 `git diff` 的 specialist（Standards + Spec），只读。
 
 ## 证据与独立性
 

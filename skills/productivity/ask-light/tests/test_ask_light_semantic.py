@@ -51,7 +51,7 @@ class AskLightSemanticTest(unittest.TestCase):
         self.assertEqual(compact["user_request"], "What next?")
         self.assertTrue(compact["project"]["initialized"])
         self.assertEqual(compact["project"]["implementation_status"], "partial")
-        self.assertEqual(compact["allowed_candidate_actions"], ["implement"])
+        self.assertEqual(compact["allowed_candidate_actions"], ["light-implement"])
 
         dumped = json.dumps(compact)
         self.assertNotIn("issues/01.md", dumped)
@@ -85,7 +85,7 @@ class AskLightSemanticTest(unittest.TestCase):
             ready_tickets=["issue-01.md"]
         ))
         self.assertEqual(res.status, "RECOMMEND")
-        self.assertEqual(res.allowed_actions, ["implement"])
+        self.assertEqual(res.allowed_actions, ["light-implement"])
         self.assertEqual(res.target_item, "issue-01.md")
 
         # 6. All tickets resolved
@@ -166,7 +166,7 @@ class AskLightSemanticTest(unittest.TestCase):
         # Explicit execution
         res_exec = compute_legal_actions(state, user_request="立刻开始执行工单")
         self.assertEqual(res_exec.status, "TRANSITION")
-        self.assertEqual(res_exec.allowed_actions, ["implement"])
+        self.assertEqual(res_exec.allowed_actions, ["light-implement"])
 
     def test_fallback_when_typesafe_sdk_or_key_unavailable(self) -> None:
         """Verify seamless fallback to deterministic baseline when API key is missing."""
@@ -181,9 +181,9 @@ class AskLightSemanticTest(unittest.TestCase):
     def test_mock_jev_system_one_response(self) -> None:
         """Verify multi-primitive Jev judgments: Ambiguity & Escalation with active consumers."""
         mock_choice = MagicMock()
-        mock_choice.choice = "implement"
+        mock_choice.choice = "light-implement"
         mock_choice.confidence = 0.95
-        mock_choice.probabilities = {"implement": 0.95}
+        mock_choice.probabilities = {"light-implement": 0.95}
 
         mock_noul_ambig = MagicMock()
         mock_noul_ambig.noul = 0.10
@@ -209,7 +209,7 @@ class AskLightSemanticTest(unittest.TestCase):
             with patch("semantic_router.TYPESAFE_AVAILABLE", True):
                 # Request contains complexity keywords -> triggers escalation check with consumer
                 rec = route_with_jev(legal, "Should we refactor the consensus engine now?", client=mock_client)
-                self.assertEqual(rec.primary_skill, "implement")
+                self.assertEqual(rec.primary_skill, "light-implement")
                 self.assertFalse(rec.fallback_used)
                 # Hard invariant: Jev output cannot grant TRANSITION authority
                 self.assertEqual(rec.status, "RECOMMEND")
@@ -236,16 +236,16 @@ class AskLightSemanticTest(unittest.TestCase):
         # Set up a legal result with multiple actions to trigger Choice
         legal = LegalActionsResult(
             status="RECOMMEND",
-            allowed_actions=["implement", "agent-config"],
-            fallback_action="implement",
-            candidate_descriptions={"implement": "Implement ticket", "agent-config": "Configure agent"},
+            allowed_actions=["light-implement", "agent-config"],
+            fallback_action="light-implement",
+            candidate_descriptions={"light-implement": "Implement ticket", "agent-config": "Configure agent"},
         )
 
         with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
             with patch("semantic_router.TYPESAFE_AVAILABLE", True):
                 rec = route_with_jev(legal, "What next?", client=mock_client)
                 self.assertTrue(rec.fallback_used)
-                self.assertEqual(rec.primary_skill, "implement")  # Baseline fallback preserved
+                self.assertEqual(rec.primary_skill, "light-implement")  # Baseline fallback preserved
                 self.assertIn("unauthorized", rec.fallback_reason.lower())
 
     def test_jev_cannot_grant_transition_authority(self) -> None:
@@ -279,15 +279,15 @@ class AskLightSemanticTest(unittest.TestCase):
 
         legal = LegalActionsResult(
             status="RECOMMEND",
-            allowed_actions=["implement"],
-            fallback_action="implement",
+            allowed_actions=["light-implement"],
+            fallback_action="light-implement",
         )
 
         with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
             with patch("semantic_router.TYPESAFE_AVAILABLE", True):
                 rec = route_with_jev(legal, "What next?", client=mock_client)
                 self.assertNotIn("next_action", rec.semantic_judgments.questions_sent)
-                self.assertEqual(rec.primary_skill, "implement")
+                self.assertEqual(rec.primary_skill, "light-implement")
 
     def test_zero_legal_actions_causes_zero_choice_request(self) -> None:
         """Section 13: len(allowed_actions) == 0 returns immediately without calling Jev."""
@@ -352,15 +352,15 @@ class AskLightSemanticTest(unittest.TestCase):
 
         legal = LegalActionsResult(
             status="RECOMMEND",
-            allowed_actions=["implement", "agent-config"],
-            fallback_action="implement",
-            candidate_descriptions={"implement": "Do work", "agent-config": "Config"},
+            allowed_actions=["light-implement", "agent-config"],
+            fallback_action="light-implement",
+            candidate_descriptions={"light-implement": "Do work", "agent-config": "Config"},
         )
 
         with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
             with patch("semantic_router.TYPESAFE_AVAILABLE", True):
                 rec = route_with_jev(legal, "What next?", client=mock_client, shadow_mode=True)
-                self.assertEqual(rec.primary_skill, "implement")  # Deterministic baseline preserved
+                self.assertEqual(rec.primary_skill, "light-implement")  # Deterministic baseline preserved
                 self.assertIn("Shadow mode", rec.justification)
                 self.assertEqual(rec.semantic_judgments.action_choice, "agent-config")
 
@@ -374,7 +374,7 @@ class AskLightSemanticTest(unittest.TestCase):
         }
         rec = ask_light_semantic_recommend(evidence, user_request="下一步做什么？", use_jev=False)
         self.assertEqual(rec.status, "RECOMMEND")
-        self.assertEqual(rec.primary_skill, "implement")
+        self.assertEqual(rec.primary_skill, "light-implement")
         self.assertEqual(rec.target_item, "01.md")
 
     def test_query_planner_zero_questions_on_plain_query_and_single_action(self) -> None:
@@ -386,7 +386,7 @@ class AskLightSemanticTest(unittest.TestCase):
         with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
             with patch("semantic_router.TYPESAFE_AVAILABLE", True):
                 rec = route_with_jev(legal, "What should I do next?", client=mock_client)
-                self.assertEqual(rec.primary_skill, "implement")
+                self.assertEqual(rec.primary_skill, "light-implement")
                 self.assertEqual(rec.confidence, 1.0)
                 # Query planner emitted 0 questions -> system_one was never called!
                 mock_client.system_one.assert_not_called()
@@ -434,7 +434,7 @@ class AskLightSemanticTest(unittest.TestCase):
                 legal_neg = compute_legal_actions(state, user_request="Don't implement anything; just tell me what comes next.")
                 rec_neg = route_with_jev(legal_neg, "Don't implement anything; just tell me what comes next.", client=mock_client)
                 self.assertEqual(rec_neg.status, "RECOMMEND")
-                self.assertEqual(rec_neg.primary_skill, "implement")
+                self.assertEqual(rec_neg.primary_skill, "light-implement")
 
                 # 2. "Should I implement now?"
                 legal_hes = compute_legal_actions(state, user_request="Should I implement now?")

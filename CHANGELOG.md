@@ -6,6 +6,8 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
+- v0.2.6 candidate: Rename 12 Light Skills with `light-`, synchronizing package identity, UI source labels, internal references, `ask-light` routing and state logic, discovery, bilingual docs, attribution records, and migration guidance. Keep the other 24 names, 36-package total, responsibilities, and invocation permissions. No installable old-name aliases or automatic global migration; candidate verification continues locally, while publication is BLOCKED by the occupied remote v0.2.6 tag; see the [blocker](docs/evidence/namespace-v0.2.6/publication-blocker.md).
+
 - `light-travelpage`: Build authenticated first-page PNG previews for PDF tickets and display them with zoom and an original-PDF link in the shared dialog. Google and Apple navigation now prefer readable local names and addresses over coordinate-only searches. Add mobile interaction, map fallback, and PDF build fixture coverage.
 
 ## 0.2.5 — 2026-09-24

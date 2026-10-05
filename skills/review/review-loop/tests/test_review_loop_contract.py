@@ -57,7 +57,7 @@ class ReviewLoopContractTest(unittest.TestCase):
 
     def test_reviewer_resolution_is_explicit(self) -> None:
         self.assertIn("generic-review", SKILL)
-        self.assertIn("code-review", SKILL)
+        self.assertIn("light-code-review", SKILL)
         self.assertIn("domain reviewer", normalized(SKILL).lower())
 
     def test_normalized_findings_contract(self) -> None:

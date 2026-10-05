@@ -97,10 +97,10 @@ class AgentSkillScenario:
         ]
         if executable:
             if executable_evidence:
-                evidence.append("Executable script: focused assertion-bearing tests (12 assertions), negative/adversarial fixture, and code-review Standards/Spec reports retained")
+                evidence.append("Executable script: focused assertion-bearing tests (12 assertions), negative/adversarial fixture, and light-code-review Standards/Spec reports retained")
                 evidence.append("Evidence label: review")
             else:
-                evidence.append("Executable script: focused or adversarial/code-review evidence missing")
+                evidence.append("Executable script: focused or adversarial/light-code-review evidence missing")
                 evidence.append("Evidence label: structural")
         else:
             evidence.append("Executable axis: not applicable; package has no scripts or executable resources")
@@ -117,14 +117,14 @@ class AgentSkillScenario:
                 "- Evidence label: behavioral",
             ]) + "\n", encoding="utf-8")
             (round_path / "code-review-standards.md").write_text("\n".join([
-                "# code-review Standards report",
+                "# light-code-review Standards report",
                 "- Fixed package revision: fixture-skill-1",
                 "- Axis: Standards",
                 "- Evidence label: review",
                 "- Specialist verdict: PASS",
             ]) + "\n", encoding="utf-8")
             (round_path / "code-review-spec.md").write_text("\n".join([
-                "# code-review Spec report",
+                "# light-code-review Spec report",
                 "- Fixed package revision: fixture-skill-1",
                 "- Axis: Spec",
                 "- Evidence label: review",
@@ -220,7 +220,7 @@ class AgentSkillScenario:
             return
         if not executable_evidence:
             self.write_evaluator("BLOCKED", "fresh independent read-only Evaluator", "BLOCKED")
-            self.set_state("BLOCKED", state.round, "obtain executable focused, adversarial, and code-review evidence", last_completed_action="executable evidence check", blocker="required executable evidence unavailable")
+            self.set_state("BLOCKED", state.round, "obtain executable focused, adversarial, and light-code-review evidence", last_completed_action="executable evidence check", blocker="required executable evidence unavailable")
             return
         if passed:
             registry = self.case_root / ".project-review" / "findings.md"
@@ -292,7 +292,7 @@ class AgentSkillProfileBehaviorTest(unittest.TestCase):
             scenario.initialize(acceptance, "model-invoked")
             c.check(scenario.state().profile == "agent-skill" and scenario.state().charter_revision == "approved-agent-skill-r2", "init freezes Agent-Skill Profile and package revision")
             integration_round = scenario.start_round()
-            c.check((integration_round / "focused-script-tests.md").is_file() and (integration_round / "code-review-standards.md").is_file() and (integration_round / "code-review-spec.md").is_file(), "executable Skill evidence retains focused tests and separate code-review axes")
+            c.check((integration_round / "focused-script-tests.md").is_file() and (integration_round / "code-review-standards.md").is_file() and (integration_round / "code-review-spec.md").is_file(), "executable Skill evidence retains focused tests and separate light-code-review axes")
             scenario.write_specialist_report(disposition="rejected", finding_id="F-001", specialist_verdict="PASS")
             c.check(scenario.state().status == "CRITIC", "specialist PASS remains evidence while Core is in CRITIC")
             scenario.ingest_finding(disposition="rejected", finding_id="F-001")

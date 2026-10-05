@@ -25,7 +25,7 @@ exit, or a switch to another workflow.
    as evidence, call `socratic` again, and continue until the completion gate.
 
 If a fact-finding gap blocks the frontier, report the gap and the capability
-that would resolve it (`research`, `prototype`, or `to-questionnaire`); do not
+that would resolve it (`light-research`, `light-prototype`, or `light-to-questionnaire`); do not
 invent an answer or turn the gap into a user decision. Reuse explicit fact-work
 authorization already given for this task and scope; otherwise request it before
 investigating. Invoke a capability only under its actual invocation policy. If

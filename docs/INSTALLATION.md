@@ -2,9 +2,21 @@
 
 [中文安装说明](INSTALLATION.zh-CN.md)
 
-The public first-party collection's current stable release is [v0.2.5](https://github.com/LightDevCoder/skills/releases/tag/v0.2.5), published at tag `v0.2.5` (immutable [release manifest](evidence/releases/v0.2.5/RELEASE_MANIFEST.md) and post-publication [release receipt](evidence/releases/v0.2.5/RELEASE_RECEIPT.md)). It provides **36 admitted first-party Skills** across 7 purpose-based categories. Package contracts remain inside `skills/<category>/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
+This checkout’s verified first-party release baseline is [v0.2.5](https://github.com/LightDevCoder/skills/releases/tag/v0.2.5), published at tag `v0.2.5` (immutable [release manifest](evidence/releases/v0.2.5/RELEASE_MANIFEST.md) and post-publication [release receipt](evidence/releases/v0.2.5/RELEASE_RECEIPT.md)). It provides **36 admitted first-party Skills** across 7 purpose-based categories. Package contracts remain inside `skills/<category>/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
 
 The standard install command is the generic `latest` form: it follows the repository's default revision, so `npx skills add LightDevCoder/skills` is the recommended interactive entry point to select the desired Skills and Agent hosts. Pinned release commands select published tags for reproducible installs. Historical verification commands (which tested full-collection installations across all supported agents) are documented below alongside historical evidence.
+
+## v0.2.6 name migration candidate
+
+The local namespace candidate is unpublished. Remote v0.2.6 is occupied by a travel-handbook release that retains old names; v0.2.5 is this checkout’s verified baseline, not the latest remote stable release. The new-name templates below are **BLOCKED; do not execute**. D7 prohibits overwriting the tag or choosing another version; see the [publication blocker](evidence/namespace-v0.2.6/publication-blocker.md). Unqualified commands follow actual remote `main`, which does not contain this local candidate or automatically select a stable tag.
+
+```bash
+# BLOCKED — do not execute: npx skills add LightDevCoder/skills#v0.2.6
+# BLOCKED — do not execute: npx skills add LightDevCoder/skills#v0.2.6 --skill light-implement
+# BLOCKED — do not execute: npx skills add LightDevCoder/skills#v0.2.6 --global --agent codex
+```
+
+Read the [migration and recovery guide](MIGRATION-v0.2.6.md) before upgrading. Reinstallation does not prove old names were removed and does not migrate other projects or automations. New-name default-branch examples below are also candidate usage; historical pinned commands retain their original names.
 
 ## Categorized sources and installed packages
 
@@ -29,13 +41,13 @@ To install a specific Skill without selecting from the entire collection:
 ```bash
 npx skills add LightDevCoder/skills --skill agent-config
 npx skills add LightDevCoder/skills --skill project-review
-npx skills add LightDevCoder/skills --skill research
+# BLOCKED — candidate not on remote main: npx skills add LightDevCoder/skills --skill light-research
 npx skills add LightDevCoder/skills --skill humanizer
 npx skills add LightDevCoder/skills --skill light-travelpage
 npx skills add LightDevCoder/skills --skill project-retro
 ```
 
-### Pinned release installation
+### Historical pinned release baseline
 
 To install from a specific published release tag (recommended for reproducible setups):
 

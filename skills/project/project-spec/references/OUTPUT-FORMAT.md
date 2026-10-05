@@ -84,8 +84,8 @@ In-scope-looking items explicitly deferred, with the reason for deferral
 
 Any residual notes, evidence gaps, or non-blocking dependencies worth
 preserving. If a fact remains unresolved but does not block the SPEC, note it
-here with the evidence gap and the next fact-work step (`research` /
-`prototype`) without converting it into a user question.
+here with the evidence gap and the next fact-work step (`light-research` /
+`light-prototype`) without converting it into a user question.
 ```
 
 ## Vocabulary and evidence rules

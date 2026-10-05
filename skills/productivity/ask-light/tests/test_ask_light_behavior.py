@@ -222,7 +222,7 @@ class SemanticEvidenceRegressionTest(unittest.TestCase):
         write_project_state(self.project, initialized=True, spec=True, ticket_statuses=["claimed", "open"])
         result = self.route()
         self.assertEqual(result["status"], "RECOMMEND")
-        self.assertEqual(result["primary_skill"], "implement")
+        self.assertEqual(result["primary_skill"], "light-implement")
         self.assertEqual(result["validation"]["status"], "VALIDATED")
 
     def test_clarification_signal_routes_to_spec(self) -> None:
@@ -247,7 +247,7 @@ class SemanticEvidenceRegressionTest(unittest.TestCase):
         write_project_state(self.project, initialized=True, spec=True)
         write_effort_state(self.project, "alpha", spec_status="active")
         write_effort_state(self.project, "beta", spec_status="active")
-        unsafe = SimpleNamespace(primary_skill="implement", model_dump=lambda: {"status": "RECOMMEND", "primary_skill": "implement"})
+        unsafe = SimpleNamespace(primary_skill="light-implement", model_dump=lambda: {"status": "RECOMMEND", "primary_skill": "light-implement"})
         with patch.object(ASK_LIGHT, "ask_light_semantic_recommend", return_value=unsafe):
             result = self.route()
         self.assertEqual(result["status"], "BLOCKED")
@@ -505,7 +505,7 @@ class DeterministicEvidenceTest(unittest.TestCase):
         names = {item["name"] for item in catalog}
         self.assertIn("project-clarify", names)
         self.assertIn("project-spec", names)
-        self.assertIn("implement", names)
+        self.assertIn("light-implement", names)
         self.assertIn("project-review", names)
         self.assertIn("eli5", names)
         for item in catalog:
@@ -595,7 +595,7 @@ class StrictScopeAndNoneValidationTest(unittest.TestCase):
             ev = ASK_LIGHT.inspect_project_evidence(proj)
 
             val = ASK_LIGHT.validate_recommendation(
-                "code-review", evidence=ev, roots=self.roots, host="codex", scope="independant"
+                "light-code-review", evidence=ev, roots=self.roots, host="codex", scope="independant"
             )
             self.assertEqual(val["status"], "BLOCKED")
             self.assertIn("scope must be one of", val["reason"])
@@ -785,9 +785,9 @@ class ApprovalTransitionAndHostCapabilityTest(unittest.TestCase):
         self.temp.cleanup()
 
     def test_model_invoked_target_begins_in_conversation(self) -> None:
-        rec = {"status": "RECOMMEND", "skill": "code-review", "scope": "independent"}
+        rec = {"status": "RECOMMEND", "skill": "light-code-review", "scope": "independent"}
         trans = ASK_LIGHT.approval_transition(rec, roots=self.roots)
-        self.assertEqual(trans["next"], "beginning-code-review")
+        self.assertEqual(trans["next"], "beginning-light-code-review")
         self.assertIn("model-invoked", trans["execution"])
 
     def test_user_invoked_target_requires_host_transition_without_capability(self) -> None:
@@ -872,7 +872,7 @@ class ApprovalTransitionAndHostCapabilityTest(unittest.TestCase):
     def test_approval_transition_fails_closed_on_missing_or_invalid_scope(self) -> None:
         """Negative G: Approval transition requires stored valid scope; fails closed otherwise."""
         # Missing scope
-        rec_missing = {"status": "RECOMMEND", "skill": "code-review"}
+        rec_missing = {"status": "RECOMMEND", "skill": "light-code-review"}
         trans_miss = ASK_LIGHT.approval_transition(rec_missing, roots=self.roots)
         self.assertEqual(trans_miss["next"], "revalidation-blocked")
         self.assertEqual(trans_miss["revalidation"]["status"], "BLOCKED")
@@ -881,7 +881,7 @@ class ApprovalTransitionAndHostCapabilityTest(unittest.TestCase):
         # Invalid scope
         for invalid in ("independant", "foo", "", "unknown"):
             with self.subTest(invalid_scope=invalid):
-                rec_inv = {"status": "RECOMMEND", "skill": "code-review", "scope": invalid}
+                rec_inv = {"status": "RECOMMEND", "skill": "light-code-review", "scope": invalid}
                 trans_inv = ASK_LIGHT.approval_transition(rec_inv, roots=self.roots)
                 self.assertEqual(trans_inv["next"], "revalidation-blocked")
                 self.assertEqual(trans_inv["revalidation"]["status"], "BLOCKED")
@@ -902,7 +902,7 @@ class ApprovalTransitionAndHostCapabilityTest(unittest.TestCase):
 
             rec = {
                 "status": "RECOMMEND",
-                "skill": "code-review",
+                "skill": "light-code-review",
                 "scope": "independent",
                 "source": "first-party",
             }
@@ -910,7 +910,7 @@ class ApprovalTransitionAndHostCapabilityTest(unittest.TestCase):
             self.assertEqual(trans["scope"], "independent")
             self.assertEqual(trans["revalidation"]["scope"], "independent")
             self.assertEqual(trans["revalidation"]["status"], "VALIDATED")
-            self.assertEqual(trans["next"], "beginning-code-review")
+            self.assertEqual(trans["next"], "beginning-light-code-review")
 
     def test_approval_preserves_independent_scope_for_user_invoked_target_fallback(self) -> None:
         """Preservation F: Scope survives fallback transition for user-invoked skill."""
@@ -1058,7 +1058,7 @@ class HardStateScopeTest(unittest.TestCase):
             ev = ASK_LIGHT.inspect_project_evidence(proj)
 
             val_wf = ASK_LIGHT.validate_recommendation(
-                "implement", evidence=ev, roots=self.roots, scope="current-workflow"
+                "light-implement", evidence=ev, roots=self.roots, scope="current-workflow"
             )
             self.assertEqual(val_wf["status"], "BLOCKED")
             self.assertIn("ambiguous-current-effort", val_wf["reason"])
@@ -1089,7 +1089,7 @@ class HardStateScopeTest(unittest.TestCase):
             self.assertIn("active-review", val_other["reason"])
 
             val_indep = ASK_LIGHT.validate_recommendation(
-                "code-review", evidence=ev, roots=self.roots, scope="independent"
+                "light-code-review", evidence=ev, roots=self.roots, scope="independent"
             )
             self.assertEqual(val_indep["status"], "VALIDATED")
 
@@ -1156,7 +1156,7 @@ class AgentConfigImplementRelationshipTest(unittest.TestCase):
             ev = ASK_LIGHT.inspect_project_evidence(proj)
             self.assertTrue(ev["tickets"]["frontierReady"])
 
-            val = ASK_LIGHT.validate_recommendation("implement", evidence=ev, roots=self.roots, scope="current-workflow")
+            val = ASK_LIGHT.validate_recommendation("light-implement", evidence=ev, roots=self.roots, scope="current-workflow")
             self.assertEqual(val["status"], "VALIDATED")
 
     def test_implement_remains_valid_when_agent_config_unavailable(self) -> None:
@@ -1170,7 +1170,7 @@ class AgentConfigImplementRelationshipTest(unittest.TestCase):
 
             context = {"availability": {"host": "codex", "unavailableSkills": ["agent-config"]}}
             val = ASK_LIGHT.validate_recommendation(
-                "implement", evidence=ev, roots=self.roots, scope="current-workflow", context=context
+                "light-implement", evidence=ev, roots=self.roots, scope="current-workflow", context=context
             )
             self.assertEqual(val["status"], "VALIDATED")
 
@@ -1185,7 +1185,7 @@ class AgentConfigImplementRelationshipTest(unittest.TestCase):
 
             context = {"hostCapabilities": {"modelSelector": False, "multiAgent": False}}
             val = ASK_LIGHT.validate_recommendation(
-                "implement", evidence=ev, roots=self.roots, scope="current-workflow", context=context
+                "light-implement", evidence=ev, roots=self.roots, scope="current-workflow", context=context
             )
             self.assertEqual(val["status"], "VALIDATED")
 

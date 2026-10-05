@@ -89,11 +89,11 @@ the map's `Decisions so far`, never by bare `NN` or id.
 
 ## Ticket types
 
-- **research** — AFK fact: read primary sources. Use `research`.
-- **prototype** — HITL experiment: cheap artifact via `prototype`.
+- **research** — AFK fact: read primary sources. Use `light-research`.
+- **prototype** — HITL experiment: cheap artifact via `light-prototype`.
 - **grilling** — HITL conversation: default for human decisions. Use `socratic`.
 - **task** — work that must happen before a decision can be made (credentials,
   provisioning, data movement). HITL or AFK. Resolved when work is done.
 
-A research ticket may be resolved by a `research` subagent in parallel during
+A research ticket may be resolved by a `light-research` subagent in parallel during
 charting; all other types resolve at most one per session.

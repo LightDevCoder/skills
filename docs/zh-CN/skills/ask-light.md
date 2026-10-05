@@ -49,7 +49,7 @@ Execution: recommendation phase was read-only; execution begins only after expli
 
 ## 误用、组合和停止点
 
-不要把它当成 discovery/specification 引擎、installer、scheduler 或静默自动串联器。它只路由真实第一方 Skills，包括 `project-init`、`project-clarify`、`project-spec`、`project-tickets`、`implement`、`code-review`、`project-review`、`learn-anything` 或 `manuscript-ops`。执行仅在用户同意后按 host 支持方式开始。规范项目流程为 `project-clarify → project-spec → project-tickets → implement → project-review`。`project-review` 拥有最终验收。建议后等待批准，或遇到 `NEED-INPUT`/`BLOCKED` 后停止。
+不要把它当成 discovery/specification 引擎、installer、scheduler 或静默自动串联器。它只路由真实第一方 Skills，包括 `project-init`、`project-clarify`、`project-spec`、`project-tickets`、`light-implement`、`light-code-review`、`project-review`、`learn-anything` 或 `manuscript-ops`。执行仅在用户同意后按 host 支持方式开始。规范项目流程为 `project-clarify → project-spec → project-tickets → light-implement → project-review`。`project-review` 拥有最终验收。建议后等待批准，或遇到 `NEED-INPUT`/`BLOCKED` 后停止。
 
 ## 安装与发现验证
 

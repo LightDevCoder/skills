@@ -12,7 +12,7 @@
 - **[project-clarify](project-clarify/SKILL.md)** — 读取已有代码和文档资料，只追问尚未确定的关键决策，并将确认结果交给技术规格编写。
 - **[project-spec](project-spec/SKILL.md)** — 把已澄清的需求与决策整理成正式的开发规格（SPEC），避免在编写阶段重新提问。
 - **[project-tickets](project-tickets/SKILL.md)** — 把已确认的技术规格拆解为有先后依赖关系的任务清单，方便逐步独立执行。
-- **[implement](implement/SKILL.md)** — 执行单个已确认的任务（代码、文档或配置），完成本地验证并提交审查。
+- **[light-implement](light-implement/SKILL.md)** — 执行单个已确认的任务（代码、文档或配置），完成本地验证并提交审查。
 
 ## Agent 或用户调用
 

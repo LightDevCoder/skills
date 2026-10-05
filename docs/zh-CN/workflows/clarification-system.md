@@ -17,7 +17,7 @@
                        │
             ┌──────────┼──────────┐
             ▼          ▼          ▼
-        research  prototype  to-questionnaire
+        light-research  light-prototype  light-to-questionnaire
 ```
 
 - [`socratic`](../../../skills/thinking/socratic/SKILL.md) — 核心引擎：动态、decision-owned 的追问，无固定问卷，区分事实与用户决策；本身不是项目流程，被其他 Skill 调用。
@@ -28,19 +28,19 @@
 | Skill | 入口 | 如何用 `socratic` | Handoff | 停止点 |
 | --- | --- | --- | --- | --- |
 | [`project-clarify`](../../../skills/project/project-clarify/SKILL.md) — user-invoked | 现有项目仍有未决决策 | **先检查：** `README`、`AGENTS.md`、`CLAUDE.md`、既有文档/SPEC/源码；*再* 对仅需用户决策的缺口调 `socratic` | 已澄清的需求决策清单（若仍极度模糊则转由 `decision-map` 梳理） | 止于澄清 summary，不建 SPEC/tickets |
-| [`decision-map`](../../../skills/thinking/decision-map/SKILL.md) — user-invoked | 大型、模糊、跨会话、依赖多 | 在 `.scratch/<effort>/map.md` 及子 tickets 上维护决策地图，可按 unknown 路由调 `socratic` 与 `research`/`prototype`/`to-questionnaire` | 决策收敛后交 `project-spec` | 止于地图更新；工作留痕于 tracker |
+| [`decision-map`](../../../skills/thinking/decision-map/SKILL.md) — user-invoked | 大型、模糊、跨会话、依赖多 | 在 `.scratch/<effort>/map.md` 及子 tickets 上维护决策地图，可按 unknown 路由调 `socratic` 与 `light-research`/`light-prototype`/`light-to-questionnaire` | 决策收敛后交 `project-spec` | 止于地图更新；工作留痕于 tracker |
 
 ## Unknown 路由
 
 ```text
 Unknown
   ├─ 须由用户决定          → socratic
-  ├─ 外部事实              → research（PORT，读一手来源）
-  ├─ 需实验                → prototype（一次性探针）
-  └─ 信息在他人处          → to-questionnaire（PORT，生成问卷）
+  ├─ 外部事实              → light-research（PORT，读一手来源）
+  ├─ 需实验                → light-prototype（一次性探针）
+  └─ 信息在他人处          → light-to-questionnaire（PORT，生成问卷）
 ```
 
-调能力，不抄指令；`research`/`prototype` 为只读查证，`to-questionnaire` 返回问卷由用户转交。
+调能力，不抄指令；`light-research`/`light-prototype` 为只读查证，`light-to-questionnaire` 返回问卷由用户转交。
 
 ## Handoff 规则
 

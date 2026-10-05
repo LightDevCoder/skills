@@ -19,7 +19,7 @@ interface AgentConfigResult {
     companion: "ready" | "missing" | "stale";
     profile: "persisted" | "session-local" | "missing";
   };
-  handoff: "project-tickets" | "setup" | "implement" | null;
+  handoff: "project-tickets" | "setup" | "light-implement" | null;
   execution_config: ExecutionConfig | null;
   reason?: string;
   diagnostics?: string[];
@@ -30,7 +30,7 @@ interface AgentConfigResult {
 - `readiness` is the single authoritative execution-readiness field (`READY | NEED_INPUT | NEED_PROJECT_TICKETS | BLOCKED | UNSUPPORTED`). Redundant status is removed.
 - `execution_config` exists **only** when `readiness === "READY"`. For any non-ready state, `execution_config` is strictly `null`.
 - `handoff` identifies the recommended next stage; it does not authorize invocation. Return to an already active caller within its authorized scope. Standalone calls recommend the explicit next invocation and stop; the invocation boundary in `SKILL.md` applies:
-  - `"implement"` when `readiness === "READY"`.
+  - `"light-implement"` when `readiness === "READY"`.
   - `"setup"` when `readiness === "NEED_INPUT"`.
   - `"project-tickets"` when `readiness === "NEED_PROJECT_TICKETS"`.
   - `null` when `readiness === "BLOCKED"` or `"UNSUPPORTED"`.

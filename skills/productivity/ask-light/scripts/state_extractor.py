@@ -20,7 +20,7 @@ CANDIDATE_DESCRIPTIONS: Dict[str, str] = {
     "project-clarify": "Socratic clarification of user requirements and trade-offs before drafting specification.",
     "project-spec": "Author formal verifiable specification (docs/spec.md) from settled requirements.",
     "project-tickets": "Decompose active specification into dependency-ordered tracer-bullet implementation tickets.",
-    "implement": "Execute an unblocked ready ticket using TDD and verify locally.",
+    "light-implement": "Execute an unblocked ready ticket using TDD and verify locally.",
     "project-review": "Conduct formal acceptance review of completed work against specification and baseline.",
     "agent-config": "Map harness capabilities and user profile to execution topology, model tier, and effort.",
     "release-workflow": "Prepare candidate commit, tag, and publish release evidence for accepted project.",
@@ -284,13 +284,13 @@ def compute_legal_actions(
 
             return LegalActionsResult(
                 status=action_status,
-                allowed_actions=["implement"],
-                fallback_action="implement",
-                deterministic_preference="implement",
+                allowed_actions=["light-implement"],
+                fallback_action="light-implement",
+                deterministic_preference="light-implement",
                 target_item=target_ticket,
                 fail_closed=False,
                 compact_state=state,
-                candidate_descriptions={"implement": CANDIDATE_DESCRIPTIONS["implement"]},
+                candidate_descriptions={"light-implement": CANDIDATE_DESCRIPTIONS["light-implement"]},
                 is_authorized=is_execute_intent,
             )
 

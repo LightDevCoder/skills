@@ -10,11 +10,11 @@
 
 - **[clarify](clarify/SKILL.md)** — 针对模糊的想法、设想或流程开展多轮问答，每次给出几个针对性选项供你选择，快速理清思路（无需建立完整项目）。
 - **[decision-map](decision-map/SKILL.md)** — 当任务庞大且跨多轮会话时，将待决策事项梳理为一张有依赖关系的决策图谱。
-- **[to-questionnaire](to-questionnaire/SKILL.md)** — 把需要他人解答的技术或业务疑问整理成结构化问卷，便于发给相关负责人。
+- **[light-to-questionnaire](light-to-questionnaire/SKILL.md)** — 把需要他人解答的技术或业务疑问整理成结构化问卷，便于发给相关负责人。
 
 ## Agent 或用户调用
 
 - **[socratic](socratic/SKILL.md)** — 启发式问答引擎：提出相互独立的选择题并给出倾向建议，逐步梳理决策并形成共识，供上层澄清技能调用。
-- **[research](research/SKILL.md)** — 针对技术选型或客观问题检索一手权威资料，梳理并沉淀结构化事实调研记录。
+- **[light-research](light-research/SKILL.md)** — 针对技术选型或客观问题检索一手权威资料，梳理并沉淀结构化事实调研记录。
 
 [全部分类](../README.zh-CN.md) · [完整目录](../../CATALOG.zh-CN.md)

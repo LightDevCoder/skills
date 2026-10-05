@@ -26,7 +26,7 @@ $kb-init
 - **边界：** 用户提问或质疑时先回答问题，再继续访谈；相关决策保持开放，不能把问题当作接受。
 - **失败：** 在用户明确批准前产出 SPEC 或实施任何内容都违反契约，不能作为有效的 `kb-init` 结果。
 
-`kb-init` 可在需要当前外部事实时调用 model-invoked `research` 能力；绝不调用另一个 user-invoked Skill。
+`kb-init` 可在需要当前外部事实时调用 model-invoked `light-research` 能力；绝不调用另一个 user-invoked Skill。
 
 ## 验证与发布状态
 

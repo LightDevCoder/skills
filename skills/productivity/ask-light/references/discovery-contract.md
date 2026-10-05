@@ -64,13 +64,13 @@ TICKET-CONTRACT): `Status:` and `Blocked by:` header fields.
   `claimedTicketPaths`, `resolvedTicketPaths`, `unknownTicketPaths`, plus
   `frontierReady` and `allResolved`.
 - At least one ready frontier item is a strong current-workflow fact for
-  `implement`; unresolved tickets with zero ready items never prove that
+  `light-implement`; unresolved tickets with zero ready items never prove that
   implementation can proceed.
 
 ### Durable review state
 
 Review evidence is inspected across project stages where durable review state exists.
-The canonical software workflow runs `project-clarify → project-spec → project-tickets → implement → project-review`.
+The canonical software workflow runs `project-clarify → project-spec → project-tickets → light-implement → project-review`.
 With an active SPEC and no tickets, the canonical next step is `project-tickets`. When an active review round,
 stale review, or completed implementation acceptance exists, the review transaction provides factual evidence.
 
@@ -146,7 +146,7 @@ any conclusion (definitions remain producer-owned):
 
 A `software`-Profile review binds its verdict to the producer-frozen
 three-field baseline whose definitions are owned by the `project-review`
-references: Charter `- Fixed point:` (immutable code-review base — exactly
+references: Charter `- Fixed point:` (immutable light-code-review base — exactly
 one full commit SHA), Charter `- Implementation scope:` (the reviewed
 software target as repository-relative literal paths, the machine
 projection of the approved `In scope`), and the verdict's
@@ -372,13 +372,13 @@ constraints bind current-workflow reasoning only).
 
 ## Implement and agent-config relationship
 
-- `implement` = bounded executor; `agent-config` = optional execution-planning enhancement.
-- When the current project has a ready implementation item, `$ask-light next` routes to `implement` (even for complex tasks; `implement` decides whether to offer `agent-config`, and the user decides whether to accept).
+- `light-implement` = bounded executor; `agent-config` = optional execution-planning enhancement.
+- When the current project has a ready implementation item, `$ask-light next` routes to `light-implement` (even for complex tasks; `light-implement` decides whether to offer `agent-config`, and the user decides whether to accept).
 - Route directly to `agent-config` only when execution configuration or setup intent itself is the user's explicit goal:
   - setup intent: `agent-config setup`, "配置当前 Harness 模型", "配置模型档位", "重新配置 Agent Config";
   - execution queries: "这个任务用哪个模型", "这些工单怎么分 Agent", "这个 Harness 怎么跑这批 tickets", "哪个模型执行/给多少 effort", "execution topology / model tier routing".
-- Ready unblocked tickets strictly route to `implement`; breaking an active SPEC into tickets strictly routes to `project-tickets`.
-- `implement` remains usable when `agent-config`, model selectors, or multi-agent routing are unavailable or declined. Selection validation never blocks `implement` for lack of routing enhancements.
+- Ready unblocked tickets strictly route to `light-implement`; breaking an active SPEC into tickets strictly routes to `project-tickets`.
+- `light-implement` remains usable when `agent-config`, model selectors, or multi-agent routing are unavailable or declined. Selection validation never blocks `light-implement` for lack of routing enhancements.
 
 ## Model candidate selection procedure
 

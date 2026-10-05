@@ -223,7 +223,7 @@ When `agent-config` is invoked in an environment where companion MCP tools are n
      - Build an in-memory plan conforming to `plan-schema.md` with `Apply mode: plan-only`.
      - Never pretend persistence succeeded; clearly note `readiness: READY`, `Apply mode: plan-only (companion absent)`.
 5. **Zero downstream disruption:**
-   - Absence of the companion MCP never blocks downstream skills (`implement`, `ask-light`, `project-tickets`, `review-loop`).
+   - Absence of the companion MCP never blocks downstream skills (`light-implement`, `ask-light`, `project-tickets`, `review-loop`).
    - Non-blocking companion-absent fallback ensures portable Skill reasoning remains 100% functional even without companion MCP runtime.
 
 ---
@@ -236,6 +236,6 @@ Companion status and profile readiness feed into the canonical `AgentConfigResul
 - `setup_state`:
   - `companion`: `ready | missing | stale` (evaluated per health semantics above).
   - `profile`: `persisted | session-local | missing`.
-- `handoff`: `"project-tickets" | "setup" | "implement" | null`.
+- `handoff`: `"project-tickets" | "setup" | "light-implement" | null`.
 - `execution_config`: `ExecutionConfig | null` (strictly non-null when `readiness === "READY"`; strictly `null` otherwise).
 

@@ -56,6 +56,17 @@ def package_dir(root: Path, name: str) -> Path:
     return matches[0].parent
 
 
+# Read-boundary mapping for immutable historical evidence; never a callable alias.
+HISTORICAL_NAMES = {
+    "implement": "light-implement", "code-review": "light-code-review",
+    "research": "light-research", "prototype": "light-prototype", "tdd": "light-tdd",
+    "diagnosing-bugs": "light-diagnosing-bugs", "wizard": "light-wizard",
+    "handoff": "light-handoff", "teach": "light-teach",
+    "to-questionnaire": "light-to-questionnaire", "wait-what": "light-wait-what",
+    "writing-for-agents": "light-writing-for-agents",
+}
+
+
 def relocated_path(root: Path, relative: str) -> Path:
     """Resolve a legacy source path in immutable pre-migration evidence."""
     path = root / relative
@@ -64,7 +75,9 @@ def relocated_path(root: Path, relative: str) -> Path:
     parts = Path(relative).parts
     if len(parts) >= 2 and parts[0] == "skills":
         try:
-            return package_dir(root, parts[1]).joinpath(*parts[2:])
+            name_index = 2 if len(parts) >= 3 and parts[1] in {"engineering", "knowledge", "productivity", "project", "review", "thinking", "writing"} else 1
+            name = HISTORICAL_NAMES.get(parts[name_index], parts[name_index])
+            return package_dir(root, name).joinpath(*parts[name_index + 1:])
         except ValueError:
             pass
     return path

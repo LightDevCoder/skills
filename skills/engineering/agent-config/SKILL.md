@@ -10,7 +10,7 @@ description: Map the current Agent Host's evidenced capabilities and confirmed p
 ## When to use
 - Before complex multi-agent or partitioned work where topology, model tier, or effort matters.
 - Explicit setup intent (`agent-config setup`) to configure or reconfigure host models and tiers.
-- When invoked or offered by `implement` or `ask-light`.
+- When invoked or offered by `light-implement` or `ask-light`.
 
 ## Inputs
 - Bounded task, SPEC, or ticket graph.
@@ -38,7 +38,7 @@ silently substituted.
 - `readiness`: `READY | NEED_INPUT | NEED_PROJECT_TICKETS | BLOCKED | UNSUPPORTED` (authoritative execution-readiness; redundant status removed).
 - `mode`: `persisted | session-local | plan-only`
 - `setup_state`: `companion` (`ready | missing | stale`), `profile` (`persisted | session-local | missing`).
-- `handoff`: `"project-tickets" | "setup" | "implement" | null`
+- `handoff`: `"project-tickets" | "setup" | "light-implement" | null`
 - `execution_config`: `ExecutionConfig | null` (strictly present when `readiness === "READY"`; strictly `null` for all non-ready states).
 
 ## Core flow
@@ -63,8 +63,8 @@ silently substituted.
 
 ## Handoff
 - Return `AgentConfigResult` to the caller; `handoff` names a recommendation, not permission to start another Skill.
-- An already active `implement` caller may resume its authorized bounded item when `readiness === "READY"`.
-- For standalone invocation, recommend explicit `$implement` when ready or `$project-tickets` when tickets are needed, then stop. Starting either user-invoked stage requires explicit user approval for that exact target and verified host transition support; otherwise show its exact invocation.
+- An already active `light-implement` caller may resume its authorized bounded item when `readiness === "READY"`.
+- For standalone invocation, recommend explicit `$light-implement` when ready or `$project-tickets` when tickets are needed, then stop. Starting either user-invoked stage requires explicit user approval for that exact target and verified host transition support; otherwise show its exact invocation.
 - Code review converges via `review-loop`; final acceptance belongs to `project-review`.
 
 ## References

@@ -74,7 +74,7 @@ Engine must:
 ## Example 5 — Missing capability, not a fabricated decision
 
 Needed fact: "Does the target sync support frontmatter aliases?"
-- `research` would check official Obsidian docs, but is not authorized in this
+- `light-research` would check official Obsidian docs, but is not authorized in this
   turn.
 - Socratic must **not** turn this into: "Do you want to support aliases?"
 - Instead: `Dependencies: alias support → research (not-authorized); blocks

@@ -15,7 +15,7 @@ copy them into state, round, or verdict records.
 ## Acceptance baseline
 - Source: <approved source path or immutable identifier>
 - Source revision or identity: <commit, version, timestamp, or equivalent>
-- Fixed point: <software Profile only - exactly one full Git commit SHA: the immutable code-review base>
+- Fixed point: <software Profile only - exactly one full Git commit SHA: the immutable light-code-review base>
 - Implementation scope: <software Profile only - reviewed software target as ';'-separated repository-relative literal paths>
 - Approval state: approved | pending user confirmation
 - Approval evidence: <source section or confirmation>

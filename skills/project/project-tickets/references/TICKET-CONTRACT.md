@@ -87,7 +87,7 @@ confirm after the slice lands. Typical styles:
 - `given <context> when <action> then <observable outcome>`;
 - `--help` / discovery probe succeeds or fails as defined;
 - the published artifact renders and links resolve;
-- the composition handoff (`project-spec → project-tickets → implement`) is
+- the composition handoff (`project-spec → project-tickets → light-implement`) is
   probe-able.
 
 A criterion is not a line-numbered code instruction or a paragraph from the

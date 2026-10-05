@@ -6,10 +6,10 @@ This document explains the **Execution** composition: entry, routing, and handof
 
 ## Skills in this group
 
-- [`implement`](../../skills/project/implement/SKILL.md) — user-invoked general-purpose bounded executor
+- [`light-implement`](../../skills/project/light-implement/SKILL.md) — user-invoked general-purpose bounded executor
 - [`agent-config`](../../skills/engineering/agent-config/SKILL.md) — model-invoked profile-driven cross-harness execution configurator
-- [`tdd`](../../skills/engineering/tdd/SKILL.md) — model-invoked test-driven loop
-- [`diagnosing-bugs`](../../skills/engineering/diagnosing-bugs/SKILL.md) — model-invoked diagnosis loop
+- [`light-tdd`](../../skills/engineering/light-tdd/SKILL.md) — model-invoked test-driven loop
+- [`light-diagnosing-bugs`](../../skills/engineering/light-diagnosing-bugs/SKILL.md) — model-invoked diagnosis loop
 - [`resolving-merge-conflicts`](../../skills/engineering/resolving-merge-conflicts/SKILL.md) — model-invoked merge/rebase resolver
 
 All are first-party and self-contained; no install of `mattpocock/skills` or `sol-advisor` is required.
@@ -18,10 +18,10 @@ All are first-party and self-contained; no install of `mattpocock/skills` or `so
 
 | Situation | Entry | Typical path | Handoff / Stop |
 | --- | --- | --- | --- |
-| One clear ticket / SPEC slice | [`implement`](../../skills/project/implement/SKILL.md) — user-invoked | `implement` → inspect context → *optional* `agent-config` offer (when profile routing, review isolation, or topology materially helps) → execute → verify → hand to `review-loop` with the right reviewer | clear code diff + focused tests + verification evidence; stop at ticket scope |
+| One clear ticket / SPEC slice | [`light-implement`](../../skills/project/light-implement/SKILL.md) — user-invoked | `light-implement` → inspect context → *optional* `agent-config` offer (when profile routing, review isolation, or topology materially helps) → execute → verify → hand to `review-loop` with the right reviewer | clear code diff + focused tests + verification evidence; stop at ticket scope |
 | Need to configure model, effort, or execution topology | [`agent-config`](../../skills/engineering/agent-config/SKILL.md) — model-invoked | requires: bounded task description + acceptance criteria + current host evidence + confirmed profile; determines provider mode and task complexity, right-sizes model tier & effort across execution modes | execution plan, not direct execution; executor performs work per plan |
-| Code feature/fix should be test-first | [`tdd`](../../skills/engineering/tdd/SKILL.md) — model-invoked | `red → green → refactor` test-first cycle | test suite + implementation slice |
-| Hard bug / regression | [`diagnosing-bugs`](../../skills/engineering/diagnosing-bugs/SKILL.md) — model-invoked | build a tight `pass/fail` signal → reproduce → hypothesize → instrument → fix → cleanup | fix accompanied by diagnostic evidence |
+| Code feature/fix should be test-first | [`light-tdd`](../../skills/engineering/light-tdd/SKILL.md) — model-invoked | `red → green → refactor` test-first cycle | test suite + implementation slice |
+| Hard bug / regression | [`light-diagnosing-bugs`](../../skills/engineering/light-diagnosing-bugs/SKILL.md) — model-invoked | build a tight `pass/fail` signal → reproduce → hypothesize → instrument → fix → cleanup | fix accompanied by diagnostic evidence |
 | Merge/rebase conflict | [`resolving-merge-conflicts`](../../skills/engineering/resolving-merge-conflicts/SKILL.md) — model-invoked | resolve conflicted files per git guidance | clean working tree ready for verification |
 
 ## Two-Repository Architecture: Skill and Companion
@@ -34,16 +34,16 @@ The execution configuration system cleanly separates policy reasoning from host 
 
 ## Composition with review
 
-`implement` does not copy reviewer instructions. Coding work follows:
+`light-implement` does not copy reviewer instructions. Coding work follows:
 
 ```text
-implement → tdd (when appropriate) → code changes + tests → review-loop → code-review
+light-implement → light-tdd (when appropriate) → code changes + tests → review-loop → light-code-review
 ```
 
 Non-coding work:
 
 ```text
-implement → artifact → review-loop → generic-review / domain reviewer
+light-implement → artifact → review-loop → generic-review / domain reviewer
 ```
 
 The reviewer is read-only; `review-loop` is the convergence engine; `project-review` (see [review-system](review-system.md)) owns final `PASS`/`FAIL`/`BLOCKED` when project acceptance is needed.
@@ -51,6 +51,6 @@ The reviewer is read-only; `review-loop` is the convergence engine; `project-rev
 ## When not to use this group
 
 - Vague idea → [clarification-system](clarification-system.md) first.
-- Approved SPEC → [`project-tickets`](../../skills/project/project-tickets/SKILL.md) before `implement`.
+- Approved SPEC → [`project-tickets`](../../skills/project/project-tickets/SKILL.md) before `light-implement`.
 - Completed project → [`project-review`](../../skills/review/project-review/SKILL.md) / [review-system](review-system.md).
 - Unknown entry → [`ask-light`](../../skills/productivity/ask-light/SKILL.md).

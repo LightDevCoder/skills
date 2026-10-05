@@ -6,14 +6,18 @@
 
 [按分类浏览](skills/README.zh-CN.md) · [路径迁移](docs/CATEGORY_MIGRATION.zh-CN.md)
 
+以下目录反映本地 v0.2.6 候选的名称。本 checkout 的已验证基线 v0.2.5 使用旧名；[完整迁移说明](docs/MIGRATION-v0.2.6.zh-CN.md)列出全部 12 项映射。候选尚未发布，新增名称的远端安装与 Host 调用验证待完成。
+
+名称迁移发布为 **BLOCKED**：远端 v0.2.6 已被现有旅行手册发布占用。D7 禁止覆盖标签或自行改号；见[发布阻断记录](docs/evidence/namespace-v0.2.6/publication-blocker.md)。新名称的远端安装模板不可执行。
+
 ## 集合状态
 
 | 字段 | 值 |
 | --- | --- |
 | 集合 | Light Skills — Composable Agent Workflows |
 | 包数量 | 36 个已准入第一方 Skill |
-| 当前状态 | main 包含 36 个包；v0.2.5 为当前最新稳定版本 |
-| 稳定版本 | [v0.2.5](https://github.com/LightDevCoder/skills/releases/tag/v0.2.5)（36 个包；上一稳定版为 v0.2.4） |
+| 当前状态 | v0.2.6 候选包含 36 个包；v0.2.5 为本地已验证基线；远端 v0.2.6 已发布 |
+| 本地已验证发布基线 | [v0.2.5](https://github.com/LightDevCoder/skills/releases/tag/v0.2.5)（36 个包；上一稳定版为 v0.2.4） |
 | 安装权威 | [docs/INSTALLATION.zh-CN.md](docs/INSTALLATION.zh-CN.md) |
 | 发现检查 | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
 | 证据 | [v0.2.5 发布清单](docs/evidence/releases/v0.2.5/RELEASE_MANIFEST.zh-CN.md) · [v0.2.5 发布收据](docs/evidence/releases/v0.2.5/RELEASE_RECEIPT.zh-CN.md) |
@@ -56,15 +60,15 @@
 - **证据：** [SKILL.md](skills/thinking/clarify/SKILL.md) 与 [ATTRIBUTION.md](skills/thinking/clarify/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/clarify/`。
 
-### code-review
+### light-code-review
 
 - **作用：** 代码审查专员：对比变更代码（`git diff`），从规范标准与业务规格两个维度检查潜在问题，仅输出问题清单而不直接修改代码。
 - **什么时候用：** 需要审查分支/PR 的代码变更（diff），或由 `review-loop` / `project-review` 请求专项软件检查时。
 - **调用方式：** Model-invoked；只读，不修复也不裁决。
-- **包位置：** [skills/review/code-review/](skills/review/code-review)
+- **包位置：** [skills/review/light-code-review/](skills/review/light-code-review)
 - **状态：** 第一方已准入；ADAPT（保留 Matt `code-review` 的双轴方法）。
-- **证据：** [references/WORKFLOW.md](skills/review/code-review/references/WORKFLOW.md) 与 [ATTRIBUTION.md](skills/review/code-review/ATTRIBUTION.md)。
-- **安装路径：** `<skills-root>/code-review/`。
+- **证据：** [references/WORKFLOW.md](skills/review/light-code-review/references/WORKFLOW.md) 与 [ATTRIBUTION.md](skills/review/light-code-review/ATTRIBUTION.md)。
+- **安装路径：** `<skills-root>/light-code-review/`。
 
 ### decision-map
 
@@ -76,15 +80,15 @@
 - **证据：** [references/MAP-CONTRACT.md](skills/thinking/decision-map/references/MAP-CONTRACT.md)。
 - **安装路径：** `<skills-root>/decision-map/`。
 
-### diagnosing-bugs
+### light-diagnosing-bugs
 
 - **作用：** 针对复杂 Bug 和性能回退进行系统性排查，通过建立紧凑反馈信号快速定位根因。
 - **什么时候用：** 出现代码报错、测试失败、行为异常或性能回退，且根因尚不明显时。
 - **调用方式：** Model-invoked。
-- **包位置：** [skills/engineering/diagnosing-bugs/](skills/engineering/diagnosing-bugs)
+- **包位置：** [skills/engineering/light-diagnosing-bugs/](skills/engineering/light-diagnosing-bugs)
 - **状态：** 第一方已准入；PORT — NO REDESIGN（保留 Matt 基线）。
-- **证据：** [SKILL.md](skills/engineering/diagnosing-bugs/SKILL.md)。
-- **安装路径：** `<skills-root>/diagnosing-bugs/`。
+- **证据：** [SKILL.md](skills/engineering/light-diagnosing-bugs/SKILL.md)。
+- **安装路径：** `<skills-root>/light-diagnosing-bugs/`。
 
 ### eli5
 
@@ -106,15 +110,15 @@
 - **证据：** [SKILL.md](skills/review/generic-review/SKILL.md)。
 - **安装路径：** `<skills-root>/generic-review/`。
 
-### handoff
+### light-handoff
 
 - **作用：** 将当前会话压缩为下一 agent 的交接文档。
 - **什么时候用：** 需要在会话结束时或在不同 Agent / 会话之间交接当前上下文时。
 - **调用方式：** 仅 user-invoked。
-- **包位置：** [skills/productivity/handoff/](skills/productivity/handoff)
+- **包位置：** [skills/productivity/light-handoff/](skills/productivity/light-handoff)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/productivity/handoff/SKILL.md)。
-- **安装路径：** `<skills-root>/handoff/`。
+- **证据：** [SKILL.md](skills/productivity/light-handoff/SKILL.md)。
+- **安装路径：** `<skills-root>/light-handoff/`。
 
 ### humanizer
 
@@ -126,15 +130,15 @@
 - **证据：** [SKILL.md](skills/writing/humanizer/SKILL.md)、[准入记录](docs/evidence/admissions/humanizer/README.zh-CN.md)。
 - **安装路径：** `<skills-root>/humanizer/`。
 
-### implement
+### light-implement
 
 - **作用：** 执行单个已确认的任务（代码、文档或配置），完成本地验证并提交审查。
 - **什么时候用：** 具体的任务工单（Ticket）或明确的规格切片已就绪且无歧义，准备进入编码或实施时。
 - **调用方式：** 仅 user-invoked。
-- **包位置：** [skills/project/implement/](skills/project/implement)
+- **包位置：** [skills/project/light-implement/](skills/project/light-implement)
 - **状态：** 第一方已准入；ADAPT（Matt `implement` → 通用执行器）。
-- **证据：** [references/WORKFLOW.md](skills/project/implement/references/WORKFLOW.md)。
-- **安装路径：** `<skills-root>/implement/`。
+- **证据：** [references/WORKFLOW.md](skills/project/light-implement/references/WORKFLOW.md)。
+- **安装路径：** `<skills-root>/light-implement/`。
 
 ### kanban-worker
 
@@ -256,15 +260,15 @@
 - **证据：** [references/](skills/project/project-tickets/references)。
 - **安装路径：** `<skills-root>/project-tickets/`。
 
-### prototype
+### light-prototype
 
 - **作用：** 为设计问题构建一次性原型。
 - **什么时候用：** 在正式编码前，需要快速构建探索性原型以验证状态模型或 UI 逻辑交互感受时。
 - **调用方式：** Model-invoked。
-- **包位置：** [skills/engineering/prototype/](skills/engineering/prototype)
+- **包位置：** [skills/engineering/light-prototype/](skills/engineering/light-prototype)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/engineering/prototype/SKILL.md)。
-- **安装路径：** `<skills-root>/prototype/`。
+- **证据：** [SKILL.md](skills/engineering/light-prototype/SKILL.md)。
+- **安装路径：** `<skills-root>/light-prototype/`。
 
 ### recap
 
@@ -286,15 +290,15 @@
 - **证据：** [SKILL.md](skills/project/release-workflow/SKILL.md)。
 - **安装路径：** `<skills-root>/release-workflow/`。
 
-### research
+### light-research
 
 - **作用：** 针对外部问题做高可信来源调研并沉淀结论。
 - **什么时候用：** 本地预设或已知事实不足以支持决策，需要检索外部权威证据与资料时。
 - **调用方式：** Model-invoked。
-- **包位置：** [skills/thinking/research/](skills/thinking/research)
+- **包位置：** [skills/thinking/light-research/](skills/thinking/light-research)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/thinking/research/SKILL.md)。
-- **安装路径：** `<skills-root>/research/`。
+- **证据：** [SKILL.md](skills/thinking/light-research/SKILL.md)。
+- **安装路径：** `<skills-root>/light-research/`。
 
 ### resolving-merge-conflicts
 
@@ -326,62 +330,62 @@
 - **证据：** [SKILL.md](skills/thinking/socratic/SKILL.md)。
 - **安装路径：** `<skills-root>/socratic/`。
 
-### tdd
+### light-tdd
 
 - **作用：** 测试驱动开发（红-绿-重构）：先编写失败的测试用例，再补充实现使其通过，最后优化重构。
 - **什么时候用：** 采用测试驱动开发模式编写代码新功能，或在修复 Bug 时增加回归测试时。
 - **调用方式：** Model-invoked。
-- **包位置：** [skills/engineering/tdd/](skills/engineering/tdd)
+- **包位置：** [skills/engineering/light-tdd/](skills/engineering/light-tdd)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/engineering/tdd/SKILL.md)。
-- **安装路径：** `<skills-root>/tdd/`。
+- **证据：** [SKILL.md](skills/engineering/light-tdd/SKILL.md)。
+- **安装路径：** `<skills-root>/light-tdd/`。
 
-### teach
+### light-teach
 
 - **作用：** 在当前 workspace 内教授新 Skill 或概念。
 - **什么时候用：** 用户希望针对特定主题开展由浅入深的引导式教学时。
 - **调用方式：** 仅 user-invoked。
-- **包位置：** [skills/knowledge/teach/](skills/knowledge/teach)
+- **包位置：** [skills/knowledge/light-teach/](skills/knowledge/light-teach)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/knowledge/teach/SKILL.md)。
-- **安装路径：** `<skills-root>/teach/`。
+- **证据：** [SKILL.md](skills/knowledge/light-teach/SKILL.md)。
+- **安装路径：** `<skills-root>/light-teach/`。
 
-### to-questionnaire
+### light-to-questionnaire
 
 - **作用：** 将未决问题转为面向持信息人的问卷。
 - **什么时候用：** 所需关键信息掌握在他人手中，需要将澄清问题转为适合外部填写的问卷时。
 - **调用方式：** 仅 user-invoked。
-- **包位置：** [skills/thinking/to-questionnaire/](skills/thinking/to-questionnaire)
+- **包位置：** [skills/thinking/light-to-questionnaire/](skills/thinking/light-to-questionnaire)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/thinking/to-questionnaire/SKILL.md)。
-- **安装路径：** `<skills-root>/to-questionnaire/`。
+- **证据：** [SKILL.md](skills/thinking/light-to-questionnaire/SKILL.md)。
+- **安装路径：** `<skills-root>/light-to-questionnaire/`。
 
-### wait-what
+### light-wait-what
 
 - **作用：** 重讲上一条未被理解的消息。
 - **什么时候用：** 用户表示困惑（如“等等，你说什么？”），需要从全新视角重新解释前文时。
 - **调用方式：** 仅 user-invoked。
-- **包位置：** [skills/productivity/wait-what/](skills/productivity/wait-what)
+- **包位置：** [skills/productivity/light-wait-what/](skills/productivity/light-wait-what)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/productivity/wait-what/SKILL.md)。
-- **安装路径：** `<skills-root>/wait-what/`。
+- **证据：** [SKILL.md](skills/productivity/light-wait-what/SKILL.md)。
+- **安装路径：** `<skills-root>/light-wait-what/`。
 
-### wizard
+### light-wizard
 
 - **作用：** 为只能人做的步骤生成交互式 bash 向导（置备、密钥、第三方控制台、割接）。
 - **什么时候用：** 任务涉及必须由人工操作的步骤（如配置云控制台、管理凭据、切流），需要交互式向导时。
 - **调用方式：** Model-invoked 或 user-invoked。
-- **包位置：** [skills/productivity/wizard/](skills/productivity/wizard)
+- **包位置：** [skills/productivity/light-wizard/](skills/productivity/light-wizard)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/productivity/wizard/SKILL.md)。
-- **安装路径：** `<skills-root>/wizard/`。
+- **证据：** [SKILL.md](skills/productivity/light-wizard/SKILL.md)。
+- **安装路径：** `<skills-root>/light-wizard/`。
 
-### writing-for-agents
+### light-writing-for-agents
 
 - **作用：** 为 agent 编写或改进面向模型的文档（Skills、AGENTS.md、CLAUDE.md）。
 - **什么时候用：** 编写或优化 Agent 指令（AGENTS.md、CLAUDE.md）或 Skill 包时。
 - **调用方式：** Model-invoked。
-- **包位置：** [skills/writing/writing-for-agents/](skills/writing/writing-for-agents)
+- **包位置：** [skills/writing/light-writing-for-agents/](skills/writing/light-writing-for-agents)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/writing/writing-for-agents/SKILL.md)。
-- **安装路径：** `<skills-root>/writing-for-agents/`。
+- **证据：** [SKILL.md](skills/writing/light-writing-for-agents/SKILL.md)。
+- **安装路径：** `<skills-root>/light-writing-for-agents/`。

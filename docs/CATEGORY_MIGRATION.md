@@ -2,23 +2,23 @@
 
 [简体中文](CATEGORY_MIGRATION.zh-CN.md)
 
-On current main, all 36 source packages move from a flat directory to categories. Skill names, explicit invocation syntax, host installation paths, and approval boundaries are unchanged.
+v0.2.2 moved all 36 source packages from a flat directory into categories without changing names or invocation modes at that time. The table preserves old flat paths and links to the current v0.2.6 candidate; 12 packages also have a separate [name migration](MIGRATION-v0.2.6.md). The local verified v0.2.5 baseline retains the earlier names.
 
-Installer selection via `--skill <name>` is unchanged. Update direct source references, symlinks, and manual copy commands using this table. Old tags and historical evidence retain their original paths; consult their recorded revision. A category is not a skill package and contains no `SKILL.md`.
+A category is not a Skill package and contains no `SKILL.md`. Old tags and historical evidence retain their original paths; inspect their recorded revision. When updating source references, symlinks, or manual copies to the candidate, also update `--skill` values and explicit invocations through the name migration guide.
 
 | Skill | Old source path | New source path |
 | --- | --- | --- |
 | `agent-config` | `skills/agent-config/` | [skills/engineering/agent-config/](../skills/engineering/agent-config/) |
 | `ask-light` | `skills/ask-light/` | [skills/productivity/ask-light/](../skills/productivity/ask-light/) |
 | `clarify` | `skills/clarify/` | [skills/thinking/clarify/](../skills/thinking/clarify/) |
-| `code-review` | `skills/code-review/` | [skills/review/code-review/](../skills/review/code-review/) |
+| `light-code-review` | `skills/code-review/` | [skills/review/light-code-review/](../skills/review/light-code-review/) |
 | `decision-map` | `skills/decision-map/` | [skills/thinking/decision-map/](../skills/thinking/decision-map/) |
-| `diagnosing-bugs` | `skills/diagnosing-bugs/` | [skills/engineering/diagnosing-bugs/](../skills/engineering/diagnosing-bugs/) |
+| `light-diagnosing-bugs` | `skills/diagnosing-bugs/` | [skills/engineering/light-diagnosing-bugs/](../skills/engineering/light-diagnosing-bugs/) |
 | `eli5` | `skills/eli5/` | [skills/knowledge/eli5/](../skills/knowledge/eli5/) |
 | `generic-review` | `skills/generic-review/` | [skills/review/generic-review/](../skills/review/generic-review/) |
-| `handoff` | `skills/handoff/` | [skills/productivity/handoff/](../skills/productivity/handoff/) |
+| `light-handoff` | `skills/handoff/` | [skills/productivity/light-handoff/](../skills/productivity/light-handoff/) |
 | `humanizer` | `skills/humanizer/` | [skills/writing/humanizer/](../skills/writing/humanizer/) |
-| `implement` | `skills/implement/` | [skills/project/implement/](../skills/project/implement/) |
+| `light-implement` | `skills/implement/` | [skills/project/light-implement/](../skills/project/light-implement/) |
 | `kanban-worker` | `skills/kanban-worker/` | [skills/project/kanban-worker/](../skills/project/kanban-worker/) |
 | `kb-init` | `skills/kb-init/` | [skills/knowledge/kb-init/](../skills/knowledge/kb-init/) |
 | `language-learning` | `skills/language-learning/` | [skills/knowledge/language-learning/](../skills/knowledge/language-learning/) |
@@ -31,18 +31,18 @@ Installer selection via `--skill <name>` is unchanged. Update direct source refe
 | `project-review` | `skills/project-review/` | [skills/review/project-review/](../skills/review/project-review/) |
 | `project-spec` | `skills/project-spec/` | [skills/project/project-spec/](../skills/project/project-spec/) |
 | `project-tickets` | `skills/project-tickets/` | [skills/project/project-tickets/](../skills/project/project-tickets/) |
-| `prototype` | `skills/prototype/` | [skills/engineering/prototype/](../skills/engineering/prototype/) |
+| `light-prototype` | `skills/prototype/` | [skills/engineering/light-prototype/](../skills/engineering/light-prototype/) |
 | `recap` | `skills/recap/` | [skills/productivity/recap/](../skills/productivity/recap/) |
 | `release-workflow` | `skills/release-workflow/` | [skills/project/release-workflow/](../skills/project/release-workflow/) |
-| `research` | `skills/research/` | [skills/thinking/research/](../skills/thinking/research/) |
+| `light-research` | `skills/research/` | [skills/thinking/light-research/](../skills/thinking/light-research/) |
 | `resolving-merge-conflicts` | `skills/resolving-merge-conflicts/` | [skills/engineering/resolving-merge-conflicts/](../skills/engineering/resolving-merge-conflicts/) |
 | `review-loop` | `skills/review-loop/` | [skills/review/review-loop/](../skills/review/review-loop/) |
 | `socratic` | `skills/socratic/` | [skills/thinking/socratic/](../skills/thinking/socratic/) |
-| `tdd` | `skills/tdd/` | [skills/engineering/tdd/](../skills/engineering/tdd/) |
-| `teach` | `skills/teach/` | [skills/knowledge/teach/](../skills/knowledge/teach/) |
-| `to-questionnaire` | `skills/to-questionnaire/` | [skills/thinking/to-questionnaire/](../skills/thinking/to-questionnaire/) |
-| `wait-what` | `skills/wait-what/` | [skills/productivity/wait-what/](../skills/productivity/wait-what/) |
-| `wizard` | `skills/wizard/` | [skills/productivity/wizard/](../skills/productivity/wizard/) |
-| `writing-for-agents` | `skills/writing-for-agents/` | [skills/writing/writing-for-agents/](../skills/writing/writing-for-agents/) |
+| `light-tdd` | `skills/tdd/` | [skills/engineering/light-tdd/](../skills/engineering/light-tdd/) |
+| `light-teach` | `skills/teach/` | [skills/knowledge/light-teach/](../skills/knowledge/light-teach/) |
+| `light-to-questionnaire` | `skills/to-questionnaire/` | [skills/thinking/light-to-questionnaire/](../skills/thinking/light-to-questionnaire/) |
+| `light-wait-what` | `skills/wait-what/` | [skills/productivity/light-wait-what/](../skills/productivity/light-wait-what/) |
+| `light-wizard` | `skills/wizard/` | [skills/productivity/light-wizard/](../skills/productivity/light-wizard/) |
+| `light-writing-for-agents` | `skills/writing-for-agents/` | [skills/writing/light-writing-for-agents/](../skills/writing/light-writing-for-agents/) |
 
 [Category index](../skills/README.md)

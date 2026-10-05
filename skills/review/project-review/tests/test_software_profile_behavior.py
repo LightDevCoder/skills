@@ -69,7 +69,7 @@ class SoftwareScenario:
         self.set_state("READY", 0, "collect Producer evidence", "none", "approved-software-spec-r7")
 
     def start_round(self) -> Path:
-        return new_review_round(self.case_root, "software", "request read-only Critic and code-review specialist", [
+        return new_review_round(self.case_root, "software", "request read-only Critic and light-code-review specialist", [
             "Scope: disposable software fixture acceptance target",
             "Profile: software",
             "Fixed point: abc1234",
@@ -78,7 +78,7 @@ class SoftwareScenario:
         ])
 
     def start_next_round(self) -> Path:
-        return new_review_next_round(self.case_root, "software", "validate existing Finding ID and request code-review recheck", [
+        return new_review_next_round(self.case_root, "software", "validate existing Finding ID and request light-code-review recheck", [
             "Scope: same frozen software target; next round",
             "Evidence label: behavioral",
             "Focused test: fixture assertions after bounded repair",
@@ -92,11 +92,11 @@ class SoftwareScenario:
     ) -> None:
         state = self.state()
         if state.status != "CRITIC":
-            raise ValueError("code-review report requires CRITIC state")
+            raise ValueError("light-code-review report requires CRITIC state")
         round_path = self.case_root / f".project-review/rounds/round-{state.round:02d}"
         round_path.mkdir(parents=True, exist_ok=True)
         (round_path / "code-review-standards.md").write_text("\n".join([
-            "# code-review Standards report",
+            "# light-code-review Standards report",
             "- Fixed point: abc1234",
             "- Axis: Standards",
             f"- Source finding reference: {standards_source_finding_reference}",
@@ -107,7 +107,7 @@ class SoftwareScenario:
             "- Evidence label: review",
         ]) + "\n", encoding="utf-8")
         (round_path / "code-review-spec.md").write_text("\n".join([
-            "# code-review Spec report",
+            "# light-code-review Spec report",
             "- Fixed point: abc1234",
             "- Axis: Spec",
             f"- Source finding reference: {spec_source_finding_reference}",
@@ -131,23 +131,23 @@ class SoftwareScenario:
         standards_report = (round_path / "code-review-standards.md").read_text(encoding="utf-8")
         spec_report = (round_path / "code-review-spec.md").read_text(encoding="utf-8")
         if "Axis: Standards" not in standards_report or "Axis: Spec" not in spec_report:
-            raise ValueError("code-review must retain separate Standards and Spec reports")
+            raise ValueError("light-code-review must retain separate Standards and Spec reports")
         parsed_standards_severity = re.search(r"(?m)^- Severity: (Critical|High|Medium|Low)", standards_report).group(1)
         parsed_spec_severity = re.search(r"(?m)^- Severity: (Critical|High|Medium|Low)", spec_report).group(1)
         if not parsed_standards_severity or not parsed_spec_severity:
-            raise ValueError("code-review reports must retain severity metadata")
+            raise ValueError("light-code-review reports must retain severity metadata")
         if (standards_severity and standards_severity != parsed_standards_severity) or (spec_severity and spec_severity != parsed_spec_severity):
-            raise ValueError("provided severity expectations do not match code-review reports")
+            raise ValueError("provided severity expectations do not match light-code-review reports")
         if f"Stable candidate ID: {standards_finding_id}" not in standards_report or f"Stable candidate ID: {spec_finding_id}" not in spec_report or f"Source finding reference: {standards_source_finding_reference}" not in standards_report or f"Source finding reference: {spec_source_finding_reference}" not in spec_report:
-            raise ValueError("code-review reports must retain stable candidate IDs")
+            raise ValueError("light-code-review reports must retain stable candidate IDs")
         registry = self.case_root / ".project-review" / "findings.md"
         records = [
             f"Re-observed {standards_finding_id} in round {state.round}",
-            f"Source: code-review; Axis: Standards; Source finding reference: {standards_source_finding_reference}",
+            f"Source: light-code-review; Axis: Standards; Source finding reference: {standards_source_finding_reference}",
             f"Severity: {parsed_standards_severity}",
             f"Disposition: {standards_disposition}",
             f"Re-observed {spec_finding_id} in round {state.round}",
-            f"Source: code-review; Axis: Spec; Source finding reference: {spec_source_finding_reference}",
+            f"Source: light-code-review; Axis: Spec; Source finding reference: {spec_source_finding_reference}",
             f"Severity: {parsed_spec_severity}",
             f"Disposition: {spec_disposition}",
             "Evidence label: review",
@@ -159,11 +159,11 @@ class SoftwareScenario:
             registry.parent.mkdir(parents=True, exist_ok=True)
             registry.write_text("\n".join(["# Finding Registry"] + [
                 f"Finding {standards_finding_id}",
-                f"Source: code-review; Axis: Standards; Source finding reference: {standards_source_finding_reference}",
+                f"Source: light-code-review; Axis: Standards; Source finding reference: {standards_source_finding_reference}",
                 f"Severity: {parsed_standards_severity}",
                 f"Disposition: {standards_disposition}",
                 f"Finding {spec_finding_id}",
-                f"Source: code-review; Axis: Spec; Source finding reference: {spec_source_finding_reference}",
+                f"Source: light-code-review; Axis: Spec; Source finding reference: {spec_source_finding_reference}",
                 f"Severity: {parsed_spec_severity}",
                 f"Disposition: {spec_disposition}",
                 "Evidence label: review",
@@ -264,12 +264,12 @@ class SoftwareScenario:
                 "Verdict: PASS",
                 "Issued by: project-review Core",
                 "Evaluator: fresh independent read-only context",
-                "Specialist input: code-review Standards + Spec findings",
+                "Specialist input: light-code-review Standards + Spec findings",
             ]) + "\n", encoding="utf-8")
             self.set_state("PASS", state.round, "preserve Core verdict")
             return
         if repair_available and state.round < maximum_round:
-            self.write_evaluator_verdict("FAIL", "fresh independent read-only Evaluator", "FAIL", "FAIL", "PASS", "PASS", "confirmed code-review findings")
+            self.write_evaluator_verdict("FAIL", "fresh independent read-only Evaluator", "FAIL", "FAIL", "PASS", "PASS", "confirmed light-code-review findings")
             self.set_state("FAIL", state.round, "CRITIC (next round); bounded repair remains")
         else:
             self.write_evaluator_verdict("BLOCKED", "fresh independent read-only Evaluator", "BLOCKED", "BLOCKED", "BLOCKED", "BLOCKED", "repair limit reached")
@@ -304,9 +304,9 @@ class SoftwareProfileBehaviorTest(unittest.TestCase):
             c.check(scenario.state().charter_revision == "approved-software-spec-r7", "software init freezes approved Charter revision")
             scenario.start_round()
             scenario.write_code_review_report(disposition="confirmed", standards_finding_id="F-001", spec_finding_id="F-002", specialist_verdict="PASS")
-            c.check(scenario.state().status == "CRITIC", "code-review specialist PASS does not set final state")
+            c.check(scenario.state().status == "CRITIC", "light-code-review specialist PASS does not set final state")
             scenario.ingest_code_review_findings(standards_disposition="confirmed", spec_disposition="confirmed", standards_finding_id="F-001", spec_finding_id="F-002")
-            c.check(scenario.state().status == "REPAIR", "code-review findings enter generic REPAIR lifecycle")
+            c.check(scenario.state().status == "REPAIR", "light-code-review findings enter generic REPAIR lifecycle")
             registry = (case_root / ".project-review/findings.md").read_text(encoding="utf-8")
             standards_report = (case_root / ".project-review/rounds/round-01/code-review-standards.md").read_text(encoding="utf-8")
             spec_report = (case_root / ".project-review/rounds/round-01/code-review-spec.md").read_text(encoding="utf-8")
@@ -328,7 +328,7 @@ class SoftwareProfileBehaviorTest(unittest.TestCase):
             evaluator_verdict = (case_root / ".project-review/rounds/round-01/evaluator-verdict.md").read_text(encoding="utf-8")
             verdict = (case_root / ".project-review/verdict.md").read_text(encoding="utf-8")
             assert_evaluator_record(c, evaluator_verdict, overall_outcome="PASS", standards_outcome="PASS", spec_outcome="PASS", behavior_outcome="PASS", safety_outcome="PASS", name="fresh Evaluator records every criterion with linked evidence, labels, and PASS outcome")
-            c.check(scenario.state().status == "PASS" and "Issued by: project-review Core" in verdict and "Issued by: code-review" not in verdict, "Core owns final PASS verdict")
+            c.check(scenario.state().status == "PASS" and "Issued by: project-review Core" in verdict and "Issued by: light-code-review" not in verdict, "Core owns final PASS verdict")
 
             case_root = new_review_case(root, "bounded-repair", "software")
             scenario = SoftwareScenario(case_root)

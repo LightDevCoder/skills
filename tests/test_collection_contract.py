@@ -9,14 +9,14 @@ EXPECTED = {
     "agent-config",
     "ask-light",
     "clarify",
-    "code-review",
+    "light-code-review",
     "decision-map",
-    "diagnosing-bugs",
+    "light-diagnosing-bugs",
     "eli5",
     "generic-review",
-    "handoff",
+    "light-handoff",
     "humanizer",
-    "implement",
+    "light-implement",
     "kanban-worker",
     "kb-init",
     "language-learning",
@@ -29,19 +29,19 @@ EXPECTED = {
     "project-review",
     "project-spec",
     "project-tickets",
-    "prototype",
+    "light-prototype",
     "recap",
     "release-workflow",
-    "research",
+    "light-research",
     "resolving-merge-conflicts",
     "review-loop",
     "socratic",
-    "tdd",
-    "teach",
-    "to-questionnaire",
-    "wait-what",
-    "wizard",
-    "writing-for-agents",
+    "light-tdd",
+    "light-teach",
+    "light-to-questionnaire",
+    "light-wait-what",
+    "light-wizard",
+    "light-writing-for-agents",
 }
 
 
@@ -114,8 +114,8 @@ class CollectionContractTests(unittest.TestCase):
         self.check("npx skills add LightDevCoder/skills#v0.2.4" in installation, "installation pinned v0.2.4 install")
         self.check("default revision" in installation and "#ref" in installation, "installation revision semantics")
         self.check("LightDevCoder/skills" in readme, "homepage about copy")
-        stable = re.search(r"\| Stable release \| \[(v\d+\.\d+\.\d+)\]", catalog)
-        self.check(stable is not None, "catalog names a stable release")
+        stable = re.search(r"\| (?:Stable release|Local verified release baseline) \| \[(v\d+\.\d+\.\d+)\]", catalog)
+        self.check(stable is not None, "catalog names a stable release or its local verified release baseline")
         if stable:
             version = stable.group(1)
             self.check(f"https://github.com/LightDevCoder/skills/releases/tag/{version}" in readme, "README links to catalog's stable release")
@@ -129,7 +129,7 @@ class CollectionContractTests(unittest.TestCase):
                             ("review policy", review_policy), ("review policy zh-CN", review_policy_zh)):
             self.check(re.search(r"prompt-only|纯提示型", text) is not None, f"{label} prompt-only fast track")
             self.check("fresh independent Evaluator" in text, f"{label} independent evaluator boundary")
-            self.check("Critic" in text and "code-review" in text, f"{label} omitted specialist boundaries")
+            self.check("Critic" in text and "light-code-review" in text, f"{label} omitted specialist boundaries")
         # New governance: reviewer vs engine vs acceptance
         self.check("project-review" in review_policy and "review-loop" in review_policy, "review policy must distinguish project-review vs review-loop")
         self.check("generic-review" in review_policy, "review policy must mention generic-review reviewer")

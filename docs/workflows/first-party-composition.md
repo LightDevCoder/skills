@@ -34,11 +34,11 @@ Possible next choices include:
 - `$project-clarify` when an existing project has unresolved decisions;
 - `$clarify` when a vague idea needs lightweight triage without a project;
 - `$decision-map` when the effort is large, foggy, and multi-session;
-- `$research` when an external fact is needed;
-- `$prototype` when a design question needs a throwaway probe;
+- `$light-research` when an external fact is needed;
+- `$light-prototype` when a design question needs a throwaway probe;
 - `$project-spec` / `$project-tickets` when a SPEC or ticket graph is the next artifact;
-- `$implement` when one unblocked ticket is ready;
-- `$diagnosing-bugs` when something is broken/throwing/failing/slow;
+- `$light-implement` when one unblocked ticket is ready;
+- `$light-diagnosing-bugs` when something is broken/throwing/failing/slow;
 - `$project-review` or `$review-loop` when the target and acceptance source are already frozen;
 - `$learn-anything` when source material may contain a reusable method;
 - `$recap` when the user explicitly wants a one-line session summary;

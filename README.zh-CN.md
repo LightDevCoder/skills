@@ -6,11 +6,15 @@
 
 `LightDevCoder/skills` 包含 36 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<category>/<name>/`，由包内的 `SKILL.md` 统领具体行为。
 
-> **发布版本：** v0.2.5 是包含全部 36 个第一方 Skill 的当前稳定版本。阅读[中文发布说明](docs/evidence/releases/v0.2.5/RELEASE_NOTES.zh-CN.md)或[English GitHub Release](https://github.com/LightDevCoder/skills/releases/tag/v0.2.5)；不可变的[发布清单](docs/evidence/releases/v0.2.5/RELEASE_MANIFEST.zh-CN.md)与发布后的[发布收据](docs/evidence/releases/v0.2.5/RELEASE_RECEIPT.zh-CN.md)记录范围和验证事实。
+> **发布版本：** v0.2.5 是本 checkout 已验证的 36 个 Skill 发布基线，并非最新远端发布。阅读[中文发布说明](docs/evidence/releases/v0.2.5/RELEASE_NOTES.zh-CN.md)或[English GitHub Release](https://github.com/LightDevCoder/skills/releases/tag/v0.2.5)；不可变的[发布清单](docs/evidence/releases/v0.2.5/RELEASE_MANIFEST.zh-CN.md)与发布后的[发布收据](docs/evidence/releases/v0.2.5/RELEASE_RECEIPT.zh-CN.md)记录范围和验证事实。
+
+> **v0.2.6 候选：** 本地候选将 12 个 Skill 改为 `light-` 名称，其他 24 个名称不变，集合仍为 36 个包。本 checkout 的已验证基线 v0.2.5 保留旧名；远端 v0.2.6 已被旅行手册发布占用。新名称的远端安装与 Host 调用验证尚待完成；见[迁移说明](docs/MIGRATION-v0.2.6.zh-CN.md)与[候选发布说明](docs/evidence/namespace-v0.2.6/release-draft/RELEASE_NOTES.zh-CN.md)。
+
+名称迁移发布为 **BLOCKED**：远端 v0.2.6 已被现有旅行手册发布占用。D7 禁止覆盖标签或自行改号；见[发布阻断记录](docs/evidence/namespace-v0.2.6/publication-blocker.md)。新名称的远端安装模板不可执行。
 
 ## 按分类浏览
 
-[全部分类与集合说明](skills/README.zh-CN.md)。36 个技能的源文件已按用途分类，名称和调用方式不变。
+[全部分类与集合说明](skills/README.zh-CN.md)。36 个技能的源文件已按用途分类，调用方式不变；候选名称见迁移说明。
 
 - [项目执行](skills/project/README.zh-CN.md) — 8 个技能
 - [工程开发](skills/engineering/README.zh-CN.md) — 5 个技能
@@ -50,12 +54,12 @@ npx skills add LightDevCoder/skills
 ```bash
 npx skills add LightDevCoder/skills --skill agent-config
 npx skills add LightDevCoder/skills --skill project-review
-npx skills add LightDevCoder/skills --skill research
+# BLOCKED — candidate not on remote main: npx skills add LightDevCoder/skills --skill light-research
 ```
 
 > **说明：** 不带 fragment 的仓库源（`LightDevCoder/skills`）将跟随默认分支 `main`，获取最新的已准入特性与集成。
 
-### 稳定版本快照（v0.2.5）
+### 本地已验证发布快照（v0.2.5）
 
 若需安装可复现的稳定发布快照，请锁定 `#v0.2.5` tag：
 
@@ -110,7 +114,7 @@ $ask-light next        # 根据当前上下文推荐合适的 Skill
 $project-init          # 初始化项目基础结构与任务跟踪
 $clarify               # 通过针对性提问澄清模糊需求
 $project-clarify       # 结合已有代码与文档澄清项目决策
-$implement             # 执行明确的开发任务并完成验证
+$light-implement       # 执行明确的开发任务并完成验证
 $project-review        # 执行最终验收：PASS / FAIL / BLOCKED
 ```
 
@@ -127,7 +131,7 @@ project-spec
       ↓
 project-tickets
       ↓
-implement
+light-implement
       ↓
 project-review
       ↓
@@ -138,7 +142,7 @@ project-retro（Agent 评估摩擦信号）
 
 - `project-init`：初始化项目基础结构与任务跟踪配置。
 - `project-clarify → project-spec → project-tickets`：澄清模糊需求、编写技术规格并拆分为可执行任务清单。
-- `implement`：逐个执行任务并运行自动化测试。
+- `light-implement`：逐个执行任务并运行自动化测试。
 - `project-review`：对照验收基准验证交付质量；由 `review-loop` 驱动多轮修复。
 - `release-workflow`：执行发布验证、打 tag 并完成发布。
 - `project-retro`：在流程终点由 Agent 自主评估执行摩擦（导航、自动化检查、规范、工具开销）并输出改进建议。
@@ -147,8 +151,8 @@ project-retro（Agent 评估摩擦信号）
 
 ```text
 clarify                          # 独立需求澄清与共识确认
-implement                        # 直接执行明确的任务
-diagnosing-bugs → implement      # 定位疑难问题并完成修复
+light-implement                        # 直接执行明确的任务
+light-diagnosing-bugs → light-implement      # 定位疑难问题并完成修复
 release-workflow                 # 仅执行发布流程
 $ask-light                       # 任务不确定时获取路由建议
 ```
@@ -170,12 +174,12 @@ $ask-light workflow
 
 | 分组 | Skill | 详细文档 |
 | --- | --- | --- |
-| **项目流程** | `project-init`、`project-clarify`、`project-spec`、`project-tickets`、`implement`、`project-review`、`release-workflow` | [CATALOG.zh-CN.md](CATALOG.zh-CN.md) |
-| **澄清与调研** | `socratic`（引擎）、`clarify`、`project-clarify`、`decision-map`、`research`、`prototype`、`to-questionnaire` | [clarification-system](docs/zh-CN/workflows/clarification-system.md) |
-| **任务执行** | `implement`、`agent-config`（原生支持主要编码 Harness：10 种原生适配器与通用回退）、`tdd`、`diagnosing-bugs`、`resolving-merge-conflicts` | [execution](docs/zh-CN/workflows/execution.md) |
-| **质量审阅** | `review-loop`（引擎）、`generic-review`、`code-review`、`project-review`（验收） | [review-system](docs/zh-CN/workflows/review-system.md) |
+| **项目流程** | `project-init`、`project-clarify`、`project-spec`、`project-tickets`、`light-implement`、`project-review`、`release-workflow` | [CATALOG.zh-CN.md](CATALOG.zh-CN.md) |
+| **澄清与调研** | `socratic`（引擎）、`clarify`、`project-clarify`、`decision-map`、`light-research`、`light-prototype`、`light-to-questionnaire` | [clarification-system](docs/zh-CN/workflows/clarification-system.md) |
+| **任务执行** | `light-implement`、`agent-config`（原生支持主要编码 Harness：10 种原生适配器与通用回退）、`light-tdd`、`light-diagnosing-bugs`、`resolving-merge-conflicts` | [execution](docs/zh-CN/workflows/execution.md) |
+| **质量审阅** | `review-loop`（引擎）、`generic-review`、`light-code-review`、`project-review`（验收） | [review-system](docs/zh-CN/workflows/review-system.md) |
 | **专项工具** | `manuscript-ops`、`kb-init`、`learn-anything`、`language-learning`、`kanban-worker`、`eli5`、`recap` | [specialized-workflows](docs/zh-CN/workflows/specialized-workflows.md) |
-| **协作效率** | `handoff`、`humanizer`、`wizard`、`wait-what`、`writing-for-agents`、`light-travelpage` | [CATALOG.zh-CN.md](CATALOG.zh-CN.md) |
+| **协作效率** | `light-handoff`、`humanizer`、`light-wizard`、`light-wait-what`、`light-writing-for-agents`、`light-travelpage` | [CATALOG.zh-CN.md](CATALOG.zh-CN.md) |
 
 每个 Skill 的完整功能、使用时机与调用方式见 [CATALOG.zh-CN.md](CATALOG.zh-CN.md)。
 
@@ -189,7 +193,7 @@ $ask-light workflow
 | 第三方定制修改 | 私有仓库 `LightDevCoder/skills-3rdParty` 托管 | 记录完整补丁、许可证与同步状态。 |
 | 历史独立迁移 | 整合并入主集合 | 在发布记录中记载迁移历史与退役状态。 |
 
-经批准的 Matt Port（共 11 个）：`research`、`prototype`、`tdd`、`handoff`、`diagnosing-bugs`、`wizard`、`teach`、`wait-what`、`to-questionnaire`、`writing-for-agents`、`resolving-merge-conflicts`。各包均含 `ATTRIBUTION.md`，无需在运行时安装上游包。
+经批准的 Matt Port（共 11 个）：`light-research`、`light-prototype`、`light-tdd`、`light-handoff`、`light-diagnosing-bugs`、`light-wizard`、`light-teach`、`light-wait-what`、`light-to-questionnaire`、`light-writing-for-agents`、`resolving-merge-conflicts`。各包均含 `ATTRIBUTION.md`，无需在运行时安装上游包。
 
 改编来源（2 个包）：`humanizer` 是基于 blader/humanizer（2.11.2）实质性转换的第一方能力，外加参考 op7418/Humanizer-zh 的薄中文适配层；两份 MIT 许可均在其 [ATTRIBUTION.md](skills/writing/humanizer/ATTRIBUTION.md) 中保留。
 

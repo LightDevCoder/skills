@@ -63,7 +63,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.require_match("TC-AS-002 severity values", profile, r"(?is)\*\*Critical\*\*.*\*\*High\*\*.*\*\*Medium\*\*.*\*\*Low\*\*")
 
     c.require_match("TC-AS-003 evidence requirements", profile, r"(?im)^## Evidence requirements$")
-    for term in ("structural", "fresh-install|clean-copy installation", "discovery", "success", "boundary", "failure", "missing-dependency", "invocation", "interaction", "assertion-bearing", "negative|adversarial", "code-review", "fresh independent Evaluator"):
+    for term in ("structural", "fresh-install|clean-copy installation", "discovery", "success", "boundary", "failure", "missing-dependency", "invocation", "interaction", "assertion-bearing", "negative|adversarial", "light-code-review", "fresh independent Evaluator"):
         c.require_match(f"TC-AS-003 evidence {term}", profile, rf"(?i){term}")
     c.require_match("TC-AS-003 protocol labels retained", evidence, r"(?is)source.*structural.*behavioral.*installation.*invocation.*review")
     c.require_no_match("TC-AS-003 unsupported primary labels absent", profile, r"(?im)(?:Evidence label|Label):\s*(?:render|visual)\b")
@@ -71,7 +71,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 
     c.require_match("TC-AS-004 focused tests", profile, r"(?i)focused automated tests")
     c.require_match("TC-AS-004 negative tests", profile, r"(?i)negative or adversarial")
-    c.require_match("TC-AS-004 code review reports", profile, r"(?is)code-review.*Standards.*Spec")
+    c.require_match("TC-AS-004 code review reports", profile, r"(?is)light-code-review.*Standards.*Spec")
     c.require_match("TC-AS-004 specialist read-only", profile, r"(?is)read-only.*never edits|never edits.*never issues")
     c.require_match("TC-AS-004 specialist evidence class", profile, r"(?i)`review` evidence")
 

@@ -62,9 +62,9 @@ class SocraticBehaviorTest(unittest.TestCase):
 
     def test_fact_routing_remains_engine_owned(self) -> None:
         self.assertEqual(CONTRACT["factRoutes"], {
-            "externalFact": "research",
-            "needsExperiment": "prototype",
-            "heldByAnotherPerson": "to-questionnaire",
+            "externalFact": "light-research",
+            "needsExperiment": "light-prototype",
+            "heldByAnotherPerson": "light-to-questionnaire",
         })
 
     def test_multiple_question_frontier_asks_all_independent_decisions(self) -> None:

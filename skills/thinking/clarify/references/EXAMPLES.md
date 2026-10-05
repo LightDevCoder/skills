@@ -39,7 +39,7 @@ are both accepted.
 **User**: `$clarify Should we use the DeepL API or Google Translate? I don't
 know their pricing.`
 
-- This contains a fact (pricing) that `research` can answer, not a pure user
+- This contains a fact (pricing) that `light-research` can answer, not a pure user
   tradeoff.
 - Socratic records: `Dependency: DeepL vs Google pricing → research`.
 - `clarify` reports:
@@ -54,7 +54,7 @@ It does not invent pricing or convert the fact into "Which do you prefer?"
 
 After two turns, frontier is empty except for a blocked dependency.
 `clarify` does not create a formal SPEC. It reports the gap and recommends:
-"If pricing is needed, run `$research`; if this becomes a project, run
+"If pricing is needed, run `$light-research`; if this becomes a project, run
 `$project-clarify`" and stops.
 
 ## Example 4 — Shared-understanding confirmation

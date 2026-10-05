@@ -6,14 +6,18 @@ This catalog is synchronized from the 36 admitted package directories under `ski
 
 [Browse by category](skills/README.md) · [Path migration](docs/CATEGORY_MIGRATION.md)
 
+The inventory below reflects local v0.2.6 candidate names. The local verified v0.2.5 baseline uses the old names; the [migration guide](docs/MIGRATION-v0.2.6.md) lists all 12 mappings. The candidate is unpublished; remote installation and Host invocation checks remain pending.
+
+Namespace publication is **BLOCKED**: remote v0.2.6 is occupied by the existing travel-handbook release. D7 prohibits overwriting the tag or choosing another version; see the [publication blocker](docs/evidence/namespace-v0.2.6/publication-blocker.md). New-name remote installation templates must not be executed.
+
 ## Collection status
 
 | Field | Value |
 | --- | --- |
 | Collection | Light Skills — Composable Agent Workflows |
 | Package count | 36 admitted first-party Skills |
-| Current state | 36 packages on main; v0.2.5 is the current stable release |
-| Stable release | [v0.2.5](https://github.com/LightDevCoder/skills/releases/tag/v0.2.5) (36 packages; previous stable was v0.2.4) |
+| Current state | 36 packages in the v0.2.6 candidate; v0.2.5 is the local verified release baseline; remote v0.2.6 is already published |
+| Local verified release baseline | [v0.2.5](https://github.com/LightDevCoder/skills/releases/tag/v0.2.5) (36 packages; previous stable was v0.2.4) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
 | Evidence | [v0.2.5 release manifest](docs/evidence/releases/v0.2.5/RELEASE_MANIFEST.md) · [v0.2.5 release receipt](docs/evidence/releases/v0.2.5/RELEASE_RECEIPT.md) |
@@ -56,15 +60,15 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Evidence:** [SKILL.md](skills/thinking/clarify/SKILL.md), [references/WORKFLOW.md](skills/thinking/clarify/references/WORKFLOW.md), [ATTRIBUTION.md](skills/thinking/clarify/ATTRIBUTION.md).
 - **Installation path:** `<skills-root>/clarify/`.
 
-### code-review
+### light-code-review
 
 - **Purpose:** Read-only specialist reviewer for a bounded `git diff` along Standards and Spec axes.
 - **When to use:** Reviewing a branch/PR diff, or when `review-loop` / `project-review` requests a software check.
 - **Invocation:** Model-invoked (read-only; never repairs or verdicts).
-- **Package:** [skills/review/code-review/](skills/review/code-review)
+- **Package:** [skills/review/light-code-review/](skills/review/light-code-review)
 - **Status:** Admitted first-party; ADAPT (Matt `code-review`, two-axis method preserved).
-- **Evidence:** [references/WORKFLOW.md](skills/review/code-review/references/WORKFLOW.md), [SMELL-BASELINE.md](skills/review/code-review/references/SMELL-BASELINE.md), [ATTRIBUTION.md](skills/review/code-review/ATTRIBUTION.md).
-- **Installation path:** `<skills-root>/code-review/`.
+- **Evidence:** [references/WORKFLOW.md](skills/review/light-code-review/references/WORKFLOW.md), [SMELL-BASELINE.md](skills/review/light-code-review/references/SMELL-BASELINE.md), [ATTRIBUTION.md](skills/review/light-code-review/ATTRIBUTION.md).
+- **Installation path:** `<skills-root>/light-code-review/`.
 
 ### decision-map
 
@@ -76,15 +80,15 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Evidence:** [references/MAP-CONTRACT.md](skills/thinking/decision-map/references/MAP-CONTRACT.md), [ATTRIBUTION.md](skills/thinking/decision-map/ATTRIBUTION.md).
 - **Installation path:** `<skills-root>/decision-map/`.
 
-### diagnosing-bugs
+### light-diagnosing-bugs
 
 - **Purpose:** Diagnosis loop for hard bugs and performance regressions with a tight feedback signal.
 - **When to use:** Something broken/throwing/failing/slow and the cause is not obvious.
 - **Invocation:** Model-invoked.
-- **Package:** [skills/engineering/diagnosing-bugs/](skills/engineering/diagnosing-bugs)
+- **Package:** [skills/engineering/light-diagnosing-bugs/](skills/engineering/light-diagnosing-bugs)
 - **Status:** Admitted first-party; PORT — NO REDESIGN (Matt baseline preserved).
-- **Evidence:** [SKILL.md](skills/engineering/diagnosing-bugs/SKILL.md), [ATTRIBUTION.md](skills/engineering/diagnosing-bugs/ATTRIBUTION.md).
-- **Installation path:** `<skills-root>/diagnosing-bugs/`.
+- **Evidence:** [SKILL.md](skills/engineering/light-diagnosing-bugs/SKILL.md), [ATTRIBUTION.md](skills/engineering/light-diagnosing-bugs/ATTRIBUTION.md).
+- **Installation path:** `<skills-root>/light-diagnosing-bugs/`.
 
 ### eli5
 
@@ -106,15 +110,15 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Evidence:** [SKILL.md](skills/review/generic-review/SKILL.md).
 - **Installation path:** `<skills-root>/generic-review/`.
 
-### handoff
+### light-handoff
 
 - **Purpose:** Compact the current conversation into a handoff document for the next agent.
 - **When to use:** Closeout or resumption across sessions/agents.
 - **Invocation:** User-invoked only.
-- **Package:** [skills/productivity/handoff/](skills/productivity/handoff)
+- **Package:** [skills/productivity/light-handoff/](skills/productivity/light-handoff)
 - **Status:** Admitted first-party; PORT — NO REDESIGN (Matt `handoff`).
-- **Evidence:** [SKILL.md](skills/productivity/handoff/SKILL.md), [ATTRIBUTION.md](skills/productivity/handoff/ATTRIBUTION.md).
-- **Installation path:** `<skills-root>/handoff/`.
+- **Evidence:** [SKILL.md](skills/productivity/light-handoff/SKILL.md), [ATTRIBUTION.md](skills/productivity/light-handoff/ATTRIBUTION.md).
+- **Installation path:** `<skills-root>/light-handoff/`.
 
 ### humanizer
 
@@ -126,15 +130,15 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Evidence:** [SKILL.md](skills/writing/humanizer/SKILL.md), [ATTRIBUTION.md](skills/writing/humanizer/ATTRIBUTION.md), [admission record](docs/evidence/admissions/humanizer/README.md).
 - **Installation path:** `<skills-root>/humanizer/`.
 
-### implement
+### light-implement
 
 - **Purpose:** Execute one bounded, already-decided work item (code, doc, config, Skill, generic task) with verification and review handoff.
 - **When to use:** A ticket or SPEC slice is ready and unambiguous.
 - **Invocation:** User-invoked only.
-- **Package:** [skills/project/implement/](skills/project/implement)
+- **Package:** [skills/project/light-implement/](skills/project/light-implement)
 - **Status:** Admitted first-party; ADAPT (Matt `implement` → general-purpose executor).
-- **Evidence:** [references/WORKFLOW.md](skills/project/implement/references/WORKFLOW.md), [ATTRIBUTION.md](skills/project/implement/ATTRIBUTION.md).
-- **Installation path:** `<skills-root>/implement/`.
+- **Evidence:** [references/WORKFLOW.md](skills/project/light-implement/references/WORKFLOW.md), [ATTRIBUTION.md](skills/project/light-implement/ATTRIBUTION.md).
+- **Installation path:** `<skills-root>/light-implement/`.
 
 ### kanban-worker
 
@@ -256,15 +260,15 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Evidence:** [references/](skills/project/project-tickets/references), [ATTRIBUTION.md](skills/project/project-tickets/ATTRIBUTION.md).
 - **Installation path:** `<skills-root>/project-tickets/`.
 
-### prototype
+### light-prototype
 
 - **Purpose:** Build a throwaway prototype to answer a design question.
 - **When to use:** State model or UI logic needs a quick feel-check before commitment.
 - **Invocation:** Model-invoked.
-- **Package:** [skills/engineering/prototype/](skills/engineering/prototype)
+- **Package:** [skills/engineering/light-prototype/](skills/engineering/light-prototype)
 - **Status:** Admitted first-party; PORT — NO REDESIGN (Matt `prototype`).
-- **Evidence:** [SKILL.md](skills/engineering/prototype/SKILL.md), [ATTRIBUTION.md](skills/engineering/prototype/ATTRIBUTION.md).
-- **Installation path:** `<skills-root>/prototype/`.
+- **Evidence:** [SKILL.md](skills/engineering/light-prototype/SKILL.md), [ATTRIBUTION.md](skills/engineering/light-prototype/ATTRIBUTION.md).
+- **Installation path:** `<skills-root>/light-prototype/`.
 
 ### recap
 
@@ -286,15 +290,15 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Evidence:** [SKILL.md](skills/project/release-workflow/SKILL.md).
 - **Installation path:** `<skills-root>/release-workflow/`.
 
-### research
+### light-research
 
 - **Purpose:** Investigate an external question against high-trust primary sources and capture findings.
 - **When to use:** Local preset or facts are insufficient; need external evidence.
 - **Invocation:** Model-invoked.
-- **Package:** [skills/thinking/research/](skills/thinking/research)
+- **Package:** [skills/thinking/light-research/](skills/thinking/light-research)
 - **Status:** Admitted first-party; PORT — NO REDESIGN (Matt `research`).
-- **Evidence:** [SKILL.md](skills/thinking/research/SKILL.md), [ATTRIBUTION.md](skills/thinking/research/ATTRIBUTION.md).
-- **Installation path:** `<skills-root>/research/`.
+- **Evidence:** [SKILL.md](skills/thinking/light-research/SKILL.md), [ATTRIBUTION.md](skills/thinking/light-research/ATTRIBUTION.md).
+- **Installation path:** `<skills-root>/light-research/`.
 
 ### resolving-merge-conflicts
 
@@ -326,65 +330,65 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Evidence:** [SKILL.md](skills/thinking/socratic/SKILL.md), [ATTRIBUTION.md](skills/thinking/socratic/ATTRIBUTION.md).
 - **Installation path:** `<skills-root>/socratic/`.
 
-### tdd
+### light-tdd
 
 - **Purpose:** Test-driven development — red → green → refactor loop with real tests.
 - **When to use:** Implementing coding features test-first or fixing bugs with regression cover.
 - **Invocation:** Model-invoked.
-- **Package:** [skills/engineering/tdd/](skills/engineering/tdd)
+- **Package:** [skills/engineering/light-tdd/](skills/engineering/light-tdd)
 - **Status:** Admitted first-party; PORT — NO REDESIGN (Matt `tdd`).
-- **Evidence:** [SKILL.md](skills/engineering/tdd/SKILL.md), [ATTRIBUTION.md](skills/engineering/tdd/ATTRIBUTION.md).
-- **Installation path:** `<skills-root>/tdd/`.
+- **Evidence:** [SKILL.md](skills/engineering/light-tdd/SKILL.md), [ATTRIBUTION.md](skills/engineering/light-tdd/ATTRIBUTION.md).
+- **Installation path:** `<skills-root>/light-tdd/`.
 
-### teach
+### light-teach
 
 - **Purpose:** Teach a new skill or concept within the workspace.
 - **When to use:** User wants a guided lesson on a topic.
 - **Invocation:** User-invoked only.
-- **Package:** [skills/knowledge/teach/](skills/knowledge/teach)
+- **Package:** [skills/knowledge/light-teach/](skills/knowledge/light-teach)
 - **Status:** Admitted first-party; PORT — NO REDESIGN (Matt `teach`).
-- **Evidence:** [SKILL.md](skills/knowledge/teach/SKILL.md), [ATTRIBUTION.md](skills/knowledge/teach/ATTRIBUTION.md).
-- **Installation path:** `<skills-root>/teach/`.
+- **Evidence:** [SKILL.md](skills/knowledge/light-teach/SKILL.md), [ATTRIBUTION.md](skills/knowledge/light-teach/ATTRIBUTION.md).
+- **Installation path:** `<skills-root>/light-teach/`.
 
-### to-questionnaire
+### light-to-questionnaire
 
 - **Purpose:** Turn an undecided question into a questionnaire for the person who holds the information.
 - **When to use:** Information is held by another person, not the current user.
 - **Invocation:** User-invoked only.
-- **Package:** [skills/thinking/to-questionnaire/](skills/thinking/to-questionnaire)
+- **Package:** [skills/thinking/light-to-questionnaire/](skills/thinking/light-to-questionnaire)
 - **Status:** Admitted first-party; PORT — NO REDESIGN.
-- **Evidence:** [SKILL.md](skills/thinking/to-questionnaire/SKILL.md), [ATTRIBUTION.md](skills/thinking/to-questionnaire/ATTRIBUTION.md).
-- **Installation path:** `<skills-root>/to-questionnaire/`.
+- **Evidence:** [SKILL.md](skills/thinking/light-to-questionnaire/SKILL.md), [ATTRIBUTION.md](skills/thinking/light-to-questionnaire/ATTRIBUTION.md).
+- **Installation path:** `<skills-root>/light-to-questionnaire/`.
 
-### wait-what
+### light-wait-what
 
 - **Purpose:** Re-pitch the last message that did not land.
 - **When to use:** User says "wait, what?" or similar confusion.
 - **Invocation:** User-invoked only.
-- **Package:** [skills/productivity/wait-what/](skills/productivity/wait-what)
+- **Package:** [skills/productivity/light-wait-what/](skills/productivity/light-wait-what)
 - **Status:** Admitted first-party; PORT — NO REDESIGN.
-- **Evidence:** [SKILL.md](skills/productivity/wait-what/SKILL.md), [ATTRIBUTION.md](skills/productivity/wait-what/ATTRIBUTION.md).
-- **Installation path:** `<skills-root>/wait-what/`.
+- **Evidence:** [SKILL.md](skills/productivity/light-wait-what/SKILL.md), [ATTRIBUTION.md](skills/productivity/light-wait-what/ATTRIBUTION.md).
+- **Installation path:** `<skills-root>/light-wait-what/`.
 
-### wizard
+### light-wizard
 
 - **Purpose:** Interactive bash wizard for human-only steps (provisioning, secrets, dashboards, cutovers).
 - **When to use:** Task needs a guided human walk-through, not an agent-auto step.
 - **Invocation:** Model-invoked.
-- **Package:** [skills/productivity/wizard/](skills/productivity/wizard)
+- **Package:** [skills/productivity/light-wizard/](skills/productivity/light-wizard)
 - **Status:** Admitted first-party; PORT — NO REDESIGN (Matt `wizard`).
-- **Evidence:** [SKILL.md](skills/productivity/wizard/SKILL.md), [ATTRIBUTION.md](skills/productivity/wizard/ATTRIBUTION.md).
-- **Installation path:** `<skills-root>/wizard/`.
+- **Evidence:** [SKILL.md](skills/productivity/light-wizard/SKILL.md), [ATTRIBUTION.md](skills/productivity/light-wizard/ATTRIBUTION.md).
+- **Installation path:** `<skills-root>/light-wizard/`.
 
-### writing-for-agents
+### light-writing-for-agents
 
 - **Purpose:** Author or edit agent-facing documents (Skills, AGENTS.md, CLAUDE.md) for model consumption.
 - **When to use:** Creating or improving agent instructions or Skill packages.
 - **Invocation:** Model-invoked.
-- **Package:** [skills/writing/writing-for-agents/](skills/writing/writing-for-agents)
+- **Package:** [skills/writing/light-writing-for-agents/](skills/writing/light-writing-for-agents)
 - **Status:** Admitted first-party; PORT — NO REDESIGN.
-- **Evidence:** [SKILL.md](skills/writing/writing-for-agents/SKILL.md), [ATTRIBUTION.md](skills/writing/writing-for-agents/ATTRIBUTION.md).
-- **Installation path:** `<skills-root>/writing-for-agents/`.
+- **Evidence:** [SKILL.md](skills/writing/light-writing-for-agents/SKILL.md), [ATTRIBUTION.md](skills/writing/light-writing-for-agents/ATTRIBUTION.md).
+- **Installation path:** `<skills-root>/light-writing-for-agents/`.
 
 ## Source-state boundaries
 

@@ -104,7 +104,7 @@ Topology and routing decisions are emitted within the canonical `AgentConfigResu
   - `readiness`: `"READY"`
   - `mode`: `"persisted"` | `"session-local"` | `"plan-only"`
   - `setup_state`: `{ companion: "ready" | "missing" | "stale", profile: "persisted" | "session-local" }`
-  - `handoff`: `"implement"`
+  - `handoff`: `"light-implement"`
   - `execution_config`: Non-null structured `ExecutionConfig` matching `execution-config.schema.json`.
 - **Missing profile / setup required:**
   - `readiness`: `"NEED_INPUT"`

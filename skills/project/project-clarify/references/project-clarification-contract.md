@@ -34,9 +34,9 @@ capability, or an unstarted authorized call blocks its downstream decision.
 
 ## Capability-call ledger
 
-`socratic` is the required model-invoked decision engine. `research` and
-`prototype` are optional model-invoked fact-work capabilities, not stages to
-start by default. `to-questionnaire` is the optional branch when the blocked
+`socratic` is the required model-invoked decision engine. `light-research` and
+`light-prototype` are optional model-invoked fact-work capabilities, not stages to
+start by default. `light-to-questionnaire` is the optional branch when the blocked
 information is held by another person; because it is a user-invoked Skill,
 record it as attempted/recommended rather than auto-running it.
 

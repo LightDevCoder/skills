@@ -16,7 +16,7 @@ frozen acceptance baseline and issues the final `PASS`, `FAIL`, or `BLOCKED`.
   implementation to check.
 - When `docs/agents/light-project.md` exists, use its review profile and
   acceptance strategy as the default, then freeze the actual acceptance source.
-- Use it as the final gate after `implement` or after a batch of tickets,
+- Use it as the final gate after `light-implement` or after a batch of tickets,
   before `release-workflow`.
 - Use it for Skill admission when the acceptance source is a package's
   `SKILL.md` and its supporting evidence.
@@ -31,13 +31,13 @@ not repair artifacts itself; the Producer performs authorized repairs.
 - Select a Profile (`generic`, `software`, `manuscript`, `agent-skill`,
   `specification`).
 - Invoke reviewers through `review-loop`: `generic-review` for ordinary
-  artifacts, `code-review` for software diffs, domain reviewers when an
+  artifacts, `light-code-review` for software diffs, domain reviewers when an
   accepted specialist exists.
 - Validate candidate findings, direct only bounded in-scope repairs, and
   request a fresh, independent Evaluator.
 - Issue `PASS`, `FAIL`, or `BLOCKED` when the stopping rules are met.
 
-`review-loop` is only the convergence engine. `generic-review` and `code-review`
+`review-loop` is only the convergence engine. `generic-review` and `light-code-review`
 are read-only reviewers: they never self-repair, never run the loop, and never
 issue the project verdict.
 
@@ -92,4 +92,4 @@ state tree and resume rules.
 - [migration.md](references/migration.md) — historical provenance only; never
   required for current runtime execution.
 - Composition targets (invoke by name, do not copy): `review-loop`,
-  `generic-review`, `code-review`.
+  `generic-review`, `light-code-review`.

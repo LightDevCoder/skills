@@ -28,7 +28,7 @@
 
 ## 组合和停止点
 
-默认组合 `generic-review`；软件 diff 用 `code-review`；有已接受 specialist 时用领域 reviewer。`project-review` 是最终验收拥有者。干净或达上限后停止并交给调用方；不要隐式调用其他 user-invoked Skill。
+默认组合 `generic-review`；软件 diff 用 `light-code-review`；有已接受 specialist 时用领域 reviewer。`project-review` 是最终验收拥有者。干净或达上限后停止并交给调用方；不要隐式调用其他 user-invoked Skill。
 
 ## 安装与发现验证
 

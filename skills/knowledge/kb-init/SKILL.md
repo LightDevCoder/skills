@@ -14,7 +14,7 @@ This skill is knowledge-base-specific. It is not tied to any particular software
 
 Run only after an explicit `kb-init` request. It is user-invoked and must not trigger on its own from a generic mention of knowledge bases, notes, wikis, or research archives. Once explicitly invoked, if the prompt contains little or no useful context, start the knowledge-base interview automatically.
 
-`kb-init` may call the model-invoked `research` capability when an unresolved decision depends on external facts or current platform capabilities. It must not invoke another user-invoked Skill on its own.
+`kb-init` may call the model-invoked `light-research` capability when an unresolved decision depends on external facts or current platform capabilities. It must not invoke another user-invoked Skill on its own.
 
 ## Core principles
 
@@ -61,12 +61,12 @@ Run only after an explicit `kb-init` request. It is user-invoked and must not tr
 
 `kb-init` may invoke one external skill:
 
-- `research` — for external facts that should be verified instead of guessed.
+- `light-research` — for external facts that should be verified instead of guessed.
 
-`research` is a soft dependency.
+`light-research` is a soft dependency.
 
-- If the environment exposes `research` as a callable skill, use it for KB-init research detours. Do not bypass it with direct web search merely because direct search is also available.
-- If `research` cannot actually be invoked in the current harness, fall back to another trustworthy research capability already present or keep the affected decision explicitly unresolved.
+- If the environment exposes `light-research` as a callable skill, use it for KB-init research detours. Do not bypass it with direct web search merely because direct search is also available.
+- If `light-research` cannot actually be invoked in the current harness, fall back to another trustworthy research capability already present or keep the affected decision explicitly unresolved.
 
 Do not invoke generic grilling or generic to-spec skills. Their useful behaviors are incorporated into this skill.
 
@@ -169,7 +169,7 @@ If the user challenges or asks about a proposal:
 3. keep the underlying decision open unless the user actually decides it;
 4. return to that decision afterward.
 
-If external facts are needed, use `research` under `references/research-contract.md`.
+If external facts are needed, use `light-research` under `references/research-contract.md`.
 
 Do not tell the user that research is underway until the research dispatch has actually been accepted/started by the harness. A planned research call is not an active research run.
 
@@ -199,7 +199,7 @@ Discover enough to understand:
 - what programmatic access is officially supported;
 - what the current Agent environment can actually use.
 
-If those facts are current, unfamiliar, or unverified, use `research`.
+If those facts are current, unfamiliar, or unverified, use `light-research`.
 
 For a third-party software or service base whose programmatic interfaces, authentication, permissions, or limits can change over time, verify the current official connection options before locking the connection route unless they were already verified from first-party sources in the current session.
 

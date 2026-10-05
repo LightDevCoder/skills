@@ -43,7 +43,7 @@ No invented facts are added.
 ## Example 3 — Missing capability, retained gap
 
 Needed fact: "Does iOS WebKit allow background sync?"
-- Local inspection cannot answer; requires `research` on official WebKit docs.
+- Local inspection cannot answer; requires `light-research` on official WebKit docs.
 - User has not authorized fact work this turn.
 
 Ledger:

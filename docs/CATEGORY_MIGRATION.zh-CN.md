@@ -2,23 +2,23 @@
 
 [English](CATEGORY_MIGRATION.md)
 
-从当前 main 开始，36 个 Skill 的源码从平铺目录移动到分类目录。技能名称、显式调用语法、宿主安装目录和批准边界均不改变。
+v0.2.2 将 36 个源码包从平铺目录迁移到分类目录，当时名称与调用方式不变。下表保留旧平铺路径，目标链接指向当前 v0.2.6 候选；其中 12 个包另有名称迁移，详见[名称迁移说明](MIGRATION-v0.2.6.zh-CN.md)。本 checkout 的已验证基线 v0.2.5 保留迁名前名称。
 
-使用 `--skill <name>` 的安装命令不变。直接引用源码路径的脚本、符号链接和手动安装命令需要按下表更新。旧 tag 与历史证据保留原始路径；回查时使用证据记录中的 revision。分类目录不是技能包，不包含 `SKILL.md`。
+分类目录不是 Skill 包，不包含 `SKILL.md`。旧 tag 与历史证据保留其原始路径；回查时使用记录中的 revision。按当前候选更新源码引用、软链接和手动复制路径时，也要按迁移说明更新 `--skill` 参数与显式调用。
 
 | 技能 | 旧源码路径 | 新源码路径 |
 | --- | --- | --- |
 | `agent-config` | `skills/agent-config/` | [skills/engineering/agent-config/](../skills/engineering/agent-config/) |
 | `ask-light` | `skills/ask-light/` | [skills/productivity/ask-light/](../skills/productivity/ask-light/) |
 | `clarify` | `skills/clarify/` | [skills/thinking/clarify/](../skills/thinking/clarify/) |
-| `code-review` | `skills/code-review/` | [skills/review/code-review/](../skills/review/code-review/) |
+| `light-code-review` | `skills/code-review/` | [skills/review/light-code-review/](../skills/review/light-code-review/) |
 | `decision-map` | `skills/decision-map/` | [skills/thinking/decision-map/](../skills/thinking/decision-map/) |
-| `diagnosing-bugs` | `skills/diagnosing-bugs/` | [skills/engineering/diagnosing-bugs/](../skills/engineering/diagnosing-bugs/) |
+| `light-diagnosing-bugs` | `skills/diagnosing-bugs/` | [skills/engineering/light-diagnosing-bugs/](../skills/engineering/light-diagnosing-bugs/) |
 | `eli5` | `skills/eli5/` | [skills/knowledge/eli5/](../skills/knowledge/eli5/) |
 | `generic-review` | `skills/generic-review/` | [skills/review/generic-review/](../skills/review/generic-review/) |
-| `handoff` | `skills/handoff/` | [skills/productivity/handoff/](../skills/productivity/handoff/) |
+| `light-handoff` | `skills/handoff/` | [skills/productivity/light-handoff/](../skills/productivity/light-handoff/) |
 | `humanizer` | `skills/humanizer/` | [skills/writing/humanizer/](../skills/writing/humanizer/) |
-| `implement` | `skills/implement/` | [skills/project/implement/](../skills/project/implement/) |
+| `light-implement` | `skills/implement/` | [skills/project/light-implement/](../skills/project/light-implement/) |
 | `kanban-worker` | `skills/kanban-worker/` | [skills/project/kanban-worker/](../skills/project/kanban-worker/) |
 | `kb-init` | `skills/kb-init/` | [skills/knowledge/kb-init/](../skills/knowledge/kb-init/) |
 | `language-learning` | `skills/language-learning/` | [skills/knowledge/language-learning/](../skills/knowledge/language-learning/) |
@@ -31,18 +31,18 @@
 | `project-review` | `skills/project-review/` | [skills/review/project-review/](../skills/review/project-review/) |
 | `project-spec` | `skills/project-spec/` | [skills/project/project-spec/](../skills/project/project-spec/) |
 | `project-tickets` | `skills/project-tickets/` | [skills/project/project-tickets/](../skills/project/project-tickets/) |
-| `prototype` | `skills/prototype/` | [skills/engineering/prototype/](../skills/engineering/prototype/) |
+| `light-prototype` | `skills/prototype/` | [skills/engineering/light-prototype/](../skills/engineering/light-prototype/) |
 | `recap` | `skills/recap/` | [skills/productivity/recap/](../skills/productivity/recap/) |
 | `release-workflow` | `skills/release-workflow/` | [skills/project/release-workflow/](../skills/project/release-workflow/) |
-| `research` | `skills/research/` | [skills/thinking/research/](../skills/thinking/research/) |
+| `light-research` | `skills/research/` | [skills/thinking/light-research/](../skills/thinking/light-research/) |
 | `resolving-merge-conflicts` | `skills/resolving-merge-conflicts/` | [skills/engineering/resolving-merge-conflicts/](../skills/engineering/resolving-merge-conflicts/) |
 | `review-loop` | `skills/review-loop/` | [skills/review/review-loop/](../skills/review/review-loop/) |
 | `socratic` | `skills/socratic/` | [skills/thinking/socratic/](../skills/thinking/socratic/) |
-| `tdd` | `skills/tdd/` | [skills/engineering/tdd/](../skills/engineering/tdd/) |
-| `teach` | `skills/teach/` | [skills/knowledge/teach/](../skills/knowledge/teach/) |
-| `to-questionnaire` | `skills/to-questionnaire/` | [skills/thinking/to-questionnaire/](../skills/thinking/to-questionnaire/) |
-| `wait-what` | `skills/wait-what/` | [skills/productivity/wait-what/](../skills/productivity/wait-what/) |
-| `wizard` | `skills/wizard/` | [skills/productivity/wizard/](../skills/productivity/wizard/) |
-| `writing-for-agents` | `skills/writing-for-agents/` | [skills/writing/writing-for-agents/](../skills/writing/writing-for-agents/) |
+| `light-tdd` | `skills/tdd/` | [skills/engineering/light-tdd/](../skills/engineering/light-tdd/) |
+| `light-teach` | `skills/teach/` | [skills/knowledge/light-teach/](../skills/knowledge/light-teach/) |
+| `light-to-questionnaire` | `skills/to-questionnaire/` | [skills/thinking/light-to-questionnaire/](../skills/thinking/light-to-questionnaire/) |
+| `light-wait-what` | `skills/wait-what/` | [skills/productivity/light-wait-what/](../skills/productivity/light-wait-what/) |
+| `light-wizard` | `skills/wizard/` | [skills/productivity/light-wizard/](../skills/productivity/light-wizard/) |
+| `light-writing-for-agents` | `skills/writing-for-agents/` | [skills/writing/light-writing-for-agents/](../skills/writing/light-writing-for-agents/) |
 
 [分类导航](../skills/README.zh-CN.md)
