@@ -89,6 +89,63 @@ test("date pages switch instantly while retaining every supplied day and origina
   assert.match(second.textContent, /15:00[\s\S]*Temple/);
 });
 
+function dateStrip(t) {
+  const w = new Window({ url: "http://localhost/" });
+  t.after(() => w.happyDOM.abort());
+  w.document.body.innerHTML = '<div class="handbook-dates"><button>Day 1</button><button>Day 7</button></div>';
+  const strip = w.document.querySelector(".handbook-dates");
+  Object.defineProperties(strip, { scrollWidth: { value: 900 }, clientWidth: { value: 390 } });
+  let captured = null;
+  strip.setPointerCapture = id => { captured = id; };
+  strip.hasPointerCapture = id => captured === id;
+  strip.releasePointerCapture = () => { captured = null; };
+  w.eval(read("handbook.js"));
+  let clicks = 0;
+  const button = strip.querySelector("button");
+  button.addEventListener("click", () => { clicks++; });
+  const pointer = (type, x, options = {}) => button.dispatchEvent(new w.PointerEvent(type, { bubbles: true, cancelable: true, pointerId: 1, pointerType: "mouse", button: 0, clientX: x, ...options }));
+  return { w, strip, button, pointer, clicks: () => clicks, captured: () => captured };
+}
+
+test("mouse dragging reaches hidden dates without selecting the release target", t => {
+  const page = dateStrip(t);
+  page.pointer("pointerdown", 300);
+  page.pointer("pointermove", 80);
+  assert.equal(page.strip.scrollLeft, 220);
+  assert.equal(page.captured(), 1);
+  assert.equal(page.strip.classList.contains("is-dragging"), true);
+  page.pointer("pointerup", 80);
+  page.button.click();
+  assert.equal(page.clicks(), 0);
+  assert.equal(page.captured(), null);
+  assert.equal(page.strip.classList.contains("is-dragging"), false);
+  page.pointer("pointerdown", 100);
+  page.pointer("pointerup", 100);
+  page.button.click();
+  assert.equal(page.clicks(), 1);
+});
+
+test("date dragging preserves normal clicks and native touch while canceling cleanly", t => {
+  const page = dateStrip(t);
+  page.pointer("pointerdown", 100);
+  page.pointer("pointermove", 103);
+  page.pointer("pointerup", 103);
+  page.button.click();
+  assert.equal(page.strip.scrollLeft, 0);
+  assert.equal(page.clicks(), 1);
+  page.pointer("pointerdown", 300, { pointerType: "touch" });
+  page.pointer("pointermove", 80, { pointerType: "touch" });
+  assert.equal(page.captured(), null);
+  assert.equal(page.strip.scrollLeft, 0);
+  page.pointer("pointerdown", 300);
+  page.pointer("pointermove", 80);
+  page.pointer("pointercancel", 80);
+  page.pointer("pointermove", 30);
+  assert.equal(page.strip.scrollLeft, 220);
+  assert.equal(page.captured(), null);
+  assert.equal(page.strip.classList.contains("is-dragging"), false);
+});
+
 function mappedPage(t) {
   const w = new Window({ url:"http://localhost/" });
   t.after(() => w.happyDOM.abort());

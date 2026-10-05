@@ -79,3 +79,28 @@ test("enabled build rejects symlinked AI assets instead of publishing server cre
     }
   } finally { spawnSync("trash", [temporary]); }
 });
+
+test("off and enabled builds reject trip credential aliases and prefixed keys before dist exists", () => {
+  const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "travel-trip-credential-"));
+  try {
+    const cases = [
+      { OPENAI_API_KEY: "synthetic-server-credential" },
+      { openaiApiKey: "synthetic-server-credential" },
+      { CLOUDFLARE_API_TOKEN: "synthetic-server-credential" },
+      { note: "sk-proj-" + "A_b-".repeat(12) },
+      { note: "sk-svcacct-" + "A_b-".repeat(12) }
+    ];
+    for (const mode of ["off", "openai"]) for (const [index, value] of cases.entries()) {
+      const project = path.join(temporary, `${mode}-${index}`);
+      assert.equal(run([create, project, "--ai", mode]).status, 0);
+      trip(project);
+      const file = path.join(project, "trip-data.json"), data = JSON.parse(fs.readFileSync(file));
+      data.metadata.extra = value;
+      fs.writeFileSync(file, JSON.stringify(data));
+      const built = run(["scripts/build.mjs"], project);
+      assert.notEqual(built.status, 0, `${mode}/${index}`);
+      assert.match(built.stderr, /Credential field cannot enter trip data|Credential pattern found/);
+      assert.equal(fs.existsSync(path.join(project, "dist")), false);
+    }
+  } finally { spawnSync("trash", [temporary]); }
+});

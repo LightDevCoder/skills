@@ -1,4 +1,41 @@
 (() => {
+  let dateDrag = null;
+  let suppressedDateClick = null;
+  const endDateDrag = event => {
+    if (!dateDrag || event.pointerId !== dateDrag.pointerId) return;
+    const { strip, moved, pointerId } = dateDrag;
+    if (moved) suppressedDateClick = { strip, until: Date.now() + 350 };
+    strip.classList.remove("is-dragging");
+    if (strip.hasPointerCapture?.(pointerId)) strip.releasePointerCapture(pointerId);
+    dateDrag = null;
+  };
+  document.addEventListener("pointerdown", event => {
+    if (event.pointerType !== "mouse" || event.button !== 0) return;
+    const strip = event.target.closest(".handbook-dates");
+    if (!strip || strip.scrollWidth <= strip.clientWidth) return;
+    suppressedDateClick = null;
+    dateDrag = { strip, pointerId: event.pointerId, x: event.clientX, scroll: strip.scrollLeft, moved: false };
+  });
+  document.addEventListener("pointermove", event => {
+    if (!dateDrag || event.pointerId !== dateDrag.pointerId) return;
+    const dx = event.clientX - dateDrag.x;
+    if (!dateDrag.moved && Math.abs(dx) < 6) return;
+    if (!dateDrag.moved) {
+      dateDrag.moved = true;
+      dateDrag.strip.setPointerCapture(event.pointerId);
+      dateDrag.strip.classList.add("is-dragging");
+    }
+    dateDrag.strip.scrollLeft = dateDrag.scroll - dx;
+    event.preventDefault();
+  });
+  document.addEventListener("pointerup", endDateDrag);
+  document.addEventListener("pointercancel", endDateDrag);
+  document.addEventListener("click", event => {
+    if (!suppressedDateClick || Date.now() > suppressedDateClick.until || !suppressedDateClick.strip.contains(event.target)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    suppressedDateClick = null;
+  }, true);
   let runtimeTodos = null;
   const esc = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
   const tr = value => window.TravelI18n?.text(value) ?? value;

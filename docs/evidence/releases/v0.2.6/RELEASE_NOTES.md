@@ -8,7 +8,7 @@ This release focuses on `light-travelpage`. Generated pages bring daily plans an
 
 ### Daily plans and maps stay together
 
-Each date opens its own daily page immediately. Its route appears beside the schedule on desktop and above it on mobile. Selecting a place in the schedule or place list expands its whole group and highlights it; the other places remain visible. Changing dates clears the previous expansion, and refreshing shared records preserves the selected day. Drafts without dates use `DAY n` labels and initialize normally.
+Each date opens its own daily page immediately. Its route appears beside the schedule on desktop and above it on mobile. Selecting a place in the schedule or place list expands its whole group and highlights it; the other places remain visible. Changing dates clears the previous expansion, and refreshing shared records preserves the selected day. Drafts without dates use `DAY n` labels and initialize normally. Mouse users can drag the date strip without accidentally changing the day; touch and trackpad scrolling remain native.
 
 Route has a visible chapter alongside Itinerary, Bookings, Ledger and to-do. Materials gets a direct topbar link when it is the only secondary section; More contains only additional sections. Flight and hotel cards, ticket status and protected original materials remain available. Geographic outlines retain their sources and distinguish visit order from actual roads.
 
@@ -22,7 +22,7 @@ The Skill asks whether to enable AI before generating a new page when the choice
 
 Enabled pages use a protected server connection compatible with Chat Completions or Responses tool calling. Configuration can point to an existing local CPA through an authorized Tunnel, an existing overseas CPA, or an API provider. The Skill does not provision those services as part of choosing AI.
 
-The assistant can read itinerary and bookings and use enabled to-do, ticket-status and shared-expense actions. It keeps source travel content and merchant orders read-only. Credentials remain on the server. Confirmed actions are shown separately from the model's prose; uncertain saves retry the same request. Failed preflight reads preserve unsent drafts, and storage errors remain visible in an operable dialog.
+The assistant can read itinerary and bookings and use enabled to-do, ticket-status and shared-expense actions. It keeps source travel content and merchant orders read-only. Credentials remain on the server. Validation rejects prefixed API-key fields and key formats before building public trip data. Confirmed actions are shown separately from the model's prose; uncertain saves retry the same request. Failed preflight reads preserve unsent drafts, and storage errors remain visible in an operable dialog.
 
 ## Upgrade notes
 
@@ -32,7 +32,7 @@ AI input is text-only. Ticket-image understanding is not included. An upstream m
 
 ## Verification
 
-The local candidate passes 77 template tests, 3 generator tests and builds for AI off, AI on and undated drafts. Desktop and 390px browser checks retain 7 days, 53 schedule items, 2 flight cards, 4 hotel cards and 14 material entries. AI browser checks use a synthetic local upstream; they do not establish a hosted provider connection or physical-device behavior.
+The local candidate passes 80 template tests, 4 generator tests and builds for AI off, AI on and undated drafts. Desktop and 390px browser checks retain 7 days, 53 schedule items, 2 flight cards, 4 hotel cards and 14 material entries. AI browser checks use a synthetic local upstream; they do not establish a hosted provider connection or physical-device behavior.
 
 Collection checks pass 528 pytest tests, 156 unittest tests, compilation and public documentation checks. Candidate-version detection is tested with isolated version folders instead of a fixed previous-release number.
 
