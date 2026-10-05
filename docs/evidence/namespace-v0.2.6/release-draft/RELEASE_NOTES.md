@@ -57,4 +57,6 @@ npx skills add LightDevCoder/skills
 
 ## Verification
 
-Local candidate checks, independent review, final candidate acceptance, exact-candidate CI, fixed-version and default-branch fresh installs, and real Host discovery/invocation evidence are pending. The [manifest](RELEASE_MANIFEST.md) records the pre-publication state. Post-publication verification belongs in a receipt created on `main` only after publication. A directory scan or Producer self-check does not establish runtime or independent acceptance.
+The local implementation passes 521 pytest tests, 158 unittest tests, compilation and public documentation checks. Two independent review axes converged without outstanding findings. Fresh local CLI installations retain 36 complete Light packages across both installation orders and modes. These are local test, review and installation observations.
+
+Actual Codex discovery and invocation remain unverified because the runtime failed before Skill reads. Candidate acceptance and publication are blocked. No exact-candidate remote CI or fixed-version namespace installation is claimed; existing v0.2.6 is a different release. See the [candidate evidence](../producer-evidence.md) and [review convergence](../review-summary.md).

@@ -20,7 +20,9 @@
 
 ## 本地候选证据
 
-本地检查、A1–A10 候选证据、R1–R5 失败诊断、独立 review-loop 收敛与 project-review 最终验收尚待完成。本草稿不会把 Producer 自检当作独立验收，也不会把结构检查当作 Host 运行时证据。候选证据须在冻结候选提交前补充。
+已审阅的本地实现为 `79d15fd410f1295f84d9761d66c601895ff9ee31`，通过 521 项 pytest、158 项 unittest、编译与公开文档检查。两个独立审阅方向已收敛。四种本地安装组合保留包身份、完整内容和正确链接；Light 清单 digest 为 `fe58ea6e7af0e7ffa4b52fc484c9b78cdbffc6e8c22cf1a28b0596779c191041`。
+
+[Producer 证据](../producer-evidence.md)、[安装与实际 Host 尝试](../installation-host.md)和[独立审阅收敛](../review-summary.md)分别保留边界。A2 Host 选择器、A9 实际发现与调用未观察，候选验收仍阻断并等待 Evaluator。R3 被既有发布版本阻断；本候选尚未完成 R4/R5。
 
 ## 后续阶段门禁
 
