@@ -38,6 +38,13 @@ class ReleasedSourceInstallationTests(unittest.TestCase):
             with patch.dict(os.environ, {"CODEX_HOME": str(home / "elsewhere")}), self.assertRaises(ValueError):
                 module.require_fresh_runner(home)
 
+    def test_global_installation_rejects_existing_native_canonical_root(self):
+        with tempfile.TemporaryDirectory() as tmp, patch.object(module.sys, "platform", "linux"), patch.dict(os.environ, {"GITHUB_ACTIONS": "true", "CODEX_HOME": ""}):
+            home = Path(tmp)
+            (home / ".agents/skills").mkdir(parents=True)
+            with self.assertRaises(ValueError):
+                module.require_fresh_runner(home)
+
     def test_complete_payload_and_symlink_are_verified(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

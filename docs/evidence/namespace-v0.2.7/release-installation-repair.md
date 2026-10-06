@@ -1,0 +1,5 @@
+# Actual released-source installation path correction
+
+First hosted run [37492137382](https://github.com/LightDevCoder/skills/actions/runs/37492137382) cloned the protected v0.2.7 tag and main at ef2d840, resolved Skills CLI1.7.0, and completed native global Codex installation with exit0. It failed verification because the helper inspected ~/.codex/skills. Actual command05 and boundCLI isUniversalAgent/install logic establish Codex global destination ~/.agents/skills.
+
+The bounded main-only verification repair changes that single expected destination to ~/.agents/skills; both global-root freshness guards remain. A regression covers rejection of a pre-existing actual canonical global root. No source packages or immutable tag are changed. The original failed run is retained; it is not INSTALL_VERIFIED. The existing fourcheck specialist loop remains closed; no fifth review is dispatched. Actual rerun artifacts and parent full-source comparison will establish R4, followed by the independent release evidence check.

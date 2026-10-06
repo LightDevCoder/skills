@@ -139,7 +139,7 @@ def main() -> None:
         project.mkdir()
         run(cli + ["add", source, *flags, "--yes"], project)
         if global_scope:
-            checked = [verify_destination(Path.home() / ".codex/skills", expected)]
+            checked = [verify_destination(Path.home() / ".agents/skills", expected)]
         else:
             checked = verify_project_targets(project, expected, selected)
         observations.append({
