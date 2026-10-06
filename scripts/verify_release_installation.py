@@ -48,6 +48,11 @@ def source_packages(root: Path) -> dict[str, dict[str, str]]:
     return result
 
 
+def require_collection_size(packages: dict) -> None:
+    if len(packages) != 36:
+        raise ValueError("whole collection must contain exactly 36 admitted packages")
+
+
 def verify_destination(root: Path, expected: dict[str, dict[str, str]]) -> dict:
     names = {p.name for p in root.iterdir() if p.is_dir() or p.is_symlink()}
     if names != set(expected):
@@ -113,9 +118,11 @@ def main() -> None:
         return root, run(["git", "rev-parse", "HEAD"], root), source_packages(root)
 
     _, pinned_sha, pinned = clone(args.tag, "pinned-source")
-    if pinned_sha != args.expected_commit or len(pinned) != 36:
+    require_collection_size(pinned)
+    if pinned_sha != args.expected_commit:
         raise ValueError("published tag does not match the expected 36-package candidate")
     _, default_sha, latest = clone("main", "default-source")
+    require_collection_size(latest)
     cli = ["npx", "--yes", "--cache", str(args.output / "npm-cache"), "skills"]
     cli_version = run(cli + ["--version"])
     cli_files = list((args.output / "npm-cache").glob("_npx/*/node_modules/skills/dist/cli.mjs"))

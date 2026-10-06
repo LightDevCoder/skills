@@ -46,3 +46,9 @@ The owner approved the two exact runtime metadata exceptions. [Real Host observa
 ## Resumed verifier checks
 
 The manual released-source workflow and first-party verifier fulfill R4 in an actual fresh hosted Linux user without repurposing HOME/CODEX_HOME. Focused positive/negative/mutation tests pass six cases. The expanded full suite passes 540 pytest tests (35.71 s), 164 unittest tests (20.290 s), compilation and public documentation checks. No future remote install result is claimed. Independent software axes and fresh final acceptance remain pending.
+
+## Approved selected-host verification repair
+
+The owner approved the concrete scope amendment and one fourth/final verifier recheck on 2026-10-06. The generic CLI registry parser was removed. Pinned/default whole installs declare Codex and Claude Code; native Codex global and three renamed Codex singles remain. Omitted declared targets and undeclared selections are rejected. The all-Agent exploratory preflight is not claimed byte-identical: Eve serializes/filters frontmatter. Both selected targets independently match 36 packages/386 files.
+
+Target `cb61cee4eb89cc22aa07509dd5bef48929fa4d34` passes eight focused behavioral tests, 542 pytest tests (36.50 s), 166 unittest tests (20.717 s), compilation, documentation checks and diff checks. Full logs: local `.scratch/light-skill-namespace/evidence/v027-selected-{full,unittest}.log`. Fourth software recheck and fresh whole-candidate evaluation are separate observations; actual released-source R4 remains pending the public tag.

@@ -74,6 +74,16 @@ class ReleasedSourceInstallationTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 module.source_packages(root / "source")
 
+    def test_whole_collection_rejects_missing_or_extra_source_packages(self):
+        expected = module.source_packages(ROOT)
+        module.require_collection_size(expected)
+        missing = dict(expected)
+        missing.pop("light-implement")
+        extra = {**expected, "unexpected-package": {"SKILL.md": "unexpected"}}
+        for packages in (missing, extra):
+            with self.subTest(count=len(packages)), self.assertRaises(ValueError):
+                module.require_collection_size(packages)
+
     def test_undeclared_or_empty_agent_selection_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             for selected in ([], ["*"], ["codex", "unsupported"]):

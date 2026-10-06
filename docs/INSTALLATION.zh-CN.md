@@ -237,4 +237,4 @@ cp -R "$source_root/$source_package" "$destination_root/$skill_name"
 
 ## 发布源安装验证环境
 
-手动 [release-installation 工作流](../.github/workflows/release-installation.yml)在新鲜的托管 Linux 用户环境中运行 [verify_release_installation.py](../scripts/verify_release_installation.py)。受保护标签存在后，传入标签和完整候选提交。它测试原生 Codex 全局范围、固定版及默认分支全集与安装器支持的目标、代表性单包；逐项核对来源身份和完整包内容，保留命令日志与清单。已有全局目标时拒绝执行，不重设 HOME/CODEX_HOME。这是安装证据，不代表 Linux Codex 运行时；实际托管结果在发布后收据中记录。
+手动 [release-installation 工作流](../.github/workflows/release-installation.yml)在新鲜的托管 Linux 用户环境中运行 [verify_release_installation.py](../scripts/verify_release_installation.py)。受保护标签存在后，传入标签和完整候选提交。它测试原生 Codex 全局范围、固定版及默认分支全集的已声明 Codex、Claude Code 目标、代表性单包；逐项核对来源身份和完整包内容，保留命令日志与清单。已有全局目标时拒绝执行，不重设 HOME/CODEX_HOME。这是安装证据，不代表 Linux Codex 运行时；实际托管结果在发布后收据中记录。
