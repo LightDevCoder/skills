@@ -6,7 +6,7 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
-- v0.2.7 name-migration candidate: Add `light-` to 12 Light Skill names, synchronizing package identity, UI source labels, internal references, `ask-light` routing and state logic, discovery, attribution, bilingual docs, and migration guidance. Keep the other 24 names, 36-package total, responsibilities, and invocation permissions. No old-name aliases or automatic global migration; candidate CI, real Host checks, and fixed-release fresh installation remain pending.
+- v0.2.7 name-migration candidate: Add `light-` to 12 Light Skill names, synchronizing package identity, UI source labels, internal references, `ask-light` routing and state logic, discovery, attribution, bilingual docs, and migration guidance. Keep the other 24 names, 36-package total, responsibilities, and invocation permissions. No old-name aliases or automatic global migration; real Host checks and independent candidate acceptance pass; candidate CI and fixed-release fresh installation remain pending.
 - The owner confirmed v0.2.7 after the earlier v0.2.6 namespace attempt was blocked by an existing release. Preserve the [historical record](docs/evidence/namespace-v0.2.6/publication-blocker.md) and all published v0.2.6 travel changes.
 
 ## 0.2.6 — 2026-10-05

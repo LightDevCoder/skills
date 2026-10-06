@@ -10,7 +10,7 @@ v0.2.6 updates `light-travelpage` with a handbook UI and default-off AI choice. 
 
 ## v0.2.7 name-migration candidate
 
-The local namespace candidate is unpublished. Stable v0.2.6 retains the old names. These commands are candidate templates; exact-candidate CI, fresh final acceptance, and fresh installation from the actual release source remain pending. An unqualified command follows actual remote `main`; it does not guarantee the local candidate or automatically select a stable tag.
+The local namespace candidate is unpublished. Stable v0.2.6 retains the old names. These commands are candidate templates; exact-candidate CI and fresh installation from the actual release source remain pending. An unqualified command follows actual remote `main`; it does not guarantee the local candidate or automatically select a stable tag.
 
 ```bash
 npx skills add LightDevCoder/skills#v0.2.7

@@ -2,7 +2,7 @@
 
 [中文清单](RELEASE_MANIFEST.zh-CN.md) · [Release Notes](RELEASE_NOTES.md)
 
-**Preparation status:** Local candidate; real Host observations are now available and fresh independent acceptance is pending, so the lifecycle has not reached PREPARED. v0.2.6 remains stable. This draft records no future verification result.
+**Preparation status:** PREPARED repository candidate. Fresh independent source acceptance passes A1–A10. v0.2.6 remains stable until publication; remote CI, tag installation and publication are subsequent gates.
 
 This document will be frozen in the candidate snapshot. Post-publication facts belong in a receipt first created on `main` during ATTESTED; no receipt belongs in this candidate or its tag snapshot.
 
@@ -22,10 +22,10 @@ This document will be frozen in the candidate snapshot. Post-publication facts b
 
 ## Candidate evidence
 
-Merged local checks pass 540 pytest tests, 164 unittest tests, compilation and public documentation checks. All 224 baseline travel/history files are preserved. [Producer evidence](../../namespace-v0.2.7/producer-evidence.md) records these bounded observations. A1–A10 verification, R1–R5 diagnostic coverage, independent review-loop convergence and project-review final acceptance must be completed against the new frozen candidate. Candidate CI, fresh final acceptance and actual release-source fresh installation are pending; real Host selector/invocation observations are recorded. Static discovery or Producer checks do not establish Host runtime or independent acceptance.
+Local checks pass 543 pytest tests, 167 unittest tests, compilation and public documentation checks. All 224 baseline travel/history files are preserved. [Resumed candidate acceptance](../../namespace-v0.2.7/acceptance-resumed.md) records project-review Core PASS after fresh full independent evaluation, including real Host selector/invocation and source-specific dependency reads. The [software review](../../namespace-v0.2.7/verifier-review.md) used the owner-approved fourth/final check; the fresh Evaluator independently verified bounded final repairs. R4 installation scope is Codex/Claude Code projects and native Codex global scope in a fresh hosted Linux user. Actual published-source installation and exact-candidate CI remain pending. No user-global migration is claimed.
 
 ## Subsequent release gates
 
 Exact-candidate CI, active tag protection/preflight, annotated tag identity, fixed-tag and default-branch fresh installation, complete package/source/content checks, GitHub Release publication, and post-publication attestation remain pending. The earlier v0.2.6 namespace attempt remains historical; the owner confirmed v0.2.7 and its new base. Actual user-global migration is a separately authorized operation.
 
-The [earlier candidate verdict](../../namespace-v0.2.7/acceptance.md) is historical BLOCKED. Resumed evaluation includes the actual Host records and manual release-installation verifier. No publication facts are recorded.
+The [earlier candidate verdict](../../namespace-v0.2.7/acceptance.md) is historical BLOCKED. The resumed independent verdict is PASS for repository preparation. No publication facts are recorded.

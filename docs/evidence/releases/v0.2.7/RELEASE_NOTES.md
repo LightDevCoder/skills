@@ -2,7 +2,7 @@
 
 [中文发布说明](RELEASE_NOTES.zh-CN.md) · [Release Manifest](RELEASE_MANIFEST.md)
 
-**Candidate:** v0.2.7 is unpublished; v0.2.6 remains stable. Candidate CI, fresh independent final acceptance, and actual release-source installation remain pending. This draft is not a publication result.
+**Candidate:** v0.2.7 is unpublished; v0.2.6 remains stable. Independent source acceptance passes A1–A10. Exact-candidate CI and actual release-source installation are subsequent gates. This draft is not a publication result.
 
 This candidate adds `light-` names to twelve Skills so their source is clear in global installations. Internal references, `ask-light` routes, and UI labels use the new names. The collection remains at 36 Skills.
 
@@ -49,6 +49,6 @@ npx skills add LightDevCoder/skills
 
 ## Verification
 
-The candidate source passes 540 pytest tests, 164 unittest tests, compilation and documentation checks. Local installation tests cover both source orders and modes, with all intended package files preserved. Actual Codex 0.160.1 shows all twelve Light source labels and resolves the explicit Light entry and its dependencies during a successful bounded task. A second explicit entry resolves its own installed source. The native selector uses a disclosed temporary transport adapter that preserves the Host Skill responses.
+The candidate source passes 543 pytest tests, 167 unittest tests, compilation and documentation checks. Local installation tests cover both source orders and modes, with all intended package files preserved. Actual Codex 0.160.1 shows all twelve Light source labels and resolves the explicit Light entry and its dependencies during a successful bounded task. A second explicit entry resolves its own installed source. The native selector uses a disclosed temporary transport adapter that preserves the Host Skill responses.
 
-The release adds a manual Linux installation check for pinned/default whole collections, representative singles and native Codex global scope. Its input guards and missing/mutated-content checks are tested. Independent final acceptance, exact-candidate remote CI and actual v0.2.7 source installation remain separate gates; no future publication result is claimed. See the [candidate evidence](https://github.com/LightDevCoder/skills/blob/main/docs/evidence/namespace-v0.2.7/producer-evidence.md).
+The release adds a manual Linux installation check for pinned/default whole collections for Codex and Claude Code, representative Codex singles and native Codex global scope. Its input guards and missing/mutated-content checks are tested. Independent source acceptance passes after separate software checks and a fresh whole-candidate Evaluator. Exact-candidate remote CI and actual v0.2.7 source installation remain separate release gates; their facts are attested on main after publication. See the [candidate evidence](https://github.com/LightDevCoder/skills/blob/main/docs/evidence/namespace-v0.2.7/producer-evidence.md).

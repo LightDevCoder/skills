@@ -8,7 +8,7 @@
 
 > **Release:** [v0.2.6](https://github.com/LightDevCoder/skills/releases/tag/v0.2.6) is the current stable release of all 36 first-party Skills. Its immutable [release manifest](docs/evidence/releases/v0.2.6/RELEASE_MANIFEST.md) and post-publication [release receipt](docs/evidence/releases/v0.2.6/RELEASE_RECEIPT.md) record the scope and verification.
 
-> **v0.2.7 candidate:** The namespace candidate is unpublished. Twelve Skills use `light-` names; the other 24 names and 36-package total stay unchanged. Stable v0.2.6 retains the old names. Candidate CI, fresh final acceptance, and release-source installation for the new names remain pending. See the [migration guide](docs/MIGRATION-v0.2.7.md) and [candidate notes](docs/evidence/releases/v0.2.7/RELEASE_NOTES.md). New-name examples below are candidate usage; remote default-branch installs may not contain them before publication.
+> **v0.2.7 candidate:** The namespace candidate is unpublished. Twelve Skills use `light-` names; the other 24 names and 36-package total stay unchanged. Stable v0.2.6 retains the old names. Candidate CI and release-source installation for the new names remain pending. See the [migration guide](docs/MIGRATION-v0.2.7.md) and [candidate notes](docs/evidence/releases/v0.2.7/RELEASE_NOTES.md). New-name examples below are candidate usage; remote default-branch installs may not contain them before publication.
 
 ## Browse by category
 

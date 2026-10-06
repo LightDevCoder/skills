@@ -8,7 +8,7 @@
 
 > **发布版本：** v0.2.6 是包含全部 36 个第一方 Skill 的当前稳定版本。阅读[中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md)或[English GitHub Release](https://github.com/LightDevCoder/skills/releases/tag/v0.2.6)；不可变的[发布清单](docs/evidence/releases/v0.2.6/RELEASE_MANIFEST.zh-CN.md)与发布后的[发布收据](docs/evidence/releases/v0.2.6/RELEASE_RECEIPT.zh-CN.md)记录范围和验证事实。
 
-> **v0.2.7 候选：** 名称迁移候选尚未发布。12 个 Skill 使用 `light-` 新名称，其他 24 个名称和 36 个包总数保留。当前稳定 v0.2.6 使用旧名。新名称的候选 CI、新的独立最终验收与发布源安装尚待完成；见[迁移说明](docs/MIGRATION-v0.2.7.zh-CN.md)与[候选发布说明](docs/evidence/releases/v0.2.7/RELEASE_NOTES.zh-CN.md)。下方新名称示例是候选用法，远端默认分支在候选发布前不保证包含它们。
+> **v0.2.7 候选：** 名称迁移候选尚未发布。12 个 Skill 使用 `light-` 新名称，其他 24 个名称和 36 个包总数保留。当前稳定 v0.2.6 使用旧名。新名称的候选 CI 与发布源安装尚待完成；见[迁移说明](docs/MIGRATION-v0.2.7.zh-CN.md)与[候选发布说明](docs/evidence/releases/v0.2.7/RELEASE_NOTES.zh-CN.md)。下方新名称示例是候选用法，远端默认分支在候选发布前不保证包含它们。
 
 ## 按分类浏览
 
