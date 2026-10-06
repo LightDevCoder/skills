@@ -8,5 +8,5 @@
   "problem": "The existing body converter concatenates a two-level relative evidence link without normalizing parent segments, generating an absent Git tree path.",
   "requirement": "SPEC R2: public release body links must target valid pages.",
   "repair": "Replace only English and Chinese Notes evidence links with the exact complete repository URL; do not redesign the converter or add redundant tests.",
-  "verification": "prepare_release_body.py generates https://github.com/LightDevCoder/skills/blob/main/docs/evidence/namespace-v0.2.7/producer-evidence.md; candidate Git tree has this path. Fresh Evaluator recheck pending."
+  "verification": "Fresh independent Evaluator checked English and Chinese body transformation and exact f40c1cb Git tree path; fixed."
 }

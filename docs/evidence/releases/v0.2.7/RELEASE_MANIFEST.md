@@ -2,7 +2,7 @@
 
 [中文清单](RELEASE_MANIFEST.zh-CN.md) · [Release Notes](RELEASE_NOTES.md)
 
-**Preparation status:** Local candidate; required Host observations and independent acceptance remain pending, so the lifecycle has not reached PREPARED. v0.2.6 remains stable. This draft records no future verification result.
+**Preparation status:** Local candidate; independent acceptance is BLOCKED by missing required Host observations, so the lifecycle has not reached PREPARED. v0.2.6 remains stable. This draft records no future verification result.
 
 This document will be frozen in the candidate snapshot. Post-publication facts belong in a receipt first created on `main` during ATTESTED; no receipt belongs in this candidate or its tag snapshot.
 
@@ -27,3 +27,5 @@ Merged local checks pass 534 pytest tests, 158 unittest tests, compilation and p
 ## Subsequent release gates
 
 Exact-candidate CI, active tag protection/preflight, annotated tag identity, fixed-tag and default-branch fresh installation, complete package/source/content checks, GitHub Release publication, and post-publication attestation remain pending. The earlier v0.2.6 namespace attempt remains historical; the owner confirmed v0.2.7 and its new base. Actual user-global migration is a separately authorized operation.
+
+[Final candidate acceptance](../../namespace-v0.2.7/acceptance.md): BLOCKED; no publication facts recorded.

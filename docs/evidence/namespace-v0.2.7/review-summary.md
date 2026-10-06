@@ -10,3 +10,7 @@
 - Handoff: return V27P001 and exact available installation/runtime records to project-review; a fresh independent Evaluator is required before Core verdict.
 
 The engine does not issue a final verdict and does not rerun reviewers to manufacture an empty finding set. No criterion is waived. The previous Revision 2 transaction and its records are preserved.
+
+## Evaluator recheck and Core acceptance
+
+V27E001 (medium R2 evidence navigation) was confirmed, boundedly repaired in two Notes links and independently rechecked as fixed. Engine check cycle two preserves the original report and does not restart any exhausted loop. Fresh Evaluator recommends BLOCKED solely for open V27P001; Core final verdict is in acceptance.md.
