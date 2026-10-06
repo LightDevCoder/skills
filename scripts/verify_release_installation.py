@@ -10,7 +10,6 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from pathlib import PurePosixPath
 
 REPOSITORY = "https://github.com/LightDevCoder/skills.git"
 SOURCE = "LightDevCoder/skills"
@@ -64,34 +63,13 @@ def verify_destination(root: Path, expected: dict[str, dict[str, str]]) -> dict:
     }
 
 
-def cli_project_targets(distribution: Path) -> dict[str, str]:
-    """Read the complete literal Agent registry from the bound CLI; fail closed on drift."""
-    text = distribution.read_text()
-    marker = "const agents = {"
-    if marker not in text:
-        raise ValueError("CLI Agent registry format is unsupported")
-    registry = text[text.index(marker):].split("\n};", 1)[0]
-    entries = re.findall(r'^\t(?:"[^"]+"|[\w-]+): \{\n(.*?)(?=^\t\}(?:,|$))', registry, re.MULTILINE | re.DOTALL)
-    targets = {}
-    for body in entries:
-        name = re.search(r'^\t\tname: "([^"]+)"[ \t]*,?[ \t]*$', body, re.MULTILINE)
-        path = re.search(r'^\t\tskillsDir: "([^"]+)"[ \t]*,?[ \t]*$', body, re.MULTILINE)
-        if not name or not path:
-            raise ValueError("CLI Agent target is not a supported literal")
-        relative = PurePosixPath(path.group(1))
-        if relative.is_absolute() or ".." in relative.parts or name.group(1) in targets:
-            raise ValueError("CLI Agent target is unsafe or ambiguous")
-        targets[name.group(1)] = str(relative)
-    if not targets or len(targets) != len(re.findall(r'^\t\tname:', registry, re.MULTILINE)):
-        raise ValueError("CLI Agent registry could not be completely resolved")
-    return targets
+PROJECT_TARGETS = {"codex": ".agents/skills", "claude-code": ".claude/skills"}
 
 
-def verify_project_targets(project: Path, expected: dict, registry: dict[str, str], selected: list[str]) -> list[dict]:
-    names = list(registry) if selected == ["*"] else selected
-    if not names or any(name not in registry for name in names):
-        raise ValueError("selected Agent is not in the bound distribution")
-    destinations = sorted({project / registry[name] for name in names})
+def verify_project_targets(project: Path, expected: dict, selected: list[str]) -> list[dict]:
+    if not selected or any(name not in PROJECT_TARGETS for name in selected):
+        raise ValueError("verification is limited to the declared Codex/Claude Code targets")
+    destinations = sorted({project / PROJECT_TARGETS[name] for name in selected})
     for destination in destinations:
         if not destination.is_dir():
             raise ValueError(f"installer omitted a required Agent target: {destination}")
@@ -144,7 +122,6 @@ def main() -> None:
     if len(cli_files) != 1:
         raise ValueError("cannot bind the resolved CLI distribution")
     cli_sha = hashlib.sha256(cli_files[0].read_bytes()).hexdigest()
-    agent_registry = cli_project_targets(cli_files[0])
     resolved_version = json.loads((cli_files[0].parent.parent / "package.json").read_text())["version"]
     if not re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][A-Za-z0-9.-]+)?", resolved_version) or resolved_version not in cli_version:
         raise ValueError("CLI version response does not match its resolved distribution")
@@ -157,17 +134,17 @@ def main() -> None:
         if global_scope:
             checked = [verify_destination(Path.home() / ".codex/skills", expected)]
         else:
-            checked = verify_project_targets(project, expected, agent_registry, selected)
+            checked = verify_project_targets(project, expected, selected)
         observations.append({
             "case": name, "selected_agents": selected, "destinations": checked,
         })
 
     fixed_source = f"{SOURCE}#{args.tag}"
     install("pinned-global-codex", fixed_source, ["--global", "--agent", "codex"], pinned, ["codex"], True)
-    install("pinned-whole", fixed_source, ["--agent", "*", "--skill", "*", "--copy"], pinned, ["*"])
+    install("pinned-whole", fixed_source, ["--agent", "codex", "claude-code", "--skill", "*", "--copy"], pinned, ["codex", "claude-code"])
     for name in ("light-implement", "light-tdd", "light-research"):
         install("single-" + name, fixed_source, ["--agent", "codex", "--skill", name], {name: pinned[name]}, ["codex"])
-    install("default-whole", SOURCE, ["--agent", "*", "--skill", "*", "--copy"], latest, ["*"])
+    install("default-whole", SOURCE, ["--agent", "codex", "claude-code", "--skill", "*", "--copy"], latest, ["codex", "claude-code"])
     default_after = run(["git", "ls-remote", REPOSITORY, "refs/heads/main"]).split()[0]
     if default_after != default_sha:
         raise ValueError("default branch moved during installation; rerun against stable identities")
@@ -179,7 +156,7 @@ def main() -> None:
         "default_commit": default_sha, "cli_version": cli_version, "cli_sha256": cli_sha,
         "native_home": str(Path.home()), "HOME_or_CODEX_HOME_overridden": False,
         "pinned_package_manifest": pinned, "default_package_manifest": latest,
-        "cli_project_agent_registry": agent_registry,
+        "declared_project_targets": PROJECT_TARGETS,
         "observations": observations,
         "scope": "fresh ephemeral Linux runner; installer evidence, not Linux Codex runtime evidence",
     }
