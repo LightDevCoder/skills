@@ -1,0 +1,207 @@
+[
+  {
+    "stem": "code-review",
+    "action": 2,
+    "capture": "/private/tmp/light-namespace-host-20261006/v027-host/native-selector-20261006-140944/captures/002-dollar-code-review.ansi",
+    "native_labels": [
+      "Light · Code Review"
+    ],
+    "canonical": "light-code-review",
+    "host_display_name": "Light · Code Review",
+    "light_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/light-code-review/SKILL.md",
+    "upstream_name": "code-review",
+    "upstream_display_name": "Code Review",
+    "upstream_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/code-review/SKILL.md",
+    "native_excerpt": "  › Code Review          [Skill] Review a diff on standards and spec                                                                                                                    Code Review          [Skill] Review a bounded diff on Standards and Spec axes, read-only  Light · Code Review  [Skill] Review a bounded diff on Standards and Spec axes, read-only   enter insert · esc close › $code-review   GPT-6.1-Sol high · /private/tmp/light-namespace-host-20261006/v027-light-first-default ",
+    "native_light_label_observed": true,
+    "native_unprefixed_label_observed": true
+  },
+  {
+    "stem": "diagnosing-bugs",
+    "action": 4,
+    "capture": "/private/tmp/light-namespace-host-20261006/v027-host/native-selector-20261006-140944/captures/004-dollar-diagnosing-bugs.ansi",
+    "native_labels": [
+      "Light · Diagnosing Bugs"
+    ],
+    "canonical": "light-diagnosing-bugs",
+    "host_display_name": "Light · Diagnosing Bugs",
+    "light_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/light-diagnosing-bugs/SKILL.md",
+    "upstream_name": "diagnosing-bugs",
+    "upstream_display_name": "Diagnosing Bugs",
+    "upstream_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/diagnosing-bugs/SKILL.md",
+    "native_excerpt": "  › Diagnosing Bugs          [Skill] Diagnose hard bugs and regressions                                                                                                                 Diagnosing Bugs          [Skill] Diagnose hard bugs and regressions  Light · Diagnosing Bugs  [Skill] Diagnose hard bugs and regressions   enter insert · esc close › $diagnosing-bugs   GPT-6.1-Sol high · /private/tmp/light-namespace-host-20261006/v027-light-first-default ",
+    "native_light_label_observed": true,
+    "native_unprefixed_label_observed": true
+  },
+  {
+    "stem": "handoff",
+    "action": 6,
+    "capture": "/private/tmp/light-namespace-host-20261006/v027-host/native-selector-20261006-140944/captures/006-dollar-handoff.ansi",
+    "native_labels": [
+      "Light · Handoff"
+    ],
+    "canonical": "light-handoff",
+    "host_display_name": "Light · Handoff",
+    "light_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/light-handoff/SKILL.md",
+    "upstream_name": "handoff",
+    "upstream_display_name": "Handoff",
+    "upstream_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/handoff/SKILL.md",
+    "native_excerpt": "  › Handoff          [Skill] Compact a conversation into a handoff                                                                                                                      Handoff          [Skill] Compact a conversation into a handoff  Claude Handoff   [Skill] Hand off to a background agent  Light · Handoff  [Skill] Compact a conversation into a handoff   enter insert · esc close › $handoff   GPT-6.1-Sol high · /private/tmp/light-namespace-host-20261006/v027-light-first-default ",
+    "native_light_label_observed": true,
+    "native_unprefixed_label_observed": true
+  },
+  {
+    "stem": "implement",
+    "action": 8,
+    "capture": "/private/tmp/light-namespace-host-20261006/v027-host/native-selector-20261006-140944/captures/008-dollar-implement.ansi",
+    "native_labels": [
+      "Light · Implement"
+    ],
+    "canonical": "light-implement",
+    "host_display_name": "Light · Implement",
+    "light_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/light-implement/SKILL.md",
+    "upstream_name": "implement",
+    "upstream_display_name": "Implement",
+    "upstream_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/implement/SKILL.md",
+    "native_excerpt": "  › Implement                     [Skill] Build work from a spec or tickets                                                                                                             Implement                     [Skill] Execute one bounded work item: code, doc, config, Skill, or generic task  Implement Spec                [Skill] Implement the result of /to-spec and /to-tickets in code.  Light · Implement             [Skill] Execute one bounded work item: code, doc, config, Skill, or generic task  plugin-management (plugin...  [Skill] Discover and suggest relevant plugins, inspect app permissions and dependencies, and manage plugin connections or removal. Use when the use…  Analytics Dashboard           [Skill] Create spreadsheets with the Analytics Dashboard template  Investment Committee Memo     [Skill] Create documents with the Investment Committee Memo template  Experiment Analysis           [Skill] Create documents with the Experiment Analysis template↓  enter insert · esc close › $implement   GPT-6.1-Sol high · /private/tmp/light-namespace-host-20261006/v027-light-first-default ",
+    "native_light_label_observed": true,
+    "native_unprefixed_label_observed": true
+  },
+  {
+    "stem": "prototype",
+    "action": 10,
+    "capture": "/private/tmp/light-namespace-host-20261006/v027-host/native-selector-20261006-140944/captures/010-dollar-prototype.ansi",
+    "native_labels": [
+      "Light · Prototype"
+    ],
+    "canonical": "light-prototype",
+    "host_display_name": "Light · Prototype",
+    "light_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/light-prototype/SKILL.md",
+    "upstream_name": "prototype",
+    "upstream_display_name": "Prototype",
+    "upstream_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/prototype/SKILL.md",
+    "native_excerpt": "  › Prototype          [Skill] Prototype to answer a design question                                                                                                                    Prototype          [Skill] Prototype to answer a design question  Light · Prototype  [Skill] Prototype to answer a design question   enter insert · esc close › $prototype   GPT-6.1-Sol high · /private/tmp/light-namespace-host-20261006/v027-light-first-default ",
+    "native_light_label_observed": true,
+    "native_unprefixed_label_observed": true
+  },
+  {
+    "stem": "research",
+    "action": 12,
+    "capture": "/private/tmp/light-namespace-host-20261006/v027-host/native-selector-20261006-140944/captures/012-dollar-research.ansi",
+    "native_labels": [
+      "Light · Research"
+    ],
+    "canonical": "light-research",
+    "host_display_name": "Light · Research",
+    "light_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/light-research/SKILL.md",
+    "upstream_name": "research",
+    "upstream_display_name": "Research",
+    "upstream_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/research/SKILL.md",
+    "native_excerpt": "  › Research                      [Skill] Research from high-trust sources                                                                                                              Research                      [Skill] Research from high-trust sources  Light · Research              [Skill] Research from high-trust sources  Improve Codebase Architec...  [Skill] Find and grill architecture improvements  Search Service                [App]   enter insert · esc close › $research   GPT-6.1-Sol high · /private/tmp/light-namespace-host-20261006/v027-light-first-default ",
+    "native_light_label_observed": true,
+    "native_unprefixed_label_observed": true
+  },
+  {
+    "stem": "tdd",
+    "action": 14,
+    "capture": "/private/tmp/light-namespace-host-20261006/v027-host/native-selector-20261006-140944/captures/014-dollar-tdd.ansi",
+    "native_labels": [
+      "Light · TDD"
+    ],
+    "canonical": "light-tdd",
+    "host_display_name": "Light · TDD",
+    "light_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/light-tdd/SKILL.md",
+    "upstream_name": "tdd",
+    "upstream_display_name": "TDD",
+    "upstream_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/tdd/SKILL.md",
+    "native_excerpt": "  › TDD                           [Skill] Test-driven red-green-refactor                                                                                                                TDD                           [Skill] Test-driven red-green-refactor  Light · TDD                   [Skill] Test-driven red-green-refactor  Analytics Dashboard           [Skill] Create spreadsheets with the Analytics Dashboard template  Setup TS Deep Modules         [Skill] Enforce deep TypeScript modules  Git Guardrails for Claude...  [Skill] Block dangerous git commands  Codex Document Control        [App]  Build Dashboard               [Skill] Create source-backed dashboards for monitoring performance, exploring drivers, and acting on metrics.↓  enter insert · esc close › $tdd   GPT-6.1-Sol high · /private/tmp/light-namespace-host-20261006/v027-light-first-default ",
+    "native_light_label_observed": true,
+    "native_unprefixed_label_observed": true
+  },
+  {
+    "stem": "teach",
+    "action": 16,
+    "capture": "/private/tmp/light-namespace-host-20261006/v027-host/native-selector-20261006-140944/captures/016-dollar-teach.ansi",
+    "native_labels": [
+      "Light · Teach",
+      "Light · Research"
+    ],
+    "canonical": "light-teach",
+    "host_display_name": "Light · Teach",
+    "light_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/light-teach/SKILL.md",
+    "upstream_name": "teach",
+    "upstream_display_name": "Teach",
+    "upstream_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/teach/SKILL.md",
+    "native_excerpt": "  › Teach                     [Skill] Learn a concept in a guided workspace                                                                                                             Teach                     [Skill] Learn a concept in a guided workspace  Light · Teach             [Skill] Learn a concept in a guided workspace  Light · Research          [Skill] Research from high-trust sources  Pets                      [App]  Search Service            [App]  Three-Statement Forecast  [Skill] Create spreadsheets with the Three-Statement Forecast template  Simple Light Mode         [Skill] Create presentations with the Simple Light Mode template↓  enter insert · esc close › $teach   GPT-6.1-Sol high · /private/tmp/light-namespace-host-20261006/v027-light-first-default ",
+    "native_light_label_observed": true,
+    "native_unprefixed_label_observed": true
+  },
+  {
+    "stem": "to-questionnaire",
+    "action": 18,
+    "capture": "/private/tmp/light-namespace-host-20261006/v027-host/native-selector-20261006-140944/captures/018-dollar-to-questionnaire.ansi",
+    "native_labels": [
+      "Light · To Questionnaire"
+    ],
+    "canonical": "light-to-questionnaire",
+    "host_display_name": "Light · To Questionnaire",
+    "light_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/light-to-questionnaire/SKILL.md",
+    "upstream_name": "to-questionnaire",
+    "upstream_display_name": "To Questionnaire",
+    "upstream_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/to-questionnaire/SKILL.md",
+    "native_excerpt": "  › To Questionnaire          [Skill] Front-load questions into a doc for someone to answer                                                                                             To Questionnaire          [Skill] Front-load questions into a doc for someone to answer  Light · To Questionnaire  [Skill] Front-load questions into a doc for someone to answer   enter insert · esc close › $to-questionnaire   GPT-6.1-Sol high · /private/tmp/light-namespace-host-20261006/v027-light-first-default ",
+    "native_light_label_observed": true,
+    "native_unprefixed_label_observed": true
+  },
+  {
+    "stem": "wait-what",
+    "action": 20,
+    "capture": "/private/tmp/light-namespace-host-20261006/v027-host/native-selector-20261006-140944/captures/020-dollar-wait-what.ansi",
+    "native_labels": [
+      "Light · Wait What"
+    ],
+    "canonical": "light-wait-what",
+    "host_display_name": "Light · Wait What",
+    "light_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/light-wait-what/SKILL.md",
+    "upstream_name": "wait-what",
+    "upstream_display_name": "Wait What",
+    "upstream_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/wait-what/SKILL.md",
+    "native_excerpt": "  › Wait What          [Skill] Re-pitch that: simpler, with the context I'm missing                                                                                                     Wait What          [Skill] Re-pitch that — simpler, with the context I'm missing  Light · Wait What  [Skill] Re-pitch that — simpler, with the context I'm missing   enter insert · esc close › $wait-what   GPT-6.1-Sol high · /private/tmp/light-namespace-host-20261006/v027-light-first-default ",
+    "native_light_label_observed": true,
+    "native_unprefixed_label_observed": true
+  },
+  {
+    "stem": "wizard",
+    "action": 22,
+    "capture": "/private/tmp/light-namespace-host-20261006/v027-host/native-selector-20261006-140944/captures/022-dollar-wizard.ansi",
+    "native_labels": [
+      "Light · Wizard"
+    ],
+    "canonical": "light-wizard",
+    "host_display_name": "Light · Wizard",
+    "light_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/light-wizard/SKILL.md",
+    "upstream_name": "wizard",
+    "upstream_display_name": "Wizard",
+    "upstream_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/wizard/SKILL.md",
+    "native_excerpt": "  › Wizard          [Skill] Generate an interactive setup wizard                                                                                                                        Wizard          [Skill] Generate an interactive setup wizard  Light · Wizard  [Skill] Generate an interactive setup wizard   enter insert · esc close › $wizard   GPT-6.1-Sol high · /private/tmp/light-namespace-host-20261006/v027-light-first-default ",
+    "native_light_label_observed": true,
+    "native_unprefixed_label_observed": true
+  },
+  {
+    "stem": "writing-for-agents",
+    "action": 24,
+    "capture": "/private/tmp/light-namespace-host-20261006/v027-host/native-selector-20261006-140944/captures/024-dollar-writing-for-agents.ansi",
+    "native_labels": [
+      "Light · Writing for Agents"
+    ],
+    "canonical": "light-writing-for-agents",
+    "host_display_name": "Light · Writing for Agents",
+    "light_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/light-writing-for-agents/SKILL.md",
+    "upstream_name": "writing-for-agents",
+    "upstream_display_name": "Writing for Agents",
+    "upstream_path": "/private/tmp/light-namespace-host-20261006/v027-light-first-default/.agents/skills/writing-for-agents/SKILL.md",
+    "native_excerpt": "  › Writing for Agents          [Skill] Write documents agents consume                                                                                                                  Writing for Agents          [Skill] Write documents agents consume  Light · Writing for Agents  [Skill] Write documents agents consume   enter insert · esc close › $writing-for-agents   GPT-6.1-Sol high · /private/tmp/light-namespace-host-20261006/v027-light-first-default ",
+    "native_light_label_observed": true,
+    "native_unprefixed_label_observed": true
+  }
+]

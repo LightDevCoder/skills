@@ -1,0 +1,31 @@
+{
+  "command": [
+    "/usr/bin/sandbox-exec",
+    "-p",
+    "(version 1) (allow default) (deny file-write*) (allow file-write* (subpath \"/private/tmp/light-namespace-host-20261006\") (literal \"/dev/null\")) (allow file-write-mode (literal \"/Users/light/.codex/tmp/arg0\")) (allow file-write-data (literal \"/Users/light/.codex/installation_id\"))",
+    "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+    "exec",
+    "--ephemeral",
+    "--ignore-user-config",
+    "--sandbox",
+    "danger-full-access",
+    "--skip-git-repo-check",
+    "--disable",
+    "shell_snapshot",
+    "--disable",
+    "daemon_auto_start",
+    "-c",
+    "history.persistence=\"none\"",
+    "-c",
+    "sqlite_home=\"/private/tmp/light-namespace-host-20261006/v027-host/exec-external-sandbox-light-20261006-135419/sqlite\"",
+    "-c",
+    "log_dir=\"/private/tmp/light-namespace-host-20261006/v027-host/exec-external-sandbox-light-20261006-135419/logs\"",
+    "-C",
+    "/private/tmp/light-namespace-host-20261006/v027-light-first-default/host-smoke-light",
+    "--json",
+    "-"
+  ],
+  "source_commit": "ce4898e782f20cb185067fab5721aec6be9b31e4",
+  "HOME_unchanged": true,
+  "CODEX_HOME_unchanged": true
+}

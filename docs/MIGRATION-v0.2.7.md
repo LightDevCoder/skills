@@ -2,7 +2,7 @@
 
 [简体中文](MIGRATION-v0.2.7.zh-CN.md) · [Candidate notes](evidence/releases/v0.2.7/RELEASE_NOTES.md)
 
-**Status:** The v0.2.7 name-migration candidate is unpublished. Stable v0.2.6 retains the old names. Commands below are candidate templates; exact-candidate CI, A2/A9 real Host selector/invocation checks, and fixed release-source installation remain pending. The earlier v0.2.6 namespace attempt was blocked by an existing release; the owner then confirmed v0.2.7. Its [historical evidence](evidence/namespace-v0.2.6/publication-blocker.md) is preserved and is not the current publication state.
+**Status:** The v0.2.7 name-migration candidate is unpublished. Stable v0.2.6 retains the old names. Commands below are candidate templates; exact-candidate CI, fresh final acceptance, and fixed release-source installation remain pending. The earlier v0.2.6 namespace attempt was blocked by an existing release; the owner then confirmed v0.2.7. Its [historical evidence](evidence/namespace-v0.2.6/publication-blocker.md) is preserved and is not the current publication state.
 
 Twelve Light packages gain `light-` names. The other 24 names, seven categories, 36-package total, responsibilities, and invocation permissions remain unchanged. There are no installable aliases or wrappers for old names. `ask-light` and `light-travelpage` keep their names. Installed paths become `<skills-root>/<new-name>/`; source paths remain `skills/<category>/<new-name>/`.
 

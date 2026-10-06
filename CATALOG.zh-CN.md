@@ -6,7 +6,7 @@
 
 [按分类浏览](skills/README.zh-CN.md) · [路径迁移](docs/CATEGORY_MIGRATION.zh-CN.md)
 
-以下目录显示 v0.2.7 本地候选名称。当前稳定 v0.2.6 保留旧名。候选尚未发布；新名称的候选 CI、真实 Host 验证和发布源安装待完成。见[完整迁移说明](docs/MIGRATION-v0.2.7.zh-CN.md)。
+以下目录显示 v0.2.7 本地候选名称。当前稳定 v0.2.6 保留旧名。候选尚未发布；新名称的候选 CI、新的独立最终验收和发布源安装待完成。见[完整迁移说明](docs/MIGRATION-v0.2.7.zh-CN.md)。
 
 ## 集合状态
 

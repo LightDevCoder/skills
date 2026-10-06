@@ -1,0 +1,12 @@
+{
+  "native_light_label_count": 12,
+  "native_unprefixed_counterpart_count": 12,
+  "skills_response_forwarding_exact": true,
+  "skills_response_count": 2,
+  "thread_start_count": 1,
+  "thread_start_ephemeral": true,
+  "upstream_turn_start_count": 0,
+  "only_request_mutation": "thread/start.params.ephemeral=true",
+  "no_reconnect_during_final_capture": true,
+  "captured_raw_ansi_sha256": "3184cfaf5f2f07abb284cfee570fe62621ba726175813f8d2abe0264675764bd"
+}

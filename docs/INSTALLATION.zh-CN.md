@@ -10,7 +10,7 @@ v0.2.6 为 `light-travelpage` 增加手册 UI 和默认关闭的 AI 选择。[�
 
 ## v0.2.7 名称迁移候选
 
-本地名称迁移候选尚未发布。当前稳定 v0.2.6 保留旧名。下列命令仅为候选模板；准确候选 CI、真实 Host 验证和实际发布源新鲜安装尚待完成。默认分支命令跟随实际远端 `main`，不保证包含本地候选，也不自动选择稳定标签。
+本地名称迁移候选尚未发布。当前稳定 v0.2.6 保留旧名。下列命令仅为候选模板；准确候选 CI、新的独立最终验收和实际发布源新鲜安装尚待完成。默认分支命令跟随实际远端 `main`，不保证包含本地候选，也不自动选择稳定标签。
 
 ```bash
 npx skills add LightDevCoder/skills#v0.2.7
@@ -234,3 +234,7 @@ cp -R "$source_root/$source_package" "$destination_root/$skill_name"
 ## 记录要求
 
 每次验证保存 exact command、installer version、URL、commit/tag、host/scope/destination、脱离 source checkout 的 discovery、success/boundary/invocation/missing-dependency smoke、fallback 和 limitations。结构检查、source checkout scan 或未执行命令都不能写成 installation proof；collection discovery script 也不能替代 fresh host install。
+
+## 发布源安装验证环境
+
+手动 [release-installation 工作流](../.github/workflows/release-installation.yml)在新鲜的托管 Linux 用户环境中运行 [verify_release_installation.py](../scripts/verify_release_installation.py)。受保护标签存在后，传入标签和完整候选提交。它测试原生 Codex 全局范围、固定版及默认分支全集与安装器支持的目标、代表性单包；逐项核对来源身份和完整包内容，保留命令日志与清单。已有全局目标时拒绝执行，不重设 HOME/CODEX_HOME。这是安装证据，不代表 Linux Codex 运行时；实际托管结果在发布后收据中记录。

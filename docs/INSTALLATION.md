@@ -10,7 +10,7 @@ v0.2.6 updates `light-travelpage` with a handbook UI and default-off AI choice. 
 
 ## v0.2.7 name-migration candidate
 
-The local namespace candidate is unpublished. Stable v0.2.6 retains the old names. These commands are candidate templates; exact-candidate CI, real Host checks, and fresh installation from the actual release source remain pending. An unqualified command follows actual remote `main`; it does not guarantee the local candidate or automatically select a stable tag.
+The local namespace candidate is unpublished. Stable v0.2.6 retains the old names. These commands are candidate templates; exact-candidate CI, fresh final acceptance, and fresh installation from the actual release source remain pending. An unqualified command follows actual remote `main`; it does not guarantee the local candidate or automatically select a stable tag.
 
 ```bash
 npx skills add LightDevCoder/skills#v0.2.7
@@ -244,3 +244,7 @@ For every future verified release or per-Skill command, preserve:
 - known limitations.
 
 Structural validation, a source-checkout scan, and an unexecuted command are not installation evidence. The collection discovery script is a structural cross-reference check; it does not replace fresh host installation.
+
+## Released-source verification runner
+
+The manual [release-installation workflow](../.github/workflows/release-installation.yml) runs [verify_release_installation.py](../scripts/verify_release_installation.py) on a fresh hosted Linux user environment. After the protected tag exists, dispatch it with that tag and its full candidate commit. It tests native Codex global scope, pinned/default whole collections across supported installer targets, and representative single Skills. It validates source identities and every intended package file, preserves command logs/manifests, rejects pre-existing global destinations, and does not override HOME/CODEX_HOME. This is installation evidence, not Linux Codex runtime evidence; the actual hosted result belongs in the post-publication receipt.

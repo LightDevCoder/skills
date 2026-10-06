@@ -6,7 +6,7 @@ This catalog is synchronized from the 36 admitted package directories under `ski
 
 [Browse by category](skills/README.md) · [Path migration](docs/CATEGORY_MIGRATION.md)
 
-The inventory below shows local v0.2.7 candidate names. Stable v0.2.6 retains the old names. The candidate is unpublished; candidate CI, real Host checks, and release-source installation remain pending. See the [complete migration guide](docs/MIGRATION-v0.2.7.md).
+The inventory below shows local v0.2.7 candidate names. Stable v0.2.6 retains the old names. The candidate is unpublished; candidate CI, fresh final acceptance, and release-source installation remain pending. See the [complete migration guide](docs/MIGRATION-v0.2.7.md).
 
 ## Collection status
 

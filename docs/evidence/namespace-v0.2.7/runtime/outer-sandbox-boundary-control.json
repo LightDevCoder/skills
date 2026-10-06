@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/usr/bin/sandbox-exec",
+    "-p",
+    "(version 1) (allow default) (deny file-write*) (allow file-write* (subpath \"/private/tmp/light-namespace-host-20261006\") (literal \"/dev/null\")) (allow file-write-mode (literal \"/Users/light/.codex/tmp/arg0\")) (allow file-write-data (literal \"/Users/light/.codex/installation_id\"))",
+    "/usr/bin/python3",
+    "-c",
+    "from pathlib import Path\np=Path('/private/tmp/light-namespace-outside-canary-ru8q5k1k/canary.txt')\ntry:\n p.write_text(\"changed\")\n print(\"UNEXPECTED_ALLOWED\")\nexcept PermissionError:\n print(\"EXPECTED_DENIED\")\n"
+  ],
+  "exit": 0,
+  "stdout": "EXPECTED_DENIED\n",
+  "fixture_unchanged": true,
+  "profile": "identical approved external write boundary; no inner Codex sandbox required"
+}

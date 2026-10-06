@@ -2,7 +2,7 @@
 
 [English GitHub Release](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7)（发布后可用） · [英文候选说明](RELEASE_NOTES.md) · [发布清单](RELEASE_MANIFEST.zh-CN.md)
 
-**候选状态：** v0.2.7 尚未发布，当前稳定版为 v0.2.6。候选 CI、真实 Host 验证与实际发布源安装尚待完成。本草稿不是已发布结果。
+**候选状态：** v0.2.7 尚未发布，当前稳定版为 v0.2.6。候选 CI、新的独立最终验收与实际发布源安装尚待完成。本草稿不是已发布结果。
 
 本候选为 12 个 Skill 增加 `light-` 前缀，便于在全局安装中识别来源。内部引用、`ask-light` 路由与界面名称使用新名称。集合仍有 36 个 Skill。
 
@@ -49,6 +49,6 @@ npx skills add LightDevCoder/skills
 
 ## 验证记录
 
-合并候选通过 128 项名称迁移、合同、冻结历史与发布保护检查，以及 80 项未改动旅行模板测试和 4 项生成器测试。旅行包与已发布历史的 224 个基线文件保持原字节。这些是本地行为与源码观察。
+候选源码通过 540 项 pytest、164 项 unittest、编译和公开文档检查。本地安装验证覆盖两种来源顺序和两种模式，完整包内容保留。真实 Codex 0.160.1 显示全部 12 个 Light 来源标签，并在成功的有界任务中解析 Light 入口和其依赖；另一显式入口解析到其对应安装来源。原生选择器使用已披露的临时传输适配器，Host Skill 响应保持原字节。
 
-合集完整检查通过 534 项 pytest、158 项 unittest、编译和公开文档检查。准确候选的本地 CLI 安装通过四种顺序与模式组合，8 个目标均保留完整来源。独立 Standards/Spec 审阅未发现新的源码缺陷；Spec 审阅记录了必须补足的 Host 证据缺口。新的独立最终评估已完成，候选因必需的 Host 观察缺失而被判为 BLOCKED。真实 Codex 选择器、调用及依赖读取仍须验证；此前运行在读取 Skill 前初始化失败。不声称候选远端 CI、v0.2.7 标签安装或正式发布已经完成。见[候选证据](https://github.com/LightDevCoder/skills/blob/main/docs/evidence/namespace-v0.2.7/producer-evidence.md)。
+本次还加入手动 Linux 安装检查，验证固定版及默认分支全集、代表性单包和原生 Codex 全局范围；输入保护、缺失和内容变更检查已有测试。独立最终验收、准确候选远端 CI 与实际 v0.2.7 发布源安装仍是分别执行的门禁，不预填未来发布结果。见[候选证据](https://github.com/LightDevCoder/skills/blob/main/docs/evidence/namespace-v0.2.7/producer-evidence.md)。

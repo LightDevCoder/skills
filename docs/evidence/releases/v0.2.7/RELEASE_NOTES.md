@@ -2,7 +2,7 @@
 
 [中文发布说明](RELEASE_NOTES.zh-CN.md) · [Release Manifest](RELEASE_MANIFEST.md)
 
-**Candidate:** v0.2.7 is unpublished; v0.2.6 remains stable. Candidate CI, real Host checks, and actual release-source installation remain pending. This draft is not a publication result.
+**Candidate:** v0.2.7 is unpublished; v0.2.6 remains stable. Candidate CI, fresh independent final acceptance, and actual release-source installation remain pending. This draft is not a publication result.
 
 This candidate adds `light-` names to twelve Skills so their source is clear in global installations. Internal references, `ask-light` routes, and UI labels use the new names. The collection remains at 36 Skills.
 
@@ -49,6 +49,6 @@ npx skills add LightDevCoder/skills
 
 ## Verification
 
-The merged candidate passes 128 focused migration, contract, frozen-history and release-guard tests, plus 80 unchanged travel-template tests and four generator tests. All 224 baseline travel-package and published-release files retain their exact contents. These are local behavioral and source observations.
+The candidate source passes 540 pytest tests, 164 unittest tests, compilation and documentation checks. Local installation tests cover both source orders and modes, with all intended package files preserved. Actual Codex 0.160.1 shows all twelve Light source labels and resolves the explicit Light entry and its dependencies during a successful bounded task. A second explicit entry resolves its own installed source. The native selector uses a disclosed temporary transport adapter that preserves the Host Skill responses.
 
-Full collection checks pass 534 pytest tests, 158 unittest tests, compilation and public documentation checks. Exact-candidate local CLI installation passes all four order/mode combinations; all eight targets preserve complete sources. Independent Standards/Spec review found no new source defect; the Spec reviewer records the required Host evidence gap. Fresh independent final evaluation is complete; candidate acceptance is BLOCKED by the required Host observations. Actual Codex selector and invocation/dependency reads remain required; prior runtime attempts failed before Skill reads. No exact-candidate remote CI, v0.2.7 tag installation or publication result is claimed. See the [candidate evidence](https://github.com/LightDevCoder/skills/blob/main/docs/evidence/namespace-v0.2.7/producer-evidence.md).
+The release adds a manual Linux installation check for pinned/default whole collections, representative singles and native Codex global scope. Its input guards and missing/mutated-content checks are tested. Independent final acceptance, exact-candidate remote CI and actual v0.2.7 source installation remain separate gates; no future publication result is claimed. See the [candidate evidence](https://github.com/LightDevCoder/skills/blob/main/docs/evidence/namespace-v0.2.7/producer-evidence.md).

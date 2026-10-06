@@ -2,7 +2,7 @@
 
 [English Manifest](RELEASE_MANIFEST.md) · [发布说明](RELEASE_NOTES.zh-CN.md)
 
-**准备状态：** 本地候选；独立验收因必需的 Host 观察缺失而为 BLOCKED，因此生命周期尚未到达 PREPARED。v0.2.6 仍是当前稳定版。本草稿不预填未来验证结果。
+**准备状态：** 本地候选；真实 Host 观察现已取得，新的独立验收尚待完成，因此生命周期尚未到达 PREPARED。v0.2.6 仍是当前稳定版。本草稿不预填未来验证结果。
 
 本文件将冻结在候选快照。发布后事实只能在 ATTESTED 阶段于 `main` 首次创建收据；候选和标签快照不包含收据。
 
@@ -11,7 +11,7 @@
 | **发布版本** | `v0.2.7`（用户确认的目标版本，尚未发布） |
 | **预期标签** | `refs/tags/v0.2.7` |
 | **发布身份** | `refs/tags/v0.2.7^{commit}` |
-| **发布范围** | 12 个 Light Skill 名称；包身份与界面标签；内部引用、ask-light 路由、状态和发现；迁移、归属记录、当前与发布双语文档及针对性验证。 |
+| **发布范围** | 12 个 Light Skill 名称；包身份与界面标签；内部引用、ask-light 路由、状态和发现；迁移、归属记录、当前与发布双语文档、针对性验证和手动发布源安装检查。 |
 | **集合包数** | 36 个已准入包；12 个改名，其他 24 个名称保留 |
 | **Policy Status** | `PROVISIONAL`（Jev 策略不变） |
 | **标签不可变性** | annotated tag 发布后永久不可改写 |
@@ -22,10 +22,10 @@
 
 ## 候选证据
 
-合并后通过 534 项 pytest、158 项 unittest、编译和公开文档检查。224 个旅行及历史基线文件保持原字节。[Producer 证据](../../namespace-v0.2.7/producer-evidence.md)记录这些有界观察。A1–A10 验证、R1–R5 诊断覆盖、独立 review-loop 收敛和 project-review 最终验收仍须绑定新的冻结候选。候选 CI、A2/A9 真实 Host 选择器和实际调用、实际发布源新鲜安装尚待完成。静态发现和 Producer 自检不能代表 Host 运行时或独立验收。
+合并后通过 540 项 pytest、164 项 unittest、编译和公开文档检查。224 个旅行及历史基线文件保持原字节。[Producer 证据](../../namespace-v0.2.7/producer-evidence.md)记录这些有界观察。A1–A10 验证、R1–R5 诊断覆盖、独立 review-loop 收敛和 project-review 最终验收仍须绑定新的冻结候选。候选 CI、新的独立最终验收、实际发布源新鲜安装尚待完成；真实 Host 选择器和调用观察已记录。静态发现和 Producer 自检不能代表 Host 运行时或独立验收。
 
 ## 后续发布门禁
 
 准确候选 CI、有效标签保护与 preflight、annotated tag 身份、固定标签与默认分支新鲜安装、完整包及来源与内容核对、GitHub Release 发布和发布后证明尚待完成。先前 v0.2.6 名称迁移尝试保留为历史；用户已确认 v0.2.7 及新基线。真实用户全局迁移属于另行授权的操作。
 
-[候选最终验收](../../namespace-v0.2.7/acceptance.md)：BLOCKED；没有预填发布事实。
+[此前候选判定](../../namespace-v0.2.7/acceptance.md)是历史 BLOCKED。恢复后的评估包含真实 Host 记录和手动发布源安装验证器；没有预填发布事实。

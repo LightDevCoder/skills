@@ -1,0 +1,26 @@
+{
+  "source_commit": "ce4898e782f20cb185067fab5721aec6be9b31e4",
+  "installed_files_unchanged": true,
+  "public_function_cases": [
+    [
+      -3,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      7,
+      7
+    ]
+  ],
+  "observed_contracts": [
+    "light-implement",
+    "light-tdd",
+    "review-loop",
+    "light-code-review"
+  ],
+  "red_then_green_observed": true,
+  "independent_review_not_claimed": "temporary task has no Git fixed point"
+}

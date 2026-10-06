@@ -1,0 +1,45 @@
+name: release-installation
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published annotated release tag to verify
+        required: true
+        type: string
+      expected_commit:
+        description: Full CI-verified candidate commit
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  installation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify released-source installations in a fresh user environment
+        env:
+          RELEASE_INSTALL_TAG: ${{ inputs.tag }}
+          RELEASE_INSTALL_COMMIT: ${{ inputs.expected_commit }}
+        run: >-
+          python scripts/verify_release_installation.py
+          --tag "$RELEASE_INSTALL_TAG"
+          --expected-commit "$RELEASE_INSTALL_COMMIT"
+          --output "$RUNNER_TEMP/release-installation"
+      - name: Preserve installation identities, content manifests and command logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-installation-evidence
+          path: ${{ runner.temp }}/release-installation
+          if-no-files-found: error

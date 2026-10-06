@@ -38,3 +38,11 @@ The parent independently rehashed every installed file and every current Light p
 ## External Terminal result and final diagnostic
 
 The user ran the prepared observer and returned `initialized: false`, `project_skills: 0`, `No response to request 1`. Parent independently read the saved command, zero responses, exit 1 and EPERM stderr. A bounded backtrace diagnostic reproduced failure; its stack contains `File::set_times` but no failing path. Scoped macOS deny-log query returned no matching entry. See `host-external/README.md` and raw records. Required Host evidence remains missing; no global permission or acceptance criterion was weakened.
+
+## Resumed real Host evidence
+
+The owner approved the two exact runtime metadata exceptions. [Real Host observations](runtime/README.md) now supply actual initialization, two explicit source invocations, Light dependency reads, and genuine native labels. The package payload is unchanged. The earlier BLOCKED verdict remains historical; the new fresh evaluation is pending. The temporary transport adapter and earlier incomplete wrapper comparison are disclosed, not hidden or converted into PASS.
+
+## Resumed verifier checks
+
+The manual released-source workflow and first-party verifier fulfill R4 in an actual fresh hosted Linux user without repurposing HOME/CODEX_HOME. Focused positive/negative/mutation tests pass six cases. The expanded full suite passes 540 pytest tests (35.71 s), 164 unittest tests (20.290 s), compilation and public documentation checks. No future remote install result is claimed. Independent software axes and fresh final acceptance remain pending.

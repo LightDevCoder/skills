@@ -2,7 +2,7 @@
 
 [English](MIGRATION-v0.2.7.md) · [候选发布说明](evidence/releases/v0.2.7/RELEASE_NOTES.zh-CN.md)
 
-**状态：** v0.2.7 名称迁移候选尚未发布。当前稳定 v0.2.6 保留旧名称。下列命令是候选模板；准确候选 CI、A2/A9 的真实 Host 选择器及实际调用、固定发布源安装尚待验证。先前 v0.2.6 名称迁移尝试因同名发布已存在而阻断，用户随后确认 v0.2.7；[历史证据](evidence/namespace-v0.2.6/publication-blocker.md)保持原样，并非当前发布状态。
+**状态：** v0.2.7 名称迁移候选尚未发布。当前稳定 v0.2.6 保留旧名称。下列命令是候选模板；准确候选 CI、新的独立最终验收、固定发布源安装尚待验证。先前 v0.2.6 名称迁移尝试因同名发布已存在而阻断，用户随后确认 v0.2.7；[历史证据](evidence/namespace-v0.2.6/publication-blocker.md)保持原样，并非当前发布状态。
 
 12 个 Light 包增加 `light-` 前缀。其他 24 个名称、七个分类、36 个包总数、职责和调用权限保持不变。旧名不提供可安装 alias 或 wrapper。`ask-light` 与 `light-travelpage` 保留名称。安装路径变为 `<skills-root>/<新名>/`；源码路径仍为 `skills/<category>/<新名>/`。
 

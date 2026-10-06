@@ -1,0 +1,12 @@
+{
+  "selected_source": "upstream implement",
+  "observed_contracts": [
+    "implement",
+    "tdd",
+    "code-review"
+  ],
+  "document_exact_bytes": "status: observed\\n",
+  "exit": 0,
+  "installed_files_unchanged": true,
+  "both_metadata_controls_unchanged": true
+}
