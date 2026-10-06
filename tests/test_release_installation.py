@@ -74,6 +74,42 @@ class ReleasedSourceInstallationTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 module.source_packages(root / "source")
 
+    def test_bound_cli_registry_resolves_shared_targets(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "cli.mjs"
+            path.write_text('const agents = {\n\tcodex: {\n\t\tname: "codex",\n\t\tskillsDir: ".agents/skills",\n\t},\n\tpeer: {\n\t\tname: "peer",\n\t\tskillsDir: ".agents/skills",\n\t}\n};\n')
+            self.assertEqual(module.cli_project_targets(path), {"codex": ".agents/skills", "peer": ".agents/skills"})
+            path.write_text(path.read_text().replace('skillsDir: ".agents/skills"', 'skillsDir: getTarget()', 1))
+            with self.assertRaises(ValueError):
+                module.cli_project_targets(path)
+
+    def test_registry_drift_and_unsafe_targets_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "cli.mjs"
+            for value in ("unsupported registry", 'const agents = {\n\tbad: {\n\t\tname: "bad",\n\t\tskillsDir: "../outside",\n\t}\n};\n', 'const agents = {\n\tbad: {\n\t\tname: "bad",\n\t\tskillsDir: "/absolute",\n\t}\n};\n'):
+                path.write_text(value)
+                with self.subTest(value=value), self.assertRaises(ValueError):
+                    module.cli_project_targets(path)
+
+    def test_complete_canonical_cannot_hide_an_omitted_agent_target(self):
+        expected = module.source_packages(ROOT)
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp)
+            canonical = project / ".agents/skills"
+            canonical.mkdir(parents=True)
+            for entry in (ROOT / "skills").glob("*/*/SKILL.md"):
+                (canonical / entry.parent.name).symlink_to(entry.parent, target_is_directory=True)
+            registry = {"codex": ".agents/skills", "peer": ".agents/skills", "claude-code": ".claude/skills"}
+            self.assertEqual(len(expected), 36)
+            self.assertEqual(module.verify_destination(canonical, expected)["packages"], 36)
+            with self.assertRaisesRegex(ValueError, "omitted a required Agent target"):
+                module.verify_project_targets(project, expected, registry, ["*"])
+            (project / ".claude").mkdir()
+            (project / ".claude/skills").symlink_to(canonical, target_is_directory=True)
+            result = module.verify_project_targets(project, expected, registry, ["*"])
+            self.assertEqual(len(result), 2)
+            self.assertTrue(all(target["actual_package_manifest"] == expected for target in result))
+
 
 if __name__ == "__main__":
     unittest.main()

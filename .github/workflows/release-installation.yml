@@ -41,5 +41,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-installation-evidence
-          path: ${{ runner.temp }}/release-installation
+          path: |
+            ${{ runner.temp }}/release-installation/*.json
+            ${{ runner.temp }}/release-installation/*.log
           if-no-files-found: error
