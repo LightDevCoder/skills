@@ -1,0 +1,67 @@
+{
+  "status": "VERIFIED",
+  "run_id": 37492680408,
+  "verifier_commit": "a7fd7d69bd9073db46c19bae9f388f9b3ec43352",
+  "pinned_commit": "ef2d840b102df881bc8d6ae251af7db1ad3a21a7",
+  "package_payload_digest": "5a682a3356a501a1285735560ef2261d7bc81cf6c18c31292c54e44ef167926b",
+  "cli_version": "1.7.0",
+  "cli_sha256": "fde68534019765fb69510a0038ca7df2810a6ffed4c26fef9beabdcf6cc6701c",
+  "commands": 12,
+  "all_exits_zero": true,
+  "artifact_sha256": {
+    "command-08.log": "327c65344104aed20f0e889b3664b10f5d9c8c898c6ff0db084c5729c5c26f23",
+    "command-09.log": "1ef4e42347d6af1a9846aea175cdd2cd3e66670509718ff50282fc944fa12faf",
+    "result.json": "3eae0c95910bc7d31a95a562345556aee543356dc695836388718c7729276082",
+    "commands.json": "e3f23e3907159bd5f26a5f85aa9a5dfa2b787d2e166603e99a527e696a0f2b64",
+    "command-02.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "command-03.log": "13bf742bfef9dbc6ffa058d7c39615bfe88d458a6336e5b0ae62f50d0b96a1f1",
+    "command-01.log": "8e054ee966a7754e0b34f236c3b237c75bb26dcaca03f1e3119a25af5bd35052",
+    "command-00.log": "907ba5153717027bba7af4bb67c115c98aeecd07ef4e1aedc9f549a296f44f71",
+    "command-04.log": "bb7320d831e7a151aa901c35e7326c752fa2ef5024f30768c42319b8bed171ed",
+    "command-10.log": "907c53b8bf8bb60847f1905fd8b81dc6dba873ae8662990740984d27d76eaf17",
+    "command-11.log": "6e056eef15179df7395e5ec92a8b44d339f4ef3e7d8aec07984906871c301d9b",
+    "command-05.log": "ff4f33db89cae5fb193fa8c8ebbbf8084700dfaa30385f16a7b3581fd4e34126",
+    "command-07.log": "6a01dc036f036c70fe97423cddc29c6137b81545e4fafccd2a63b6766c8a140d",
+    "command-06.log": "683e63b04ced1bef4683b3df3b29dadb795f46c60ffa61faec1d042eb606c816"
+  },
+  "observations": [
+    {
+      "case": "pinned-global-codex",
+      "targets": 1,
+      "packages_per_target": 36,
+      "files_per_target": 386
+    },
+    {
+      "case": "pinned-whole",
+      "targets": 2,
+      "packages_per_target": 36,
+      "files_per_target": 386
+    },
+    {
+      "case": "single-light-implement",
+      "targets": 1,
+      "packages_per_target": 1,
+      "files_per_target": 7
+    },
+    {
+      "case": "single-light-tdd",
+      "targets": 1,
+      "packages_per_target": 1,
+      "files_per_target": 5
+    },
+    {
+      "case": "single-light-research",
+      "targets": 1,
+      "packages_per_target": 1,
+      "files_per_target": 3
+    },
+    {
+      "case": "default-whole",
+      "targets": 2,
+      "packages_per_target": 36,
+      "files_per_target": 386
+    }
+  ],
+  "native_home": "/home/runner",
+  "HOME_CODEX_HOME_overrides": false
+}

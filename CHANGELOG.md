@@ -6,8 +6,12 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
-- v0.2.7 name-migration candidate: Add `light-` to 12 Light Skill names, synchronizing package identity, UI source labels, internal references, `ask-light` routing and state logic, discovery, attribution, bilingual docs, and migration guidance. Keep the other 24 names, 36-package total, responsibilities, and invocation permissions. No old-name aliases or automatic global migration; real Host checks and independent candidate acceptance pass; candidate CI and fixed-release fresh installation remain pending.
-- The owner confirmed v0.2.7 after the earlier v0.2.6 namespace attempt was blocked by an existing release. Preserve the [historical record](docs/evidence/namespace-v0.2.6/publication-blocker.md) and all published v0.2.6 travel changes.
+No unreleased changes.
+
+## 0.2.7 — 2026-10-07
+
+- Add `light-` to 12 Skill names; synchronize package identity, UI source labels, internal references, ask-light routing/state/discovery, attribution and bilingual migration/docs. Retain 24 other names, 36 packages, responsibilities and invocation permissions. No old-name aliases or automatic global migration.
+- Independent candidate acceptance, native Codex selector/source invocation checks, exact candidate CI, protected annotated tag and actual Codex/Claude project, Codex global and renamed single installs passed. Main verification helper corrects the observed CLI global root; the immutable tag and package payload are preserved. See [release receipt](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.md).
 
 ## 0.2.6 — 2026-10-05
 

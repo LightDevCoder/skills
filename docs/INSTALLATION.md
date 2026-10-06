@@ -2,15 +2,15 @@
 
 [中文安装说明](INSTALLATION.zh-CN.md)
 
-The public first-party collection's current stable release is [v0.2.6](https://github.com/LightDevCoder/skills/releases/tag/v0.2.6), published at tag `v0.2.6` (immutable [release manifest](evidence/releases/v0.2.6/RELEASE_MANIFEST.md) and post-publication [release receipt](evidence/releases/v0.2.6/RELEASE_RECEIPT.md)). It provides **36 admitted first-party Skills** across 7 purpose-based categories. Package contracts remain inside `skills/<category>/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
+The public first-party collection's current stable release is [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7), published at tag `v0.2.7` (immutable [release manifest](evidence/releases/v0.2.7/RELEASE_MANIFEST.md) and post-publication [release receipt](evidence/releases/v0.2.7/RELEASE_RECEIPT.md)). It provides **36 admitted first-party Skills** across 7 purpose-based categories. Package contracts remain inside `skills/<category>/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
 
 The standard install command is the generic `latest` form: it follows the repository's default revision, so `npx skills add LightDevCoder/skills` is the recommended interactive entry point to select the desired Skills and Agent hosts. Pinned release commands select published tags for reproducible installs. Historical verification commands (which tested full-collection installations across all supported agents) are documented below alongside historical evidence.
 
 v0.2.6 updates `light-travelpage` with a handbook UI and default-off AI choice. Its [release notes](evidence/releases/v0.2.6/RELEASE_NOTES.md) describe the changes. The [release receipt](evidence/releases/v0.2.6/RELEASE_RECEIPT.md) records pinned/latest installations in separate disposable directories: 36 packages and 385 package files in each, byte-identical to the release snapshot; Skills CLI 1.7.0 discovered all 36 Skills.
 
-## v0.2.7 name-migration candidate
+## v0.2.7 name migration
 
-The local namespace candidate is unpublished. Stable v0.2.6 retains the old names. These commands are candidate templates; exact-candidate CI and fresh installation from the actual release source remain pending. An unqualified command follows actual remote `main`; it does not guarantee the local candidate or automatically select a stable tag.
+v0.2.7 is published and actual-source fresh installations passed. The fixed tag selects36 admitted packages with the new names. Pinned/default Codex and Claude Code project installs, native Codex global scope and three representative renamed singles are verified. An unqualified command follows actual main and does not automatically select a stable tag.
 
 ```bash
 npx skills add LightDevCoder/skills#v0.2.7
@@ -18,7 +18,7 @@ npx skills add LightDevCoder/skills#v0.2.7 --skill light-implement
 npx skills add LightDevCoder/skills#v0.2.7 --global --agent codex
 ```
 
-Read the [migration and recovery guide](MIGRATION-v0.2.7.md) before upgrading. Reinstallation does not prove old names were removed. New-name default-branch examples below are also candidate usage; historical pinned commands retain their original names.
+Read the [migration and recovery guide](MIGRATION-v0.2.7.md) before upgrading. Reinstallation does not prove old names were removed. New-name examples are verified for the declared targets; historical pinned commands retain their original names.
 
 ## Categorized sources and installed packages
 
@@ -54,8 +54,8 @@ npx skills add LightDevCoder/skills --skill project-retro
 To install from a specific published release tag (recommended for reproducible setups):
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.6 -y
-npx skills add LightDevCoder/skills#v0.2.6 --skill project-retro -y
+npx skills add LightDevCoder/skills#v0.2.7 -y
+npx skills add LightDevCoder/skills#v0.2.7 --skill light-implement -y
 ```
 
 Previous releases (such as `#v0.2.5`, `#v0.2.4`, `#v0.2.3`, `#v0.2.2`, `#v0.2.1`, and `#v0.2.0`) remain available for reproducible historical installs:

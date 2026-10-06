@@ -6,7 +6,7 @@
 
 [按分类浏览](skills/README.zh-CN.md) · [路径迁移](docs/CATEGORY_MIGRATION.zh-CN.md)
 
-以下目录显示 v0.2.7 本地候选名称。当前稳定 v0.2.6 保留旧名。候选尚未发布；新名称的候选 CI 和发布源安装待完成。见[完整迁移说明](docs/MIGRATION-v0.2.7.zh-CN.md)。
+以下目录显示已发布v0.2.7名称：36个包，12项迁移、24个保留。见[完整迁移说明](docs/MIGRATION-v0.2.7.zh-CN.md)。
 
 ## 集合状态
 
@@ -14,13 +14,13 @@
 | --- | --- |
 | 集合 | Light Skills — Composable Agent Workflows |
 | 包数量 | 36 个已准入第一方 Skill |
-| 当前状态 | v0.2.7 本地候选包含 36 个包；v0.2.6 为当前稳定版本 |
-| 稳定版本 | [v0.2.6](https://github.com/LightDevCoder/skills/releases/tag/v0.2.6)（36 个包；上一稳定版为 v0.2.5） |
+| 当前状态 | 36个包；v0.2.7为当前稳定版本 |
+| 稳定版本 | [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7)（36个包；上一稳定版为v0.2.6） |
 | 安装权威 | [docs/INSTALLATION.zh-CN.md](docs/INSTALLATION.zh-CN.md) |
 | 发现检查 | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
-| 证据 | [v0.2.6 发布清单](docs/evidence/releases/v0.2.6/RELEASE_MANIFEST.zh-CN.md) · [v0.2.6 发布收据](docs/evidence/releases/v0.2.6/RELEASE_RECEIPT.zh-CN.md) |
+| 证据 | [v0.2.7 发布清单](docs/evidence/releases/v0.2.7/RELEASE_MANIFEST.zh-CN.md) · [v0.2.7 发布收据](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md) |
 
-`v0.2.6` 的公开发布与全新安装已验证；包数量仍为 36。
+`v0.2.7` 的公开发布与全新安装已验证；包数量仍为 36。
 
 v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md)与独立[英文说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.md)记录旅行手册和可选 AI 变化。
 

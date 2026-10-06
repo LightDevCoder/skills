@@ -1,8 +1,8 @@
 # Light Skills v0.2.7 名称迁移
 
-[English](MIGRATION-v0.2.7.md) · [候选发布说明](evidence/releases/v0.2.7/RELEASE_NOTES.zh-CN.md)
+[English](MIGRATION-v0.2.7.md) · [发布说明](evidence/releases/v0.2.7/RELEASE_NOTES.zh-CN.md)
 
-**状态：** v0.2.7 名称迁移候选尚未发布。当前稳定 v0.2.6 保留旧名称。下列命令是候选模板；准确候选 CI、固定发布源安装尚待验证。先前 v0.2.6 名称迁移尝试因同名发布已存在而阻断，用户随后确认 v0.2.7；[历史证据](evidence/namespace-v0.2.6/publication-blocker.md)保持原样，并非当前发布状态。
+**状态：** v0.2.7已公开。独立候选验收、准确CI、受保护标签和真实发布源安装通过。见[发布收据](evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md)。v0.2.6保留旧名，先前阻断记录保持历史原样。
 
 12 个 Light 包增加 `light-` 前缀。其他 24 个名称、七个分类、36 个包总数、职责和调用权限保持不变。旧名不提供可安装 alias 或 wrapper。`ask-light` 与 `light-travelpage` 保留名称。安装路径变为 `<skills-root>/<新名>/`；源码路径仍为 `skills/<category>/<新名>/`。
 
@@ -29,7 +29,7 @@
 
 ## 升级步骤
 
-1. v0.2.7 发布并通过安装验证后，把固定标签安装到所需 Host 范围。只选择实际使用的 Skill 与 Host；下列命令不强制复制，也不写入所有 Host。
+1. 把已发布并通过安装验证的v0.2.7固定标签安装到所需 Host 范围。只选择实际使用的 Skill 与 Host；下列命令不强制复制，也不写入所有 Host。
 2. 确认旧名安装属于 Light，且已保存副本或软链接目标后，再移除或归档。重新安装可能留下旧目录。其他来源的包保留原样。
 3. 按完整映射表更新 Light 的旧 `--skill` 参数和显式调用，例如 `$implement` 改为 `$light-implement`。逐项更新项目能力声明、提示、自动化与源码链接；每个目标的写入需要对应授权。
 4. 软链接安装需确认 canonical 源码已升级，链接解析到新目录。复制安装需核对每个 Host 的完整包内容，再按 Host 的界面刷新发现。

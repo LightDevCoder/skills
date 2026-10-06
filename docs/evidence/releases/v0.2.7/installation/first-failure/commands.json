@@ -1,0 +1,79 @@
+[
+  {
+    "argv": [
+      "git",
+      "clone",
+      "--quiet",
+      "--depth",
+      "1",
+      "--branch",
+      "v0.2.7",
+      "https://github.com/LightDevCoder/skills.git",
+      "/home/runner/work/_temp/release-installation/pinned-source"
+    ],
+    "cwd": null,
+    "exit": 0
+  },
+  {
+    "argv": [
+      "git",
+      "rev-parse",
+      "HEAD"
+    ],
+    "cwd": "/home/runner/work/_temp/release-installation/pinned-source",
+    "exit": 0
+  },
+  {
+    "argv": [
+      "git",
+      "clone",
+      "--quiet",
+      "--depth",
+      "1",
+      "--branch",
+      "main",
+      "https://github.com/LightDevCoder/skills.git",
+      "/home/runner/work/_temp/release-installation/default-source"
+    ],
+    "cwd": null,
+    "exit": 0
+  },
+  {
+    "argv": [
+      "git",
+      "rev-parse",
+      "HEAD"
+    ],
+    "cwd": "/home/runner/work/_temp/release-installation/default-source",
+    "exit": 0
+  },
+  {
+    "argv": [
+      "npx",
+      "--yes",
+      "--cache",
+      "/home/runner/work/_temp/release-installation/npm-cache",
+      "skills",
+      "--version"
+    ],
+    "cwd": null,
+    "exit": 0
+  },
+  {
+    "argv": [
+      "npx",
+      "--yes",
+      "--cache",
+      "/home/runner/work/_temp/release-installation/npm-cache",
+      "skills@1.7.0",
+      "add",
+      "LightDevCoder/skills#v0.2.7",
+      "--global",
+      "--agent",
+      "codex",
+      "--yes"
+    ],
+    "cwd": "/home/runner/work/_temp/release-installation/pinned-global-codex",
+    "exit": 0
+  }
+]

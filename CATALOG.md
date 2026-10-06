@@ -6,7 +6,7 @@ This catalog is synchronized from the 36 admitted package directories under `ski
 
 [Browse by category](skills/README.md) · [Path migration](docs/CATEGORY_MIGRATION.md)
 
-The inventory below shows local v0.2.7 candidate names. Stable v0.2.6 retains the old names. The candidate is unpublished; candidate CI and release-source installation remain pending. See the [complete migration guide](docs/MIGRATION-v0.2.7.md).
+The inventory shows the published v0.2.7 names: 36 packages, 12 renamed and 24 retained. See the [complete migration guide](docs/MIGRATION-v0.2.7.md).
 
 ## Collection status
 
@@ -14,13 +14,13 @@ The inventory below shows local v0.2.7 candidate names. Stable v0.2.6 retains th
 | --- | --- |
 | Collection | Light Skills — Composable Agent Workflows |
 | Package count | 36 admitted first-party Skills |
-| Current state | 36 packages in the local v0.2.7 candidate; v0.2.6 is the current stable release |
-| Stable release | [v0.2.6](https://github.com/LightDevCoder/skills/releases/tag/v0.2.6) (36 packages; previous stable was v0.2.5) |
+| Current state | 36 packages; v0.2.7 is the current stable release |
+| Stable release | [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7) (36 packages; previous stable was v0.2.6) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
-| Evidence | [v0.2.6 release manifest](docs/evidence/releases/v0.2.6/RELEASE_MANIFEST.md) · [v0.2.6 release receipt](docs/evidence/releases/v0.2.6/RELEASE_RECEIPT.md) |
+| Evidence | [v0.2.7 release manifest](docs/evidence/releases/v0.2.7/RELEASE_MANIFEST.md) · [v0.2.7 release receipt](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.md) |
 
-`v0.2.6` publication and fresh installation are verified; package count remains 36.
+`v0.2.7` publication and fresh installation are verified; package count remains 36.
 
 v0.2.6 optimizes `light-travelpage`; [English notes](docs/evidence/releases/v0.2.6/RELEASE_NOTES.md) and the independent [中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md) describe the handbook and optional AI changes.
 

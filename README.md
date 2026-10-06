@@ -6,9 +6,9 @@
 
 `LightDevCoder/skills` provides 36 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<category>/<name>/` and defines its own behavior in `SKILL.md`.
 
-> **Release:** [v0.2.6](https://github.com/LightDevCoder/skills/releases/tag/v0.2.6) is the current stable release of all 36 first-party Skills. Its immutable [release manifest](docs/evidence/releases/v0.2.6/RELEASE_MANIFEST.md) and post-publication [release receipt](docs/evidence/releases/v0.2.6/RELEASE_RECEIPT.md) record the scope and verification.
+> **Release:** [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7) is the current stable release of all 36 first-party Skills. Its immutable [release manifest](docs/evidence/releases/v0.2.7/RELEASE_MANIFEST.md) and post-publication [release receipt](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.md) record the scope and verification.
 
-> **v0.2.7 candidate:** The namespace candidate is unpublished. Twelve Skills use `light-` names; the other 24 names and 36-package total stay unchanged. Stable v0.2.6 retains the old names. Candidate CI and release-source installation for the new names remain pending. See the [migration guide](docs/MIGRATION-v0.2.7.md) and [candidate notes](docs/evidence/releases/v0.2.7/RELEASE_NOTES.md). New-name examples below are candidate usage; remote default-branch installs may not contain them before publication.
+> **Name migration:** Twelve Skills now use `light-` names; 24 names and the 36-package total are retained. See the [migration guide](docs/MIGRATION-v0.2.7.md) and [release notes](docs/evidence/releases/v0.2.7/RELEASE_NOTES.md). Exact CI, protected tag and actual Codex/Claude project and Codex global installs are verified.
 
 ## Browse by category
 
@@ -57,13 +57,13 @@ npx skills add LightDevCoder/skills --skill light-research
 
 > **Note:** An unqualified repository source (`LightDevCoder/skills`) follows the default branch `main`, delivering the latest admitted features and integrations.
 
-### Stable release snapshot (v0.2.6)
+### Stable release snapshot (v0.2.7)
 
-To install the reproducible stable release snapshot, pin the `#v0.2.6` tag:
+To install the reproducible stable release snapshot, pin the `#v0.2.7` tag:
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.6
-npx skills add LightDevCoder/skills#v0.2.6 --skill project-retro
+npx skills add LightDevCoder/skills#v0.2.7
+npx skills add LightDevCoder/skills#v0.2.7 --skill light-implement
 ```
 
 Previous releases (such as `#v0.2.4`, `#v0.2.2`, `#v0.2.1`, and `#v0.2.0`) remain available for reproducible installs:
@@ -206,5 +206,5 @@ Adapted origin (2 packages): `humanizer` is a substantially transformed first-pa
 - [Review Policy](docs/REVIEW_POLICY.md) · [Reviewer Contract](docs/REVIEWER_CONTRACT.md)
 - [Catalog](CATALOG.md) · [Changelog](CHANGELOG.md)
 - [Workflow Guides](docs/workflows)
-- [Release Receipt](docs/evidence/releases/v0.2.6/RELEASE_RECEIPT.md)
+- [Release Receipt](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.md)
 - [Collection Discovery Tests](tests/test_collection_discovery.py) · [Composition Tests](tests/test_composition.py)

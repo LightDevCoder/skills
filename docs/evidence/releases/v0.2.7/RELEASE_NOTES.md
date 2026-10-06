@@ -2,9 +2,7 @@
 
 [中文发布说明](RELEASE_NOTES.zh-CN.md) · [Release Manifest](RELEASE_MANIFEST.md)
 
-**Candidate:** v0.2.7 is unpublished; v0.2.6 remains stable. Independent source acceptance passes A1–A10. Exact-candidate CI and actual release-source installation are subsequent gates. This draft is not a publication result.
-
-This candidate adds `light-` names to twelve Skills so their source is clear in global installations. Internal references, `ask-light` routes, and UI labels use the new names. The collection remains at 36 Skills.
+Twelve Skills now use `light-` names so their source is clear in global installations. Internal references, `ask-light` routes, and UI labels use the new names. The collection remains at 36 Skills.
 
 ## What changed
 
@@ -33,7 +31,7 @@ For recovery, restore the saved Light copies or symlink targets, restore related
 
 ## Installation
 
-Candidate templates only. These commands become verified usage after fresh installation checks against the published v0.2.7 source.
+Installation from the actual v0.2.7 source passed in fresh environments. Select the fixed tag for a reproducible install:
 
 ```bash
 npx skills add LightDevCoder/skills#v0.2.7
@@ -49,6 +47,8 @@ npx skills add LightDevCoder/skills
 
 ## Verification
 
-The candidate source passes 543 pytest tests, 167 unittest tests, compilation and documentation checks. Local installation tests cover both source orders and modes, with all intended package files preserved. Actual Codex 0.160.1 shows all twelve Light source labels and resolves the explicit Light entry and its dependencies during a successful bounded task. A second explicit entry resolves its own installed source. The native selector uses a disclosed temporary transport adapter that preserves the Host Skill responses.
+The candidate source passes 543 pytest tests, 167 unittest tests, compilation and documentation checks. Local installation tests cover both source orders and modes, with all intended package files preserved. Actual Codex 0.160.1 shows all twelve Light source labels and resolves the explicit Light entry and its dependencies during a successful bounded task. The native selector uses a disclosed temporary transport adapter that preserves the Host Skill responses.
 
-The release adds a manual Linux installation check for pinned/default whole collections for Codex and Claude Code, representative Codex singles and native Codex global scope. Its input guards and missing/mutated-content checks are tested. Independent source acceptance passes after separate software checks and a fresh whole-candidate Evaluator. Exact-candidate remote CI and actual v0.2.7 source installation remain separate release gates; their facts are attested on main after publication. See the [candidate evidence](https://github.com/LightDevCoder/skills/blob/main/docs/evidence/namespace-v0.2.7/producer-evidence.md).
+Independent source acceptance passed. Exact-candidate CI and the protected annotated tag identity are verified. Actual released-source installation passed in a fresh hosted Linux user: Codex and Claude Code pinned/default whole targets each preserve 36 packages and 386 files against their exact source revisions. Native Codex global installation and single installs of `light-implement`, `light-tdd` and `light-research` also passed, without overriding HOME/CODEX_HOME. The first verifier run checked the wrong global directory; the corrected rerun passed with the tag and package payload unchanged.
+
+The manifest preserves the pre-publication tag snapshot; publication facts are attested in the post-release receipt on main. See the [source and runtime evidence](https://github.com/LightDevCoder/skills/blob/main/docs/evidence/namespace-v0.2.7/producer-evidence.md).

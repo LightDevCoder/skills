@@ -6,9 +6,9 @@
 
 `LightDevCoder/skills` 包含 36 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<category>/<name>/`，由包内的 `SKILL.md` 统领具体行为。
 
-> **发布版本：** v0.2.6 是包含全部 36 个第一方 Skill 的当前稳定版本。阅读[中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md)或[English GitHub Release](https://github.com/LightDevCoder/skills/releases/tag/v0.2.6)；不可变的[发布清单](docs/evidence/releases/v0.2.6/RELEASE_MANIFEST.zh-CN.md)与发布后的[发布收据](docs/evidence/releases/v0.2.6/RELEASE_RECEIPT.zh-CN.md)记录范围和验证事实。
+> **发布版本：** v0.2.7 是包含全部 36 个第一方 Skill 的当前稳定版本。阅读[中文发布说明](docs/evidence/releases/v0.2.7/RELEASE_NOTES.zh-CN.md)或[English GitHub Release](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7)；不可变的[发布清单](docs/evidence/releases/v0.2.7/RELEASE_MANIFEST.zh-CN.md)与发布后的[发布收据](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md)记录范围和验证事实。
 
-> **v0.2.7 候选：** 名称迁移候选尚未发布。12 个 Skill 使用 `light-` 新名称，其他 24 个名称和 36 个包总数保留。当前稳定 v0.2.6 使用旧名。新名称的候选 CI 与发布源安装尚待完成；见[迁移说明](docs/MIGRATION-v0.2.7.zh-CN.md)与[候选发布说明](docs/evidence/releases/v0.2.7/RELEASE_NOTES.zh-CN.md)。下方新名称示例是候选用法，远端默认分支在候选发布前不保证包含它们。
+> **名称迁移：** 12 个Skill使用 `light-` 新名称，其他24个名称及36个包总数保留。见[迁移说明](docs/MIGRATION-v0.2.7.zh-CN.md)和[发布说明](docs/evidence/releases/v0.2.7/RELEASE_NOTES.zh-CN.md)。准确CI、受保护标签及真实Codex/Claude项目与Codex全局安装已验证。
 
 ## 按分类浏览
 
@@ -57,13 +57,13 @@ npx skills add LightDevCoder/skills --skill light-research
 
 > **说明：** 不带 fragment 的仓库源（`LightDevCoder/skills`）将跟随默认分支 `main`，获取最新的已准入特性与集成。
 
-### 稳定版本快照（v0.2.6）
+### 稳定版本快照（v0.2.7）
 
-若需安装可复现的稳定发布快照，请锁定 `#v0.2.6` tag：
+若需安装可复现的稳定发布快照，请锁定 `#v0.2.7` tag：
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.6
-npx skills add LightDevCoder/skills#v0.2.6 --skill project-retro
+npx skills add LightDevCoder/skills#v0.2.7
+npx skills add LightDevCoder/skills#v0.2.7 --skill light-implement
 ```
 
 历史版本（如 `#v0.2.4`、`#v0.2.2`、`#v0.2.1` 与 `#v0.2.0`）依然保留供复现：
@@ -206,5 +206,5 @@ $ask-light workflow
 - [审阅策略](docs/REVIEW_POLICY.zh-CN.md) · [Reviewer 契约](docs/REVIEWER_CONTRACT.zh-CN.md)
 - [目录](CATALOG.zh-CN.md) · [变更记录](CHANGELOG.zh-CN.md)
 - [工作流指南](docs/zh-CN/workflows)
-- [发布收据](docs/evidence/releases/v0.2.6/RELEASE_RECEIPT.zh-CN.md)
+- [发布收据](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md)
 - [集合发现测试](tests/test_collection_discovery.py) · [组合测试](tests/test_composition.py)

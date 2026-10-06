@@ -1,8 +1,8 @@
 # Light Skills v0.2.7 name migration
 
-[简体中文](MIGRATION-v0.2.7.zh-CN.md) · [Candidate notes](evidence/releases/v0.2.7/RELEASE_NOTES.md)
+[简体中文](MIGRATION-v0.2.7.zh-CN.md) · [Release notes](evidence/releases/v0.2.7/RELEASE_NOTES.md)
 
-**Status:** The v0.2.7 name-migration candidate is unpublished. Stable v0.2.6 retains the old names. Commands below are candidate templates; exact-candidate CI and fixed release-source installation remain pending. The earlier v0.2.6 namespace attempt was blocked by an existing release; the owner then confirmed v0.2.7. Its [historical evidence](evidence/namespace-v0.2.6/publication-blocker.md) is preserved and is not the current publication state.
+**Status:** v0.2.7 is published. Independent candidate acceptance, exactcandidateCI, protectedtag and actual published-source installs passed. See the [release receipt](evidence/releases/v0.2.7/RELEASE_RECEIPT.md). v0.2.6 retains the old names; prior blocked attempts remain historical.
 
 Twelve Light packages gain `light-` names. The other 24 names, seven categories, 36-package total, responsibilities, and invocation permissions remain unchanged. There are no installable aliases or wrappers for old names. `ask-light` and `light-travelpage` keep their names. Installed paths become `<skills-root>/<new-name>/`; source paths remain `skills/<category>/<new-name>/`.
 
@@ -29,7 +29,7 @@ Inventory old names in project prompts, `AGENTS.md`, availability declarations, 
 
 ## Upgrade steps
 
-1. After v0.2.7 is published and its installation checks pass, install the fixed tag into the intended Host scope. Choose the Skills and Host you actually use; the commands below do not force copies or populate every Host.
+1. Install the fixed tag into the intended Host scope. Choose the Skills and Host you actually use; the commands below do not force copies or populate every Host.
 2. Remove or archive an old-name installation only after confirming it belongs to Light and saving its contents or link target. Reinstallation may leave the old directory present. Leave packages from another source intact.
 3. Update old Light `--skill` arguments and explicit invocations using the complete table. For example, `$implement` becomes `$light-implement`. Update project availability declarations, prompts, automations, and source links deliberately; each write requires the authority for that destination.
 4. For symlinks, verify the canonical source was upgraded and links resolve to the new directories. For copies, verify each Host's complete package content. Refresh discovery according to the Host's own interface.
