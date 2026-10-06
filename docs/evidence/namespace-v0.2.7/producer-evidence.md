@@ -34,3 +34,7 @@ The parent independently rehashed every installed file and every current Light p
 ## Current runtime diagnosis and unblock
 
 `installation-host.md`, `host-diagnosis.json` and `host-raw/` preserve the current read-only endpoint investigation and preceding startup failures. The installed desktop server has no observed documented local listener; no private pipe, daemon, global Skills or configuration mutation was attempted. EPERM root cause remains unestablished. `observe-external.py` in the temporary evidence root is syntax-checked and prepared for an external Terminal; it only rehashes installed files and requests initialize/skills/list under a write restriction. It is not yet externally executed and would establish discovery only, not UI selector or explicit invocation/dependency selection. The user has been asked to run this bounded environment diagnostic while independent evaluation continues.
+
+## External Terminal result and final diagnostic
+
+The user ran the prepared observer and returned `initialized: false`, `project_skills: 0`, `No response to request 1`. Parent independently read the saved command, zero responses, exit 1 and EPERM stderr. A bounded backtrace diagnostic reproduced failure; its stack contains `File::set_times` but no failing path. Scoped macOS deny-log query returned no matching entry. See `host-external/README.md` and raw records. Required Host evidence remains missing; no global permission or acceptance criterion was weakened.

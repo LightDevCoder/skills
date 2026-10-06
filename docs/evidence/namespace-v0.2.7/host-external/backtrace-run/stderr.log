@@ -1,0 +1,13 @@
+WARNING: proceeding, even though we could not create PATH aliases: Operation not permitted (os error 1)
+Error: Operation not permitted (os error 1)
+
+Stack backtrace:
+   0: <std::fs::File>::set_times
+   1: alloc::raw_vec::RawVec<T,A>::grow_one
+   2: _main
+   3: <clatter::crypto_impl::sha::Sha256 as clatter::traits::Hash>::result
+   4: <clatter::crypto_impl::sha::Sha256 as clatter::traits::Hash>::result
+   5: _main
+   6: <clatter::crypto_impl::sha::Sha256 as clatter::traits::Hash>::result
+   7: std::sys::thread_local::destructors::list::register
+   8: __pthread_exit
