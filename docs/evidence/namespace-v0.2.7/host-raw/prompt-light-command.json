@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/usr/bin/sandbox-exec",
+    "-p",
+    "(version 1) (allow default) (deny file-write*) (allow file-write* (subpath \"/private/tmp/light-namespace-host-20261006\") (literal \"/dev/null\"))",
+    "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+    "-c",
+    "sqlite_home=\"/private/tmp/light-namespace-host-20261006/v027-host/sqlite\"",
+    "-c",
+    "log_dir=\"/private/tmp/light-namespace-host-20261006/v027-host/logs\"",
+    "-c",
+    "history.persistence=\"none\"",
+    "--disable",
+    "shell_snapshot",
+    "debug",
+    "prompt-input",
+    "$light-implement Inspect one bounded task and report the selected installed Light skill and required light-tdd/review-loop/light-code-review paths. This is read-only validation; do not execute setup, change any file, commit, publish, configure, or contact people."
+  ],
+  "exit": 1,
+  "HOME_unchanged": true,
+  "CODEX_HOME_unchanged": true
+}

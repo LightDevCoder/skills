@@ -1,0 +1,64 @@
+{
+  "candidate_commit": "ce4898e782f20cb185067fab5721aec6be9b31e4",
+  "light_manifest_sha256": "5a682a3356a501a1285735560ef2261d7bc81cf6c18c31292c54e44ef167926b",
+  "source_package_count": 36,
+  "source_file_count": 386,
+  "checks": [
+    {
+      "project": "/private/tmp/light-namespace-host-20261006/v027-light-first-default",
+      "agent": "codex",
+      "packages": 74,
+      "files": 489,
+      "exact": true
+    },
+    {
+      "project": "/private/tmp/light-namespace-host-20261006/v027-light-first-default",
+      "agent": "claude-code",
+      "packages": 74,
+      "files": 489,
+      "exact": true
+    },
+    {
+      "project": "/private/tmp/light-namespace-host-20261006/v027-light-first-copy",
+      "agent": "codex",
+      "packages": 74,
+      "files": 489,
+      "exact": true
+    },
+    {
+      "project": "/private/tmp/light-namespace-host-20261006/v027-light-first-copy",
+      "agent": "claude-code",
+      "packages": 74,
+      "files": 489,
+      "exact": true
+    },
+    {
+      "project": "/private/tmp/light-namespace-host-20261006/v027-upstream-first-default",
+      "agent": "codex",
+      "packages": 74,
+      "files": 489,
+      "exact": true
+    },
+    {
+      "project": "/private/tmp/light-namespace-host-20261006/v027-upstream-first-default",
+      "agent": "claude-code",
+      "packages": 74,
+      "files": 489,
+      "exact": true
+    },
+    {
+      "project": "/private/tmp/light-namespace-host-20261006/v027-upstream-first-copy",
+      "agent": "codex",
+      "packages": 74,
+      "files": 489,
+      "exact": true
+    },
+    {
+      "project": "/private/tmp/light-namespace-host-20261006/v027-upstream-first-copy",
+      "agent": "claude-code",
+      "packages": 74,
+      "files": 489,
+      "exact": true
+    }
+  ]
+}

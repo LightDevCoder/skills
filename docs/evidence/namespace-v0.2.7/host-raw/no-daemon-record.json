@@ -1,0 +1,55 @@
+{
+  "command": [
+    "/usr/bin/sandbox-exec",
+    "-p",
+    "(version 1) (allow default) (deny file-write*) (allow file-write* (subpath \"/private/tmp/light-namespace-host-20261006\") (literal \"/dev/null\"))",
+    "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+    "app-server",
+    "--listen",
+    "stdio://",
+    "--disable",
+    "shell_snapshot",
+    "-c",
+    "history.persistence=\"none\"",
+    "-c",
+    "sqlite_home=\"/private/tmp/light-namespace-host-20261006/v027-host/sqlite\"",
+    "-c",
+    "log_dir=\"/private/tmp/light-namespace-host-20261006/v027-host/logs\"",
+    "--disable",
+    "daemon_auto_start"
+  ],
+  "requests": [
+    {
+      "id": 1,
+      "method": "initialize",
+      "params": {
+        "clientInfo": {
+          "name": "light_namespace_diagnostics",
+          "title": "Light namespace diagnostics",
+          "version": "0.2.7"
+        },
+        "capabilities": {
+          "experimentalApi": true
+        }
+      }
+    },
+    {
+      "method": "initialized",
+      "params": {}
+    },
+    {
+      "id": 2,
+      "method": "skills/list",
+      "params": {
+        "cwds": [
+          "/private/tmp/light-namespace-host-20261006/review2-light-first-default"
+        ],
+        "forceReload": true
+      }
+    }
+  ],
+  "responses": [],
+  "exit": 1,
+  "HOME_unchanged": true,
+  "CODEX_HOME_unchanged": true
+}

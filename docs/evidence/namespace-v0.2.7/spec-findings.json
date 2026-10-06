@@ -1,0 +1,16 @@
+{
+  "reviewer": "/root/v027_spec",
+  "reviewed_implementation": "ce4898e782f20cb185067fab5721aec6be9b31e4",
+  "fixed_point": "97adf5f319b8800b6635057434dcb4aeda2ddecd",
+  "findings": [
+    {
+      "id": "V27P001",
+      "state": "open",
+      "severity": "high",
+      "location": "docs/evidence/namespace-v0.2.7/producer-evidence.md:22",
+      "problem": "A2 Host selector and A9 actual Codex discovery, explicit source invocation and Light dependency reads lack successful observations. Required evidence gap; static/installer results do not satisfy it.",
+      "reason": "SPEC Revision 3:199 metadata + Host selector; :206 observe actual read paths and behavior; :227 unavailable Host remains not tested. Runtime failed before Skill reads.",
+      "suggestion": "Use the exact frozen candidate and fixed upstream in an initializing isolated Codex environment; preserve the gap until observed."
+    }
+  ]
+}
