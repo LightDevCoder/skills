@@ -2,6 +2,8 @@
 
 [English GitHub Release](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7) · [英文发布说明](RELEASE_NOTES.md) · [发布清单](RELEASE_MANIFEST.zh-CN.md)
 
+**发布状态：已发布并完成验证。** [发布后收据](RELEASE_RECEIPT.zh-CN.md)和[收尾 CI（提交 `b687e6e`）](https://github.com/LightDevCoder/skills/actions/runs/37494241977)记录实际结果。收据也保留先前失败及修复记录。
+
 本次为 12 个 Skill 增加 `light-` 前缀，便于在全局安装中识别来源。内部引用、`ask-light` 路由与界面名称使用新名称。集合仍有 36 个 Skill。
 
 ## 主要变化

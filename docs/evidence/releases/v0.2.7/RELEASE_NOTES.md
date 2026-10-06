@@ -2,6 +2,8 @@
 
 [中文发布说明](RELEASE_NOTES.zh-CN.md) · [Release Manifest](RELEASE_MANIFEST.md)
 
+**Release status: published and attested.** The [post-publication receipt](RELEASE_RECEIPT.md) and [closeout CI for `b687e6e`](https://github.com/LightDevCoder/skills/actions/runs/37494241977) record the verified results. The receipt also preserves earlier failures and their repairs.
+
 Twelve Skills now use `light-` names so their source is clear in global installations. Internal references, `ask-light` routes, and UI labels use the new names. The collection remains at 36 Skills.
 
 ## What changed
