@@ -4,6 +4,28 @@ Use before pushing a candidate, a post-publication attestation or any repair
 commit, and before reporting the release complete. Local checks, published
 tag identity and the final main CI are separate evidence.
 
+## Assemble one repair batch
+
+Within one lifecycle stage, gather the whole coherent repair before committing:
+implementation, generated artifacts, both languages, dependent links, status
+and acceptance evidence. Review and repair locally using an immutable staged
+tree/export or a snapshot digest; a review identity does not require an
+intermediate public commit. Default to one final commit and one push for that
+batch, after final-artifact checks pass. Keep intermediate observations in the
+local task record.
+
+If agent-owned unpublished checkpoint commits already exist, consolidate them
+only within the user's authorized scope, preserving the reviewed package
+bytes and rechecking the final tree. Never rewrite published history, tags,
+user commits or other work to meet a commit-count target. If ownership or
+rewrite authority is unclear, keep the commits and disclose the reason.
+
+PREPARED candidate and post-publication ATTESTED receipt are separate batches:
+publication must precede the receipt, so do not force an entire release into
+one commit or prefill future facts. A genuine failure discovered after a push
+requires a new coherent repair and CI; preserve and explain it. Do not delay
+necessary repair or hide failure just to claim one commit.
+
 ## Verify final artifacts
 
 1. Finish generated files, copies, renames and raw-log archives. Update every

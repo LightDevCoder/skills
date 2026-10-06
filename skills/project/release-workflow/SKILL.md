@@ -15,7 +15,12 @@ description: >-
 
 Governance-gated release workflow for a first-party Agent Skills collection.
 The release follows a six-stage lifecycle separating immutable pre-release
-manifests from post-publication attestation receipts:
+manifests from post-publication attestation receipts. Before each same-stage
+repair, [assemble one coherent batch](references/CLOSEOUT.md#assemble-one-repair-batch):
+finish local review and all dependent changes, then make one final commit and
+one push; candidate and post-publication receipt remain separate stages.
+
+The lifecycle is:
 
 ```text
 PREPARED

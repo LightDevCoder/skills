@@ -1,0 +1,11 @@
+# Release repair batch rule acceptance
+
+Source readiness: PASS (project-review Core after fresh Critic and distinct fresh Evaluator). Deployment and exact pushed-commit CI follow this record and are not future facts asserted here.
+
+Frozen review identity: Git tree `d3bc0b179c989ac96bd6fe5822251084927b1c69`, baseline `5f0fdc6db9d614e3a9764cb9efd456cf0e228f65`. Review used a tree/export instead of creating intermediate commits. Profile: agent-skill. Core/profile independence: full. Critic check1/3, Findings: []; Evaluator found no new gap. No executable product resource or shared test change; software axis N/A.
+
+The package entry and CLOSEOUT reference explicitly gather review, implementation, both languages, generated artifacts, dependent links, status and acceptance evidence into a coherent same-stage batch before one final commit/push. Only authorized, agent-owned unpublished checkpoints may be consolidated; user commits, published history, tags and unclear ownership remain intact. Candidate and post-publication receipt are distinct stages. A real post-push failure legitimately needs a new repair and CI, with its evidence preserved.
+
+C1-C5 are accepted for source/package readiness. Existing final-artifact staged-tree exports, commit-tree equality and exact-SHA CI conditions remain. Four-file isolated copy matches the review tree; metadata/frontmatter and implicit policy unchanged. Full checks pass544pytest/168unittest, compilation/public docs/whitespace; exported collection discovery passes. Independent Evaluator read the actual installed package and correctly interpreted four fixtures: incomplete dependent links/review holds the batch; only authorized unpublished own checkpoints can be consolidated; candidate/receipt cannot be collapsed; genuine later failure is preserved and repaired. These are bounded model/behavioral observations, not an actual new release or CI run.
+
+The final task will commit/push once after all local artifacts and checks, wait matching successful CI, backup and update only the active release-workflow package, and preserve other installed Skills. No new release or notification-policy change. Operational facts are recorded outside their own commit to avoid a self-reference loop.

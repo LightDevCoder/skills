@@ -6,7 +6,7 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
-- `release-workflow`: Validate finalized staged artifacts and receipt/archive links before every push; bind candidate and final attestation CI to exact commits, wait for success, and disclose failed attempts and historical file badges. Preserve release history and notification settings.
+- `release-workflow`: Validate finalized staged artifacts and receipt/archive links before every push; bind candidate and final attestation CI to exact commits, wait for success, and disclose failed attempts and historical file badges. Use one final commit/push per coherent same-stage repair, gathering review and all affected artifacts first; keep candidate/receipt stages and genuine post-push failures distinct. Preserve release history and notification settings.
 
 ## 0.2.7 — 2026-10-07
 
