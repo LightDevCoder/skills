@@ -287,7 +287,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Invocation:** Model-invoked (or manual entry where supported).
 - **Package:** [skills/project/release-workflow/](skills/project/release-workflow)
 - **Status:** Admitted first-party; MIGRATE — NO REWRITE (from `LightDevCoder/release-workflow`).
-- **Evidence:** [SKILL.md](skills/project/release-workflow/SKILL.md).
+- **Evidence:** [SKILL.md](skills/project/release-workflow/SKILL.md) · [Closeout guard acceptance](docs/evidence/2026-10-07-release-closeout/acceptance.md).
 - **Installation path:** `<skills-root>/release-workflow/`.
 
 ### light-research

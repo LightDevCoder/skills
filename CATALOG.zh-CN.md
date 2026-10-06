@@ -287,7 +287,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** Model-invoked；支持手动入口。
 - **包位置：** [skills/project/release-workflow/](skills/project/release-workflow)
 - **状态：** 第一方已准入；MIGRATE — NO REWRITE（来自 `LightDevCoder/release-workflow`）。
-- **证据：** [SKILL.md](skills/project/release-workflow/SKILL.md)。
+- **证据：** [SKILL.md](skills/project/release-workflow/SKILL.md) · [发布收尾门禁验收](docs/evidence/2026-10-07-release-closeout/acceptance.md)。
 - **安装路径：** `<skills-root>/release-workflow/`。
 
 ### light-research
