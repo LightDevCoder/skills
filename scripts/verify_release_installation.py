@@ -108,6 +108,10 @@ def main() -> None:
     if len(cli_files) != 1:
         raise ValueError("cannot bind the resolved CLI distribution")
     cli_sha = hashlib.sha256(cli_files[0].read_bytes()).hexdigest()
+    resolved_version = json.loads((cli_files[0].parent.parent / "package.json").read_text())["version"]
+    if not re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][A-Za-z0-9.-]+)?", resolved_version) or resolved_version not in cli_version:
+        raise ValueError("CLI version response does not match its resolved distribution")
+    cli[-1] = "skills@" + resolved_version
 
     def install(name: str, source: str, flags: list[str], expected: dict, global_scope: bool = False) -> None:
         project = args.output / name
@@ -136,7 +140,8 @@ def main() -> None:
     default_after = run(["git", "ls-remote", REPOSITORY, "refs/heads/main"]).split()[0]
     if default_after != default_sha:
         raise ValueError("default branch moved during installation; rerun against stable identities")
-    if hashlib.sha256(cli_files[0].read_bytes()).hexdigest() != cli_sha:
+    final_cli_files = list((args.output / "npm-cache").glob("_npx/*/node_modules/skills/dist/cli.mjs"))
+    if not final_cli_files or any(hashlib.sha256(p.read_bytes()).hexdigest() != cli_sha for p in final_cli_files):
         raise ValueError("resolved CLI distribution changed during verification")
     record = {
         "status": "VERIFIED", "tag": args.tag, "pinned_commit": pinned_sha,
