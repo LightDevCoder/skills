@@ -10,13 +10,11 @@
 
 ## 当前同步基线
 
-准入集合包含 `skills/` 下 **36 个第一方 Skill**（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)）。本 checkout 的已验证发布基线为 `v0.2.5`（36 个包；上一稳定版为 `v0.2.4`）。
+准入集合包含 `skills/` 下 **36 个第一方 Skill**（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)）。当前稳定版本为 `v0.2.6`（36 个包；上一稳定版为 `v0.2.5`）。
 
 历史：`v0.1.1` 五个、`v0.1.2` 七个、`v0.1.3` 工具链迁移、`v0.1.4`（`light-kanban-worker`）、`v0.1.5` 调度与身份加固、`v0.1.6`（`kb-init`）。结构发现检查在 [tests/test_collection_discovery.py](../tests/test_collection_discovery.py) 与 [tests/test_composition.py](../tests/test_composition.py)，仅为结构证据，不是 fresh-install 证明。
 
-v0.2.6 候选按[名称迁移说明](MIGRATION-v0.2.6.zh-CN.md)调整 12 个名称；v0.2.5 为本 checkout 的已验证发布基线。
-
-名称迁移发布已阻断：远端 v0.2.6 被占用，不能覆盖或自行改号；见[发布阻断记录](evidence/namespace-v0.2.6/publication-blocker.md)。
+v0.2.7 名称迁移候选按[迁移说明](MIGRATION-v0.2.7.zh-CN.md)调整 12 个名称，当前稳定版仍为 v0.2.6。先前 v0.2.6 尝试的证据保留为历史，不代表当前候选阻断。
 
 ## 变更流程
 
@@ -65,7 +63,7 @@ v0.2.6 候选按[名称迁移说明](MIGRATION-v0.2.6.zh-CN.md)调整 12 个名�
 
 ## Closeout 记录
 
-收尾时记录最终仓库位置、已发版本/tag、已验证命令、第一方目录（34）、已批准 Port / direct upstream / modified third-party 区分、证据、限制与迁移/归档指引。不得把结构或模拟证据写成 runtime proof。Historical closeout must be recorded with exact identifiers and limitations — closeout is not structural proof. 历史证据（`docs/evidence/`）保持不变。
+收尾时记录最终仓库位置、已发版本/tag、已验证命令、第一方目录（36）、已批准 Port / direct upstream / modified third-party 区分、证据、限制与迁移/归档指引。不得把结构或模拟证据写成 runtime proof。Historical closeout must be recorded with exact identifiers and limitations — closeout is not structural proof. 历史证据（`docs/evidence/`）保持不变。
 
 
 ## 分类目录的验证入口

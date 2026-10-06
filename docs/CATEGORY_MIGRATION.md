@@ -2,7 +2,7 @@
 
 [简体中文](CATEGORY_MIGRATION.zh-CN.md)
 
-v0.2.2 moved all 36 source packages from a flat directory into categories without changing names or invocation modes at that time. The table preserves old flat paths and links to the current v0.2.6 candidate; 12 packages also have a separate [name migration](MIGRATION-v0.2.6.md). The local verified v0.2.5 baseline retains the earlier names.
+v0.2.2 moved all 36 source packages from a flat directory into categories without changing names or invocation modes at that time. The table preserves old flat paths and links to the current v0.2.7 candidate; 12 packages also have a separate [name migration](MIGRATION-v0.2.7.md). The published v0.2.6 release retains the earlier names.
 
 A category is not a Skill package and contains no `SKILL.md`. Old tags and historical evidence retain their original paths; inspect their recorded revision. When updating source references, symlinks, or manual copies to the candidate, also update `--skill` values and explicit invocations through the name migration guide.
 

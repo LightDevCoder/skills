@@ -63,6 +63,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-## Light canonical name migration (v0.2.6 candidate)
+## Light canonical name migration (v0.2.7 candidate)
 
 The current Light package is `light-implement` (formerly `implement`). Only package identity, UI source labeling, and Light capability references changed. Original upstream paths, pinned revisions, license notices, and responsibilities above remain applicable. Upstream names identify provenance, not current Light invocation.

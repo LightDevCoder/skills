@@ -11,6 +11,8 @@ const GOLDEN = Object.freeze({
   routeColors: ["#397dc1", "#e77e22", "#618344", "#209aaa", "#8865a5", "#df6185"],
   maxOverviewPlaces: 10
 });
+const TEMPLATE_MAP_DISCLAIMER = "本图仅表达地点的相对方位与路线顺序，不代表真实比例或精确地理边界。";
+const GEOGRAPHIC_MAP_DISCLAIMER = "地理轮廓来自配置的边界数据；地点按提供坐标绘制。连线仅表示行程顺序，不代表实际道路或航线。";
 
 function argsFrom(argv) {
   const supported = new Set(["trip", "config", "map", "out"]);
@@ -51,6 +53,69 @@ function finiteGeo(place) {
   const lat = Number(place?.geo?.lat);
   const lng = Number(place?.geo?.lng ?? place?.geo?.lon);
   return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
+}
+
+function geographicProjection(bounds, frame) {
+  if (!Array.isArray(bounds) || bounds.length !== 4) throw new Error("Geographic map bounds must contain west, south, east, north");
+  const [west, south, east, north] = bounds;
+  if (![west, south, east, north, frame?.x, frame?.y, frame?.width, frame?.height].every(Number.isFinite) || east <= west || north <= south || frame.width <= 0 || frame.height <= 0) {
+    throw new Error("Geographic map bounds and frame must be finite and ordered");
+  }
+  const longitudeScale = Math.cos((south + north) / 2 * Math.PI / 180);
+  const scale = Math.min(frame.width / ((east - west) * longitudeScale), frame.height / (north - south));
+  const originX = frame.x + (frame.width - (east - west) * longitudeScale * scale) / 2;
+  const originY = frame.y + (frame.height - (north - south) * scale) / 2;
+  return ({ lat, lng }) => ({
+    x: Number((originX + (lng - west) * longitudeScale * scale).toFixed(2)),
+    y: Number((originY + (north - lat) * scale).toFixed(2))
+  });
+}
+
+function geographicPath(geometry, project) {
+  if (geometry?.type !== "MultiPolygon") throw new Error("Geographic outline must be a MultiPolygon");
+  return geometry.coordinates.flatMap((polygon) => polygon.map((ring) => {
+    if (!Array.isArray(ring) || ring.length < 4 || ring.some(([lng, lat]) => !Number.isFinite(lng) || !Number.isFinite(lat) || Math.abs(lng) > 180 || Math.abs(lat) > 90)) {
+      throw new Error("Geographic outline contains invalid coordinates");
+    }
+    return ring.map(([lng, lat], index) => {
+    const point = project({ lat, lng });
+    return `${index ? "L" : "M"}${point.x} ${point.y}`;
+    }).join(" ") + " Z";
+  })).join(" ");
+}
+
+function geographicBaseSvg(geometry, configuration) {
+  const mainProject = geographicProjection(configuration.mainBounds, configuration.mainFrame);
+  const detailProject = geographicProjection(configuration.detailBounds, configuration.detailFrame);
+  const mainPath = geographicPath(geometry, mainProject);
+  const detailPath = geographicPath(geometry, detailProject);
+  const [west, south, east, north] = configuration.detailBounds;
+  const northwest = mainProject({ lat: north, lng: west });
+  const southeast = mainProject({ lat: south, lng: east });
+  const focus = { x: northwest.x - 12, y: northwest.y - 12, width: southeast.x - northwest.x + 24, height: southeast.y - northwest.y + 24 };
+  const frame = configuration.detailFrame;
+  const xmlText = (value) => String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&apos;" })[character]);
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${GOLDEN.width} ${GOLDEN.height}" role="img" aria-label="${xmlText(configuration.ariaLabel || "真实地理轮廓与行程区域")}">
+  <defs>
+    <linearGradient id="sea" x2="0" y2="1"><stop stop-color="#f2f7f4"/><stop offset="1" stop-color="#e6efed"/></linearGradient>
+    <pattern id="grain" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="3" cy="6" r=".8" fill="#a9b8a8" opacity=".22"/><circle cx="18" cy="21" r=".7" fill="#a9b8a8" opacity=".18"/></pattern>
+    <clipPath id="detail-clip"><rect x="${frame.x}" y="${frame.y}" width="${frame.width}" height="${frame.height}" rx="8"/></clipPath>
+  </defs>
+  <rect width="${GOLDEN.width}" height="${GOLDEN.height}" fill="url(#sea)"/>
+  <path d="${mainPath}" fill="#f5f0dd" fill-rule="evenodd" stroke="#61746c" stroke-width="3" stroke-linejoin="round"/>
+  <path d="${mainPath}" fill="url(#grain)" fill-rule="evenodd"/>
+  <rect x="${focus.x}" y="${focus.y}" width="${focus.width}" height="${focus.height}" rx="14" fill="#5f998c" fill-opacity=".12" stroke="#397a7b" stroke-width="2" stroke-dasharray="9 7"/>
+  <path d="M${focus.x} ${focus.y + focus.height} C${focus.x - 100} ${focus.y + focus.height + 25} ${frame.x + frame.width + 95} ${frame.y + 20} ${frame.x + frame.width} ${frame.y + 20}" fill="none" stroke="#90a9a2" stroke-width="2" stroke-dasharray="8 7"/>
+  <text x="1020" y="135" text-anchor="middle" fill="#526d68" font-family="serif" font-size="22" letter-spacing="2">${xmlText(configuration.mainLabel || "REGION / 地区全图")}</text>
+  <rect x="${frame.x - 18}" y="${frame.y - 45}" width="${frame.width + 36}" height="${frame.height + 62}" rx="20" fill="#fffdf6" stroke="#b9cbc4" stroke-width="2"/>
+  <text x="${frame.x + 8}" y="${frame.y - 17}" fill="#244e59" font-family="serif" font-size="23">${xmlText(configuration.detailLabel || "ITINERARY / 行程区域")}</text>
+  <g clip-path="url(#detail-clip)">
+    <rect x="${frame.x}" y="${frame.y}" width="${frame.width}" height="${frame.height}" fill="#e8f1ee"/>
+    <path d="${detailPath}" fill="#f5f0dd" fill-rule="evenodd" stroke="#61746c" stroke-width="3" stroke-linejoin="round"/>
+    <path d="${detailPath}" fill="url(#grain)" fill-rule="evenodd"/>
+  </g>
+  <rect x="${frame.x}" y="${frame.y}" width="${frame.width}" height="${frame.height}" rx="8" fill="none" stroke="#a9bcb5" stroke-width="1.5"/>
+  </svg>\n`;
 }
 
 function distanceKm(first, second) {
@@ -425,23 +490,43 @@ function mapDataForRegion(mapData, region, regionCount) {
   return { ...mapData, region, places, routes, dailyRoutes };
 }
 
-function buildRegion(mapData, manifest) {
+async function buildRegion(mapData, manifest) {
   if (!mapData.places.length) return null;
-  const selection = templateSelection(mapData, manifest);
-  const template = selection.template;
-  const points = separatePoints(projectedLayout(mapData.places, mapData.routes, template.safeArea), mapData.places, template.safeArea);
+  const geographic = mapData.mapMode === "geographic-outline" ? mapData.region.geographic : null;
+  const selection = geographic ? null : templateSelection(mapData, manifest);
+  const template = selection?.template;
+  let points;
+  if (geographic) {
+    if (!/^assets\/maps\/[a-z0-9-]+\.geojson$/.test(geographic.outlineFile || "") || !/^assets\/maps\/[a-z0-9-]+\.svg$/.test(geographic.baseImage || "")) {
+      throw new Error("Geographic map paths must name local map assets");
+    }
+    const boundary = await readJson(absolute(geographic.outlineFile));
+    const projection = geographicProjection(geographic.detailBounds, geographic.detailFrame);
+    points = new Map(mapData.places.map((place) => {
+      const geo = finiteGeo(place);
+      if (!geo) throw new Error(`Geographic map place ${place.id} needs coordinates`);
+      const [west, south, east, north] = geographic.detailBounds;
+      if (geo.lng < west || geo.lng > east || geo.lat < south || geo.lat > north) throw new Error(`Geographic map place ${place.id} is outside detail bounds`);
+      return [place.id, projection(geo)];
+    }));
+    await fs.writeFile(absolute(geographic.baseImage), geographicBaseSvg(boundary.geometry, geographic));
+  } else {
+    points = separatePoints(projectedLayout(mapData.places, mapData.routes, template.safeArea), mapData.places, template.safeArea);
+  }
   const occupied = [{ x: 18, y: 38, width: 335, height: 360 }, ...mapData.places.map((place) => { const point = points.get(place.id); return { x: point.x - 17, y: point.y - 17, width: 34, height: 34 }; })];
   const renderedPlaces = mapData.places.map((place, index) => {
     const point = points.get(place.id);
     const days = daysForPlace(place, mapData.routes);
     const colored = { ...place, ...point, color: GOLDEN.routeColors[((days[0] || 1) - 1) % GOLDEN.routeColors.length] };
-    const label = labelFor(colored, index, occupied);
-    const primary = place.name || place.nameZh || place.id;
-    const secondary = place.nameZh && place.nameZh !== primary ? place.nameZh : null;
-    return { id: place.id, ...point, color: colored.color, tx: Number(label.x.toFixed(2)), ty: Number(label.y.toFixed(2)), size: 24, anchor: label.anchor, lines: secondary ? [`${primary} /`, secondary] : [primary], query: place.query || `${primary} ${mapData.region.label}`, geo: place.geo, days };
+    const label = geographic && place.labelPosition ? place.labelPosition : labelFor(colored, index, occupied);
+    const primary = place.mapLabel || place.name || place.nameZh || place.id;
+    const secondary = !geographic && place.nameZh && place.nameZh !== primary ? place.nameZh : null;
+    return { id: place.id, ...point, color: colored.color, tx: Number(label.x.toFixed(2)), ty: Number(label.y.toFixed(2)), size: geographic ? 22 : 24, anchor: label.anchor, lines: secondary ? [`${primary} /`, secondary] : [primary], query: place.query || `${place.name || primary} ${mapData.region.label}`, geo: place.geo, days, leader: Boolean(geographic) };
   });
   const placeById = new Map(renderedPlaces.map((place) => [place.id, place]));
-  const overviewPlaceIds = overviewPlaces(mapData.places, mapData.routes);
+  const overviewPlaceIds = geographic && Array.isArray(mapData.region.overviewPlaceIds)
+    ? mapData.region.overviewPlaceIds.filter((id) => placeById.has(id))
+    : overviewPlaces(mapData.places, mapData.routes);
   const overviewSet = new Set(overviewPlaceIds);
   const routes = mapData.routes.map((route) => {
     const ids = (route.placeIds || []).filter((id) => placeById.has(id));
@@ -463,19 +548,21 @@ function buildRegion(mapData, manifest) {
     id: regionId,
     label: mapData.region.label,
     countryCode: mapData.region.countryCode,
-    scope: "template-schematic",
-    mapMode: "frozen-template",
-    templateId: template.id,
-    mapModeReason: selection.reason,
-    mapModeMetrics: Object.fromEntries(Object.entries(selection.metrics).map(([key, value]) => [key, typeof value === "number" ? Number(value.toFixed(2)) : value])),
+    scope: geographic ? "geographic-outline" : "template-schematic",
+    mapMode: geographic ? "geographic-inset" : "frozen-template",
+    templateId: template?.id || null,
+    mapModeReason: geographic ? "authored-geographic-outline" : selection.reason,
+    mapModeMetrics: geographic ? { geoPlaceCount: points.size } : Object.fromEntries(Object.entries(selection.metrics).map(([key, value]) => [key, typeof value === "number" ? Number(value.toFixed(2)) : value])),
     days,
     canvas: { width: GOLDEN.width, height: GOLDEN.height },
-    projection: { type: "relative-schematic", bounds: null },
-    baseImage: template.file,
+    projection: geographic ? { type: "geographic-inset", bounds: geographic.detailBounds, frame: geographic.detailFrame } : { type: "relative-schematic", bounds: null },
+    baseImage: geographic ? geographic.baseImage : template.file,
     title: mapData.region.title || mapData.title || `${mapData.region.label} · 旅行路线`,
-    ariaLabel: `${mapData.region.label}模板化旅行路线示意图，共${days.length}天`,
-    description: mapData.region.description,
-    disclaimer: mapData.disclaimer || manifest.disclaimer,
+    ariaLabel: geographic ? `${mapData.region.label}真实地理轮廓和地点路线图，共${days.length}天` : `${mapData.region.label}模板化旅行路线示意图，共${days.length}天`,
+    description: mapData.region.description || (geographic ? "地理轮廓与行程地点；彩色连线只表示行程顺序。" : undefined),
+    disclaimer: geographic && (!mapData.disclaimer || mapData.disclaimer === TEMPLATE_MAP_DISCLAIMER)
+      ? GEOGRAPHIC_MAP_DISCLAIMER
+      : mapData.disclaimer || manifest.disclaimer,
     heading: { text: mapData.region.heading || mapData.region.label, x: 33, y: 105, size: 40 },
     legend: { x: 35, y: 168, gap: 43 },
     annotations: [],
@@ -511,17 +598,18 @@ if (config.modules?.overview === false) {
   console.log(`Skipped map build for ${path.relative(ROOT, outPath)} because the map module is disabled.`);
 } else {
   const manifest = await readJson(absolute(MANIFEST_PATH));
-  if (mapData.mapMode !== "template-auto") throw new Error("trip-data.json map.mapMode must be template-auto");
+  if (!["template-auto", "geographic-outline"].includes(mapData.mapMode)) throw new Error("trip-data.json map.mapMode must be template-auto or geographic-outline");
   if (!Array.isArray(mapData.places) || !mapData.places.length) throw new Error("trip-data.json map.places must contain places");
   if (!Array.isArray(mapData.routes) || !mapData.routes.length) throw new Error("trip-data.json map.routes must contain routes");
 
   const definitions = destinationRegions(mapData, tripData);
+  if (mapData.mapMode === "geographic-outline" && definitions.some((definition) => !definition.geographic)) throw new Error("Geographic map mode requires an outline configuration for every region");
   const previousTemplates = new Map((tripData.routeMap?.regions || []).map(region => [region.id, region.templateId]));
-  const regions = definitions.map((definition) => {
+  const regions = (await Promise.all(definitions.map(async (definition) => {
     const regional = mapDataForRegion(mapData, definition, definitions.length);
     if ((!regional.templateId || regional.templateId === "auto") && previousTemplates.has(definition.id)) regional.templateId = previousTemplates.get(definition.id);
     return buildRegion(regional, manifest);
-  }).filter(Boolean);
+  }))).filter(Boolean);
   if (!regions.length) throw new Error("No destination map regions contain usable places");
   for (const region of regions) await fs.access(absolute(region.baseImage));
   const output = {
@@ -532,5 +620,5 @@ if (config.modules?.overview === false) {
     routeMap: { defaultRegionId: regions.some((region) => region.id === mapData.defaultRegionId) ? mapData.defaultRegionId : regions[0].id, regions }
   };
   await writeJsonAtomically(outPath, output);
-  console.log(`Built ${path.relative(ROOT, outPath)} with ${regions.length} destination map region(s): ${regions.map((region) => `${region.label}=${region.templateId}`).join(", ")}.`);
+  console.log(`Built ${path.relative(ROOT, outPath)} with ${regions.length} destination map region(s): ${regions.map((region) => `${region.label}=${region.templateId || region.mapMode}`).join(", ")}.`);
 }

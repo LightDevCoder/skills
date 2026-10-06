@@ -1,0 +1,32 @@
+{
+  "candidate": "06b0e64c0d99c5bce5de2dd1bf776e82d3c9df72",
+  "charter": "travel-handbook-2026-10-03-v2",
+  "round": 4,
+  "maximum": 4,
+  "standards": {
+    "agent": "/root/standards_round4_resume",
+    "findings": [],
+    "report": "round4-standards.md",
+    "rechecked": {
+      "F-001": "fixed"
+    }
+  },
+  "spec": {
+    "agent": "/root/spec_round4_resume",
+    "findings": [],
+    "report": "round4-spec.md",
+    "rechecked": {
+      "F-002": "fixed",
+      "F-003": "fixed",
+      "F-004": "fixed",
+      "F-005": "fixed",
+      "F-006": "fixed",
+      "F-007": "fixed"
+    }
+  },
+  "core": {
+    "openFindings": [],
+    "disposition": "F-001..F-007 resolved with per-ID independent evidence; fresh whole-target Evaluator pending."
+  },
+  "attempts": "Initial Round4 review was interrupted by account/platform state before complete reports; resumed the same Round4 without source or baseline changes. Completed reports retained."
+}

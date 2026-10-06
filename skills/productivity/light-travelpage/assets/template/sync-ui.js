@@ -79,7 +79,7 @@
         const current = await TravelRuntimeStorage.exportSnapshot(options);
         if (
           !confirm(
-            `将用备份替换当前共享待办、门票状态和账本（${backup.snapshot?.bills?.length || 0} 笔账单）。建议先导出当前备份。继续恢复？`,
+            `将用备份替换当前共享 to-do、门票状态和账本（${backup.snapshot?.bills?.length || 0} 笔账单）。建议先导出当前备份。继续恢复？`,
           )
         )
           return;

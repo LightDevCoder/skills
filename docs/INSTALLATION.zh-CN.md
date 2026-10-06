@@ -2,21 +2,23 @@
 
 [English installation guide](INSTALLATION.md)
 
-本 checkout 的第一方集合已验证发布基线是 [v0.2.5](https://github.com/LightDevCoder/skills/releases/tag/v0.2.5)，发布于 `v0.2.5` tag（不可变的[发布清单](evidence/releases/v0.2.5/RELEASE_MANIFEST.zh-CN.md)和发布后的[发布收据](evidence/releases/v0.2.5/RELEASE_RECEIPT.zh-CN.md)）。它提供 **36 个已准入的第一方 Skill**，涵盖七大按职责划分的分类目录。`skills/<category>/<name>/` 内的包契约仍是行为权威；本页规定安装方法与验证记录。
+公开第一方集合当前稳定版本是 [v0.2.6](https://github.com/LightDevCoder/skills/releases/tag/v0.2.6)，发布于 `v0.2.6` tag（不可变的[发布清单](evidence/releases/v0.2.6/RELEASE_MANIFEST.zh-CN.md)和发布后的[发布收据](evidence/releases/v0.2.6/RELEASE_RECEIPT.zh-CN.md)）。它提供 **36 个已准入的第一方 Skill**，涵盖七大按职责划分的分类目录。`skills/<category>/<name>/` 内的包契约仍是行为权威；本页规定安装方法与验证记录。
 
 标准安装命令是通用 `latest` 形式：它跟随仓库默认 revision，因此 `npx skills add LightDevCoder/skills` 是推荐的交互式安装入口，可按需选择 Skill 与目标 Agent。pinned release 命令选择已发布的 tag，用于可复现安装。历史验证命令（曾用于在隔离环境中跨所有受支持 Agent 测试完整集合）与历史证据一同记录在下方。
 
-## v0.2.6 名称迁移候选
+v0.2.6 为 `light-travelpage` 增加手册 UI 和默认关闭的 AI 选择。[发布说明](evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md)记录变化，[发布收据](evidence/releases/v0.2.6/RELEASE_RECEIPT.zh-CN.md)记录两个隔离目录中的标签/最新主干全新安装：均为 36 个包、385 个包内文件，逐字节一致；Skills CLI 1.7.0 实际发现全部 36 个 Skill。
 
-本地名称迁移候选尚未发布。远端 v0.2.6 已被旅行手册发布占用，保留旧名；v0.2.5 是本 checkout 的已验证基线，并非最新远端稳定版。下列新名称模板为 **BLOCKED，不可执行**。按 D7，不能覆盖标签或自行改号；见[发布阻断记录](evidence/namespace-v0.2.6/publication-blocker.md)。默认分支命令跟随实际远端 `main`，不包含本地候选，也不自动选择稳定标签。
+## v0.2.7 名称迁移候选
+
+本地名称迁移候选尚未发布。当前稳定 v0.2.6 保留旧名。下列命令仅为候选模板；准确候选 CI、真实 Host 验证和实际发布源新鲜安装尚待完成。默认分支命令跟随实际远端 `main`，不保证包含本地候选，也不自动选择稳定标签。
 
 ```bash
-# BLOCKED — do not execute: npx skills add LightDevCoder/skills#v0.2.6
-# BLOCKED — do not execute: npx skills add LightDevCoder/skills#v0.2.6 --skill light-implement
-# BLOCKED — do not execute: npx skills add LightDevCoder/skills#v0.2.6 --global --agent codex
+npx skills add LightDevCoder/skills#v0.2.7
+npx skills add LightDevCoder/skills#v0.2.7 --skill light-implement
+npx skills add LightDevCoder/skills#v0.2.7 --global --agent codex
 ```
 
-升级前阅读[名称迁移与恢复说明](MIGRATION-v0.2.6.zh-CN.md)。重新安装不会证明旧名已清理，也不会自动迁移其他项目或自动化。下方默认分支中的新名称示例同样是候选用法；历史固定标签命令保留原名称。
+升级前阅读[名称迁移与恢复说明](MIGRATION-v0.2.7.zh-CN.md)。重新安装不代表旧名已清理。下方新名称默认分支示例同样是候选用法；历史固定标签命令保留原名称。
 
 ## 分类源码与安装目录
 
@@ -41,7 +43,7 @@ npx skills add LightDevCoder/skills
 ```bash
 npx skills add LightDevCoder/skills --skill agent-config
 npx skills add LightDevCoder/skills --skill project-review
-# BLOCKED — candidate not on remote main: npx skills add LightDevCoder/skills --skill light-research
+npx skills add LightDevCoder/skills --skill light-research
 npx skills add LightDevCoder/skills --skill humanizer
 npx skills add LightDevCoder/skills --skill light-travelpage
 npx skills add LightDevCoder/skills --skill project-retro
@@ -52,13 +54,14 @@ npx skills add LightDevCoder/skills --skill project-retro
 通过指定发布的 Release Tag 进行确定性安装（推荐用于可复现环境）：
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.5 -y
-npx skills add LightDevCoder/skills#v0.2.5 --skill project-retro -y
+npx skills add LightDevCoder/skills#v0.2.6 -y
+npx skills add LightDevCoder/skills#v0.2.6 --skill project-retro -y
 ```
 
 历史版本（如 `#v0.2.4`、`#v0.2.3`、`#v0.2.2`、`#v0.2.1` 与 `#v0.2.0`）依然保留供复现：
 
 ```bash
+npx skills add LightDevCoder/skills#v0.2.5
 npx skills add LightDevCoder/skills#v0.2.4
 npx skills add LightDevCoder/skills#v0.2.3
 npx skills add LightDevCoder/skills#v0.2.3 --skill project-retro

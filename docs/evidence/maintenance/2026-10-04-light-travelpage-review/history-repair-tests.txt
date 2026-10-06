@@ -1,0 +1,63 @@
+npm notice run light-travelpage-site@0.1.0 test
+npm notice run node --test tests/*.test.mjs
+✔ accommodation dates and itinerary references are checked while legacy trips remain valid (3.595541ms)
+✔ flight, stay and itinerary PDF tickets share an image preview, zoom and source link (14.080917ms)
+✔ rental locations use canonical references or address-search fallbacks (4.118875ms)
+✔ flight carousel controls reach the second card and return to the first (5.061166ms)
+✔ calendar and null draft handling (4.081916ms)
+Shared state operation failed Error
+Shared state operation failed Error
+Shared state operation failed Error
+Shared state operation failed Error
+✔ todo seed contract matches first sync GET (29.78525ms)
+✔ bad dates, backwards span and dangling references fail (0.34975ms)
+✔ ticket asset traversal and invalid map coordinates fail (0.321916ms)
+✔ fail closed for missing auth and private assets (1.296583ms)
+✔ signed session, code rotation, bad login and cross-origin writes (2.055666ms)
+✔ server rejects other trips and unauthenticated direct handler (2.373459ms)
+✔ D1 contract: persist, retry, conflict and changed duplicate ID (7.124042ms)
+✔ shared settings persist and invalid bill cannot mutate state (3.00525ms)
+✔ valid integer-cent bill and member references (0.700125ms)
+✔ client preserves exact uncertain request, including after reload (1.28525ms)
+✔ client requires observed revision and does not leak to cross-origin API (0.472916ms)
+✔ damaged backup is rejected before any network operation (0.19775ms)
+✔ unsupported currencies fail atomically in bills and settings (0.11125ms)
+✔ Pages catch-all array route is accepted for exactly one trip segment (2.568125ms)
+✔ journal cleanup failure cannot roll back a confirmed server save (1.271ms)
+✔ uncertain request survives expired login and retries the identical body (0.573583ms)
+✔ batch recovery delivers successful snapshots when another adapter still fails (0.9015ms)
+✔ only the translation runtime is publicly readable for bilingual sign-in (1.472416ms)
+✔ chapters and deep stay links retain drafts and respect disabled modules (57.342833ms)
+✔ material-only draft remains useful when all travel modules are disabled (4.088833ms)
+✔ date selection shows the supplied day without rebuilding original ticket controls (15.448417ms)
+✔ pocket and material entries derive from supplied records and escape their values (3.952916ms)
+✔ content anchor preserves the visible chapter and disabled ledger hashes retain a travel chapter (85.741ms)
+✔ demo navigation remains in the travel main when the handbook footer is outside it (7.051208ms)
+✔ browser history restores the chapter belonging to a content-anchor entry (85.812291ms)
+✔ switch language in place without resetting form, user text or expanded state (20.891917ms)
+✔ authored missing translations retain both source languages including blank entries (3.523208ms)
+✔ actual stay cards mark missing cancellation and navigation translations both ways (5.12925ms)
+✔ pocket follows initialized and refreshed ledger snapshots without clearing bill drafts (56.449ms)
+✔ forced ledger refresh updates pocket and retains the open member form (18.873583ms)
+✔ member conflict refresh preserves form and permits explicit retry (49.711416ms)
+✔ unrelated task retry leaves new bill draft untouched (21.426ms)
+✔ failed bill retry preserves newer edits and clears only the submitted draft (52.393458ms)
+✔ member retry preserves newer DOM input and refreshes saved members after closing (37.923ms)
+✔ unchanged member retry renders the confirmed server snapshot immediately (32.679041ms)
+✔ confirmed retry is consumed even when subsequent GET fails (48.754792ms)
+✔ save rejected by pending guard cannot replace the original recovery draft generation (43.360333ms)
+✔ bilingual ledger keeps the real form draft through switching and forced refresh (21.788167ms)
+✔ mobile map zoom starts at the configured itinerary inset (5.889833ms)
+✔ geographic map builds a sourced outline and keeps coordinates fixed (74.614125ms)
+✔ navigation follows destination region and per-region choice, preserving unknown coordinates as search (5.942584ms)
+✔ map URLs encode labels, respect coordinate systems, and reject unsafe destinations (3.171083ms)
+✔ Google and Apple search by readable place and address while Apple retains WGS84 ll (2.596542ms)
+✔ coordinates are a search fallback when no readable name or address exists (2.638959ms)
+ℹ tests 49
+ℹ suites 0
+ℹ pass 49
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 647.770792

@@ -326,7 +326,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 
     semantic_matrix = [
         ("README.md", "README.zh-CN.md", [("Light Skills", "Light Skills"), ("ask-light", "ask-light"), ("Assets/header.png", "Assets/header.png")]),
-        ("CATALOG.md", "CATALOG.zh-CN.md", [("Collection status", "集合状态"), ("Local verified release baseline", "本地已验证发布基线"), ("Installation authority", "安装权威")]),
+        ("CATALOG.md", "CATALOG.zh-CN.md", [("Collection status", "集合状态"), ("Stable release", "稳定版"), ("Installation authority", "安装权威")]),
         ("CHANGELOG.md", "CHANGELOG.zh-CN.md", [("0.2.0", "0.2.0"), ("ATTRIBUTION", "ATTRIBUTION")]),
         ("docs/INSTALLATION.md", "docs/INSTALLATION.zh-CN.md", [("Revision semantics", "Revision 语义"), ("Historical v0.1.0 verification", "历史 v0.1.0 验证"), ("Manual fallback", "手动 fallback")]),
         ("docs/MAINTENANCE.md", "docs/MAINTENANCE.zh-CN.md", [("Authoritative records", "权威记录"), ("Synchronization matrix", "同步矩阵"), ("closeout", "closeout")]),

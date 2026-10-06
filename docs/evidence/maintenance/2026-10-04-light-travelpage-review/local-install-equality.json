@@ -1,0 +1,9 @@
+{
+  "candidate": "3f6cb55c9f0abcfda8d0f6d46da5d7d48753e1b6",
+  "source": "/Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skills-ui/skills/productivity/light-travelpage",
+  "destination": "/Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skill-local-install/.agents/skills/light-travelpage",
+  "files": 61,
+  "all_file_hashes_equal": true,
+  "generated_runtime_files_equal": true,
+  "host": "Project-local Codex Skills CLI discovery; actual current host session reload is not claimed."
+}

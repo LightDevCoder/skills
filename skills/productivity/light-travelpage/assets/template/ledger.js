@@ -1111,6 +1111,13 @@ import { CURRENCY_CATALOG } from "./currencies.js";
     return queued;
   }
 
+  function notifyLedgerChanged(reason) {
+    ledgerRoot.dispatchEvent(new CustomEvent("travel-ledger:changed", {
+      bubbles: true,
+      detail: { tripId: ledgerTripId, reason, data: deepClone(ledgerData) }
+    }));
+  }
+
   async function mutateData(mutator, options = {}) {
     return enqueueMutation(async () => {
       const next = deepClone(ledgerData);
@@ -1125,10 +1132,7 @@ import { CURRENCY_CATALOG } from "./currencies.js";
         if (typeof options.afterSuccess === "function") options.afterSuccess();
         notice = options.message || "";
         renderApp();
-        ledgerRoot.dispatchEvent(new CustomEvent("travel-ledger:changed", {
-          bubbles: true,
-          detail: { tripId: ledgerTripId, reason: options.reason || "update", data: deepClone(ledgerData) }
-        }));
+        notifyLedgerChanged(options.reason || "update");
         return true;
       } catch (error) {
         if (ledgerAdapter.pending && !alreadyPending) recoveredMutation = {generation, afterSuccess: options.afterSuccess};
@@ -1431,10 +1435,7 @@ import { CURRENCY_CATALOG } from "./currencies.js";
         if (fullBillNote) fullBillNote.value = note;
         replaceBillNoteControl(id, false);
         setNotice(note ? "备注已更新" : "备注已清空");
-        ledgerRoot.dispatchEvent(new CustomEvent("travel-ledger:changed", {
-          bubbles: true,
-          detail: { tripId: ledgerTripId, reason: "bill-note-updated", data: deepClone(ledgerData) }
-        }));
+        notifyLedgerChanged("bill-note-updated");
         return true;
       } catch (error) {
         console.error("TravelLedger could not save note", error);
@@ -1788,6 +1789,7 @@ import { CURRENCY_CATALOG } from "./currencies.js";
     initialized = true;
     renderApp();
     ledgerRoot.removeAttribute("aria-busy");
+    notifyLedgerChanged("initialized");
     return deepClone(ledgerData);
   }
 
@@ -1801,11 +1803,17 @@ import { CURRENCY_CATALOG } from "./currencies.js";
         ledgerData = normalizeData(await ledgerAdapter.load());
         renderDirty = true;
         setNotice("已读取同行者的最新数据，保留了你的表单；请检查后重新保存。");
+        notifyLedgerChanged("refresh");
         return true;
       }
       captureBillDraft();
       const next = normalizeData(await ledgerAdapter.load());
-      if (renderDirty || JSON.stringify(next) !== JSON.stringify(ledgerData)) { ledgerData = next; renderApp(); renderDirty = false; }
+      if (renderDirty || JSON.stringify(next) !== JSON.stringify(ledgerData)) {
+        ledgerData = next;
+        renderApp();
+        renderDirty = false;
+        notifyLedgerChanged("refresh");
+      }
       return true;
     },
     async recoverSavedMutation(recovered) {
@@ -1819,9 +1827,11 @@ import { CURRENCY_CATALOG } from "./currencies.js";
       if (changed) {
         renderDirty = true;
         setNotice("先前的修改已保存；保留了你随后输入的内容，请检查后再保存。");
+        notifyLedgerChanged("recovered");
         return;
       }
       if (initialized) renderApp();
+      notifyLedgerChanged("recovered");
     },
     setActiveTab,
     createLocalStorageAdapter,

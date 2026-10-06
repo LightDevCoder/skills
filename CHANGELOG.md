@@ -6,9 +6,16 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
-- v0.2.6 candidate: Rename 12 Light Skills with `light-`, synchronizing package identity, UI source labels, internal references, `ask-light` routing and state logic, discovery, bilingual docs, attribution records, and migration guidance. Keep the other 24 names, 36-package total, responsibilities, and invocation permissions. No installable old-name aliases or automatic global migration; candidate verification continues locally, while publication is BLOCKED by the occupied remote v0.2.6 tag; see the [blocker](docs/evidence/namespace-v0.2.6/publication-blocker.md).
+- v0.2.7 name-migration candidate: Add `light-` to 12 Light Skill names, synchronizing package identity, UI source labels, internal references, `ask-light` routing and state logic, discovery, attribution, bilingual docs, and migration guidance. Keep the other 24 names, 36-package total, responsibilities, and invocation permissions. No old-name aliases or automatic global migration; candidate CI, real Host checks, and fixed-release fresh installation remain pending.
+- The owner confirmed v0.2.7 after the earlier v0.2.6 namespace attempt was blocked by an existing release. Preserve the [historical record](docs/evidence/namespace-v0.2.6/publication-blocker.md) and all published v0.2.6 travel changes.
 
-- `light-travelpage`: Build authenticated first-page PNG previews for PDF tickets and display them with zoom and an original-PDF link in the shared dialog. Google and Apple navigation now prefer readable local names and addresses over coordinate-only searches. Add mobile interaction, map fallback, and PDF build fixture coverage.
+## 0.2.6 — 2026-10-05
+
+- `light-travelpage`: Use the approved travel handbook with system serif headings, instant daily pages and a visible Route chapter. Keep each daily map with its schedule; expand the selected place's full group, preserve other points and reset expansion when changing dates. Show Materials directly when it is the only secondary section.
+- `light-travelpage`: Unify sign-in, map/ticket dialogs, ledger controls and optional AI surfaces; use to-do consistently while preserving authored travel text, bilingual drafts, flight/stay cards, protected original materials and shared record IDs.
+- `light-travelpage`: Ask about AI before generation when the choice is unknown; default off. Enabled pages use a protected server-side Chat Completions/Responses connection for available to-do, ticket-status and ledger actions. Keep source travel content and merchant orders read-only. Preserve exact-request retry, unsent/new drafts and visible initialization errors.
+- `light-travelpage`: Initialize validated undated drafts with DAY labels. Retain sourced geographic outlines, accessible desktop flight paging and authenticated PNG ticket previews with original PDFs. Preserve the earlier rollback and exact historical review records.
+- Release checks: detect the latest candidate using an isolated version-directory fixture, so preparing a new version does not fail a test pinned to the previous release.
 
 ## 0.2.5 — 2026-09-24
 

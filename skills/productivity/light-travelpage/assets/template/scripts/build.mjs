@@ -3,7 +3,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import { validateTrip, assetPath } from "./validate.mjs";
+import { normalizeAiConfig } from "../ai-config.js";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const ai = normalizeAiConfig(fs.existsSync(path.join(root, "ai-config.json"))
+  ? JSON.parse(fs.readFileSync(path.join(root, "ai-config.json"), "utf8"))
+  : undefined);
 const data = JSON.parse(
   fs.readFileSync(path.join(root, "trip-data.json"), "utf8"),
 );
@@ -24,6 +28,7 @@ const files = [
   "index.html",
   "styles.css",
   "ledger.css",
+  "handbook.css",
   "app.js",
   "i18n.js",
   "map-navigation.js",
@@ -31,6 +36,7 @@ const files = [
   "overview-map.js",
   "route-ui.js",
   "site-navigation.js",
+  "handbook.js",
   "ledger.js",
   "currencies.js",
   "runtime-storage.js",
@@ -38,11 +44,19 @@ const files = [
   "LICENSE",
   "trip-data.json",
 ];
+if (ai.provider === "openai") files.push("ai-ui.js", "ai.css");
 for (const file of files) {
   const src = path.join(root, file);
   if (fs.lstatSync(src).isSymbolicLink())
     throw new Error("Runtime symlink rejected");
   fs.copyFileSync(src, path.join(stage, file));
+}
+fs.writeFileSync(path.join(stage, "ai-config.json"), JSON.stringify(ai) + "\n");
+if (ai.provider === "openai") {
+  const html = fs.readFileSync(path.join(stage, "index.html"), "utf8")
+    .replace("<!-- optional-ai:head -->", '<link rel="stylesheet" href="ai.css"><script src="ai-ui.js" defer></script>')
+    .replace("<!-- optional-ai:body -->", fs.readFileSync(assetPath(root, "assets/ai-panel.html"), "utf8"));
+  fs.writeFileSync(path.join(stage, "index.html"), html);
 }
 const assets = new Set([
   ...(trip.metadata.assets.routeMaps || []),

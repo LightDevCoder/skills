@@ -1,0 +1,235 @@
+{
+  "schemaVersion": "2.0-lite",
+  "config": {
+    "schemaVersion": "1.0.0",
+    "modules": {
+      "flights": false,
+      "overview": false,
+      "itinerary": true,
+      "todo": true,
+      "driving": false,
+      "ledger": true,
+      "accommodations": true
+    },
+    "language": "zh-CN",
+    "persistence": {
+      "mode": "d1",
+      "apiBase": "/api/trip",
+      "sharedCollections": [
+        "todos",
+        "tickets",
+        "ledger"
+      ]
+    },
+    "demo": true
+  },
+  "metadata": {
+    "tripId": "handbook-ui-example",
+    "title": "京都慢旅行 · 示例",
+    "language": "zh-CN",
+    "assets": {},
+    "timeZone": "Asia/Tokyo"
+  },
+  "trip": {
+    "status": "draft",
+    "startDate": "2026-11-07",
+    "endDate": "2026-11-09",
+    "dayCount": 3,
+    "nightCountAway": 2,
+    "countries": [
+      {
+        "code": "JP",
+        "nameZh": "日本",
+        "nameEn": "Japan"
+      }
+    ],
+    "primaryDestinationCountries": [
+      "JP"
+    ],
+    "citiesAndAreas": [
+      "京都"
+    ],
+    "routeSummary": "",
+    "groupSize": 2,
+    "heroTitle": "京都慢旅行",
+    "heroEyebrow": "示例旅程 · Kyoto"
+  },
+  "flightJourneys": [],
+  "flights": [],
+  "accommodations": [
+    {
+      "id": "stay",
+      "status": "pending",
+      "name": "京都住宿 · 待补资料",
+      "checkIn": "2026-11-07",
+      "checkOut": "2026-11-09",
+      "missingFields": [
+        "酒店名称",
+        "原地址",
+        "房型",
+        "金额",
+        "确认号",
+        "入住 / 退房具体时刻"
+      ]
+    }
+  ],
+  "groundTransport": {
+    "rentalCar": null,
+    "rentalChecklist": [],
+    "drivingNotes": [],
+    "drivingReferenceLinks": [],
+    "plannedRoadLegs": [],
+    "publicTransitAndRail": []
+  },
+  "days": [
+    {
+      "day": 1,
+      "date": "2026-11-07",
+      "title": "到达京都",
+      "locations": [
+        "京都站"
+      ],
+      "schedule": [
+        {
+          "id": "station",
+          "time": "10:00",
+          "text": "京都站集合 · 到达时间尚未与真实车票核对",
+          "type": "note"
+        }
+      ]
+    },
+    {
+      "day": 2,
+      "date": "2026-11-08",
+      "title": "午餐与散步",
+      "locations": [
+        "锦市场",
+        "清水寺"
+      ],
+      "schedule": [
+        {
+          "id": "lunch",
+          "time": "12:00",
+          "text": "锦市场午餐 · 具体餐厅待选择",
+          "type": "note"
+        },
+        {
+          "id": "walk",
+          "time": "15:00",
+          "text": "清水寺散步 · 走累了就提前回去",
+          "type": "walk",
+          "placeId": "kiyomizu"
+        }
+      ]
+    },
+    {
+      "day": 3,
+      "date": "2026-11-09",
+      "title": "退房日",
+      "locations": [],
+      "schedule": []
+    }
+  ],
+  "places": [
+    {
+      "id": "kiyomizu",
+      "name": "Kiyomizu-dera",
+      "nameZh": "清水寺",
+      "localName": "清水寺",
+      "regionCode": "JP",
+      "cityOrArea": "京都",
+      "coordinates": {
+        "lat": 34.994856,
+        "lng": 135.785046,
+        "system": "WGS84",
+        "source": "design-spec verified WGS84"
+      }
+    }
+  ],
+  "restaurants": [],
+  "bookingsAndTickets": [],
+  "ticketPlanning": {
+    "statusStorage": "d1",
+    "statusStorageNote": "Shared with your travel group",
+    "items": []
+  },
+  "preTrip": {
+    "packingItems": [
+      {
+        "id": "ticket",
+        "text": "小林：上传实际车票 · 截止 2026-11-06",
+        "completed": false
+      },
+      {
+        "id": "hotel",
+        "text": "阿青：补充酒店确认邮件",
+        "completed": false
+      }
+    ],
+    "preparationsExplicitlyMentioned": [],
+    "missingNote": ""
+  },
+  "mapLinks": {
+    "providedGoogleMapsLinks": [],
+    "note": "",
+    "cityLevelNavigationDisabled": false,
+    "navigationPolicy": {
+      "noNavigationTypes": [
+        "flight",
+        "note",
+        "rest"
+      ],
+      "selfNavigationTypes": [
+        "drive",
+        "return",
+        "transfer",
+        "check-in",
+        "check-out",
+        "restaurant",
+        "attraction",
+        "walk",
+        "hike"
+      ]
+    },
+    "navigationPlaces": []
+  },
+  "issuesAndUncertainties": [],
+  "map": {
+    "schemaVersion": "1.0-lite",
+    "mapMode": "template-auto",
+    "templateId": "auto",
+    "disclaimer": "本图仅表达地点的相对方位与路线顺序，不代表真实比例或精确地理边界。",
+    "places": [],
+    "routes": [],
+    "dailyRoutes": []
+  },
+  "translations": {
+    "京都慢旅行": {
+      "en": "Kyoto at a gentle pace"
+    },
+    "示例旅程 · Kyoto": {
+      "en": "Example itinerary · Kyoto"
+    },
+    "到达京都": {
+      "en": "Arrive in Kyoto"
+    },
+    "午餐与散步": {
+      "en": "Lunch and a walk"
+    },
+    "退房日": {
+      "en": "Check-out day"
+    },
+    "京都站集合 · 到达时间尚未与真实车票核对": {
+      "en": "Meet at Kyoto Station · arrival time awaits the original ticket"
+    },
+    "锦市场午餐 · 具体餐厅待选择": {
+      "en": "Lunch at Nishiki Market · restaurant undecided"
+    },
+    "清水寺散步 · 走累了就提前回去": {
+      "en": "Walk at Kiyomizu-dera · return early when tired"
+    },
+    "京都住宿 · 待补资料": {
+      "en": "Kyoto stay · details pending"
+    }
+  }
+}

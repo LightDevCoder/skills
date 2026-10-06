@@ -14,4 +14,4 @@
 | [写作编辑](writing/README.zh-CN.md) | 3 | 组织长文稿生产、润色文本消除 AI 生硬感，以及编写清晰易懂的 Agent 指导文档。 |
 | [日常工具](productivity/README.zh-CN.md) | 6 | 寻找合适技能、交接会话上下文、一句话总结进展、引导手动操作，以及生成旅行计划页面。 |
 
-源码路径为 `skills/<category>/<name>/`。v0.2.6 候选修改 12 个 Skill 的名称及安装目录名，调用方式和总数不变。见[名称迁移说明](../docs/MIGRATION-v0.2.6.zh-CN.md)。
+源码路径为 `skills/<category>/<name>/`。v0.2.7 候选修改 12 个 Skill 的名称及安装目录名，调用方式和总数不变。见[名称迁移说明](../docs/MIGRATION-v0.2.7.zh-CN.md)。

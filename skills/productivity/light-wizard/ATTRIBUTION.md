@@ -15,6 +15,6 @@ This package is a Light first-party port of an upstream Skill.
 
 Verification: `SKILL.md` frontmatter `name: light-wizard` matches, `agents/openai.yaml` is valid, and aside from this attribution no `mattpocock/skills` runtime coupling remains in executable content.
 
-## Light canonical name migration (v0.2.6 candidate)
+## Light canonical name migration (v0.2.7 candidate)
 
 The current Light package is `light-wizard` (formerly `wizard`). Only package identity, UI source labeling, and Light capability references changed. Original upstream paths, pinned revisions, license notices, and responsibilities above remain applicable. Upstream names identify provenance, not current Light invocation.

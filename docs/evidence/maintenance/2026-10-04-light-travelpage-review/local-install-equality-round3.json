@@ -1,0 +1,9 @@
+{
+  "source": "/Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skills-ui/skills/productivity/light-travelpage",
+  "destination": "/Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skill-local-final/.agents/skills/light-travelpage",
+  "files": 61,
+  "all_file_hashes_equal": true,
+  "cli": "skills 1.7.0",
+  "command": "npm_config_cache=/Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/npm-cache npx --yes skills add /Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skills-ui --skill light-travelpage --agent codex --yes --copy",
+  "scope": "fresh project-local Codex installation; no current host session reload claim"
+}

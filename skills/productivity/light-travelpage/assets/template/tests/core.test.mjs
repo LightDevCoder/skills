@@ -43,6 +43,26 @@ function fixture() {
   d.demoNavigationPlaceIds = [];
   return d;
 }
+test("trip data rejects prefixed credential fields and key values at every nesting level", () => {
+  for (const field of ["apiKey", "OPENAI_API_KEY", "openaiApiKey", "CLOUDFLARE_API_TOKEN", "session-secret", "accountPassword"]) {
+    const data = fixture();
+    data.metadata.extra = { [field]: "synthetic-credential" };
+    const result = validateTrip(data, root);
+    assert.equal(result.ok, false, field);
+    assert.ok(result.errors.includes("Credential field cannot enter trip data"), field);
+  }
+  for (const prefix of ["sk-", "sk-proj-", "sk-svcacct-"]) {
+    const data = fixture();
+    data.metadata.extra = { note: prefix + "A_b-".repeat(12) };
+    const result = validateTrip(data, root);
+    assert.equal(result.ok, false, prefix);
+    assert.ok(result.errors.includes("Credential pattern found"), prefix);
+  }
+  const ordinary = fixture();
+  ordinary.metadata.extra = { sourceKey: "reference identifier", note: "sk-short" };
+  assert.equal(validateTrip(ordinary, root).ok, true);
+});
+
 function database() {
   const db = new DatabaseSync(":memory:");
   db.exec(

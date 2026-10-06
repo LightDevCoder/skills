@@ -98,8 +98,15 @@ main { overflow: hidden; }
 .section-heading { margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
 .section-heading h2 { margin: 0; font-size: 30px; line-height: 1; letter-spacing: -0.04em; }
 .section-index, .soft-label { margin: 0; color: var(--muted); font: 400 11px/1 "Baskerville", "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "STSong", "SimSun", serif; letter-spacing: 0.08em; }
+.flight-controls { display: flex; align-items: center; gap: 8px; }
+.flight-controls .section-index { margin-right: 8px; }
+.flight-controls button { width: 34px; height: 34px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: var(--ink); font: 400 24px/1 var(--travel-serif); cursor: pointer; }
+.flight-controls button:disabled { opacity: .35; cursor: default; }
+.flight-controls button:not(:disabled):hover { border-color: var(--lake); color: var(--lake); }
+.flight-controls button:focus-visible, .flight-carousel:focus-visible, .carousel-dot:focus-visible { outline: 2px solid var(--lake); outline-offset: 3px; }
 
 .flight-carousel {
+  position: relative;
   display: flex;
   gap: 14px;
   overflow-x: auto;
@@ -146,9 +153,10 @@ main { overflow: hidden; }
 .flight-placeholder p { max-width: 520px; margin: 12px 0 0; color: #b8cccf; font-size: 12px; line-height: 1.7; }
 .flight-placeholder ul { margin: 14px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 7px; list-style: none; }
 .flight-placeholder li { padding: 6px 9px; border: 1px solid rgba(143,198,208,.3); border-radius: 999px; color: #d7e7e8; background: rgba(255,255,255,.04); font-size: 10px; }
-.carousel-dots { display: flex; justify-content: center; gap: 7px; }
-.carousel-dot { width: 6px; height: 6px; border: 0; padding: 0; border-radius: 50%; background: #aebbb8; transition: width .2s ease; }
-.carousel-dot.is-active { width: 22px; border-radius: 99px; background: var(--lake); }
+.carousel-dots { display: flex; justify-content: center; gap: 3px; }
+.carousel-dot { display: grid; place-items: center; width: 28px; height: 20px; border: 0; padding: 0; background: transparent; cursor: pointer; }
+.carousel-dot::before { content: ""; display: block; width: 6px; height: 6px; border-radius: 50%; background: #aebbb8; transition: width .2s ease; }
+.carousel-dot.is-active::before { width: 22px; border-radius: 99px; background: var(--lake); }
 
 .route-map-button { position: relative; display: block; width: 100%; padding: 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow); cursor: zoom-in; }
 .route-map-button img { width: 100%; height: auto; }

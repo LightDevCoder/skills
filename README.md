@@ -6,15 +6,13 @@
 
 `LightDevCoder/skills` provides 36 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<category>/<name>/` and defines its own behavior in `SKILL.md`.
 
-> **Release:** [v0.2.5](https://github.com/LightDevCoder/skills/releases/tag/v0.2.5) is this checkout’s verified 36-Skill release baseline, rather than the latest remote release. Its immutable [release manifest](docs/evidence/releases/v0.2.5/RELEASE_MANIFEST.md) and post-publication [release receipt](docs/evidence/releases/v0.2.5/RELEASE_RECEIPT.md) record the scope and verification.
+> **Release:** [v0.2.6](https://github.com/LightDevCoder/skills/releases/tag/v0.2.6) is the current stable release of all 36 first-party Skills. Its immutable [release manifest](docs/evidence/releases/v0.2.6/RELEASE_MANIFEST.md) and post-publication [release receipt](docs/evidence/releases/v0.2.6/RELEASE_RECEIPT.md) record the scope and verification.
 
-> **v0.2.6 candidate:** The local candidate renames 12 Skills with `light-`; the other 24 names and the 36-package total stay unchanged. The v0.2.5 local verified baseline retains the old names; remote v0.2.6 is already occupied by a travel-handbook release. Remote installation and Host invocation checks for the new names are pending. See the [migration guide](docs/MIGRATION-v0.2.6.md) and [candidate notes](docs/evidence/namespace-v0.2.6/release-draft/RELEASE_NOTES.md).
-
-Namespace publication is **BLOCKED**: remote v0.2.6 is occupied by the existing travel-handbook release. D7 prohibits overwriting the tag or choosing another version; see the [publication blocker](docs/evidence/namespace-v0.2.6/publication-blocker.md). New-name remote installation templates must not be executed.
+> **v0.2.7 candidate:** The namespace candidate is unpublished. Twelve Skills use `light-` names; the other 24 names and 36-package total stay unchanged. Stable v0.2.6 retains the old names. Candidate CI, real Host checks, and release-source installation for the new names remain pending. See the [migration guide](docs/MIGRATION-v0.2.7.md) and [candidate notes](docs/evidence/releases/v0.2.7/RELEASE_NOTES.md). New-name examples below are candidate usage; remote default-branch installs may not contain them before publication.
 
 ## Browse by category
 
-[All categories and collection guides](skills/README.md). The 36 source packages are grouped by purpose; invocation modes are unchanged; the candidate names follow the migration guide.
+[All categories and collection guides](skills/README.md). The 36 source packages are grouped by purpose; invocation modes are unchanged; candidate names follow the migration guide.
 
 - [project](skills/project/README.md) — 8 skills
 - [engineering](skills/engineering/README.md) — 5 skills
@@ -41,7 +39,7 @@ Skills follow the progressive disclosure patterns of Matt Pocock Skills and the 
 
 ## Installation
 
-### Default branch / latest (candidate usage)
+### Current main / latest (includes updated Agent Config)
 
 Install the latest collection from the default branch `main`:
 
@@ -54,18 +52,18 @@ Install a single Skill from `main` (for example, the updated `agent-config` Skil
 ```bash
 npx skills add LightDevCoder/skills --skill agent-config
 npx skills add LightDevCoder/skills --skill project-review
-# BLOCKED — candidate not on remote main: npx skills add LightDevCoder/skills --skill light-research
+npx skills add LightDevCoder/skills --skill light-research
 ```
 
 > **Note:** An unqualified repository source (`LightDevCoder/skills`) follows the default branch `main`, delivering the latest admitted features and integrations.
 
-### Local verified release snapshot (v0.2.5)
+### Stable release snapshot (v0.2.6)
 
-To install the reproducible stable release snapshot, pin the `#v0.2.5` tag:
+To install the reproducible stable release snapshot, pin the `#v0.2.6` tag:
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.5
-npx skills add LightDevCoder/skills#v0.2.5 --skill project-retro
+npx skills add LightDevCoder/skills#v0.2.6
+npx skills add LightDevCoder/skills#v0.2.6 --skill project-retro
 ```
 
 Previous releases (such as `#v0.2.4`, `#v0.2.2`, `#v0.2.1`, and `#v0.2.0`) remain available for reproducible installs:
@@ -114,7 +112,7 @@ $ask-light next        # Suggest the next appropriate Skill from current context
 $project-init          # Bootstrap project workspace and task tracker settings
 $clarify               # Clarify requirements through targeted questions
 $project-clarify       # Clarify project decisions using repository context
-$light-implement       # Execute a ready ticket with verification
+$light-implement             # Execute a ready ticket with verification
 $project-review        # Run final acceptance checks: PASS / FAIL / BLOCKED
 ```
 
@@ -151,7 +149,7 @@ Direct paths for common tasks:
 
 ```text
 clarify                          # Standalone brainstorming and clarification
-light-implement                        # Implement a well-defined ticket directly
+implement                        # Implement a well-defined ticket directly
 light-diagnosing-bugs → light-implement      # Diagnose an issue, then apply the fix
 release-workflow                 # Publish an approved release
 $ask-light                       # Route unclear tasks to the right Skill
@@ -208,5 +206,5 @@ Adapted origin (2 packages): `humanizer` is a substantially transformed first-pa
 - [Review Policy](docs/REVIEW_POLICY.md) · [Reviewer Contract](docs/REVIEWER_CONTRACT.md)
 - [Catalog](CATALOG.md) · [Changelog](CHANGELOG.md)
 - [Workflow Guides](docs/workflows)
-- [Release Receipt](docs/evidence/releases/v0.2.5/RELEASE_RECEIPT.md)
+- [Release Receipt](docs/evidence/releases/v0.2.6/RELEASE_RECEIPT.md)
 - [Collection Discovery Tests](tests/test_collection_discovery.py) · [Composition Tests](tests/test_composition.py)

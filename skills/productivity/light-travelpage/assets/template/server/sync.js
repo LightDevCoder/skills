@@ -26,7 +26,7 @@ export function validateRecord(collection, value) {
     throw new Error("记录 ID 无效");
   if (JSON.stringify(value).length > 20000) throw new Error("单条记录过大");
   if (collection === "todos" && !validTodoRecord(value))
-    throw new Error("待办内容无效");
+    throw new Error("to-do 内容无效");
   if (collection === "tickets" && typeof value.completed !== "boolean")
     throw new Error("门票状态无效");
   if (

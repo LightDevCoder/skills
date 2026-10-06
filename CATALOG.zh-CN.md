@@ -6,9 +6,7 @@
 
 [按分类浏览](skills/README.zh-CN.md) · [路径迁移](docs/CATEGORY_MIGRATION.zh-CN.md)
 
-以下目录反映本地 v0.2.6 候选的名称。本 checkout 的已验证基线 v0.2.5 使用旧名；[完整迁移说明](docs/MIGRATION-v0.2.6.zh-CN.md)列出全部 12 项映射。候选尚未发布，新增名称的远端安装与 Host 调用验证待完成。
-
-名称迁移发布为 **BLOCKED**：远端 v0.2.6 已被现有旅行手册发布占用。D7 禁止覆盖标签或自行改号；见[发布阻断记录](docs/evidence/namespace-v0.2.6/publication-blocker.md)。新名称的远端安装模板不可执行。
+以下目录显示 v0.2.7 本地候选名称。当前稳定 v0.2.6 保留旧名。候选尚未发布；新名称的候选 CI、真实 Host 验证和发布源安装待完成。见[完整迁移说明](docs/MIGRATION-v0.2.7.zh-CN.md)。
 
 ## 集合状态
 
@@ -16,13 +14,15 @@
 | --- | --- |
 | 集合 | Light Skills — Composable Agent Workflows |
 | 包数量 | 36 个已准入第一方 Skill |
-| 当前状态 | v0.2.6 候选包含 36 个包；v0.2.5 为本地已验证基线；远端 v0.2.6 已发布 |
-| 本地已验证发布基线 | [v0.2.5](https://github.com/LightDevCoder/skills/releases/tag/v0.2.5)（36 个包；上一稳定版为 v0.2.4） |
+| 当前状态 | v0.2.7 本地候选包含 36 个包；v0.2.6 为当前稳定版本 |
+| 稳定版本 | [v0.2.6](https://github.com/LightDevCoder/skills/releases/tag/v0.2.6)（36 个包；上一稳定版为 v0.2.5） |
 | 安装权威 | [docs/INSTALLATION.zh-CN.md](docs/INSTALLATION.zh-CN.md) |
 | 发现检查 | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
-| 证据 | [v0.2.5 发布清单](docs/evidence/releases/v0.2.5/RELEASE_MANIFEST.zh-CN.md) · [v0.2.5 发布收据](docs/evidence/releases/v0.2.5/RELEASE_RECEIPT.zh-CN.md) |
+| 证据 | [v0.2.6 发布清单](docs/evidence/releases/v0.2.6/RELEASE_MANIFEST.zh-CN.md) · [v0.2.6 发布收据](docs/evidence/releases/v0.2.6/RELEASE_RECEIPT.zh-CN.md) |
 
-`v0.2.5` 的公开发布与全新安装已验证；包数量仍为 36。
+`v0.2.6` 的公开发布与全新安装已验证；包数量仍为 36。
+
+v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md)与独立[英文说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.md)记录旅行手册和可选 AI 变化。
 
 `v0.1.1` 发布五个包；`v0.1.2` 增加 `recap` 与 `language-learning`（七个）；`v0.1.3` 迁移测试工具链；`v0.1.4` 增加 `kanban-worker`；`v0.1.5` 收紧看板调度与身份；`v0.1.6` 增加 `kb-init`（九个）。`v0.2.0` 正式发布涵盖项目工作流、澄清、执行、审阅与专项工具的完整 33 包架构，随后 v0.2.0 发布线扩展了 `humanizer` 准入（34 个包；见 [CHANGELOG.zh-CN.md](CHANGELOG.zh-CN.md)）。`v0.2.1` 增加 `light-travelpage` 与 `project-retro`（36 个包）。`v0.2.2` 最终收敛 TypeSafe Jev 语义加速、分类目录架构与不可变发布完整性。`v0.2.3` 拆分发布前不可变清单与发布后验证收据，追加 v0.2.2 历史事实证明，完成 project-retro 正向状态驱动重构，并形式化六阶段发布生命周期。
 
@@ -182,12 +182,12 @@
 
 ### light-travelpage
 
-- **作用：** 从资料生成或更新中英双语手机旅行网页，提供航班/住宿卡片、地区地图导航，共享同行人、账单、币种设置、待办与门票状态。
+- **作用：** 生成或更新双语旅行手册，包含每天一页及可见路线、航班与酒店卡片、原始材料、共同费用、to-do 和票据状态；可选择加入受保护的服务端 AI 接入。
 - **什么时候用：** 需要根据已有行程资料生成或维护手机旅行网页（含账单、待办、地图），而非普通旅行咨询或票务购买时。
-- **调用方式：** Model-invoked 或 user-invoked。
+- **调用方式：** Model-invoked。
 - **包位置：** [skills/productivity/light-travelpage/](skills/productivity/light-travelpage)
 - **状态：** 实质性转换的第一方能力，已收录于当前稳定版本集合；默认 GitHub + Cloudflare Pages、Functions 与 D1，每个部署一个同权限小组。
-- **证据：** [准入](docs/evidence/admissions/light-travelpage/README.md) · [本次更新](docs/evidence/maintenance/2026-09-15-light-travelpage.md) · [来源](skills/productivity/light-travelpage/ATTRIBUTION.md)。
+- **证据：** [准入](docs/evidence/admissions/light-travelpage/README.md) · [手册源码验收](docs/evidence/maintenance/2026-10-05-light-travelpage-candidate.md) · [此前撤回](docs/evidence/maintenance/2026-10-04-light-travelpage-rollback.md) · [来源](skills/productivity/light-travelpage/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/light-travelpage/`。
 
 ### manuscript-ops

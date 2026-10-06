@@ -1,0 +1,332 @@
+{
+  "baseline": "97adf5f319b8800b6635057434dcb4aeda2ddecd",
+  "spec_revision": 3,
+  "package_count": 36,
+  "expected_name_set_equal": true,
+  "packages": [
+    {
+      "old_name": "agent-config",
+      "name": "agent-config",
+      "category": "engineering",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "diagnosing-bugs",
+      "name": "light-diagnosing-bugs",
+      "category": "engineering",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true,
+      "ui_source_label": true,
+      "prompt_names_current": true,
+      "old_entry_absent": true
+    },
+    {
+      "old_name": "prototype",
+      "name": "light-prototype",
+      "category": "engineering",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true,
+      "ui_source_label": true,
+      "prompt_names_current": true,
+      "old_entry_absent": true
+    },
+    {
+      "old_name": "resolving-merge-conflicts",
+      "name": "resolving-merge-conflicts",
+      "category": "engineering",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "tdd",
+      "name": "light-tdd",
+      "category": "engineering",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true,
+      "ui_source_label": true,
+      "prompt_names_current": true,
+      "old_entry_absent": true
+    },
+    {
+      "old_name": "eli5",
+      "name": "eli5",
+      "category": "knowledge",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "kb-init",
+      "name": "kb-init",
+      "category": "knowledge",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "language-learning",
+      "name": "language-learning",
+      "category": "knowledge",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "learn-anything",
+      "name": "learn-anything",
+      "category": "knowledge",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "teach",
+      "name": "light-teach",
+      "category": "knowledge",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true,
+      "ui_source_label": true,
+      "prompt_names_current": true,
+      "old_entry_absent": true
+    },
+    {
+      "old_name": "ask-light",
+      "name": "ask-light",
+      "category": "productivity",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "handoff",
+      "name": "light-handoff",
+      "category": "productivity",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true,
+      "ui_source_label": true,
+      "prompt_names_current": true,
+      "old_entry_absent": true
+    },
+    {
+      "old_name": "light-travelpage",
+      "name": "light-travelpage",
+      "category": "productivity",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "recap",
+      "name": "recap",
+      "category": "productivity",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "wait-what",
+      "name": "light-wait-what",
+      "category": "productivity",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true,
+      "ui_source_label": true,
+      "prompt_names_current": true,
+      "old_entry_absent": true
+    },
+    {
+      "old_name": "wizard",
+      "name": "light-wizard",
+      "category": "productivity",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true,
+      "ui_source_label": true,
+      "prompt_names_current": true,
+      "old_entry_absent": true
+    },
+    {
+      "old_name": "implement",
+      "name": "light-implement",
+      "category": "project",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true,
+      "ui_source_label": true,
+      "prompt_names_current": true,
+      "old_entry_absent": true
+    },
+    {
+      "old_name": "kanban-worker",
+      "name": "kanban-worker",
+      "category": "project",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "project-clarify",
+      "name": "project-clarify",
+      "category": "project",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "project-init",
+      "name": "project-init",
+      "category": "project",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "project-retro",
+      "name": "project-retro",
+      "category": "project",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "project-spec",
+      "name": "project-spec",
+      "category": "project",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "project-tickets",
+      "name": "project-tickets",
+      "category": "project",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "release-workflow",
+      "name": "release-workflow",
+      "category": "project",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "code-review",
+      "name": "light-code-review",
+      "category": "review",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true,
+      "ui_source_label": true,
+      "prompt_names_current": true,
+      "old_entry_absent": true
+    },
+    {
+      "old_name": "generic-review",
+      "name": "generic-review",
+      "category": "review",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "project-review",
+      "name": "project-review",
+      "category": "review",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "review-loop",
+      "name": "review-loop",
+      "category": "review",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "clarify",
+      "name": "clarify",
+      "category": "thinking",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "decision-map",
+      "name": "decision-map",
+      "category": "thinking",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "research",
+      "name": "light-research",
+      "category": "thinking",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true,
+      "ui_source_label": true,
+      "prompt_names_current": true,
+      "old_entry_absent": true
+    },
+    {
+      "old_name": "socratic",
+      "name": "socratic",
+      "category": "thinking",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "to-questionnaire",
+      "name": "light-to-questionnaire",
+      "category": "thinking",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true,
+      "ui_source_label": true,
+      "prompt_names_current": true,
+      "old_entry_absent": true
+    },
+    {
+      "old_name": "humanizer",
+      "name": "humanizer",
+      "category": "writing",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "manuscript-ops",
+      "name": "manuscript-ops",
+      "category": "writing",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true
+    },
+    {
+      "old_name": "writing-for-agents",
+      "name": "light-writing-for-agents",
+      "category": "writing",
+      "name_matches": true,
+      "disable_preserved": true,
+      "implicit_preserved": true,
+      "ui_source_label": true,
+      "prompt_names_current": true,
+      "old_entry_absent": true
+    }
+  ]
+}

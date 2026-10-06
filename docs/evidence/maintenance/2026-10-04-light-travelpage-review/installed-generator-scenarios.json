@@ -1,0 +1,36 @@
+{
+  "label": "behavioral",
+  "source": "/Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skill-local-final/.agents/skills/light-travelpage",
+  "destination": "/Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skill-from-install",
+  "scenarios": [
+    {
+      "command": [
+        "node",
+        "/Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skill-local-final/.agents/skills/light-travelpage/scripts/create.mjs",
+        "/Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skill-from-install"
+      ],
+      "exit": 0,
+      "stdout": "Created /Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skill-from-install. Fill trip-data.json, npm ci, then npm run build. Cloudflare setup is described in references/deployment.md.\n",
+      "observed": "Complete template copied byte-for-byte."
+    },
+    {
+      "command": [
+        "node",
+        "/Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skill-local-final/.agents/skills/light-travelpage/scripts/create.mjs",
+        "/Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skill-from-install"
+      ],
+      "exit": 1,
+      "error": "Destination already exists; use update.mjs for an existing trip",
+      "observed": "Existing destination refused; every file hash unchanged."
+    },
+    {
+      "command": [
+        "node",
+        "/Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skill-local-final/.agents/skills/light-travelpage/scripts/create.mjs"
+      ],
+      "exit": 1,
+      "error": "Usage: node create.mjs <new-project-directory>",
+      "observed": "Missing destination rejected; no project created."
+    }
+  ]
+}

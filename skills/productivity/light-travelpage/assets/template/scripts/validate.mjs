@@ -281,7 +281,7 @@ export function validateTrip(data, root, { allowEmpty = false } = {}) {
     const map = data.map || {},
       ids = unique(map.places, "map places");
     check(
-      map.mapMode === "template-auto" && ids.size > 0,
+      ["template-auto", "geographic-outline"].includes(map.mapMode) && ids.size > 0,
       "Map input required",
     );
     for (const place of map.places || [])
@@ -310,13 +310,13 @@ export function validateTrip(data, root, { allowEmpty = false } = {}) {
     if (!value || typeof value !== "object") return;
     for (const [key, item] of Object.entries(value)) {
       if (
-        /^(api_?key|access_?token|session_?secret|password)$/i.test(key) &&
+        /(api[_-]?key|api[_-]?token|access[_-]?token|session[_-]?secret|password)$/i.test(key) &&
         item
       )
         errors.push("Credential field cannot enter trip data");
       if (
         typeof item === "string" &&
-        /(-----BEGIN .*PRIVATE KEY-----|AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{24,})/.test(
+        /(-----BEGIN .*PRIVATE KEY-----|AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9_-]{24,})/.test(
           item,
         )
       )

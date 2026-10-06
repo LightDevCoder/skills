@@ -6,9 +6,7 @@ This catalog is synchronized from the 36 admitted package directories under `ski
 
 [Browse by category](skills/README.md) · [Path migration](docs/CATEGORY_MIGRATION.md)
 
-The inventory below reflects local v0.2.6 candidate names. The local verified v0.2.5 baseline uses the old names; the [migration guide](docs/MIGRATION-v0.2.6.md) lists all 12 mappings. The candidate is unpublished; remote installation and Host invocation checks remain pending.
-
-Namespace publication is **BLOCKED**: remote v0.2.6 is occupied by the existing travel-handbook release. D7 prohibits overwriting the tag or choosing another version; see the [publication blocker](docs/evidence/namespace-v0.2.6/publication-blocker.md). New-name remote installation templates must not be executed.
+The inventory below shows local v0.2.7 candidate names. Stable v0.2.6 retains the old names. The candidate is unpublished; candidate CI, real Host checks, and release-source installation remain pending. See the [complete migration guide](docs/MIGRATION-v0.2.7.md).
 
 ## Collection status
 
@@ -16,13 +14,15 @@ Namespace publication is **BLOCKED**: remote v0.2.6 is occupied by the existing 
 | --- | --- |
 | Collection | Light Skills — Composable Agent Workflows |
 | Package count | 36 admitted first-party Skills |
-| Current state | 36 packages in the v0.2.6 candidate; v0.2.5 is the local verified release baseline; remote v0.2.6 is already published |
-| Local verified release baseline | [v0.2.5](https://github.com/LightDevCoder/skills/releases/tag/v0.2.5) (36 packages; previous stable was v0.2.4) |
+| Current state | 36 packages in the local v0.2.7 candidate; v0.2.6 is the current stable release |
+| Stable release | [v0.2.6](https://github.com/LightDevCoder/skills/releases/tag/v0.2.6) (36 packages; previous stable was v0.2.5) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
-| Evidence | [v0.2.5 release manifest](docs/evidence/releases/v0.2.5/RELEASE_MANIFEST.md) · [v0.2.5 release receipt](docs/evidence/releases/v0.2.5/RELEASE_RECEIPT.md) |
+| Evidence | [v0.2.6 release manifest](docs/evidence/releases/v0.2.6/RELEASE_MANIFEST.md) · [v0.2.6 release receipt](docs/evidence/releases/v0.2.6/RELEASE_RECEIPT.md) |
 
-`v0.2.5` publication and fresh installation are verified; package count remains 36.
+`v0.2.6` publication and fresh installation are verified; package count remains 36.
+
+v0.2.6 optimizes `light-travelpage`; [English notes](docs/evidence/releases/v0.2.6/RELEASE_NOTES.md) and the independent [中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md) describe the handbook and optional AI changes.
 
 `v0.1.1` shipped five packages; `v0.1.2` added `recap` and `language-learning` (seven); `v0.1.3` migrated the test toolchain; `v0.1.4` added `kanban-worker`; `v0.1.5` tightened kanban scheduling and identity; `v0.1.6` added `kb-init` (nine). `v0.2.0` released the full 33-package architecture across project workflow, clarification, execution, review, and specialized tools, and the v0.2.0 line was extended with the `humanizer` admission (34 packages; see [CHANGELOG.md](CHANGELOG.md)). `v0.2.1` added `light-travelpage` and `project-retro` (36 packages). `v0.2.2` finalized TypeSafe Jev semantic acceleration, category layout, and immutable release integrity. `v0.2.3` separated immutable release manifests from post-publication receipts, added v0.2.2 historical attestation, refactored project-retro into positive state-driven instructions, and formalized the six-stage release lifecycle.
 
@@ -182,13 +182,13 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### light-travelpage
 
-- **Purpose:** Generate or update a bilingual mobile travel page with flight/stay cards, regional map navigation, shared members, expenses, currency settings, tasks and ticket status.
+- **Purpose:** Generate or update a bilingual travel handbook with daily pages and visible routes, flight/stay cards, original materials, shared expenses, to-do and ticket status; optionally include a protected server-side AI connection.
 - **When to use:** Create or maintain a travel webpage from supplied materials; not ordinary travel advice or booking purchases.
 - **Invocation:** Model-invoked.
 - **Package:** [skills/productivity/light-travelpage/](skills/productivity/light-travelpage)
 - **Installation path:** `<skills-root>/light-travelpage/`.
 - **Status:** Admitted first-party transformation; included in the current stable collection. Default deployment: GitHub + Cloudflare Pages, Functions and D1; one equal-access group per deployment.
-- **Evidence:** [Admission](docs/evidence/admissions/light-travelpage/README.md) · [Latest update](docs/evidence/maintenance/2026-09-15-light-travelpage.md) · [Attribution](skills/productivity/light-travelpage/ATTRIBUTION.md).
+- **Evidence:** [Admission](docs/evidence/admissions/light-travelpage/README.md) · [Handbook source acceptance](docs/evidence/maintenance/2026-10-05-light-travelpage-candidate.md) · [Prior rollback](docs/evidence/maintenance/2026-10-04-light-travelpage-rollback.md) · [Attribution](skills/productivity/light-travelpage/ATTRIBUTION.md).
 
 ### manuscript-ops
 

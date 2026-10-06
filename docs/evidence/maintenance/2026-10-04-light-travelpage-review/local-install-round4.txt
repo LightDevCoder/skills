@@ -1,0 +1,37 @@
+npm notice run npx
+npm notice run 'skills' add /Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skills-ui --skill light-travelpage --agent codex --yes --copy
+
+│
+●   codex  Agent detected — installing non-interactively
+[?25l│
+◇  Source: /Users/light/Documents/Codex/2026-10-03/ai-travel-mvp/work/skills-ui
+[?25h[?25l│
+◇  Local path validated
+[?25h[?25l│
+◇  Found 36 skills
+[?25h│
+●  Selected 1 skill: light-travelpage
+
+│
+◇  Installation Summary ───────────────────────────────────────────────────────╮
+│                                                                              │
+│  ~/Documents/Codex/2026-10-03/ai-travel-mvp/work/skill-local-round4/.agents  │
+│  /skills/light-travelpage                                                    │
+│    copy → Codex                                                              │
+│                                                                              │
+├──────────────────────────────────────────────────────────────────────────────╯
+[?25l│
+◇  Installation complete
+[?25h
+│
+◇  Installed 1 skill ──────────────────────────────────────────────────────────╮
+│                                                                              │
+│  ✓ light-travelpage (copied)                                                 │
+│    → ~/Documents/Codex/2026-10-03/ai-travel-mvp/work/skill-local-round4/.ag  │
+│  ents/skills/light-travelpage                                                │
+│                                                                              │
+├──────────────────────────────────────────────────────────────────────────────╯
+
+│
+└  Done!  Review skills before use; they run with full agent permissions.
+

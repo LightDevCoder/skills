@@ -6,11 +6,9 @@
 
 `LightDevCoder/skills` 包含 36 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<category>/<name>/`，由包内的 `SKILL.md` 统领具体行为。
 
-> **发布版本：** v0.2.5 是本 checkout 已验证的 36 个 Skill 发布基线，并非最新远端发布。阅读[中文发布说明](docs/evidence/releases/v0.2.5/RELEASE_NOTES.zh-CN.md)或[English GitHub Release](https://github.com/LightDevCoder/skills/releases/tag/v0.2.5)；不可变的[发布清单](docs/evidence/releases/v0.2.5/RELEASE_MANIFEST.zh-CN.md)与发布后的[发布收据](docs/evidence/releases/v0.2.5/RELEASE_RECEIPT.zh-CN.md)记录范围和验证事实。
+> **发布版本：** v0.2.6 是包含全部 36 个第一方 Skill 的当前稳定版本。阅读[中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md)或[English GitHub Release](https://github.com/LightDevCoder/skills/releases/tag/v0.2.6)；不可变的[发布清单](docs/evidence/releases/v0.2.6/RELEASE_MANIFEST.zh-CN.md)与发布后的[发布收据](docs/evidence/releases/v0.2.6/RELEASE_RECEIPT.zh-CN.md)记录范围和验证事实。
 
-> **v0.2.6 候选：** 本地候选将 12 个 Skill 改为 `light-` 名称，其他 24 个名称不变，集合仍为 36 个包。本 checkout 的已验证基线 v0.2.5 保留旧名；远端 v0.2.6 已被旅行手册发布占用。新名称的远端安装与 Host 调用验证尚待完成；见[迁移说明](docs/MIGRATION-v0.2.6.zh-CN.md)与[候选发布说明](docs/evidence/namespace-v0.2.6/release-draft/RELEASE_NOTES.zh-CN.md)。
-
-名称迁移发布为 **BLOCKED**：远端 v0.2.6 已被现有旅行手册发布占用。D7 禁止覆盖标签或自行改号；见[发布阻断记录](docs/evidence/namespace-v0.2.6/publication-blocker.md)。新名称的远端安装模板不可执行。
+> **v0.2.7 候选：** 名称迁移候选尚未发布。12 个 Skill 使用 `light-` 新名称，其他 24 个名称和 36 个包总数保留。当前稳定 v0.2.6 使用旧名。新名称的候选 CI、真实 Host 验证与发布源安装尚待完成；见[迁移说明](docs/MIGRATION-v0.2.7.zh-CN.md)与[候选发布说明](docs/evidence/releases/v0.2.7/RELEASE_NOTES.zh-CN.md)。下方新名称示例是候选用法，远端默认分支在候选发布前不保证包含它们。
 
 ## 按分类浏览
 
@@ -54,18 +52,18 @@ npx skills add LightDevCoder/skills
 ```bash
 npx skills add LightDevCoder/skills --skill agent-config
 npx skills add LightDevCoder/skills --skill project-review
-# BLOCKED — candidate not on remote main: npx skills add LightDevCoder/skills --skill light-research
+npx skills add LightDevCoder/skills --skill light-research
 ```
 
 > **说明：** 不带 fragment 的仓库源（`LightDevCoder/skills`）将跟随默认分支 `main`，获取最新的已准入特性与集成。
 
-### 本地已验证发布快照（v0.2.5）
+### 稳定版本快照（v0.2.6）
 
-若需安装可复现的稳定发布快照，请锁定 `#v0.2.5` tag：
+若需安装可复现的稳定发布快照，请锁定 `#v0.2.6` tag：
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.5
-npx skills add LightDevCoder/skills#v0.2.5 --skill project-retro
+npx skills add LightDevCoder/skills#v0.2.6
+npx skills add LightDevCoder/skills#v0.2.6 --skill project-retro
 ```
 
 历史版本（如 `#v0.2.4`、`#v0.2.2`、`#v0.2.1` 与 `#v0.2.0`）依然保留供复现：
@@ -114,7 +112,7 @@ $ask-light next        # 根据当前上下文推荐合适的 Skill
 $project-init          # 初始化项目基础结构与任务跟踪
 $clarify               # 通过针对性提问澄清模糊需求
 $project-clarify       # 结合已有代码与文档澄清项目决策
-$light-implement       # 执行明确的开发任务并完成验证
+$light-implement             # 执行明确的开发任务并完成验证
 $project-review        # 执行最终验收：PASS / FAIL / BLOCKED
 ```
 
@@ -151,7 +149,7 @@ project-retro（Agent 评估摩擦信号）
 
 ```text
 clarify                          # 独立需求澄清与共识确认
-light-implement                        # 直接执行明确的任务
+implement                        # 直接执行明确的任务
 light-diagnosing-bugs → light-implement      # 定位疑难问题并完成修复
 release-workflow                 # 仅执行发布流程
 $ask-light                       # 任务不确定时获取路由建议
@@ -208,5 +206,5 @@ $ask-light workflow
 - [审阅策略](docs/REVIEW_POLICY.zh-CN.md) · [Reviewer 契约](docs/REVIEWER_CONTRACT.zh-CN.md)
 - [目录](CATALOG.zh-CN.md) · [变更记录](CHANGELOG.zh-CN.md)
 - [工作流指南](docs/zh-CN/workflows)
-- [发布收据](docs/evidence/releases/v0.2.5/RELEASE_RECEIPT.zh-CN.md)
+- [发布收据](docs/evidence/releases/v0.2.6/RELEASE_RECEIPT.zh-CN.md)
 - [集合发现测试](tests/test_collection_discovery.py) · [组合测试](tests/test_composition.py)
