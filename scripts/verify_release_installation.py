@@ -74,8 +74,8 @@ def cli_project_targets(distribution: Path) -> dict[str, str]:
     entries = re.findall(r'^\t(?:"[^"]+"|[\w-]+): \{\n(.*?)(?=^\t\}(?:,|$))', registry, re.MULTILINE | re.DOTALL)
     targets = {}
     for body in entries:
-        name = re.search(r'^\t\tname: "([^"]+)"', body, re.MULTILINE)
-        path = re.search(r'^\t\tskillsDir: "([^"]+)"', body, re.MULTILINE)
+        name = re.search(r'^\t\tname: "([^"]+)"[ \t]*,?[ \t]*$', body, re.MULTILINE)
+        path = re.search(r'^\t\tskillsDir: "([^"]+)"[ \t]*,?[ \t]*$', body, re.MULTILINE)
         if not name or not path:
             raise ValueError("CLI Agent target is not a supported literal")
         relative = PurePosixPath(path.group(1))

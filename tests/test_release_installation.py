@@ -91,6 +91,16 @@ class ReleasedSourceInstallationTests(unittest.TestCase):
                 with self.subTest(value=value), self.assertRaises(ValueError):
                     module.cli_project_targets(path)
 
+    def test_literal_prefix_does_not_hide_a_dynamic_property(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "cli.mjs"
+            for key, value in (("skillsDir", '".agents/skills" + "/nested"'), ("skillsDir", '".agents/skills" ? left : right'), ("name", '"codex" + suffix')):
+                name = value if key == "name" else '"codex"'
+                directory = value if key == "skillsDir" else '".agents/skills"'
+                path.write_text('const agents = {\n\tcodex: {\n\t\tname: ' + name + ',\n\t\tskillsDir: ' + directory + ',\n\t}\n};\n')
+                with self.subTest(key=key, value=value), self.assertRaises(ValueError):
+                    module.cli_project_targets(path)
+
     def test_complete_canonical_cannot_hide_an_omitted_agent_target(self):
         expected = module.source_packages(ROOT)
         with tempfile.TemporaryDirectory() as tmp:
