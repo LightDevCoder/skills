@@ -17,9 +17,21 @@ tag identity and the final main CI are separate evidence.
    the same tracked content as the index. Record
    `VERIFIED_TREE="$(git write-tree)"`, then run `git diff --cached --check`,
    full collection tests, compilation and public-doc checks from PREPARED.
-   Include `python3 -m pytest -q tests/test_collection_discovery.py`: this
-   existing checker resolves final Markdown links, including receipt links.
-   A clean integrity result alone does not replace this check.
+   Also export the recorded tree to a fresh directory and run the existing
+   collection-discovery checker there. Working-directory files can include
+   untracked or ignored targets that will be absent from the commit:
+
+   ```bash
+   VERIFY_DIR="$(mktemp -d)"
+   git archive --output="$VERIFY_DIR/tree.tar" "$VERIFIED_TREE"
+   tar -xf "$VERIFY_DIR/tree.tar" -C "$VERIFY_DIR"
+   (cd "$VERIFY_DIR" && python3 -m pytest -q tests/test_collection_discovery.py)
+   ```
+
+   Retain the result/tree identity, then clean the disposable snapshot with
+   `trash`. This checker resolves final Markdown links, including receipts,
+   against committed files. The tree export and checker must both succeed;
+   a clean integrity result or a workspace-only test does not replace them.
 4. Before committing, require no unstaged tracked changes and the same
    `git write-tree` value. After committing, require
    `git rev-parse HEAD^{tree}` to match `VERIFIED_TREE`. Later edits or path
