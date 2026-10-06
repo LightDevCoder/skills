@@ -72,19 +72,27 @@ release manifest:
 4. Create candidate `RELEASE_NOTES.md` and `RELEASE_NOTES.zh-CN.md`.
 5. **Do NOT create `RELEASE_RECEIPT*.md`** in `PREPARED`. No candidate receipts
    may enter candidate commits or tag snapshots.
-6. Execute pre-commit content and quality verification:
+6. Finalize artifact paths and links, then follow the
+   [final-artifact checks](references/CLOSEOUT.md#verify-final-artifacts).
+   Stage the candidate and bind verification to its exact tree:
    ```bash
+   git add <candidate-files>
+   git diff --exit-code
+   VERIFIED_TREE="$(git write-tree)"
+   git diff --cached --check
    python3 -m pytest -q
    python3 -m unittest discover -s tests
    python3 -m compileall -q skills tests scripts
    python3 scripts/check_public_docs.py
    git diff --check
    ```
-7. Commit candidate changes:
+7. Confirm the checked tree is unchanged, then commit:
    ```bash
-   git add <candidate-files>
+   git diff --exit-code
+   test "$(git write-tree)" = "$VERIFIED_TREE"
    git commit -m "release: prepare vX.Y.Z"
    CANDIDATE_SHA="$(git rev-parse HEAD)"
+   test "$(git rev-parse HEAD^{tree})" = "$VERIFIED_TREE"
    ```
 8. On the clean working tree, validate the `PREPARED` state:
    ```bash
@@ -102,10 +110,13 @@ Ensure the exact candidate commit is verified by remote CI:
 1. Push candidate commit to `origin/main`.
 2. Await remote GitHub Actions `collection-quality` execution on the exact candidate commit SHA:
    ```bash
-   gh run list --commit <candidate-sha> -L 1
-   gh run watch <run-id>
+   gh run list --commit "$CANDIDATE_SHA" --workflow collection-quality --json databaseId,headSha,status,conclusion --limit 1
+   gh run watch <run-id> --exit-status
+   gh run view <run-id> --json headSha,status,conclusion
    ```
-3. Verify CI conclusion is `SUCCESS`.
+3. Require the run's `headSha` to equal `CANDIDATE_SHA`, `status` to be
+   `completed`, and `conclusion` to be `success`. An unavailable query or any
+   other result does not pass; follow [CI completion](references/CLOSEOUT.md#wait-for-the-exact-commit).
 4. **Transition:** Transition lifecycle state to `CI_VERIFIED`.
 
 ### 3. Stage TAGGED (Remote Tag Protection Gate & Immutable Tag Creation)
@@ -218,7 +229,10 @@ Record verified publication facts into `RELEASE_RECEIPT.md`:
    - GitHub Release URL and publication timestamp
    Receipts may link back to `RELEASE_MANIFEST.md` and `RELEASE_NOTES.md`.
 2. Update documentation and catalog to reflect the new stable release.
-3. Commit attestation to `main`: `docs(release): attest vX.Y.Z publication`.
+3. Finish archive/copy operations and update every affected link before
+   following [final-artifact checks](references/CLOSEOUT.md#verify-final-artifacts)
+   on the complete staged attestation. Commit that verified tree to `main`:
+   `docs(release): attest vX.Y.Z publication`; record `ATTESTATION_SHA`.
 4. On the clean working tree on `main`, run the full ATTESTED integrity gate:
    ```bash
    python3 scripts/verify_release_integrity.py \
@@ -228,4 +242,11 @@ Record verified publication facts into `RELEASE_RECEIPT.md`:
      --check-remote
    ```
 5. Only after `verify_release_integrity.py` passes, push the attestation commit to `origin/main`.
-6. **Transition:** Transition lifecycle state to `ATTESTED`.
+6. Follow [CI completion](references/CLOSEOUT.md#wait-for-the-exact-commit) for
+   `ATTESTATION_SHA`. Every subsequent repair repeats the local checks and
+   exact-commit remote CI; retain earlier failures.
+7. **Transition:** Reach `ATTESTED` only after that final commit passes CI.
+   [Closeout reporting](references/CLOSEOUT.md#report-the-whole-release) names
+   candidate/final commit and run identities, publication facts, and any failed
+   attempts with their repairs; it distinguishes old file badges from current
+   branch status.
